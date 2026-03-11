@@ -1,0 +1,680 @@
+Title: Beyond One-Size-Fits-All: Adaptive Subgraph Denoising for Zero-Shot Graph Learning with Large Language Models
+
+URL Source: https://arxiv.org/pdf/2603.02938v1
+
+Published Time: Wed, 04 Mar 2026 02:02:28 GMT
+
+Number of Pages: 17
+
+Markdown Content:
+# Beyond One-Size-Fits-All: Adaptive Subgraph Denoising for Zero-Shot Graph Learning with Large Language Models 
+
+# Fengzhi Li 
+
+JIUTIAN Research Beijing, China lifengzhi@cmjt.chinamobile.com 
+
+# Liang Zhang ∗
+
+The Hong Kong University of Science and Technology (Guangzhou) Guangzhou, China liangzhang@hkust-gz.edu.cn 
+
+# Yuan Zuo 
+
+MIIT Key Laboratory of Data and Decision Intelligence (DIG) Beijing, China zuoyuan@buaa.edu.cn 
+
+# Ruiqing Zhao 
+
+Beihang University Beijing, China ruiqingzhao@buaa.edu.cn 
+
+# Yansong Liu 
+
+Beihang University Beijing, China liuyansong@buaa.edu.cn 
+
+# Yunfei Ma 
+
+JIUTIAN Research Beijing, China mayunfei@cmjt.chinamobile.com 
+
+# Fanyu Meng 
+
+JIUTIAN Research Beijing, China mengfanyu@cmjt.chinamobile.com 
+
+# Junlan Feng 
+
+JIUTIAN Research Beijing, China fengjunlan@cmjt.chinamobile.com 
+
+## Abstract 
+
+Graph-based tasks in the zero-shot setting remain a significant challenge due to data scarcity and the inability of traditional Graph Neural Networks (GNNs) to generalize to unseen domains or la-bel spaces. While recent advancements have transitioned toward leveraging Large Language Models (LLMs) as predictors to enhance GNNs, these methods often suffer from cross-modal alignment issues. A recent paradigm ( i.e. , Graph-R1) overcomes the afore-mentioned architectural dependencies by adopting a purely text-based format and utilizing LLM-based graph reasoning, showing improved zero-shot generalization. However, it employs a task-agnostic, one-size-fits-all subgraph extraction strategy, which in-evitably introduces significant structural noise—irrelevant neigh-bors and edges—that distorts the LLMs’ receptive field and leads to suboptimal predictions. To address this limitation, we introduce 
+
+GraphSSR , a novel framework designed for adaptive subgraph extraction and denoising in zero-shot LLM-based graph reasoning. Specifically, we propose the SSR pipeline, which dynamically tailors subgraph extraction to specific contexts through a “Sample-Select-Reason” process, enabling the model to autonomously filter out task-irrelevant neighbors and overcome the one-size-fits-all issue. To internalize this capability, we develop SSR-SFT , a data synthe-sis strategy that generates high-quality SSR-style graph reasoning traces for supervised fine-tuning of LLMs. Furthermore, we pro-pose SSR-RL , a two-stage reinforcement learning framework that  
+
+> ∗Corresponding Author Permission to make digital or hard copies of all or part of this work for personal or classroom use is granted without fee provided that copies are not made or distributed for profit or commercial advantage and that copies bear this notice and the full citation on the first page. Copyrights for components of this work owned by others than the author(s) must be honored. Abstracting with credit is permitted. To copy otherwise, or republish, to post on servers or to redistribute to lists, requires prior specific permission and/or a fee. Request permissions from permissions@acm.org.
+> Conference acronym ’XX, Woodstock, NY
+> ©2018 Copyright held by the owner/author(s). Publication rights licensed to ACM. ACM ISBN 978-1-4503-XXXX-X/2018/06 https://doi.org/XXXXXXX.XXXXXXX
+
+explicitly regulates sampling and selection operations within the proposed SSR pipeline designed for adaptive subgraph denoising. By incorporating Authenticity-Reinforced and Denoising-Reinforced RL, we guide the model to achieve accurate predictions using par-simonious, denoised subgraphs for reasoning. Extensive experi-ments across multiple benchmarks demonstrate that GraphSSR significantly outperforms state-of-the-art methods, highlighting the necessity of adaptive subgraph denoising for zero-shot graph reasoning. 
+
+## CCS Concepts 
+
+• Computing methodologies → Artificial intelligence ; • In-formation systems → Data mining .
+
+## Keywords 
+
+Zero-shot Graph Reasoning, Subgraph Denoising, Sample-Select-Reason, Authenticity-Reinforced and Denoising-Reinforced RL 
+
+ACM Reference Format: 
+
+Fengzhi Li, Liang Zhang, Yuan Zuo, Ruiqing Zhao, Yansong Liu, Yunfei Ma, Fanyu Meng, and Junlan Feng. 2018. Beyond One-Size-Fits-All: Adaptive Subgraph Denoising for Zero-Shot Graph Learning with Large Language Models. In Proceedings of Make sure to enter the correct conference title from your rights confirmation email (Conference acronym ’XX). ACM, New York, NY, USA, 17 pages. https://doi.org/XXXXXXX.XXXXXXX 
+
+## 1 Introduction 
+
+Graph-based tasks, such as node classification and link prediction, are ubiquitous across various real-world domains, from social net-work analysis and bioinformatics to advanced recommendation systems [1–6]. However, traditional methods for these tasks often rely on sufficient labeled data for model training, which can be particularly challenging in many real-world scenarios, especially when dealing with new or unseen domains. This data scarcity issue has recently sparked growing research interest in the zero-shot learning setting for graphs [ 7–9 ], where models are able to perform  
+
+> arXiv:2603.02938v1 [cs.LG] 3 Mar 2026 Conference acronym ’XX, June 03–05, 2018, Woodstock, NY Trovato et al.
+
+tasks in previously unseen label spaces or domains without the need for task-specific supervision. Graph neural networks (GNNs) are the leading methods designed specifically for graph-based tasks, significantly advancing the field by enabling models to capture intricate structural dependencies. However, while conventional GNN-based methods perform well with ample labeled data, their generalization ability deteriorates sharply under distribution shifts or in unseen label spaces, i.e. , in the so-called zero-shot learning setting. In this context, Large Language Models (LLMs) offer a promising complementary alternative. Existing methods generally fall into two strategic paradigms: LLM-as-enhancer and LLM-as-predictor. The former, including methods such as OFA [ 10 ], ZeroG [ 11 ], and DAS [ 12 ], uses LLMs to refine node features or generate auxiliary signals ( e.g. , synthetic labels or node descriptions). However, they remain tied to GNN backbones for prediction, which still require retraining for each task based on labeled data, limiting their transferability to unseen domains or labels. On the other hand, LLM-as-predictor methods, such as GraphGPT [ 13 ] and GOFA [ 14 ], directly leverage LLMs as inference engines, where structural signals from a frozen GNN serve as input through cross-modal projection or token insertions. While this paradigm improves zero-shot accuracy to some extent by leveraging the generalization of LLM predictions, the separa-tion between the GNN and LLM components, each operating in distinct modalities, requires complex alignment pretraining. Such alignment may not hold in new domains or label spaces, severely hindering true zero-shot generalization. To overcome the architectural dependencies in previous LLM-based modeling paradigms, a recent work, Graph-R1 [ 15 ], rethinks zero-shot graph reasoning in a purely text-based format. It demon-strates that LLM-based reasoning over graphs, empowered by in-struction tuning and reinforcement learning, can significantly en-hance zero-shot generalization. Taking zero-shot node classification as an example, Graph-R1 transforms a target node and its associated 
+
+𝑘 -hop neighbor subgraph, along with task descriptions, into a text sequence. It then prompts an LLM to generate reasoning chains for prediction via a transparent reason-then-predict pipeline. Although successful, Graph-R1 assumes a uniform and task-agnostic subgraph extraction setting in its reasoning design: for any node and task ( e.g. , label space or domain), the same 𝑘 -hop local subgraph extraction strategy is applied for LLM reasoning. How-ever, we argue that such a one-size-fits-all approach is inherently suboptimal, as real-world graphs often contain prevalent struc-tural noise [ 16 ]. In Graph-R1, irrelevant nodes and edges, which do not contribute to the task at hand, are inevitably included. These task-irrelevant components introduce noise, distorting the model’s receptive field and interfering with its reasoning process, ultimately leading to suboptimal or even erroneous predictions. To illustrate this challenge, consider a specific instance from the Cora [ 17 ] dataset. As shown in Figure 1, the target node describes: “Hierarchical logistic belief networks for linear model selection, using Gibbs sampling for parameter learning ”, belonging to the ground-truth category “ Neural Networks ”. Among its 𝑘 -hop local sub-graph, some neighboring nodes are semantically aligned, such as node 13 (discussing hierarchical mixtures of experts) and node 17 (discussing models of neural networks). However, the subgraph also contains noisy nodes like node 9 and node 14 (both discussing Target Node                    
+
+> Node 1
+> Hierarchical logistic belief networks for linear model
+> selection, using Gibbs sampling for parameter learning.
+> Ground Truth Label: Neural Networks
+> Initial Egocentric Subgraph
+> 14
+> 13
+> 17 19
+> Node 13
+> Tree -structured hierarchical mixtures of experts with
+> EM algorithm, validated via robot dynamics simulations.
+> Node 17
+> Generative models for sparse distributed representations
+> in neural networks , using Bayesian inference and simple
+> learning rules.
+> Node 9
+> EM algorithm for mixtures of factor analyzers,
+> combining clustering and dimensionality reduction in
+> latent variable models.
+> Node 14
+> EM reinterpreted via free energy maximization,
+> enabling faster incremental updates and improved
+> convergence.
+> Denoising Pure Subgraph
+> 13
+> 17 1
+> Neural Networks?
+> Neural Networks?
+> Probabilistic Methods?
+> Probabilistic Methods?
+> False Label: Probabilistic Methods True Label: Neural Networks
+> The reasoning
+> is disrupted .
+> The reasoning
+> is coherent .
+> Nois yNodes Relevant Nodes
+
+Figure 1: A case of structural noise in the subgraph mislead-ing the model’s reasoning from the Cora dataset. 
+
+different variants of the EM algorithm). While these neighbors are topologically connected, their semantic focus shifts toward a different category “ Probabilistic Methods ”. Without an explicit mechanism to prune these irrelevant nodes, the LLM is prone to aggregating misleading “Probabilistic Methods” context, leading to a prediction biased by structural noise and resulting in misclassifi-cation. Conversely, if the model can autonomously filter out these noisy neighbors and focus solely on relevant “Neural Networks” structures, the quality of the reasoning process will be enhanced. To address the challenges of task-agnostic subgraphs and struc-tural noise, we propose a novel framework, GraphSSR , for sub-graph denoising in zero-shot LLM-based graph reasoning. Central to our method is the “Sample-Select-Reason” (SSR) pipeline, a meticulously designed graph reasoning process that dynamically tailors subgraph extraction to both the specific node ( e.g. , zero-shot node classification) and task conditions, avoiding the one-size-fits-all limitation. Specifically, in the first stage, the model Samples 
+
+a diverse set of candidate subgraphs, exploring various structural and semantic perspectives of the target node. Subsequently, the model performs a dynamic denoising process by evaluating the quality of each candidate subgraph, discarding those contaminated by irrelevant nodes or edges, and Selecting only the most “pure” structural context. This approach explicitly mitigates the impact of structural noise. Finally, the model executes high-fidelity Reason-ing on the filtered subgraph, leveraging its task-specific context to generate accurate predictions. To empower the LLM model with such specialized graph reasoning capabilities, we introduce a novel data synthesis strategy, SSR-SFT , for Supervised Fine-Tuning (SFT). By leveraging the open-source Graph-R1 [ 15 ] dataset and advanced teacher models, we curate high-quality graph reasoning traces that explicitly guide the model in executing the SSR pipeline. Building on the SSR pipeline, we introduce SSR-RL , a two-stage reinforcement learning framework to further enhance the model’s subgraph denoising and reasoning abilities using Group Relative Policy Optimization (GRPO) [ 18 ]. Unlike traditional outcome-based RL, which focuses solely on final answer correctness, we design in-termediate rewards to directly guide the subgraph denoising steps, 
+
+i.e. , sampling and selecting operations within the SSR pipeline, tai-lored for zero-shot graph reasoning. Specifically, in the first stage, we propose Authenticity-Reinforced RLVR , which incorporates Beyond One-Size-Fits-All: Adaptive Subgraph Denoising for Zero-Shot Graph Learning with Large Language ModelsConference acronym ’XX, June 03–05, 2018, Woodstock, NY 
+
+sampling authenticity and selection consistency rewards within the standard RL from Verifiable Rewards (RLVR) framework. This stage helps reduce hallucinations during subgraph sampling and se-lecting while solidifying the model’s foundational graph reasoning capabilities. In the second stage, we further propose Denoising-Reinforced RLVR , where a subgraph size-based reward mecha-nism guides the subgraph denoising process by assigning additional rewards to correct reasoning derived from more parsimonious sub-graphs. This stage encourages the model to perform structural denoising and filter out irrelevant nodes and edges, effectively penalizing structural noise. Extensive experimental results demon-strate that our method significantly enhances reasoning precision in complex graph environments, achieving state-of-the-art perfor-mance across multiple zero-shot graph benchmarks. Our primary contributions are summarized as follows: 
+
+• Conceptually: For the first time, we rethink the existing LLM-based zero-shot reasoning pipeline, revealing the inherent limita-tions of traditional one-size-fits-all subgraph extraction strategies, and then reformulate zero-shot graph reasoning as a “Sample-Select-Reason” process, enabling autonomous and adaptive struc-tural denoising. 
+
+• Methodologically: We design a new post-training framework for LLMs built upon the SSR pipeline, where SSR-SFT intro-duces a rigorous data synthesis and filtering strategy to create high-quality SSR-style graph reasoning demonstrations for su-pervised fine-tuning. This is followed by a two-stage reinforce-ment learning framework, i.e. , Authenticity-Reinforced RLVR and Denoising-Reinforced RLVR, that incorporates intermediate rewards to directly guide the subgraph sampling and selecting operations, encouraging the use of more parsimonious subgraphs and reducing structural noise. 
+
+• Empirically: Extensive experiments show that our method sig-nificantly outperforms existing LLM-based graph learning meth-ods and vanilla LLMs of the same scale across various zero-shot graph-based tasks of benchmark datasets. 
+
+## 2 Methodology 
+
+To address the inherent challenges of task-agnostic subgraphs and associated structural noise in zero-shot graph reasoning, we pro-pose a novel framework, GraphSSR . It is built upon the Sample-Select-Reason (SSR) pipeline, which shifts subgraph extraction from a one-size-fits-all strategy to an adaptive, task-specific ap-proach. Specifically, we reformulate graph-based tasks ( e.g. , node classi-fication) as a conditional generation problem in which the model first executes a Sample Phase to explore a diverse space of can-didate subgraphs, followed by a Select Phase to autonomously prune task-irrelevant noisy ones, and concludes with a Reason Phase that leverages the denoised structural context to generate answers. Within this conceptual framework, the sampling and se-lecting operations mitigate the impact of structural noise by explic-itly performing subgraph denoising, thereby focusing on the most “pure” structural context. To empower the model with SSR-based graph reasoning capabilities, we introduce SSR-SFT , a rigorous data synthesis strategy that leverages teacher models and multi-dimensional quality filters to curate high-quality reasoning traces. To further enhance the model’s subgraph denoising and reasoning abilities, we introduce SSR-RL , a two-stage reinforcement learning framework: the first stage strengthens reasoning and reduces hal-lucinations during subgraph denoising by incorporating sampling authenticity and selection consistency rewards, while the second stage introduces a subgraph size-based reward that explicitly pe-nalizes structural noise and encourages parsimonious subgraph selection. The overall architecture of our proposed GraphSSR is illustrated in Figure 2. 
+
+## 2.1 Problem Definition 
+
+We represent a graph as G = (V , E, A, X), where V = {𝑣 1, 𝑣 2, . . . , 𝑣 𝑛 }
+
+denotes the set of 𝑛 nodes and E ⊆ V × V represents the set of edges. The structural topology is captured by the adjacency matrix 
+
+A ∈ { 0, 1}𝑛 ×𝑛 , with A𝑖 𝑗 = 1 if an edge exists between 𝑣 𝑖 and 𝑣 𝑗 ,and A𝑖 𝑗 = 0 otherwise. Each node 𝑣 𝑖 ∈ V is associated with a tex-tual attribute x𝑖 ∈ X, providing semantic context to the structural information. Given a specific zero-shot graph-based task 𝜏 (e.g. , node classifi-cation or link classification), LLM-based graph reasoning typically reformulates the task as a conditional generation problem. This involves extracting a subgraph Gsub ⊂ G to preserve relevant structural information, and applying a transformation function 
+
+T (·) that maps the subgraph Gsub , its associated text attributes 
+
+Xsub , the candidate label set Y, and the task description D into a natural language prompt. The graph-based task 𝜏 is then defined as optimizing an LLM model that maximizes the probability of generating the correct label 𝑦 given the prompt, formulated as 
+
+𝑃 (𝑦 | T (G sub , Xsub , Y, D)) .
+
+## 2.2 Sample-Select-Reason (SSR) Pipeline 
+
+Given the formulation 𝑃 (𝑦 | T (G sub , Xsub , Y, D)) , we identify sub-graph extraction as the key to the success of zero-shot graph rea-soning. Existing methods predominantly employ a one-size-fits-all subgraph extraction strategy ( e.g. , all 𝑘 -hop neighbors). However, such a task-agnostic strategy often includes task-irrelevant nodes or edges and introduces significant structural noise, making it sub-optimal. To address this issue, we reformulate the zero-shot graph reasoning task as a systematic “Sample-Select-Reason (SSR)” pipeline designed for subgraph denoising and structural refinement to en-able adaptive subgraph extraction. Specific prompt designs for the SSR pipeline are detailed in Appendix A.1. 
+
+Sample Phase. Given a specific task 𝜏 , our goal is to extract an optimized subgraph G𝜏 suitable for graph reasoning, centered around the target node(s) associated with 𝜏 (e.g. , node pairs for link classification). Recognizing that generating the optimal subgraph in a single shot is inherently challenging due to topological com-plexity, we introduce a diversity-driven subgraph group generation strategy, inspired by the group-based reasoning in the GRPO al-gorithm. Rather than sampling a single definitive subgraph, the model samples a group of candidates S = {𝑔 1, 𝑔 2, . . . , 𝑔 𝑘 }, analogous to GRPO’s multi-rollout process. Each candidate 𝑔 𝑖 represents a distinct structural and textual perspective of the local neighbor-hood. This exploration of the “subgraph space” ensures sufficient subgraph diversity, significantly increasing the likelihood that at Conference acronym ’XX, June 03–05, 2018, Woodstock, NY Trovato et al. Sample -Select -Reason (SSR) Pipeline     
+
+> Sample Phase Input Subgraph
+> Sample Candidate Subgraphs
+> Select Phase
+> Denoise & Select Optimal Subgraph
+> 𝑔 1
+> ⋯
+> 𝑔 2𝑔 𝑘 𝑔 ∗
+> Relevant Noise
+> Structural Relevant
+> Semantic Support
+> Pure and Noise -free
+> Reason Phase
+
+SSR -SFT  SSR -RL   
+
+> Purified Reasoning
+> 𝑔 ∗
+> Target
+> Label 1
+> Label 2
+> Label N
+> ⋯
+> SSR Prompts
+> Teacher LLM
+> Filtering Strategy
+> Subgraph Authenticity
+> Structural Diversity
+> Selection Consistency
+> Answer Check
+> SFT
+> (𝑹 𝟏 ) Authenticity -
+> Reinforced RLVR (𝑹 𝟐 ) Denoising -Reinforced RLVR
+> 𝑆 𝑟𝑒𝑎𝑙
+> 𝑆 𝑐𝑜𝑛𝑠𝑖𝑠𝑡
+> 𝑆 𝑎𝑛𝑠
+> 0
+> 0.05
+> 0.1
+> 1.0
+
+𝑟 𝑠  
+
+> Pure Subgraph Complex Subgraph
+
+𝑟 𝑠       
+
+> 𝑅 2=1+𝜆 ∙𝑟 𝑠
+> Denoising Intensity
+> 𝜆
+
+Figure 2: Overview of our proposed GraphSSR framework. 
+
+least one candidate captures the task-relevant structures necessary for the targeted task 𝜏 .
+
+Select Phase. We implement a denoising mechanism where the model is designed to evaluate the sampled candidates and select the most suitable subgraph for the specific downstream task 𝜏 . By analyzing the structural and textual properties of each 𝑔 𝑖 ∈ S, the model autonomously identifies and retains the optimal subgraph 𝑔 ∗
+
+while discarding those containing noisy information. The Sample and Select phases work together to perform adaptive subgraph denoising, effectively pruning irrelevant graph features prior to the final reasoning step. 
+
+Reason Phase. The refined subgraph 𝑔 ∗ serves as the context for the downstream task 𝜏 . Having been denoised through the Sample and Select phases, 𝑔 ∗ provides purified structural and textual signals, allowing the LLM to avoid interference from noise and improving the performance of zero-shot graph reasoning. 
+
+## 2.3 SSR-SFT 
+
+To enable the model to execute the SSR pipeline, we construct a high-quality Supervised Fine-Tuning (SFT) dataset for the LLM instruction tuning. Given the high cost of obtaining ground truth reasoning traces for complex graph-based tasks in real-world sce-narios, we adopt a synthetic data generation strategy. Specifically, by leveraging graph queries from the open-source Graph-R1 dataset, we construct SSR pipeline instruction prompts, as outlined in Sec-tion 2.2, and queries a powerful teacher model ( e.g. , DeepSeek-R1 [ 19 ]) to generate detailed chain-of-thought reasoning traces and final answers. To ensure the rigor of the training data, we introduce multi-dimensional quality control filters to identify and filter out poor-quality reasoning traces: 
+
+• Subgraph Authenticity Verification : We rigorously verify that all nodes and edges within each sampled candidate subgraph are authentic subsets of the original graph. Any instance containing hallucinated structural elements is discarded. 
+
+• Structural Diversity Evaluation : To ensure the model explores a broad structural and textual space, we quantify the diversity of the sampled subgraphs in the candidate group S. Specifically, we adopt an energy-based metric [ 20 ] to measure the diversity of S:Energy (S) = − 1
+
+|S| (| S| − 1)∑︁ 𝑖 ≠𝑗 
+
+1
+
+𝐷 (𝑔 𝑖 , 𝑔 𝑗 ) , (1) where 𝐷 (· , ·) denotes the distance function between a pair of graphs. To effectively capture both topological structure and tex-tual semantics across diverse datasets and domains, we leverage LLMs to assess the pairwise distance (with the specific prompt provided in Appendix A.2). A higher Energy (S) value indicates greater diversity, and thus only instances exceeding a predefined energy threshold are retained. 
+
+• Selection Consistency Check : We ensure that the subgraph ultimately selected by the model for reasoning strictly belongs to the previously sampled candidate group. Any discrepancy between the selected subgraph and the available candidates leads to the exclusion of the instance. 
+
+• Answer Check : Finally, we validate the model’s predicted label against the ground-truth label, retaining only instances with correct predictions through graph reasoning. Through this rigorous distillation process, we curate a final SFT dataset comprising over 8,000 high-quality SSR-style graph rea-soning demonstrations. We subsequently fine-tune the model to reconstruct the complete reasoning trajectory. Specifically, we em-ploy a standard cross-entropy loss to minimize the discrepancy between the model’s output and the high-quality synthetic traces. The objective function is defined as: 
+
+L𝑆𝑆𝑅 −𝑆𝐹𝑇 = −
+
+> 𝑇
+
+∑︁ 
+
+> 𝑡 =1
+
+log 𝑃 (𝑠 𝑡 | 𝑠 <𝑡 , T (G 𝑠𝑢𝑏 , Xsub , Y, D)) , (2) where 𝑠 represents the entire token sequence encompassing the subgraph sampling, selection, and final graph reasoning process. This training regime ensures the model internalizes the full SSR pipeline, simultaneously enhancing its subgraph denoising and reasoning capabilities, thereby establishing a powerful foundation for subsequent reinforcement learning. Beyond One-Size-Fits-All: Adaptive Subgraph Denoising for Zero-Shot Graph Learning with Large Language ModelsConference acronym ’XX, June 03–05, 2018, Woodstock, NY 
+
+## 2.4 SSR-RL 
+
+While SSR-SFT equips the model with essential graph reasoning capabilities through the SSL pipeline, specifically by learning from high-quality teacher-generated reasoning traces, these general-purpose signals might not fully enable adaptive subgraph denoising and reasoning in complex, diverse zero-shot graph reasoning set-tings. To further enhance these capabilities, we propose a two-stage RL framework utilizing the GRPO algorithm. GRPO is particularly well-suited to our SSR pipeline due to its group-based reward mech-anism, which aligns with our strategy of sampling diverse subgraph candidates to promote both exploration and generalization. 
+
+2.4.1 Stage I: Authenticity-Reinforced RLVR . In the first stage, we employ Authenticity-Reinforced Reinforcement Learning from Verifiable Rewards (RLVR) to reduce hallucinations during sub-graph denoising, i.e. , sampling and selecting, and strengthen the model’s foundational graph reasoning ability. Unlike traditional outcome-based RLVR, which focuses solely on final answer cor-rectness, the reward function 𝑅 1 is designed with nested logic to enforce the integrity and correctness of the “Sample-Select-Reason” process. Specifically, the reward is calculated based on three ver-ifiable conditions, as described in Section 2.3: the authenticity of the sampled subgraphs ( Status 𝑟𝑒𝑎𝑙 ), the consistency of the selected subgraph within the sampled subgraph group ( Status 𝑐𝑜𝑛𝑠𝑖𝑠𝑡 ), and the correctness of the final answer (Status 𝑎𝑛𝑠 ). 
+
+𝑅 1 =
+
+
+
+1.0 if Status 𝑟𝑒𝑎𝑙 ∧ Status 𝑐𝑜𝑛𝑠𝑖𝑠𝑡 ∧ Status 𝑎𝑛𝑠 
+
+0.1 if Status 𝑟𝑒𝑎𝑙 ∧ Status 𝑐𝑜𝑛𝑠𝑖𝑠𝑡 ∧ ¬ Status 𝑎𝑛𝑠 
+
+0.05 if Status 𝑟𝑒𝑎𝑙 ∧ ¬ Status 𝑐𝑜𝑛𝑠𝑖𝑠𝑡 
+
+0.0 if ¬Status 𝑟𝑒𝑎𝑙 
+
+, (3) This hierarchical mechanism is designed to incentivize the model to solve complex zero-shot graph reasoning tasks by strictly adhering to the SSR pipeline. While Status 𝑎𝑛𝑠 remains the ultimate objective, the intermediate rewards calculated by Status 𝑟𝑒𝑎𝑙 and Status 𝑐𝑜𝑛𝑠𝑖𝑠𝑡 
+
+ensure that the model achieves the correct answer through a verifi-able and consistent logical process rather than relying on shortcut heuristics. 
+
+2.4.2 Stage II: Denoising-Reinforced RLVR . Experimental ob-servations reveal that models trained solely with Authenticity-Reinforced RLVR, while adhering to the SSR pipeline and perform-ing authentic subgraph sampling and consistent selection for sub-graph denoising, still exhibit a bias toward selecting larger sub-graphs. These models tend to maximize information density at the expense of introducing excessive noise, primarily due to the lack of direct guidance for denoising. To address this, we intro-duce Denoising-Reinforced RLVR, which incorporates structural parsimony into the reward function. This modification explicitly penalizes structural noise, thereby guiding the model toward more effective subgraph denoising as follows: 
+
+𝑅 2 =
+
+(
+
+1 + 𝜆 · 𝑟 𝑠 if 𝑅 1 = 1.0
+
+𝑅 1 otherwise , (4) where 𝑟 𝑠 encourages the model to select a “purer” subgraph from the candidates. It is computed based on the sizes of subgraphs within the group S:
+
+𝑟 𝑠 = 𝜌 𝑖 
+
+|S| − 1 , (5) where 𝜌 𝑖 denotes the descending rank index of the selected sub-graph’s size within S. The hyperparameter 𝜆 governs the denoising intensity; while an overly small 𝜆 may fail to induce the desired denoising effect, an excessive value risks filtering out critical infor-mation. Therefore, 𝜆 must be carefully calibrated to ensure optimal performance. The complete GRPO-based training process for the two-stage SSR-RL framework is detailed in Appendix B. 
+
+## 3 Experiments 
+
+In this section, we conduct extensive experiments to evaluate the performance of the GraphSSR framework from five perspectives: (1) 
+
+a comparison with state-of-the-art (SOTA) baselines (Section 3.2), 
+
+(2) performance evaluation against general large reasoning models (Section 3.3), (3) the contribution of various modeling modules (Sec-tion 3.4), (4) the impact of the denoising intensity hyperparameter 𝜆 
+
+(Section 3.5), and (5) the effectiveness of the denoising mechanism in pruning structural noise (Section 3.6). 
+
+## 3.1 Experimental Settings 
+
+3.1.1 Datasets Description . Following the experimental setup of GOFA [ 14 ], we conduct extensive experiments across a variety of graph domains, including social networks, web links, knowl-edge graphs, citation networks, and e-commerce. Specifically, we evaluate the zero-shot transferability of our model on node and link classification tasks using four benchmark datasets: Cora [ 17 ], WikiCS [ 21 ], Products [ 22 ], and FB15K237 [ 10 ]. These datasets are strictly excluded during both the SFT and RL stages. Detailed statistics for these datasets are provided in Table 4 of Appendix C. 
+
+3.1.2 Baselines and Evaluation Metrics . We compare GraphSSR against a diverse set of baselines that represent the current state-of-the-art in both graph-specific models and general-purpose LLMs, providing a rigorous comparison for our proposed method. 
+
+• Graph-Specific Reasoning Models : These methods are tai-lored specifically for zero-shot graph-based tasks, capitalizing on feature enhancement, cross-modality alignment, or graph rea-soning: OFA [ 10 ], GraphGPT [ 13 ], UniGraph [ 23 ], ZeroG [ 11 ], LLaGA [24], GOFA [14], and Graph-R1 [15]. 
+
+• General Large Reasoning Models : These models are optimized for broad cognitive tasks. To handle graph-based tasks, they re-quire textual serialization to perform inference: DeepSeek-R1-distilled-Qwen2.5-14B [ 19 ], Qwen3-14B (Thinking) [ 25 ], Ministral-3-14B-Reasoning-2512 [26], and DeepSeek-R1-0528 [19]. We use Accuracy as the primary metric to evaluate performance on both node and link classification tasks in a zero-shot setting. 
+
+3.1.3 Implementation Details . We employ DeepSeek-R1-distilled-Qwen2.5-14B as the foundational backbone for all experiments. Dur-ing the SSR-SFT phase, we utilize the LlamaFactory framework [ 27 ]to fine-tune the model for 3 epochs with a learning rate of 1.0×10 −5
+
+and a batch size of 64. For the subsequent SSR-RL phase, we lever-age the verl [ 28 ] framework, training the model for 4 epochs with a more conservative learning rate of 1.0 × 10 −6 and a batch size of 64. In the Denoising-Reinforced RLVR, the denoising intensity Conference acronym ’XX, June 03–05, 2018, Woodstock, NY Trovato et al. 
+
+Table 1: Main Results Comparison. We report Accuracy (ACC) across various tasks. The best results are indicated in bold, and the second-best are underlined. Results of baselines are from the Graph-R1 paper, and “-” denotes results are not available. Method Cora WikiCS Products FB15K237 7 2 10 5 47 10 5 10 
+
+OFA 28.65 56.92 21.20 35.15 19.37 30.43 39.31 -GraphGPT 44.65 - - - 18.84 - - -UniGraph 69.53 89.74 43.45 60.23 38.45 66.07 75.73 -ZeroG 64.21 87.83 31.26 48.25 31.24 51.24 71.29 -LLaGA 51.85 62.73 - - 23.10 34.15 39.72 -GOFA-T 70.81 85.73 71.17 80.93 54.60 79.33 87.13 73.59 GOFA-F 69.41 87.52 68.84 80.52 56.13 80.03 88.34 80.69 
+
+Graph-R1 71.53 89.08 78.68 86.89 66.59 85.72 91.78 75.17 
+
+GraphSSR 72.41 89.81 79.40 87.93 68.49 86.46 91.98 78.94 
+
+Table 2: Comparison between GraphSSR and Large Reasoning Models (LRMs). Best in bold; second best underlined. Methods Cora (7) WikiCS (10) Products (47) FB15K237 (10) 
+
+DeepSeek-R1-0528 69.59 76.96 70.17 84.12 
+
+Qwen3-14B (Thinking) 65.15 78.56 66.54 77.86 Ministral-3-14B-Reasoning-2512 69.30 75.38 59.89 77.67 DeepSeek-R1-distilled-Qwen2.5-14B 68.80 75.26 66.09 73.49 
+
+GraphSSR 72.41 79.40 68.49 78.94 hyperparameter 𝜆 is set to 0.1. All computational tasks, including data synthesis and model training, are conducted on a cluster of 8 NVIDIA H100 GPUs. 
+
+## 3.2 Main Results 
+
+Table 1 summarizes the performance comparison between our proposed GraphSSR and several state-of-the-art (SOTA) baselines across various benchmark datasets. The values beneath each dataset header denote the number of candidate categories, where a larger number indicates increased task complexity. As illustrated in Table 1, GraphSSR achieves SOTA performance on the majority of tasks. For instance, on the 7-category Cora and 47-category Products node classification tasks, our method achieves 72.41% and 68.49% accuracy, respectively, marking a significant im-provement over baselines. While GOFA-F remains the leader on the FB15K237 link classification task, our method effectively narrows the performance gap, demonstrating strong generalizability across different graph-based tasks. A particularly noteworthy observation is GraphSSR’s perfor-mance on the Products dataset. Specifically, as the number of candi-date categories increases from 5 to 47, the performance gap between our method and the runner-up, Graph-R1, widens significantly. At the maximum 47-category setting—the most challenging configura-tion—our method outperforms Graph-R1 by nearly 2% (68.49% vs. 66.59%). This trend can be attributed to the inherent nature of the Products dataset, where labels exhibit substantial semantic overlap (e.g. , “Kitchen & Dining” and “Grocery & Gourmet Food”). As the label space expands, the increased reasoning complexity demands that the model extract highly precise and relevant structural infor-mation to discern subtle semantic nuances. While previous methods often succumb to distracting noise in such dense environments, our method effectively prunes task-irrelevant nodes and edges. Such superior and adaptive denoising capability allows our method to maintain high reasoning accuracy even as the task difficulty scales, underscoring the necessity of subgraph denoising for zero-shot graph reasoning in complex scenarios. 
+
+## 3.3 Comparison with Large Reasoning Models 
+
+To comprehensively evaluate the effectiveness of GraphSSR , we compare it against several state-of-the-art Large Reasoning Mod-els (LRMs). Specifically, we selected three open-source reasoning models of equivalent parameter scales, alongside the large-scale DeepSeek-R1 as a high-end benchmark. The results, summarized in Table 2, demonstrate the clear superiority of our method in integrating structural graph information with specialized graph reasoning. As shown in the table, our method consistently outperforms all same-scale baselines. This performance gap indicates that the general-purpose knowledge and native reasoning capabilities of LLMs, while powerful, are insufficient for addressing complex zero-shot graph reasoning tasks. Without an explicit mechanism to process graph topology and mitigate structural noise, these models struggle to identify the most relevant information within a complex graph context. Beyond One-Size-Fits-All: Adaptive Subgraph Denoising for Zero-Shot Graph Learning with Large Language ModelsConference acronym ’XX, June 03–05, 2018, Woodstock, NY 
+
+Notably, our method even outperforms the full-parameter DeepSeek-R1-0528 on the Cora and WikiCS datasets. Despite DeepSeek-R1-0528 possessing a substantially larger parameter scale and superior general reasoning capabilities, its performance on these specific graph tasks is hindered by the absence of an effective subgraph denoising mechanism. These observations provide strong evidence that our proposed Sample-Select-Reason pipeline and two-stage RL strategy are essential for bridging the gap between general linguistic reasoning and graph reasoning. 
+
+## 3.4 Ablation Study 
+
+To evaluate the contribution of each core component in GraphSSR, we conduct ablation studies across various datasets. We consider four model variants: (1) w/o SSR pipeline , which omits our Sample-Select-Reason pipeline and directly performs reasoning on the raw, task-agnostic subgraph after standard SFT and RLVR training; (2) 
+
+w/o RL , which utilizes the SSR pipeline during SSR-SFT but ex-cludes the entire SSR-RL process; (3) w/o Authenticity-Reinforced RLVR , which follows the full pipeline but specifically excludes the Authenticity-Reinforced RLVR; and (4) w/o Denoising-Reinforced RLVR , which similarly excludes the Denoising-Reinforced RLVR. The experimental results, as illustrated in Figure 3, consistently demonstrate the effectiveness of our proposed modules. Notably, the removal of the SSR pipeline leads to the most substantial per-formance degradation across the majority of datasets. This decline highlights that without the adaptive sampling and selecting phases, the model is forced to process task-agnostic subgraphs that often contain task-irrelevant nodes and edges. The inability to filter this structural noise directly impedes the model’s reasoning qualities, confirming that the SSR pipeline is fundamental to zero-shot graph reasoning. Furthermore, the performance drop observed in the w/o RL setting demonstrates that SSR-SFT alone is insufficient for the model to fully internalize the complex strategies required for effec-tive subgraph denoising and reasoning. The RL phase is essential for bridging the gap between simply mimicking the teacher’s rea-soning traces and autonomously exploring optimal traces in the subgraph space. Furthermore, both Authenticity-Reinforced RLVR and Denoising-Reinforced RLVR contribute critically to the final performance, albeit through different mechanisms. Specifically, the absence of Authenticity-Reinforced RLVR weakens the model’s ability to iden-tify task-relevant, authentic structural information and limits its fundamental reasoning capabilities. Conversely, omitting Denoising-Reinforced RLVR results in a lack of denoising capability. For a more intuitive demonstration of these effects, we provide detailed case studies in Appendix D.3. 
+
+## 3.5 Parameter Sensitivity 
+
+In this section, we investigate the sensitivity of GraphSSR to the hy-perparameter 𝜆 , which governs the denoising intensity by control-ling the weight of the reward 𝑟 𝑠 during the Denoising-Reinforced RLVR stage. To evaluate its impact, we conduct experiments on the Cora (7-class) and WikiCS (10-class) datasets with 𝜆 values ranging from 0.01 to 1.0. The results are depicted in Figure 4, where the model’s accuracy exhibits a consistent “inverted U-shape” trend across both datasets. When 𝜆 is set to a relatively low value ( e.g. ,Cora (7) WikiCS (10) Products (47) FB15K237 (10) 
+
+> 65.0
+> 67.5
+> 70.0
+> 72.5
+> 75.0
+> 77.5
+> 80.0
+> 82.5
+> Accuracy (%)
+> Ablation Study Results Across Datasets
+> w/o SSR pipeline
+> w/o RL
+> w/o Authenticity-Reinforced RLVR
+> w/o Denoising-Reinforced RLVR
+> GraphSSR
+
+Figure 3: Ablation study of GraphSSR on different datasets. 0.01 0.05 0.1(Ours) 0.5 1.0     
+
+> 70.5
+> 71.0
+> 71.5
+> 72.0
+> 72.5
+> Accuracy (%)
+> Cora (7)
+> 0.01 0.05 0.1(Ours) 0.5 1.0
+> 78.6
+> 78.8
+> 79.0
+> 79.2
+> 79.4
+> 79.6
+> Accuracy (%)
+> WikiCS (10)
+
+Figure 4: Parameter Sensitivity of 𝜆 .
+
+0.01 ), the performance is suboptimal. This is primarily because a small 𝑟 𝑠 weight fails to impose sufficient pressure on the model to prune noisy structures, leading the model to suffer from the interference of noisy nodes and edges. As 𝜆 increases, we observe a steady improvement in accuracy, reaching a peak at 𝜆 = 0.1.This upward trend validates that introducing a properly weighted denoising reward successfully guides the model toward selecting “purer” and more relevant subgraphs, which enhances its reasoning quality. However, as 𝜆 continues to increase beyond the optimal threshold, the performance starts to decline on both datasets. This phenomenon suggests that an excessively high penalty may lead to an “over-pruning” issue, where the model becomes overly biased toward structural brevity at the expense of losing critical semantic information required for correct classification. 
+
+## 3.6 Case Study 
+
+3.6.1 Reasoning Trajectory Analysis Under Adaptive Sub-graph Denoising . To better understand how GraphSSR performs subgraph denoising and enables correct graph reasoning, we con-duct a qualitative analysis on a specific zero-shot node classification task from the Cora dataset. In this example, the target node 11’s textual content is: “ Hierarchical logistic belief networks for linear model selection, using Gibbs sampling for parameter learning ”, with the ground-truth label “ Neural Networks ”. Within its neighbor-hood, there are semantically consistent nodes that support correct reasoning ( e.g. , node 13, node 17), as well as detrimental noisy nodes (e.g. , node 9, node 14) whose textual attributes pertain to another Conference acronym ’XX, June 03–05, 2018, Woodstock, NY Trovato et al. 
+
+Table 3: Graph size analysis under subgraph denoising. Datasets Existing Strategy GraphSSR 
+
+Cora (7) 17.31 5.71 
+
+WikiCS (10) 26.70 6.97 
+
+Products (47) 16.63 6.72 
+
+FB15K237 (10) 31.27 8.88 
+
+label, “ Probabilistic Methods ”, which is somewhat connected to the target node but incorrect. In the absence of our proposed SSR pipeline and the associated subgraph denoising training strategy, the model takes as input a uniform, task-agnostic, and unfiltered ego-subgraph ( i.e. , the 𝑘 -hop subgraph commonly used in existing work). Without a denoising mechanism, the descriptions of noisy neighbors, such as “EM al-gorithm”, can overwhelm the specific attributes of the target node. Despite the presence of semantically consistent nodes, the interfer-ence from noisy information misleads the model into producing an incorrect prediction: “Probabilistic Methods”. In contrast, GraphSSR demonstrates a decisive strategic advantage. By effectively select-ing a task-adaptive subgraph 𝑆𝑢𝑏𝑔𝑟𝑎𝑝ℎ _2—which retains relevant neighbors (node 13 and node 17) while pruning noisy ones (node 9 and node 14)—our method strikes an optimal balance between purity and informativeness. This task-adaptive, denoised context empowers the reasoning module to focus on the precise semantics of the target node, i.e. , “networks”, ultimately yielding the correct classification: “Neural Networks”. The complete case study, model output, and additional analysis of other model variants are provided in Appendix D.2. 
+
+3.6.2 Graph Analysis Under Adaptive Subgraph Denoising .
+
+To quantitatively validate the effectiveness of GraphSSR, we analyze the structure of the subgraphs selected during the reasoning phase for each dataset. Specifically, as shown in Table 3, our proposed GraphSSR significantly compresses the subgraph size compared to the uniform and unfiltered ego-subgraph, which typically includes the entire neighborhood of the target node. Crucially, this reduc-tion in subgraph size is accompanied by a simultaneous improve-ment in task performance. This inverse correlation provides strong empirical evidence that “more information” does not equate to “better reasoning” in graph reasoning tasks. It further underscores GraphSSR’s ability to prune large-scale structural noise through its SSR pipeline and denoising strategy, ultimately yielding a more robust and effective model. 
+
+## 4 Related Work 4.1 Integrating LLMs with Graph Modules 
+
+This line of research explores the synergy between LLMs and spe-cialized graph-specific modules, such as GNNs, to integrate the semantic depth of LLMs with the structural inductive biases of GNNs. It can primarily be divided into two aspects: 
+
+LLM as Enhancer. This category of methods leverages the su-perior semantic reasoning capabilities and inherent knowledge of LLMs to enrich graph data, providing high-quality features for downstream GNNs. Representative methods such as OFA [ 10 ], Un-iGraph [ 23 ], and ZeroG [ 11 ] utilize LLMs to project diverse node attributes into a unified semantic space, facilitating cross-domain feature alignment. To address scenarios with missing or sparse textual information, TANS [29] employs LLMs to synthesize high-quality textual descriptions from raw graph structures. Beyond static enhancement, other studies introduce dynamic refinement and knowledge transfer: DAS [ 12 ] implements a feedback-driven loop where an LLM iteratively refines node text descriptions guided by GNN feedback to better align semantics with graph topology, and PKD [ 30 ] adopts a preference-driven knowledge distillation strategy to transfer task-specific expertise from LLMs to GNNs for enhanced few-shot classification. Despite their effectiveness, a primary limitation of these methods is their persistent reliance on GNN training, which often leads to suboptimal transferability and performance in zero-shot settings. 
+
+LLM as Predictor. In this paradigm, LLMs serve as the final reasoning engine, where graph-specific structural information is first encoded by a graph module and then integrated into the LLM’s input space for prediction. A core group of methods focuses on aligning graph topological features with the LLM’s embedding space; for instance, LLaGA [ 24 ] transforms neighborhood structures into sequential representations via predefined templates, whereas GraphGPT [ 13 ], GraphTranslator [ 31 ], and TEA-GLM [ 32 ] utilize multi-stage alignment or translation modules to bridge the modality gap. To endow LLMs with intrinsic GNN capabilities, GOFA [ 14 ] in-tegrates GNN layers into the LLM architecture, while UniGTE [ 33 ]recovers node-permutation invariance like GNNs by modifying the attention mechanism within the LLM. Despite their progress, this “encoder-then-reasoner” paradigm often suffers from modality decoupling, where the reliance on complex, domain-specific align-ment pretraining limits their adaptability to unseen label spaces and hinders universal zero-shot generalization. 
+
+## 4.2 Vanilla LLM-based Graph Reasoning 
+
+Another direction explores the inherent reasoning capabilities of LLMs to solve graph-based tasks directly through natural language, obviating the need for external graph-specific modules. Earlier methods convert graph topologies into natural language prompts, enabling pretrained LLMs to perform zero-shot or few-shot rea-soning without parameter updates [ 34 –37 ]. While they capitalize on the general-purpose reasoning of LLMs, the lack of domain-specific adaptation often leads to suboptimal performance on tasks requiring deep structural understanding. To overcome these lim-itations, subsequent research has shifted from frozen prompting to fine-tuning. Specifically, InstructGraph [ 38 ] utilizes structured reasoning tasks and preference alignment to guide graph-specific outputs, while InstructGLM [ 39 ] employs multi-prompt training across diverse tasks to improve cross-task generalization. Unlike traditional instruction tuning, recent studies have attempted to propose unique training paradigms. LangGFM [ 40 ] introduces self-supervised alignment via topology and feature-masked autoen-coding, whereas GRIP [ 41 ] leverages LoRA fine-tuning to inter-nalize graph structures within model parameters, enabling effi-cient reasoning without external structural inputs during inference. Furthermore, Graph-R1 [ 15 ], which is most closely related to our Beyond One-Size-Fits-All: Adaptive Subgraph Denoising for Zero-Shot Graph Learning with Large Language ModelsConference acronym ’XX, June 03–05, 2018, Woodstock, NY 
+
+method, employs reinforcement learning to incentivize zero-shot graph learning by driving explicit, long chain-of-thought reason-ing through task-specific templates. However, Graph-R1 relies on a task-agnostic, fixed 𝑘 -hop subgraph extraction strategy, which inevitably introduces task-irrelevant structural noise that interferes with the reasoning process. To address this, our method proposes a subgraph denoising SSR pipeline coupled with a two-stage rein-forcement training strategy. Distinct from existing methods, our method performs reasoning over purified, task-relevant subgraphs, thereby narrowing the receptive field to essential components and significantly enhancing overall performance. 
+
+## 5 Conclusion 
+
+In this paper, we address the critical challenge of structural noise in zero-shot graph reasoning by proposing GraphSSR, a novel frame-work that shifts the modeling paradigm from traditional “one-size-fits-all” task-agnostic subgraph extraction to an adaptive Sample-Select-Reason (SSR) pipeline with an explicit subgraph denoising mechanism. In this way, GraphSSR enables Large Language Models to autonomously explore a diverse space of candidate subgraphs, filter out task-irrelevant nodes and edges, and execute high-fidelity reasoning on a denoised structural context. To enable the model to execute the SSR pipeline, we integrate a rigorous SSR-SFT data synthesis strategy with a two-stage reinforcement learning frame-work, SSR-RL, which utilizes Authenticity-Reinforced RLVR to eliminate hallucinations during subgraph sampling and selecting while solidifying reasoning capabilities, and Denoising-Reinforced RLVR to penalize structural noise through a subgraph size-based reward mechanism. By incentivizing the model to achieve correct predictions using the concise and relevant structural information, GraphSSR achieves state-of-the-art performance across multiple zero-shot benchmarks, providing a robust and effective solution for generalizing graph reasoning to unseen domains and label spaces. 
+
+## References 
+
+[1] Yanfu Zhang, Shangqian Gao, Jian Pei, and Heng Huang. Improving social network embedding via new second-order continuous graph neural networks. In Proceedings of the 28th ACM SIGKDD conference on knowledge discovery and data mining , pages 2515–2523, 2022. [2] Mei Guo, Chen Chen, Chunyan Hou, Yike Wu, and Xiaojie Yuan. Fgdgnn: Fine-grained dynamic graph neural network for rumor detection on social media. In Findings of the Association for Computational Linguistics: ACL 2025 , pages 5676–5687, 2025. [3] Hai-Cheng Yi, Zhu-Hong You, De-Shuang Huang, and Chee Keong Kwoh. Graph representation learning in bioinformatics: trends, methods and applications. 
+
+Briefings in Bioinformatics , 23(1):bbab340, 2022. [4] Odin Zhang, Haitao Lin, Xujun Zhang, Xiaorui Wang, Zhenxing Wu, Qing Ye, Weibo Zhao, Jike Wang, Kejun Ying, Yu Kang, et al. Graph neural networks in modern ai-aided drug discovery. Chemical Reviews , 125(20):10001–10103, 2025. [5] Chen Gao, Yu Zheng, Nian Li, Yinfeng Li, Yingrong Qin, Jinghua Piao, Yuhan Quan, Jianxin Chang, Depeng Jin, Xiangnan He, et al. A survey of graph neural networks for recommender systems: Challenges, methods, and directions. ACM Transactions on Recommender Systems , 1(1):1–51, 2023. [6] Driss El Alaoui, Jamal Riffi, Abdelouahed Sabri, Badraddine Aghoutane, Ali Yahyaouy, and Hamid Tairi. A novel session-based recommendation system using capsule graph neural network. Neural Networks , 185:107176, 2025. [7] Haiteng Zhao, Shengchao Liu, Ma Chang, Hannan Xu, Jie Fu, Zhihong Deng, Lingpeng Kong, and Qi Liu. Gimlet: A unified graph-text model for instruction-based molecule zero-shot learning. Advances in neural information processing systems , 36:5850–5887, 2023. [8] Junyang Chen, Rui Mi, Huan Wang, Huisi Wu, Jiqian Mo, Jingcai Guo, Zhihui Lai, Liangjie Zhang, and Victor CM Leung. A review of few-shot and zero-shot learning for node classification in social networks. IEEE Transactions on Computational Social Systems , 2024. [9] Yusheng Zhao, Qixin Zhang, Xiao Luo, Weizhi Zhang, Zhiping Xiao, Wei Ju, Philip S Yu, and Ming Zhang. Dynamic text bundling supervision for zero-shot inference on text-attributed graphs. arXiv preprint arXiv:2505.17599 , 2025. [10] Hao Liu, Jiarui Feng, Lecheng Kong, Ningyue Liang, Dacheng Tao, Yixin Chen, and Muhan Zhang. One for all: Towards training one graph model for all classifi-cation tasks. arXiv preprint arXiv:2310.00149 , 2023. [11] Yuhan Li, Peisong Wang, Zhixun Li, Jeffrey Xu Yu, and Jia Li. Zerog: Investigating cross-dataset zero-shot transferability in graphs. In Proceedings of the 30th ACM SIGKDD Conference on Knowledge Discovery and Data Mining , pages 1725–1735, 2024. [12] Safal Thapaliya, Zehong Wang, Jiazheng Li, Ziming Li, Yanfang Ye, and Chuxu Zhang. Semantic refinement with llms for graph representations. arXiv preprint arXiv:2512.21106 , 2025. [13] Jiabin Tang, Yuhao Yang, Wei Wei, Lei Shi, Lixin Su, Suqi Cheng, Dawei Yin, and Chao Huang. Graphgpt: Graph instruction tuning for large language models. In Proceedings of the 47th International ACM SIGIR Conference on Research and Development in Information Retrieval , pages 491–500, 2024. [14] Lecheng Kong, Jiarui Feng, Hao Liu, Chengsong Huang, Jiaxin Huang, Yixin Chen, and Muhan Zhang. Gofa: A generative one-for-all model for joint graph language modeling. arXiv preprint arXiv:2407.09709 , 2024. [15] Yicong Wu, Guangyue Lu, Yuan Zuo, Huarong Zhang, and Junjie Wu. Graph-r1: Incentivizing the zero-shot graph learning capability in llms via explicit reasoning. In Proceedings of the 2025 Conference on Empirical Methods in Natural Language Processing , pages 23920–23938, 2025. [16] Wei Ju, Siyu Yi, Yifan Wang, Zhiping Xiao, Zhengyang Mao, Hourun Li, Yiyang Gu, Yifang Qin, Nan Yin, Senzhang Wang, et al. A survey of graph neural networks in real world: Imbalance, noise, privacy and ood challenges. IEEE Transactions on Pattern Analysis and Machine Intelligence , 2025. [17] Zhihao Wen and Yuan Fang. Augmenting low-resource text classification with graph-grounded pre-training and prompting. In Proceedings of the 46th Inter-national ACM SIGIR Conference on Research and Development in Information Retrieval , pages 506–516, 2023. [18] Zhihong Shao, Peiyi Wang, Qihao Zhu, Runxin Xu, Junxiao Song, Xiao Bi, Haowei Zhang, Mingchuan Zhang, YK Li, Yang Wu, et al. Deepseekmath: Pushing the limits of mathematical reasoning in open language models. arXiv preprint arXiv:2402.03300 , 2024. [19] DeepSeek-AI. Deepseek-r1: Incentivizing reasoning capability in llms via rein-forcement learning, 2025. [20] Fedor Velikonivtsev, Mikhail Mironov, and Liudmila Prokhorenkova. Challenges of generating structurally diverse graphs. Advances in Neural Information Pro-cessing Systems , 37:57993–58022, 2024. [21] Péter Mernyei and Cătălina Cangea. Wiki-cs: A wikipedia-based benchmark for graph neural networks. arXiv preprint arXiv:2007.02901 , 2020. [22] Xiaoxin He, Xavier Bresson, Thomas Laurent, Adam Perold, Yann LeCun, and Bryan Hooi. Harnessing explanations: Llm-to-lm interpreter for enhanced text-attributed graph representation learning. arXiv preprint arXiv:2305.19523 , 2023. [23] Yufei He and Bryan Hooi. Unigraph: Learning a cross-domain graph foundation model from natural language. CoRR , 2024. [24] Runjin Chen, Tong Zhao, Ajay Jaiswal, Neil Shah, and Zhangyang Wang. Llaga: Large language and graph assistant. arXiv preprint arXiv:2402.08170 , 2024. [25] Qwen Team. Qwen3 technical report, 2025. [26] Alexander H Liu, Kartik Khandelwal, Sandeep Subramanian, Victor Jouault, Abhinav Rastogi, Adrien Sadé, Alan Jeffares, Albert Jiang, Alexandre Cahill, Alexandre Gavaudan, et al. Ministral 3. arXiv preprint arXiv:2601.08584 , 2026. [27] Yaowei Zheng, Richong Zhang, Junhao Zhang, Yanhan Ye, Zheyan Luo, Zhangchi Feng, and Yongqiang Ma. Llamafactory: Unified efficient fine-tuning of 100+ language models. In Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 3: System Demonstrations) , Bangkok, Thailand, 2024. Association for Computational Linguistics. [28] Guangming Sheng, Chi Zhang, Zilingfeng Ye, Xibin Wu, Wang Zhang, Ru Zhang, Yanghua Peng, Haibin Lin, and Chuan Wu. Hybridflow: A flexible and efficient rlhf framework. arXiv preprint arXiv: 2409.19256 , 2024. [29] Zehong Wang, Sidney Liu, Zheyuan Zhang, Tianyi Ma, Chuxu Zhang, and Yan-fang Ye. Can llms convert graphs to text-attributed graphs? In Proceedings of the 2025 Conference of the Nations of the Americas Chapter of the Association for Computational Linguistics: Human Language Technologies (Volume 1: Long Papers) ,pages 1412–1432, 2025. [30] Xing Wei, Chunchun Chen, Rui Fan, Xiaofeng Cao, Sourav Medya, and Wei Ye. Preference-driven knowledge distillation for few-shot node classification. arXiv preprint arXiv:2510.10116 , 2025. [31] Mengmei Zhang, Mingwei Sun, Peng Wang, Shen Fan, Yanhu Mo, Xiaoxiao Xu, Hong Liu, Cheng Yang, and Chuan Shi. Graphtranslator: Aligning graph model to large language model for open-ended tasks. In Proceedings of the ACM Web Conference 2024 , pages 1003–1014, 2024. [32] Duo Wang, Yuan Zuo, Fengzhi Li, and Junjie Wu. Llms as zero-shot graph learners: Alignment of gnn representations with llm token embeddings. Advances in Neural Information Processing Systems , 37:5950–5973, 2024. Conference acronym ’XX, June 03–05, 2018, Woodstock, NY Trovato et al.                             
+
+> [33] Duo Wang, Yuan Zuo, Guangyue Lu, and Junjie Wu. Unigte: Unified graph-text encoding for zero-shot generalization across graph tasks and domains. arXiv preprint arXiv:2510.16885 , 2025. [34] Yuntong Hu, Zheng Zhang, and Liang Zhao. Beyond text: A deep dive into large language models’ ability on understanding graph data. arXiv preprint arXiv:2310.04944 , 2023. [35] Qinyong Wang, Zhenxiang Gao, and Rong Xu. Graph agent: Explicit reasoning agent for graphs. arXiv preprint arXiv:2310.16421 , 2023. [36] Jintang Li, Ruofan Wu, Yuchang Zhu, Huizhe Zhang, Liang Chen, and Zibin Zheng. Are large language models in-context graph learners? arXiv preprint arXiv:2502.13562 , 2025. [37] Yuanfu Sun, Zhengnan Ma, Yi Fang, Jing Ma, and Qiaoyu Tan. Graphicl: Unlock-ing graph learning potential in llms through structured prompt design. arXiv preprint arXiv:2501.15755 , 2025. [38] Jianing Wang, Junda Wu, Yupeng Hou, Yao Liu, Ming Gao, and Julian McAuley. Instructgraph: Boosting large language models via graph-centric instruction tuning and preference alignment. arXiv preprint arXiv:2402.08785 , 2024. [39] Ruosong Ye, Caiqi Zhang, Runhui Wang, Shuyuan Xu, and Yongfeng Zhang. Language is all a graph needs. In Findings of the association for computational linguistics: EACL 2024 , pages 1955–1973, 2024. [40] Tianqianjin Lin, Pengwei Yan, Kaisong Song, Zhuoren Jiang, Yangyang Kang, Jun Lin, Weikang Yuan, Junjie Cao, Changlong Sun, and Xiaozhong Liu. Langgfm: A large language model alone can be a powerful graph foundation model. arXiv preprint arXiv:2410.14961 , 2024. [41] Jiarui Feng, Donghong Cai, Yixin Chen, and Muhan Zhang. Grip: In-parameter graph reasoning through fine-tuning large language models. arXiv preprint arXiv:2511.07457 , 2025. [42] Yuhan Li, Peisong Wang, Xiao Zhu, Aochuan Chen, Haiyun Jiang, Deng Cai, Victor W Chan, and Jia Li. Glbench: A comprehensive benchmark for graph with large language models. Advances in Neural Information Processing Systems ,37:42349–42368, 2024. [43] Weihua Hu, Matthias Fey, Marinka Zitnik, Yuxiao Dong, Hongyu Ren, Bowen Liu, Michele Catasta, and Jure Leskovec. Open graph benchmark: Datasets for machine learning on graphs. Advances in neural information processing systems ,33:22118–22133, 2020. [44] Zhilin Yang, William Cohen, and Ruslan Salakhudinov. Revisiting semi-supervised learning with graph embeddings. In International conference on machine learning , pages 40–48. PMLR, 2016. [45] Hao Yan, Chaozhuo Li, Ruosong Long, Chao Yan, Jianan Zhao, Wenwen Zhuang, Jun Yin, Peiyan Zhang, Weihao Han, Hao Sun, et al. A comprehensive study on text-attributed graphs: Benchmarking and rethinking. Advances in Neural Information Processing Systems , 36:17238–17264, 2023.
+
+## A Prompt Templates A.1 Sample-Select-Reason Pipeline 
+
+In this section, we provide a prompt example for the zero-shot node classification task and detail the prompt template design for the SSR pipeline. The pipeline begins with the Task Description and Initialized Subgraph , where we define the model’s persona as a “graph analysis expert” and provide the raw subgraph data. This stage establishes a comprehensive context, ensuring the model captures both node semantics and explicit topological connections as a foundation for subsequent reasoning. In the Sample Phase , the model is tasked with sampling multi-ple candidate subgraphs ( e.g. , 5) while ensuring both their structural validity and factual existence. This constraint minimizes the risk of generating “hallucinated” or non-existent subgraphs. By enforc-ing diverse sampling criteria—ranging from a “target-node-only” structure to “semantically-dense” subgraphs—we guide the model to explore varying scales and semantic contexts. Furthermore, by optimizing for “information difference” between candidates, we encourage the model to consider distinct topological structures and textual attributes, thereby enhancing the overall quality and diversity of the subgraph pool. In the Select Phase , the model is expected to autonomously evaluate the quality of candidate subgraphs and identify the optimal one. To facilitate this, we prescribe only fundamental constraints, granting the model maximum reasoning autonomy. This design allows the model’s internal selecting logic to evolve and refine adaptively during the training process, ensuring that the selection criteria align with the overall objective. In the Reason Phase , we impose rigorous constraints by re-quiring the model to “repeat and verify” the selected subgraphs. This mechanism is designed to maintain logical consistency dur-ing long-context generation. By prioritizing independent analysis and holistic modeling, we effectively isolate the decision-making process from the interference of non-selected candidate subgraphs. This ensures that the final classification is derived strictly from the local topology and semantic evidence of the chosen subgraph, yielding the optimal prediction. 
+
+## A.2 Subgraph Diversity Score Calculation 
+
+To capture both topological relationships and textual semantics across heterogeneous datasets, we move beyond traditional GNN-based embeddings. Instead, we employ LLMs to perform direct pairwise distance estimation. We task the LLM with performing a cross-graph structural and semantic analysis to generate a normal-ized score within the range of [0, 1]. This value serves as a universal distance metric to quantify the diversity between two subgraph structures. 
+
+## B Training Details 
+
+Datasets . To ensure robust model performance across diverse zero-shot graph reasoning tasks, we developed specialized datasets for both SSR-SFT and SSR-RL. Our SSR-SFT training data origi-nates from the publicly available Graph-R1 SFT collection. To adapt these samples to our specific task requirements, we utilized the SSR pipeline to reconstruct the corresponding prompts, which were then processed by DeepSeek-R1 to generate high-quality chain-of-thought reasoning paths and final answers. Following a rigorous quality filtration process, we curated a final SSR-SFT training set comprising 8,265 high-quality instances. Notably, in the Structural Diversity Evaluation, we set a predefined energy threshold of 0.3. For SSR-RL, we implemented a difficulty-aware sampling strategy to enhance the model’s exploration capabilities. We first randomly sampled target nodes from the raw graph data and extracted their subgraphs. These subgraphs were transformed into prompts via the SSR pipeline and fed into the previously trained SSR-SFT model for an initial difficulty assessment. Specifically, each instance un-derwent five independent inference trials. An instance was cate-gorized as “Easy” if the model produced correct results in 4 or 5 trials, “Medium” for 2 or 3 correct results, and “Hard” for 0 or 1 correct results. We sampled across these difficulty tiers with a fixed ratio of 2:2:1 (Easy:Medium:Hard), yielding a comprehensive SSR-RL training dataset of 10,000 instances. For evaluation, we adopt the datasets utilized in the GOFA paper. All validation instances were processed through the SSR pipeline to maintain consistency in prompt structure with the training phases, ensuring a reliable benchmark. 
+
+Baselines . For the baseline results reported in Section 3.2, we directly adopt the performance metrics provided in the Graph-R1 paper. To evaluate the Large Reasoning Models in Section 3.3, we conducted evaluations on the same datasets using a prompt Beyond One-Size-Fits-All: Adaptive Subgraph Denoising for Zero-Shot Graph Learning with Large Language ModelsConference acronym ’XX, June 03–05, 2018, Woodstock, NY 
+
+construction method without the SSR pipeline. Given that all ex-perimental settings remain identical across these configurations, the results are directly comparable. 
+
+Training Process . We adopt DeepSeek-R1-distilled-Qwen2.5-14B as the base model for all experiments to leverage its superior reasoning capabilities. The training process is divided into two dis-tinct phases. First, in the SSR-SFT phase, we utilize the LlamaFactory framework to fine-tune the model for 3 epochs. We employ a learn-ing rate of 1.0 × 10 −5 and a total batch size of 64 to establish a stable foundation for graph-based reasoning. 
+
+A Prompt Example on Node Classification for SSR pipeline 
+
+#### Task Description and Initialized Subgraph 
+
+Task Description :You are a graph analysis expert. Given a complete subgraph structure, which includes the description of the central node(s), its neighboring nodes, and their connection relationships, please follow the following steps to operate the analysis: 
+
+Complete subgraph :- Central node ID(s): nodex - Node texts (central node(s) and neighboring nodes): [nodex: node description] - Connection relationships: [<nodex, nodey>] #### Sampling Phase 
+
+Step description :1. Subgraph Sampling :- In order to complete the Node Classification task of the central node(s), you need to first sample 5 subgraphs from the complete graph that are most suitable for the current task from this subgraph. - These subgraphs must keep all central node(s) as mentioned in the complete subgraph, they can include no, partial or all one-hop or two-hop neighbors of the central node(s). - You must ensure that the sampled subgraphs actually exist and do not create fictitious nodes and edges. - There must be a subgraph that consists only the central node(s) .- There should also be a subgraph, where as many neighboring nodes as possible can semantically support the central node(s) . If there is no such subgraph, do not fabricate one. - You must ensure that the information differences between these subgraphs are as significant as possible, so that these subgraphs can represent different semantic and structural meanings. The sizes of the subgraphs should also be as different as possible. #### Selection Phase 2. Subgraph Choosing :From the sampled subgraphs, choose one subgraph that is best suited for the current task and use it for subsequent reasoning. #### Reasoning Phase 3. Node Classification Reasoning :- Repeat and verify the subgraph you have chosen, ensuring that the chosen subgraph you analyze and output is consistent with 
+
+the sampled subgraphs. - Analyze the chosen subgraph independently. Only consider the nodes and edges of the current subgraph . The obtained answer is entirely based on the chosen subgraph and is independent of other sampled subgraphs and the complete subgraph. - You must treat the current subgraph as a whole for reasoning, taking into account the information of all nodes in this subgraph, not just the information of the central node(s). - Provide the Node Classification answer of the central node(s) obtained through reasoning, the answer must be selected strictly 
+
+from the following Node Classification options. Each option is enclosed within < >, but when you answer, do not include < >. 4. Node Classification Options : <Theory>, <Probabilistic Methods>, <Genetic Algorithms>, <Reinforcement Learning>, <Case-Based>, <Neural Networks>, <Rule Learning>. Conference acronym ’XX, June 03–05, 2018, Woodstock, NY Trovato et al. 
+
+A Prompt Sample for Subgraph Diversity Score Calculation 
+
+Task Description :You are a graph analysis expert. Given two graph structures, which includes the description of the central node(s), its neighboring nodes, and their connection relationships, please follow the following steps to operate the analysis: 
+
+Graph structure 1 :- Central node ID(s): nodex - Node texts (central node(s) and neighboring nodes): [nodex: node description] - Connection relationships: [<nodex, nodey>] 
+
+Graph structure 2 :- Central node ID(s): nodex - Node texts (central node(s) and neighboring nodes): [nodex: node description] - Connection relationships: [<nodex, nodey>] 
+
+Step description :1. Analyze the differences between the two graph structures in terms of the central node(s), neighboring nodes, and connection relationships. 2. Based on the analysis, provide a distance score ranging from 0 to 1 to quantify how different these two graph structures are. A score of 0 indicates that the two graph structures are identical, while a score of 1 indicates that they are completely different. 
+
+Subsequently, we transition to the SSR-RL phase using the verl framework. We adopt a sequential training strategy: Authenticity-Reinforced RLVR followed by Denoising-Reinforced RLVR. This phased approach is necessitated by the observation that the model’s graph reasoning capabilities following SSR-SFT are insufficient to manage the complexity of subgraph denoising. Introducing the reward 𝑟 𝑠 prematurely could lead the model to aggressively prune subgraphs, losing vital information before it has learned how to reason on graph-based tasks. By first establishing a baseline of correctness through Authenticity-Reinforced RLVR, the model can then focus on refining its selections in Denoising-Reinforced RLVR. The overall optimization follows the GRPO loss formulation: 
+
+L𝐺𝑅𝑃𝑂 (𝜃 ) = − 1
+
+𝐺 
+
+> 𝐺
+
+∑︁ 
+
+> 𝑖 =1
+
+"
+
+min 𝜋 𝜃 (𝑠 𝑖 |𝑥 )
+
+𝜋 𝜃 𝑜𝑙𝑑 (𝑠 𝑖 |𝑥 ) ˆ𝐴 𝑖 ,
+
+clip 
+
+ 𝜋 𝜃 (𝑠 𝑖 |𝑥 )
+
+𝜋 𝜃 𝑜𝑙𝑑 (𝑠 𝑖 |𝑥 ) , 1 − 𝜖, 1 + 𝜖 
+
+
+
+ˆ𝐴 𝑖 
+
+!
+
+− 𝛽 D𝐾𝐿 (𝜋 𝜃 ∥𝜋 𝑟𝑒 𝑓 )
+
+#
+
+(6) where 𝐺 is the rollout group size and the advantage ˆ𝐴 𝑖 is computed by normalizing the rewards within each group, driving the model to prefer outputs that achieve higher accuracy with lower structural noise. For RL training, the model is trained for 4 epochs with a more conservative learning rate of 1.0 × 10 −6 and a batch size of 64. To prevent the model from being prematurely influenced by the de-noising reward—especially when its fundamental graph reasoning capabilities are still maturing—we introduce Denoising-Reinforced RLVR solely during the final 2,048 instances of the RL training process. For the Denoising-Reinforced RLVR, we specifically set the denoising intensity hyperparameter 𝜆 to 0.1, balancing the cor-rection of noisy graph structures with the preservation of essential topological information. The entire pipeline, including data syn-thesis and model training, was executed on a high-performance cluster equipped with 8 NVIDIA H100 GPUs. 
+
+## C Dataset Descriptions 
+
+To verify the cross-dataset adaptability and zero-shot performance of GraphSSR, we conducted experiments on several benchmark datasets spanning five distinct domains: Social Networks, Knowl-edge Graphs, Citation Networks, E-commerce, and Web Links. De-tailed topological statistics for these datasets are summarized in Table 4. 
+
+Social Network .
+
+• Instagram [42 ]: This dataset represents a social graph where nodes signify individual users and edges illustrate social ties (e.g., follower-following dynamics). Node-level features are derived from user-provided profile summaries and self-descriptions. 
+
+Knowledge Graph .
+
+• WN18RR [10 ]: A subset of the WordNet lexical database, this graph maps relationships between English words. It consists of 40,943 nodes where edges define semantic connections between linguistic entities. 
+
+• FB15K237 [ 10 ]: Derived from Freebase, this large-scale knowl-edge base contains entities (nodes) and their multifaceted relations (edges). Each entity is enriched with textual de-scriptions based on its name and relational context. 
+
+Citation .Beyond One-Size-Fits-All: Adaptive Subgraph Denoising for Zero-Shot Graph Learning with Large Language ModelsConference acronym ’XX, June 03–05, 2018, Woodstock, NY 
+
+Table 4: Comprehensive statistics of the multi-domain benchmarks. We employ a zero-shot setting, ensuring that datasets marked for testing remain entirely inaccessible during the training phase to rigorously assess model generalizability.                                                             
+
+> Domain Dataset #Nodes #Edges #Classes Split Social Network Instagram 11,339 155,349 2Training
+> Knowledge Graph WN18RR 40,943 93,003 11 Training
+> FB15K237 14,541 310,116 237 Test (Zero-shot) Citation
+> Arxiv 169,343 1,166,243 40 Training Citeseer 3,186 8,554 6Training Pubmed 19,717 88,648 3Training
+> Cora 2,708 10,556 7Test (Zero-shot) E-commerce
+> Children 76,875 1,554,578 24 Training Computer 87,229 721,081 10 Training Photo 48,362 500,939 12 Training Sports 173,055 1,773,500 13 Training
+> Products 54,025 144,638 47 Test (Zero-shot) Web Link WikiCS 11,701 216,123 10 Test (Zero-shot)
+
+• Arxiv [43 ]: A massive citation network of computer science papers. Each node is an academic publication, and edges denote direct citations. The objective is to categorize papers into 40 distinct subfields. 
+
+• Citeseer [44 ]: A specialized citation network centered on the computer science domain. It maps the interconnectedness of research papers through their citation links. 
+
+• Pubmed [ 22 ]: A biomedical citation graph sourced from the PubMed database. Nodes represent scientific articles related to diseases, and edges represent citation links. 
+
+• Cora [17 ]: A machine learning-centric citation graph. De-spite its smaller size, it provides a challenging classification task involving 7 fine-grained categories of research papers. 
+
+E-commerce .
+
+• Children, Computer, Photo, Sports, & Products [22 , 45 ]: These datasets are product graphs from Amazon. Nodes represent specific products, and edges indicate that products were frequently viewed or purchased in the same session. Textual metadata includes user reviews. 
+
+Web Link .
+
+• WikiCS [ 21 ]: A hyperlink network focused on the computer science branch of Wikipedia. Nodes correspond to individ-ual articles, and directed edges represent the web links con-necting them. The full text of each article provides the rich semantic information for each node. 
+
+## D Detailed Analysis of Case Study on Cora 
+
+To further elucidate the internal mechanisms of the Sample-Select-Reason (SSR) pipeline and the impact of the two-stage RL on sub-graph denoising, we present a comprehensive breakdown of the case study referenced in the main text. This example from the Cora dataset illustrates how structural noise in a dense egocentric sub-graph can interfere with graph reasoning and how our strategy successfully recovers the precise semantic signal. 
+
+## D.1 Input Data Characteristics and Semantic Dissonance 
+
+The target node ( node 11 ) is defined by the text: “ Hierarchical logistic belief networks for linear model selection, using Gibbs sam-pling for parameter learning ”. The ground-truth label is “Neural Networks” .Due to spatial constraints, the “Input Egocentric Subgraph” ( i.e. ,the uniform subgraph used in Graph-R1) exclusively visualizes the target node’s first-order neighbors, omitting second-order and higher-order neighbors. These neighboring nodes may provide task-relevant signals, they can also introduce potential noise. Specifically, 
+
+• Relevant Nodes: node 13 (hierarchical mixtures of experts) and node 17 (representations in neural networks) are all nodes related to the network architecture. They are all di-rectly connected to the target node, forming a “Network” semantic cluster. 
+
+• Noisy Nodes: node 9 (EM algorithm) and node 14 (EM reinterpreted via free energy maximization) describe the probabilistic method about the EM algorithm. While topically related, their semantic relevance to the target node is not strong enough. 
+
+## D.2 The Necessity of SSR Pipeline in Task-Relevant Subgraph Denoising 
+
+In this section, we provide an extended comparative analysis of the real-world inference results for the case study introduced in Section 3.6.1, contrasting GraphSSR with its variant that omits the SSR pipeline. This comparison serves to further justify the necessity of the SSR pipeline and the specialized training regime in isolating task-relevant structural information from inherent graph noise. The detailed variants and results are presented below: 
+
+Variant: w/o SSR pipeline. In this variant, the model is forced to process all neighbors simultaneously, including all first-order neigh-boring nodes and the unlisted second-order neighboring nodes, etc. This results in the model’s reasoning focuses on the cumulative Conference acronym ’XX, June 03–05, 2018, Woodstock, NY Trovato et al. 
+
+occurrence of keywords like “EM algorithm”. The signals from the nodes describing “networks” are drowned out by the statistical prevalence of EM-related neighbors. Consequently, the model fails to capture the “Neural Networks” essence of the target node and yields a biased classification of “Probabilistic Methods”. 
+
+GraphSSR. . The full model GraphSSR, equipped with the SSR pipeline and trained with the two-stage RL, demonstrates a so-phisticated filtering strategy. It samples five candidate subgraphs (𝑆𝑢𝑏𝑔𝑟𝑎𝑝ℎ _0 to 𝑆𝑢𝑏𝑔𝑟𝑎𝑝ℎ _4), including a pure subgraph 𝑆𝑢𝑏𝑔𝑟𝑎𝑝ℎ _2
+
+which contains only node 13 and node 17, and a subgraph 𝑆𝑢𝑏𝑔𝑟𝑎𝑝ℎ _4
+
+which contains all the first-order neighbors. Due to the existence of the subgraph denoising mechanism, GraphSSR selects 𝑆𝑢𝑏𝑔𝑟𝑎𝑝ℎ _2
+
+rather than the larger 𝑆𝑢𝑏𝑔𝑟𝑎𝑝ℎ _4, and “courageously” prunes the noisy nodes describing EM algorithms. By isolating the relation-ship between “belief networks”, “mixtures of experts”, and “neural networks”, the LLM’s reasoning engine recognizes a unified theme: network architecture. This distilled context allows it to bypass the “Probabilistic Methods” category and correctly identify the specific “Neural Networks” category. 
+
+## D.3 The Synergistic Effect of Two-Stage RL in Balancing Denoising and Reasoning 
+
+As illustrated in Section 2.4, we introduce SSR-RL, a novel two-stage reinforcement learning framework, to enhance the model’s capacity for both subgraph denoising and complex reasoning. To further demonstrate how this two-stage fusion approach can en-hance the ability of subgraph denoising, we conduct a compar-ative analysis using two distinct model variants: one employing solely Authenticity-Reinforced RLVR and the other restricted to Denoising-Reinforced RLVR. 
+
+Variant: solely Authenticity-Reinforced RLVR. . Based on the SSR pipeline, the variant can also sample five candidate sub-graphs and include a relatively pure subgraph 𝑆𝑢𝑏𝑔𝑟𝑎𝑝ℎ _3 in the candidates. However, without the subgraph denoising reward from Denoising-Reinforced RLVR, it incorrectly assumes that more data equals better evidence and chooses 𝑆𝑢𝑏𝑔𝑟𝑎𝑝ℎ _4, which is the most comprehensive (containing all 4 first-order neighbors). Since 𝑆𝑢𝑏𝑔𝑟𝑎𝑝ℎ _4
+
+still contains noisy node 9 and node 14, the reasoning is flawed and leads to the incorrect answer “Probabilistic Methods”. 
+
+Variant: solely Denoising-Reinforced RLVR. . In this variant, there is also a relatively pure subgraph 𝑆𝑢𝑏𝑔𝑟𝑎𝑝ℎ _1 with only the 
+
+The Input Egocentric Subgraph 
+
+Complete subgraph: 
+
+- Central node ID(s): node11 - Node texts (central node(s) and neighboring nodes): [node9: EM algorithm for mixtures of factor analyzers, combining clustering and dimensionality reduction in latent variable models. node11: Hierarchical logistic belief networks for linear model selection, using Gibbs sampling for parameter learning. node13: Tree-structured hierarchical mixtures of experts with EM algorithm, validated via robot dynamics simulations. node14: EM reinterpreted via free energy maximization, enabling faster incremental updates and improved convergence. node17: Generative models for sparse distributed representations in neural networks, using Bayesian inference and simple learning rules. ]- Connection relationships: [<node0, node8>, <node1, node12>, <node1, node14>, <node2, node13>, <node3, node13>, <node3, node14>, <node3, node20>, <node4, node13>, <node4, node18>, <node5, node13>, <node6, node7>, <node7, node13>, <node8, node17>, <node9, node11>, <node10, node13>, <node10, node14>, <node10, node18>, <node11, node13>, <node11, node14>, <node11, node17>, <node13, node18>, <node13, node21>, <node15, node18>, <node16, node18>, <node18, node19> ]
+
+The Output of the “w/o SSR Pipeline” Variant 
+
+Answer : Probabilistic Methods 
+
+Brief_reasoning : Node11 focuses on “hierarchical logistic belief networks” and Gibbs sampling, aligning with probabilistic modeling techniques. Connections to nodes involving EM algorithms (node9, node10, node14), mixture models (node13), and Gibbs sampling (node15, node18) reinforce its probabilistic methodology. While “belief networks” can intersect with neural networks, the emphasis on hierarchical structure and sampling for parameter learning fits better under probabilistic methods. Neural Networks is less precise here, as no direct mention of neural architecture (e.g., layers, activation functions) exists. Beyond One-Size-Fits-All: Adaptive Subgraph Denoising for Zero-Shot Graph Learning with Large Language ModelsConference acronym ’XX, June 03–05, 2018, Woodstock, NY 
+
+The Output of GraphSSR 
+
+Subgraph_0 
+
+Central_node_ID: node11 Neighboring_node_ID: Connection_relationship: 
+
+Subgraph_1 
+
+Central_node_ID: node11 Neighboring_node_ID: node13 Connection_relationship: <node11, node13> 
+
+Subgraph_2 
+
+Central_node_ID: node11 Neighboring_node_ID: node13,node17 Connection_relationship: <node11, node13>,<node11, node17> 
+
+Subgraph_3 
+
+Central_node_ID: node11 Neighboring_node_ID: node9,node13,node14,node17 Connection_relationship: <node9, node11>,<node11, node13>,<node11, node14>,<node11, node17> 
+
+Subgraph_4 
+
+Central_node_ID: node11 Neighboring_node_ID: node13,node4,node18 Connection_relationship: <node11, node13>,<node4, node13>,<node4, node18>,<node13, node18> 
+
+Chosen_subgraph_reasoning Chosen_subgraph: 2Chosen_subgraph_reason: This subgraph optimally balances relevance and focus: node13 directly supports hierarchical modeling, while node17 explicitly references neural networks, providing strong semantic reinforcement for classification without extraneous nodes. Central_node_ID: node11 Neighboring_node_ID: node13,node17 Connection_relationship: <node11, node13>,<node11, node17> 
+
+Answer: Neural Networks 
+
+Brief_reasoning: Node11 describes “hierarchical logistic belief networks” (a neural network architecture). Node13 discusses “hierarchical mixtures of experts” (a neural network model), and node17 explicitly mentions “neural networks” in generative modeling. Collective context confirms neural network focus. 
+
+neighboring node 13 in the candidates. However without Authenticity-Reinforced RLVR, the model has not yet developed a strong graph reasoning ability at the early stage of training. The premature in-troduction of the subgraph denoising reward would lead the model to favor smaller, information-sparse subgraphs. Specifically, the model selects 𝑆𝑢𝑏𝑔𝑟𝑎𝑝ℎ _0—containing only the isolated target node itself—to avoid potential neighbor noise, yet this strategy backfires. Without the structural context of neighboring nodes to clarify its identity, the model is misled by the “Gibbs sampling” description in the target node 11 and also incorrectly yields a “Probabilistic Methods” label. The empirical results from these two variants demonstrate that Authenticity-Reinforced RLVR and Denoising-Reinforced RLVR serve as indispensable components of GraphSSR. Specifically, the absence of either module results in an imbalance in the adaptive sub-graph denoising process—either failing to filter out sufficient noise or inadvertently removing critical structural information. Such an imbalance inevitably leads to suboptimal subgraph quality and a subsequent degradation in overall model performance. By syner-gistically integrating these two modules, GraphSSR successfully strikes a robust balance between noise reduction and information preservation, ensuring that the generated subgraphs remain both pure and informative, ultimately driving the superior performance of the model across various benchmarks.  
+
+> Received 20 February 2007; revised 12 March 2009; accepted 5 June 2009 Conference acronym ’XX, June 03–05, 2018, Woodstock, NY Trovato et al.
+
+The Output of the “solely Authenticity-Reinforced RLVR” Variant 
+
+Subgraph_0 
+
+Central_node_ID: node11 Neighboring_node_ID: Connection_relationship: 
+
+Subgraph_1 
+
+Central_node_ID: node11 Neighboring_node_ID: node9 Connection_relationship: <node9, node11> 
+
+Subgraph_2 
+
+Central_node_ID: node11 Neighboring_node_ID: node13,node14 Connection_relationship: <node11, node13>,<node11, node14> 
+
+Subgraph_3 
+
+Central_node_ID: node11 Neighboring_node_ID: node13,node18 Connection_relationship: <node11, node13>,<node13, node18> 
+
+Subgraph_4 
+
+Central_node_ID: node11 Neighboring_node_ID: node9,node13,node14,node17 Connection_relationship: <node9, node11>,<node11, node13>,<node11, node14>,<node11, node17> 
+
+Chosen_subgraph_reasoning Chosen_subgraph: 4Chosen_subgraph_reason: This subgraph contains all direct neighbors of node11, providing maximal semantic context about probabilistic methods (EM, Gibbs sampling) and neural networks, which are central to node11’s description. Central_node_ID: node11 Neighboring_node_ID: node9,node13,node14,node17 Connection_relationship: <node9, node11>,<node11, node13>,<node11, node14>,<node11, node17> 
+
+Answer: Probabilistic Methods 
+
+Brief_reasoning: The central node (node11) describes hierarchical logistic belief networks using Gibbs sampling. Neighbors node9, node13, and node14 focus on EM algorithms for probabilistic models, while node17 discusses generative models with Bayesian inference. Collectively, this subgraph emphasizes probabilistic modeling techniques, aligning with the “Probabilistic Methods” classification. Beyond One-Size-Fits-All: Adaptive Subgraph Denoising for Zero-Shot Graph Learning with Large Language ModelsConference acronym ’XX, June 03–05, 2018, Woodstock, NY 
+
+The Output of the “solely Denoising-Reinforced RLVR” Variant 
+
+Subgraph_0 
+
+Central_node_ID: node11 Neighboring_node_ID: Connection_relationship: 
+
+Subgraph_1 
+
+Central_node_ID: node11 Neighboring_node_ID: node13 Connection_relationship: <node11, node13> 
+
+Subgraph_2 
+
+Central_node_ID: node11 Neighboring_node_ID: node13,node14 Connection_relationship: <node11, node13>,<node11, node14> 
+
+Subgraph_3 
+
+Central_node_ID: node11 Neighboring_node_ID: node17,node8 Connection_relationship: <node11, node17>,<node8, node17> 
+
+Subgraph_4 
+
+Central_node_ID: node11 Neighboring_node_ID: node9,node13,node14,node17,node18 Connection_relationship: <node9, node11>,<node11, node13>,<node11, node14>,<node11, node17>,<node13, node18> 
+
+Chosen_subgraph_reasoning Chosen_subgraph: 0Chosen_subgraph_reason: Subgraph_0 is optimal as it isolates the central node’s core semantics (“belief networks” and “Gibbs sampling”), avoiding potential neighbor-induced biases (e.g., neural network terminology in other subgraphs). The central node’s text alone provides unambiguous evidence for classification. Central_node_ID: node11 Neighboring_node_ID: Connection_relationship: 
+
+Answer: Probabilistic Methods 
+
+Brief_reasoning: The central node (node11) explicitly describes hierarchical logistic belief networks—a probabilistic graphical model, and uses Gibbs sampling—a core probabilistic inference technique. This directly aligns with “Probabilistic Methods” without requiring neighbor context.

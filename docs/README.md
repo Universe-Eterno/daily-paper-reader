@@ -6,82 +6,67 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-02-10 ~ 2026-03-11
-- 运行时间：2026-03-11 10:15:12 UTC
+- 最新运行日期：2026-03-11
+- 运行时间：2026-03-11 20:08:44 UTC
 - 运行状态：成功
-- 本次总论文数：20
-- 精读区：8
+- 本次总论文数：15
+- 精读区：3
 - 速读区：12
 
 ### 今日简报（AI）
-今日精选 20 篇前沿论文，深度复盘了超图神经网络与大模型驱动的启发式算法设计。
-重点关注 p-spin 模型优化及 LLM 自动生成 CVRP 求解策略，两项研究均获满分推荐。
-建议优先研读 LLM 与组合优化结合的满分案例，探索大模型自动化提升算法效率的新路径。
-- 详情：[/20260210-20260311/README](/20260210-20260311/README)
+今日聚焦 15 篇 AI 前沿进展，深度解析了 LLM 在零样本图学习去噪与归纳逻辑约束求解中的突破性应用。
+核心结论指出，自适应子图去噪与过程奖励模型（PRISM）正成为提升大模型复杂推理与结构化数据处理能力的关键。
+建议关注如何利用 LLM 解决特定领域的逻辑约束问题，并尝试将推理过程递归化以增强
+- 详情：[/202603/11/README](/202603/11/README)
 
 ### 精读区论文标签
-1. [Optimizing p-spin models through hypergraph neural networks and deep reinforcement learning](/20260210-20260311/2602.16665v1-optimizing-p-spin-models-through-hypergraph-neural-networks-and-deep-reinforcement-learning)  
-   标签：评分：10.0/10、query:nco-lm
-   evidence：超图神经网络与深度强化学习用于组合优化
-2. [Enhancing CVRP Solver through LLM-driven Automatic Heuristic Design](/20260210-20260311/2602.23092v1-enhancing-cvrp-solver-through-llm-driven-automatic-heuristic-design)  
-   标签：评分：10.0/10、query:nco-lm
-   evidence：大模型驱动的CVRP自动启发式设计
-3. [Construct, Merge, Solve & Adapt with Reinforcement Learning for the min-max Multiple Traveling Salesman Problem](/20260210-20260311/2602.23579v1-construct-merge-solve--adapt-with-reinforcement-learning-for-the-min-max-multiple-traveling-salesman-problem)  
-   标签：评分：10.0/10、query:nco-lm
-   evidence：强化学习用于多旅行商问题
-4. [RLGT: A reinforcement learning framework for extremal graph theory](/20260210-20260311/2602.17276v1-rlgt-a-reinforcement-learning-framework-for-extremal-graph-theory)  
-   标签：评分：9.0/10、query:nco
-   evidence：强化学习用于极值图论中的组合优化
-5. [Benchmarking Graph Neural Networks in Solving Hard Constraint Satisfaction Problems](/20260210-20260311/2602.18419v1-benchmarking-graph-neural-networks-in-solving-hard-constraint-satisfaction-problems)  
-   标签：评分：9.0/10、query:nco
-   evidence：在硬约束满足问题上对图神经网络进行基准测试
-6. [Tensor Network Generator-Enhanced Optimization for Traveling Salesman Problem](/20260210-20260311/2602.20175v1-tensor-network-generator-enhanced-optimization-for-traveling-salesman-problem)  
-   标签：评分：9.0/10、query:nco-lm
-   evidence：旅行商问题的神经求解器
-7. [LiTS: A Modular Framework for LLM Tree Search](/20260210-20260311/2603.00631v1-lits-a-modular-framework-for-llm-tree-search)  
-   标签：评分：9.0/10、query:nco-lm
-   evidence：基于树搜索的大语言模型推理模块化框架
-8. [Learning to Rank the Initial Branching Order of SAT Solvers](/20260210-20260311/2603.07176v1-learning-to-rank-the-initial-branching-order-of-sat-solvers)  
-   标签：评分：9.0/10、query:nco
-   evidence：使用图神经网络预测 SAT 求解器的分支顺序
+1. [Beyond One-Size-Fits-All: Adaptive Subgraph Denoising for Zero-Shot Graph Learning with Large Language Models](/202603/11/2603.02938v1-beyond-one-size-fits-all-adaptive-subgraph-denoising-for-zero-shot-graph-learning-with-large-language-models)  
+   标签：评分：8.0/10、query:nco-llm
+   evidence：大模型与图推理的结合
+2. [Can LLM Aid in Solving Constraints with Inductive Definitions?](/202603/11/2603.03668v1-can-llm-aid-in-solving-constraints-with-inductive-definitions)  
+   标签：评分：8.0/10、query:nco-llm
+   evidence：将大模型与约束求解器结合处理归纳定义
+3. [Learning to Reflect: Hierarchical Multi-Agent Reinforcement Learning for CSI-Free mmWave Beam-Focusing](/202603/11/2603.07370v1-learning-to-reflect-hierarchical-multi-agent-reinforcement-learning-for-csi-free-mmwave-beam-focusing)  
+   标签：评分：8.0/10、query:nco
+   evidence：针对组合动作空间的强化学习
 
 ### 速读区论文标签
-1. [Aligning Tree-Search Policies with Fixed Token Budgets in Test-Time Scaling of LLMs](/20260210-20260311/2602.09574v1-aligning-tree-search-policies-with-fixed-token-budgets-in-test-time-scaling-of-llms)  
-   标签：评分：8.0/10、query:nco-lm
-   evidence：基于大语言模型的树搜索解码，用于预算约束下的优化
-2. [Exploring Multiple High-Scoring Subspaces in Generative Flow Networks](/20260210-20260311/2602.11491v1-exploring-multiple-high-scoring-subspaces-in-generative-flow-networks)  
-   标签：评分：8.0/10、query:nco
-   evidence：用于构建复杂组合对象的生成流网络
-3. [Which Algorithms Can Graph Neural Networks Learn?](/20260210-20260311/2602.13106v1-which-algorithms-can-graph-neural-networks-learn)  
-   标签：评分：8.0/10、query:nco
-   evidence：图神经网络学习离散算法的理论框架
-4. [Concentration for random Euclidean combinatorial optimization](/20260210-20260311/2602.21851v2-concentration-for-random-euclidean-combinatorial-optimization)  
-   标签：评分：8.0/10、query:nco
-   evidence：旅行商问题（TSP）的集中不等式界限
-5. [Learning to Compose for Cross-domain Agentic Workflow Generation](/20260210-20260311/2602.11114v1-learning-to-compose-for-cross-domain-agentic-workflow-generation)  
-   标签：评分：7.0/10、query:nco-lm
-   evidence：基于大模型的复杂任务可执行算子图生成
-6. [Robustness Verification of Binary Neural Networks: An Ising and Quantum-Inspired Framework](/20260210-20260311/2602.13536v1-robustness-verification-of-binary-neural-networks-an-ising-and-quantum-inspired-framework)  
+1. [PRISM: Pushing the Frontier of Deep Think via Process Reward Model-Guided Inference](/202603/11/2603.02479v1-prism-pushing-the-frontier-of-deep-think-via-process-reward-model-guided-inference)  
+   标签：评分：7.0/10、query:nco-llm
+   evidence：过程奖励模型引导的复杂任务推理
+2. [Constraint-Aware Generative Re-ranking for Multi-Objective Optimization in Advertising Feeds](/202603/11/2603.04227v1-constraint-aware-generative-re-ranking-for-multi-objective-optimization-in-advertising-feeds)  
    标签：评分：7.0/10、query:nco
-   evidence：将神经网络验证建模为组合优化问题
-7. [TabTracer: Monte Carlo Tree Search for Complex Table Reasoning with Large Language Models](/20260210-20260311/2602.14089v1-tabtracer-monte-carlo-tree-search-for-complex-table-reasoning-with-large-language-models)  
-   标签：评分：7.0/10、query:nco-lm
-   evidence：MCTS与大模型用于组合表格推理
-8. [Avoid What You Know: Divergent Trajectory Balance for GFlowNets](/20260210-20260311/2602.17827v1-avoid-what-you-know-divergent-trajectory-balance-for-gflownets)  
+   evidence：通过神经解码解决受限组合优化问题
+3. [Recursive Inference Machines for Neural Reasoning](/202603/11/2603.05234v1-recursive-inference-machines-for-neural-reasoning)  
    标签：评分：7.0/10、query:nco
-   evidence：用于生成离散和组合对象的GFlowNets
-9. [Learning to Configure Agentic AI Systems](/20260210-20260311/2602.11574v1-learning-to-configure-agentic-ai-systems)  
+   evidence：针对数独和复杂问题的神经推理
+4. [LLM-FK: Multi-Agent LLM Reasoning for Foreign Key Detection in Large-Scale Complex Databases](/202603/11/2603.07278v1-llm-fk-multi-agent-llm-reasoning-for-foreign-key-detection-in-large-scale-complex-databases)  
+   标签：评分：7.0/10、query:nco-llm
+   evidence：大模型处理数据库中的组合搜索空间
+5. [Reject, Resample, Repeat: Understanding Parallel Reasoning in Language Model Inference](/202603/11/2603.07887v1-reject-resample-repeat-understanding-parallel-reasoning-in-language-model-inference)  
+   标签：评分：7.0/10、query:nco-llm
+   evidence：通过过程奖励模型和序贯蒙特卡洛引导大模型
+6. [Test-Time Meta-Adaptation with Self-Synthesis](/202603/11/2603.03524v1-test-time-meta-adaptation-with-self-synthesis)  
+   标签：评分：6.0/10、query:nco-llm
+   evidence：通过双层优化实现大语言模型自适应
+7. [$\nabla$-Reasoner: LLM Reasoning via Test-Time Gradient Descent in Latent Space](/202603/11/2603.04948v1-nabla-reasoner-llm-reasoning-via-test-time-gradient-descent-in-latent-space)  
+   标签：评分：6.0/10、query:nco-llm
+   evidence：LLM解码过程中的可微Token概率优化
+8. [HiFlow: Hierarchical Feedback-Driven Optimization for Constrained Long-Form Text Generation](/202603/11/2603.04996v1-hiflow-hierarchical-feedback-driven-optimization-for-constrained-long-form-text-generation)  
+   标签：评分：6.0/10、query:nco-llm
+   evidence：大模型用于文本生成中的受限优化
+9. [LEAD: Breaking the No-Recovery Bottleneck in Long-Horizon Reasoning](/202603/11/2603.06870v1-lead-breaking-the-no-recovery-bottleneck-in-long-horizon-reasoning)  
+   标签：评分：6.0/10、query:nco-llm
+   evidence：基于大模型的长程推理与算法谜题
+10. [Hierarchical threshold structure in Max-Cut with geometric edge weights](/202603/11/2603.08876v1-hierarchical-threshold-structure-in-max-cut-with-geometric-edge-weights)  
    标签：评分：6.0/10、query:nco
-   evidence：强化学习用于组合设计空间
-10. [Evaluating Robustness of Reasoning Models on Parameterized Logical Problems](/20260210-20260311/2602.12665v1-evaluating-robustness-of-reasoning-models-on-parameterized-logical-problems)  
-   标签：评分：6.0/10、query:nco-lm
-   evidence：基于大模型的逻辑问题推理器
-11. [A universal LLM Framework for General Query Refinements](/20260210-20260311/2602.15681v1-a-universal-llm-framework-for-general-query-refinements)  
-   标签：评分：6.0/10、query:nco-lm
-   evidence：基于大模型提示优化的查询精简框架
-12. [COMBA: Cross Batch Aggregation for Learning Large Graphs with Context Gating State Space Models](/20260210-20260311/2602.17893v1-comba-cross-batch-aggregation-for-learning-large-graphs-with-context-gating-state-space-models)  
-   标签：评分：6.0/10、query:nco
-   evidence：利用上下文门控状态空间模型学习大规模图
+   evidence：研究完全图上具有几何权重的Max-Cut实例
+11. [Quantifying the Accuracy and Cost Impact of Design Decisions in Budget-Constrained Agentic LLM Search](/202603/11/2603.08877v1-quantifying-the-accuracy-and-cost-impact-of-design-decisions-in-budget-constrained-agentic-llm-search)  
+   标签：评分：6.0/10、query:nco-llm
+   evidence：具有规划提示和迭代搜索策略的智能体LLM搜索
+12. [Deep Tabular Research via Continual Experience-Driven Execution](/202603/11/2603.09151v1-deep-tabular-research-via-continual-experience-driven-execution)  
+   标签：评分：6.0/10、query:nco-llm
+   evidence：大模型用于复杂的长程分析任务和操作级搜索空间
 
 
 <div class="dpr-home-promo-card">

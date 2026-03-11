@@ -1,0 +1,600 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-11T20:06:51.103347+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 3,
+    "deep_cap": 7,
+    "deep_selected": 3,
+    "quick_candidates": 12,
+    "quick_skim_target": 12,
+    "quick_selected": 12
+  },
+  "deep_dive": [
+    {
+      "id": "2603.07370v1",
+      "title": "Learning to Reflect: Hierarchical Multi-Agent Reinforcement Learning for CSI-Free mmWave Beam-Focusing",
+      "abstract": "Reconfigurable Intelligent Surfaces promise to transform wireless environments, yet practical deployment is hindered by the prohibitive overhead of Channel State Information (CSI) estimation and the dimensionality explosion inherent in centralized optimization. This paper proposes a Hierarchical Multi-Agent Reinforcement Learning (HMARL) framework for the control of mechanically reconfigurable reflective surfaces in millimeter-wave (mmWave) systems. We introduce a \"CSI-free\" paradigm that substitutes pilot-based channel estimation with readily available user localization data. To manage the massive combinatorial action space, the proposed architecture utilizes Multi-Agent Proximal Policy Optimization (MAPPO) under a Centralized Training with Decentralized Execution (CTDE) paradigm. The proposed architecture decomposes the control problem into two abstraction levels: a high-level controller for user-to-reflector allocation and decentralized low-level controllers for low-level focal point optimization. Comprehensive ray-tracing evaluations demonstrate that the framework achieves 2.81-7.94 dB RSSI improvements over centralized baselines, with the performance advantage widening as system complexity increases. Scalability analysis reveals that the system maintains sustained efficiency, exhibiting minimal per-user performance degradation and stable total power utilization even when user density doubles. Furthermore, robustness validation confirms the framework's viability across varying reflector aperture sizes (45-99 tiles) and demonstrates graceful performance degradation under localization errors up to 0.5 m. By eliminating CSI overhead while maintaining high-fidelity beam-focusing, this work establishes HMARL as a practical solution for intelligent mmWave environments.",
+      "authors": [
+        "Hieu Le",
+        "Oguz Bedir",
+        "Mostafa Ibrahim",
+        "Jian Tao",
+        "Sabit Ekin"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-07T22:46:21+00:00",
+      "link": "https://arxiv.org/pdf/2603.07370v1",
+      "tags": [
+        "keyword:NCO",
+        "query:NCO"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Reinforcement learning for combinatorial action space",
+      "llm_evidence_cn": "针对组合动作空间的强化学习",
+      "llm_evidence": "针对组合动作空间的强化学习",
+      "canonical_evidence": "针对组合动作空间的强化学习",
+      "llm_tldr_en": "Applies Hierarchical Multi-Agent Reinforcement Learning to manage massive combinatorial action spaces in wireless.",
+      "llm_tldr_cn": "应用分层多智能体强化学习来管理无线通信中的大规模组合动作空间。",
+      "llm_tldr": "应用分层多智能体强化学习来管理无线通信中的大规模组合动作空间。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Reinforcement learning frameworks for combinatorial optimization",
+      "matched_requirement_id": "req-24",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.02938v1",
+      "title": "Beyond One-Size-Fits-All: Adaptive Subgraph Denoising for Zero-Shot Graph Learning with Large Language Models",
+      "abstract": "Graph-based tasks in the zero-shot setting remain a significant challenge due to data scarcity and the inability of traditional Graph Neural Networks (GNNs) to generalize to unseen domains or label spaces. While recent advancements have transitioned toward leveraging Large Language Models (LLMs) as predictors to enhance GNNs, these methods often suffer from cross-modal alignment issues. A recent paradigm (i.e., Graph-R1) overcomes the aforementioned architectural dependencies by adopting a purely text-based format and utilizing LLM-based graph reasoning, showing improved zero-shot generalization. However, it employs a task-agnostic, one-size-fits-all subgraph extraction strategy, which inevitably introduces significant structural noise--irrelevant neighbors and edges--that distorts the LLMs' receptive field and leads to suboptimal predictions. To address this limitation, we introduce GraphSSR, a novel framework designed for adaptive subgraph extraction and denoising in zero-shot LLM-based graph reasoning. Specifically, we propose the SSR pipeline, which dynamically tailors subgraph extraction to specific contexts through a \"Sample-Select-Reason\" process, enabling the model to autonomously filter out task-irrelevant neighbors and overcome the one-size-fits-all issue. To internalize this capability, we develop SSR-SFT, a data synthesis strategy that generates high-quality SSR-style graph reasoning traces for supervised fine-tuning of LLMs. Furthermore, we propose SSR-RL, a two-stage reinforcement learning framework that explicitly regulates sampling and selection operations within the proposed SSR pipeline designed for adaptive subgraph denoising. By incorporating Authenticity-Reinforced and Denoising-Reinforced RL, we guide the model to achieve accurate predictions using parsimonious, denoised subgraphs for reasoning.",
+      "authors": [
+        "Fengzhi Li",
+        "Liang Zhang",
+        "Yuan Zuo",
+        "Ruiqing Zhao",
+        "YanSong Liu",
+        "Yunfei Ma",
+        "Fanyu Meng",
+        "Junlan Feng"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-03T12:47:44+00:00",
+      "link": "https://arxiv.org/pdf/2603.02938v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Integration of LLM and graph reasoning",
+      "llm_evidence_cn": "大模型与图推理的结合",
+      "llm_evidence": "大模型与图推理的结合",
+      "canonical_evidence": "大模型与图推理的结合",
+      "llm_tldr_en": "Enhances zero-shot graph learning by integrating LLMs with adaptive subgraph denoising for graph reasoning.",
+      "llm_tldr_cn": "通过将大模型与自适应子图去噪结合进行图推理，增强零样本图学习能力。",
+      "llm_tldr": "通过将大模型与自适应子图去噪结合进行图推理，增强零样本图学习能力。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Integration of GNN and LLM for combinatorial optimization",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.03668v1",
+      "title": "Can LLM Aid in Solving Constraints with Inductive Definitions?",
+      "abstract": "Solving constraints involving inductive (aka recursive) definitions is challenging. State-of-the-art SMT/CHC solvers and first-order logic provers provide only limited support for solving such constraints, especially when they involve, e.g., abstract data types. In this work, we leverage structured prompts to elicit Large Language Models (LLMs) to generate auxiliary lemmas that are necessary for reasoning about these inductive definitions. We further propose a neuro-symbolic approach, which synergistically integrates LLMs with constraint solvers: the LLM iteratively generates conjectures, while the solver checks their validity and usefulness for proving the goal. We evaluate our approach on a diverse benchmark suite comprising constraints originating from algebrai data types and recurrence relations. The experimental results show that our approach can improve the state-of-the-art SMT and CHC solvers, solving considerably more (around 25%) proof tasks involving inductive definitions, demonstrating its efficacy.",
+      "authors": [
+        "Weizhi Feng",
+        "Shidong Shen",
+        "Jiaxiang Liu",
+        "Taolue Chen",
+        "Fu Song",
+        "Zhilin Wu"
+      ],
+      "primary_category": "cs.LO",
+      "categories": [
+        "cs.LO"
+      ],
+      "published": "2026-03-04T02:48:27+00:00",
+      "link": "https://arxiv.org/pdf/2603.03668v1",
+      "tags": [
+        "keyword:NCO+LLM",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "integrates LLMs with constraint solvers for inductive definitions",
+      "llm_evidence_cn": "将大模型与约束求解器结合处理归纳定义",
+      "llm_evidence": "将大模型与约束求解器结合处理归纳定义",
+      "canonical_evidence": "将大模型与约束求解器结合处理归纳定义",
+      "llm_tldr_en": "Proposes a neuro-symbolic approach integrating LLMs with SMT solvers to solve inductive constraints.",
+      "llm_tldr_cn": "提出一种神经符号方法，将大模型与约束求解器结合以解决归纳约束问题。",
+      "llm_tldr": "提出一种神经符号方法，将大模型与约束求解器结合以解决归纳约束问题。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Integrating large language models with combinatorial optimization solvers",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2603.02479v1",
+      "title": "PRISM: Pushing the Frontier of Deep Think via Process Reward Model-Guided Inference",
+      "abstract": "DEEPTHINK methods improve reasoning by generating, refining, and aggregating populations of candidate solutions, which enables strong performance on complex mathematical and scientific tasks. However, existing frameworks often lack reliable correctness signals during inference, which creates a population-enhancement bottleneck where deeper deliberation amplifies errors, suppresses correct minority solutions, and yields weak returns to additional compute. In this paper, we introduce a functional decomposition of DEEPTHINK systems and propose PRISM, a Process Reward Model (PRM)-guided inference algorithm that uses step-level verification to guide both population refinement and solution aggregation. During refinement, PRISM treats candidate solutions as particles in a PRM-defined energy landscape and reshapes the population through score-guided resampling and stochastic refinement, which concentrates probability mass on higher-quality reasoning while preserving diversity. Across mathematics and science benchmarks, PRISM is competitive with or outperforms existing DEEPTHINK methods, reaching 90.0%, 75.4%, and 71.4% with gpt-oss-20b on AIME25, HMMT25, and GPQA Diamond, respectively, while matching or exceeding gpt-oss-120b. Additionally, our analysis shows that PRISM produces consistent net-directional correction during refinement, remains reliable when the initial population contains few correct candidates, and often lies on the compute-accuracy Pareto frontier.",
+      "authors": [
+        "Rituraj Sharma",
+        "Weiyuan Chen",
+        "Noah Provenzano",
+        "Tu Vu"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-03-03T00:03:42+00:00",
+      "link": "https://arxiv.org/pdf/2603.02479v1",
+      "tags": [
+        "query:NCO"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "process reward model-guided inference for complex tasks",
+      "llm_evidence_cn": "过程奖励模型引导的复杂任务推理",
+      "llm_evidence": "过程奖励模型引导的复杂任务推理",
+      "canonical_evidence": "过程奖励模型引导的复杂任务推理",
+      "llm_tldr_en": "Introduces PRISM, using step-level verification to guide solution refinement in deep reasoning models.",
+      "llm_tldr_cn": "引入PRISM，利用步骤级验证引导深度推理模型中的解优化。",
+      "llm_tldr": "引入PRISM，利用步骤级验证引导深度推理模型中的解优化。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM-based heuristic search and optimization",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.03524v1",
+      "title": "Test-Time Meta-Adaptation with Self-Synthesis",
+      "abstract": "As strong general reasoners, large language models (LLMs) encounter diverse domains and tasks, where the ability to adapt and self-improve at test time is valuable. We introduce MASS, a meta-learning framework that enables LLMs to self-adapt by generating problem-specific synthetic training data and performing targeted self-updates optimized for downstream performance at inference time. We train this behavior end-to-end via bilevel optimization: an inner loop adapts on self-generated examples while an outer loop meta-learns data-attribution signals and rewards post-update task performance. The synthetic data is optimized with scalable meta-gradients, backpropagating the downstream loss through the inner updates to reward useful generations. Experiments on mathematical reasoning show that MASS learns to synthesize per-instance curricula that yield effective, data-efficient test-time adaptation.",
+      "authors": [
+        "Zeyneb N. Kaya",
+        "Nick Rui"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-03T21:16:18+00:00",
+      "link": "https://arxiv.org/pdf/2603.03524v1",
+      "tags": [
+        "keyword:NCO+LLM",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "LLM self-adaptation via bilevel optimization",
+      "llm_evidence_cn": "通过双层优化实现大语言模型自适应",
+      "llm_evidence": "通过双层优化实现大语言模型自适应",
+      "canonical_evidence": "通过双层优化实现大语言模型自适应",
+      "llm_tldr_en": "Introduces MASS, a meta-learning framework for LLMs to self-adapt via synthetic data and bilevel optimization.",
+      "llm_tldr_cn": "引入MASS元学习框架，通过合成数据和双层优化使大语言模型实现推理时自适应。",
+      "llm_tldr": "引入MASS元学习框架，通过合成数据和双层优化使大语言模型实现推理时自适应。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Large Language Models (LLM) for optimization tasks",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.04227v1",
+      "title": "Constraint-Aware Generative Re-ranking for Multi-Objective Optimization in Advertising Feeds",
+      "abstract": "Optimizing reranking in advertising feeds is a constrained combinatorial problem, requiring simultaneous maximization of platform revenue and preservation of user experience. Recent generative ranking methods enable listwise optimization via autoregressive decoding, but their deployment is hindered by high inference latency and limited constraint handling.   We propose a constraint-aware generative reranking framework that transforms constrained optimization into bounded neural decoding. Unlike prior approaches that separate generator and evaluator models, our framework unifies sequence generation and reward estimation into a single network.   We further introduce constraint-aware reward pruning, integrating constraint satisfaction directly into decoding to efficiently generate optimal sequences. Experiments on large-scale industrial feeds and online A/B tests show that our method improves revenue and user engagement while meeting strict latency requirements, providing an efficient neural solution for constrained listwise optimization.",
+      "authors": [
+        "Chenfei Li",
+        "Hantao Zhao",
+        "Weixi Yao",
+        "Ruiming Huang",
+        "Rongrong Lu",
+        "Geng Tian",
+        "Dongying Kong"
+      ],
+      "primary_category": "cs.IR",
+      "categories": [
+        "cs.IR"
+      ],
+      "published": "2026-03-04T16:09:36+00:00",
+      "link": "https://arxiv.org/pdf/2603.04227v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "constrained combinatorial problem solved via neural decoding",
+      "llm_evidence_cn": "通过神经解码解决受限组合优化问题",
+      "llm_evidence": "通过神经解码解决受限组合优化问题",
+      "canonical_evidence": "通过神经解码解决受限组合优化问题",
+      "llm_tldr_en": "Proposes a generative re-ranking framework that unifies sequence generation and reward estimation for advertising.",
+      "llm_tldr_cn": "提出一种生成式重排序框架，将广告流中的受限组合优化转化为神经解码过程。",
+      "llm_tldr": "提出一种生成式重排序框架，将广告流中的受限组合优化转化为神经解码过程。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Deep learning models for solving NP hard combinatorial problems",
+      "matched_requirement_id": "req-23",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.04948v1",
+      "title": "$\\nabla$-Reasoner: LLM Reasoning via Test-Time Gradient Descent in Latent Space",
+      "abstract": "Scaling inference-time compute for Large Language Models (LLMs) has unlocked unprecedented reasoning capabilities. However, existing inference-time scaling methods typically rely on inefficient and suboptimal discrete search algorithms or trial-and-error prompting to improve the online policy. In this paper, we propose $\\nabla$-Reasoner, an iterative generation framework that integrates differentiable optimization over token logits into the decoding loop to refine the policy on the fly. Our core component, Differentiable Textual Optimization (DTO), leverages gradient signals from both the LLM's likelihood and a reward model to refine textual representations. $\\nabla$-Reasoner further incorporates rejection sampling and acceleration design to robustify and speed up decoding. Theoretically, we show that performing inference-time gradient descent in the sample space to maximize reward is dual to aligning an LLM policy via KL-regularized reinforcement learning. Empirically, $\\nabla$-Reasoner achieves over 20% accuracy improvement on a challenging mathematical reasoning benchmark, while reducing number of model calls by approximately 10-40% compared to strong baselines. Overall, our work introduces a paradigm shift from zeroth-order search to first-order optimization at test time, offering a cost-effective path to amplify LLM reasoning.",
+      "authors": [
+        "Peihao Wang",
+        "Ruisi Cai",
+        "Zhen Wang",
+        "Hongyuan Mei",
+        "Qiang Liu",
+        "Pan Li",
+        "Zhangyang Wang"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-05T08:42:54+00:00",
+      "link": "https://arxiv.org/pdf/2603.04948v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "differentiable optimization over token logits in LLM decoding",
+      "llm_evidence_cn": "LLM解码过程中的可微Token概率优化",
+      "llm_evidence": "LLM解码过程中的可微Token概率优化",
+      "canonical_evidence": "LLM解码过程中的可微Token概率优化",
+      "llm_tldr_en": "Introduces a framework for LLM reasoning using gradient-based optimization in latent space during inference.",
+      "llm_tldr_cn": "提出一种通过在推理阶段对潜空间进行梯度下降来增强大模型推理能力的框架。",
+      "llm_tldr": "提出一种通过在推理阶段对潜空间进行梯度下降来增强大模型推理能力的框架。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Large Language Models (LLM) for optimization tasks",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.05234v1",
+      "title": "Recursive Inference Machines for Neural Reasoning",
+      "abstract": "Neural reasoners such as Tiny Recursive Models (TRMs) solve complex problems by combining neural backbones with specialized inference schemes. Such inference schemes have been a central component of stochastic reasoning systems, where inference rules are applied to a stochastic model to derive answers to complex queries. In this work, we bridge these two paradigms by introducing Recursive Inference Machines (RIMs), a neural reasoning framework that explicitly incorporates recursive inference mechanisms inspired by classical inference engines. We show that TRMs can be expressed as an instance of RIMs, allowing us to extend them through a reweighting component, yielding better performance on challenging reasoning benchmarks, including ARC-AGI-1, ARC-AGI-2, and Sudoku Extreme. Furthermore, we show that RIMs can be used to improve reasoning on other tasks, such as the classification of tabular data, outperforming TabPFNs.",
+      "authors": [
+        "Mieszko Komisarczyk",
+        "Saurabh Mathur",
+        "Maurice Kraus",
+        "Sriraam Natarajan",
+        "Kristian Kersting"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-05T14:51:47+00:00",
+      "link": "https://arxiv.org/pdf/2603.05234v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Neural reasoning for Sudoku and complex problems",
+      "llm_evidence_cn": "针对数独和复杂问题的神经推理",
+      "llm_evidence": "针对数独和复杂问题的神经推理",
+      "canonical_evidence": "针对数独和复杂问题的神经推理",
+      "llm_tldr_en": "Proposes Recursive Inference Machines to solve complex reasoning tasks like Sudoku using neural backbones.",
+      "llm_tldr_cn": "提出递归推理机，结合神经网络骨干和推理机制解决数独等复杂推理任务。",
+      "llm_tldr": "提出递归推理机，结合神经网络骨干和推理机制解决数独等复杂推理任务。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Deep learning models for solving NP hard combinatorial problems",
+      "matched_requirement_id": "req-23",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.04996v1",
+      "title": "HiFlow: Hierarchical Feedback-Driven Optimization for Constrained Long-Form Text Generation",
+      "abstract": "Large language models perform well in short text generation but still struggle with long text generation, particularly under complex constraints. Such tasks involve multiple tightly coupled objectives, including global structural consistency, local semantic coherence, and constraint feasibility, forming a challenging constrained optimization problem. Existing approaches mainly rely on static planning or offline supervision, limiting effective coordination between global and local objectives during generation. To address these challenges, we propose HiFlow, a hierarchical feedback-driven optimization framework for constrained long text generation. HiFlow formulates generation as a two-level optimization process, consisting of a planning layer for global structure and constraint modeling, and a generation layer for conditioned text generation. By incorporating constraint-aware plan screening and closed-loop feedback at both levels, HiFlow enables joint optimization of planning quality and generation behavior, progressively guiding the model toward high-quality, constraint-satisfying outputs. Experiments on multiple backbones confirm HiFlow's effectiveness over baseline methods.",
+      "authors": [
+        "Yifan Zhu",
+        "Guanting Chen",
+        "Bing Wei",
+        "Haoran Luo"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-03-05T09:41:39+00:00",
+      "link": "https://arxiv.org/pdf/2603.04996v1",
+      "tags": [
+        "keyword:NCO+LLM",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "LLM for constrained optimization in text generation",
+      "llm_evidence_cn": "大模型用于文本生成中的受限优化",
+      "llm_evidence": "大模型用于文本生成中的受限优化",
+      "canonical_evidence": "大模型用于文本生成中的受限优化",
+      "llm_tldr_en": "Formulates long-form text generation as a hierarchical constrained optimization problem for LLMs.",
+      "llm_tldr_cn": "将长文本生成建模为分层受限优化问题，通过反馈驱动机制协调全局与局部目标。",
+      "llm_tldr": "将长文本生成建模为分层受限优化问题，通过反馈驱动机制协调全局与局部目标。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "How to use Large Language Models to solve combinatorial optimization problems",
+      "matched_requirement_id": "req-12",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.07278v1",
+      "title": "LLM-FK: Multi-Agent LLM Reasoning for Foreign Key Detection in Large-Scale Complex Databases",
+      "abstract": "Detecting missing foreign keys (FKs) requires accurately modeling semantic dependencies across database schemas, which conventional heuristic-based methods are fundamentally limited in capturing. We propose LLM-FK, the first fully automated multi-agent framework for FK detection, designed to address three core challenges that hinder naive LLM-based solutions in large-scale complex databases: combinatorial search space explosion, ambiguous inference under limited context, and global inconsistency arising from isolated local predictions. LLM-FK coordinates four specialized agents: a Profiler that decomposes the FK detection problem into the task of validating FK candidate column pairs and prunes the search space via a unique-key-driven schema decomposition strategy; an Interpreter that injects self-augmented domain knowledge; a Refiner that constructs compact structural representations and performs multi-perspective chain-of-thought reasoning; and a Verifier that enforces schema-wide consistency through a holistic conflict resolution strategy. Experiments on five benchmark datasets demonstrate that LLM-FK consistently achieves F1-scores above 93%, surpassing existing baselines by 15% on the large-scale MusicBrainz database, while reducing the candidate search space by two to three orders of magnitude without losing true FKs and maintaining robustness under challenging conditions like missing data. These results demonstrate the effectiveness and scalability of LLM-FK in real-world databases.",
+      "authors": [
+        "Zijian Tang",
+        "Ying Zhang",
+        "Sibo Cai",
+        "Ruoxuan Wang"
+      ],
+      "primary_category": "cs.DB",
+      "categories": [
+        "cs.DB"
+      ],
+      "published": "2026-03-07T16:41:02+00:00",
+      "link": "https://arxiv.org/pdf/2603.07278v1",
+      "tags": [
+        "keyword:NCO+LLM",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "LLM for combinatorial search space in databases",
+      "llm_evidence_cn": "大模型处理数据库中的组合搜索空间",
+      "llm_evidence": "大模型处理数据库中的组合搜索空间",
+      "canonical_evidence": "大模型处理数据库中的组合搜索空间",
+      "llm_tldr_en": "A multi-agent LLM framework to detect foreign keys by managing combinatorial search space explosion.",
+      "llm_tldr_cn": "一种多智能体大模型框架，通过管理组合搜索空间爆炸来检测数据库外键。",
+      "llm_tldr": "一种多智能体大模型框架，通过管理组合搜索空间爆炸来检测数据库外键。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "How to use Large Language Models to solve combinatorial optimization problems",
+      "matched_requirement_id": "req-12",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.06870v1",
+      "title": "LEAD: Breaking the No-Recovery Bottleneck in Long-Horizon Reasoning",
+      "abstract": "Long-horizon execution in Large Language Models (LLMs) remains unstable even when high-level strategies are provided. Evaluating on controlled algorithmic puzzles, we demonstrate that while decomposition is essential for stability, extreme decomposition creates a \"no-recovery bottleneck\". We show that this bottleneck becomes critical due to highly non-uniform error distribution, where consistent errors on a few \"hard\" steps become irreversible.   To address this, we propose Lookahead-Enhanced Atomic Decomposition (LEAD). By incorporating short-horizon future validation and aggregating overlapping rollouts, LEAD provides enough isolation to maintain stability while retaining enough local context to correct errors. This enables the o4-mini model to solve Checkers Jumping up to complexity $n=13$, whereas extreme decomposition fails beyond $n=11$.",
+      "authors": [
+        "Denys Pushkin",
+        "Emmanuel Abbe"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-03-06T20:42:41+00:00",
+      "link": "https://arxiv.org/pdf/2603.06870v1",
+      "tags": [
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "LLM-based long-horizon reasoning and algorithmic puzzles",
+      "llm_evidence_cn": "基于大模型的长程推理与算法谜题",
+      "llm_evidence": "基于大模型的长程推理与算法谜题",
+      "canonical_evidence": "基于大模型的长程推理与算法谜题",
+      "llm_tldr_en": "Proposes LEAD to improve LLM stability in long-horizon reasoning through lookahead and decomposition.",
+      "llm_tldr_cn": "提出LEAD方法，通过前瞻验证和原子分解提高大模型在长程推理中的稳定性。",
+      "llm_tldr": "提出LEAD方法，通过前瞻验证和原子分解提高大模型在长程推理中的稳定性。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM-based heuristic search and optimization",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.07887v1",
+      "title": "Reject, Resample, Repeat: Understanding Parallel Reasoning in Language Model Inference",
+      "abstract": "Inference-time methods that aggregate and prune multiple samples have emerged as a powerful paradigm for steering large language models, yet we lack any principled understanding of their accuracy-cost tradeoffs. In this paper, we introduce a route to rigorously study such approaches using the lens of *particle filtering* algorithms such as Sequential Monte Carlo (SMC). Given a base language model and a *process reward model* estimating expected terminal rewards, we ask: *how accurately can we sample from a target distribution given some number of process reward evaluations?* Theoretically, we identify (1) simple criteria enabling non-asymptotic guarantees for SMC; (2) algorithmic improvements to SMC; and (3) a fundamental limit faced by all particle filtering methods. Empirically, we demonstrate that our theoretical criteria effectively govern the *sampling error* of SMC, though not necessarily its final *accuracy*, suggesting that theoretical perspectives beyond sampling may be necessary.",
+      "authors": [
+        "Noah Golowich",
+        "Fan Chen",
+        "Dhruv Rohatgi",
+        "Raghav Singhal",
+        "Carles Domingo-Enrich",
+        "Dylan J. Foster",
+        "Akshay Krishnamurthy"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.CL",
+        "math.ST",
+        "stat.ML"
+      ],
+      "published": "2026-03-09T01:50:31+00:00",
+      "link": "https://arxiv.org/pdf/2603.07887v1",
+      "tags": [
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "LLM steering via process reward models and Sequential Monte Carlo",
+      "llm_evidence_cn": "通过过程奖励模型和序贯蒙特卡洛引导大模型",
+      "llm_evidence": "通过过程奖励模型和序贯蒙特卡洛引导大模型",
+      "canonical_evidence": "通过过程奖励模型和序贯蒙特卡洛引导大模型",
+      "llm_tldr_en": "Uses Sequential Monte Carlo to study accuracy-cost tradeoffs in parallel reasoning for LLMs.",
+      "llm_tldr_cn": "利用序贯蒙特卡洛方法研究大模型并行推理中的准确性与成本权衡。",
+      "llm_tldr": "利用序贯蒙特卡洛方法研究大模型并行推理中的准确性与成本权衡。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM-guided heuristic search for optimization",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.08876v1",
+      "title": "Hierarchical threshold structure in Max-Cut with geometric edge weights",
+      "abstract": "We study a family of weighted Max-Cut instances on the complete graph $K_n$ in which edge weights decrease geometrically in lexicographic order: the $i$-th edge has weight $r^{N-i}$ where $N=\\binom{n}{2}$. For $r\\ge 2$, the lexicographically first cut is optimal; for $r=1$, all edges have equal weight and the balanced partition wins. In this paper we study the intermediate regime $1< r <2$.   The geometric weighting makes early edges dominant and singles out the $k$-isolated cuts $C_k=\\{1,\\dots,k\\}\\mid\\{k+1,\\dots,n\\}$ as natural candidates for optimality. For each $n$ and $k\\le\\lfloor n/2\\rfloor-1$, we define threshold polynomials $P^{n,k}(r)$ whose unique roots $r_k(n)\\in(1,2)$ determine when $C_k$ and $C_{k+1}$ exchange dominance. We prove that, for fixed $n$, these thresholds are strictly decreasing in $k$ and that $r_k(n)\\to 1$ as $n\\to\\infty$. As our main result, we show that for $r\\in(r_k(n),r_{k-1}(n))$ the cut $C_k$ achieves maximum weight among all isolated cuts, yielding a sharp phase diagram for the isolated-cut family.   We conjecture that isolated cuts are globally optimal among all $2^{n-1}$ cuts when $n\\ge 7$; all counterexamples for small $n$ are characterized completely, and extensive computations for $n\\le 100$ support the conjecture.",
+      "authors": [
+        "Nevena Marić"
+      ],
+      "primary_category": "math.CO",
+      "categories": [
+        "math.CO",
+        "cs.DM",
+        "math.OC"
+      ],
+      "published": "2026-03-09T19:41:42+00:00",
+      "link": "https://arxiv.org/pdf/2603.08876v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Study of Max-Cut instances on complete graphs with geometric weights",
+      "llm_evidence_cn": "研究完全图上具有几何权重的Max-Cut实例",
+      "llm_evidence": "研究完全图上具有几何权重的Max-Cut实例",
+      "canonical_evidence": "研究完全图上具有几何权重的Max-Cut实例",
+      "llm_tldr_en": "Analyzes the hierarchical threshold structure and optimality in weighted Max-Cut combinatorial problems.",
+      "llm_tldr_cn": "分析了加权Max-Cut组合问题中的分层阈值结构和最优性。",
+      "llm_tldr": "分析了加权Max-Cut组合问题中的分层阈值结构和最优性。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Deep learning models for solving NP hard combinatorial problems",
+      "matched_requirement_id": "req-23",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.08877v1",
+      "title": "Quantifying the Accuracy and Cost Impact of Design Decisions in Budget-Constrained Agentic LLM Search",
+      "abstract": "Agentic Retrieval-Augmented Generation (RAG) systems combine iterative search, planning prompts, and retrieval backends, but deployed settings impose explicit budgets on tool calls and completion tokens. We present a controlled measurement study of how search depth, retrieval strategy, and completion budget affect accuracy and cost under fixed constraints. Using Budget-Constrained Agentic Search (BCAS), a model-agnostic evaluation harness that surfaces remaining budget and gates tool use, we run comparisons across six LLMs and three question-answering benchmarks. Across models and datasets, accuracy improves with additional searches up to a small cap, hybrid lexical and dense retrieval with lightweight re-ranking produces the largest average gains in our ablation grid, and larger completion budgets are most helpful on HotpotQA-style synthesis. These results provide practical guidance for configuring budgeted agentic retrieval pipelines and are accompanied by reproducible prompts and evaluation settings.",
+      "authors": [
+        "Kyle McCleary",
+        "James Ghawaly"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-03-09T19:42:21+00:00",
+      "link": "https://arxiv.org/pdf/2603.08877v1",
+      "tags": [
+        "keyword:NCO+LLM",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Agentic LLM search with planning prompts and iterative search strategies",
+      "llm_evidence_cn": "具有规划提示和迭代搜索策略的智能体LLM搜索",
+      "llm_evidence": "具有规划提示和迭代搜索策略的智能体LLM搜索",
+      "canonical_evidence": "具有规划提示和迭代搜索策略的智能体LLM搜索",
+      "llm_tldr_en": "Evaluates the impact of search depth and budget on the accuracy of agentic LLM search systems.",
+      "llm_tldr_cn": "评估了搜索深度和预算对智能体LLM搜索系统准确性的影响。",
+      "llm_tldr": "评估了搜索深度和预算对智能体LLM搜索系统准确性的影响。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM-guided heuristic search for optimization",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.09151v1",
+      "title": "Deep Tabular Research via Continual Experience-Driven Execution",
+      "abstract": "Large language models often struggle with complex long-horizon analytical tasks over unstructured tables, which typically feature hierarchical and bidirectional headers and non-canonical layouts. We formalize this challenge as Deep Tabular Research (DTR), requiring multi-step reasoning over interdependent table regions. To address DTR, we propose a novel agentic framework that treats tabular reasoning as a closed-loop decision-making process. We carefully design a coupled query and table comprehension for path decision making and operational execution. Specifically, (i) DTR first constructs a hierarchical meta graph to capture bidirectional semantics, mapping natural language queries into an operation-level search space; (ii) To navigate this space, we introduce an expectation-aware selection policy that prioritizes high-utility execution paths; (iii) Crucially, historical execution outcomes are synthesized into a siamese structured memory, i.e., parameterized updates and abstracted texts, enabling continual refinement. Extensive experiments on challenging unstructured tabular benchmarks verify the effectiveness and highlight the necessity of separating strategic planning from low-level execution for long-horizon tabular reasoning.",
+      "authors": [
+        "Junnan Dong",
+        "Chuang Zhou",
+        "Zheng Yuan",
+        "Yifei Yu",
+        "Siyu An",
+        "Di Yin",
+        "Xing Sun",
+        "Feiyue Huang"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-03-10T03:42:54+00:00",
+      "link": "https://arxiv.org/pdf/2603.09151v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "LLM for complex long-horizon analytical tasks and operation-level search space",
+      "llm_evidence_cn": "大模型用于复杂的长程分析任务和操作级搜索空间",
+      "llm_evidence": "大模型用于复杂的长程分析任务和操作级搜索空间",
+      "canonical_evidence": "大模型用于复杂的长程分析任务和操作级搜索空间",
+      "llm_tldr_en": "Introduces an agentic framework for tabular reasoning using meta-graphs and search space navigation.",
+      "llm_tldr_cn": "提出一种智能体框架，利用元图和搜索空间导航解决复杂的表格推理任务。",
+      "llm_tldr": "提出一种智能体框架，利用元图和搜索空间导航解决复杂的表格推理任务。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Large Language Models (LLM) for optimization tasks",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
