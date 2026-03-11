@@ -26,34 +26,34 @@ subscriptions:
     diff_threshold_pct: 15
   keyword_recall_mode: or
   intent_profiles:
-    - tag: NCO LM
-      description: 查找神经组合优化以及结合大模型相关的论文
+    - tag: NCO+LLM
+      description: 查找神经组合优化结合大模型相关的论文
       enabled: true
       keywords:
-        - keyword: 大模型
-          keyword_cn: LLM
-          query: d
         - keyword: Neural Combinatorial Optimization
           keyword_cn: 神经组合优化
-          query: Neural Combinatorial Optimization (NCO) methods and architectures
+          query: Neural Combinatorial Optimization (NCO) methods and frameworks
         - keyword: Large Language Models
           keyword_cn: 大语言模型
-          query: Large Language Models (LLM) for solving optimization problems
+          query: Large Language Models (LLM) for optimization tasks
         - keyword: Deep Reinforcement Learning
           keyword_cn: 深度强化学习
-          query: Deep Reinforcement Learning for combinatorial optimization
+          query: Deep Reinforcement Learning in combinatorial optimization
         - keyword: Heuristics
           keyword_cn: 启发式算法
           query: LLM-based heuristic search and optimization
         - keyword: Graph Neural Networks
           keyword_cn: 图神经网络
-          query: Graph Neural Networks for combinatorial optimization tasks
-        - keyword: Traveling Salesman Problem
-          keyword_cn: 旅行商问题
-          query: Neural solvers for the Traveling Salesman Problem (TSP)
+          query: Integration of GNN and LLM for combinatorial optimization
         - keyword: Routing Problems
           keyword_cn: 路径规划问题
           query: Neural combinatorial optimization for vehicle routing problems
+        - keyword: In-context learning
+          keyword_cn: 语境学习
+          query: In-context learning for combinatorial optimization problems
+        - keyword: Heuristic search
+          keyword_cn: 启发式搜索
+          query: LLM-guided heuristic search for optimization
       intent_queries:
         - query: Integrating large language models with combinatorial optimization solvers
           query_cn: 大语言模型与组合优化求解器的集成
@@ -70,7 +70,17 @@ subscriptions:
           enabled: true
           source: manual
           note: ''
-      updated_at: '2026-03-11T08:53:58.913Z'
+        - query: How to use Large Language Models to solve combinatorial optimization problems
+          query_cn: 如何利用大语言模型解决组合优化问题
+          enabled: true
+          source: generated
+          note: ''
+        - query: Fine tuning language models for neural combinatorial optimization tasks
+          query_cn: 针对神经组合优化任务微调语言模型
+          enabled: true
+          source: generated
+          note: ''
+      updated_at: '2026-03-11T10:07:22.714Z'
     - tag: NCO
       description: 神经组合优化（NCO）相关学术论文检索
       enabled: true
