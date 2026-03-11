@@ -1,0 +1,1257 @@
+Title: Toward Graph-Tokenizing Large Language Models with Reconstructive Graph Instruction Tuning
+
+URL Source: https://arxiv.org/pdf/2603.01385v1
+
+Published Time: Tue, 03 Mar 2026 03:13:44 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+# Toward Graph-Tokenizing Large Language Models with Reconstructive Graph Instruction Tuning 
+
+# Zhongjian Zhang ∗
+
+zhangzj@bupt.edu.cn Beijing University of Posts and Telecommunications Beijing, China 
+
+# Xiao Wang ∗
+
+xiao_wang@buaa.edu.cn Beihang University Beijing, China 
+
+# Mengmei Zhang 
+
+zhangmengmei@bestpay.com.cn China Telecom Bestpay Beijing, China 
+
+# Jiarui Tan 
+
+tanjiarui@bupt.edu.cn Beijing University of Posts and Telecommunications Beijing, China 
+
+# Chuan Shi †
+
+shichuan@bupt.edu.cn Beijing University of Posts and Telecommunications Beijing, China 
+
+## Abstract 
+
+The remarkable success of large language models (LLMs) has moti-vated researchers to adapt them as universal predictors for various graph-related tasks, with the ultimate goal of developing a graph foundation model that generalizes diverse scenarios. The key chal-lenge is to align graph data with language spaces so that LLMs can better comprehend graphs. As a popular paradigm, Graph-Tokenizing LLMs (GTokenLLMs) encode complex structures and lengthy texts into a graph token sequence, and then align them with text tokens via language instructions tuning. Despite their initial success, our information-theoretic analysis reveals that existing GTokenLLMs rely solely on text supervision from language instruc-tions, which achieve only implicit graph–text alignment, resulting in a text-dominant bias that underutilizes graph context. To over-come this limitation, we first prove that the alignment objective is upper-bounded by the mutual information between the input graphs and their hidden representations in the LLM, which moti-vates us to improve this upper bound to achieve better alignment. To this end, we further propose a reconstructive graph instruc-tion tuning pipeline, RGLM 1. Our key idea is to reconstruct the graph information from the LLM’s graph token outputs, explicitly incorporating graph supervision to constrain the alignment process. Technically, we embody RGLM by exploring three distinct variants from two complementary perspectives: RGLM-Decoder from the input space; RGLM-Similarizer and RGLM-Denoiser from the la-tent space. Additionally, we theoretically analyze the alignment effectiveness of each variant. Extensive experiments on various benchmarks and task scenarios validate the effectiveness of the pro-posed RGLM, paving the way for new directions in GTokenLLMs’ alignment research.  
+
+> ∗Both authors contributed equally to this research.
+> †Corresponding author.
+> 1The source code is available at https://github.com/zhongjian-zhang/RGLM
+> This work is licensed under a Creative Commons Attribution 4.0 International License.
+> WWW ’26, Dubai, United Arab Emirates.
+> ©2026 Copyright held by the owner/author(s). ACM ISBN 979-8-4007-2307-0/2026/04 https://doi.org/10.1145/3774904.3792077
+
+## CCS Concepts 
+
+• Mathematics of computing → Graph algorithms ; • Computing methodologies → Natural language generation .
+
+## Keywords 
+
+Graph Foundation Models; Large Language Models; Graph Mining 
+
+ACM Reference Format: 
+
+Zhongjian Zhang, Xiao Wang, Mengmei Zhang, Jiarui Tan, and Chuan Shi. 2026. Toward Graph-Tokenizing Large Language Models with Reconstruc-tive Graph Instruction Tuning. In Proceedings of the ACM Web Conference 2026 (WWW ’26), April 13–17, 2026, Dubai, United Arab Emirates. ACM, New York, NY, USA, 13 pages. https://doi.org/10.1145/3774904.3792077 
+
+## 1 Introduction 
+
+Graph data are ubiquitous in the real world, such as social net-works [ 18 ] and webpage networks [ 42 ]. Traditional graph neural networks (GNNs) [ 20 , 44 ] are powerful tools for modeling graph structures, but they suffer from a weak multi-task handling capabil-ity [ 3 ]. Recently, the success of GPT-style LLMs [ 1, 6 , 33 ] has moti-vated numerous studies to adapt them to the graph learning domain, particularly for text-attributed graphs (TAGs), where each node is associated with a text attribute. The ultimate goal is to build a graph foundation model that generalizes across diverse scenarios [ 25 ], in which LLMs are typically employed as predictors to accomplish various graph tasks, e.g., node classification, exhibiting promising potential and attracting considerable attention [5, 40, 56, 61]. A central challenge in this endeavor lies in aligning graph data with the natural language embedding space, so that LLMs can better comprehend graphs. To address this challenge, existing ef-forts mainly fall into two categories: Graph-Textualizing LLMs (GTextLLMs) [ 5, 8, 10 , 37 , 59 ] and Graph-Tokenizing LLMs (GToken-LLMs) [ 3 , 22 , 32 , 36 , 55 ]. The GTextLLMs utilize natural language to describe graphs via manually crafted prompt templates, directly aligning them with text. However, such strategies often suffer from redundancy and imprecise characterization [ 3, 5 ]. In contrast, GTo-kenLLMs construct various language instructions around graph tasks to perform tuning alignment, demonstrating superior perfor-mance while maintaining cost-effective training schemes. As shown  
+
+> arXiv:2603.01385v1 [cs.CL] 2 Mar 2026 WWW ’26, April 13–17, 2026, Dubai, United Arab Emirates. Zhongjian Zhang, Xiao Wang, Mengmei Zhang, Jiarui Tan, and Chuan Shi
+
+(b) Our Pipeline       
+
+> Text
+> Supervision
+> Language
+> Instructions
+> TAG Encoder
+> Projector
+> Large Language Models
+> Text -attributed
+> Graphs
+> USER :…?
+> ASSISTANT: …
+> A
+> BD
+> C
+> E
+> F
+> Graph
+> Supervision
+
+(a) Existing Pipeline       
+
+> Text
+> Supervision
+> Language
+> Instructions
+> TAG Encoder
+> Projector
+> Large Language Models
+> Text -attributed
+> Graphs
+> USER :…?
+> ASSISTANT: …
+> A
+> BD
+> C
+> E
+> F
+
+Figure 1: (a) Typical graph instruction tuning methods follow an LLM-centric design that solely leverages text supervision. (b) RGLM designs extra reconstructive graph tasks to explic-itly incorporate graph supervision into the tuning process. 
+
+in Figure 1(a), GTokenLLMs typically adopt a TAG encoder to en-code the complex structures and lengthy texts into a graph token sequence. This sequence is then aligned with the LLM embedding space via a projector, and subsequently used as prefix tokens for querying LLMs. However, this pipeline: TAG encoder → projector 
+
+→ LLM ⇐ language instructions (where “ ⇐” denotes supervision), is predominantly LLM-centric: (i) graph comprehension largely depends on graph-text alignment and the selected TAG encoder, and (ii) supervision derives exclusively from text data. This natu-rally raises a question: Can language instructions alone effectively support graph–text alignment? Answering this question is essential for advancing more effective and principled alignment strategies. Here, we analyze the relationship between language instruction tuning and graph–text alignment from an information-theoretic perspective. In GTokenLLMs, the ideal optimization objective is to maximize the contribution of graph tokens to generating the current text token, given the preceding text context, which can be realized by maximizing the Conditional Graph–Text Mutual Infor-mation ( C-GTMI ). We prove that C-GTMI can be decomposed into two main terms (see Theorem 3.1): (i) a graph–text alignment term and (ii) a textual autoregressive dependency term. However, we find that the current GTokenLLMs [ 3 , 32 , 52 ] primarily optimize the second term, but neglect the explicit optimization of the first term, which achieves only implicit graph-text alignment. This leads to a bias toward textual information, potentially diminishing the significance of graph context in graph comprehension, yielding a suboptimal C-GTMI and limited alignment. Therefore, another ques-tion naturally arises: How can we more effectively optimize C-GTMI to achieve better alignment? Considering that LLMs’ semantic space is high-dimensional, designing a stable and effective optimization mechanism for this purpose remains a significant challenge. In this paper, we first prove that the C-GTMI is upper-bounded by the mutual information between the input graph and its hidden representations in the LLM (see Lemma 3.1). This result motivates us to improve this upper bound to achieve better alignment, and this improvement can be realized through reconstruction. To this end, we further propose a novel alignment pipeline, RGLM , termed reconstructive graph instruction tuning. Our key idea is to recon-struct the graph information from the LLM’s graph token outputs, which are largely ignored in current GTokenLLMs. As illustrated in A   
+
+> BD
+> C
+> E
+> F
+> A
+> B
+> AF
+> C
+> A
+> D
+> AE
+
+Node Sequence: A B C D A F A A E
+
+Figure 2: Neighbor detail template for graph serialization [ 3]. 
+
+Figure 1(b), this pipeline explicitly incorporates graph supervision to constrain the alignment process. Technically, we embody RGLM by exploring three variants from two complementary perspectives: RGLM-Decoder, defined from the input space; RGLM-Similarizer and -Denoiser, defined from the latent space. Additionally, we the-oretically analyze how each RGLM variant optimizes the upper bound of the C-GTMI. Our main contributions are as follows: 
+
+• We are the first to theoretically reveal that current GTokenLLMs using language instructions tuning achieve only implicit graph-text alignment, and prove that the alignment objective is upper-bounded by the mutual information between the input graphs and their hid-den representations in the LLM. 
+
+• We propose a reconstructive graph instruction tuning pipeline, called RGLM, and explore three distinct variants: RGLM-Decoder from the input space, RGLM-Similarizer and RGLM-Denoiser from the latent spaces. Additionally, we theoretically analyze the align-ment effectiveness of each variant. 
+
+• Experimental results on four datasets demonstrate that the pro-posed RGLM, which introduces different reconstructive graph losses, achieves substantial improvements in supervised learning, multi-dataset generalization, and zero-shot capability, highlighting its potential as a graph foundation model. 
+
+## 2 Preliminary 2.1 Text-attributed Graphs (TAGs) 
+
+We define a TAG as Gfull = (V full , Efull , Sfull ), where Vfull ={𝑣 𝑖 }| V full | 
+
+> 𝑖 =1
+
+,
+
+Efull ={𝑒 𝑖 }| E full | 
+
+> 𝑖 =1
+
+, Sfull ={𝑠 𝑖 }| S full | 
+
+> 𝑖 =1
+
+denote the node, edge, and text set, respectively. The text set Sfull is typically encoded into node features 
+
+Zfull = {z1, . . . , z| V full | } using pre-trained language models [ 7 , 30 ]. To efficiently process node-level tasks with LLMs, e.g., node clas-sification, it is common to sample a subgraph centered at a node to reduce computational cost and irrelevant information [ 3, 32 ]. Formally, we denote Gℎ 
+
+> sub
+
+(𝑣 )=(V ℎ𝑣 , Eℎ𝑣 , Zℎ𝑣 ) as the ℎ-hop subgraph centered at node 𝑣 , where Vℎ𝑣 includes all nodes within ℎ hops of 𝑣 ,
+
+Eℎ𝑣 contains their interconnecting edges, and Zℎ𝑣 is the correspond-ing feature matrix. For simplicity, we use G ={V , E, Z} to denote such subgraphs when clear from context. 
+
+## 2.2 Graph-Tokenizing LLMs (GTokenLLMs) 
+
+Generally, a 𝜃 -parameterized LLM models the canonical causal distribution over a text token sequence 𝒙 1: 𝑇 = (𝒙 1, . . . , 𝒙 𝑇 ) of length 
+
+𝑇 as 𝑝 𝜃 (𝒙 ) = Î𝑇 𝑖 =1 𝑝 𝜃 (𝒙 𝑖 |𝒙 <𝑖 ). To enable LLMs to understand graph content, GTokenLLMs encode complex structures and lengthy texts into a graph token sequence, and treat them as prefix tokens for querying LLMs. As illustrated in Figure 3(a), a graph G is first encoded as a token sequence via a TAG encoder F , where F can be a predefined GNN [ 14 , 22 , 55 ] or a graph serialization template [ 3,32 , 52 ]. These tokens are subsequently projected into the LLM’s Toward Graph-Tokenizing Large Language Models with Reconstructive Graph Instruction Tuning WWW ’26, April 13–17, 2026, Dubai, United Arab Emirates. 
+
+input space via a 𝜙 -parameterized projector P. Thus, the canonical causal distribution is reformulated as: 
+
+𝑝 Θ (𝒙 ) =
+
+> 𝑇
+
+Ö
+
+> 𝑖 =1
+
+𝑝 Θ (𝒙 𝑖 |𝒗 , 𝒙 <𝑖 ), 𝒗 = P𝜙 ◦ F (G) , (1) where Θ = {𝜃, 𝜙 } is the parameters, 𝒗 1: 𝑁 = (𝒗 1, . . . , 𝒗 𝑁 ) is the graph token sequence of length 𝑁 . In this paper, we adopt the state-of-the-art graph serialization Neighbor Detail Template [ 3] as F ,owing to its elaborate descriptions of a node and its surrounding neighborhood, which is more suitable for our subsequent recon-struction task. As illustrated in Figure 2, given a central node 𝐴 , we construct a fixed-size computational tree rooted at 𝐴 to represent its ℎ-hop subgraph. In this tree, 𝐴 serves as the root, its 1-hop neigh-bors are assigned as its children, 2-hop neighbors as the children of 1-hop neighbors, and so on. When a node has more neighbors than the predefined size, we randomly sample a subset; if it has fewer neighbors, we insert placeholder nodes to maintain structural consistency. The tree is then traversed in level-order to produce a fixed-length graph token sequence, where each token corresponds to a node and is represented by its feature z. This process effectively transforms the graph structure into a sequence while preserving the hierarchical neighborhood information. Typically, GTokenLLMs are trained with supervised instruction tuning, where the model parameters Θ are optimized by minimiz-ing an autoregressive loss on language supervision (e.g., textual labels of node classification). In this setting, the autoregressive loss enforces next-token prediction, i.e., each input token yields one output conditioned on the preceding context. The overall objective is to maximize the log-likelihood of the supervised textual outputs. 
+
+Ltext (Θ = {𝜃, 𝜙 }, G, 𝒙 ) = −1
+
+|S| ∑︁ 𝑖 ∈ S 
+
+log 𝑝 Θ (𝒙 𝑖 | 𝒗 , 𝒙 <𝑖 ), (2) where S ⊆ { 𝑁 + 1, . . . ,𝑇 } denotes the index set of textual label tokens in the input sequence. As indicated in Equation (2), only the text outputs 𝒙 𝑖 ∈ S are supervised. 
+
+## 3 Motivation Analysis 3.1 Implicit Graph-Text Alignment of Existing GTokenLLMs 
+
+Given an input token sequence of length 𝑇 , consisting of a pre-fix graph token sequence 𝒗 1: 𝑁 = (𝒙 1, . . . , 𝒙 𝑁 ) and a text token sequence 𝒙 1: 𝑀 = (𝒙 1, . . . , 𝒙 𝑀 ), where 𝑀 = 𝑇 − 𝑁 . At decoding step 
+
+𝑡 , GTokenLLMs predict 𝒙 𝑡 conditioned on 𝒗 and 𝒙 <𝑡 . We denote entropy by H (·) and mutual information by I (· ; ·) . The ideal opti-mization objective of GTokenLLMs is to maximize the contribution of graph tokens to generating the current text token, given the preceding text context. To formalize it, we first give the definition: 
+
+Definition 3.1 (Conditional Graph-Text Mutual Infor-mation (C-GTMI)). At decoding step 𝑡 , let 𝒔 𝐺 and 𝒔 𝑇  
+
+> <𝑡
+
+denote the LLM’s hidden representation of the graph tokens and the preceding text tokens, respectively. The C-GTMI is defined as I ( 𝒙 𝑡 ; 𝒔 𝐺 | 𝒔 𝑇  
+
+> <𝑡
+
+),which measures how much the graph tokens contribute to generating the current text token given the preceding text context. 
+
+Based on the above definition, the optimization objective of GTokenLLMs can be realized by maximizing the C-GTMI. 
+
+Theorem 3.1 (Implicit Graph-Text Alignment via Autore-gressive Loss). The C-GTMI can be decomposed as: 
+
+I ( 𝒙 𝑡 ; 𝒔 𝐺 | 𝒔 𝑇  
+
+> <𝑡
+
+) = I ( 𝒙 𝑡 ; 𝒔 𝐺 ) + I ( 𝒙 𝑡 ; 𝒔 𝑇  
+
+> <𝑡
+
+| 𝒔 𝐺 ) − I ( 𝒙 𝑡 ; 𝒔 𝑇  
+
+> <𝑡
+
+), (3) 
+
+where I ( 𝒙 𝑡 ; 𝒔 𝐺 ) reflects graph-text alignment, I ( 𝒙 𝑡 ; 𝒔 𝑇  
+
+> <𝑡
+
+| 𝒔 𝐺 ) cap-tures textual autoregressive dependencies, and I ( 𝒙 𝑡 ; 𝒔 𝑇  
+
+> <𝑡
+
+) depends only on the textual data distribution. 
+
+Theorem 3.1 reveals that the autoregressive loss on language supervision primarily optimizes the textual autoregressive depen-dency, but only implicitly encourages graph-text alignment, namely that I ( 𝒙 𝑡 ; 𝒔 𝐺 ) is not explicitly optimized. Consequently, the model tends to overly rely on textual information, potentially diminishing the significance of graph context in graph comprehension, yielding a suboptimal C-GTMI and limited performance. 
+
+Proof. In practice, the autoregressive training objective of GTo-kenLLMs is the cross-entropy loss between the true distribution 𝑝 
+
+and the model distribution 𝑞 𝜃 . Equivalently, at step 𝑡 , this can be written as the negative log-likelihood: 
+
+LCE = −E [log 𝑞 𝜃 (𝒙 𝑡 | 𝒗 , 𝒙 <𝑡 )] 
+
+= H ( 𝒙 𝑡 | 𝒗 , 𝒙 <𝑡 ) + E [KL 𝑝 (𝒙 𝑡 | ·) ∥ 𝑞 𝜃 (𝒙 𝑡 | ·)] ≥ H ( 𝒙 𝑡 | 𝒗 , 𝒙 <𝑡 ) .
+
+(4) Since decoder-only LLMs generate tokens based on their inter-nal hidden states rather than directly on raw input tokens, the conditional probability of the next text token can be equivalently expressed in terms of these hidden representations. Thus, we have: 
+
+𝑞 𝜃 (𝒙 𝑡 | 𝒗 , 𝒙 <𝑡 ) = 𝑞 𝜃 (𝒙 𝑡 | 𝒔 𝐺 , 𝒔 𝑇  
+
+> <𝑡
+
+). (5) This formulation highlights that the prediction of the next token depends solely on the internal hidden representations of both modal-ities, providing a foundation for analyzing alignment at the level of hidden states. Substituting this into Equation (4) yields: 
+
+LCE = −E[log 𝑞 𝜃 (𝒙 𝑡 | 𝒔 𝐺 , 𝒔 𝑇  
+
+> <𝑡
+
+)] ≥ H ( 𝒙 𝑡 | 𝒔 𝐺 , 𝒔 𝑇  
+
+> <𝑡
+
+). (6) According to the mutual information identity: 
+
+H ( 𝒙 𝑡 | 𝒔 𝐺 , 𝒔 𝑇  
+
+> <𝑡
+
+) = H ( 𝒙 𝑡 | 𝒔 𝑇  
+
+> <𝑡
+
+) − I ( 𝒙 𝑡 ; 𝒔 𝐺 | 𝒔 𝑇  
+
+> <𝑡
+
+). (7) Intuitively, H ( 𝒙 𝑡 |𝒔 𝑇  
+
+> <𝑡
+
+) is determined by the data distribution, and minimizing H ( 𝒙 𝑡 |𝒔 𝐺 , 𝒔 𝑇  
+
+> <𝑡
+
+) is equivalent to maximizing the C-GTMI 
+
+I ( 𝒙 𝑡 ; 𝒔 𝐺 | 𝒔 𝑇  
+
+> <𝑡
+
+). By the chain rule of mutual information, we have: 
+
+I ( 𝒙 𝑡 ; 𝒔 𝐺 | 𝒔 𝑇  
+
+> <𝑡
+
+) = I ( 𝒙 𝑡 ; 𝒔 𝐺 ) + I ( 𝒙 𝑡 ; 𝒔 𝑇  
+
+> <𝑡
+
+| 𝒔 𝐺 ) − I ( 𝒙 𝑡 ; 𝒔 𝑇  
+
+> <𝑡
+
+). (8) 
+
+□
+
+## 3.2 Towards Explicit Graph–Text Alignment 
+
+To achieve better alignment by more effectively optimizing C-GTMI, we first theoretically establish an upper bound for C-GTMI: 
+
+Lemma 3.1 (Upper Bound of C-GTMI). Given an input graph 
+
+G, the C-GTMI is upper-bounded by the mutual information between the graph G and its hidden representations 𝒔 𝐺 in the LLM, i.e., 
+
+I ( 𝒙 𝑡 ; 𝒔 𝐺 | 𝒔 𝑇  
+
+> <𝑡
+
+) ≤ I (G ; 𝒔 𝐺 ). (9) Lemma 3.1 motivates us to optimize the lower bound of I (G ; 𝒔 𝐺 ),and this improvement can be further realized through reconstruc-tion [ 4, 15 , 38 , 39 ], which in turn improves the attainable upper bound of C-GTMI. This not only explicitly optimizes the graph–text WWW ’26, April 13–17, 2026, Dubai, United Arab Emirates. Zhongjian Zhang, Xiao Wang, Mengmei Zhang, Jiarui Tan, and Chuan Shi 
+
+alignment term I ( 𝒙 𝑡 ; 𝒔 𝐺 ), but also enhances autoregressive depen-dency modeling I ( 𝒙 𝑡 ; 𝒔 < 𝑡 𝑇 | 𝒔 𝐺 ), thereby achieving better align-ment. 
+
+Proof. Based on the chain rule of mutual information, we first analyze the I (G , 𝒔 𝐺 , 𝒙 𝑡 ) under the condition 𝒔 𝑇  
+
+> <𝑡
+
+and have: 
+
+I (G ; 𝒔 𝐺 , 𝒙 𝑡 | 𝒔 𝑇  
+
+> <𝑡
+
+) = I (G ; 𝒔 𝐺 | 𝒔 𝑇  
+
+> <𝑡
+
+) + I (G ; 𝒙 𝑡 | 𝒔 𝐺 , 𝒔 𝑇  
+
+> <𝑡
+
+)
+
+= I (G ; 𝒙 𝑡 | 𝒔 𝑇  
+
+> <𝑡
+
+) + I (G ; 𝒔 𝐺 | 𝒙 𝑡 , 𝒔 𝑇  
+
+> <𝑡
+
+). (10) By equating the two expressions and rearranging terms, and then applying the symmetry of mutual information, we obtain: 
+
+I (G ; 𝒔 𝐺 | 𝒔 𝑇  
+
+> <𝑡
+
+) − I (G ; 𝒔 𝐺 | 𝒙 𝑡 , 𝒔 𝑇  
+
+> <𝑡
+
+)
+
+= I (G ; 𝒙 𝑡 | 𝒔 𝑇  
+
+> <𝑡
+
+) − I (G ; 𝒙 𝑡 | 𝒔 𝐺 , 𝒔 𝑇  
+
+> <𝑡
+
+)
+
+= I ( 𝒙 𝑡 ; G | 𝒔 𝑇  
+
+> <𝑡
+
+) − I ( 𝒙 𝑡 ; G | 𝒔 𝐺 , 𝒔 𝑇  
+
+> <𝑡
+
+)
+
+= I ( 𝒙 𝑡 ; 𝒔 𝐺 | 𝒔 𝑇  
+
+> <𝑡
+
+) − I ( 𝒙 𝑡 ; 𝒔 𝐺 | G , 𝒔 𝑇  
+
+> <𝑡
+
+).
+
+(11) Given that graph tokens 𝒗 are typically input as prefix tokens into decoder-only LLMs, the 𝒔 𝐺 are deterministically derived from G,thus we have I ( 𝒙 𝑡 ; 𝒔 𝐺 | G , 𝒔 𝑇  
+
+> <𝑡
+
+) = 0, yielding the identity: 
+
+I ( 𝒙 𝑡 ; 𝒔 𝐺 | 𝒔 𝑇  
+
+> <𝑡
+
+) = I (G ; 𝒔 𝐺 | 𝒔 𝑇  
+
+> <𝑡
+
+) − I (G ; 𝒔 𝐺 | 𝒙 𝑡 , 𝒔 𝑇  
+
+> <𝑡
+
+)
+
+= H ( 𝒔 𝐺 | 𝒔 𝑇  
+
+> <𝑡
+
+) − I (G ; 𝒔 𝐺 | 𝒙 𝑡 , 𝒔 𝑇  
+
+> <𝑡
+
+)≤ H ( 𝒔 𝐺 | 𝒔 𝑇  
+
+> <𝑡
+
+).
+
+(12) Since I ( 𝒔 𝐺 ; 𝒔 𝑇  
+
+> <𝑡
+
+) = H ( 𝒔 𝐺 ) − H ( 𝒔 𝐺 | 𝒔 𝑇  
+
+> <𝑡
+
+) ≥ 0, it follows: 
+
+H ( 𝒔 𝐺 | 𝒔 𝑇  
+
+> <𝑡
+
+) ≤ H ( 𝒔 𝐺 ). (13) Moreover, since 𝒔 𝐺 is a deterministic function of G:
+
+I (G ; 𝒔 𝐺 ) = H ( 𝒔 𝐺 ) − H ( 𝒔 𝐺 | G) = H ( 𝒔 𝐺 ). (14) Combining the inequalities yields the final result: 
+
+I ( 𝒙 𝑡 ; 𝒔 𝐺 | 𝒔 𝑇  
+
+> <𝑡
+
+) ≤ I (G ; 𝒔 𝐺 ). (15) 
+
+□
+
+## 4 Methodology 4.1 Overview 
+
+Motivated by Lemma 3.1, we propose a reconstructive graph in-struction tuning pipeline, called RGLM, which explicitly optimizes the lower bound of I (G ; 𝒔 𝐺 ) through extra reconstructive graph tasks. As shown in Figure 3(a), a graph G is first serialized into a token sequence using the neighbor detail template F . These tokens are aligned with the text space via a 𝜙 -parameterized projector, and then used as prefix tokens to query the 𝜃 -parameterized LLM. Our RGLM aims to reconstruct graph information from the LLM-generated graph token representation 𝒔 𝐺 . Since 𝒔 𝐺 may contain multiple tokens for the same node (e.g., node 𝐴 appears four times in Figure 2), we apply mean aggregation over these tokens to obtain the reconstruction token representation H = {h1, · · · , h| V | }:
+
+h𝑣 = 1
+
+|Γ(𝑣 )| ∑︁ 𝑖 ∈Γ (𝑣 )
+
+𝒔 𝐺 𝑖 , ∀𝑣 ∈ V , (16) where Γ(𝑣 ) ⊆ { 1, . . . , 𝑁 } denotes the index set of tokens associated with node 𝑣 in 𝒔 𝐺 . Here, to reduce computational cost and avoid catastrophic forgetting [ 21 ], we adopt LoRA [ 16 ] for fine-tuning the LLM. The training objective comprises two components: 
+
+LRGLM = Ltext + L graph , (17) where Ltext is the textual autoregressive loss defined in Equation (2), and Lgraph is an extra reconstruction term on graph data. The 
+
+Lgraph is defined using a customized metric M that measures the discrepancy between the reconstruction tokens H and a predefined target derived from the graph G. Formally, this loss is expressed as: 
+
+Lgraph (Θ = {𝜙, 𝜃, 𝜋 }, G, 𝒙 ) = M (J 𝜋 (H) , R (G)) , (18) where J𝜋 is a 𝜋 -parameterized post-projection function, which maps H to be consistent with the predefined target. The function R
+
+constructs the reconstruction target from G, which may include any observable graph signals. Evidently, the choice of R and M yields different variants. In the following, we explore three variants with alignment guarantees from two complementary perspectives. In the input space, we consider a variant that directly reconstructs the raw node features and topology. In the latent space of pre-trained GNNs, we examine two semantic variants that reconstruct latent node representations: one uses a similarity-based objective while the other employs a denoising strategy. 
+
+## 4.2 Raw Graph Reconstruction in Input Space 
+
+In the input space, we introduce RGLM-Decoder, which recon-structs the raw graph information from H. As shown in Figure 3(b), we train a feature decoder 𝑑 𝑓 and a structure decoder 𝑑 𝑠 to recon-struct the node features and the adjacency, respectively. In this setting, J𝜋 is instantiated by 𝑑 𝑓 and 𝑑 𝑠 , while R consists of a pre-trained language model for text encoding and an adjacency matrix extractor. The metric M is defined as the mean squared error (MSE) for feature reconstruction and the binary cross entropy (BCE) for structure reconstruction. The objective function is formulated as: 
+
+Lgraph = 𝜆 𝑓 · L feat + 𝜆 𝑠 · L topo , (19) 
+
+Lfeat = 1
+
+|V | 
+
+> | V |
+
+∑︁ 
+
+> 𝑖 =1
+
+𝑑 𝑓 (h𝑖 ) − z𝑖 22, (20) 
+
+Ltopo = − 1
+
+|E| ∑︁ (𝑖,𝑗 ) ∈ E 
+
+log 𝜎  𝑑 𝑠 (h𝑖 , h𝑗 )
+
+− 1
+
+| ˆE| ∑︁ (𝑖,𝑗 ′ ) ∈ ˆE
+
+log  1 − 𝜎 (𝑑 𝑠 (h𝑖 , h𝑗 ′ )) , (21) where E and ˆE represent sets of existing and non-existing con-nections in G, respectively, and z denotes the node feature. 𝜎 (·) is the sigmoid function, 𝜆 𝑓 and 𝜆 𝑠 balance the feature and structural reconstruction losses, respectively. 
+
+Proposition 4.1 (Lower Bound via RGLM-Decoder). Given a graph G = (Z, A), where Z denotes the node feature matrix and A
+
+the adjacency matrix, minimizing the reconstruction losses Lfeat and 
+
+Ltopo provides a variational lower bound of I (G ; 𝒔 𝐺 ):
+
+I (G ; 𝒔 𝐺 ) ≥ H ( Z) + H ( A) − 1 
+
+> 𝜆 𝑓
+
+Lfeat − 1 
+
+> 𝜆 𝑠
+
+Ltopo . (22) The proof is given in Appendix B.1. Proposition 4.1 indicates min-imizing the raw graph reconstruction loss maximizes a computable lower bound of I (G ; 𝒔 𝐺 ), which directly improves the upper bound of optimization objective C-GTMI I ( 𝒙 𝑡 ; 𝒔 𝐺 | 𝒔 𝑇  
+
+> <𝑡
+
+).Toward Graph-Tokenizing Large Language Models with Reconstructive Graph Instruction Tuning WWW ’26, April 13–17, 2026, Dubai, United Arab Emirates. Projector Text Tokenizer        
+
+> USER :Which category does this
+> paper belong to?
+> ASSISTANT: This paper belongs
+> to Machine Learning.
+
+Text Supervision Graph Supervision   
+
+> Reconstruct  Loss
+> ABE
+
+…Serializ e
+
+Lora Large Language Model 
+
+…
+
+> Tunable Frozen
+
+(a) Overview of RGLM      
+
+> Reconstruction Token Target Token Noisy Token
+> Aggregate
+
+ℱ   
+
+> Text
+> Encode
+> AB
+> CD
+> EF
+
+𝓛 𝒇𝒆𝒂𝒕 𝓛 𝒕𝒐𝒑𝒐 
+
+> Feature
+> Decoder
+> Structure
+> Decoder
+
+(b) RGLM -Decoder     
+
+> A
+> BD
+> C
+> E
+> F
+> A
+> BD
+> C
+> E
+> F
+> LM -based Pre -trained
+> GNN Encoder
+> Similarizer
+
+𝓛 𝒔𝒊𝒎 
+
+(c) RGLM -Similarizer  
+
+> A
+> BD
+> C
+> E
+> F
+> Text
+> Encode
+
+(d) RGLM -Denoiser     
+
+> Denoiser
+> Noise 𝝐
+> LM -based Pre -trained
+> GNN Encoder
+> A
+> BD
+> C
+> E
+> F
+> Text
+> Encode
+
+𝓛 𝒅𝒊𝒇𝒇 
+
+Figure 3: (a) Overview of RGLM. Given an input TAG, RGLM aims to reconstruct the graph information from the LLM’s graph token outputs, explicitly incorporating graph supervision to constrain the alignment process. (b) Decoder variant directly reconstructs the raw node features and topology in the input space. (c) Similarizer and (d) Denoiser variants reconstruct latent node representations of pre-trained GNNs via the cosine-similarity and denoising strategy, respectively. 
+
+## 4.3 Node Representation Reconstruction in Latent Space 
+
+Unlike reconstructing the raw graph information in the input space, this subsection focuses on reconstructing node representation in the latent space of pre-trained GNNs. Specifically, we first pre-train an LM-based GNN encoder 𝑔 to obtain fine-grained node representations, and then train a lightweight module, Similarizer or Denoiser, to reconstruct node-level semantics from the H.
+
+LM-based Pre-trained GNN Encoder. To obtain fine-grained node representations that effectively capture discrete graph struc-tures and multi-level feature information (i.e., node-, edge-, and graph-level), we pretrain an LM-based GNN encoder 𝑔 within an autoencoder framework [ 50 , 60 ]. Specifically, given a full TAG 
+
+Gfull = (V full , Efull , Sfull ), we first encode the textual attributes Sfull 
+
+using Sentence-BERT [30] to extract the initial node features Zfull .Following [ 29 , 60 ], to further enhance structural awareness, we incorporate learnable edge embeddings by treating absent edges as a special edge type, while introducing LapPE and RWSE posi-tional encodings. We adopt the combination of DeeperGCN [ 23 ]and GAT [ 35 ] as the backbone of the encoder. Since the latent space is already powerful, the decoder can be a relatively simple linear layer. In the training stage, we randomly mask node labels of the training set for prediction, which can be regarded as a special case of graph reconstruction. The objective function is defined as follows: 
+
+Lpretrain = Lmask + L reg , (23) where Lmask denotes the loss for masked label prediction, and Lreg 
+
+is a regularization term, implemented as a KL-penalty to push the learned latent representations towards a standard normal distribu-tion [ 50 ]. Once the encoder 𝑔 is well trained, it is used to encode each subgraph G and produce the target token representations E, where 
+
+𝑔 corresponds to the reconstruction function R in Equation (18). 
+
+RGLM-Similarizer. As shown in Figure 3(c), RGLM-Similarizer trains a lightweight multilayer perceptron 𝑠 , referred to as the Simi-larizer, to directly regress the reconstruction token representations 
+
+H onto the fine-grained target token representations E. In this set-ting, M is defined as the cosine similarity loss, and J corresponds to the 𝑠 . The objective function is formulated as: 
+
+Lgraph = 𝜆 𝑙 · L sim , Lsim = 1 − ⟨𝑠 (H), E⟩∥𝑠 (H)∥ 2 ∥E∥2
+
+, (24) where 𝜆 𝑙 is a scaling factor that balances the reconstruction losses. 
+
+Proposition 4.2 (Lower Bound via RGLM-Similarizer). Given the latent node representations E of a graph G obtained from a pre-trained GNN 𝑔 , minimizing the cosine similarity loss Lsim provides a variational lower bound of I (G ; 𝒔 𝐺 ):
+
+I (G ; 𝒔 𝐺 ) ≥ H ( E) − ( 𝜅 · 𝜆 𝑙 · L sim + C). (25) 
+
+where 𝜅 > 0 and C is a constant independent of 𝒔 𝐺 . The proof is given in Appendix B.2. 
+
+RGLM-Denoiser. RGLM-Similarizer is a result-oriented recon-struction, which directly regresses H onto E. In contrast, RGLM-Denoiser is a process-oriented reconstruction by leveraging a de-noising objective. As illustrated in Figure 3(d), RGLM-Denoiser trains a denoiser 𝑓 that conditions on the reconstruction tokens H
+
+to recover clean latent tokens E from their noisy tokens E𝑡 . The denoiser 𝑓 is implemented as a stack of transformer blocks, each equipped with three additional projection layers for the conditions 
+
+H, the noisy inputs E𝑡 , and the timesteps 𝑡 , respectively. In this setting, M is defined as the MSE loss between the predicted and true noise, and J corresponds to the 𝑓 . The training procedure follows a standard diffusion process: 
+
+Lgraph = 𝜆 𝑙 · L diff , Ldiff = E𝑡, 𝝐 
+
+∥𝑓 (E𝑡 , H, 𝑡 ) − 𝝐 ∥22
+
+ , (26) WWW ’26, April 13–17, 2026, Dubai, United Arab Emirates. Zhongjian Zhang, Xiao Wang, Mengmei Zhang, Jiarui Tan, and Chuan Shi 
+
+Table 1: Node classification results under supervised settings. Best are bolded, and runner-up are underlined. “OOM” indicates out-of-memory, exceeding the A800’s 80 GB limit. “Rank” represents the overall ranking on all datasets. 
+
+Method Dataset Cora Pubmed OGBN-Arxiv Reddit Rank Metric Acc F1 Acc F1 Acc F1 Acc F1 Acc F1 GNNs GCN 89.30 87.95 89.48 89.04 73.83 54.97 63.19 62.49 5 6GraphSAGE 87.82 86.77 90.54 90.51 74.47 56.41 58.51 58.41 10 8GAT 87.08 86.32 88.11 87.60 74.39 57.71 61.78 65.38 9 5DIFFormer 85.60 84.31 81.60 81.94 58.80 42.44 55.30 55.09 15 14 UniMP 87.82 86.32 90.34 90.17 70.96 53.24 59.55 59.53 11 10 NodeFormer 87.30 85.03 89.92 89.63 68.69 50.64 68.06 67.89 7 7GraphCL 86.53 84.50 90.39 90.28 OOM OOM 57.67 57.67 12 12 GRACE 89.11 88.12 86.89 86.58 72.00 50.79 65.39 65.39 8 9LGD 85.61 84.61 90.77 90.65 72.88 50.06 65.92 62.00 6 11 GTextLLMs GraphText-ICL 82.29 81.16 56.72 52.55 68.67 51.67 56.50 52.23 16 16 GTokenLLMs GraphText-SFT 84.69 83.77 87.80 87.68 49.88 19.46 62.20 62.07 14 15 GraphGPT 83.92 82.72 81.76 80.99 71.59 54.58 62.11 62.39 13 13 LLaGA 88.75 87.87 90.34 90.25 74.61 56.48 66.38 66.38 4 4RGLM-Decoder 89.85 89.39 91.15 91.07 75.00 56.92 68.64 68.54 1 1RGLM-Similarizer 89.67 88.96 91.61 91.51 75.14 57.74 66.79 66.77 3 2RGLM-Denoiser 90.22 89.35 90.95 90.90 75.10 56.84 67.64 67.50 2 3
+
+where 𝜆 𝑙 is a scaling factor that balances the reconstruction losses. 
+
+E𝑡 is sampled from N ( √︁ 1 − 𝛽 𝑡 E𝑡 −1, 𝛽 𝑡 I), and E𝑡 −1 can be reparam-eterized directly from E by letting ¯𝛼 𝑡 = Î𝑡 𝑖 =1 (1 − 𝛽 𝑖 ):
+
+E𝑡 = √ ¯𝛼 𝑡 E + √1 − ¯𝛼 𝑡 𝝐 , 𝝐 ∼ N ( 0, I). (27) 
+
+Proposition 4.3 (Lower Bound via RGLM-Denoiser). Given the latent node representations E of a graph G obtained from a pre-trained GNN 𝑔 , minimizing the diffusion noise prediction loss Ldiff 
+
+provides a variational lower bound of I (G ; 𝒔 𝐺 ):
+
+I (G ; 𝒔 𝐺 ) ≥ H ( E) − ( 𝜆 𝑙 · L diff + C). (28) 
+
+where C is a constant independent of 𝒔 𝐺 . Proof see Appendix B.3. 
+
+## 5 Experiment 5.1 Experiment Setup 
+
+Datasets. We conduct experiments on four widely-used datasets: Cora [ 51 ], Pubmed [ 51 ] and OGBN-Arxiv [ 17 ] from citation net-works, as well as Reddit [ 18 ] from a social network. Following [ 3 ,24 ], we select two widely adopted metrics: accuracy (Acc( ↑)) and macro-F1 (F1( ↑)). More dataset details refer to Appendix C.1. 
+
+Baselines. We compare five categories of representative baselines: (i) Traditional GNNs, GCN [ 20 ], GAT [ 35 ] and GraphSAGE [ 13 ]; (ii) Graph transformer models, UniMP [ 31 ], DIFFormer [ 43 ] and Node-Former [ 44 ]; (iii) Pretrain-finetune GNNs, GraphCL [ 53 ], GRACE [ 62 ]and LGD [ 60 ]; (iv) The GTextLLMs, GraphText-ICL [ 59 ]; (v) The GTokenLLMs, GraphText-SFT [ 59 ], GraphGPT [ 32 ] and LLaGA [ 3]. We adopt Sentence-BERT [ 30 ] to extract node features from the raw textual attributes, and all GTokenLLMs use Vicuna-7B-v1.5-16K [ 6 ]as the base LLM. More baseline introduction and implementation details refer to Appendix C.2 and Appendix C.3, respectively. 
+
+## 5.2 Main Results 
+
+5.2.1 Performance on Node Classification . We mainly focus on the supervised node classification task. In Table 1, we find: (1) 
+
+Table 2: Link prediction results under supervised settings. Best are bolded, and runner-up are underlined.                                                           
+
+> Method Dataset Cora Pubmed Reddit Metric Acc F1 Acc F1 Acc F1 Baselines
+> GCN 84.26 83.91 90.00 89.98 74.38 73.85
+> UniMP 71.62 70.92 80.76 80.54 73.09 72.53
+> GRACE 70.44 69.19 81.74 81.56 61.68 60.88
+> GraphGPT 59.85 59.85 73.60 73.39 56.69 27.19
+> LLaGA 82.21 79.66 91.78 91.88 79.73 76.60 Ours
+> RGLM-Decoder 88.97 87.96 94.84 94.91 81.90 77.97
+> RGLM-Similarizer 89.85 88.82 94.67 94.72 81.83 78.10
+> RGLM-Denoiser 89.71 88.92 94.67 94.74 81.86 77.93
+
+RGLM consistently outperforms all baselines. It highlights RGLM’s emergent ability to tackle complex graph tasks beyond traditional GNNs. Compared to existing GTokenLLMs, RGLM introduces ex-plicit graph supervision, which yields more effective alignment, leading to superior performance. (2) Among the three RGLM vari-ants, Decoder achieves the overall best performance. A possible reason is that reconstructing both the node features and the graph topology in the input space provides more comprehensive supervi-sion for alignment. (3) Although we follow the pretraining frame-work of LGD for learning node latent representations, the perfor-mance of Similarizer/Denoiser is not upper-bounded by it. This is because graph reconstruction serves as a regularization term, aiming to enhance the attainable performance ceiling of the model. 
+
+5.2.2 Performance on Link Prediction . We also evaluate RGLM on the supervised link prediction task. Following works [ 3, 32 ], we randomly select node pairs from the node classification training set for training and from the test set for evaluation, ensuring the edge-level training sets match the size of the node-level. As shown in Table 2, RGLM consistently outperforms all baselines in the link prediction task. Compared to GraphGPT and LLaGA, which solely Toward Graph-Tokenizing Large Language Models with Reconstructive Graph Instruction Tuning WWW ’26, April 13–17, 2026, Dubai, United Arab Emirates. Cora 
+
+> 87.82
+> 89.48
+> 88.75
+> 89.85
+> 89.30
+> 89.67
+> 89.48
+> 90.22
+
+Pubmed  
+
+> 90.21
+> 90.54 90.52
+> 91.15
+> 89.45
+> 91.61
+> 90.77
+> 90.95
+
+OGBN-Arxiv  
+
+> 74.60
+> 74.87 74.88
+> 75.00
+> 74.66
+> 75.33
+> 74.74
+> 75.10
+
+Reddit   
+
+> 66.29
+> 67.14
+> 67.39
+> 68.64
+> 66.41
+> 66.79
+> 67.05
+> 67.64
+> Vanilla
+> Similarizer w/o PreGNN
+> Decoder w/o feat
+> Full Similarizer
+> Decoder w/o topo
+> Denoiser w/o PreGNN
+> Full Decoder
+> Full Denoiser
+
+Figure 4: Ablation study on the node classification task across different datasets, where accuracy is reported for each variant. Cora   
+
+> 85.59 85.71
+> 87.68
+> 88.97 88.82
+> 89.85
+> 88.41
+> 89.71
+
+Pubmed 
+
+> 93.28
+> 94.49
+> 93.39
+> 94.84
+> 94.44
+> 94.67
+> 94.24
+> 94.67
+
+Reddit   
+
+> 80.64
+> 81.52
+> 81.31
+> 81.90
+> 81.50
+> 81.83
+> 81.42
+> 81.86
+> Vanilla
+> Similarizer w/o PreGNN
+> Decoder w/o feat
+> Full Similarizer
+> Decoder w/o topo
+> Denoiser w/o PreGNN
+> Full Decoder
+> Full Denoiser
+
+Figure 5: Ablation study on the link prediction task across different datasets, where accuracy is reported for each variant. Table 3: Node classification results under multi-dataset train-ing. Best are bolded, and runner-up are underlined. 
+
+Method Training set Cora+Pubmed Test set Cora Pubmed Metric Acc F1 Acc F1 Baselines 
+
+GCN 85.61 84.16 85.07 84.29 
+
+GraphSAGE 86.35 86.21 89.27 89.12 
+
+GAT 83.03 82.29 86.51 85.99 
+
+UniMP 86.35 85.21 89.20 89.14 
+
+NodeFormer 87.30 85.44 88.44 88.22 
+
+GRACE 88.56 87.55 86.21 85.92 
+
+GraphGPT 81.59 79.83 78.21 77.45 
+
+LLaGA 88.53 87.28 89.60 89.46 Ours 
+
+RGLM-Decoder 89.67 88.14 90.37 90.32 
+
+RGLM-Similarizer 88.93 87.49 91.18 91.07 
+
+RGLM-Denoiser 90.04 88.94 90.34 90.36 
+
+leverage text supervision, RGLM explicitly incorporates graph su-pervision into the alignment process, resulting in an accuracy im-provement of 2.1 to 30 points. This highlights the critical role of explicit graph supervision in supporting graph–text alignment. 
+
+5.2.3 Multi-dataset Generalization Ability . Typically, train-ing a model on multiple datasets may lead to catastrophic forget-ting [ 21 ], resulting in degraded performance. Here, we examine the multi-dataset generalization capability of RGLM across multiple datasets. In our study, the models are first trained on node classifica-tion tasks using both the Cora and Pubmed, and then evaluated on each dataset. As reported in Table 3, RGLM remains robust when trained across different datasets, achieving superior performance and demonstrating its capability in cross-dataset learning. 
+
+5.2.4 Zero-Shot Ability . We investigate the zero-shot capabil-ity of RGLM, where the model is trained on a source dataset and evaluated on a target dataset without any access to the target data Cora-Node       
+
+> 23.62
+> 52.95
+> 57.38 55.35
+> Pubmed-Node
+> 70.99
+> 74.95 75.05 75.06
+> Cora-Link
+> 81.76
+> 85.15
+> 83.82
+> 85.29
+> Pubmed-Link
+> 77.74
+> 80.23
+> 82.94
+> 80.18
+> LLaGA Decoder Similarizer Denoiser
+
+Figure 6: Zero-shot accuracy on node classification and link prediction tasks, where models are trained on the OGBN-Arxiv and evaluated on unseen Cora and Pubmed. 
+
+during training. Following LLaGA [ 3 ], we train the model on the node description and link prediction tasks with OGBN-Arxiv, and evaluate it on node classification and link prediction using Cora and Pubmed, respectively. As shown in Figure 6, the three RGLM variants have robust zero-shot capabilities across both tasks. By in-troducing the additional graph reconstruction tasks, the knowledge can be more effectively transferred across different scenarios. 
+
+## 5.3 Model Analysis 
+
+5.3.1 Ablation Study . We first evaluate the importance of key components through an ablation study. Figures 4 and 5 present the ablation results of the three RGLM variants on node classification and link prediction, respectively. Specifically, “Vanilla” denotes the setting without any reconstruction loss, where LLMs are tuned solely through text supervision. “w/o Lfeat ” and “w/o Ltopo ” corre-spond to removing the feature decoder and the structure decoder, respectively. “w/o PreGNN” refers to removing the pre-trained GNN, which is equivalent to reconstructing the input features while ig-noring structural information on the graph. Based on the results, we observe: (1) Explicitly incorporating graph supervision into the instruction tuning process consistently improves performance com-pared with pure text supervision, demonstrating the effectiveness of RGLM. (2) For Decoder, introducing both feature reconstruction WWW ’26, April 13–17, 2026, Dubai, United Arab Emirates. Zhongjian Zhang, Xiao Wang, Mengmei Zhang, Jiarui Tan, and Chuan Shi 2.5 2.0 1.5 1.0 0.5        
+
+> Attention Score (Cora Dataset)
+> 0.0
+> 0.5
+> 1.0
+> 1.5
+> 2.0
+> 2.5
+> 3.0
+> Density
+> 2.4 2.0 1.6 1.2 0.8
+> Attention Score (Pubmed Dataset)
+> LLaGA Decoder Similarizer Denoiser
+
+Figure 7: Attention distribution over graph tokens for differ-ent methods, where the attention scores are log-scaled. Vanilla Decoder Similarizer Denoiser      
+
+> Training Time Comparison
+> 0
+> 200
+> 400
+> 600
+> 800
+> 1000
+> 1200
+> Time (s)
+> Cora Pubmed
+> Vanilla Decoder Similarizer Denoiser
+> GPU Memory Usage Comparison
+> 0
+> 5000
+> 10000
+> 15000
+> 20000
+> 25000
+> GPU Memory (MB)  Cora Pubmed
+
+Figure 8: Time complexity (left) and resource cost (right) analysis of different RGLM variants. 
+
+and structure reconstruction consistently improves performance, with the best results achieved when both are applied together. (3) For Similarizer and Denoiser, even without the pre-trained GNN, RGLM still yields performance gains in most cases, which is because they approximately degenerate into input feature reconstruction. 
+
+5.3.2 Attention Analysis . We compute the attention scores of the last token with respect to all graph tokens, excluding the place-holder tokens, on the test set of Cora and Pubmed. Figure 7 illus-trates the attention distribution over graph tokens for LLaGA and RGLM. The results reveal that RGLM yields significantly higher at-tention scores than LLaGA, indicating that incorporating the graph reconstruction objective effectively guides the LLM to focus on input graphs and enhances its ability to comprehend graphs. 
+
+5.3.3 Compatibility Analysis . We separately adopt LLaMA3-8B [ 33 ] and Vicuna-13B [ 6 ] as base LLMs to evaluate RGLM’s compatibility. We report the accuracy of various LLMs under two settings: without the reconstruction loss ("Vanilla") and with the proposed RGLM. As shown in Figure 9, introducing reconstructive graph loss consistently improves the performance of various LLMs compared with pure text supervision, demonstrating that RGLM is compatible with diverse LLMs and serves as a universal pipeline. 
+
+5.3.4 Complexity Analysis . We further evaluate the time and space complexity of RGLM. Since the graph reconstruction loss does not affect the inference stage of the LLM, here we focus on the in-struction tuning phase. Figure 8 reports the training time and GPU memory overhead of the three variants on the Cora and Pubmed datasets. The results indicate that the reconstruction process in-troduces only a negligible increase in training time and resources, while the performance gains clearly outweigh this minor overhead. 
+
+5.3.5 Hyper-parameter Analysis . Finally, we conduct sensitiv-ity analysis on the reconstruction loss coefficients: 𝜆 𝑓 and 𝜆 𝑠 for Decoder, 𝜆 𝑙 for Similarizer and Denoiser. As shown in Figure 10 and Figure 11, RGLM’s performance increases at first and then decreases LLaMA3-8B (Cora)    
+
+> 88.01
+> 89.85 89.67 89.48
+> LLaMA3-8B (Pubmed)
+> 90.72
+> 91.18
+> 91.94
+> 91.20
+> Vicuna-13B (Cora)
+> 87.45
+> 88.93 89.11
+> 89.67
+> Vicuna-13B (Pubmed)
+> 90.44
+> 90.80
+> 91.71
+> 91.20
+
+Vanilla Decoder Similarizer Denoiser 
+
+Figure 9: Compatibility analysis of different RGLM variants on base LLMs, where accuracy is reported for each variant. s     
+
+> 0.1 0.2 0.4 0.6 0.8 1.0
+> f
+> 12
+> 4
+> 6
+> 8
+> 10
+> Accuracy(%)
+> 75.0
+> 77.5
+> 80.0
+> 82.5
+> 85.0
+> 87.5
+> 90.0
+> 92.5
+> 95.0
+
+(a) Cora. s      
+
+> 0.1 0.2 0.4 0.6 0.8 1.0
+> f
+> 12
+> 4
+> 6
+> 8
+> 10
+> Accuracy(%)
+> 75.0
+> 77.5
+> 80.0
+> 82.5
+> 85.0
+> 87.5
+> 90.0
+> 92.5
+> 95.0
+
+(b) Pubmed. 
+
+Figure 10: Analysis of the hyper-parameter 𝜆 𝑠 and 𝜆 𝑓 in the RGLM-Decoder variant. 0.0 0.2 0.4 0.6 0.8 1.0 1.2 1.4 1.6 1.8 2.0               
+
+> l(Cora Dataset)
+> 86
+> 87
+> 88
+> 89
+> 90
+> 91
+> 92
+> Accuracy (%)
+> Similarizer Denoiser 0.0 0.2 0.4 0.6 0.8 1.0 1.2 1.4 1.6 1.8 2.0
+> l(Pubmed Dataset)
+> 90.00
+> 90.25
+> 90.50
+> 90.75
+> 91.00
+> 91.25
+> 91.50
+> 91.75
+> 92.00
+> Accuracy (%)
+> Similarizer Denoiser
+
+Figure 11: Analysis of the hyper-parameter 𝜆 𝑙 in the RGLM-Similarizer and RGLM-Denoiser variants. 
+
+as the reconstruction loss weight grows. This trend stems from the role of reconstruction objectives as regularization terms: when the weight is too small, the explicit graph supervision becomes insuffi-cient, leading to under-utilization of graph information; when the weight is too large, the reconstruction loss dominates training and interferes with language modeling, degrading the performance. 
+
+## 6 Conclusion 
+
+In this work, we theoretically reveal the limitations of existing GTokenLLMs that rely solely on text supervision from language instructions, resulting in implicit graph–text alignment. To over-come it, we prove that the alignment objective is upper-bounded by the mutual information between the input graphs and their hidden representations in the LLM, and further propose a reconstructive graph instruction tuning pipeline, RGLM, to improve this upper bound. The RGLM is embodied through three distinct variants: Decoder from the input space; Similarizer and Denoiser from the latent space. Extensive experiments validate RGLM’s effectiveness. 
+
+## Acknowledgments 
+
+This work is supported in part by the National Natural Science Foundation of China (No. 62550138, 62192784, 62572064, 62472329, 62322203, 62172052), and the BUPT Excellent Ph.D. Students Foun-dation (No. CX20251005). Toward Graph-Tokenizing Large Language Models with Reconstructive Graph Instruction Tuning WWW ’26, April 13–17, 2026, Dubai, United Arab Emirates. 
+
+## References 
+
+[1] Josh Achiam, Steven Adler, Sandhini Agarwal, et al . 2023. Gpt-4 technical report. 
+
+arXiv preprint arXiv:2303.08774 (2023). [2] Jinwen Chen, Hao Miao, Dazhuo Qiu, et al . 2025. Sustainability-Oriented Task Recommendation in Spatial Crowdsourcing. In ICDE .[3] Runjin Chen, Tong Zhao, Ajay Kumar Jaiswal, et al . 2024. LLaGA: Large Language and Graph Assistant. In International Conference on Machine Learning . PMLR. [4] Xi Chen, Yan Duan, Rein Houthooft, et al . 2016. Infogan: Interpretable represen-tation learning by information maximizing generative adversarial nets. Advances in neural information processing systems 29 (2016). [5] Zhikai Chen, Haitao Mao, et al . 2024. Exploring the potential of large language models (llms) in learning on graphs. ACM SIGKDD Explorations Newsletter (2024). [6] Wei-Lin Chiang, Zhuohan Li, Ziqing Lin, et al . 2023. Vicuna: An open-source chatbot impressing gpt-4 with 90%* chatgpt quality. See https://vicuna. lmsys. org (accessed 14 April 2023) 2, 3 (2023), 6. [7] Jacob Devlin, Ming-Wei Chang, et al. 2019. BERT: Pre-training of Deep Bidirec-tional Transformers for Language Understanding. In North American Chapter of the Association for Computational Linguistics .[8] Bahare Fatemi, Jonathan Halcrow, and Bryan Perozzi. 2024. Talk like a Graph: Encoding Graphs for Large Language Models. In The Twelfth International Con-ference on Learning Representations .[9] Matthias Fey and Jan Eric Lenssen. 2019. Fast graph representation learning with PyTorch Geometric. arXiv preprint arXiv:1903.02428 (2019). [10] Jiayan Guo, Lun Du, Hengyu Liu, et al . 2023. Gpt4graph: Can large language mod-els understand graph structured data? an empirical evaluation and benchmarking. 
+
+arXiv preprint arXiv:2305.15066 (2023). [11] Yuxin Guo, Deyu Bo, Cheng Yang, Zhiyuan Lu, Zhongjian Zhang, Jixi Liu, Yufei Peng, and Chuan Shi. 2024. Data-centric graph learning: A survey. IEEE Transac-tions on Big Data 11, 1 (2024), 1–20. [12] Zeyuan Guo, Enmao Diao, Cheng Yang, and Chuan Shi. [n. d.]. Graph Tok-enization for Bridging Graphs and Transformers. In The Fourteenth International Conference on Learning Representations .[13] Will Hamilton, Zhitao Ying, and Jure Leskovec. 2017. Inductive representation learning on large graphs. Advances in neural information processing systems 
+
+(2017). [14] Yufei He, Yuan Sui, Xiaoxin He, et al . 2025. Unigraph: Learning a unified cross-domain foundation model for text-attributed graphs. In Proceedings of the 31st ACM SIGKDD Conference on Knowledge Discovery and Data Mining V. 1 .[15] R Devon Hjelm, Alex Fedorov, Samuel Lavoie-Marchildon, et al . 2019. Learning deep representations by mutual information estimation and maximization. In 
+
+International Conference on Learning Representations .[16] Edward J Hu, Yelong Shen, Phillip Wallis, et al . 2022. Lora: Low-rank adaptation of large language models. ICLR 1, 2 (2022), 3. [17] Weihua Hu, Matthias Fey, Marinka Zitnik, et al . 2020. Open graph benchmark: Datasets for machine learning on graphs. Advances in neural information pro-cessing systems (2020). [18] Xuanwen Huang, Kaiqiao Han, Yang Yang, et al . 2024. Can gnn be good adapter for llms?. In Proceedings of the ACM Web Conference 2024 .[19] Bowen Jin, Gang Liu, et al . 2024. Large language models on graphs: A compre-hensive survey. IEEE Transactions on Knowledge and Data Engineering (2024). [20] Thomas N. Kipf and Max Welling. 2017. Semi-Supervised Classification with Graph Convolutional Networks. In International Conference on Learning Repre-sentations .[21] James Kirkpatrick, Razvan Pascanu, Neil Rabinowitz, et al . 2017. Overcoming catastrophic forgetting in neural networks. Proceedings of the national academy of sciences (2017). [22] Lecheng Kong, Jiarui Feng, Hao Liu, et al . 2025. GOFA: A Generative One-For-All Model for Joint Graph Language Modeling. In The Thirteenth International Conference on Learning Representations .[23] Guohao Li, Chenxin Xiong, Ali Thabet, et al . 2020. Deepergcn: All you need to train deeper gcns. arXiv preprint arXiv:2006.07739 (2020). [24] Yuhan Li, Peisong Wang, Xiao Zhu, et al . 2024. Glbench: A comprehensive benchmark for graph with large language models. Advances in Neural Information Processing Systems 37 (2024), 42349–42368. [25] Jiawei Liu, Cheng Yang, Zhiyuan Lu, et al . 2025. Graph foundation models: Concepts, opportunities and challenges. IEEE Transactions on Pattern Analysis and Machine Intelligence (2025). [26] Yinghui Liu, Hao Miao, Guojiang Shen, et al . 2025. SPOT-Trip: Dual-Preference Driven Out-of-Town Trip Recommendation. In NeurIPS .[27] Renqiang Luo, Huafei Huang, Ivan Lee, et al . 2025. FairGP: A Scalable and Fair Graph Transformer Using Graph Partitioning. In Proceedings of the 39th Annual AAAI Conference on Artificial Intelligence .[28] Renqiang Luo, Huafei Huang, Shuo Yu, et al . 2024. FairGT: A Fairness-aware Graph Transformer. In Proceedings of the 32nd International Joint Conference on Artificial Intelligence .[29] Ladislav Rampášek, Michael Galkin, et al . 2022. Recipe for a general, powerful, scalable graph transformer. Advances in Neural Information Processing Systems 
+
+(2022). [30] Nils Reimers and Iryna Gurevych. 2019. Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks. In Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing (EMNLP-IJCNLP) .[31] Yunsheng Shi, Zhengjie Huang, Shikun Feng, et al . 2021. Masked Label Prediction: Unified Message Passing Model for Semi-Supervised Classification. International Joint Conferences on Artificial Intelligence Organization. [32] Jiabin Tang, Yuhao Yang, Wei Wei, et al . 2024. Graphgpt: Graph instruction tuning for large language models. In Proceedings of the 47th International ACM SIGIR Conference on Research and Development in Information Retrieval .[33] Hugo Touvron, Thibaut Lavril, Gautier Izacard, et al . 2023. Llama: Open and efficient foundation language models. arXiv preprint arXiv:2302.13971 (2023). [34] Ashish Vaswani, Noam Shazeer, Niki Parmar, et al . 2017. Attention is all you need. Advances in neural information processing systems (2017). [35] Petar Veličković, Guillem Cucurull, Arantxa Casanova, et al . 2018. Graph Atten-tion Networks. In International Conference on Learning Representations .[36] Duo Wang, Yuan Zuo, Fengzhi Li, et al . 2024. Llms as zero-shot graph learners: Alignment of gnn representations with llm token embeddings. Advances in Neural Information Processing Systems 37 (2024), 5950–5973. [37] Heng Wang, Shangbin Feng, Tianxing He, et al . 2023. Can language models solve graph problems in natural language? Advances in Neural Information Processing Systems 36 (2023), 30840–30861. [38] Haochen Wang, Yucheng Zhao, Tiancai Wang, Haoqiang Fan, Xiangyu Zhang, and Zhaoxiang Zhang. 2025. Ross3d: Reconstructive visual instruction tuning with 3d-awareness. In Proceedings of the IEEE/CVF International Conference on Computer Vision . 9275–9286. [39] Haochen Wang, Anlin Zheng, Yucheng Zhao, Tiancai Wang, Zheng Ge, Xiangyu Zhang, and Zhaoxiang Zhang. [n. d.]. Reconstructive Visual Instruction Tuning. In The Thirteenth International Conference on Learning Representations .[40] Haoyu Peter Wang, Shikun Liu, Rongzhe Wei, et al . 2025. Generalization Princi-ples for Inference over Text-Attributed Graphs with Large Language Models. In 
+
+Forty-second International Conference on Machine Learning .[41] Jianing Wang, Junda Wu, Yupeng Hou, et al . 2024. Instructgraph: Boosting large language models via graph-centric instruction tuning and preference alignment. 
+
+arXiv preprint arXiv:2402.08785 (2024). [42] Fei Wu, Xiao-Yuan Jing, Pengfei Wei, et al . 2022. Semi-supervised multi-view graph convolutional networks with application to webpage classification. Infor-mation Sciences 591 (2022), 142–154. [43] Qitian Wu, Chenxiao Yang, Wentao Zhao, et al . 2023. Difformer: Scalable (graph) transformers induced by energy constrained diffusion. arXiv preprint arXiv:2301.09474 (2023). [44] Qitian Wu, Wentao Zhao, Zenan Li, et al . 2022. Nodeformer: A scalable graph structure learning transformer for node classification. Advances in Neural Infor-mation Processing Systems (2022). [45] Zonghan Wu, Shirui Pan, Fengwen Chen, et al . 2020. A comprehensive survey on graph neural networks. IEEE transactions on neural networks and learning systems (2020). [46] Bo Yan, Yang Cao, Haoyu Wang, et al . 2024. Federated heterogeneous graph neural network for privacy-preserving recommendation. In Proceedings of the ACM Web Conference 2024 .[47] Bo Yan, Sihao He, Cheng Yang, et al . 2025. Federated graph condensation with information bottleneck principles. In Proceedings of the AAAI Conference on Artificial Intelligence .[48] Bo Yan, Zhongjian Zhang, Huabin Sun, Mengmei Zhang, Yang Cao, and Chuan Shi. 2025. Data-centric federated graph learning with large language models. 
+
+arXiv preprint arXiv:2503.19455 (2025). [49] Jinyu Yang, Ruijia Wang, et al . 2025. Harnessing Language Model for Cross-Heterogeneity Graph Knowledge Transfer. In Proceedings of the AAAI Conference on Artificial Intelligence .[50] Ling Yang, Ye Tian, Minkai Xu, et al . 2024. VQGraph: Rethinking Graph Rep-resentation Space for Bridging GNNs and MLPs. In The Twelfth International Conference on Learning Representations .[51] Zhilin Yang, William Cohen, and Ruslan Salakhudinov. 2016. Revisiting semi-supervised learning with graph embeddings. In International conference on ma-chine learning .[52] Ruosong Ye, Caiqi Zhang, Runhui Wang, et al . 2024. Language is All a Graph Needs. In EACL (Findings) .[53] Yuning You, Tianlong Chen, Yongduo Sui, et al . 2020. Graph contrastive learning with augmentations. Advances in neural information processing systems (2020). [54] Chaohao Yuan, Kangfei Zhao, Ercan Engin Kuruoglu, et al . 2025. A survey of graph transformers: Architectures, theories and applications. arXiv preprint arXiv:2502.16533 (2025). [55] Mengmei Zhang, Mingwei Sun, Peng Wang, et al . 2024. Graphtranslator: Aligning graph model to large language model for open-ended tasks. In Proceedings of the ACM Web Conference 2024 . 1003–1014. [56] Zhongjian Zhang, Xiao Wang, et al . 2025. Can large language models improve the adversarial robustness of graph neural networks?. In Proceedings of the 31st ACM SIGKDD Conference on Knowledge Discovery and Data Mining V. 1 .WWW ’26, April 13–17, 2026, Dubai, United Arab Emirates. Zhongjian Zhang, Xiao Wang, Mengmei Zhang, Jiarui Tan, and Chuan Shi 
+
+[57] Zhongjian Zhang, Mengmei Zhang, et al . 2024. Endowing pre-trained graph models with provable fairness. In Proceedings of the ACM Web Conference 2024 .[58] Zhongjian Zhang, Mengmei Zhang, Xiao Wang, et al . 2025. Rethinking Byzantine Robustness in Federated Recommendation from Sparse Aggregation Perspective. In Proceedings of the AAAI Conference on Artificial Intelligence .[59] Jianan Zhao, Le Zhuo, Yikang Shen, et al . 2024. GraphText: Graph Reasoning in Text Space. In Adaptive Foundation Models: Evolving AI for Personalized and Efficient Learning .[60] Cai Zhou, Xiyuan Wang, and Muhan Zhang. 2024. Unifying generation and prediction on graphs with latent graph diffusion. Advances in Neural Information Processing Systems (2024). [61] Huachi Zhou, Jiahe Du, et al . 2025. Each graph is a new language: Graph Learning with LLMs. In Findings of the Association for Computational Linguistics: ACL 2025 .Association for Computational Linguistics. [62] Yanqiao Zhu, Yichen Xu, et al . 2020. Deep Graph Contrastive Representation Learning. In ICML Workshop on Graph Representation Learning and Beyond .Toward Graph-Tokenizing Large Language Models with Reconstructive Graph Instruction Tuning WWW ’26, April 13–17, 2026, Dubai, United Arab Emirates. 
+
+## A Related Work A.1 Learning on Graphs 
+
+Graph data are ubiquitous in the real world, including social net-works [ 18 , 57 ], webpage networks [ 42 ], citation networks [ 47 , 51 ], and e-commerce networks [ 2, 26 , 46 , 58 ]. However, due to their inherent irregularity and complex connectivity patterns, effectively modeling graph structure is a fundamental challenge. Graph Neural Networks (GNNs) have emerged as powerful tools to address this issue by leveraging the message-passing mechanism to aggregate information from local neighborhoods [ 11 , 45 ]. Representative mod-els such as GCN [20], GAT [35] and GraphSAGE [13] have shown notable success in node classification and link prediction tasks. Concurrently, there is a growing interest in adapting transformer-based architectures [ 34 ] to graph domains [ 27 , 28 , 43 , 44 , 54 ]. These models aim to capture global dependencies and richer structural se-mantics, providing a complementary perspective to traditional local aggregation schemes. Despite these successes, a critical limitation of existing GNNs lies in their poor task generalization. Most ex-isting models are trained in a task-specific and dataset-dependent manner, which hampers their performance when transferred to different distributions or tasks. 
+
+## A.2 Large Language Models for Graphs 
+
+Recently, the remarkable success of large language models (LLMs) [ 1,6 , 33 ] has motivated researchers to adapt them to the graph learning domain, with the ultimate goal of developing a graph foundation model that generalizes across diverse scenarios [ 12 , 25 , 48 , 49 ]. Typi-cally, LLMs are employed as predictors to accomplish various graph tasks, attracting considerable attention [ 19 ]. A key challenge lies in aligning graph data with the natural language embedding space, so that LLMs can better comprehend graphs. To address this chal-lenge, existing efforts mainly fall into Graph-Textualizing LLMs (GTextLLMs) and Graph-Tokenizing LLMs (GTokenLLMs). GTextLLMs [ 5, 8, 10 , 37 , 41 , 59 ] utilize natural language to de-scribe graphs via manually crafted prompt templates, directly align-ing them with text. For instance, NLGraph [ 37 ] represents graphs as node and edge lists embedded in textual templates. GraphText [ 59 ]converts graphs into tree-based textual formats using syntactic graph parsing. However, such strategies often suffer from redun-dancy and imprecise characterization [ 3, 5 , 32 ]. In contrast, GTo-kenLLMs [ 3, 22 , 32 , 36 , 55 ] encode complex structures and lengthy texts into a graph token sequence, and treat them as prefix tokens for querying LLMs. To align graph tokens with the text embedding space, they typically construct various language instructions re-lated to graph tasks, and learn a projector to facilitate modalities alignment. For example, GraphGPT [ 32 ] builds language instruc-tions around the graph matching task, while LLaGA [ 3] builds them by node classification, link prediction, and node description tasks. Despite these successes, their alignment process follows an LLM-centric design that relies solely on text supervision, resulting in only implicit graph-text alignment and thus limiting performance. 
+
+## B Proofs B.1 Proof of Proposition 4.1 
+
+Proof. Since H is a deterministic function of 𝒔 𝐺 (i.e., mean pooling), the data processing inequality ensures that I (G ; 𝒔 𝐺 ) ≥ I (G ; H). By decoding H back into node features Z and adjacency matrix A, where A𝑖 𝑗 = 1 if nodes 𝑣 𝑖 and 𝑣 𝑗 are connected, otherwise 
+
+A𝑖 𝑗 = 0, the reconstruction loss can be expressed as: 
+
+Lgraph = 𝜆 𝑓 E − log 𝑞 𝑓 (Z | H) + 𝜆 𝑠 E − log 𝑞 𝑠 (A | H) . (29) Assume 𝑞 𝑓 (Z | H) = N ( 𝜇 𝑓 (H), 𝜎 2I), which corresponds to MSE loss over features; and 𝑞 𝑠 (A | H) = Î𝑖 < 𝑗 Bernoulli (𝜋 𝑠 (h𝑖 , h𝑗 )) , which corresponds to BCE loss over edges. By the Barber–Agakov identity, for any conditional model 𝑞 we have: 
+
+E[− log 𝑞 𝑓 (Z | H)] = H ( Z | H) + E[KL (𝑝 (Z | ·) ∥ 𝑞 𝑓 (Z | ·))] ≥ H ( Z | H), (30) 
+
+E[− log 𝑞 𝑠 (A | H)] = H ( A | H) + E[KL (𝑝 (A | ·) ∥ 𝑞 𝑠 (A | ·))] ≥ H ( A | H). (31) Thus, 
+
+Lgraph ≥ 𝜆 𝑓 H ( Z | H) + 𝜆 𝑠 H ( A | H). (32) Here, we assume the graph as a pair of independent random vari-ables (Z, A). The mutual information can be decomposed as: 
+
+I (G ; H) = I ( Z; H) + I ( A; H)
+
+= H ( Z) − H ( Z | H) + H ( A) − H ( A | H). (33) Since H ( Z) and H ( A) are parameter-independent, combining the above inequality and dropping non-negative KL terms yields: 
+
+I (G ; 𝒔 𝐺 ) ≥ H ( Z) + H ( A) − 1 
+
+> 𝜆 𝑓
+
+Lfeat − 1 
+
+> 𝜆 𝑠
+
+Ltopo . (34) 
+
+□
+
+The proof indicates that minimizing the raw graph reconstruc-tion loss maximizes a computable lower bound of I (G ; 𝒔 𝐺 ), which directly improves the upper bound of optimization objective C-GTMI I ( 𝒙 𝑡 ; 𝒔 𝐺 | 𝒔 𝑇  
+
+> <𝑡
+
+).
+
+## B.2 Proof of Proposition 4.2 
+
+Proof. Given a subgraph G, let E = 𝑔 (G) denote the latent node representation matrix extracted by the pre-trained GNN 𝑔 .The reconstruction tokens H are mapped to E by a lightweight MLP 𝑠 (·) , with normalization ensuring ∥E∥ = ∥𝑠 (H)∥ = 1. The reconstruction loss is defined as the cosine similarity: 
+
+Lsim = E[1 − cos (𝑠 (H), E)] . (35) On the unit sphere, we assume that E conditioned on H follows a von Mises–Fisher (vMF) distribution: 
+
+𝑞 𝑠 (E | H) = vMF (E; 𝜇 (H), 𝜅 ) ∝ exp  𝜅 · 𝜆 𝑙 · cos (𝜇 (H), E), (36) where 𝜇 (H) := 𝑠 (H)∥𝑠 (H) ∥ , 𝜅 > 0, 𝜆 𝑙 is a scaling factor. It follows that: 
+
+− log 𝑞 𝑠 (E | H) = −𝜅 · 𝜆 𝑙 · cos (𝑠 (H), E) + log 𝐶 𝑑 (𝜅 ), (37) where log 𝐶 𝑑 (𝜅 ) is a constant independent of H. Therefore, 
+
+E[− log 𝑞 𝑠 (E | H)] = const + 𝜅 · 𝜆 𝑙 · E[1 − cos (𝑠 (H), E)] 
+
+= const + 𝜅 · 𝜆 𝑙 · L sim . (38) For any conditional model 𝑞 𝑠 (E | H), we have: 
+
+E[− log 𝑞 𝑠 (E | H)] = H ( E | H) + E[KL (𝑝 (E | ·) ∥ 𝑞 𝑠 (E | ·))] ≥ H ( E | H). (39) WWW ’26, April 13–17, 2026, Dubai, United Arab Emirates. Zhongjian Zhang, Xiao Wang, Mengmei Zhang, Jiarui Tan, and Chuan Shi 
+
+Thus, we obtain: 
+
+Lsim ≥ 1
+
+𝜅 · 𝜆 𝑙 
+
+H ( E | H) − const ⇒ H ( E | H) ≤ 𝜅 · 𝜆 𝑙 · L sim + const .
+
+(40) Since I ( E; H) = H ( E) − H ( E | H), we obtain: 
+
+I ( E; H) ≥ H ( E) − ( 𝜅 · 𝜆 𝑙 · L sim + const ). (41) Moreover, 𝑔 is frozen so that E = 𝑔 (G) is a deterministic function of G, and H is a deterministic function of 𝒔 𝐺 , thus we have: 
+
+I (G ; 𝒔 𝐺 ) ≥ I (G ; H) ≥ I ( E; H) ≥ H ( E) − ( 𝜅 ·𝜆 𝑙 ·L sim + const ). (42) 
+
+□
+
+The proof indicates that minimizing the similarity loss between 
+
+H and E maximizes a computable lower bound of I (G ; 𝒔 𝐺 ), which in turn improves the attainable upper bound of C-GTMI I ( 𝒙 𝑡 ; 𝒔 𝐺 |
+
+𝒔 𝑇  
+
+> <𝑡
+
+).
+
+## B.3 Proof of Proposition 4.3 
+
+Proof. Given a subgraph G, let E = 𝑔 (G) denote the latent node representation matrix extracted by the pre-trained GNN 𝑔 .The reconstruction tokens H are projected into a condition matrix 
+
+C = Ψ(H). The objective is to model a conditional distribution 
+
+𝑞 𝑓 (E𝑡 −1 | E𝑡 , C), such that the clean embeddings E can be recovered from their noisy counterparts E𝑡 under the condition C. The forward diffusion process is formulated as a Markov chain that gradually perturbs the clean embeddings E by adding Gaussian noise, thereby constructing noisy embeddings E𝑡 :
+
+𝑝 (E𝑡 | E) = N √ ¯𝛼 𝑡 E, (1 − ¯𝛼 𝑡 ) I,
+
+E𝑡 = √ ¯𝛼 𝑡 E + √1 − ¯𝛼 𝑡 𝝐 , 𝝐 ∼ N ( 0, I), (43) where N ( 𝝁 , 𝚺 ) denotes a Gaussian distribution, 𝑡 indicates discrete timesteps, 𝛼 𝑡 = 1 − 𝛽 𝑡 , ¯𝛼 𝑡 = Î𝑡 𝑖 =1 𝛼 𝑡 , and 𝛽 𝑡 ∈ ( 0, 1) is a pre-defined variance schedule. A latent diffusion model learns to reverse this progressive noise addition process. Specifically, to iteratively generate clean embeddings E from pure noise E𝑡 conditioned on C,the reverse process is parameterized as 
+
+𝑞 𝑓 (E𝑡 −1 | E𝑡 , C) = N
+
+
+
+𝝁 𝑓 (E𝑡 , C, 𝑡 ), 𝜎 2 
+
+> 𝑡
+
+I
+
+
+
+,
+
+𝝁 𝑓 = 1
+
+√𝛼 𝑡 
+
+
+
+E𝑡 − 1 − 𝛼 𝑡 
+
+√1 − ¯𝛼 𝑡 
+
+𝝐 𝑓 (E𝑡 ; C, 𝑡 )
+
+
+
+.
+
+(44) The marginal conditional likelihood is then given by 
+
+log 𝑞 𝑓 (E | H) = log 
+
+∫
+
+𝑞 𝑓 (E𝑇 )
+
+> 𝑇
+
+Ö
+
+> 𝑡 =1
+
+𝑞 𝑓 (E𝑡 −1 | E𝑡 , C)× 𝑞 𝑓 (E | E1, C) 𝑑 E1: 𝑇 .
+
+(45) By introducing the forward distribution 𝑝 (E1: 𝑇 | E) as a variational approximation, the standard variational lower bound (ELBO) can be derived: 
+
+log 𝑞 𝑓 (E | H) ≥ − KL  𝑝 (E𝑇 | E) ∥ 𝑞 𝑓 (E𝑇 )
+
+−
+
+> 𝑇
+
+∑︁ 
+
+> 𝑡 =2
+
+E KL  𝑝 (E𝑡 −1 | E𝑡 , E) ∥ 𝑞 𝑓 (E𝑡 −1 | E𝑡 , C) 
+
++ E log 𝑞 𝑓 (E | E1, C) .
+
+(46) Under a variance-preserving schedule and Gaussian parameteri-zation, each KL term can be rewritten as a mean-squared error (MSE) on the noise prediction, up to a constant independent of the parameters: 
+
+KL  𝑝 (E𝑡 −1|E𝑡 , E)∥ 𝑞 𝑓 (E𝑡 −1|E𝑡 , C) = ˜𝜆 𝑡 E𝝐 ∼N ( 0,I) ∥𝝐 𝑓 (E𝑡 ; C, 𝑡 ) − 𝝐 ∥22
+
++ const 𝑡 ,
+
+(47) where ˜𝜆 𝑡 > 0 depends on the noise schedule. Substituting back into the ELBO and aggregating constants yields the diffusion loss, which is equivalent to the negative ELBO up to a constant: 
+
+Ldiff =
+
+> 𝑇
+
+∑︁  
+
+> 𝑡 =1
+
+𝜆 𝑡 E(E,H), 𝝐 𝝐 𝑓 
+
+ √ ¯𝛼 𝑡 E + √1 − ¯𝛼 𝑡 𝝐 ; C, 𝑡  − 𝝐 22, (48) where 𝜆 𝑡 > 0 absorbs the constants into the weights. This equiva-lence leads to the upper bound on the negative log-likelihood: 
+
+E[− log 𝑞 𝑓 (E | H)] ≤ const + 𝜆 𝑙 · L diff , (49) where 𝜆 𝑙 is a scaling factor. Moreover, for any conditional model 
+
+𝑞 𝑓 (E | H) we have: 
+
+E[− log 𝑞 𝑓 (E | H)] = H ( E | H) + EKL  𝑝 (E | H) ∥ 𝑞 𝑓 (E | H) 
+
+≥ H ( E | H). (50) Discarding the non-negative KL term yields the following upper bound on the conditional entropy: 
+
+H ( E | H) ≤ const + 𝜆 𝑙 · L diff . (51) By the definition I ( E; H) = H ( E) − H ( E | H), we obtain: 
+
+I ( E; H) ≥ H ( E) − ( const + 𝜆 𝑙 · L diff ). (52) Finally, since E = 𝑔 (G) is a deterministic function of G and H is deterministically obtained from 𝒔 𝐺 by mean pooling, we have: 
+
+I (G ; 𝒔 𝐺 ) ≥ I ( E; 𝒔 𝐺 ) ≥ I ( E; H) ≥ H ( E) − ( const +𝜆 𝑙 · L diff ). (53) 
+
+□
+
+The proof indicates that minimizing the diffusion noise predic-tion loss Ldiff maximizes a computable lower bound of I (G ; 𝒔 𝐺 ),which in turn improves the attainable upper bound of C-GTMI 
+
+I ( 𝒙 𝑡 ; 𝒔 𝐺 | 𝒔 𝑇  
+
+> <𝑡
+
+).
+
+## C Experiment Details C.1 Dataset Descriptions 
+
+We conduct experiments on four widely-used datasets: Cora [ 51 ], Pubmed [ 51 ] and OGBN-Arxiv [ 17 ] from citation networks, as well as Reddit [ 18 ] from a social network. The dataset statistics are in Table 4, and the detailed descriptions are listed as follows: 
+
+• Cora is a citation network in which each node denotes a research paper in the field of computer science, and the associated raw text features include the title and abstract of the paper. Edges represent citation relationships between papers. Each node is assigned a label indicating the paper’s category. 
+
+• Pubmed is a citation network consisting of research papers in the biomedical domain, where each node corresponds to a paper and each edge denotes a citation relationship between two papers. 
+
+• OGBN-Arxiv is a citation network comprising research papers and their citation relationships, collected from the arXiv repository. Each node represents a paper, and each edge indicates a citation link between two papers. 
+
+• Reddit is a social network in which each node represents a user, Toward Graph-Tokenizing Large Language Models with Reconstructive Graph Instruction Tuning WWW ’26, April 13–17, 2026, Dubai, United Arab Emirates. 
+
+Table 4: Statistics of experiment datasets.                          
+
+> Dataset # Nodes # Edges # Class Splitting Domain Cora 2,708 5,429 76:2:2 citation Pubmed 19,717 44,338 36:2:2 citation OGBN-Arxiv 169,343 1,166,243 40 6:2:3 citation Reddit 33,434 198,448 21:1:8 social network
+
+and edges indicate whether two users have interacted by replying to each other. The raw text associated with each node comprises the content from the user’s previously published subreddit posts, limited to the most recent three entries. Each node is labeled to indicate whether the user is categorized as popular or normal. 
+
+## C.2 Baseline Descriptions 
+
+The traditional GNN models include: 
+
+• GCN [20 ] is a popular graph convolutional network based on spectral theory. 
+
+• GAT [35 ] is composed of multiple attention layers, which can learn different weights for different neighborhood nodes. 
+
+• GraphSAGE [ 13 ] inductively learns node embeddings by utiliz-ing ego-node features along with a fixed number of neighboring node features. The transformer-based graph models include: 
+
+• UniMP [ 31 ] employs a Graph Transformer network to integrate both feature and label propagation during training and inference. 
+
+• NodeFormer [44 ] filters out dissimilar neighbors using a fixed threshold and aggregates multi-view neighborhood information to address graph inconsistency. 
+
+• DIFFormer [43 ] introduces an energy-constrained, diffusion-based graph transformer designed to encode a batch of instances into evolutionary states by incorporating contextual information from other instances. The pretrain-finetune GNNs include: 
+
+• GraphCL [53 ] employs diverse graph augmentation techniques to generate multiple views of a graph and learns node represen-tations by maximizing feature consistency across these views. 
+
+• GRACE [ 62 ] proposes to augment the graph structure by both random edge dropout and random node feature dropping, and uses the corrupted graphs as the contrastive views. 
+
+• LGD [ 60 ] LGD pretrains an autoencoder to embed graphs into a powerful latent space and then trains a diffusion model in this space to unify graph generation and prediction tasks. The GTextLLMs include: 
+
+• GraphText-ICL [59 ] is the in-context learning variant of Graph-Text, which eliminates the tuning process. GraphText decouples depth and scope by encapsulating node attributes and relation-ships in the graph syntax tree and processing it with an LLM. The GTokenLLMs include: 
+
+• GraphText-SFT [59 ] is a supervised fine-tuning variant of Graph-Text, which employs an MLP projector to map node continuous features into the textual input space for querying LLMs. 
+
+• GraphGPT [ 32 ] encodes graph data using a pre-trained GNN and introduces a dual-stage instruction tuning to align graph representations with natural language. 
+
+• LLaGA [3 ] designs two graph description templates to serialize graph data and instruction-tuning LLMs with three different tasks, including node description, node classification, and link prediction tasks. 
+
+## C.3 Implementation Details 
+
+First, RGLM aims to explicitly incorporate graph supervision into the tuning process, rather than designing a new instruction dataset. Therefore, we utilize the instruction datasets from LLaGA [ 3] to train the model. In the tuning stage, we train our model for one epoch with the AdamW optimizer, set the batch size to 4 per device, and set the projector learning rate to 2e-3. Following LLaGA [ 3], to compensate for the limited data size, we replicate the training samples from the smallest dataset, Cora and Reddit, three times. The warmup ratio is set to 3e-2, and the maximum input length of LLMs is 4096. For the Neighbor Detail Template, we sample two-hop neighbors around each node, setting the sample size to 10 for each hop. We adopt LoRA [ 16 ] for efficient fine-tuning, with the learning rate, dropout rate, rank, and 𝛼 set to 5e-4, 0.1, 8, and 32, respectively. In the inference stage, we set the temperature of the LLM to 0.001 to ensure reproducibility of the results. We uniformly set the learning rate to 5e-4 for all three RGLM variants and configure the hyperparameters as follows: For RGLM-Decoder, the hyperparameter 𝜆 𝑓 is selected from {0.1, 0.2, 0.4, 0.6, 0.8, 1.0},and 𝜆 𝑠 is selected from {1, 2, 4, 6, 8, 10 }. For RGLM-Similarizer and RGLM-Denoiser, 𝜆 𝑙 is chosen from 0.2 to 2.0 with a step size of 0.2. For the LM-based pre-trained GNN encoder, following [ 29 , 60 ], we use the combination of DeeperGCN [ 23 ] and GAT [ 35 ] as the backbone, with 7 layers and 96 hidden dimensions. We use LapPE and RWSE. We train the model for 500 epochs with a masked label ratio of 0.8, and a cosine learning rate with 50 warm-up epochs and an initial value of 1e-3. To facilitate fair comparisons, we adopt a unified text encoder, Sentence-BERT [ 30 ], to extract node features from the raw textual attributes. All GTokenLLMs use Vicuna-7B-v1.5-16K [ 6 ] as the base LLM. For these baseline models, we implement them with the source code provided by the authors. Unless otherwise specified, we adopt the default parameter setting in the author’s implementation. For datasets not included in the released baseline code, we tune all baselines using a grid search strategy. For all experiments, we select the optimal hyperparameters on the validation set and apply them to the test set. The implementation of all models uses PyG [ 9]. 
+
+## C.4 Computing Environment and Resources 
+
+The experiments are conducted in a computing environment with the following specifications: 
+
+• OS : Linux ubuntu 5.15.0-102-generic. 
+
+• CPU : Intel(R) Xeon(R) Platinum 8358 CPU @ 2.60GHz. 
+
+• GPU : NVIDIA A800 80GB.

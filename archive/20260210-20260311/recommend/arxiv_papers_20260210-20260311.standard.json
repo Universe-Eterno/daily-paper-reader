@@ -1,16 +1,586 @@
 {
   "mode": "standard",
-  "generated_at": "2026-03-11T08:57:10.327199+00:00",
+  "generated_at": "2026-03-11T09:48:55.336739+00:00",
   "stats": {
     "mode": "standard",
     "tag_count": 1,
-    "deep_divecandidates": 0,
-    "deep_cap": null,
-    "deep_selected": 0,
-    "quick_candidates": 0,
+    "deep_divecandidates": 7,
+    "deep_cap": 6,
+    "deep_selected": 6,
+    "quick_candidates": 9,
     "quick_skim_target": 11,
-    "quick_selected": 0
+    "quick_selected": 9
   },
-  "deep_dive": [],
-  "quick_skim": []
+  "deep_dive": [
+    {
+      "id": "2602.20175v1",
+      "title": "Tensor Network Generator-Enhanced Optimization for Traveling Salesman Problem",
+      "abstract": "We present an application of the tensor network generator-enhanced optimization (TN-GEO) framework to address the traveling salesman problem (TSP), a fundamental combinatorial optimization challenge. Our approach employs a tensor network Born machine based on automatically differentiable matrix product states (MPS) as the generative model, using the Born rule to define probability distributions over candidate solutions. Unlike approaches based on binary encoding, which require $N^2$ variables and penalty terms to enforce valid tour constraints, we adopt a permutation-based formulation with integer variables and use autoregressive sampling with masking to guarantee that every generated sample is a valid tour by construction. We also introduce a $k$-site MPS variant that learns distributions over $k$-grams (consecutive city subsequences) using a sliding window approach, enabling parameter-efficient modeling for larger instances. Experimental validation on TSPLIB benchmark instances with up to 52 cities demonstrates that TN-GEO can outperform classical heuristics including swap and 2-opt hill-climbing. The $k$-site variants, which put more focus on local correlations, show better results compared to the full-MPS case.",
+      "authors": [
+        "Ryo Sakai",
+        "Chen-Yu Liu"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "math.OC",
+        "quant-ph"
+      ],
+      "published": "2026-02-12T21:18:19+00:00",
+      "link": "https://arxiv.org/pdf/2602.20175v1",
+      "tags": [
+        "keyword:NCO LM",
+        "query:NCO LM"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "Neural solver for Traveling Salesman Problem",
+      "llm_evidence_cn": "旅行商问题的神经求解器",
+      "llm_evidence": "旅行商问题的神经求解器",
+      "canonical_evidence": "旅行商问题的神经求解器",
+      "llm_tldr_en": "Applies tensor network Born machines to solve the Traveling Salesman Problem using autoregressive sampling.",
+      "llm_tldr_cn": "应用张量网络 Born 机，通过自回归采样解决旅行商问题。",
+      "llm_tldr": "应用张量网络 Born 机，通过自回归采样解决旅行商问题。",
+      "llm_tags": [
+        "query:nco-lm"
+      ],
+      "matched_query_tag": "query:nco-lm",
+      "matched_query_text": "Neural solvers for the Traveling Salesman Problem (TSP)",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2602.23092v1",
+      "title": "Enhancing CVRP Solver through LLM-driven Automatic Heuristic Design",
+      "abstract": "The Capacitated Vehicle Routing Problem (CVRP), a fundamental combinatorial optimization challenge, focuses on optimizing fleet operations under vehicle capacity constraints. While extensively studied in operational research, the NP-hard nature of CVRP continues to pose significant computational challenges, particularly for large-scale instances. This study presents AILS-AHD (Adaptive Iterated Local Search with Automatic Heuristic Design), a novel approach that leverages Large Language Models (LLMs) to revolutionize CVRP solving. Our methodology integrates an evolutionary search framework with LLMs to dynamically generate and optimize ruin heuristics within the AILS method. Additionally, we introduce an LLM-based acceleration mechanism to enhance computational efficiency. Comprehensive experimental evaluations against state-of-the-art solvers, including AILS-II and HGS, demonstrate the superior performance of AILS-AHD across both moderate and large-scale instances. Notably, our approach establishes new best-known solutions for 8 out of 10 instances in the CVRPLib large-scale benchmark, underscoring the potential of LLM-driven heuristic design in advancing the field of vehicle routing optimization.",
+      "authors": [
+        "Zhuoliang Xie",
+        "Fei Liu",
+        "Zhenkun Wang",
+        "Qingfu Zhang"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-02-26T15:12:23+00:00",
+      "link": "https://arxiv.org/pdf/2602.23092v1",
+      "tags": [
+        "keyword:NCO LM",
+        "query:NCO LM"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "LLM-driven automatic heuristic design for CVRP",
+      "llm_evidence_cn": "大模型驱动的CVRP自动启发式设计",
+      "llm_evidence": "大模型驱动的CVRP自动启发式设计",
+      "canonical_evidence": "大模型驱动的CVRP自动启发式设计",
+      "llm_tldr_en": "Uses LLMs to dynamically generate and optimize ruin heuristics for the Capacitated Vehicle Routing Problem.",
+      "llm_tldr_cn": "利用大模型为容量受限车辆路径问题（CVRP）动态生成并优化启发式算法。",
+      "llm_tldr": "利用大模型为容量受限车辆路径问题（CVRP）动态生成并优化启发式算法。",
+      "llm_tags": [
+        "query:nco-lm"
+      ],
+      "matched_query_tag": "query:nco-lm",
+      "matched_query_text": "LLM driven heuristic generation for combinatorial optimization",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2602.18419v1",
+      "title": "Benchmarking Graph Neural Networks in Solving Hard Constraint Satisfaction Problems",
+      "abstract": "Graph neural networks (GNNs) are increasingly applied to hard optimization problems, often claiming superiority over classical heuristics. However, such claims risk being unsolid due to a lack of standard benchmarks on truly hard instances. From a statistical physics perspective, we propose new hard benchmarks based on random problems. We provide these benchmarks, along with performance results from both classical heuristics and GNNs. Our fair comparison shows that classical algorithms still outperform GNNs. We discuss the challenges for neural networks in this domain. Future claims of superiority can be made more robust using our benchmarks, available at https://github.com/ArtLabBocconi/RandCSPBench.",
+      "authors": [
+        "Geri Skenderi",
+        "Lorenzo Buffoni",
+        "Francesco D'Amico",
+        "David Machado",
+        "Raffaele Marino",
+        "Matteo Negri",
+        "Federico Ricci-Tersenghi",
+        "Carlo Lucibello",
+        "Maria Chiara Angelini"
+      ],
+      "primary_category": "cond-mat.dis-nn",
+      "categories": [
+        "cond-mat.dis-nn",
+        "cs.LG"
+      ],
+      "published": "2026-02-20T18:41:48+00:00",
+      "link": "https://arxiv.org/pdf/2602.18419v1",
+      "tags": [
+        "keyword:NCO LM",
+        "query:NCO LM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Benchmarking GNNs on hard constraint satisfaction problems",
+      "llm_evidence_cn": "在硬约束满足问题上评估图神经网络",
+      "llm_evidence": "在硬约束满足问题上评估图神经网络",
+      "canonical_evidence": "在硬约束满足问题上评估图神经网络",
+      "llm_tldr_en": "Provides a benchmark to compare GNNs against classical heuristics for hard optimization problems.",
+      "llm_tldr_cn": "提供了一个基准，用于在硬优化问题上比较图神经网络与经典启发式算法。",
+      "llm_tldr": "提供了一个基准，用于在硬优化问题上比较图神经网络与经典启发式算法。",
+      "llm_tags": [
+        "query:nco-lm"
+      ],
+      "matched_query_tag": "query:nco-lm",
+      "matched_query_text": "Graph Neural Networks for combinatorial optimization tasks",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2602.23579v1",
+      "title": "Construct, Merge, Solve & Adapt with Reinforcement Learning for the min-max Multiple Traveling Salesman Problem",
+      "abstract": "The Multiple Traveling Salesman Problem (mTSP) extends the Traveling Salesman Problem to m tours that start and end at a common depot and jointly visit all customers exactly once. In the min-max variant, the objective is to minimize the longest tour, reflecting workload balance. We propose a hybrid approach, Construct, Merge, Solve & Adapt with Reinforcement Learning (RL-CMSA), for the symmetric single-depot min-max mTSP. The method iteratively constructs diverse solutions using probabilistic clustering guided by learned pairwise q-values, merges routes into a compact pool, solves a restricted set-covering MILP, and refines solutions via inter-route remove, shift, and swap moves. The q-values are updated by reinforcing city-pair co-occurrences in high-quality solutions, while the pool is adapted through ageing and pruning. This combination of exact optimization and reinforcement-guided construction balances exploration and exploitation. Computational results on random and TSPLIB instances show that RL-CMSA consistently finds (near-)best solutions and outperforms a state-of-the-art hybrid genetic algorithm under comparable time limits, especially as instance size and the number of salesmen increase.",
+      "authors": [
+        "Guillem Rodríguez-Corominas",
+        "Maria J. Blesa",
+        "Christian Blum"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-02-27T01:07:59+00:00",
+      "link": "https://arxiv.org/pdf/2602.23579v1",
+      "tags": [
+        "keyword:NCO LM",
+        "query:NCO LM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Reinforcement learning for Multiple Traveling Salesman Problem",
+      "llm_evidence_cn": "强化学习用于多旅行商问题",
+      "llm_evidence": "强化学习用于多旅行商问题",
+      "canonical_evidence": "强化学习用于多旅行商问题",
+      "llm_tldr_en": "Proposes a hybrid RL-CMSA approach to solve the min-max Multiple Traveling Salesman Problem.",
+      "llm_tldr_cn": "提出一种混合RL-CMSA方法来解决最小-最大多旅行商问题。",
+      "llm_tldr": "提出一种混合RL-CMSA方法来解决最小-最大多旅行商问题。",
+      "llm_tags": [
+        "query:nco-lm"
+      ],
+      "matched_query_tag": "query:nco-lm",
+      "matched_query_text": "Deep Reinforcement Learning for combinatorial optimization",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.07176v1",
+      "title": "Learning to Rank the Initial Branching Order of SAT Solvers",
+      "abstract": "Finding good branching orders is key to solving SAT problems efficiently, but finding such branching orders is a difficult problem. Using a learning based approach to predict a good branching order before solving, therefore, has potential. In this paper, we investigate predicting branching orders using graph neural networks as a preprocessing step to conflict-driven clause learning (CDCL) SAT solvers. We show that there are significant gains to be made in existing CDCL SAT solvers by providing a good initial branching. Further, we provide three labeling methods to find such initial branching orders in a tractable way. Finally, we train a graph neural network to predict these branching orders and show through our evaluations that a GNN-initialized ordering yields significant speedups on random 3-CNF and pseudo-industrial benchmarks, with generalization capabilities to instances much larger than the training set. However, we also find that the predictions fail at speeding up more difficult and industrial instances. We attribute this to the solver's dynamic heuristics, which rapidly overwrite the provided initialization, and to the complexity of these instances, making GNN prediction hard.",
+      "authors": [
+        "Arvid Eriksson",
+        "Gabriel Poesia",
+        "Roman Bresson",
+        "Karl Henrik Johansson",
+        "David Broman"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.LO"
+      ],
+      "published": "2026-03-07T12:35:36+00:00",
+      "link": "https://arxiv.org/pdf/2603.07176v1",
+      "tags": [
+        "keyword:NCO LM",
+        "query:NCO LM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "GNNs for predicting branching orders in SAT solvers",
+      "llm_evidence_cn": "GNN 用于预测 SAT 求解器的分支顺序",
+      "llm_evidence": "GNN 用于预测 SAT 求解器的分支顺序",
+      "canonical_evidence": "GNN 用于预测 SAT 求解器的分支顺序",
+      "llm_tldr_en": "Uses Graph Neural Networks to predict initial branching orders for improving CDCL SAT solvers.",
+      "llm_tldr_cn": "使用图神经网络预测初始分支顺序，以改进 CDCL SAT 求解器。",
+      "llm_tldr": "使用图神经网络预测初始分支顺序，以改进 CDCL SAT 求解器。",
+      "llm_tags": [
+        "query:nco-lm"
+      ],
+      "matched_query_tag": "query:nco-lm",
+      "matched_query_text": "Graph Neural Networks for combinatorial optimization tasks",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2602.11574v1",
+      "title": "Learning to Configure Agentic AI Systems",
+      "abstract": "Configuring LLM-based agent systems involves choosing workflows, tools, token budgets, and prompts from a large combinatorial design space, and is typically handled today by fixed large templates or hand-tuned heuristics. This leads to brittle behavior and unnecessary compute, since the same cumbersome configuration is often applied to both easy and hard input queries. We formulate agent configuration as a query-wise decision problem and introduce ARC (Agentic Resource & Configuration learner), which learns a light-weight hierarchical policy using reinforcement learning to dynamically tailor these configurations. Across multiple benchmarks spanning reasoning and tool-augmented question answering, the learned policy consistently outperforms strong hand-designed and other baselines, achieving up to 25% higher task accuracy while also reducing token and runtime costs. These results demonstrate that learning per-query agent configurations is a powerful alternative to \"one size fits all\" designs.",
+      "authors": [
+        "Aditya Taparia",
+        "Som Sagar",
+        "Ransalu Senanayake"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-02-12T04:45:44+00:00",
+      "link": "https://arxiv.org/pdf/2602.11574v1",
+      "tags": [
+        "keyword:NCO LM",
+        "query:NCO LM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "RL for combinatorial design space of agent configurations",
+      "llm_evidence_cn": "强化学习用于智能体配置的组合设计空间",
+      "llm_evidence": "强化学习用于智能体配置的组合设计空间",
+      "canonical_evidence": "强化学习用于智能体配置的组合设计空间",
+      "llm_tldr_en": "Uses reinforcement learning to optimize the combinatorial configuration of LLM-based agent systems.",
+      "llm_tldr_cn": "使用强化学习优化基于大模型的智能体系统的组合配置。",
+      "llm_tldr": "使用强化学习优化基于大模型的智能体系统的组合配置。",
+      "llm_tags": [
+        "query:nco-lm"
+      ],
+      "matched_query_tag": "query:nco-lm",
+      "matched_query_text": "Deep Reinforcement Learning for combinatorial optimization",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2603.04227v1",
+      "title": "Constraint-Aware Generative Re-ranking for Multi-Objective Optimization in Advertising Feeds",
+      "abstract": "Optimizing reranking in advertising feeds is a constrained combinatorial problem, requiring simultaneous maximization of platform revenue and preservation of user experience. Recent generative ranking methods enable listwise optimization via autoregressive decoding, but their deployment is hindered by high inference latency and limited constraint handling.   We propose a constraint-aware generative reranking framework that transforms constrained optimization into bounded neural decoding. Unlike prior approaches that separate generator and evaluator models, our framework unifies sequence generation and reward estimation into a single network.   We further introduce constraint-aware reward pruning, integrating constraint satisfaction directly into decoding to efficiently generate optimal sequences. Experiments on large-scale industrial feeds and online A/B tests show that our method improves revenue and user engagement while meeting strict latency requirements, providing an efficient neural solution for constrained listwise optimization.",
+      "authors": [
+        "Chenfei Li",
+        "Hantao Zhao",
+        "Weixi Yao",
+        "Ruiming Huang",
+        "Rongrong Lu",
+        "Geng Tian",
+        "Dongying Kong"
+      ],
+      "primary_category": "cs.IR",
+      "categories": [
+        "cs.IR"
+      ],
+      "published": "2026-03-04T16:09:36+00:00",
+      "link": "https://arxiv.org/pdf/2603.04227v1",
+      "tags": [
+        "keyword:NCO LM",
+        "query:NCO LM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "constrained combinatorial problem via neural decoding",
+      "llm_evidence_cn": "通过神经解码解决受限组合优化问题",
+      "llm_evidence": "通过神经解码解决受限组合优化问题",
+      "canonical_evidence": "通过神经解码解决受限组合优化问题",
+      "llm_tldr_en": "Proposes a constraint-aware generative framework for multi-objective combinatorial optimization in advertising.",
+      "llm_tldr_cn": "提出一种针对广告推荐中多目标组合优化问题的约束感知生成式重排序框架。",
+      "llm_tldr": "提出一种针对广告推荐中多目标组合优化问题的约束感知生成式重排序框架。",
+      "llm_tags": [
+        "query:nco-lm"
+      ],
+      "matched_query_tag": "query:nco-lm",
+      "matched_query_text": "Neural Combinatorial Optimization (NCO) methods and architectures",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2602.09574v1",
+      "title": "Aligning Tree-Search Policies with Fixed Token Budgets in Test-Time Scaling of LLMs",
+      "abstract": "Tree-search decoding is an effective form of test-time scaling for large language models (LLMs), but real-world deployment imposes a fixed per-query token budget that varies across settings. Existing tree-search policies are largely budget-agnostic, treating the budget as a termination condition, which can lead to late-stage over-branching or premature termination. We propose {Budget-Guided MCTS} (BG-MCTS), a tree-search decoding algorithm that aligns its search policy with the remaining token budget: it starts with broad exploration, then prioritizes refinement and answer completion as the budget depletes while reducing late-stage branching from shallow nodes. BG-MCTS consistently outperforms budget-agnostic tree-search baselines across different budgets on MATH500 and AIME24/25 with open-weight LLMs.",
+      "authors": [
+        "Sora Miyamoto",
+        "Daisuke Oba",
+        "Naoaki Okazaki"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-02-10T09:23:26+00:00",
+      "link": "https://arxiv.org/pdf/2602.09574v1",
+      "tags": [
+        "keyword:NCO LM",
+        "query:NCO LM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Tree-search decoding for LLM test-time scaling",
+      "llm_evidence_cn": "大模型推理时缩放的树搜索解码",
+      "llm_evidence": "大模型推理时缩放的树搜索解码",
+      "canonical_evidence": "大模型推理时缩放的树搜索解码",
+      "llm_tldr_en": "Introduces Budget-Guided MCTS to align LLM search policies with fixed token budgets.",
+      "llm_tldr_cn": "引入预算引导的 MCTS，使大模型搜索策略与固定 Token 预算对齐。",
+      "llm_tldr": "引入预算引导的 MCTS，使大模型搜索策略与固定 Token 预算对齐。",
+      "llm_tags": [
+        "query:nco-lm"
+      ],
+      "matched_query_tag": "query:nco-lm",
+      "matched_query_text": "LLM-based heuristic search and optimization",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2602.11114v1",
+      "title": "Learning to Compose for Cross-domain Agentic Workflow Generation",
+      "abstract": "Automatically generating agentic workflows -- executable operator graphs or codes that orchestrate reasoning, verification, and repair -- has become a practical way to solve complex tasks beyond what single-pass LLM generation can reliably handle. Yet what constitutes a good workflow depends heavily on the task distribution and the available operators. Under domain shift, current systems typically rely on iterative workflow refinement to discover a feasible workflow from a large workflow space, incurring high iteration costs and yielding unstable, domain-specific behavior. In response, we internalize a decompose-recompose-decide mechanism into an open-source LLM for cross-domain workflow generation. To decompose, we learn a compact set of reusable workflow capabilities across diverse domains. To recompose, we map each input task to a sparse composition over these bases to generate a task-specific workflow in a single pass. To decide, we attribute the success or failure of workflow generation to counterfactual contributions from learned capabilities, thereby capturing which capabilities actually drive success by their marginal effects. Across stringent multi-domain, cross-domain, and unseen-domain evaluations, our 1-pass generator surpasses SOTA refinement baselines that consume 20 iterations, while substantially reducing generation latency and cost.",
+      "authors": [
+        "Jialiang Wang",
+        "Shengxiang Xu",
+        "Hanmo Liu",
+        "Jiachuan Wang",
+        "Yuyu Luo",
+        "Shimin Di",
+        "Min-Ling Zhang",
+        "Lei Chen"
+      ],
+      "primary_category": "cs.MA",
+      "categories": [
+        "cs.MA",
+        "cs.AI",
+        "cs.LG",
+        "cs.SE"
+      ],
+      "published": "2026-02-11T18:27:22+00:00",
+      "link": "https://arxiv.org/pdf/2602.11114v1",
+      "tags": [
+        "query:NCO LM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "LLM for generating executable operator graphs",
+      "llm_evidence_cn": "大模型生成可执行算子图",
+      "llm_evidence": "大模型生成可执行算子图",
+      "canonical_evidence": "大模型生成可执行算子图",
+      "llm_tldr_en": "Internalizes a decompose-recompose mechanism in LLMs to generate complex agentic workflows.",
+      "llm_tldr_cn": "在大模型中内置分解-重组机制，以生成复杂的智能体工作流。",
+      "llm_tldr": "在大模型中内置分解-重组机制，以生成复杂的智能体工作流。",
+      "llm_tags": [
+        "query:nco-lm:composite"
+      ],
+      "matched_query_tag": "query:nco-lm:composite",
+      "matched_query_text": "Papers central to 查找神经组合优化以及结合大模型相关的论文, especially work that connects or combines: d; Neural Combinatorial Optimization (NCO) methods and architectures; Large Language Models (LLM) for solving optimization problems; Deep Reinforcement Learning for combinatorial optimization; LLM-based heuristic search and optimization; Graph Neural Networks for combinatorial optimization tasks; Neural solvers for the Traveling Salesman Problem (TSP); Neural combinatorial optimization for vehicle routing problems; Integrating large language models with combinatorial optimization solvers; LLM driven heuristic generation for combinatorial optimization.",
+      "matched_requirement_id": "req-composite-nco-lm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.00631v1",
+      "title": "LiTS: A Modular Framework for LLM Tree Search",
+      "abstract": "LiTS is a modular Python framework for LLM reasoning via tree search. It decomposes tree search into three reusable components (Policy, Transition, and RewardModel) that plug into algorithms like MCTS and BFS. A decorator-based registry enables domain experts to extend to new domains by registering components, and algorithmic researchers to implement custom search algorithms. We demonstrate composability on MATH500 (language reasoning), Crosswords (environment planning), and MapEval (tool use), showing that components and algorithms are orthogonal: components are reusable across algorithms within each task type, and algorithms work across all components and domains. We also report a mode-collapse finding: in infinite action spaces, LLM policy diversity (not reward quality) is the bottleneck for effective tree search. A demonstration video is available at https://youtu.be/nRGX43YrR3I. The package is released under the Apache 2.0 license at https://github.com/xinzhel/lits-llm, including installation instructions and runnable examples that enable users to reproduce the demonstrated workflows.",
+      "authors": [
+        "Xinzhe Li",
+        "Yaguang Tao"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-02-28T12:54:37+00:00",
+      "link": "https://arxiv.org/pdf/2603.00631v1",
+      "tags": [
+        "keyword:NCO LM",
+        "query:NCO LM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "LLM tree search framework for reasoning and planning",
+      "llm_evidence_cn": "用于推理和规划的大模型树搜索框架",
+      "llm_evidence": "用于推理和规划的大模型树搜索框架",
+      "canonical_evidence": "用于推理和规划的大模型树搜索框架",
+      "llm_tldr_en": "A modular framework for LLM reasoning using tree search algorithms like MCTS and BFS across various domains.",
+      "llm_tldr_cn": "一个模块化的大模型推理框架，通过MCTS和BFS等树搜索算法解决推理与规划任务。",
+      "llm_tldr": "一个模块化的大模型推理框架，通过MCTS和BFS等树搜索算法解决推理与规划任务。",
+      "llm_tags": [
+        "query:nco-lm"
+      ],
+      "matched_query_tag": "query:nco-lm",
+      "matched_query_text": "LLM-based heuristic search and optimization",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2602.14089v1",
+      "title": "TabTracer: Monte Carlo Tree Search for Complex Table Reasoning with Large Language Models",
+      "abstract": "Large language models (LLMs) have emerged as powerful tools for natural language table reasoning, where there are two main categories of methods. Prompt-based approaches rely on language-only inference or one-pass program generation without step-level verification. Agent-based approaches use tools in a closed loop, but verification is often local and backtracking is limited, allowing errors to propagate and increasing cost. Moreover, they rely on chain- or beam-style trajectories that are typically combinatorially redundant, leading to high token costs. In this paper, we propose TabTracer, an agentic framework that coordinates multi-step tool calls over intermediate table states, with explicit state tracking for verification and rollback. First, it enforces step-level verification with typed operations and lightweight numeric and format checks to provide reliable rewards and suppress hallucinations. Second, execution-feedback Monte Carlo Tree Search maintains a search tree of candidate table states and uses backpropagated reflection scores to guide UCB1 selection and rollback via versioned snapshots. Third, it reduces redundancy with budget-aware pruning, deduplication, and state hashing with a monotonicity gate to cut token cost. Comprehensive evaluation on TabFact, WikiTQ, and CRT datasets shows that TabTracer outperforms state-of-the-art baselines by up to 6.7% in accuracy while reducing token consumption by 59--84%.",
+      "authors": [
+        "Zhizhao Luo",
+        "Zhaojing Luo",
+        "Meihui Zhang",
+        "Rui Mao"
+      ],
+      "primary_category": "cs.DB",
+      "categories": [
+        "cs.DB",
+        "cs.AI"
+      ],
+      "published": "2026-02-15T10:39:43+00:00",
+      "link": "https://arxiv.org/pdf/2602.14089v1",
+      "tags": [
+        "keyword:NCO LM",
+        "query:NCO LM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "MCTS and LLM for complex table reasoning",
+      "llm_evidence_cn": "蒙特卡洛树搜索与大模型用于复杂表格推理",
+      "llm_evidence": "蒙特卡洛树搜索与大模型用于复杂表格推理",
+      "canonical_evidence": "蒙特卡洛树搜索与大模型用于复杂表格推理",
+      "llm_tldr_en": "Coordinates multi-step tool calls with MCTS for efficient and verified table reasoning.",
+      "llm_tldr_cn": "利用蒙特卡洛树搜索协调多步工具调用，实现高效且经过验证的表格推理。",
+      "llm_tldr": "利用蒙特卡洛树搜索协调多步工具调用，实现高效且经过验证的表格推理。",
+      "llm_tags": [
+        "query:nco-lm"
+      ],
+      "matched_query_tag": "query:nco-lm",
+      "matched_query_text": "LLM-based heuristic search and optimization",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.01047v1",
+      "title": "Evaluating GFlowNet from partial episodes for stable and flexible policy-based training",
+      "abstract": "Generative Flow Networks (GFlowNets) were developed to learn policies for efficiently sampling combinatorial candidates by interpreting their generative processes as trajectories in directed acyclic graphs. In the value-based training workflow, the objective is to enforce the balance over partial episodes between the flows of the learned policy and the estimated flows of the desired policy, implicitly encouraging policy divergence minimization. The policy-based strategy alternates between estimating the policy divergence and updating the policy, but reliable estimation of the divergence under directed acyclic graphs remains a major challenge. This work bridges the two perspectives by showing that flow balance also yields a principled policy evaluator that measures the divergence, and an evaluation balance objective over partial episodes is proposed for learning the evaluator. As demonstrated on both synthetic and real-world tasks, evaluation balance not only strengthens the reliability of policy-based training but also broadens its flexibility by seamlessly supporting parameterized backward policies and enabling the integration of offline data-collection techniques.",
+      "authors": [
+        "Puhua Niu",
+        "Shili Wu",
+        "Xiaoning Qian"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "stat.ML"
+      ],
+      "published": "2026-03-01T11:00:04+00:00",
+      "link": "https://arxiv.org/pdf/2603.01047v1",
+      "tags": [
+        "keyword:NCO LM",
+        "query:NCO LM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "GFlowNets for sampling combinatorial candidates",
+      "llm_evidence_cn": "用于采样组合候选解的生成流网络",
+      "llm_evidence": "用于采样组合候选解的生成流网络",
+      "canonical_evidence": "用于采样组合候选解的生成流网络",
+      "llm_tldr_en": "Explores GFlowNets for sampling combinatorial candidates by interpreting generative processes as graph trajectories.",
+      "llm_tldr_cn": "通过将生成过程解释为图轨迹，探索用于采样组合候选解的 GFlowNets。",
+      "llm_tldr": "通过将生成过程解释为图轨迹，探索用于采样组合候选解的 GFlowNets。",
+      "llm_tags": [
+        "query:nco-lm"
+      ],
+      "matched_query_tag": "query:nco-lm",
+      "matched_query_text": "Neural Combinatorial Optimization (NCO) methods and architectures",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.01385v1",
+      "title": "Toward Graph-Tokenizing Large Language Models with Reconstructive Graph Instruction Tuning",
+      "abstract": "The remarkable success of large language models (LLMs) has motivated researchers to adapt them as universal predictors for various graph-related tasks, with the ultimate goal of developing a graph foundation model that generalizes diverse scenarios. The key challenge is to align graph data with language spaces so that LLMs can better comprehend graphs. As a popular paradigm, Graph-Tokenizing LLMs (GTokenLLMs) encode complex structures and lengthy texts into a graph token sequence, and then align them with text tokens via language instructions tuning. Despite their initial success, our information-theoretic analysis reveals that existing GTokenLLMs rely solely on text supervision from language instructions, which achieve only implicit graph-text alignment, resulting in a text-dominant bias that underutilizes graph context. To overcome this limitation, we first prove that the alignment objective is upper-bounded by the mutual information between the input graphs and their hidden representations in the LLM, which motivates us to improve this upper bound to achieve better alignment. To this end, we further propose a reconstructive graph instruction tuning pipeline, RGLM. Our key idea is to reconstruct the graph information from the LLM's graph token outputs, explicitly incorporating graph supervision to constrain the alignment process. Technically, we embody RGLM by exploring three distinct variants from two complementary perspectives: RGLM-Decoder from the input space; RGLM-Similarizer and RGLM-Denoiser from the latent space. Additionally, we theoretically analyze the alignment effectiveness of each variant. Extensive experiments on various benchmarks and task scenarios validate the effectiveness of the proposed RGLM, paving the way for new directions in GTokenLLMs' alignment research.",
+      "authors": [
+        "Zhongjian Zhang",
+        "Xiao Wang",
+        "Mengmei Zhang",
+        "Jiarui Tan",
+        "Chuan Shi"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI"
+      ],
+      "published": "2026-03-02T02:26:54+00:00",
+      "link": "https://arxiv.org/pdf/2603.01385v1",
+      "tags": [
+        "query:NCO LM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Graph-Tokenizing LLMs for graph-related tasks",
+      "llm_evidence_cn": "用于图相关任务的图标记化大模型",
+      "llm_evidence": "用于图相关任务的图标记化大模型",
+      "canonical_evidence": "用于图相关任务的图标记化大模型",
+      "llm_tldr_en": "Proposes reconstructive graph instruction tuning to align graph data with language spaces in LLMs.",
+      "llm_tldr_cn": "提出重构式图指令微调，以在大模型中对齐图数据与语言空间。",
+      "llm_tldr": "提出重构式图指令微调，以在大模型中对齐图数据与语言空间。",
+      "llm_tags": [
+        "query:nco-lm"
+      ],
+      "matched_query_tag": "query:nco-lm",
+      "matched_query_text": "Graph Neural Networks for combinatorial optimization tasks",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.04948v1",
+      "title": "$\\nabla$-Reasoner: LLM Reasoning via Test-Time Gradient Descent in Latent Space",
+      "abstract": "Scaling inference-time compute for Large Language Models (LLMs) has unlocked unprecedented reasoning capabilities. However, existing inference-time scaling methods typically rely on inefficient and suboptimal discrete search algorithms or trial-and-error prompting to improve the online policy. In this paper, we propose $\\nabla$-Reasoner, an iterative generation framework that integrates differentiable optimization over token logits into the decoding loop to refine the policy on the fly. Our core component, Differentiable Textual Optimization (DTO), leverages gradient signals from both the LLM's likelihood and a reward model to refine textual representations. $\\nabla$-Reasoner further incorporates rejection sampling and acceleration design to robustify and speed up decoding. Theoretically, we show that performing inference-time gradient descent in the sample space to maximize reward is dual to aligning an LLM policy via KL-regularized reinforcement learning. Empirically, $\\nabla$-Reasoner achieves over 20% accuracy improvement on a challenging mathematical reasoning benchmark, while reducing number of model calls by approximately 10-40% compared to strong baselines. Overall, our work introduces a paradigm shift from zeroth-order search to first-order optimization at test time, offering a cost-effective path to amplify LLM reasoning.",
+      "authors": [
+        "Peihao Wang",
+        "Ruisi Cai",
+        "Zhen Wang",
+        "Hongyuan Mei",
+        "Qiang Liu",
+        "Pan Li",
+        "Zhangyang Wang"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-05T08:42:54+00:00",
+      "link": "https://arxiv.org/pdf/2603.04948v1",
+      "tags": [
+        "keyword:NCO LM",
+        "query:NCO LM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "LLM reasoning via differentiable optimization",
+      "llm_evidence_cn": "通过可微优化进行大模型推理",
+      "llm_evidence": "通过可微优化进行大模型推理",
+      "canonical_evidence": "通过可微优化进行大模型推理",
+      "llm_tldr_en": "Integrates differentiable optimization into LLM decoding to refine reasoning policies on the fly.",
+      "llm_tldr_cn": "将可微优化集成到大模型解码循环中，以实时改进推理策略。",
+      "llm_tldr": "将可微优化集成到大模型解码循环中，以实时改进推理策略。",
+      "llm_tags": [
+        "query:nco-lm"
+      ],
+      "matched_query_tag": "query:nco-lm",
+      "matched_query_text": "LLM-based heuristic search and optimization",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.04996v1",
+      "title": "HiFlow: Hierarchical Feedback-Driven Optimization for Constrained Long-Form Text Generation",
+      "abstract": "Large language models perform well in short text generation but still struggle with long text generation, particularly under complex constraints. Such tasks involve multiple tightly coupled objectives, including global structural consistency, local semantic coherence, and constraint feasibility, forming a challenging constrained optimization problem. Existing approaches mainly rely on static planning or offline supervision, limiting effective coordination between global and local objectives during generation. To address these challenges, we propose HiFlow, a hierarchical feedback-driven optimization framework for constrained long text generation. HiFlow formulates generation as a two-level optimization process, consisting of a planning layer for global structure and constraint modeling, and a generation layer for conditioned text generation. By incorporating constraint-aware plan screening and closed-loop feedback at both levels, HiFlow enables joint optimization of planning quality and generation behavior, progressively guiding the model toward high-quality, constraint-satisfying outputs. Experiments on multiple backbones confirm HiFlow's effectiveness over baseline methods.",
+      "authors": [
+        "Yifan Zhu",
+        "Guanting Chen",
+        "Bing Wei",
+        "Haoran Luo"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-03-05T09:41:39+00:00",
+      "link": "https://arxiv.org/pdf/2603.04996v1",
+      "tags": [
+        "query:NCO LM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "hierarchical feedback-driven optimization for constrained generation",
+      "llm_evidence_cn": "受限生成的层次化反馈驱动优化",
+      "llm_evidence": "受限生成的层次化反馈驱动优化",
+      "canonical_evidence": "受限生成的层次化反馈驱动优化",
+      "llm_tldr_en": "Formulates long-form text generation as a hierarchical constrained optimization problem using feedback.",
+      "llm_tldr_cn": "利用反馈机制将长文本生成建模为一个层次化的受限优化问题。",
+      "llm_tldr": "利用反馈机制将长文本生成建模为一个层次化的受限优化问题。",
+      "llm_tags": [
+        "query:nco-lm"
+      ],
+      "matched_query_tag": "query:nco-lm",
+      "matched_query_text": "LLM-based heuristic search and optimization",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
 }
