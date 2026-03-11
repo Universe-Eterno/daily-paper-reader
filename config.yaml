@@ -71,3 +71,53 @@ subscriptions:
           source: manual
           note: ''
       updated_at: '2026-03-11T08:53:58.913Z'
+    - tag: NCO
+      description: 神经组合优化（NCO）相关学术论文检索
+      enabled: true
+      keywords:
+        - keyword: Deep Reinforcement Learning
+          keyword_cn: 深度强化学习
+          query: Deep Reinforcement Learning for combinatorial optimization
+        - keyword: Graph Neural Networks
+          keyword_cn: 图神经网络
+          query: Graph Neural Networks for solving combinatorial problems
+        - keyword: Traveling Salesman Problem
+          keyword_cn: 旅行商问题
+          query: Neural solvers for Traveling Salesman Problem TSP
+        - keyword: Vehicle Routing Problem
+          keyword_cn: 车辆路径问题
+          query: Neural combinatorial optimization for Vehicle Routing Problem VRP
+        - keyword: Attention Mechanism
+          keyword_cn: 注意力机制
+          query: Attention mechanisms in neural combinatorial optimization models
+        - keyword: Combinatorial Optimization
+          keyword_cn: 组合优化
+          query: Machine learning approaches to combinatorial optimization
+        - keyword: Transformer
+          keyword_cn: Transformer模型
+          query: Transformer architectures for combinatorial optimization
+        - keyword: Heuristics Learning
+          keyword_cn: 启发式学习
+          query: Learning search heuristics with neural networks
+      intent_queries:
+        - query: State of the art neural combinatorial optimization techniques
+          query_cn: 神经组合优化领域的前沿技术
+          enabled: true
+          source: manual
+          note: ''
+        - query: Deep learning models for solving NP hard combinatorial problems
+          query_cn: 用于解决NP难组合问题的深度学习模型
+          enabled: true
+          source: manual
+          note: ''
+        - query: Reinforcement learning frameworks for combinatorial optimization
+          query_cn: 用于组合优化的强化学习框架
+          enabled: true
+          source: manual
+          note: ''
+        - query: End to end learning for combinatorial optimization tasks
+          query_cn: 组合优化任务的端到端学习
+          enabled: true
+          source: manual
+          note: ''
+      updated_at: '2026-03-11T10:02:52.022Z'
