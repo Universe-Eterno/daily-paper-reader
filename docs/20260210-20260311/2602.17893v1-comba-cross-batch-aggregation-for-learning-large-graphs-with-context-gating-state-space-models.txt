@@ -1,0 +1,1077 @@
+Title: COMBA: Cross Batch Aggregation for Learning Large Graphs with Context Gating State Space Models
+
+URL Source: https://arxiv.org/pdf/2602.17893v1
+
+Published Time: Mon, 23 Feb 2026 01:12:43 GMT
+
+Number of Pages: 21
+
+Markdown Content:
+# COMBA: Cross Batch Aggregation for Learning Large Graphs with Context Gating State Space Models 
+
+## Jiajun Shen Yufei Jin Florida Atlantic University Florida Atlantic University 
+
+## jshen2024@fau.edu yjin2021@fau.edu 
+
+## Yi He Xingquan Zhu William & Mary Florida Atlantic University 
+
+## yihe@wm.edu xzhu3@fau.edu 
+
+## February 23, 2026 
+
+Abstract 
+
+State space models (SSMs) have recently emerged for modeling long-range de-pendency in sequence data, with much simplified computational costs than modern alternatives, such as transformers. Advancing SMMs to graph structured data, espe-cially for large graphs, is a significant challenge because SSMs are sequence models and the shear graph volumes make it very expensive to convert graphs as sequences for effective learning. In this paper, we propose COMBA to tackle large graph learn-ing using state space models, with two key innovations: graph context gating and cross batch aggregation. Graph context refers to different hops of neighborhood for each node, and graph context gating allows COMBA to use such context to learn best control of neighbor aggregation. For each graph context, COMBA samples nodes as batches, and train a graph neural network (GNN), with information being aggregated cross batches, allowing COMBA to scale to large graphs. Our theoretical study as-serts that cross-batch aggregation guarantees lower error than training GNN without aggregation. Experiments on benchmark networks demonstrate significant perfor-mance gains compared to baseline approaches. Code and benchmark datasets will be released for public access. 
+
+# 1 Introduction 
+
+Graph learning has become popular to handle data structures for representing entities and their relationships in a wide range of domains, including social networks (Fan et al., 2019), citation networks (Yang et al., 2016), and molecular structures (Wu et al., 2018). 1
+
+> arXiv:2602.17893v1 [cs.LG] 19 Feb 2026
+
+Graph neural networks (GNNs) have achieved great success in learning from graph-structured data by propagating neighborhood information. However, scaling GNNs to large graphs remains challenging due to the high memory and computational cost of neighborhood expansion and the difficulty of preserving long-range dependencies (Dwivedi et al., 2022). Transformers, by contrast, excel at modeling long-range dependencies through global attention, which directly relates every node to every other node in the graph (Yun et al., 2019). While global attention enables Transformers to capture arbitrary dependencies, graphs lack the inherent sequential ordering. To address this, graph Transformers incor-porate structural encodings (SEs) or positional encodings (PEs) to provide nodes with contextual information about their position and role within the graph (Kim et al., 2022). However, the quadratic cost of attention makes Transformers difficult to apply at scale, particularly for massive graphs with millions of nodes and edges. To mitigate this, some works have proposed linear-time attention approximations, such as sparse attention (Za-heer et al., 2020) and low-rank factorization (Wang et al., 2020), which reduce memory and computational costs compared to full graph attention. Recently, state space models (SSMs) have emerged as efficient alternatives for se-quence modeling, combining structured recurrence with linear-time complexity while still capturing long-range dependencies (Gu et al., 2021). Mamba is a state space model (SSM) architecture designed to efficiently model long-range dependencies in sequential data. Unlike traditional models that rely on attention mechanisms, Mamba employs a selective state space framework, enabling it to process sequences in linear time while maintaining high performance across various modalities (Gu & Dao, 2024). Yet, applying SSMs to graph data poses unique challenges. First, graphs are inher-ently irregular and lack a natural sequential ordering, making it difficult to directly feed them into sequence models. Second, traditional SSMs process sequences by updating the current hidden state, which is sufficient for sequential data but inadequate for graphs where each node depends on multi-hop neighborhoods. Since the sheer size of graphs de-mands scalable and efficient learning, we adopt a batch-based sampling strategy, which introduces additional challenges such as sampling bias and variance (Balaji et al., 2025). To tackle these challenges, our COMBA framework incorporates three key compo-nents: (1) hop-aware graph context construction, which leverages adjacency matrices at multiple hops to capture local and multi-hop neighborhood information; (2) cross-batch aggregation, which updates node embeddings across overlapping batches to mitigate sam-pling variance and preserve global graph information; and (3) graph context gating, which selectively controls the contribution of each hop to a node’s representation. Together, they allow COMBA to efficiently model long-range dependencies in large graphs. By combin-ing local hop-aware context with cross-batch updates, the framework balances scalability with expressive power, enabling robust learning on large homogeneous graphs. 
+
+Specific contributions of this paper are as follows: • We develop a cross-batch aggregation mechanism to mitigate variance from batch-based sampling and preserve global information. • We introduce graph context gating, which selectively controls the contribution of 2multi-hop neighborhoods to each node’s representation. • We propose COMBA, a state-space model framework for learning from large-scale homogeneous graphs, with validation on benchmark datasets demonstrating signif-icant performance gains over baselines. • Our theoretical study asserts that cross-batch aggregation reduces error compared to traditional batch-wise GNN training without cross-batch aggregation. 
+
+# 2 Related Work 
+
+## 2.1 Homogeneous Graph Neural Networks 
+
+Graph neural networks (GNNs) have emerged as a powerful tool for learning on graph-structured data. Pioneer works such as Graph Convolution Networks (GCNs) (Kipf & Welling, 2017), extended convolution operations to graphs by aggregating information from a node’s neighbors. Other works, including GAT (Velickovic et al., 2017), incor-porate attention mechanisms to assign different weights to different neighbors, and Gat-edGCN (Bresson & Laurent, 2017) extends standard GCNs by using learnable edge-wise gates to control neighbors’ influence during message passing. 
+
+## 2.2 Graph Transformers 
+
+Graph Transformers extend the standard Transformer architecture to handle graph-structured data by integrating both node features and graph topology into the attention mechanism. The first generalized graph transformer (Dwivedi & Bresson, 2020) incorporates neigh-borhood connectivity as their attention mechanism, and introduces Laplacian-based po-sitional encodings. Graphormer (Ying et al., 2021) encodes both node features and graph structure, using spatial encodings and centrality-aware attention to capture relationships between nodes. NAGPhormer (Chen et al., 2022) uses node-adaptive gating and hierar-chical attention over multi-hop neighborhoods to better capture long-range dependencies in graphs. Although graph transformers are highly expressive and capable of capturing long-range dependencies, their quadratic complexity with respect to the number of nodes limits scalability to large graphs. 
+
+## 2.3 State Space Models with graphs 
+
+State space models (SSMs) have emerged as a powerful alternative to traditional recur-rent architectures for sequence modeling. Structured State Space Models (S4) are a class of state space models designed to efficiently model long-range dependencies in sequen-tial data using reparameterization (Gu et al., 2021). Recently, Mamba (Gu & Dao, 2024) demonstrated fast inference and linear-time complexity in long sequence modeling with improved performance compared with Transformers. In the context of graphs, Mamba has been adapted to propagate information along nodes and edges, allowing a expres-sive node representation across multi-hop neighborhoods. A recent example is Graph 3Mamba (Wang et al., 2024) which integrates a Mamba block with graph-specific node prioritization and permutation strategies to efficiently capture long-range dependencies. Another Graph Mamba (Behrouz & Hashemi, 2024) considers nodes’ induced subgraphs as tokens and generates input sequences for Mamba by applying MPNNs to these sub-graphs. While effective, its reliance on computing MPNNs over all node subgraphs can be computationally expensive, motivating our batched variant and modifications such as the context gating mechanism for improved efficiency and performance. 
+
+## 2.4 Homogeneous Graph Scaling 
+
+Scaling GNNs to large graphs remains a challenge, primarily due to the neighborhood explosion problem, where the number of nodes involved in computation grows expo-nentially with the number of layers. To mitigate this problem, GraphSAGE Hamilton et al. (2017) generates node embeddings by sampling and aggregating features from a fixed-size neighborhood, enabling generalization to unseen nodes while reducing com-putational cost compared to full-graph methods. Similarly, Clustering-based strategies offer another solution by partitioning the graph into smaller, more manageable subgraphs. Cluster-GNN Chiang et al. (2019) divides the graph using a clustering algorithm (such as Metis) and trains a GNN with mini-batch updates on these clusters, which significantly reduces memory usage. FastGCN Chen et al. (2018) further improves efficiency by using importance sampling to train on large graphs and treats the convolutions as integral trans-forms, thereby approximating the feature propagation through Monte Carlo sampling. Our approach utilizes adjacency matrices from different hops to construct hop-aware graph context for each batch. For each hop, we apply a graph neural network (GNN) to the corresponding adjacency matrix, enabling the model to capture structural information from multiple neighborhood ranges. To prevent isolated batch training from losing global information, we propose a cross-batch aggregation mechanism to help all batches to up-date their node embeddings, through shared multi-hop neighbors between batches. To adaptively balance the contributions of hop-aware graph contexts, we use a learnable gat-ing function that selectively weights hop embeddings, allowing the model to emphasize more informative hops. Together, adjacency-driven hop contexts, cross-batch aggrega-tion, and gating for adaptive control enable our model to effectively scale state space models to large graphs, while preserving both local and long-range dependencies. 
+
+# 3 Problem Definition 
+
+Let G = ( V, E, X ) be a homogeneous graph, where the node set is V = {v1, v 2, . . . , v n},the edge set is E ⊆ V × V , and X ∈ Rn×d is the node feature matrix, with each row 
+
+xi denoting the d-dimensional feature of node i ∈ V . We denote A ∈ { 0, 1}n×n as the binary adjacency matrix of G, defined as 
+
+Aij =
+
+(1 if (vi, v j ) ∈ E, 
+
+0 otherwise , Aii = 0 for all i. 
+
+4Below we also define the hop-k adjacency matrices which indicate whether two nodes are connected by a path of exactly length k.Gen (G, A ) = Ak, where 
+
+Akij =
+
+(1, if (Ak)ij > 0 and (Ar )ij = 0 ∀r = 1 , . . . , k − 1,
+
+0, otherwise , (1) 
+
+Akii = 0 , ∀i. 
+
+Structured State Space Model (S4) The Structured State Space (S4) model is a se-quence model designed to capture long-range dependencies efficiently. For a sequence of inputs xt ∈ RN , we can map the sequence to output sequence y(t) ∈ RN by the latent state h(t) ∈ RN . The continuous-time linear state space formulation is: 
+
+h′(t) = Ah(t) + Bx(t), (2) 
+
+y(t) = Ch(t), (3) where A ∈ RN ×N , B ∈ RN , C ∈ RN are the system matrices representing the state transition, input projection, and output projection, respectively. Since the real-world data is usually discrete, we can discretize the continuous system using the zero-order hold (ZOH) discretization rule, yielding: 
+
+ht+1 = ¯Aht + ¯Bxt, (4) 
+
+yt = Cht, (5) where ¯A = exp(∆ A), ¯B = (∆ A)−1(exp(∆ A − I)∆ B, are the discretized matrices, and ∆ is the discretization step size. S4 has demonstrated strong performance on long sequences due to its ability to model global dependencies, while remaining computationally efficient (Gu et al., 2021). Our 
+
+goal is to design an effective state space model-based learning framework for large graphs with maximum node classification accuracy. 
+
+# 4 Proposed Framework 
+
+Our model is primarily motivated by Graph Mamba (Behrouz & Hashemi, 2024), which extends state space models (SSMs) to the graph domain by converting graph neighbor-hoods into sequential structures. Each node’s representation is updated by applying an message-passing neural network (MPNN) to subgraphs generated from random walks starting from that node, followed by Mamba-style sequence modeling to capture long-range dependencies. This design introduces sequential inductive bias into graph repre-sentation learning, allowing the model to better combine local structural information and sequential dependencies. However, Graph Mamba also suffers several limitations: (1) it performs MPNN computations on every node’s random-walk subgraphs, which becomes computational expensive on large-scale graphs, and (2) it uses only the current input to 5compute the gating signal, potentially missing richer contextual dependencies from adja-cent graph contexts. In contrast, our framework employs a batch-based hop-aware adjacency construction, where each batch directly encodes multi-hop neighborhoods through MPNN, avoiding redundant per-node subgraph processing. Specifically, COMBA integrates two core com-ponents to overcome the limitations of prior approaches: (1) a cross-batch aggregation promotes interactions between batches, (2) a graph context gating to selectively control multi-hop information flow. 
+
+## 4.1 Local Graph Context 
+
+Let B = {b1, b 2, . . . , b ˆm} denote a set of batches of nodes. For each batch bm ∈ B we extract the induced subgraph Gbm to enable localized and scalable computation. Based on Gbm , we then generate the sequence of hop-based adjacency matrices: 
+
+Abm = {A1 
+
+> bm
+
+, A 2 
+
+> bm
+
+, . . . , A ˆkbm } = {Gen (Gbm , A 1 
+
+> bm
+
+), Gen (Gbm , A 2 
+
+> bm
+
+), . . . , Gen (Gbm , A ˆkbm )},
+
+where Gbm and Abm are the subgraph and adjacency matrix restricted to nodes in batch 
+
+bm, and Gen (·) is the hop-matrix generation function defined in Eq. 1. These matrices capture multi-hop connectivity patterns within each batch, and A = {Ab1 , . . . , A b ˆm }
+
+contains sequences of the hop matrices for all batches. For each each batch bm, a graph learner is trained, using the hop-based adjacency matrices {Akbm }ˆkk=1 together with the corresponding node features Xbm . This produces hop-aware node representations for each batch: 
+
+Zbm = {Zbm,1, Z bm,2, . . . , Z bm,ˆk}, Zbm,k = σ Akbm Xbm Wbm
+
+
+
+allowing the models to capture structural information at different hop distances within the batch. Concatenating over all batches yields the global representation set Z = {Z b1 , Zb2 , . . . , Zb ˆm }.
+
+To capture local structural context, we utilize the hop dimension in Z. For each node 
+
+n, its sequence of hop-aware embeddings is Zn, 1, Zn, 2, . . . , Zn, ˆk , which encodes information aggregated from neighborhoods of different ranges. We then define a local hop-context window around hop k with window size w as Ckn =Zn, k −w, . . . , Zn, k +w , ensuring that each node representation at hop k incorporates information from both its own embedding and its neighboring hops. 
+
+## 4.2 Cross Batch Aggregation 
+
+To compute node representations for each batch, we first apply Dropout to the input feature matrix for all nodes in the batch and perform a linear transformation: 
+
+˜Xbm = Dropout (Xbm , p ) (6) 
+
+Z(0)  
+
+> bm
+
+= σ( ˜Xbm W (0)  
+
+> bm
+
+) (7) 6a1a2a4a 3a 5a6a 7a1a 2a3a3a 6a4a3a 5a 7a1a 2a 2a 1
+
+2 a 2 a3 a4a 1a4a3a2a 5a 5a7a 7 a7a 7a 1                                
+
+> 11111111
+> a2a3a4a1a4a3a2a5a5a1
+> 1111111
+> Batch 2 Batch 1
+> 1
+> a2a3a4a1a4a3a2a5a5a6a6a1
+> 1111111111111
+> a2a3a4a1a4a3a2a5a5a6a6a1
+> 111111 1 111
+> a6a7a2a6a1a3a3a7a2
+
+3 4 51                 
+
+> a4a5a4a4a5
+> 1
+> a5a5a4a1a4a2a4a5a1a2a2a1a5a4
+
+Figure 1: Cross batch aggregation process. From left to right, given a graph in 1 ⃝, the nodes are partitioned into batches (only two batches are shown in 2 ⃝). For each batch, COMBA first finds each nodes’ ˆk-hop neighbors and forms a subgraph shown in 3⃝
+
+(ˆk = 2 in this case). A GNN is trained for each 1-hope, 2-hop, and k-hop based ad-jacency matrix. When training each hop’s GNN, information from other batches are used to help learn current batch node’s embedding. E.g. , in 4⃝, node a2 in Batch 1 aggre-gates information from a4 from Batch 2. Cross batch aggregation allows all GNNs being trained to collectively help each others. where, Dropout (Xbm , p ) randomly zeroes elements of Xbm with probability p. W (0)  
+
+> bm
+
+is a learnable weight matrix, and σ(·) is a nonlinear activation function. For nodes in batch bm, the message passing at layer 1 and hop k is computed as 
+
+Z(1)  
+
+> bm,k
+
+= σ Akbm Z(0)  
+
+> bm
+
+W (1) 
+
+> bm
+
+, (8) where Akbm is the hop-based adjacency matrix. W (1)  
+
+> bm
+
+is the learnable weight for batch 
+
+bm with hop k at layer 1 and σ(·) is a non-linear activation function such as ReLU. The resulting Z(1)  
+
+> bm,k
+
+contains the embeddings for all nodes in batch bm under hop k. The updated hop-k representations of each node n in batch bm across all batches that contain that node are then explicitly updated as 
+
+Z(0) 
+
+> b1: ˆ m,k
+
+(n) ← Z(1) 
+
+> bm,k
+
+(n), ∀n ∈ bm ∩ b1: ˆ m, k = 1 , . . . , ˆk (9) For deeper layers (l + 1) , the embedding is computed recursively by the cross-batch updated node embeddings Z(0) 
+
+> bm,k
+
+:
+
+Z(l+1)  
+
+> bm,k
+
+= σ Akbm Z(0) 
+
+> bm,k
+
+W (l+1) 
+
+> bm
+
+, (10) 
+
+Z(0)  
+
+> b1: M,k
+
+(n) ← Z(l+1)  
+
+> bm,k
+
+(n), ∀n ∈ bm ∩ b1: ˆ m (11) Fig. 1 shows an example of information aggregation across two batches, where node 
+
+a2 from Batch 1 leverages information from a4, which is in Batch 2, to learn embeddings. 7Finally, for each batch bm, we obtain a sequence of ˆk embeddings corresponding to the ˆk hop-based adjacency matrices: 
+
+Zbm = {Z(L)
+
+> bm,1
+
+, Z (L)
+
+> bm,2
+
+, . . . , Z (L)
+
+> bm,ˆk
+
+} (12) where Z(L) 
+
+> bm,k
+
+denotes the embedding obtained after L message passing layers. To form the global representation for all nodes in all batches, we stack the sequences across all batches: 
+
+Z = ˆmm=1 Zbm , ˜X = ˆmm=1 ˜Xbm , Z′ = ˜X∥Z (13) where Z contains the final hop-aware embeddings for all nodes in all batches, and ˜X con-tains the original feature for all nodes after Dropout. Z′ thus forms the global sequence input to our COMBA. Algorithm 2 in Appendix lists the pseudo-code of the cross batch aggregation process. Linear Linear Linear z kAkBkCkzk-w:k+w y khk-1 Pooling Concat 
+
+Figure 2: Illustration of the COMBA block with context gating. From left to right. The in-put sequence Z′ is first processed by the S4 module to produce hop-wise representations. A context gating mechanism C is then applied over the local hop window zk−w:k+w to refine each hop embedding yk. The gated outputs are concatenated with the original node features, forming a new sequence Y . Pooling along the hop dimension aggregates the sequence into embedding X′ for downstream tasks. 
+
+## 4.3 Context Gating 
+
+The COMBA framework follows the state space model (SSM) formulation in Eq. 3, but in our approach, we replace t with the hop index k and the input x(t) with the hop-aware node embedding zk. Thus, the zero-order hold discrete recurrence following Eq. 5 becomes 
+
+hk = ¯Ahk−1 + ¯Bzk, yk = Chk. (14) In the standard Mamba formulation, the output is obtained by applying a fixed pro-jection to the hidden state. In our approach, the output projection is hop-varing and is computed from a local context window. For example, at hop step k we may form a con-text window of inputs Z′k−1: k+1 = zk−1, z k, z k+1 
+
+, which captures the graph context around zk. More generally, as shown in Fig. 2 for a window size w the input segment is 
+
+Z′z−w:z+w = zk−w, z k−k+1 , . . . , z k+w
+
+.8We then compute a context-dependent output matrix 
+
+Ck = Φ  Z′k−w:k+w
+
+, (15) where Φ is a learnable mapping. The model output at hop k is obtained by applying this context-dependent projection to the current hidden state: 
+
+yk = Ckhk. (16) Algorithm 3 in Appendix lists the pseudo-code of the context gating mechanism. Comba Block YCross-Entropy Loss Proj                  
+
+> 56
+> Cross Batch Cross Batch
+> 4
+> a1a2a4a3a5a6a7a1a2a3a6a4a3a5a7a1a1a2a2
+> 231
+> a4a5a5a4
+> Batch m
+> aiaj
+> Batch 2 Batch 1
+
+Figure 3: The proposed COMBA framework on large homogeneous graph. From left to right. Nodes of a homogeneous graph in 1 ⃝ are partitioned into ˆm batches in 2 ⃝. 3⃝:for each batch, COMBA identifies the ˆk-hop neighbors of target nodes and constructs a corresponding subgraph. 4⃝: Node embeddings will be updated across batches via cross batch aggregation as illustrated in Fig.1. The resulting sequence will pass into COMBA block with context gating 5 ⃝ as illustrated in Fig.2. 6⃝: the final predictions ˆY for all nodes are obtained and optimized using the cross-entropy loss 
+
+## 4.4 COMBA Framework 
+
+Given node features X, a set of sampled batches B, and their corresponding adjacency matrices A, the COMBA framework first utilizes the CrossBatch module in 4 ⃝ of Fig. 3 which aggregates information across batches to construct contextual sequences Z′.
+
+Z′ = CrossBatch (X, B, A)
+
+Then, these sequences are passed to the COMBA Block in 5 ⃝ of Fig. 3 which applies context gating over different neighborhood hops to control aggregation adaptively. 
+
+X′ = CombaBlock (Z′, B, A)
+
+Finally, model training is guided by the cross-entropy loss over the predicted labels. Al-gorithm 1 in Appendix lists the pseudo-code of the main COMBA framework. 94.5 Theoretical Analysis 
+
+We justify that cross-batch aggregation guarantees lower error than training GNN without interactions between batches through following theorem: 
+
+Theorem 1. Denote the number of batches per group as d, with the set of batches B =
+
+{B1, . . . , B d}. Let BI be the set of all node indices appearing in B, and define the set of all seed node indices as 
+
+S =
+
+> d
+
+[
+
+> i=1
+
+si,
+
+where si are the seed node indices in batch Bi. The complement of S with respect to BI 
+
+is then Sc = BI \ S .For each batch Bi at layer l: - Let Ai be the sampled subgraph, - Let Xli be the node features for all nodes in Bi, - Let ˜Xli = Xli [si] denote features of seed nodes si, - Let ¯Xli
+
+denote features of other seed nodes from different batches that appear in Bi, - Let sji be the indices of such seed nodes from batch Bj , and let κ be the set of all available batches. Define a gated GNN layer as a function f (Ai, X li ). Then, the cross-batch aggregation update at layer l + 1 is given by: 
+
+˜Xli = f (Ai, X li )[ si] (1) 
+
+¯Xli = j̸ =i, j ∈κf (Aj , X lj )[ sji ] (2) 
+
+Xl+1  
+
+> i
+
+[si] = ˜Xli (3) 
+
+Xl+1  
+
+> i
+
+[sji ] = ¯Xli (4) 
+
+We can express the cross-batch aggregation as an approximate gated GNN layer in the following form in terms of batch Bi:
+
+Xl+1  
+
+> i
+
+[n] = Ii(n) · f (Ai, X li )[ n] + (1 − Ii(n)) · Xli [n] (17) 
+
+where the indicator function Ii(n) ∈ { 0, 1} is treated as a hard gate defined as: 
+
+Ii(n) = 
+
+(
+
+1, if n ∈ S i
+
+0, if n ∈ S c
+
+> i
+
+(18) 
+
+Define the ideal aggregation update when trained over full batched graph for the set of batch B: ¯Xl+1  
+
+> i
+
+[n] = f (Ai, X li )[ n] (19) 
+
+Define the aggregation update without cross-batch update for the set of batch B as ˆXl+1  
+
+> i
+
+.Define the approximation error between the cross-batch aggregation update and the ideal aggregation update when trained over full graph as: 
+
+El+1 (Xl+1  
+
+> i
+
+, ¯Xl+1  
+
+> i
+
+) = 1
+
+d
+
+> d
+
+X
+
+> i=1
+
+1
+
+|Bi|
+
+X
+
+> j∈Bi
+
+∥Xl+1  
+
+> i
+
+− ¯Xl+1  
+
+> i
+
+∥22 (20) 
+
+We can show that El+1 (Xl+1  
+
+> i
+
+, ¯Xl+1  
+
+> i
+
+) ≤ E l+1 ( ˆXl+1  
+
+> i
+
+, ¯Xl+1  
+
+> i
+
+).
+
+The proof of Theorem 1 is presented in Appendix due to space limit. 10 5 Experiments 
+
+## 5.1 Benchmark Datasets 
+
+Six real-world homogeneous graphs are used as our benchmark datasets. We used four heterophilic datasets from the work (Platonov et al., 2023) and two large datasets from Open Graph Benchmark (Hu et al., 2020). Additional details about the datasets are shown in Appendix. 
+
+## 5.2 Baselines 
+
+We compare our COMBA with (1) GNN, e.g., GCN (Kipf & Welling, 2017) and Gat-edGCN (Bresson & Laurent, 2017), (2) a transformer architecture: NAGphormer (Chen et al., 2022), (3) a scalable GNN: ClusterGCN (Chiang et al., 2019), and two recent vari-ants of Graph Mamba: Graph Mamba-1 Behrouz & Hashemi (2024) and Graph Mamba-2 Wang et al. (2024). Additional details of the baseline models are in Appendix. 
+
+## 5.3 Results and Analysis 
+
+Baseline Comparison Table 1 summarizes the performance of various models on six homogeneous graph datasets. COMBA consistently achieves the highest accuracy across all datasets, outperforming baseline models. Under the same message passing scheme, COMBA shows statistically significant improvements on five datasets, including Roman-empire, Ogbn-arxiv, Ogbn-product, Minesweeper, and Tolokers. On the Amazon-ratings dataset, COMBA achieves the highest accuracy while Nagphormer performs compara-bly but requires more memory, highlighting COMBA’s robustness across various graph structures. Notably, COMBA consistently outperforms Graph Mamba-1 across five benchmark datasets. While Graph Mamba-1 constructs multiple graphs for each node, which can introduce redundancy and increase computational complexity, COMBA efficiently ag-gregates hop-aware node embeddings within a single unified graph. This design allows COMBA to capture structural information effectively, resulting in higher accuracy and more reliable performance compared to Graph Mamba-1. 
+
+Abalation Study Table 2 presents the ablation results of COMBA, showing that each component plays an important role in its overall performance. When the cross-batch aggregation is removed, the model consistently underperforms, underscoring the neces-sity of aggregating information across batches to capture richer global structural patterns. Likewise, removing the context gating mechanism leads to a further drop in accuracy, which demonstrates its effectiveness in filtering and emphasizing relevant hop-level in-formation. These results confirm that both cross-batch aggregation and context gating are integral to COMBA’s strong performance. In particular, Amazon-ratings and Tolok-ers exhibit substantial gains when both the cross batch aggregation and context gating mechanism are applied, underscoring their effectiveness in settings with dense connec-tivity and feature noise. 11 Table 1: Performance comparisons between baselines and our proposed method across five homogeneous datasets. Over 5 different initialization status, accuracies are reported for Roman-empire, Amazon-ratings, Ogbn-arxiv, and Ogbn-products and roc auc scores are reported for Minesweeper and Tolokers. Superscript * indicates that COMBA is statistically significantly better than this method at 95% confidence level using the per-formance metrics. Model Roman-empire Accuracy Amazon-ratings Accuracy Ogbn-arxiv Accuracy Ogbn-product Accuracy Minesweeper ROC AUC Tolokers ROC AUC GCN 0.795 ∗±0.0088 0.462 ±0.0080 0.680 ∗±0.0044 OOM 0.884 ∗±0.0046 0.838 ∗±0.0034 
+
+Gated-GCN 0.833 ∗±0.0079 0.481 ∗±0.0071 0.701 ∗±0.0065 OOM 0.905 ∗±0.0016 0.832 ∗±0.0090 
+
+Nagphormer 0.800 ∗±0.0043 0.504 ±0.0070 0.696 ∗±0.0023 OOM 0.903 ∗±0.0006 0.834 ∗±0.0045 
+
+Cluster-GCN 0.815 ∗±0.0042 0.476 ∗±0.0047 0.678 ∗±0.0076 0.717 ∗±0.0053 0.886 ∗±0.0024 0.758 ∗±0.0056 
+
+Graph Mamba-1 0.677 ∗±0.0009 0.415 ∗±0.0016 0.604 ∗±0.0020 OOM 0.806 ∗±0.0059 0.734 ∗±0.0113 
+
+Graph Mamba-2 0.869 ∗±0.0092 0.490 ∗±0.0036 0.686 ∗±0.0089 OOM 0.927 ∗±0.0021 0.803 ∗±0.0199 
+
+COMBA 0.895 ±0.0038 0.507 ±0.0025 0.716 ±0.0037 0.735 ±0.0100 0.942 ±0.0039 0.845 ±0.0009 
+
+Table 2: Ablation study results w.r.t. cross batch aggregation and context gating mecha-nism Model Roman-empire Accuracy Amazon-ratings Accuracy Ogbn-arxiv Accuracy Minesweeper ROC AUC Tolokers ROC AUC COMBA 0.895 ±0.0038 0.507 ±0.0025 0.716 ±0.0037 0.942 ±0.0039 0.845 ±0.0009 
+
+w/o cross batch 0.881 ±0.0040 0.492 ±0.0062 0.703 ±0.0009 0.940 ±0.0051 0.832 ±0.0022 
+
+w/o context gating 0.878 ±0.0005 0.472 ±0.0007 0.705 ±0.0014 0.939 ±0.0050 0.805 ±0.0039 
+
+Figure 4: Log average runtime per epoch ( y-axis) us-ing fixed batch sizes vs. the sum of number of nodes and number of edges in log scale ( x-axis). 
+
+Complexity Analysis We evaluate the wall-clock runtime across six benchmark datasets to assess the scal-ability of our approach. As illustrated in Figure 4, the average training time per epoch consistently increases with the total number of nodes and edges. Importantly, this relationship follows an approximately linear trend on a log-log scale, indicating that our method maintains efficient scalability even on large homogeneous graphs. This trend suggests that our proposed framework avoids the neighborhood explosion problem often encountered in GNN. Moreover, this observed lin-ear behavior demonstrates that our cross batch aggregation and context-gating mechanism do not introduce computational overhead. This scalability is especially important for real-world applications, where graphs with millions of nodes and edges are common, underscoring the utility of our approach in large-scale graph scenarios. 12 6 Conclusion 
+
+This paper introduces COMBA, a state space model–based framework for large graph learning. Unlike prior methods that inefficiently obtain subgraphs for each node, COMBA uses multi-hop neighbors of each batch to construct a subgraph for scalable GNN learn-ing. In contrast to approaches that only consider the current step during gating, our context gating mechanism captures richer graph contexts from a window of neighbor-hoods. To mitigate the bias introduced by batch sampling and capture global structural information, we employ cross-batch aggregation that promotes information switch be-tween batches with theoretical guarantees for error reduction. Together, these innovations enable COMBA to scale to large graphs while achieving robustness and superior perfor-mance. Extensive experiments on benchmark datasets confirm that COMBA consistently outperforms baseline methods, highlighting its effectiveness in capturing long-range de-pendencies with improved accuracy, efficiency, and robustness. 
+
+# References 
+
+Vignesh Balaji, Christos Kozyrakis, Gal Chechik, and Haggai Maron. Efficient gnn train-ing through structure-aware randomized mini-batching, 04 2025. Ali Behrouz and Farnoosh Hashemi. Graph mamba: Towards learning on graphs with state space models. In Proceedings of the 30th ACM SIGKDD Conference on Knowl-edge Discovery and Data Mining , KDD ’24, pp. 119–130, New York, NY, USA, 2024. Association for Computing Machinery. ISBN 9798400704901. doi: 10.1145/3637528. 3672044. URL https://doi.org/10.1145/3637528.3672044 .Xavier Bresson and Thomas Laurent. Residual gated graph convnets. ArXiv ,abs/1711.07553, 2017. URL https://api.semanticscholar.org/ CorpusID:13761978 .Jie Chen, Tengfei Ma, and Cao Xiao. Fastgcn: Fast learning with graph convolutional networks via importance sampling. 01 2018. doi: 10.48550/arXiv.1801.10247. Jinsong Chen, Kaiyuan Gao, Gaichao Li, and Kun He. Nagphormer: A tokenized graph transformer for node classification in large graphs. In International Conference on Learning Representations , 2022. URL https://api.semanticscholar. org/CorpusID:252846362 .Wei-Lin Chiang, Xuanqing Liu, Si Si, Yang Li, Samy Bengio, and Cho-Jui Hsieh. Cluster-gcn: An efficient algorithm for training deep and large graph convolu-tional networks. In Proc. SIGKDD Conference , pp. 257–266, 2019. ISBN 9781450362016. doi: 10.1145/3292500.3330925. URL https://doi.org/10. 1145/3292500.3330925 .Vijay Prakash Dwivedi and Xavier Bresson. A generalization of transformer networks to graphs. ArXiv , abs/2012.09699, 2020. URL https://api.semanticscholar. org/CorpusID:229298019 .13 Vijay Prakash Dwivedi, Ladislav Ramp´ aˇ sek, Mikhail Galkin, Ali Parviz, Guy Wolf, Anh Tuan Luu, and Dominique Beaini. Long range graph benchmark. In Proceed-ings of the 36th International Conference on Neural Information Processing Systems ,NIPS ’22, Red Hook, NY, USA, 2022. Curran Associates Inc. ISBN 9781713871088. Wenqi Fan, Yao Ma, Qing Li, Yuan He, Eric Zhao, Jiliang Tang, and Dawei Yin. Graph neural networks for social recommendation. In The World Wide Web Confer-ence , WWW ’19, pp. 417–426, New York, NY, USA, 2019. Association for Com-puting Machinery. ISBN 9781450366748. doi: 10.1145/3308558.3313488. URL 
+
+https://doi.org/10.1145/3308558.3313488 .Albert Gu and Tri Dao. Mamba: Linear-time sequence modeling with selective state spaces, 2024. URL https://openreview.net/forum?id=AL1fq05o7H .Albert Gu, Karan Goel, and Christopher R’e. Efficiently modeling long sequences with structured state spaces. ArXiv , abs/2111.00396, 2021. URL https://api. semanticscholar.org/CorpusID:240354066 .William L. Hamilton, Rex Ying, and Jure Leskovec. Inductive representation learning on large graphs. In Proc. NIPS Conference , NIPS’17, pp. 1025–1035, Red Hook, NY, USA, 2017. Curran Associates Inc. ISBN 9781510860964. Weihua Hu, Matthias Fey, Marinka Zitnik, Yuxiao Dong, Hongyu Ren, Bowen Liu, Michele Catasta, and Jure Leskovec. Open graph benchmark: datasets for machine learning on graphs. In Proceedings of the 34th International Conference on Neural Information Processing Systems , NIPS ’20, Red Hook, NY, USA, 2020. Curran Asso-ciates Inc. ISBN 9781713829546. Jinwoo Kim, Tien Dat Nguyen, Seonwoo Min, Sungjun Cho, Moontae Lee, Honglak Lee, and Seunghoon Hong. Pure transformers are powerful graph learners. In Proceedings of the 36th International Conference on Neural Information Processing Systems , NIPS ’22, Red Hook, NY, USA, 2022. Curran Associates Inc. ISBN 9781713871088. Diederik Kingma and Jimmy Ba. Adam: A method for stochastic optimization. ICLR Conference , 12 2014. Thomas N. Kipf and Max Welling. Semi-supervised classification with graph convolu-tional networks, 2017. URL https://arxiv.org/abs/1609.02907 .Oleg Platonov, Denis Kuznedelev, Michael Diskin, Artem Babenko, and Liudmila Prokhorenkova. A critical look at the evaluation of GNNs under heterophily: Are we really making progress? In The Eleventh International Conference on Learn-ing Representations , 2023. URL https://openreview.net/forum?id= tJbbQfw-5wv .Petar Velickovic, Guillem Cucurull, Arantxa Casanova, Adriana Romero, Pietro Lio’, and Yoshua Bengio. Graph attention networks. ArXiv , abs/1710.10903, 2017. URL 
+
+https://api.semanticscholar.org/CorpusID:3292002 .14 Chloe Wang, Oleksii Tsepa, Jun Ma, and Bo Wang. Graph-mamba: Towards long-range graph sequence modeling with selective state spaces, 2024. URL https://arxiv. org/abs/2402.00789 .Sinong Wang, Belinda Z. Li, Madian Khabsa, Han Fang, and Hao Ma. Linformer: Self-attention with linear complexity. ArXiv , abs/2006.04768, 2020. URL https:// api.semanticscholar.org/CorpusID:219530577 .Zhenqin Wu, Bharath Ramsundar, Evan N. Feinberg, Joseph Gomes, Caleb Geniesse, Aneesh S. Pappu, Karl Leswing, and Vijay Pande. Moleculenet: A benchmark for molecular machine learning, 2018. URL https://arxiv.org/abs/1703. 00564 .Zhilin Yang, William W. Cohen, and Ruslan Salakhutdinov. Revisiting semi-supervised learning with graph embeddings. In Proceedings of the 33rd International Conference on International Conference on Machine Learning - Volume 48 , ICML’16, pp. 40–48. JMLR.org, 2016. Chengxuan Ying, Tianle Cai, Shengjie Luo, Shuxin Zheng, Guolin Ke, Di He, Yanming Shen, and Tie-Yan Liu. Do transformers really perform bad for graph representation? In Proceedings of the 35th International Conference on Neural Information Process-ing Systems , NIPS ’21, Red Hook, NY, USA, 2021. Curran Associates Inc. ISBN 9781713845393. Seongjun Yun, Minbyul Jeong, Raehyun Kim, Jaewoo Kang, and Hyunwoo J. Kim. 
+
+Graph transformer networks . Curran Associates Inc., Red Hook, NY, USA, 2019. Manzil Zaheer, Guru Guruganesh, Avinava Dubey, Joshua Ainslie, Chris Alberti, Santi-ago Ontanon, Philip Pham, Anirudh Ravula, Qifan Wang, Li Yang, and Amr Ahmed. Big bird: transformers for longer sequences. In Proceedings of the 34th International Conference on Neural Information Processing Systems , NIPS ’20, Red Hook, NY, USA, 2020. Curran Associates Inc. ISBN 9781713829546. 
+
+# A Appendix 
+
+## A.1 Theorem Proof 
+
+Theorem. Denote the number of batches per group as d, with the set of batches B =
+
+{B1, . . . , B d}. Let BI be the set of all node indices appearing in B, and define the set of all seed node indices as 
+
+S =
+
+> d
+
+[
+
+> i=1
+
+si,
+
+where si are the seed node indices in batch Bi. The complement of S with respect to BI 
+
+is 
+
+Sc = BI \ S .
+
+15 For each batch Bi at layer l: - Let Ai be the sampled subgraph, - Let Xli be the node features for all nodes in Bi, - Let ˜Xli = Xli [si] denote features of seed nodes si, - Let ¯Xli
+
+denote features of other seed nodes from different batches that appear in Bi, - Let sji be the indices of such seed nodes from batch Bj , and let κ be the set of all available batches. Define a gated GNN layer as a function f (Ai, X li ).Then, the cross-batch aggregation update at layer l + 1 is given by: 
+
+˜Xli = f (Ai, X li )[ si] (1) 
+
+¯Xli = j̸ =i, j ∈κf (Aj , X lj )[ sji ] (2) 
+
+Xl+1  
+
+> i
+
+[si] = ˜Xli (3) 
+
+Xl+1  
+
+> i
+
+[sji ] = ¯Xli (4) 
+
+We can express the cross-batch aggregation as an approximate gated GNN layer in the following form in terms of batch Bi:
+
+Xl+1  
+
+> i
+
+[n] = Ii(n) · f (Ai, X li )[ n] + (1 − Ii(n)) · Xli [n] (21) 
+
+where the indicator function Ii(n) ∈ { 0, 1} is treated as a hard gate defined as: 
+
+Ii(n) = 
+
+(
+
+1, if n ∈ S i
+
+0, if n ∈ S c
+
+> i
+
+(22) 
+
+Define the ideal aggregation update when trained over full batched graph for the set of batch B: ¯Xl+1  
+
+> i
+
+[n] = f (Ai, X li )[ n] (23) 
+
+Define the aggregation update without cross-batch update for the set of batch B as ˆXl+1  
+
+> i
+
+.Define the approximation error between the cross-batch aggregation update and the ideal aggregation update when trained over full graph as: 
+
+El+1 (Xl+1  
+
+> i
+
+, ¯Xl+1  
+
+> i
+
+) = 1
+
+d
+
+> d
+
+X
+
+> i=1
+
+1
+
+|Bi|
+
+X
+
+> j∈Bi
+
+∥Xl+1  
+
+> i
+
+− ¯Xl+1  
+
+> i
+
+∥22 (24) 
+
+We can show that El+1 (Xl+1  
+
+> i
+
+, ¯Xl+1  
+
+> i
+
+) ≤ E l+1 ( ˆXl+1  
+
+> i
+
+, ¯Xl+1  
+
+> i
+
+).
+
+Proof 1. Fix a batch i and a seed node n ∈ Bi. Define the per-node squared errors relative to the ideal update: 
+
+EX (n) = ∥Xl+1  
+
+> i
+
+[n] − ¯Xl+1  
+
+> i
+
+[n]∥22, E ˆX (n) = ∥ ˆXl+1  
+
+> i
+
+[n] − ¯Xl+1  
+
+> i
+
+[n]∥22.
+
+Case 1. n ∈ si (local seed nodes). For local seed nodes, the cross-batch update and the ideal update coincide: 
+
+Xl+1  
+
+> i
+
+[n] = ¯Xl+1  
+
+> i
+
+[n].
+
+Hence EX (n) = 0 ≤ E ˆX (n).
+
+16 Case 2. n ∈ sc 
+
+> i
+
+(cross-batch nodes). Let a(n) = ¯Xl+1  
+
+> i
+
+[n] = f (Ai, X li )[ n] be the ideal update, b(n) = Xl+1  
+
+> i
+
+[n] the cross-batch update, and c(n) = ˆXl+1  
+
+> i
+
+[n] the no cross-batch value. The squared errors relative to the ideal update are 
+
+EX (n) = ∥b(n) − a(n)∥22, E ˆX (n) = ∥c(n) − a(n)∥22.
+
+Substituting b(n) gives 
+
+b(n) − a(n) = ( Ii(n) − 1) a(n) + (1 − Ii(n)) Xli [n] = (1 − Ii(n))  Xli [n] − a(n),
+
+so that 
+
+EX (n) = (1 − Icross i (n)) ∥Xli [n] − a(n)∥22.
+
+Similarly, for the no-cross-batch update, 
+
+E ˆX (n) = (1 − Ino −cross i (n)) ∥Xli [n] − a(n)∥22.
+
+Since Icross  
+
+> i
+
+(n) ≥ Ino-cross  
+
+> i
+
+(n), ∀n ∈ Bi, it follows that 
+
+EX (n) = (1 −Icross i (n)) ∥Xli [n]−a(n)∥22 ≤ (1 −Ino −cross i (n)) ∥Xli [n]−a(n)∥22 = E ˆX (n).
+
+Conclusion. For every node n, we have EX (n) ≤ E ˆX (n). Averaging over all nodes and batches, 
+
+El+1 (Xl+1 , ¯Xl+1 ) = 1
+
+d
+
+> d
+
+X
+
+> i=1
+
+1
+
+|Bi|
+
+X
+
+> n∈Bi
+
+EX (n) ≤ 1
+
+d
+
+> d
+
+X
+
+> i=1
+
+1
+
+|Bi|
+
+X
+
+> n∈Bi
+
+E ˆX (n) = El+1 ( ˆXl+1 , ¯Xl+1 ).
+
+Thus the inequality holds. 
+
+## A.2 Detailed Implementations 
+
+We provide the pseudo code in Algorithm 1 to show the full pipeline of COMBA 
+
+Algorithm 1: Comba 
+
+Input: Node features {X},Batch set B = {b1, . . . , b ˆm},All batches’ sequences of matrices A = {Ab1 , . . . , A b ˆm }
+
+Output: ˆY for downstream prediction tasks  
+
+> 1
+
+Z′ ← CrossBatch (X, B, A); 
+
+> 2
+
+X′ ← CombaBlock (Z′, B, A); 
+
+> 3
+
+ˆY ← Projection (X′);// Calculate cross-entropy loss  
+
+> 4
+
+L ← − P 
+
+> i
+
+yi log(ˆ yi); 
+
+> 5
+
+return ˆY
+
+17 Algorithm 2: Cross batch aggregation 
+
+Input: Node features X,Batch set B = {b1, . . . , b ˆm},All batches’ sequences of matrices A = {Ab1 , . . . , A b ˆm }
+
+Output: Sequence Z′ ∈ N × (ˆk + 1) × d for nodes in all batches  
+
+> 1
+
+for each batch bm in {b1, . . . , b ˆm} do  
+
+> 2
+
+˜Xbm ← Dropout (Xbm , p ); 
+
+> 3
+
+Z(0)  
+
+> bm
+
+← Projection ( ˜Xbm ); 
+
+> 4
+
+for each Akbm in Abm do 
+
+/* Cross-batch update for each node n in batch bm */  
+
+> 5
+
+Z(0) 
+
+> b1: ˆ m,k
+
+(n) ← GN N (Z(0)  
+
+> bm
+
+, A kbm )( n), ∀n ∈ bm ∩ b1: ˆ m; 
+
+> 6
+
+for l = 0 , . . . , L − 1 do  
+
+> 7
+
+Z(l+1)  
+
+> bm,k
+
+← GN N (Z(0) 
+
+> bm,k
+
+, A kbm ); 
+
+> 8
+
+Z(0)  
+
+> b1: M,k
+
+(n) ← Z(l+1)  
+
+> bm,k
+
+(n), ∀n ∈ bm ∩ b1: ˆ m 
+
+> 9
+
+end  
+
+> 10
+
+end  
+
+> 11
+
+Zbm ← (Z(L)
+
+> bm,1
+
+, Z (L)
+
+> bm,2
+
+, . . . , Z (L)
+
+> bm,ˆk
+
+) ; // Obtain sequence for batch bm 
+
+> 12
+
+end  
+
+> 13
+
+Z ← ˆmm=1 Zbm // Obtain sequences for all batches  
+
+> 14
+
+˜X ← ˆmm=1 ˜Xbm ; 
+
+> 15
+
+Z′ ← ˜X∥Z ; 
+
+> 16
+
+return Z′
+
+18 Algorithm 3: COMBA Block for Node Embeddings 
+
+Input : Node embeddings sequences Z ∈ RN ×ˆk×d,Batch set {b1, . . . , b ˆm},All batches’ sequences of matrices {Ab1 , . . . , A b ˆm }
+
+Output: Updated node embeddings X′ ∈ RN ×d 
+
+> 1
+
+for each batch bm in {b1, . . . , b ˆm} and l = 0 , . . . , L do  
+
+> 2
+
+Z′ ← Layernorm (Z(l) 
+
+> bm
+
+); 
+
+> 3
+
+A ← Linear A(Z′); 
+
+> 4
+
+B ← Linear B (Z′); 
+
+> 5
+
+C ← Linear C (Z′k−w:k+w)( Eq. 15) // Compute context-dependent output matrix  
+
+> 6
+
+; 
+
+> 7
+
+∆ ← softplus (Linear ∆(Zbm )) ; 
+
+> 8
+
+¯A ← discretize (∆ , A )( Eq. 11) ; 
+
+> 9
+
+¯B ← discretize (∆ , A, B )( Eq. 12) ;/* Use context gating mechanism to produce output at each hop k */  
+
+> 10
+
+for n = 1 to N do  
+
+> 11
+
+(x1, . . . , x ˆk) ← Z ′n, :,:; 
+
+> 12
+
+h0 ← 0; 
+
+> 13
+
+for k = 1 to ˆk do  
+
+> 14
+
+hk ← ¯Akhk−1 + ¯Bkxk; 
+
+> 15
+
+yk ← Ckhk 
+
+> 16
+
+end  
+
+> 17
+
+end  
+
+> 18
+
+; 
+
+> 19
+
+Y : ( |bm|, ˆk, d ) ← ˆkk=1 yk;// Output sequence for all nodes in batch bm 
+
+> 20
+
+Y ′ ← LayerNorm  Y + Zbm ); 
+
+> 21
+
+X′ 
+
+> bm
+
+← 1ˆk
+
+Pˆkk=1 Y ′ 
+
+> :,k, :
+
+// Pooling across hop dimension  
+
+> 22
+
+; 
+
+> 23
+
+for each Akbm in Abm do  
+
+> 24
+
+Y kbm ← GN N (X′ 
+
+> bm
+
+, A kbm ); 
+
+> 25
+
+end  
+
+> 26
+
+Ybm ← (Y 1 
+
+> bm
+
+, Y 2 
+
+> bm
+
+, . . . , Y ˆkbm );// Rebuild sequence  
+
+> 27
+
+Z(l+1)  
+
+> bm
+
+← X′ 
+
+> bm
+
+∥Ybm ;// Concatenate node representations X′ 
+
+> bm
+
+with sequence Ybm 
+
+> 28
+
+end  
+
+> 29
+
+X′ ← ˆmm=1 X′ 
+
+> bm
+
+;// Concatenate node representations for nodes in all batches  
+
+> 30
+
+return X′ ;19 A.3 Details of Datasets 
+
+Table 3: Dataset Statistics Roman-empire Amazon-ratings Minesweeper Tolokers Ogbn-arxiv Ogbn-products # Nodes 22,662 24,492 10,000 11,758 169,343 2,449,029 # Edges 32,927 93,050 39,402 51,900 1,166,243 61,859,140 # Features 300 300 7 10 128 100 # Classes 18 5 2 2 40 47 
+
+Roman-empire(Platonov et al., 2023): This dataset is based on the Roman Empire article from Wikipedia. Each node in the graph represents one word in the text, and edges exist if two words are connected. For semi-supervised learning, the nodes are split into training, validation, and test sets with 11,331 (50%), 5,665 (25%), and 5,666 (25%) nodes, respectively. 
+
+Amazon-ratings(Platonov et al., 2023): This dataset is based on the Amazon prod-uct co-purchasing network. Each node in the graph represents products, and edges exist if products are bought together. For semi-supervised learning, the nodes are split into train-ing, validation, and test sets with 12,246 (50%), 6,123 (25%), and 6,123 (25%) nodes, respectively. 
+
+Minesweeper(Platonov et al., 2023): This dataset inspired by the Minesweeper game, a synthetic dataset. Each node in the graph represents one cell in the grid, and edges exist for neighboring cells. For semi-supervised learning, the nodes are split into training, validation, and test sets with 5,000 (50%), 2,500 (25%), and 2,500 (25%) nodes, respectively. 
+
+Tolokers(Platonov et al., 2023): This dataset is based on data from the Toloka crowdsourcing platform. Each node in the graph represents tolokers (workers), and edges exist if two tolokers work on the same task. For semi-supervised learning, the nodes are split into training, validation, and test sets with 5,879 (50%), 2,939 (25%), and 2,940 (25%) nodes, respectively. 
+
+Ogbn-arxiv(Hu et al., 2020): This dataset is from Open Graph Benchmark, repre-senting the citation network for computer science papers. Each node in the graph rep-resents a paper, and edges exist if one paper cites another one. For semi-supervised learning, the nodes are split into training, validation, and test sets with 90,941 (53.7%), 29,799 (17.6%), and 48,603 (28.7%) nodes, respectively. 
+
+Ogbn-products(Hu et al., 2020): This dataset is also from Open Graph Benchmark, representing an Amazon product co-purchasing network. Each node in the graph repre-sents products sold in Amazon, and edges exist if two products are purchased together. For semi-supervised learning, the nodes are split into training, validation, and test sets with 196,615 (8.0%), 39,323 (1.6%), and 2,213,091 (90.4%) nodes, respectively. 
+
+## A.4 Details of Baseline Models 
+
+We compare our COMBA with some state-of-art baselines. 20 GCN (Kipf & Welling, 2017) is a homogeneous graph neural network. It learns node representations by aggregating and transforming features from each node’s neighbors. 
+
+Gated-GCN (Bresson & Laurent, 2017) extends standard GCN by incorporating gat-ing mechanisms to control the flow of information from neighboring nodes, allowing more flexible and selective feature aggregation. Our COMBA employs the Gated-GCN model as default for GNN. 
+
+Nagphormer (Chen et al., 2022) is a graph transformer model. It introduces the Hop2Token module, which aggregates neighborhood features from multiple hops into distinct token representations. 
+
+Cluster-GCN (Chiang et al., 2019) partitions the graph into clusters and performing mini-batch training within these clusters. By reducing the neighborhood size per batch, it preserves graph structure while lowering memory and computational costs. 
+
+Graph Mamba-1 (Behrouz & Hashemi, 2024) treats each node’s induced subgraphs as tokens and constructs input sequences by processing these subgraphs with MPNNs. Since it is not reproducible due to the high time complexity of the full model, we adopt a simplified version for efficiency. 
+
+Graph Mamba-2 (Wang et al., 2024) leverages SSM to efficiently capture long-range dependencies in graphs. By permutation and node prioritization techniques, it achieves strong predictive performance with reduced computational and memory costs. 
+
+## A.5 Implementation Details 
+
+We conduct a grid search over a selected range of hyperparameters, including hidden di-mension: [64,128], number of layers: [2,3], feature dropout rate: [0,0.3,0.5], hop length: [2,3,5,10] and batch size: [5,10,50,100]. Adam (Kingma & Ba, 2014) is used as the op-timizer. The learning rate, weight decay, and number of training epochs are fixed, with early stopping applied. For each method, we report the average accuracy over five differ-ent random seeds. All experiments are performed on desktop workstations equipped with NVIDIA RTX A6000 Ada Generation GPUs. 
+
+## A.6 The use of LLMs 
+
+LLMs are used to generate initial code skeletons in the research process. These drafts are later refined, debugged, and adapted to the specific requirements of our COMBA framework. 21

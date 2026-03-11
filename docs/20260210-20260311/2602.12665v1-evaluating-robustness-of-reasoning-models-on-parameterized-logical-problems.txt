@@ -1,0 +1,1011 @@
+Title: Evaluating Robustness of Reasoning Models on Parameterized Logical Problems
+
+URL Source: https://arxiv.org/pdf/2602.12665v1
+
+Published Time: Mon, 16 Feb 2026 01:28:35 GMT
+
+Number of Pages: 22
+
+Markdown Content:
+# Evaluating Robustness of Reasoning Models on Parameterized Logical Problems 
+
+Na¨ ım Es-sebbani 1 Esteban Marquer 2 Yakoub Salhi 1 Zied Bouraoui 1
+
+## Abstract 
+
+Logic provides a controlled testbed for evalu-ating LLM-based reasoners, yet standard SAT-style benchmarks often conflate surface difficulty (length, wording, clause order) with the struc-tural phenomena that actually determine satisfi-ability. We introduce a diagnostic benchmark for 2-SAT built from parameterized families of structured 2–CNF formulas, where satisfiability is characterized by the implication graph and can be tuned along interpretable axes. Our generators isolate distinct competencies and failure modes: (i) contradiction-cycle UNSAT cores with control-lable size and imbalance, (ii) SAT instances with a prescribed fraction of free variables to control solution multiplicity, (iii) planted backbones that modulate propagation, (iv) late bridge clauses that couple otherwise monotone regions to probe sen-sitivity to ordering and revision, and (v) symme-try/duplication variants that test abstraction under renaming and redundant structure. We evaluate LLM-based reasoners on decision accuracy and assignment validity, and quantify robustness un-der semantics-preserving perturbations such as clause reordering, filler clauses, and variable re-naming. Across models, we observe sharp per-formance transitions under targeted structural in-terventions even when surface statistics are held fixed, revealing brittleness regimes that are invisi-ble to aggregate SAT accuracy. 
+
+## 1. Introduction 
+
+Large reasoning models (LRMs) augment standard language models with training- and inference-time mechanisms that encourage explicit multi-step computation, and they have achieved strong empirical performance on mathematical reasoning and code generation (Patel et al., 2023; Bubeck     
+
+> 1CRIL UMR 8188, Univ Artois, CNRS, France 2GREYC, Universit ´e de Caen Basse Normandie, France. Correspondence to: Na ¨ım Es-sebbani <essebbani@cril.fr >, Esteban Marquer <este-ban.marquer@unicaen.fr >.
+> Preprint. February 16, 2026.
+
+et al., 2023). Motivated by these gains, recent benchmarks increasingly emphasize combinatorial search and constraint satisfaction, including planning and propositional satisfiabil-ity (Valmeekam et al., 2025). While LRMs often outperform conventional LLMs in these settings, both model families frequently exhibit abrupt degradation once instance com-plexity crosses a threshold. One hypothesis is that LRMs ap-proximate solver-like procedures through search-like behav-iors such as self-correction and candidate selection (Hazra et al., 2025); if so, performance should be stable under semantics-preserving transformations and should degrade primarily with increases in structural difficulty. The central question is whether such behaviors reflect trans-ferable algorithmic competence or task-specific pattern reuse. A growing body of evidence points to brittle gener-alization: models can fail even when instances admit short solutions (Ariyani et al., 2025), exhibit systematic errors on certain relational reasoning classes (Das et al., 2025), and transfer poorly across closely related maze distributions (Stechly et al., 2025). Prior work also suggests that per-formance can depend on producing traces with the “right” surface structure even when intermediate steps are not se-mantically faithful (Li et al., 2025). These motivate evalu-ations that isolate genuine structure tracking from reliance on memorized trace templates and surface cues. We advocate a more diagnostic evaluation regime based on parameterized problem families, where difficulty varies along explicit structural axes while the verification objec-tive remains unchanged. Concretely, we focus on satis-fiability of 2-CNF formulas (2-SAT). Although 2-SAT is polynomial-time solvable, it supports rich structural phe-nomena and admits an exact characterization via strongly connected components of the implication graph, enabling clean, verifiable perturbations. We design generators that tar-get distinct competencies, including long-range implication tracking, localization of contradiction cores, and invariance to clause order and variable renaming. This fine-grained control enables stress tests beyond aggregate SAT/UNSAT accuracy and exposes brittleness regimes that are not visible under a single instance distribution. Our contributions are threefold. (i) We introduce a diagnostic 2-SAT benchmark built from parameterized families of structured 2-CNF for-mulas with controllable implication-graph signatures and semantics-preserving perturbations (e.g., clause reordering, 1
+
+> arXiv:2602.12665v1 [cs.AI] 13 Feb 2026 Evaluating Robustness of Reasoning Models on Parameterized Logical Problems
+
+filler clauses, and variable renaming). (ii) We propose an evaluation suite that scores both decision accuracy and as-signment validity, and quantifies robustness under targeted interventions. (iii) We present a systematic empirical study of LLM-based reasoners across these families, revealing sharp performance transitions and generator-specific brittle-ness even when instance size is held fixed. 
+
+## 2. Related work 
+
+Reasoning in LLMs and LRMs. A large literature evalu-ates language models as reasoners across inference regimes, including deductive (Clark et al., 2020; Saeed et al., 2021), abductive (Kazemi et al., 2023a), commonsense (Tian et al., 2021), and logical or symbolic reasoning (Jiang et al., 2024). Beyond language-centric benchmarks, recent work probes models on algorithmic and combinatorial tasks that more directly instantiate search and constraint satisfaction, in-cluding graph search (Rameshkumar et al., 2025), planning (Valmeekam et al., 2025), puzzles (Shojaee et al., 2025), propositional satisfiability (Hazra et al., 2025), and graph coloring (Heyman & Zylberberg, 2025). Across these set-tings, the required inference depth is often a strong predictor of difficulty (Parmar et al., 2024). Methodologically, three common approaches are used to elicit or support reasoning: prompting-based scaffolds such as CoT (Kojima et al., 2022; Saparov & He, 2023) and in-context exemplars (Wang et al., 2023); specialized reasoning models that improve over fine-tuning (Valmeekam et al., 2024); and tool-oriented pipelines that translate problems into symbolic forms executed by external solvers or verifiers (Jiang et al., 2024). 
+
+Logical benchmarks and SAT-based evaluation. A promi-nent line of work studies formal inference when logical state-ments are rendered in simplified natural language. Clark et al. (2020) report near-perfect accuracy on Horn-rule en-tailment in such settings, but subsequent analyses find brittle-ness under distribution shift, consistent with shortcut learn-ing rather than systematic rule-based generalization (Zhang et al., 2023). Related observations hold for satisfiability-style evaluation: Richardson & Sabharwal (2022) consider hard propositional SAT instances presented in simplified lan-guage and highlight sensitivity to training data selection and limited extrapolation to larger instances. Another approach seeks robustness by eliciting explicit proof traces, relying on the premise that reliable local steps can compose into longer derivations (Saha et al., 2020; Tafjord et al., 2021; Creswell et al., 2023). 
+
+Logical reasoning datasets. Benchmarks such as LogiQA (Liu et al., 2020), ReClor (Yu et al., 2020), BoardgameQA (Kazemi et al., 2023b), and CLUTRR (Sinha et al., 2019) probe logical and relational reasoning in text, but often entangle formal inference with world knowledge and lin-guistic priors. In contrast, datasets such as FOLIO (Han et al., 2024a), RuleTaker (Clark et al., 2020), and P-FOLIO (Han et al., 2024b) more directly target knowledge-light logical inference. Logical puzzle corpora provide another controlled avenue (Giadikiaroglou et al., 2024), including ZebraLogic (Lin et al., 2025) and AutoLogi (Zhu et al., 2025). Finally, some recent benchmarks evaluate models on SAT-style inputs more directly, e.g., PARAT (Pan et al., 2024) and SATBench (Wei et al., 2025), which frame satis-fiability problems as natural language puzzles and leverage classical SAT solvers for verification. 
+
+Position. Compared to prior logic and SAT benchmarks, we emphasize parameterized instance families with fine-grained structural control and semantics-preserving per-turbations (e.g., clause order, filler clauses, and renaming invariances). This differs from SAT-in-natural-language settings that primarily vary surface realizations of fixed instances, and from proof/trace-based evaluations that re-quire models to emit (and be graded on) explicit deriva-tions. Instead, we keep the verification objective unchanged and probe whether models’ decisions and assignments re-main stable under transformations that preserve satisfiability while targeting specific structural competencies. Focusing on 2-SAT enables mechanistic instance design because satis-fiability is characterized by the implication graph, allowing attribution of failures to concrete graph phenomena rather than to instance size or surface form alone. 
+
+## 3. Problem setting 
+
+We study satisfiability of 2–CNF formulas and design pa-rameterized instance families whose difficulty can be tuned through interpretable structural properties. Throughout, let 
+
+V = {x1, . . . , x n} be a finite set of Boolean variables, and let L = V ∪ {¬ x | x ∈ V} be its associated set of lit-erals. Given a literal ℓ, we write ℓ for its complementary literal. We use the usual definitions ℓ → ℓ′ := ℓ ∨ ℓ′ and 
+
+(ℓ ↔ ℓ′) := ( ℓ → ℓ′) ∧ (ℓ′ → ℓ) ≡ (ℓ ∨ ℓ′) ∧ (ℓ′ ∨ ℓ).A 2–CNF is a conjunction of clauses, each clause a disjunc-tion of at most two literals. A literal in a 2–CNF formula is 
+
+pure if it appears with only one polarity. We write n := |V| 
+
+for the number of variables and m := |C| for the number of clauses. 
+
+Implication graph for 2-SAT. To decide satisfiability of a 
+
+2–CNF formula, we associate with it an implication graph on vertex set L. Each clause (ℓ1 ∨ ℓ2) contributes the edges 
+
+ℓ1 → ℓ2 and ℓ2 → ℓ1. We use l ⇝ l′ to denote that there is a path from l to l′ in the implication graph. A 2–CNF formula is unsatisfiable (UNSAT) iff there exists a variable 
+
+x such that x and ¬x belong to the same Strongly Connected Component (SCC) of the implication graph (equivalently, 
+
+x ⇝ ¬x and ¬x ⇝ x). 
+
+Difficulty controls. For each generator, we vary the instance 2Evaluating Robustness of Reasoning Models on Parameterized Logical Problems 
+
+structure and its presentation (clause order, variable renam-ing), which does not change satisfiability but can stress heuristic sensitivity. For UNSAT generators, we mainly vary (i) the structure of the implication-graph witness of un-satisfiability (the UNSAT core ) and (ii) the number of filler 
+
+clauses, i.e., clauses that can be satisfied independently of the core and thus do not contribute to the contradiction. For SAT generators, we mainly vary (i) the number of critical variables (e.g., backbone variables), (ii) the total number of variables, and (iii) the number of pure literals (literals that occur with only one polarity and hence do not constrain satisfiability). 
+
+3.1. UNSAT Generator using Implication Cycles 
+
+We pick distinct variables v1, . . . , v L and for each we pick a literal ℓi ∈ { vi, ¬vi} for i = 1 , . . . , L . Then, we construct a directed cycle in the implication graph: 
+
+Forward part: ℓ1 → ℓ2 → · · · → ℓk → ℓ1,
+
+Backward part: ℓ1 → ℓk+1 → · · · → ℓL → ℓ1.
+
+Encoding each implication ℓ → ℓ′ as the single 2-clause 
+
+ℓ ∨ ℓ′ yields a core that forces both ℓ1 → ℓ1 and ℓ1 → ℓ1,hence UNSAT. The construction above contains one clause per displayed implication. The forward part contributes k
+
+clauses; the backward part contributes (L − k + 1) clauses, for a total of L+1 clauses. 
+
+Parameters controlling difficulty. Difficulty is controlled by four parameters: (i) the cycle split (L, k ), where L is the number of literals in the core cycle and k is the position of the twist to ℓ1 (equivalently, the imbalance k/L , with ex-tremes k = 1 and k = L); (ii) the number of filler clauses 
+
+r that are satisfiable independently of the core (control-ling size/density); (iii) the presentation , i.e., whether core clauses are ordered along the implication chain or shuffled and interleaved with fillers; and (iv) the total number of variables n ≥ L, with variables outside the core appearing only in fillers (controlling the ratio L/n ). The key structural difficulty is the imbalance k/L : when it is close to 0 or 1
+
+(e.g., k = 1 or k = L), one direction of the contradiction cycle is long while the other is short, forcing long-range implication tracking before closing the cycle. 
+
+3.2. SAT Generator via Free Variables 
+
+We choose a set F ⊆ V of free variables with |F | = f ,meaning that the values of variables in F can be chosen ar-bitrarily. For every remaining variable y ∈ V \ F , we choose a parent p(y) ∈ F and a literal τ (y) ∈ { p(y), ¬p(y)}, and enforce y ↔ τ (y). Each such definition contributes two binary clauses (two implications). Every assignment to F
+
+extends uniquely to a satisfying assignment on all of V.
+
+Parameters controlling difficulty. The number of variables 
+
+n and free variables f determines the model count 2f . The 
+
+free-to-bound ratio f / (n − f ) controls coupling strength: smaller ratios induce stronger propagation from a small free set. Varying the presentation order by placing definition clauses early vs. late in the clause list to probe order sen-sitivity. The size of the formula is 2( n − f ). This isolates sensitivity to solution multiplicity (via f ) and the amount of propagation required to produce a valid assignment. 
+
+3.3. Backbone-based Method 
+
+The goal is to construct a satisfiable 2–CNF that is the conjunction of: (i) clauses that infer a planted backbone 
+
+assignment, i.e., an assignment on a subset of variables that is forced in every satisfying assignment (these variables take the same truth value in all solutions), and (ii) a remainder consisting only of monotone 2-clauses (all literals have the same polarity). We choose a backbone B ⊆ V with a planted assignment b : B → { 0, 1}, and let F = V \ B be the free part. We introduce a fresh auxiliary variable ax for each x ∈ B. The formula is a conjunction of two parts: 
+
+Φ⋆ := Φbackbone 
+
+| {z }  
+
+> infers busing only 2-clauses
+
+∧ Φmono 
+
+| {z }  
+
+> monotone 2-clauses over F
+
+.
+
+(A) Backbone inference. For every x ∈ B, we add the following clauses using a fresh auxiliary ax:Case b(x) = 1 : (x ∨ ax) ∧ (x ∨ ¬ ax),
+
+Case b(x) = 0 : (¬x ∨ ax) ∧ (¬x ∨ ¬ ax).
+
+Each pair is logically equivalent to the unit clause it emulates (respectively x or ¬x), but uses only binary clauses; thus it fixes x to b(x) in all satisfying assignments. 
+
+(B) Monotone remainder. We choose an orientation π ∈{+, −} and add only 2-clauses over variables in F :Case π = − : add clauses (¬y ∨ ¬ z) for y, z ∈ F, 
+
+Case π = + : add clauses (y ∨ z) for y, z ∈ F. 
+
+No variable from B appears in Φmono . If π = −, setting all 
+
+y ∈ F to 0 satisfies Φmono ; if π = + , setting all y ∈ F to 1
+
+does. Together with the pinned backbone, Φ⋆ is satisfiable. 
+
+Parameters controlling difficulty. Let |B| = βn and 
+
+mmono be the number of monotone clauses added over F .The part Φbackbone has exactly 2|B| clauses and |B| auxil-iaries. The total clause count is |C| = 2 |B| + mmono . Dif-ficulty is tuned via the backbone fraction β, the monotone density relative to possible pairs 2mmono   
+
+> |F|2
+
+, and the orientation 
+
+π.
+
+3.4. Monotone Split with Moving Cross-Polarity Bridge 
+
+We construct a 2–CNF such that (i) a positive-monotone part over variables P (only clauses of the form (p ∨ p′) with 3Evaluating Robustness of Reasoning Models on Parameterized Logical Problems 
+
+p, p ′ ∈ P ), (ii) a negative-monotone part over variables N
+
+(only clauses of the form (¬q ∨ ¬ q′) with q, q ′ ∈ N ), with 
+
+P ∩ N = ∅, and (iii) a single bridge clause that couples both parts (¬p⋆ ∨ q⋆) with p⋆ ∈ P and q⋆ ∈ N . The bridge is inserted at a chosen position in the clause list so we can probe when a solving method backtracks as it scans clauses. 
+
+Parameters controlling difficulty. The number of clauses is |C| = m+ + m− + 1 with m+ and m− the number of positive and negative clauses, plus the bridge. Densi-ties m+/|P | and m−/|N | and the proportion of each part control how strongly each monotone part biases decisions. 
+
+Bridge position s probes sensitivity to late coupling and potential revision during clause scanning; satisfiability is invariant under s. In particular, we parametrize generation with the overall variable density |P |+|N | 
+
+> 2|C|
+
+, the relative size of the positive part m+/|C| , and the position s ∈ [1 , |C| − 1] 
+
+of the bridge among the clauses. 
+
+3.5. Symmetry/Redundancy Probe 
+
+Given a base 2–CNF Ψ over variables V, we build a new in-stance Φ := Ψ ∧ ρ(Ψ) , where ρ is a bijective renaming from 
+
+V to a fresh, disjoint set V′ (so V ∩ V ′ = ∅). Thus Φ is the concatenation of two isomorphic, independent copies of Ψ.Comparing a model on Ψ versus on Φ reveals the method’s ability to avoid redoing symmetric/duplicated reasoning. 
+
+Properties (independence and symmetry). Independence .
+
+V and V′ are disjoint, so there is no logical interaction. Au-tomorphism. Swapping V ↔ V ′ (i.e. applying ρ or ρ−1)leaves Φ invariant. Φ has a nontrivial symmetry. Satisfiabil-ity. Φ is SAT iff Ψ is SAT. If Ψ has M models, then Φ has 
+
+M 2 models (Cartesian product across copies). If Ψ is UN-SAT, so is Φ. Absent symmetry-awareness or abstraction that reuses proofs across variable renamings, a model may re-discover the same implications twice, once per copy. 
+
+Variants and extensions. More copies. We use d > 2 dis-joint renamings to form Ψ ∧ ρ2(Ψ) ∧ · · · ∧ ρd(Ψ) , probing scaling under repeated symmetry. Copy-wise shuffles. Ran-domly permute the clause order within each copy; or apply a variable permutation per copy to avoid accidental alignment in indices. Trigger placement. If Ψ has a late trigger clause that forces a contradiction, we place its renamed counterpart early (or vice versa) to study sensitivity across copies. 
+
+## 4. Dataset construction 
+
+Verbalizers. We convert each 2–CNF into text using two approaches as illustrated in Fig 10. The template verbalizer 
+
+deterministically renders each clause into a short natural-language statement, using a fixed mapping from variables to entity names within a theme. We use 6 different templates to reformulate the SAT problem into a more practical problem: a direct verbalization of how the clause reads (logic), letter passing between people (letter), assignment of people to a blue and a red team (team), affinities between invitees to constrain a social gathering (social), room lighting rules (room), door locking (door). Each template maps a clause to a fixed sentence pattern with named entities (e.g., ¬a ∨ b
+
+becomes “either a is on the Blue team or b is on the Red team”). The mapping is deterministic and invertible, so the logical content of each clause is preserved by construction. The LLM verbalizer uses an LLM to rewrite each clause as a short narrative paragraph. We present the LLM with the two literals as natural-language statements derived from a thematic entity mapping (e.g., “the butler is innocent”, “the detective is the murderer”) and ask it to produce a paragraph expressing their disjunction. We use three themes (spy, heist, detective) to guide stylistic context. To prevent information loss, each paragraph is checked by a two-step LLM validator: it (i) extracts the two referenced entities and (ii) infers whether each is stated positively or negatively. We compare the recovered clause to the original; mismatches trigger regeneration (up to three attempts), after which we fall back to a deterministic template. On the augmented dataset, 95.4% of clauses validate on the first attempt and only 3.3% use the fallback, indicating that the verbalizer is typically semantically faithful. 
+
+Choice of generation parameters. To generate the dataset, we use difficulty the parameters described in Section 3 for each generator. To facilitate sampling, each parameter is designed to be in [0 , 1] . In our experiments, for each param-eter, we split its possible values into thirds and generate data using an easy to manipulate value close to the center of each interval of the parameter space ( 0.2 ∈ [0; 13 ], 0.5 ∈ [ 13 , 23 ],
+
+0.8 ∈ [ 23 , 1] ). When studying the impact of each parame-ter, we considered 4 additional values that correspond to the bounds of those intervals ( 0, 13 , 23 , 1). For generators where more than one major difficulty parameter identified, we vary only one parameter at a time and set the others to 
+
+0.5 to minimize the number of settings to evaluate. When generating data, the number of generated clauses is the main generation parameter, but minor differences might appear depending on the specifics of each generator. For instance, some generators are unable to generate an odd number of core clauses. Hereafter, number of clauses is given with a 
+
+±1 tolerance to best match the target difficulty. 
+
+Pipeline. For a given generator parameter combination, we generate 10 formulas and produce, for each of them, either 6 verbalizations for the template verbalizer or 3 for the LLM verbalizer (only in the ablation study Section 5.5). 4Evaluating Robustness of Reasoning Models on Parameterized Logical Problems                                                                                                                                                                                                                                                                                                                                                 
+
+> Llama-3.3 OLMo-3 Phi4 Phi4 QwQ Qwen3-Next GPT-OSS Model 70B-Instruct 32B reasoning reasoning-plus 32B 80B 120B Generator |C| Sat. Wit. Sat. Wit. Sat. Wit. Sat. Wit. Sat. Wit. Sat. Wit. Sat. Wit. ImplicationCycle 50.0 —98.3 —83.3 —95.0 —98.3 —100.0 —91.7 —10 1.7 —95.0 —83.3 —75.0 —96.7 —98.3 —95.0 —15 15.0 —96.7 —61.7 —40.0 —68.3 —96.7 —93.3 —20 18.3 —88.3 —41.7 —15.0 —65.0 —96.7 —93.3 —50 11.7 —65.0 —3.3 —0.0 —40.0 —81.7 —56.7 —75 13.3 —50.0 —1.7 —0.0 —48.3 —73.3 —45.0 —100 20.0 —51.7 —0.0 —0.0 —45.0 —76.7 —40.0 —EquivalenceCore 10 100.0 1.7 100.0 93.3 100.0 80.0 100.0 86.7 100.0 86.7 100.0 91.7 100.0 83.3
+> 15 98.3 0.0 100.0 55.0 90.0 35.0 95.0 35.0 96.7 45.0 100.0 53.3 100.0 46.7 20 96.7 0.0 91.7 56.7 86.7 21.7 83.3 38.3 86.7 43.3 100.0 63.3 100.0 50.0
+> 50 93.3 0.0 83.3 1.7 76.7 1.7 68.3 0.0 83.3 1.7 98.3 8.3 100.0 8.3
+> Backbone 20 100.0 63.3 100.0 96.7 100.0 96.7 100.0 100.0 100.0 98.3 100.0 96.7 100.0 96.7
+> 50 98.3 71.7 98.3 83.3 98.3 85.0 93.3 80.0 98.3 76.7 100.0 76.7 100.0 98.3
+> 75 96.7 51.7 90.0 36.7 96.7 58.3 73.3 38.3 96.7 65.0 100.0 75.0 98.3 88.3
+> 100 100.0 50.0 83.3 15.0 81.7 33.3 53.3 11.7 93.3 50.0 98.3 73.3 100.0 83.3
+> MonoBridge 10 100.0 55.0 100.0 98.3 100.0 98.3 100.0 98.3 100.0 90.0 100.0 100.0 100.0 100.0
+> 20 100.0 36.7 100.0 96.7 100.0 93.3 100.0 96.7 98.3 86.7 100.0 100.0 100.0 100.0
+> 50 98.3 13.3 96.7 66.7 93.3 71.7 68.3 26.7 96.7 58.3 100.0 61.7 100.0 83.3 75 100.0 13.3 95.0 18.3 75.0 35.0 51.7 11.7 68.3 28.3 93.3 60.0 100.0 68.3
+> 100 100.0 1.7 88.3 1.7 80.0 20.0 48.3 0.0 83.3 13.3 91.7 23.3 100.0 53.3
+> 150 96.7 3.3 80.0 1.7 83.3 1.7 58.3 0.0 78.3 1.7 93.3 21.7 90.0 31.7
+> 200 98.3 0.0 66.7 0.0 78.3 0.0 65.0 0.0 83.3 0.0 93.3 16.7 73.3 23.3
+
+Table 1. Satisfiability decision accuracy (Sat., %) and witness validity (Wit., %, SAT only). Each cell averages 10 formulas × 6verbalizations. Difficulty at 0.5. Best in bold, second in italics. 
+
+## 5. Experiments 
+
+Table 1 reports results for seven public reasoning models (14B to 120B) using a fixed generator with all difficulty parameters set to 0.5, varying only the number of clauses. Model details appear in Appendix Table 3. For each setting, we sample 10 formulas and generate 6 template verbaliza-tions per formula (60 prompts). We parse the SAT/UNSAT decision and, when SAT, an assignment, counting truncated or unparsable outputs as incorrect. Ablations focus on four models (Phi4-reasoning, Phi4-reasoning-plus, Qwen3-Next-80B, GPT-OSS-120B) under the same protocol unless noted. 
+
+Number of clauses as the main difficulty parameter. 
+
+Number of clauses as a primary control. Increasing |C| si-multaneously increases (i) input length and parsing burden, and (ii) the amount of structure the model must integrate to reach a consistent global conclusion. We therefore treat |C| 
+
+as the primary scaling axis. Importantly, |C| conflates core clauses (that witness SAT/UNSAT) with non-core clauses; in section 5.2 we decouple these to test whether failures are driven by reasoning depth in the core or by distractor load. Phi4-reasoning-plus frequently produces outputs that exceed our maximum output budget, leading to truncated or unparsable answers even on moderate sizes. We report these cases as incorrect (per the protocol above). Details about the truncation rate is provided in Appendix Table 4. 
+
+Validation bias and variable assignment. Models can ob-tain deceptively high decision accuracy by over-predicting SAT. To separate decision priors from constructive reason-ing, we additionally require a verifiable SAT witness: when predicting SAT, the model must output an assignment that satisfies all clauses under deterministic checking. We there-fore report (i) SAT/UNSAT decision accuracy (Sat.), and (ii) witness validity (Wit.) on SAT instances. To quantify decision bias, we also report the model’s SAT prediction rate on UNSAT instances (Appendix Table 5). Each setting contains 10 independently generated formulas; the 6 verbal-izations per formula are treated as repeated measurements and aggregated per formula for significance testing. 
+
+Generator difficulty at comparable formula size. With 
+
+|C| and difficulty fixed (0.5), ImplicationCycle is consis-tently harder than the SAT generators: UNSAT requires finding a contradiction certificate (reachability x ⇝ ¬x
+
+and ¬x ⇝ x) that depends on long-range implication in-tegration, whereas EquivalenceCore and Backbone often allow local propagation over repeated equivalence patterns. Llama-3.3-70B-Instruct also shows a strong SAT bias, pre-dicting SAT on 88.3% of UNSAT instances (Appendix Ta-ble 5). At |C| = 50 , mean accuracy suggests ImplicationCy-cle and EquivalenceCore are hardest, then Backbone, with MonoBridge easiest. Analysis below isolate the impact of core size, distractors, and clause ordering. 
+
+5.1. Impact of each difficulty parameters 
+
+To assess whether generator parameters matter beyond 
+
+|C| , we sweep each parameter over a 7-point grid 
+
+0, 0.2, 1/3, 0.5, 2/3, 0.8, 1 while fixing the others at 0.5. Each formula is one sample (10 per setting), with verbal-izations aggregated per formula. We apply Friedman’s test across levels and Benjamini–Hochberg correction within each ablation family. Sweeps are run at clause counts near 5Evaluating Robustness of Reasoning Models on Parameterized Logical Problems 0.0 0.5 1.0          
+
+> 20
+> 40
+> 60
+> 80
+> 100
+> Accuracy %
+> Backbone | |= 75 0.0 0.5 1.0
+> 25
+> 50
+> 75
+> 100
+> Accuracy %
+> Backbone | mono_density | = 75 0.0 0.5 1.0
+> 40
+> 60
+> 80
+> 100
+> Accuracy %
+> Backbone | |= 75
+> model
+> Phi4-reasoning
+> Phi4-reasoning-plus
+> Qwen3-Next-80B
+> gpt-oss-120b
+
+Figure 1. Main three difficulty parameters for Backbone at |C| = 75 . Shade corresponds to 95% confidence interval. For π, π = 0 for a negative and π = 1 for a positive monotonous part, while at π = 0 .5 the sign is randomly chosen. 0.0 0.5 1.0        
+
+> 0
+> 25
+> 50
+> 75
+> Accuracy %
+> MonoBridge | positive-part-ratio | = 75 0.0 0.5 1.0
+> 0
+> 25
+> 50
+> 75
+> 100
+> Accuracy %
+> MonoBridge | overall-density | = 75 0.0 0.5 1.0
+> 0
+> 20
+> 40
+> 60
+> 80
+> Accuracy %
+> MonoBridge | bridge-position | = 75
+> model
+> Phi4-reasoning
+> Phi4-reasoning-plus
+> Qwen3-Next-80B
+> gpt-oss-120b
+
+Figure 2. Main three difficulty parameters for MonoBridge at |C| = 75 . Shade corresponds to 95% confidence interval. 
+
+each generator’s transition region: |C| = 75 for Implica-tionCycle, MonoBridge, and Backbone, and |C| = 20 for EquivalenceCore. Appendix Table 6 reports Friedman p-values at these sizes (7-point grid) and additional results aggregated across sizes and on a 3-point grid. 
+
+MonoBridge parameters. The positive-part ratio has a significant effect ( p < 0.05 at |C| = 75 ): instances are hardest near a balanced split (ratio ≈ 0.5) and easier when one monotone region dominates, consistent with a simple majority-assignment heuristic in the imbalanced regime and the need to reason about the cross-polarity bridge when bal-anced. Variable density also has a strong effect ( p ≪ 0.001 ): low density favors simplification via repeated variables, in-termediate density produces a performance valley, and some large models recover at high density as the bridge becomes more salient. Qwen3 Next-80B and GPT-OSS-120B in par-ticular shift strategy around density 0.6 to 0.8, improving by exploiting the bridge rather than brute-force simplification. Bridge position is not significant, plausibly because models often treat clauses as an unordered constraint set rather than processing them sequentially. The bridge position is not sig-nificant under our current protocol. The reason is that many models do not process clauses strictly sequentially: they often restate the problem as an unordered set of constraints before attempting simplification. 
+
+Backbone parameters. The three difficulty parameters identified for Backbone have limited impact on the perfor-mance compared to, for instance, the number of clauses. First, the backbone fraction β has the most significant ef-fect on the performance ( p-value < 0.005 for |C| = 75 0.0 0.5 1.0  
+
+> 0
+> 25
+> 50
+> 75
+> 100
+> Accuracy %
+> EquivalenceCore | free_to_bound_ratio | = 20
+> model
+> Phi4-reasoning
+> Phi4-reasoning-plus
+> Qwen3-Next-80B
+> gpt-oss-120b
+
+Figure 3. Main difficulty parameter for EquivalenceCore at |C| =20 . Shade corresponds to 95% confidence interval. 
+
+and p-value < 0.02 overall), but this effect is marginal compared to the effect of the difficulty parameters of the other generators, with a drop of around 10% in the average performance between β = 0 and β = 1 . This indicates that the backbone part, that has pairs of related clauses, is more complex to handle than the monotonous part. While the density of the monotonous part (mono density) has the next most significant impact on performance, it is signifi-cant only when considering |C| = 75 where we observe an increase in performance of up to 20% for the worst model (p-value < 0.005 for |C| = 75 and p-value = 0 .31 overall). Higher monotonous density means fewer distinct literals and stronger propagation. Finally, the polarity π of the monotonous part has no significant impact on the perfor-mance, with models manipulating literal polarity without issues in the CoT traces we analyzed (all p-values > 0.9). 
+
+EquivalenceCore parameter. The free-to-bound variable ratio has a very striking and consistent impact on perfor-mance as can be seen in Figure 3, with a consistent effect on 6Evaluating Robustness of Reasoning Models on Parameterized Logical Problems 0.0 0.5 1.0  
+
+> 0
+> 25
+> 50
+> 75
+> 100
+> Accuracy %
+> ImplicationCycle | forward-path-length | = 75
+> model
+> Phi4-reasoning
+> Phi4-reasoning-plus
+> Qwen3-Next-80B
+> gpt-oss-120b
+
+Figure 4. Main difficulty parameter for implication cycle at |C| =75 . Shade corresponds to 95% confidence interval. 75,0 75,25 100,0         
+
+> 0
+> 50
+> Accuracy %  p<.001
+> ***
+> p=0.008
+> **
+> G = Backbone
+> 20,0 20,30 50,0
+> p=0.002
+> **
+> p=0.05
+> *
+> G = EquivalenceCore
+> 75,0 75,25 100,0
+> | |, r
+> 0
+> 50
+> Accuracy %  p=0.09
+> ns
+> p=0.54
+> ns
+> G = ImplicationCycle
+> 75,0 75,25 100,0
+> | |, r
+> p<.001
+> ***
+> p<.001
+> ***
+> G = MonoBridge
+
+Figure 5. Comparison of decision accuracy on satisfiability (UN-SAT problems) and SAT witness validity (SAT problems), between the construction order and a shuffling of the clauses. All difficulty parameters are set at 0.5. Error bars are 95% confidence intervals across models and verbalization templates. 
+
+all tested number of clauses ( p-value < 0.005 for |C| = 20 
+
+and p-value = 0 .31 overall). High values of the ratio, cor-responding to low propagation, are significantly harder to solve than low ratios, as the models rely on early simplifi-cation of equivalence classes through propagation. Across CoT traces, all models managed to properly identify equiva-lences from the 2–CNF in its construction order. 
+
+ImplicationCycle parameter. The ImplicationCycle split parameter ( k/m ) affects performance mainly at larger sizes: extreme splits create one short side of the contradiction cycle, offering a shorter certificate path to track, while near-balanced splits force long-range reachability reasoning in both directions. The effect is significant at |C| = 75 but does not consistently generalize across sizes, so we see it as a targeted brittleness regime rather than a universal trend. 
+
+5.2. Impact of non-core variables 
+
+To test sensitivity to variables irrelevant to satisfiability, we add filler clauses over fresh variables. Let Vfresh be disjoint from the core variable set and define literals ℓi ∈ vi, ¬vi
+
+for vi ∈ Vfresh . We sample filler clauses from pairs of these literals, choosing |Vfresh | so filler and core clauses have comparable variable density. We use two comparison 50 75 100         
+
+> 0
+> 100
+> Accuracy %  G = Backbone
+> 15 20 50
+> G = EquivalenceCore
+> 20 50 75 100
+> | |
+> 0
+> 100
+> Accuracy %  G = ImplicationCycle
+> 75 100 150 200
+> | |
+> G = MonoBridge
+> Shuffle clauses
+> False
+> True
+
+Figure 6. Comparison of accuracy between the construction order and a shuffling of the clauses. All difficulty parameters are set at 0.5. Error bars are 95% confidence intervals. For UNSAT problems, accuracy is measured on the prediction of satisfiability, and on variable assignment for SAT problems. 50 50x2 
+
+> interleave
+> 50x2
+> grouped
+> 100
+
+Redundancy 
+
+> 0
+> 50
+> Accuracy %
+
+shuffle_clauses 
+
+> False
+> True
+
+Figure 7. Comparison of accuracy when duplicating the clauses. All difficulty parameters are set at 0.5. Error bars are 95% confi-dence intervals. For UNSAT, accuracy is measured on the predic-tion of satisfiability, and on variable assignment for SAT problems. 
+
+regimes: fixed core size and matched total clause count. Concretely, we compare (|C| = 75 , r = 25) to (75 , 0) and 
+
+(100 , 0) , and (|C| = 20 , r = 30) to (20 , 0) and (50 , 0) .At difficulty 0.5, trends are visible but rarely significant, so we report results on the 3-level grid from Section 5.1 (0.2, 0.5, 0.8). For all generators except ImplicationCycle, adjacent settings differ significantly (paired t-tests; see Fig-ure 5). Filler clauses significantly hurt EquivalenceCore, Backbone, and MonoBridge when the core size is fixed. Under matched total clauses, EquivalenceCore behaves dif-ferently: a smaller equivalence core plus filler can be easier than a larger core alone. Trace inspection suggests mod-els prioritize equivalences, but when they fail to compress equivalence classes, they repeatedly re-verify local consis-tency, making equivalences more costly than filler. For Backbone and MonoBridge, filler mainly adds noise, since their monotone regions already resemble filler structure, which further obscures the global pattern. 
+
+5.3. Sensitivity to clause order 
+
+We compare in Figure 6 our four main models under two clause orders: (i) the generator construction order (see Sec-7Evaluating Robustness of Reasoning Models on Parameterized Logical Problems 0 50 100       
+
+> 0
+> 50
+> 100
+> Accuracy %
+> Backbone
+> 020 40
+> EquivalenceCore
+> 050 100
+> | |
+> 0
+> 50
+> 100
+> Accuracy %
+> ImplicationCycle
+> 0100 200
+> | |
+> MonoBridge
+> Verbalizer
+> template
+> door
+> logic
+> room
+> letter
+> team
+> social
+
+Figure 8. Decision accuracy on UNSAT and SAT witness validity against number of clauses for each generator, depending on the verbalization template used. Shade is the 95% confidence interval. 10 15 20    
+
+> 0
+> 50
+> 100
+> Accuracy %
+> Backbone
+> 10 20
+> EquivalenceCore
+> 10 20
+> | |
+> 0
+> 50
+> 100
+> Accuracy %
+> ImplicationCycle
+> 20 40
+> | |
+> MonoBridge
+> LLM
+> augmentation
+> theme
+> heist
+> detective
+> spy
+
+Figure 9. Decision accuracy on UNSAT and SAT witness validity against number of clauses for each generator, depending on the LLM verbalization theme used. Error bars are 95% confidence intervals. 
+
+tion 3) and (ii) a random permutation. Clause order signifi-cantly affects performance for all generators (paired t-tests, 
+
+p < 0.003 ), with a weaker but still significant effect for Im-plicationCycle ( p = 0 .035 ). For EquivalenceCore, shuffling is beneficial. As discussed in Section 5.2, when implica-tion structure is poorly formalized, contiguous implication chains can act as misleading local patterns; shuffling breaks these groupings by separating related clauses, reducing early commitment to an incorrect structure. 
+
+5.4. Ability to handle repeated patterns 
+
+We report in Figure 7 results for Backbone at medium dif-ficulty (all parameters set to 0.5) under clause repetition. We duplicate a base set of 50 clauses to obtain 100 clauses, using a fresh variable-to-entity mapping for the copy. We test two layouts: grouped , where the copy forms the last 50 clauses, and interleave , where copied clauses are randomly interleaved while preserving their internal order. We also compare against random clause permutations. Performance at 50 clauses differs significantly from all other variants (independent t-tests, p < 0.001 ). Shuffling significantly degrades performance within each setting (paired t-tests, 
+
+p < 0.001 ), except for 50 ×2 interleave (p = 0 .036 ). Dif-ferences between the 50 ×2 and 100-distinct-clauses condi-tions are not significant ( p > 0.1), suggesting that repeating clauses is about as hard as adding distinct ones. Reason-ing traces indicate that models rarely detect or exploit the repeated pattern. 
+
+5.5. Verbalization strategy 
+
+As shown in Figure 8, template-only verbalizations yield similar performance across templates, indicating little sensi-tivity to surface wording when the clause structure is explicit. In contrast, LLM verbalizer substantially degrades accuracy (Figure 9): at comparable clause sizes, performance drops by about 25 points relative to Figure 8. We attribute this mainly to increased contextual noise and weaker structural cues, which make clause extraction harder even though the underlying 2-CNF is information-preserving and can be recovered when models are explicitly prompted to do so (Section 3.5). Across themes, detective narratives are hardest, followed by spy, then heist, consistent with the intended stylistic bias. Detective stories tend to be more indirect, which further obscures the logical form. For Im-plicationCycle, theme effects are smaller: the shared-literal chain induces more coherent narratives, improving verbal-ization consistency and partially mitigating theme differ-ences. Overall, templates make the 2-CNF structure easy to recognize, whereas LLM narratives often impede structure recovery and lead models to miss global logical patterns. 
+
+## 6. Conclusion 
+
+We introduce a diagnostic 2-SAT benchmark based on pa-rameterized 2-CNF families with controllable implication-graph structure, together with semantics-preserving pertur-bations such as clause reordering, variable renaming, and non-core fillers. This setup tests whether solver-like behav-ior remains stable when satisfiability is unchanged but the presentation and the required witness structure are altered. Across several reasoning models, these targeted interven-tions induce sharp performance shifts even at fixed instance size. Long-cycle UNSAT instances are particularly brittle, and the gap between decision accuracy and assignment va-lidity shows that correct predictions can mask weak witness construction. Sensitivity to ordering, fillers, and repetition further points to limited invariance and limited reuse of intermediate structure. 8Evaluating Robustness of Reasoning Models on Parameterized Logical Problems 
+
+## Impact Statement 
+
+This paper presents work whose goal is to advance the un-derstanding of reasoning capabilities and failure modes in large language models through controlled diagnostic evalu-ation on logical satisfiability problems. We do not foresee specific negative societal consequences of this work. By exposing brittleness regimes that are invisible to aggregate accuracy metrics, our benchmark may contribute to more re-liable deployment of LLM-based reasoners in safety-critical applications where logical consistency matters. Looking ahead, two directions seem promising. First, ex-tend the same recipe to richer constraint classes, for example k-SAT with planted structure, bounded-width CNF families, or SAT-to-proof settings, to test whether similar brittleness regimes persist. Second, use these diagnostics to guide model and decoding design toward explicit, reusable inter-mediate structure, such as induced implication graphs or SCC certificates, and toward invariances like order and re-naming invariance that appear critical for robust reasoning. 
+
+## Acknowledgment 
+
+This work was supported by ANR-22-CE23-0002 ERIANA and was granted access to the HPC resources of IDRIS under the allocation 2026-AD011013338 made by GENCI. 
+
+## References 
+
+Ariyani, N. F., Bouraoui, Z., Booth, R., and Schockaert, S. There’s no such thing as simple reasoning for llms. In Che, W., Nabende, J., Shutova, E., and Pilehvar, M. T. (eds.), Findings of the Association for Computational Linguistics, ACL 2025, Vienna, Austria, July 27 - August 1, 2025 , pp. 4503–4514. Association for Computational Linguistics, 2025. URL https://aclanthology. org/2025.findings-acl.232/ .Bubeck, S., Chandrasekaran, V., Eldan, R., Gehrke, J., Horvitz, E., Kamar, E., Lee, P., Lee, Y. T., Li, Y., Lund-berg, S., Nori, H., Palangi, H., Ribeiro, M. T., and Zhang, Y. Sparks of artificial general intelligence: Early experi-ments with gpt-4, 2023. URL https://arxiv.org/ abs/2303.12712 .Clark, P., Tafjord, O., and Richardson, K. Transform-ers as soft reasoners over language. In Bessiere, C. (ed.), Proceedings of the Twenty-Ninth International Joint Conference on Artificial Intelligence, IJCAI 2020 , pp. 3882–3890. ijcai.org, 2020. doi: 10.24963/ijcai.2020/ 537. URL https://doi.org/10.24963/ijcai. 2020/537 .Creswell, A., Shanahan, M., and Higgins, I. Selection-inference: Exploiting large language models for inter-pretable logical reasoning. In The Eleventh Interna-tional Conference on Learning Representations, ICLR 2023, Kigali, Rwanda, May 1-5, 2023 . OpenReview.net, 2023. URL https://openreview.net/forum? id=3Pf3Wg6o-A4 .Das, A., Khalid, I., Pe ˜naloza, R., and Schockaert, S. When no paths lead to Rome: Benchmarking systematic neural relational reasoning. In Proceedings of The Thirty-Ninth Annual Conference on Neural Information Processing Systems , 2025. Giadikiaroglou, P., Lymperaiou, M., Filandrianos, G., and Stamou, G. Puzzle solving using reasoning of large lan-guage models: A survey. In Al-Onaizan, Y., Bansal, M., and Chen, Y. (eds.), Proceedings of the 2024 Confer-ence on Empirical Methods in Natural Language Process-ing, EMNLP 2024, Miami, FL, USA, November 12-16, 2024 , pp. 11574–11591. Association for Computational Linguistics, 2024. doi: 10.18653/V1/2024.EMNLP-MAIN.646. URL https://doi.org/10.18653/ v1/2024.emnlp-main.646 .Han, S., Schoelkopf, H., Zhao, Y., Qi, Z., Riddell, M., Zhou, W., Coady, J., Peng, D., Qiao, Y., Benson, L., Sun, L., Wardle-Solano, A., Szab ´o, H., Zubova, E., Burtell, M., Fan, J., Liu, Y., Wong, B., Sailor, M., Ni, A., Nan, L., Kasai, J., Yu, T., Zhang, R., Fabbri, A. R., Kryscinski, W., Yavuz, S., Liu, Y., Lin, X. V., Joty, S., Zhou, Y., Xiong, C., Ying, R., Cohan, A., and Radev, D. FOLIO: natural language reasoning with first-order logic. In Al-Onaizan, Y., Bansal, M., and Chen, Y. (eds.), Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing, EMNLP 2024, Miami, FL, USA, November 12-16, 2024 ,pp. 22017–22031, 2024a. URL https://dblp.org/ rec/conf/emnlp/HanS0QRZCPQBSWS24 .Han, S., Yu, A., Shen, R., Qi, Z., Riddell, M., Zhou, W., Qiao, Y., Zhao, Y., Yavuz, S., Liu, Y., Joty, S., Zhou, Y., Xiong, C., Radev, D., Ying, R., and Cohan, A. P-FOLIO: evaluating and improving logical reason-ing with abundant human-written reasoning chains. In Al-Onaizan, Y., Bansal, M., and Chen, Y. (eds.), Find-ings of the Association for Computational Linguistics: EMNLP 2024, Miami, Florida, USA, November 12-16, 2024 , pp. 16553–16565. Association for Computational Linguistics, 2024b. doi: 10.18653/V1/2024.FINDINGS-EMNLP.966. URL https://doi.org/10.18653/ v1/2024.findings-emnlp.966 .Hazra, R., Venturato, G., Dos Martires, P. Z., and De Raedt, L. Have large language models learned to reason? acharacterization via 3-SAT. In Second Conference on Language Modeling , 2025. 9Evaluating Robustness of Reasoning Models on Parameterized Logical Problems 
+
+Heyman, A. and Zylberberg, J. Evaluating the system-atic reasoning abilities of large language models through graph coloring. CoRR , abs/2502.07087, 2025. doi: 10.48550/ARXIV.2502.07087. URL https://doi. org/10.48550/arXiv.2502.07087 .Jiang, D., Fonseca, M., and Cohen, S. LeanReasoner: Boost-ing complex logical reasoning with lean. In Duh, K., Gomez, H., and Bethard, S. (eds.), Proceedings of the 2024 Conference of the North American Chapter of the Association for Computational Linguistics: Human Lan-guage Technologies (Volume 1: Long Papers) , pp. 7497– 7510, Mexico City, Mexico, June 2024. Association for Computational Linguistics. doi: 10.18653/v1/2024.naacl-long.416. URL https://aclanthology.org/ 2024.naacl-long.416/ .Kazemi, M., Yuan, Q., Bhatia, D., Kim, N., Xu, X., Imbrasaite, V., and Ramachandran, D. BoardgameQA: A dataset for natural language reasoning with contradictory information. In Oh, A., Naumann, T., Globerson, A., Saenko, K., Hardt, M., and Levine, S. (eds.), Advances in Neural Information Processing Systems 36: Annual Conference on Neural Information Processing Systems 2023, NeurIPS 2023, New Orleans, LA, USA, Decem-ber 10 - 16, 2023 , 2023a. URL http://papers. nips.cc/paper_files/paper/2023/hash/ 7adce80e86aa841490e6307109094de5-Abstract-Datasets_and_Benchmarks.html .Kazemi, M., Yuan, Q., Bhatia, D., Kim, N., Xu, X., Im-brasaite, V., and Ramachandran, D. Boardgameqa: A dataset for natural language reasoning with contradic-tory information. CoRR , abs/2306.07934, 2023b. doi: 10.48550/ARXIV.2306.07934. URL https://doi. org/10.48550/arXiv.2306.07934 .Kojima, T., Gu, S. S., Reid, M., Matsuo, Y., and Iwasawa, Y. Large language models are zero-shot reasoners. In Koyejo, S., Mohamed, S., Agarwal, A., Belgrave, D., Cho, K., and Oh, A. (eds.), Advances in Neural Information Processing Systems 35: Annual Conference on Neural Information Processing Systems 2022, NeurIPS 2022, New Orleans, LA, USA, November 28 - December 9, 2022 , 2022. URL http://papers. nips.cc/paper_files/paper/2022/hash/ 8bb0d291acd4acf06ef112099c16f326-Abstract-Conference.html .Li, D., Cao, S., Griggs, T., Liu, S., Mo, X., Tang, E., Hegde, S., Hakhamaneshi, K., Patil, S. G., Zaharia, M., Gonzalez, J. E., and Stoica, I. LLMs can easily learn to reason from demonstrations structure, not content, is what matters! 
+
+CoRR , abs/2502.07374, 2025. doi: 10.48550/ARXIV. 2502.07374. URL https://doi.org/10.48550/ arXiv.2502.07374 .Lin, B. Y., Bras, R. L., Richardson, K., Sabharwal, A., Poovendran, R., Clark, P., and Choi, Y. Zebralogic: On the scaling limits of llms for logical reasoning. 
+
+CoRR , abs/2502.01100, 2025. doi: 10.48550/ARXIV. 2502.01100. URL https://doi.org/10.48550/ arXiv.2502.01100 .Liu, J., Cui, L., Liu, H., Huang, D., Wang, Y., and Zhang, Y. LogiQA: A challenge dataset for machine reading comprehension with logical reasoning. In Bessiere, C. (ed.), Proceedings of the Twenty-Ninth International Joint Conference on Artificial Intelligence, IJCAI 2020 , pp. 3622–3628. ijcai.org, 2020. doi: 10.24963/IJCAI.2020/ 501. URL https://doi.org/10.24963/ijcai. 2020/501 .Pan, L., Ganesh, V., Abernethy, J. D., Esposo, C., and Lee, W. Can transformers reason logically? A study in SAT solving. CoRR , abs/2410.07432, 2024. doi: 10.48550/ ARXIV.2410.07432. URL https://doi.org/10. 48550/arXiv.2410.07432 .Parmar, M., Patel, N., Varshney, N., Nakamura, M., Luo, M., Mashetty, S., Mitra, A., and Baral, C. LogicBench: Towards systematic evaluation of logical reasoning abil-ity of large language models. In Ku, L.-W., Martins, A., and Srikumar, V. (eds.), Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers) , pp. 13679–13707, Bangkok, Thailand, August 2024. Association for Com-putational Linguistics. doi: 10.18653/v1/2024.acl-long. 739. URL https://aclanthology.org/2024. acl-long.739/ .Patel, A., Li, B., Rasooli, M. S., Constant, N., Raffel, C., and Callison-Burch, C. Bidirectional language models are also few-shot learners. In The Eleventh Interna-tional Conference on Learning Representations, ICLR 2023, Kigali, Rwanda, May 1-5, 2023 . OpenReview.net, 2023. URL https://openreview.net/forum? id=wCFB37bzud4 .Rameshkumar, R., Huang, J., Sun, Y., Xia, F., and Saparov, A. Reasoning models reason well, until they don’t. 
+
+CoRR , abs/2510.22371, 2025. doi: 10.48550/ARXIV. 2510.22371. URL https://doi.org/10.48550/ arXiv.2510.22371 .Richardson, K. and Sabharwal, A. Pushing the limits of rule reasoning in transformers through natural language satisfiability. In Thirty-Sixth AAAI Conference on Artifi-cial Intelligence, AAAI 2022, Thirty-Fourth Conference on Innovative Applications of Artificial Intelligence, IAAI 2022, The Twelveth Symposium on Educational Advances in Artificial Intelligence, EAAI 2022 Virtual Event, Febru-ary 22 - March 1, 2022 , pp. 11209–11219. AAAI Press, 10 Evaluating Robustness of Reasoning Models on Parameterized Logical Problems 
+
+2022. doi: 10.1609/aaai.v36i10.21371. URL https: //doi.org/10.1609/aaai.v36i10.21371 .Saeed, M., Ahmadi, N., Nakov, P., and Papotti, P. Rule-BERT: Teaching soft rules to pre-trained language mod-els. In Moens, M.-F., Huang, X., Specia, L., and Yih, S. W.-t. (eds.), Proceedings of the 2021 Conference on Empirical Methods in Natural Language Process-ing , pp. 1460–1476, Online and Punta Cana, Domini-can Republic, November 2021. Association for Com-putational Linguistics. doi: 10.18653/v1/2021.emnlp-main.110. URL https://aclanthology.org/ 2021.emnlp-main.110/ .Saha, S., Ghosh, S., Srivastava, S., and Bansal, M. PRover: Proof generation for interpretable reasoning over rules. In Webber, B., Cohn, T., He, Y., and Liu, Y. (eds.), Pro-ceedings of the 2020 Conference on Empirical Meth-ods in Natural Language Processing (EMNLP) , pp. 122– 136, Online, November 2020. Association for Computa-tional Linguistics. doi: 10.18653/v1/2020.emnlp-main. 9. URL https://aclanthology.org/2020. emnlp-main.9/ .Saparov, A. and He, H. Language models are greedy reasoners: A systematic formal analysis of chain-of-thought. In The Eleventh International Conference on Learning Representations, ICLR 2023, Kigali, Rwanda, May 1-5, 2023 . OpenReview.net, 2023. URL https: //openreview.net/forum?id=qFVVBzXxR2V .Shojaee, P., Mirzadeh, I., Alizadeh, K., Horton, M., Ben-gio, S., and Farajtabar, M. The illusion of think-ing: Understanding the strengths and limitations of reasoning models via the lens of problem complexity. 
+
+CoRR , abs/2506.06941, 2025. doi: 10.48550/ARXIV. 2506.06941. URL https://doi.org/10.48550/ arXiv.2506.06941 .Sinha, K., Sodhani, S., Dong, J., Pineau, J., and Hamil-ton, W. L. CLUTRR: A diagnostic benchmark for in-ductive reasoning from text. In Inui, K., Jiang, J., Ng, V., and Wan, X. (eds.), Proceedings of the 2019 Confer-ence on Empirical Methods in Natural Language Pro-cessing and the 9th International Joint Conference on Natural Language Processing, EMNLP-IJCNLP 2019, Hong Kong, China, November 3-7, 2019 , pp. 4505–4514. Association for Computational Linguistics, 2019. doi: 10.18653/V1/D19-1458. URL https://doi.org/ 10.18653/v1/D19-1458 .Stechly, K., Valmeekam, K., Gundawar, A., Palod, V., and Kambhampati, S. Beyond semantics: The unrea-sonable effectiveness of reasonless intermediate tokens. 
+
+CoRR , abs/2505.13775, 2025. doi: 10.48550/ARXIV. 2505.13775. URL https://doi.org/10.48550/ arXiv.2505.13775 .Tafjord, O., Dalvi, B., and Clark, P. ProofWriter: Gen-erating implications, proofs, and abductive statements over natural language. In Zong, C., Xia, F., Li, W., and Navigli, R. (eds.), Findings of the Association for Com-putational Linguistics: ACL-IJCNLP 2021 , pp. 3621– 3634, Online, August 2021. Association for Computa-tional Linguistics. doi: 10.18653/v1/2021.findings-acl. 317. URL https://aclanthology.org/2021. findings-acl.317/ .Tian, J., Li, Y., Chen, W., Xiao, L., He, H., and Jin, Y. Di-agnosing the first-order logical reasoning ability through LogicNLI. In Moens, M.-F., Huang, X., Specia, L., and Yih, S. W.-t. (eds.), Proceedings of the 2021 Confer-ence on Empirical Methods in Natural Language Pro-cessing , pp. 3738–3747, Online and Punta Cana, Do-minican Republic, November 2021. Association for Com-putational Linguistics. doi: 10.18653/v1/2021.emnlp-main.303. URL https://aclanthology.org/ 2021.emnlp-main.303/ .Valmeekam, K., Stechly, K., and Kambhampati, S. LLMs still can’t plan; can LRMs? A preliminary evaluation of OpenAI’s o1 on PlanBench. CoRR , abs/2409.13373, 2024. doi: 10.48550/ARXIV.2409.13373. URL https: //doi.org/10.48550/arXiv.2409.13373 .Valmeekam, K., Stechly, K., Gundawar, A., and Kamb-hampati, S. A systematic evaluation of the planning and scheduling abilities of the reasoning model o1. 
+
+Trans. Mach. Learn. Res. , 2025, 2025. URL https: //openreview.net/forum?id=FkKBxp0FhR .Wang, B., Min, S., Deng, X., Shen, J., Wu, Y., Zettle-moyer, L., and Sun, H. Towards understanding chain-of-thought prompting: An empirical study of what mat-ters. In Rogers, A., Boyd-Graber, J., and Okazaki, N. (eds.), Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers) , pp. 2717–2739, Toronto, Canada, July 2023. Association for Computational Linguistics. doi: 10.18653/v1/2023.acl-long.153. URL https: //aclanthology.org/2023.acl-long.153/ .Wei, A., Wu, Y., Wan, Y., Suresh, T., Tan, H., Zhou, Z., Koyejo, S., Wang, K., and Aiken, A. SAT-Bench: Benchmarking LLMs’ logical reasoning via automated puzzle generation from SAT formulas. In Christodoulopoulos, C., Chakraborty, T., Rose, C., and Peng, V. (eds.), Proceedings of the 2025 Conference on Empirical Methods in Natural Language Process-ing , pp. 33832–33849, Suzhou, China, November 2025. Association for Computational Linguistics. ISBN 979-8-89176-332-6. doi: 10.18653/v1/2025.emnlp-main. 1716. URL https://aclanthology.org/2025. emnlp-main.1716/ .11 Evaluating Robustness of Reasoning Models on Parameterized Logical Problems 
+
+Yu, W., Jiang, Z., Dong, Y., and Feng, J. Reclor: A reading comprehension dataset requiring logical reasoning. In 8th International Conference on Learning Representations, ICLR 2020, Addis Ababa, Ethiopia, April 26-30, 2020 .OpenReview.net, 2020. URL https://openreview. net/forum?id=HJgJtT4tvB .Zhang, H., Li, L. H., Meng, T., Chang, K., and den Broeck, G. V. On the paradox of learning to reason from data. In Proceedings of the Thirty-Second Interna-tional Joint Conference on Artificial Intelligence, IJCAI 2023, 19th-25th August 2023, Macao, SAR, China , pp. 3365–3373. ijcai.org, 2023. doi: 10.24963/ijcai.2023/ 375. URL https://doi.org/10.24963/ijcai. 2023/375 .Zhu, Q., Huang, F., Peng, R., Lu, K., Yu, B., Cheng, Q., Qiu, X., Huang, X., and Lin, J. Autologi: Automated generation of logic puzzles for evaluating reasoning abil-ities of large language models. CoRR , abs/2502.16906, 2025. doi: 10.48550/ARXIV.2502.16906. URL https: //doi.org/10.48550/arXiv.2502.16906 .12 Evaluating Robustness of Reasoning Models on Parameterized Logical Problems 
+
+## A. Background 
+
+Let V be a finite set of variables. A literal is either a variable p (positive) or its negation ¬p (negative). Two literals are complementary if one is the negation of the other. A clause is a disjunction of literals. A formula is in Conjunctive Normal Form (CNF) if it is a conjunction of clauses. A 
+
+2–CNF formula is a CNF formula where each clause contains at most two literals. An interpretation is a function ω : V −→ { 0, 1}, where 1 stands for true and 0 for false . It is extended to formulas as follows: ω(¬φ) = 1 − ω(φ), ω(φ ∧ ψ) = min( ω(φ), ω (ψ)) , and ω(φ ∨ ψ) = max( ω(φ), ω (ψ)) .A model of a formula φ is an interpretation ω that satisfies the formula: ω(φ) = 1 . In particular, ω is a model of a CNF formula φ if and only if for each clause c in φ, there exists a literal l in c such that ω(l) = 1 .A formula is satisfiable if and only if it has at least one model; otherwise, it is unsatisfiable .
+
+Definition A.1 (Implication Graph) . Let φ be a 2–CNF formula. The implication graph of φ is a directed graph G = ( V, E ),where V = Lit (V ar (φ)) and E = S{{ (l, l ′), (l′, l )} : l ∨ l′ ∈ φ or (l ∈ ϕ and l′ = l)}.We use l ⇝ l′ to denote that there is a path from l to l′ in the implication graph. 
+
+Definition A.2 (Proof Cycle) . Let φ be an unsatisfiable 2–CNF formula. A proof cycle of the unsatisfiability of φ is a cycle 
+
+l → l1 → · · · lk → l in the implication graph of ϕ, where there exists i ∈ { 1, . . . , k } such that li = l.
+
+Theorem A.3. A 2–CNF formula is unsatisfiable iff it admits a proof cycle. 
+
+## B. UNSAT Generator using Implication Cycles 
+
+We create one clause per implication shown above: 
+
+(¬ℓ1 ∨ ℓ2), (¬ℓ2 ∨ ℓ3), . . . , (¬ℓk−1 ∨ ℓk), (¬ℓk ∨ ¬ ℓ1),
+
+(¬¬ ℓ1 ∨ ℓk+1 ), (¬ℓk+1 ∨ ℓk+2 ), . . . , (¬ℓm−1 ∨ ℓm), (¬ℓm ∨ ℓ1).
+
+We describe our generator in Algorithm 1. 
+
+Example 1 (UNSAT core with m=5 , k=3 ). Let (ℓ1, . . . , ℓ 5) = ( v1, ¬v2, v 3, v 4, ¬v5). Core clauses: 
+
+(¬v1 ∨ ¬ v2), (v2 ∨ v3), (¬v3 ∨ ¬ v1),
+
+(v1 ∨ v4), (¬v4 ∨ ¬ v5), (v5 ∨ v1).
+
+This forces v1 ⇝ ¬v1 and ¬v1 ⇝ v1, hence UNSAT. 
+
+## C. SAT Generator via Free Variables 
+
+For each y ∈ V \ F :
+
+τ (y) = p(y) : (¬y ∨ p(y)) ∧ (¬p(y) ∨ y), τ (y) = ¬p(y) : (¬y ∨ ¬ p(y)) ∧ (p(y) ∨ y).
+
+This generator is described in Algorithm 2. 
+
+Example 2. Let F = {p} (free) and define q ↔ ¬ p, r ↔ p. Clauses: 
+
+(¬q ∨ ¬ p) ∧ (p ∨ q) ∧ (¬r ∨ p) ∧ (¬p ∨ r).
+
+There are exactly two models, extending p ∈ { 0, 1}.13 Evaluating Robustness of Reasoning Models on Parameterized Logical Problems 
+
+Algorithm 1 GENERATE UNSAT 2CNF (n, m, k, r, shuffle )
+
+Require: n ≥ m ≥ 2, 1 ≤ k ≤ m, r ≥ 0, shuffle ∈ { true , false } 
+
+> 1:
+
+Create variables V = {x1, . . . , x n}; pick distinct v1, . . . , v m ∈ V  
+
+> 2:
+
+For i = 1 ..m , choose a polarity ℓi ∈ { vi, ¬vi} 
+
+> 3:
+
+Initialize clause set C ← ∅ { Forward part } 
+
+> 4:
+
+for i = 1 to k − 1 do  
+
+> 5:
+
+C ← C ∪ { (¬ℓi ∨ ℓi+1 )} 
+
+> 6:
+
+end for  
+
+> 7:
+
+C ← C ∪ { (¬ℓk ∨ ¬ ℓ1)} { Backward part } 
+
+> 8:
+
+C ← C ∪ { (¬¬ ℓ1 ∨ ℓk+1 )} 
+
+> 9:
+
+for i = k + 1 to m − 1 do  
+
+> 10:
+
+C ← C ∪ { (¬ℓi ∨ ℓi+1 )} 
+
+> 11:
+
+end for  
+
+> 12:
+
+C ← C ∪ { (¬ℓm ∨ ℓ1)} { Fillers } 
+
+> 13:
+
+for j = 1 to r do  
+
+> 14:
+
+Add a filler clause (λ ∨ λ′) over V (optionally avoid tautologies)  
+
+> 15:
+
+end for  
+
+> 16:
+
+if shuffle then  
+
+> 17:
+
+Randomly permute C 
+
+> 18:
+
+end if  
+
+> 19:
+
+Output Φ = V 
+
+> C∈C
+
+C =0 
+
+Algorithm 2 GENERATE SAT 2CNF (n, f )
+
+Require: n ≥ 1, 0 ≤ f ≤ n 
+
+> 1:
+
+Create variables V = {x1, . . . , x n}; choose free set F ⊆ V with |F | = f 
+
+> 2:
+
+C ← ∅  
+
+> 3:
+
+for each y ∈ V \ F do  
+
+> 4:
+
+Pick p(y) ∈ F and sign s ∈ { +1 , −1} 
+
+> 5:
+
+if s = +1 then  
+
+> 6:
+
+C ← C ∪ { (¬y ∨ p(y)) , (¬p(y) ∨ y)} 
+
+> 7:
+
+else  
+
+> 8:
+
+C ← C ∪ { (¬y ∨ ¬ p(y)) , (p(y) ∨ y)} 
+
+> 9:
+
+end if  
+
+> 10:
+
+end for  
+
+> 11:
+
+Output Φ = V 
+
+> C∈C
+
+C =0 14 Evaluating Robustness of Reasoning Models on Parameterized Logical Problems 
+
+## D. Backbone-based Method 
+
+Pseudocode: 
+
+1. Input: n, B ⊆ V , planted b, orientation π ∈ { +, −} , mmono .2. F ← V \ B; initialize clause multiset C ← ∅ .3. For each x ∈ B: introduce ax and add (x ∨ ax), (x ∨ ¬ ax) if b(x) = 1 , else (¬x ∨ ax), (¬x ∨ ¬ ax).4. Repeat mmono times: sample y, z ∈ F , y̸ = z, and add (¬y ∨ ¬ z) if π = −, else (y ∨ z).5. Output Φ⋆ = V 
+
+> C∈C
+
+C.
+
+## E. Monotone Split with a Moving Cross-Polarity Bridge 
+
+Construction: 
+
+1. Disjoint variable sets. Partition the variables into P = {p1, . . . , p n+ } and N = {n1, . . . , n n− } with P ∩ N = ∅.2. Positive-monotone core Φ+. Generate m+ clauses, each (pi ∨ pj ) for some pi, p j ∈ P (avoid tautologies and duplicates if desired). 3. Negative-monotone core Φ−. Generate m− clauses, each (¬ni ∨ ¬ nj ) for some ni, n j ∈ N .4. Bridge clause B. Pick endpoints p⋆ ∈ P and n⋆ ∈ N and set 
+
+B := ( ¬p⋆ ∨ n⋆).
+
+5. Ordering (moving the bridge). Fix an overall ordering of Φ+ ∪ Φ− (e.g., all Φ+ then all Φ− or any shuffle). Let 
+
+M = m+ + m− be the number of monotone clauses. Choose an index s ∈ { 1, . . . , M +1 } and insert B as the s-th clause . Varying s across instances moves where the solver first encounters the coupling. 
+
+Proposition E.1 (Satisfiable by construction) . The formula Φ := Φ + ∧ Φ− ∧ B is satisfiable. 
+
+For example, the assignment that set all P to 1 and set n⋆ to 1 and all other N \ { n⋆} to 0 satisfies Φ+ (positives are 1), satisfies B (since n⋆ = 1 ), and satisfies every (¬ni ∨ ¬ nj ) in Φ− (at least one of ni, n j is 0). 
+
+Backtracking trigger. If a solver’s early decisions tend to make p⋆ = 1 (natural for Φ+) and n⋆ = 0 (natural for Φ−), then when B is finally processed it becomes (¬1 ∨ 0) and conflicts, forcing a revision (unit propagation or backtrack). By changing the insertion index s, we control when this conflict becomes visible. 
+
+Pseudocode 
+
+1. Input: n+, n −, m +, m −, p ⋆ ∈ P, n ⋆ ∈ N , insertion index s ∈ [1 , M +1] .2. Build lists C+ of m+ clauses (p ∨ p′) over P and C− of m− clauses (¬n ∨ ¬ n′) over N .3. Concatenate C := order (C+, C −) (any fixed order or shuffle); let M = |C|.4. Insert B = ( ¬p⋆ ∨ n⋆) at position s in C.5. Output Φ = VM +1  
+
+> i=1
+
+C[i].15 Evaluating Robustness of Reasoning Models on Parameterized Logical Problems 
+
+2CNF formula 
+
+Template verbalizer LLM verbalizer 
+
+logic 
+
+door 
+
+letter 
+
+room 
+
+social 
+
+team 
+
+spy 
+
+heist 
+
+detective 
+
+Figure 10. Summary of the verbalization process 
+
+## F. Symmetry/Redundancy Probe 
+
+Construction 
+
+1. Base formula. Let Ψ = V 
+
+> c∈C
+
+c be any 2–CNF over variables V = {x1, . . . , x n}.2. Disjoint renaming. Choose a bijection ρ : V → V ′ = {x′
+
+> 1
+
+, . . . , x ′
+
+> n
+
+} with V ∩ V ′ = ∅. Extend ρ to literals and clauses in the obvious way (e.g., ρ(¬x) = ¬ρ(x), ρ(ℓ1 ∨ ℓ2) = ρ(ℓ1) ∨ ρ(ℓ2)). 3. Concatenation. Define 
+
+Φ := Ψ ∧ ρ(Ψ) .
+
+Optionally, order the clauses as (i) all of Ψ then all of ρ(Ψ) (grouped), or (ii) an interleaving of the two clause lists (to blur copy boundaries). 
+
+## G. Verbalization Templates and Prompts 
+
+G.1. Template Verbalizers 
+
+Each template verbalizer converts a 2-CNF clause (ℓ1 ∨ ℓ2) into a natural language sentence following a fixed pattern. The verbalizer also provides a context preamble and a final yes/no question. Table 2 summarizes the six schemes. 
+
+Scheme True value False value Entity naming Context preamble 
+
+logic true false Letters: A, B, . . . , Z, AA, AB, . . . Consider these logical relationships: 
+
+letter has doesn’t have Person names Consider these rules about who has the letter: 
+
+team Red Blue Person names We have team assignment rules: 
+
+social attends doesn’t attend Person names You’re planning a party with these atten-dance conditions: 
+
+room lit dark room 1, room 2, . . . A building has lighting rules: 
+
+door open closed door 1, door 2, . . . A facility has door coupling rules: 
+
+Table 2. Summary of the six template verbalizers. Each row shows the scheme name, the context preamble, the true/false value labels, and the entity naming convention. 
+
+Clause-to-text patterns. Below are the exact sentence templates used for each scheme. In all cases, A and B denote the entity names of the two literals’ variables, and the polarity determines which value (true or false) is used. • logic: Either {A} is true or {B} is false (or both). 
+
+• letter: Either {A} has the letter or {B} doesn’t have the letter (or both). 
+
+• team: Either {A} is on the Red team or {B} is on the Blue team. 
+
+• social: {A} attends or {B} doesn’t attend (or both). 
+
+• room: room {i} is lit or room {j} is dark (or both). 
+
+• door: door {i} is open or door {j} is closed (or both). 
+
+16 Evaluating Robustness of Reasoning Models on Parameterized Logical Problems 
+
+Final questions. 
+
+• logic: Can you assign truth values to all statements without creating a contradiction? • letter: Is there a consistent way for people to hold or not hold the letter? • team: Is there a valid team assignment that satisfies all constraints? • social: Can you create a guest list that respects everyone’s conditions? • room: Can all the lighting rules be satisfied simultaneously? • door: Is there a configuration of doors that satisfies all the rules? 
+
+Assembled output. For each formula, the verbalizer concatenates the context preamble, one sentence per clause, a blank line, and the final question. For example, with the logic scheme and clauses (¬A ∨ B), (A ∨ ¬ C):
+
+Consider these logical relationships: Either A is false or B is true (or both). Either A is true or C is false (or both). Can you assign truth values to all statements without creating a contradiction? 
+
+G.2. Evaluation Prompt 
+
+The evaluation prompt is appended after the verbalized formula. Two variants exist depending on whether template or LLM verbalization is used. 
+
+Template verbalizer prompt. 
+
+{verbalized formula text} Think step by step. If a valid assignment exists, provide it as JSON using "{true_val}" or "{false_val}" as values. Example format: {"{entity_1}": "{true_val}", "{entity_2}": "{false_val}", "{entity_3}": "{true_val}" }End your response with exactly one of: - "The answer is: Yes" (if a valid assignment exists) - "The answer is: No" (if no valid assignment exists) 
+
+where {true val } and {false val } are the scheme-specific values from Table 2, and the example JSON shows the first three entities. 17 Evaluating Robustness of Reasoning Models on Parameterized Logical Problems 
+
+LLM verbalizer prompt. 
+
+{augmented story text} Think step by step. If a valid assignment exists, provide it as JSON with one of the allowed values for each entity. Entities and their possible values: - "{entity_name}": "{true_desc}" or "{false_desc}" ... Example JSON format: {"entity_name": "value" }End your response with exactly one of: - "The answer is: Yes" (if a valid assignment exists) - "The answer is: No" (if no valid assignment exists) 
+
+where each entity is listed with its theme-specific true/false descriptions. 
+
+G.3. LLM Story Generation Prompts 
+
+The LLM verbalizer uses a multi-turn conversation to generate narrative clues. Below are the exact prompts used at each step. 
+
+Step 1: Global context generation. 
+
+You are a mystery story writer. Create a short introduction for a detective story. CHARACTERS/OBJECTS in this story: - {entity_1_name} - {entity_2_name} ... Requirements: - Set the scene for a mystery with clues to discover - Briefly introduce each character/object naturally in the narrative - Do NOT mention any specific rules or relationships yet - Keep it brief and atmospheric Write only the introduction paragraph. 
+
+18 Evaluating Robustness of Reasoning Models on Parameterized Logical Problems 
+
+Step 2: Per-clause narrative generation. For each clause (ℓ1 ∨ ℓ2), the following prompt is appended to the conversation: 
+
+Write clue {i}/{total} for our mystery story. This clue must express that AT LEAST ONE of these statements is true: - Statement A: {entity_1_name} {state_1} - Statement B: {entity_2_name} {state_2} (It’s possible both are true, but at least one MUST be true.) Write 2-3 sentences that naturally convey this logical rule through detective reasoning, witness testimony, or evidence analysis. Be creative but ensure the logic is clear. Write ONLY the clue paragraph: 
+
+Step 3a: Entity extraction (validation). 
+
+From this clue, identify the TWO main entities being discussed. CLUE: "{generated_paragraph}" AVAILABLE ENTITIES: ["entity_1", "entity_2", ...] Which two entities does this clue primarily discuss? Respond with ONLY a JSON array of exactly 2 entity names: ["entity1", "entity2"] 
+
+19 Evaluating Robustness of Reasoning Models on Parameterized Logical Problems 
+
+Model Model ID Param. Max Tokens License 
+
+Phi 4 reasoning microsoft/Phi-4-reasoning 15B 32K MIT Phi 4 reasoning plus microsoft/Phi-4-reasoning-plus 15B 32K MIT Qwen3-Next 80B Qwen/Qwen3-Next-80B-A3B-Thinking 81B 262K Apache 2.0 GPT-OSS-120B openai/gpt-oss-120b 120B 131K Apache 2.0 OLMo-3 32B allenai/Olmo-3.1-32B-Think 32B 66K Apache 2.0 QwQ 32B Qwen/QwQ-32B 33B 41K Apache 2.0 Llama-3.3 70B-Instruct meta-llama/Llama-3.3-70B-Instruct 71B 66K Llama 3.3  
+
+> Table 3. Overview of the reasoning models.
+
+Model Max Tokens Truncation Rate (%) 
+
+Phi-4-reasoning 16 384 14.9 Phi-4-reasoning-plus 16 384 30.5 Qwen3-Next 80B 32 768 1.3 GPT-OSS-120B 32 768 0.0 OLMo-3 32B 32 768 3.0 QwQ 32B 32 768 3.6 Llama-3.3 70B-Instruct 32 768 0.0  
+
+> Table 4. Truncation rates by model under fixed output budget.
+
+Step 3b: State extraction (validation). For each of the two extracted entities: 
+
+In this clue, what is stated about {entity_name}? CLUE: "{generated_paragraph}" The clue says that {entity_name}: A) {true_description} B) {false_description} Which state does the clue indicate? Answer with ONLY "A" or "B". 
+
+If validation fails after 3 attempts, a programmatic fallback sentence is used: 
+
+Either {entity_1} {state_1}, or {entity_2} {state_2} (or both). 
+
+## H. Information about model used 
+
+Table 3 reports general model information. 
+
+## I. Truncation rate 
+
+Table 4 reports output truncation rates per model. 
+
+## J. SAT Prediction Bias on UNSAT Instances 
+
+Table 5 reports the proportion of UNSAT instances for which each model incorrectly predicted SAT. A high rate indicates a tendency to over-predict satisfiability regardless of the actual logical structure. Llama-3.3-70B-Instruct exhibits a particularly strong SAT bias (88.3%), suggesting it defaults to predicting satisfiability rather than performing genuine constraint reasoning. 20 Evaluating Robustness of Reasoning Models on Parameterized Logical Problems 
+
+Model SAT Prediction (%) 
+
+Phi-4-reasoning 33.3 Phi-4-reasoning-plus 20.2 Qwen3-Next 80B 10.5 GPT-OSS-120B 26.4 OLMo-3 32B 21.7 QwQ 32B 34.0 Llama-3.3 70B-Instruct 88.3 
+
+Table 5. SAT prediction rate on UNSAT instances (ImplicationCycle generator). Higher values indicate stronger bias toward predicting satisfiability. 
+
+## K. Statistical significance results 
+
+Significance results for Friedman’s test for repeated measurements across difficulty parameter levels with Ben-jamini–Hochberg correction are reported in Table 6. 21 Evaluating Robustness of Reasoning Models on Parameterized Logical Problems 
+
+Generator Difficulty parameter |C| p-value Backbone Monotonous density Overall 3.363 e−3
+
+20 4.724 e−1
+
+50 3.813 e−2
+
+75 4.724 e−1
+
+75 7-point 3.125 e−1
+
+100 3.877 e−2
+
+β Overall 1.865 e−2
+
+20 1.462 e−1
+
+50 5.971 e−2
+
+75 3.877 e−2
+
+75 7-point 4.310 e−3
+
+100 3.679 e−1
+
+π 75 7-point 9.355 e−1
+
+EquivalenceCore Free-to-bound variable ratio Overall 2.754 e−5
+
+15 1.832 e−2
+
+20 1.832 e−2
+
+20 7-point 1.296 e−3
+
+50 8.208 e−2
+
+ImplicationCycle Forward path relative length Overall 8.116 e−1
+
+5 7.643 e−2
+
+10 5.488 e−1
+
+15 3.679 e−1
+
+20 2.574 e−1
+
+50 4.412 e−1
+
+75 2.725 e−1
+
+75 7-point 7.257 e−3
+
+100 5.292 e−1
+
+MonoBridge Bridge relative position Overall 1.869 e−1
+
+50 1.889 e−1
+
+75 7.788 e−1
+
+75 7-point 2.154 e−1
+
+100 1.738 e−1
+
+150 1.496 e−1
+
+200 1.353 e−1
+
+Overall variable density Overall 2.073 e−7
+
+50 4.979 e−2
+
+75 1.832 e−2
+
+75 7-point 2.719 e−3
+
+100 3.813 e−2
+
+150 9.697 e−2
+
+200 2.307 e−2
+
+Positive part ratio Overall 1.158 e−3
+
+50 4.979 e−2
+
+75 4.724 e−1
+
+75 7-point 2.944 e−2
+
+100 4.979 e−2
+
+150 4.412 e−1
+
+200 2.231 e−1
+
+Table 6. Statistical significance results for each difficulty parameter 
+
+22
