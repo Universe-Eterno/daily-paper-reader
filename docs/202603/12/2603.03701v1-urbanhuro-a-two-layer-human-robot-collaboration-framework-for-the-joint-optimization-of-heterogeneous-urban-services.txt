@@ -1,0 +1,597 @@
+Title: UrbanHuRo: A Two-Layer Human-Robot Collaboration Framework for the Joint Optimization of Heterogeneous Urban Services
+
+URL Source: https://arxiv.org/pdf/2603.03701v1
+
+Published Time: Thu, 05 Mar 2026 01:30:06 GMT
+
+Number of Pages: 8
+
+Markdown Content:
+# UrbanHuRo: A Two-Layer Human-Robot Collaboration Framework for the Joint Optimization of Heterogeneous Urban Services 
+
+Tonmoy Dey 1†, Lin Jiang 1†, Zheng Dong 2, Guang Wang 1∗
+
+Abstract — In the vision of smart cities, technologies are being developed to enhance the efficiency of urban services and improve residents’ quality of life. However, most existing research focuses on optimizing individual services in isola-tion, without adequately considering the reciprocal interactions among heterogeneous urban services that could yield higher efficiency and improved resource utilization. For example, human couriers could collect traffic and air quality data along their delivery routes, while sensing robots could assist with on-demand delivery during peak hours, enhancing both sensing coverage and delivery efficiency. However, the joint optimiza-tion of different urban services is challenging due to their potentially conflicting objectives and real-time coordination in dynamic environments. In this paper, we propose UrbanHuRo, a two-layer human-robot collaboration framework for joint optimization of heterogeneous urban services, demonstrated through the examples of crowdsourced delivery and urban sensing. There are two innovative designs in UrbanHuRo, i.e., (i) a scalable distributed MapReduce-based K-Submodular maximization module for efficient order dispatch and (ii) a deep submodular reward reinforcement learning algorithm for sensing route planning. Experimental evaluations on real-world datasets from a food delivery platform demonstrate that our UrbanHuRo improves sensing coverage by 29.7% and courier income by 39.2% on average in most settings, while also significantly reducing the number of overdue orders. 
+
+I. I NTRODUCTION 
+
+Rapid advancements in Artificial Intelligence (AI) and sensing technologies have enabled diverse smart city ser-vices, such as large-scale real-time order dispatch in food delivery [1] and robot vehicle (RV) cruising for urban sensing [2]. While many studies [3]–[5] focus on improving the efficiency of individual services, they often treat these services in isolation, overlooking opportunities to leverage resources across services for higher overall efficiency. For instance, food-delivery couriers could collect air-quality or traffic data along their routes, while sensing RVs could assist with food delivery during peak hours, forming a win-win collaboration, as illustrated in Fig. 1. Although a collaborative paradigm holds great potential for improving the efficiency of heterogeneous urban services, designing effective algorithms for joint optimization remains nontrivial due to several fundamental challenges : (i) Con-flicting objectives and asynchronous reward feedback. Dif-ferent services often have independent and even conflicting objectives, making resource sharing difficult without compro-mising the performance of individual tasks. Moreover, it is           
+
+> †These authors contributed equally (co-first authors).
+> ∗Corresponding author.
+> 1Department of Computer Science, Florida State University.
+> 2Department of Computer Science, Wayne State University. Delivery Sensing
+> Current
+> Solution
+> Robots only
+> for Sensing
+> Couriers
+> Prioritize Delivery
+> Assist Sensing
+> Robots
+> Prioritize Sensing
+> Assist Delivery
+> Current
+> Solution
+> Couriers only
+> for Delivery
+> Collaboration
+> Human
+> Couriers Robot
+> Vehicles Our Solution
+
+Fig. 1: Intuition of Human-Robot Collaboration challenging to assess how a single action impacts multiple objectives when rewards are observed asynchronously. For example, the potential sensing benefit of an order dispatch decision cannot be determined in advance, as it depends on subsequent sensing actions. (ii) Real-time coordination in dynamic environments. Coordinating large numbers of agents in real time is inherently complex and computationally demanding, particularly in urban systems involving multi-ple interdependent services. (iii) Human-robot collaboration. 
+
+The coexistence of human workers (e.g., couriers) and au-tonomous robots (e.g., sensing RVs) adds complexity. Robots follow instructions strictly, whereas human workers have diverse preferences and behaviors. Their satisfaction and willingness to participate should be considered in decision-making to ensure sustainability. To address these challenges, we propose UrbanHuRo , a two-layer human-robot collaboration framework for jointly optimizing real-time crowdsourced delivery and urban sens-ing services. Our objectives are threefold: minimizing over-due orders, maximizing delivery income, and enhancing urban sensing coverage. The framework introduces hybrid reward-value feedback to address the first challenge, i.e., asynchronous reward signals in multi-objective optimiza-tion. Specifically, the order dispatch layer makes decisions based on both immediate delivery rewards and estimated sensing values computed by the sensing layer, represent-ing expected future sensing returns. To address the sec-ond and third challenges, we further design two coupled components in UrbanHuRo: (i) an efficient MapReduce-based K-Submodular maximization module for order dis-patch, referred to as KSubMR . This module leverages the submodular property of the matching function and employs the MapReduce paradigm to enable parallel, real-time coor-dination in large-scale dispatch problems, thereby enhancing computational efficiency. (ii) a Deep Submodular Reward Q-Network ( DSRQN ) for sensing route planning. Here, human couriers follow their preferred routes to encourage partici-pation, while RVs are guided by a coverage-aware spatio-
+
+> arXiv:2603.03701v1 [cs.RO] 4 Mar 2026
+
+temporal reward function to dynamically balance sensing and delivery tasks. To facilitate human-robot coordination, sensing gains from human agents are computed directly, whereas those from RVs are passed to the upper layer and aggregated using a submodular function. To summarize, our main contributions are as follows:  
+
+> •
+
+Conceptually , we study the optimization of heteroge-neous urban services through human-robot collabora-tion. In particular, we integrate two originally inde-pendent services, food delivery performed by human couriers and urban sensing conducted by RVs, for joint optimization. Our motivation is to enable each service to opportunistically utilize idle resources to support the other through cooperation.  
+
+> •
+
+Technically , we propose UrbanHuRo , a two-layer human-robot collaboration framework designed to jointly optimize heterogeneous urban services. The up-per decision layer is a scalable MapReduce-based K-Submodular maximization module, KSubMR , for effi-cient order dispatch. The lower decision layer includes a novel deep reinforcement learning algorithm called 
+
+DSRQN , for effective sensing route planning.  
+
+> •
+
+Experimentally , we evaluate UrbanHuRo on a real-world dataset from a food delivery platform, containing 160K orders collected in Shanghai. Experimental results demonstrate that our UrbanHuRo improves sensing cov-erage by 29.7% and courier income by 39.2% on aver-age in most settings, while also significantly reducing the number of overdue orders. II. P ROBLEM FORMULATION 
+
+Considering the sequential nature of crowdsourced de-livery and urban sensing tasks, we formulate their joint optimization as a Markov Decision Process (MDP), denoted by M = ( S, A, R, P, γ ), where S is the state space, A is the action space, R is the reward function, P(st+1 | st, a t)
+
+specifies the state transition dynamics, and γ ∈ [0 , 1) is the discount factor. In our setting, an entire day is divided into multiple time slots. At each slot, agents interact with the environment following a policy π(at|st) that selects the joint action based on the current state.  
+
+> •
+
+Agent : We model human couriers and sensing RVs as agents. When not distinguishing the two types, we use 
+
+di to denote the i-th agent. Specifically, the i-th courier is ci and the i-th RV is rv i. The total fleet sizes of couriers and RVs are N c and N rv , respectively, and are assumed constant throughout the day. In contrast, the numbers of available couriers and RVs vary over time and are denoted at time step t by nct and nrv t . 
+
+> •
+
+State S: Each agent has a state sit ∈ S , defined as the concatenation of three components: agent-specific fea-tures as it, order-related features os it, and sensing-related features ss it, i.e., sit = [ as it, os it, ss it]. The agent-specific component is as it = [ t, g it, avail it, type i], where t is the current time step, git is the region (grid) ID where agent i is located, avail it indicates whether the agent is available, and type i specifies whether the agent is a human courier or an RV. The order-related component 
+
+os it = [ oip,t , o id,t , o iddl,t , o if ee,t ] includes the pickup and drop-off regions, the promised delivery deadline, and the delivery fee. Here, os it corresponds to the order(s) currently assigned to agent i (denoted by Oit), with a capacity constraint |O it| ≤ cd. The sensing-related component is ss it = [ gi, last  
+
+> t
+
+, neigh it, prop (git)] , where 
+
+gi, last  
+
+> t
+
+denotes the last region where agent i performed sensing, neigh it is the number of adjacent regions visited by agent i in the past hour, and prop (git) encodes region properties such as region type and accessibility.  
+
+> •
+
+Action A: We consider a joint action at = ( aot , a st ) ∈A in our two-layer decision framework, where A =
+
+Ao ×A s. In the dispatch layer, aot assigns each available order ojt ∈ Ot to an agent di (a courier or an RV). In the sensing layer, we make routing decisions only for RVs: ast = {as,i t }nrv t
+
+> i=1
+
+, where each as,i t moves an rv i
+
+from its current region to one of the eight neighboring regions (8-connected directions). Couriers do not take routing actions in the sensing layer and are assumed to travel according to their own preferences (e.g., fast and high-reward routes), whereas RVs strictly follow ast . 
+
+> •
+
+Reward R: At the end of time slot t, we define the reward received by each agent di during this slot t as 
+
+rit = ( rid,t , r is,t ), where rid,t and ris,t denote the delivery and sensing rewards, respectively. Here, rid,t aggregates the delivery rewards from all orders completed by agent 
+
+di during time slot t, and the definition is shown as: 
+
+rid,t = P 
+
+> oj∈O i, comp
+> t
+
+ojf ee,t × β∆toj , (1) where Oi, comp  
+
+> t
+
+is the set of orders completed by agent 
+
+di during time slot t, ojf ee,t is the delivery fee of order 
+
+oj , ∆toj is its delivery delay, and β ∈ (0 , 1) is a late-delivery discount factor. If ∆toj = 0 , the full fee is obtained; otherwise, it decays exponentially with ∆toj .The sensing reward ris,t is defined as: 
+
+ris,t = rreg   
+
+> git,d i
+
++ rnbr   
+
+> git,d i
+
+− rpen   
+
+> git,d i
+
+. (2) Here, git is the region visited by agent di at time slot t.The regional term rreg   
+
+> git,d i
+
+measures the sensing value at 
+
+git and is set to zero if git has been visited within the past hour to avoid redundancy. The neighboring term 
+
+rnbr   
+
+> git,d i
+
+encourages broader coverage by rewarding visits to regions adjacent to unsensed regions, computed in the same way as rreg   
+
+> git,d i
+
+. The penalty term rpen   
+
+> git,d i
+
+imposes a large cost when an order assigned to di misses its deadline, discouraging risky sensing actions that may delay deliveries.  
+
+> •
+
+Transition P: A mapping S × A × S → [0 , 1] , where 
+
+P(st+1 | st, a t) denotes the probability of transitioning from st to st+1 under the action at. In UrbanHuRo, 
+
+P is driven by within-step updates of agent locations and order statuses in the Environment and Simulator modules: routing actions ast move RVs across regions, while the dispatch action aot assigns newly arrived orders to both couriers and RVs. Fig. 2: An Overview of the Proposed UrbanHuRo Framework  
+
+> •
+
+Policy π: In an MDP, a policy π maps states to actions. UrbanHuRo employs two policies in a two-layer decision framework and updates them at each time step: the order dispatch policy Fo, which generates the dispatch action aot for all agents, and the urban sensing policy Fs, which produces routing actions ast for RVs. III. D ESIGN OF URBAN HURO
+
+To solve the above MDP, we propose a two-layer human-robot collaboration framework, UrbanHuRo . As shown in Fig. 2, UrbanHuRo comprises the Environment , the Simula-tor , and a Decision-making module with two coupled layers, order dispatch and route planning. In the order dispatch 
+
+layer, the system assigns orders to both human couriers and RVs. In the route planning layer, couriers follow their preferences (i.e., profit-maximizing routes), whereas RVs strictly follow system-generated actions for sensing. 
+
+A. Environment and Simulator 
+
+In the Environment module, we model couriers, RVs, and orders, together with contextual factors such as weather and the road network. Each order includes pickup and drop-off regions, a delivery fee, and a deadline. Both couriers and RVs can perform delivery and sensing, but with different roles: couriers prioritize timely deliveries and passively collect sensing data along the way, whereas RVs prioritize sensing to maximize coverage in each period (e.g., hourly). When courier capacity is insufficient, RVs assist with deliveries to reduce overdue orders. We also incorporate weather and road-network conditions, which affect agent behavior, travel speed, and region accessibility. The Simulator models agent operations from time slot t
+
+to t+1 on a grid-based map. As shown in Fig. 2, we capture three behavior patterns: (1) Couriers always take reward-maximizing routes (modeled as the fastest routes), reflect-ing their preference for minimum travel time, and sense passively; (2) RVs without delivery tasks follow system-generated sensing actions to maximize coverage; and (3) RVs with delivery tasks follow sensing actions under deadlines, balancing coverage and timely delivery. 
+
+B. Efficient Two-layer Decision-making 
+
+In this section, we present the details of the proposed ef-ficient two-layer decision-making strategy with human-robot collaboration, which comprises two coupled layers: (i) the 
+
+upper layer , an efficient MapReduce-based K-submodular maximization module for order dispatch (KSubMR), and (ii) the lower layer , a Deep Submodular Reward Q-Network (DSRQN) for route planning. Both couriers and RVs accept order dispatch actions, but only RVs strictly follow system-generated route planning actions. 
+
+1) Optimization Objectives: At the beginning of each time slot t, there are nct available human couriers and nrv t
+
+available RVs. Let Dt = dinct +nrv t 
+
+> i=1
+
+denote the set of available agents and Ot denote the set of pending orders at time t.In our two-layer human–robot collaboration framework, the upper layer uses the order dispatch policy Fo (imple-mented as KSubMR) to assign orders to agents by maximiz-ing delivery and sensing rewards, while the lower layer uses the route-planning policy Fs (implemented as DSRQN) to maximize RV sensing rewards subject to on-time delivery. Moreover, Fo relies on the sensing value estimated by Fs.As a result, Fo outputs the dispatch action aot (i.e., the matching set St) and Fs outputs the routing actions ast for RVs, forming the joint action at = ( aot , a st ) in our MDP. The upper-layer function Fo is defined as a binary assign-ment indicator: 
+
+Fo : Ot × Dt → { 0, 1}, (3) where Fo(o, d ) = 1 indicates that order o ∈ Ot is assigned to agent d ∈ Dt. The resulting assignment set is 
+
+St = {(o, d ) ∈ Ot × Dt | Fo(o, d ) = 1 }. (4) Master Machine 
+
+> Orders Couriers RVs Map
+> Worker Machine
+> K-Submodular Top-N Dispatch
+> Top-N Local Order-Courier Pairings Weighted Connected Feature Graph Delivery Quotient Feature Matrix Sensing Quotient Feature Matrix Unassigned Robot Vehicle K-Submodular Threshold Dispatch
+> Merged Top-N Weighted Pairings from all Workers Threshold Pair Filtering
+> Final Order-Courier Pairings
+> ……
+> Features Merged Top-N Weighted Pairings (N = 2) from all Workers to generate a Bipartite Feature Graph
+
+Fig. 3: An Overview of the Proposed KSubMR we score each candidate pair (o, d ) by 
+
+r(o, d ) = rd(o, d ) + vs(o, d ), (5) where o ∈ Ot and d ∈ Dt. Here, rd(o, d ) is the delivery re-ward for completing order o (computed following Eq. 1), and 
+
+vs(o, d ) is the urban sensing value calculated in Section III-B.3. The resulting reward-driven many-to-many matching is formulated as the following optimization problem: 
+
+St ← arg max 
+
+> St⊆Ot×Dt
+
+Rd(St) + Vs(St)
+
+s.t. P 
+
+> d∈Dt
+
+1(o,d )∈St ≤ 1, ∀o ∈ Ot,
+
+P 
+
+> o∈Ot
+
+1(o,d )∈St ≤ cd, ∀d ∈ Dt,
+
+(6) where 
+
+Rd(St) = P 
+
+> (o,d )∈St
+
+rd(o, d ),Vs(St) = fsub 
+
+ P 
+
+> (o,d )∈St
+
+vs(o, d )
+
+
+
+. (7) Here, Rd(St) is the delivery reward of the assignment set St, Vs(St) is its overall sensing value, and fsub (·) is a submodular aggregation function. A key challenge in optimizing Fo in Eq. 3 is asynchronous feedback : Rd(St)
+
+is available once St is decided, whereas Vs(St) cannot be observed at dispatch time because it depends on subsequent RV routing actions. Thus, the objective in Eq. 6 is coupled with future decisions, making Fo nontrivial to optimize. To address this issue, we propose UrbanHuRo with hy-brid reward–value feedback . Specifically, the upper layer KSubMR applies the order dispatch policy Fo to solve Eq. 6 by combining the immediate reward Rd(St) with the estimated value Vs(St). The sensing value terms vs(o, d ) and 
+
+Vs(St) are computed in the lower layer by DSRQN, and are fed back to KSubMR for dispatch optimization. 
+
+2) KSubMR for Order Dispatch Decision-making: The multi-objective optimization in Eq. 6 can be formulated as a weighted bipartite graph for many-to-many matching, for which the Kuhn–Munkres algorithm [6] is a common solution. However, as the numbers of orders, couriers, and RVs grow substantially, its computational complexity 
+
+increases sharply. Coupled with the computational cost of deep RL, this approach becomes impractical for meeting the real-time requirements of order dispatch systems. To address the computational-efficiency challenge and en-able real-time coordination in highly dynamic environments, we propose the KSubMR algorithm, which integrates a two-round MapReduce framework with k-submodular maximiza-tion, as illustrated in Fig. 3. This approach leverages the submodular property [7] of the dispatch policy function 
+
+Fo, which provides provable approximation guarantees in combinatorial optimization [8]. Moreover, the composability of local solutions makes it well-suited for parallelization in distributed frameworks such as MapReduce [9]. In the first MapReduce round, each worker machine runs the K-Submodular Top-N Dispatch algorithm (Algorithm 1) on its partition of orders and agent states {sit} to produce a local assignment set Sj . Here, M denotes the number of parallel workers. In the second MapReduce round, the master machine aggregates the worker outputs, reconstructs a bipar-tite graph over feasible order–agent pairs, and applies the K-Submodular Threshold Dispatch algorithm (Algorithm 2) to generate the final dispatch. 
+
+K-Submodular Top-N Dispatch (Algorithm 1) : During the first MapReduce round, orders are distributed to worker machines with agent states sit. Two quotient matrices are constructed, namely the Delivery Quotient ( DQ ) and Sens-ing Quotient ( SQ ), based on rd(o, d ) and vs(o, d ). Guided by these matrices, each order iteratively selects its top-N
+
+agents in a round-robin manner. Agents are ranked by the computable dispatch reward Rd(·) and the sensing value 
+
+Vs(·) from DSRQN, where ∆o,d (Sj ) in Algorithm 1 denotes the marginal gain of adding (o, d ) to the local assignment set 
+
+Sj under Rd(·) + Vs(·). The k-submodular structure reduces redundancy in local solutions and yields disjoint assignments. Each worker then transmits its results to the master node. 
+
+K-Submodular Threshold Dispatch (Algorithm 2) : In the second MapReduce round, the master machine aggregates the worker outputs and reconstructs a bipartite graph con-necting orders and agents to regenerate the quotient matrices. The final dispatch is obtained by applying a decreasing sequence of thresholds, starting from a selected order–agent pair. For each threshold τ , the algorithm scans unassigned order–agent pairs and selects those whose marginal gains exceed τ . This process continues until all orders are assigned or the threshold falls below a predefined value. Algorithm 1 K-Submodular Top-N Dispatch  
+
+> 1:
+
+Input: dispatch reward function Rd(·), sensing value function Vs(·), agent limit N per order  
+
+> 2:
+
+Output: a sparse pair set S ⊆ O × D 
+
+> 3:
+
+S ← ∅  
+
+> 4:
+
+for each o ∈ O do  
+
+> 5:
+
+Sj ← ∅  
+
+> 6:
+
+for i = 1 to N do  
+
+> 7:
+
+(o, d ) ← arg max d∈D ∆o,d (Sj ) 
+
+> 8:
+
+Sj ← Sj ∪ { (o, d )} 
+
+> 9:
+
+end for  
+
+> 10:
+
+S ← S ∪ Sj 
+
+> 11:
+
+end for  
+
+> 12:
+
+return S
+
+Algorithm 2 K-Submodular Threshold Dispatch  
+
+> 1:
+
+Input: value oracle for monotone k-submodular fsub , O,
+
+D, {cd}d∈D , ϵ ∈ (0 , 1)  
+
+> 2:
+
+Output: S ⊆ O × D 
+
+> 3:
+
+S ← ∅ , {Sd}d∈D ← ∅  
+
+> 4:
+
+τ ← τ0 ← max {rd(o, d ) : o ∈ O, d ∈ D} 
+
+> 5:
+
+while τ > ϵτ 0 do  
+
+> 6:
+
+for all (o, d ) ∈ O × D do  
+
+> 7:
+
+if (o, d ) /∈ S and fsub (S ∪{ (o, d )})−fsub (S) ≥ τ
+
+and |Sd| < c d then  
+
+> 8:
+
+Sd ← Sd ∪ { (o, d )}, S ← S ∪ { (o, d )} 
+
+> 9:
+
+end if  
+
+> 10:
+
+end for  
+
+> 11:
+
+τ ← (1 − ϵ)τ 
+
+> 12:
+
+end while  
+
+> 13:
+
+return S
+
+3) DSRQN for Urban Sensing Decision-making: We now present our Deep Submodular Reward Q-Network (DSRQN), which serves two objectives: (1) generating RV route-planning actions ast to improve sensing coverage, and (2) estimating the aggregated sensing value Vs(St) for the order dispatch layer. Specifically, DSRQN builds on a Q-value-based RL algorithm to estimate the expected return of routing actions and guide RV behavior. 
+
+Firstly, we describe how route-planning actions are generated. We introduce key concepts in DSRQN. The Q-value for a state–action pair, denoted as Q(sit, a s,i t ), repre-sents the expected cumulative sensing reward when RV rv i
+
+takes routing action as,i t at state sit. Accordingly, we define 
+
+Q(sit, a s,i t ) = E
+
+" HX
+
+> k=0
+
+ris,t +k sit, a s,i t
+
+#
+
+. (8) In DSRQN, we parameterize the Q-function as 
+
+Q(sit, a s,i t ; θ), where θ denotes the parameters of Fs.The sensing reward ris,t in Eq. 2 serves as the learning signal for estimating Q(sit, a s,i t ) and consists of three components: the regional reward rreg   
+
+> git,d i
+
+, the neighboring reward rnbr   
+
+> git,d i
+
+, and the timeout penalty rpen   
+
+> git,d i
+
+.The optimal Q-value Q∗(sit, a s,i t ) represents the maximum expected return achievable from state sit by taking action 
+
+as,i t and then making optimal routing decisions thereafter. In DSRQN, we learn a parameterized Q-function Q(sit, a s,i t ; θ)
+
+and derive the route-planning policy function Fs via a greedy action-selection rule: 
+
+Fs(sit; θ) = arg max 
+
+> as,i t
+
+Q(sit, a s,i t ; θ). (9) Finally, Fs outputs the route-planning action as,i t for each RV rv i in the lower decision layer. 
+
+Next, we describe the computation of the aggregated sensing value Vs(St), which is passed to KSubMR for solving Fo. We first define the sensing value vs(o, d ) for an order–agent pair (o, d ) ∈ St, which estimates the sensing gain of assigning order o to agent d (an RV in our setting, since only RVs follow system-generated routing actions). For illustration, we use an order oj and an agent di as a running example. We adopt an RL value-function view to quantify the expected future sensing return from the agent’s current state under the learned routing policy. Since sensing is location-dependent, we define the region-level sensing value Vreg at region g given agent state sit as 
+
+Vreg (g | sit) = Q sit, F s(sit; θ); θ , (10) where Fs is the route-planning function in Eq. 9. Given an order ojt ∈ Ot and an agent di ∈ Dt, let git be the current region of di and ojd,t the drop-off region of ojt . We estimate the sensing value of assigning ojt to di as 
+
+vs(ojt , d i) = Vreg 
+
+
+
+ojd,t | sit
+
+
+
+− Vreg 
+
+ git | sit
+
+ . (11) This value is computed as the difference between the region-level values at the drop-off region and the current region. After obtaining vs(ojt , d i) for each selected pair (ojt , d i) ∈
+
+St, we aggregate them to compute Vs(St) in Eq. 7. To capture diminishing returns caused by spatial redundancy, we adopt a submodular aggregation function fsub (·) and define 
+
+Vs(St) ≜ fsub (St) = 
+
+X 
+
+> (ojt,d i)∈St
+
+vs(ojt , d i)
+
+·(1 − ρ(St)) , (12) 
+
+where the redundancy penalty ρ(St) is 
+
+ρ(St) = 1
+
+|St|(|St| − 1) 
+
+X
+
+> m̸=n
+
+exp − dis  (om, d m), (on, d n)
+
+2σ2
+
+!
+
+.
+
+(13) 
+
+Here, ρ(·) measures spatial redundancy among the paths induced by the assignments in St [10]. The term 
+
+dis  (om, d m), (on, d n) denotes the distance between the m-th and n-th order–agent assignments, and the exponential kernel assigns higher similarity to closer (more redundant) paths. The normalization by |St|(|St| − 1) keeps ρ(St)
+
+scale-invariant, while the bandwidth σ controls the effective influence radius. The submodularity of fsub (·) originates from the normalized pairwise similarity measure ρ(·), which induces diminishing returns in the aggregation in Eq. 12. IV. E VALUATION 
+
+In this section, we conduct extensive experiments to eval-uate the performance of our UrbanHuRo. 
+
+A. Evaluation Setup 1) Parameter Setting and Experiment Environment: We evaluate UrbanHuRo under fine-grained spatial and tem-poral settings to improve practicality. Specifically, we set the region size (GS) to (0 .05 km) 2 and use a 1-minute time slot to support timely delivery and high-resolution sensing. We run experiments on 40 Intel(R) Xeon(R) Gold 5218R CPU @ 2.10GHz processors. We implement DSRQN in TensorFlow 2.4.1 and Python 3.8, and train on an NVIDIA TITAN RTX (TU102) GPU using real-world data distribu-tions. Training uses an experience replay buffer of size 10 6
+
+and a batch size of 128. We optimize Q-networks with Adam (learning rate 0.01 ) and set the discount factor γ to 0.9.
+
+2) Evaluation Metrics: We evaluate the joint optimization of order dispatch and urban sensing using three metrics: number of overdue orders, sensing coverage, and the average courier income. These metrics are defined as follows:  
+
+> •
+
+Overdue Orders : The number of orders not delivered by their deadlines during an hour.  
+
+> •
+
+Normalized Sensing Coverage ( CN ): The ratio of the number of visited locations achieved by a model to that achieved by UrbanHuRo.  
+
+> •
+
+Average Courier Income : Average hourly income of human couriers, calculated based on total revenue from assigned orders minus overdue penalties. 
+
+3) Datasets: We utilize a real-world dataset from a food delivery platform for evaluation [11]. The dataset includes over 160K on-demand food delivery orders collected within a week in Shanghai, with around 2,200 active couriers at noon. It contains detailed information such as user IDs, pickup/drop-off locations with timestamps, delivery dead-lines, and fees. 
+
+4) Baselines: We compare UrbanHuRo with the following five state-of-the-art baselines.  
+
+> •
+
+Fastest-Delivery (FastD) : This approach always se-lects the nearest agent and performs RV sensing using the Shortest Diversified Path Routing (SDPR) method, based on the K-Shortest Diversified Path Routing algo-rithm [12] with k = 1 . 
+
+> •
+
+High-Sensing (HighS) : This approach selects the agent that provides the maximum coverage of unvisited lo-cations along its route. It performs sensing using the Trajectory Scheduling for Maximum Task Coverage (TSMTC) algorithm [13], which selects the neighboring location with the highest coverage potential.  
+
+> •
+
+Joint-Delivery and Sensing Efficiency (JointDS) [14]: This approach selects the agent with the highest ratio of sensed regions to driving distance. It utilizes the REASSIGN [15] routing method for RVs.  
+
+> •
+
+LSTAlloc [16]: This approach aims to maximize courier profit by prioritizing order assignments based on a balance between current income and driving distance. Any unassigned orders are then allocated to RVs.  
+
+> •
+
+AJRP [17]: This approach estimates a cost-to-go func-tion based solely on sensing gain, considering human couriers first. If no couriers are available, it applies the same strategy to assign active orders to RVs. 
+
+B. Evaluation Results 
+
+TABLE I: Overall Comparison.                                                                                 
+
+> # RVs 500 1000 2000 4000 500 1000 2000 4000 500 1000 2000 4000 Models Overdue Orders Coverage ( CN)Courier Income HighS 291 287 284 281 1.01 0.79 0.72 0.81 5.76 5.55 5.07 5.00
+> FastD 16 15 14 13 0.05 0.03 0.02 0.02 5.63 4.39 3.14 2.64
+> JointDS 386 374 361 356 0.94 0.76 0.52 0.50 4.48 4.03 3.64 3.17
+> LSTAlloc 266 266 266 265 0.83 0.59 0.46 0.40 8.15 8.15 8.15 8.15
+> AJRP 390 374 366 361 0.88 0.62 0.48 0.42 5.71 5.69 5.61 5.48
+> UrbanHuRo 31 30 28 28 1.00 1.00 1.00 1.00 11.34 11.35 11.34 11.36
+
+We provide an overall comparison of our experimental re-sults in Table I. As shown, UrbanHuRo consistently achieves strong performance across different RV fleet-size settings in all the three metrics. The details are shown as below. 
+
+1) Overdue Orders: Fig. 4 compares the number of over-due orders at different times of the day, demonstrating the effectiveness of UrbanHuRo in minimizing delayed deliv-eries under dynamic, high-demand conditions. UrbanHuRo consistently matches FastD in maintaining timely fulfillment, even during peak periods. In contrast, other baselines exhibit noticeable spikes in overdue orders, particularly around noon, suggesting limited scalability for real-time dispatch. Quantitatively, UrbanHuRo achieves an orders-of-magnitude reduction in overdue orders compared to state-of-the-art baselines, especially during core business hours (8:00 AM–8:00 PM) when system load is highest. This indicates that UrbanHuRo prioritizes time-sensitive dispatch without sacrificing sensing coverage. Unlike HighS and JointDS, which favor coverage at the expense of on-time delivery, UrbanHuRo strikes a better balance, making it more suitable for practical joint delivery and sensing. 
+
+2) Sensing Coverage: As shown in Table I, with 500 RVs, HighS shows similar map coverage to UrbanHuRo. However, as the number of RVs increases, UrbanHuRo outperforms all baselines. Notably, with 1000, 2000, and 4000 RVs, UrbanHuRo exceeds the best-performing baseline, HighS, by an average of 29.7% in coverage. This demonstrates UrbanHuRo’s scalability and adaptability in effectively bal-ancing urban sensing with delivery efficiency. 
+
+3) Courier Income: Figure 5 shows that UrbanHuRo consistently boosts earnings for human couriers. On aver-age, UrbanHuRo more than doubles courier income com-pared to HighS and JointDS, and exceeds LSTAlloc, aSOTA method specifically designed to maximize courier earnings, by about 39.2% in average. This improvement stems from UrbanHuRo’s ability to reduce overdue orders, which would otherwise diminish courier compensation. Im-portantly, UrbanHuRo achieves these income gains while maintaining low overdue orders and strong sensing coverage. (a) 500 RVs (b) 1000 RVs (c) 2000 RVs (d) 4000 RVs 
+
+Fig. 4: Overdue orders across three key time periods, i.e., morning rush hours, noon peak hours, and evening rush hours.    
+
+> (a) 500 RVs (b) 1000 RVs (c) 2000 RVs (d) 4000 RVs
+
+Fig. 5: Average hourly income of couriers under different numbers of RVs.   
+
+> (a) Overdue Orders (1000 RVs) (b) Overdue Orders (2000 RVs)
+> (c) Coverage (1000 RVs) (d) Coverage (2000 RVs)
+
+Fig. 6: Ablation Studies 
+
+4) Ablation Study: We evaluate three variants of UrbanHuRo: (i) UrbanHuRo (−rR), excluding the regional reward rreg   
+
+> git,d i
+
+; (ii) UrbanHuRo (−rN ), excluding the neigh-boring reward rnbr   
+
+> git,d i
+
+; and (iii) UrbanHuRo (−rP ), excluding the timeout penalty rpen   
+
+> git,d i
+
+. In Figures 6a and 6b, we observe that removing any of the three components leads to an increase in overdue orders. Notably, omitting the timeout penalty rpen   
+
+> git,d i
+
+causes the most significant rise in overdue orders throughout the day, whereas removing the neighboring reward rnbr   
+
+> git,d i
+
+has minimal impact. In Figures 6c and 6d, we also examine the impact of the three components on sensing coverage. The results show that removing either the regional reward rreg   
+
+> git,d i
+
+or the neighboring reward rnbr   
+
+> git,d i
+
+weakens the system’s sensing capability. In contrast, omitting the timeout penalty rpen   
+
+> git,d i
+
+enhances coverage, as the system no longer needs to sacrifice sensing gains to meet delivery deadlines. V. R ELATED WORK 
+
+A. Urban Service Optimization 
+
+Urban service optimization has attracted much interest from both the research community and industry due to its importance in reducing operational costs, increasing profits, and improving the quality of life. Recent studies have investi-gated effective order dispatch in ridesharing and logistics [3], [11], [18]–[20], route planning for urban sensing [21], [22], next location recommendation [23], and resource allocation and management in mobility systems [24]–[28]. While these works achieve substantial gains within individual services, they often overlook the potential synergies and reciprocal benefits that could be realized through the joint optimization of heterogeneous urban services. 
+
+B. Human-Robot Collaboration in Smart Cities 
+
+With the rapid advancement of smart cities, human–robot collaboration has become a key research focus for diverse urban services. For instance, in smart mobility and trans-portation, prior studies have examined interactions between delivery robots and human drivers in public transit systems [29]. In urban sensing and inspection, robots have been utilized to collaborate with municipal workers and local resi-dents to collect sensing data [30]. Researchers have explored human–robot collaboration for public safety and emergency response [31]. Furthermore, human–robot collaboration has also been applied in social navigation within public spaces [32]. However, little research has explored human–robot collaboration for joint optimization of heterogeneous urban services, which is the focus of our work. VI. C ONCLUSION 
+
+This paper presents UrbanHuRo, a two-layer human-robot collaboration framework designed for joint optimization of heterogeneous urban services (e.g., crowdsourced delivery and urban sensing). UrbanHuRo comprises two key com-ponents: (i) a scalable distributed MapReduce-based K-Submodular maximization module called KSubMR for real-time order dispatch, and (ii) a deep submodular reward Q-network algorithm named DSRQN for dynamic urban sens-ing. These two modules are interconnected as the DSRQN will also provide sensing values for the KSubMR to optimize and balance real-time delivery and sensing performance. Our evaluation on real-world datasets from a food delivery platform demonstrates that UrbanHuRo improves sensing coverage by an average of 29.7% (with 1,000 to 4,000 RVs) and increases courier income by 39.2% on average, while substantially reducing overdue orders. ACKNOWLEDGMENT 
+
+We sincerely thank all anonymous reviewers for their valuable suggestions. This work is partially supported by Florida State University, National Science Foundation under Grant Numbers 2411152, 2441179, 2231523, and 2140346. REFERENCES [1] “Uber eats,” https://www.ubereats.com/, Uber, 2026. [2] “Google street view,” https://www.google.com/streetview/, Google, 2026. [3] L. Jiang, Y. Yang, and G. Wang, “Hcride: harmonizing passenger fairness and driver preference for human-centered ride-hailing,” in 
+
+Proceedings of the Thirty-Fourth International Joint Conference on Artificial Intelligence , 2025, pp. 10 289–10 297. [4] G. Wang, S. He, L. Jiang, S. Wang, F. Miao, F. Zhang, Z. Dong, and D. Zhang, “Fairmove: A data-driven vehicle displacement system for jointly optimizing profit efficiency and fairness of electric for-hire vehicles,” IEEE Transactions on Mobile Computing , vol. 23, no. 6, pp. 6785–6802, 2023. [5] E. Wang, W. Liu, W. Liu, Y. Yang, B. Yang, and J. Wu, “Spatiotem-poral urban inference and prediction in sparse mobile crowdsensing: A graph neural network approach,” IEEE Transactions on Mobile Computing , 2022. [6] B. Guo, S. Wang, Y. Ding, G. Wang, S. He, D. Zhang, and T. He, “Concurrent order dispatch for instant delivery with time-constrained actor-critic reinforcement learning,” in 2021 IEEE Real-Time Systems Symposium (RTSS) . IEEE, 2021, pp. 176–187. [7] G. L. Nemhauser, L. A. Wolsey, and M. L. Fisher, “An analysis of approximations for maximizing submodular set functions—i,” Mathe-matical programming , vol. 14, pp. 265–294, 1978. [8] B. Mirzasoleiman, A. Karbasi, R. Sarkar, and A. Krause, “Distributed submodular maximization,” The Journal of Machine Learning Re-search , vol. 17, no. 1, pp. 8330–8373, 2016. [9] J. Dean and S. Ghemawat, “Mapreduce: simplified data processing on large clusters,” Communications of the ACM , vol. 51, no. 1, pp. 107–113, 2008. [10] H. Lin and J. Bilmes, “A class of submodular functions for document summarization,” in Proceedings of the 49th annual meeting of the as-sociation for computational linguistics: human language technologies ,2011, pp. 510–520. [11] L. Jiang, S. Wang, B. Guo, H. Wang, D. Zhang, and G. Wang, “Faircod: A fairness-aware concurrent dispatch system for large-scale instant delivery services,” in Proceedings of the 29th ACM SIGKDD Conference on Knowledge Discovery and Data Mining , 2023, pp. 4229–4238. [12] Y. Lai, Y. Xu, D. Mai, Y. Fan, and F. Yang, “Optimized large-scale road sensing through crowdsourced vehicles,” IEEE Transactions on Intelligent Transportation Systems , vol. 23, no. 4, pp. 3878–3889, 2022. [13] G. Fan, H. Jin, Q. Liu, W. Qin, X. Gan, H. Long, L. Fu, and X. Wang, “Joint scheduling and incentive mechanism for spatio-temporal vehicular crowd sensing,” IEEE Transactions on Mobile Computing , vol. 20, 2019. [14] C. Xiang, Y. Zhou, H. Dai, Y. Qu, S. He, C. Chen, and P. Yang, “Reusing delivery drones for urban crowdsensing,” IEEE Transactions on Mobile Computing , vol. 22, no. 5, pp. 2972–2988, 2021. [15] N. S. Lesmana, X. Zhang, and X. Bei, “Balancing efficiency and fairness in on-demand ridesourcing,” Advances in neural information processing systems , vol. 32, 2019. [16] C. Xiang, W. Cheng, C. Lin, X. Zhang, D. Liu, X. Zheng, and Z. Li, “Lstaloc: A driver-oriented incentive mechanism for mobility-on-demand vehicular crowdsensing market,” IEEE Transactions on Mobile Computing , vol. 23, no. 4, pp. 3106–3122, 2023. [17] S. Liu and Z. Luo, “On-demand delivery from stores: Dynamic dispatching and routing with random demand,” Manufacturing & Service Operations Management , vol. 25, no. 2, pp. 595–612, 2023. [18] H. Zhang, G. Wang, X. Wang, Z. Zhou, C. Zhang, Z. Dong, and Y. Wang, “Nondbrem: Nondeterministic offline reinforcement learning for large-scale order dispatching,” in Proceedings of the AAAI Con-ference on Artificial Intelligence , vol. 38, no. 1, 2024, pp. 401–409. [19] S. Choudhury, K. Solovey, M. J. Kochenderfer, and M. Pavone, “Efficient large-scale multi-drone delivery using transit networks,” in 
+
+2020 IEEE International Conference on Robotics and Automation (ICRA) , 2020, pp. 4543–4550. [20] H. Makino and S. Ito, “Online multi-agent pickup and delivery with task deadlines,” in 2024 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS) . IEEE, 2024, pp. 8428–8434. [21] J. R¨ uckin, F. Magistri, C. Stachniss, and M. Popovi´ c, “An informative path planning framework for active learning in uav-based semantic mapping,” IEEE Transactions on Robotics , vol. 39, no. 6, pp. 4279– 4296, 2023. [22] W. Ji, K. Han, and Q. Ge, “Route planning of mobile sensing fleets for repeatable environmental monitoring tasks,” Computers, Environment and Urban Systems , vol. 119, p. 102285, 2025. [23] R. Xu, K. Cai, L. Jiang, Z. Hong, Y. Tian, and G. Wang, “Geogen: A two-stage coarse-to-fine framework for fine-grained synthetic location-based social network trajectory generation,” in The 40th Annual AAAI Conference on Artificial Intelligence (AAAI) , 2026. [24] G. Wang, Y. Chen, S. Wang, F. Zhang, and D. Zhang, “Foretaxi: Data-driven fleet-oriented charging resource allocation in large-scale electric taxi networks,” ACM transactions on sensor networks , vol. 19, no. 3, pp. 1–25, 2023. [25] L. Jiang, D. Yu, R. Xu, T. Tang, and G. Wang, “Uncertainty-aware predict-then-optimize framework for equitable post-disaster power restoration,” in Proceedings of the Thirty-Fourth International Joint Conference on Artificial Intelligence , 2025, pp. 9719–9727. [26] H. Tan, Y. Yuan, H. Yan, S. Zhong, and Y. Yang, “Human preference-aware rebalancing and charging for shared electric micromobility vehicles,” in 2024 IEEE International Conference on Robotics and Automation (ICRA) . IEEE, 2024, pp. 9608–9615. [27] S. He, L. Pepin, G. Wang, D. Zhang, and F. Miao, “Data-driven dis-tributionally robust electric vehicle balancing for mobility-on-demand systems under demand and supply uncertainties,” in 2020 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS) .IEEE, 2020, pp. 2165–2172. [28] S. Ruan, J. Bao, Y. Liang, R. Li, T. He, C. Meng, Y. Li, Y. Wu, and Y. Zheng, “Dynamic public resource allocation based on human mobility prediction,” Proceedings of the ACM on interactive, mobile, wearable and ubiquitous technologies , vol. 4, no. 1, pp. 1–22, 2020. [29] A. De Maio, G. Ghiani, D. Lagan` a, and E. Manni, “Sustainable last-mile distribution with autonomous delivery robots and public trans-portation,” Transportation Research Part C: Emerging Technologies ,vol. 163, p. 104615, 2024. [30] I. Munasinghe, A. Perera, and R. C. Deo, “A comprehensive review of uav-ugv collaboration: Advancements and challenges,” Journal of Sensor and Actuator Networks , vol. 13, no. 6, p. 81, 2024. [31] T. H. Chung, V. Orekhov, and A. Maio, “Into the robotic depths: Analysis and insights from the darpa subterranean challenge,” Annual Review of Control, Robotics, and Autonomous Systems , vol. 6, no. 1, pp. 477–502, 2023. [32] P. T. Singamaneni, P. Bachiller-Burgos, L. J. Manso, A. Garrell, A. Sanfeliu, A. Spalanzani, and R. Alami, “A survey on socially aware robot navigation: Taxonomy and future challenges,” The International Journal of Robotics Research , vol. 43, no. 10, pp. 1533–1572, 2024.

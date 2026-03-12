@@ -1,0 +1,421 @@
+Title: Knowledge-informed Bidding with Dual-process Control for Online Advertising
+
+URL Source: https://arxiv.org/pdf/2603.04920v1
+
+Published Time: Fri, 06 Mar 2026 01:40:10 GMT
+
+Number of Pages: 8
+
+Markdown Content:
+# Knowledge-informed Bidding with Dual-process Control for Online Advertising 
+
+Huixiang Luo 1, Longyu Gao 1, Yaqi Liu 2, Qianqian Chen 1, Pingchun Huang 2, Tianning Li 1B 
+
+> 1
+
+Alibaba Health, Hangzhou, China  
+
+> 2
+
+Alibaba Health, Beijing, China 
+
+{luohuixiang.lhx, longyu.gly, fangqi.cqq, tianning.litn}@alibaba-inc.com {lyq418445, pingchun.hpch}@alibaba-inc.com 
+
+Abstract 
+
+Bid optimization in online advertising relies on black-box ma-chine learning models that learn bidding decisions from histori-cal data. However, these approaches sometimes fail to replicate human experts’ adaptive, experience-driven, and globally coher-ent decisions. Specifically, they generalize poorly in data-sparse cases because of missing structured knowledge, make short-sighted decisions that ignore long-term interdependencies, and struggle to adapt in out-of-distribution scenarios where human experts succeed. To address this, we propose KBD (Knowledge-informed Bidding with Dual-process control), a novel method for bid optimization. KBD embeds human expertise as induc-tive biases through the Informed Machine Learning paradigm, uses Decision Transformer (DT) to globally optimize multi-step bidding sequences, and implements dual-process control by combining a fast rule-based PID (System 1) with DT (Sys-tem 2). Extensive experiments highlight KBD’s advantage over existing methods and underscore the benefit of grounding bid optimization in human expertise and dual-process control. 
+
+Keywords: Informed Machine Learning; Dual-process Theory; Decision Transformer; Auto-bidding; Online Advertising 
+
+# Introduction 
+
+Auto-bidding now dominates digital impression purchasing, projected to exceed $200 billion dollar in ad spend in 2026 and to comprise over 92% of online ad transactions (Mitchell-Wolf, 2025). In ad platforms, advertisers choose appropriate auto-bidding strategies and specify high-level performance goals (e.g., target Return-on-Investment (tROI), target Cost-Per-Action (tCPA), and target Cost-Per-Click (tCPC)) for ad campaigns, while the platform handles impression procure-ment by bidding automatically for each ad impression under advertisers’ guidance. Since performance goals are advertis-ers’ main control lever and directly affect revenues (e.g., Gross Merchandise Volume, GMV), setting goal decisions effec-tively is crucial for achieving procurement objectives. Prior works (Castiglioni et al., 2025; Liang et al., 2023; Luo et al., 2024) seek to replace human experts with black-box Machine Learning (ML) models that learn bid optimization policies from historical data, enabling scalable bid optimization sys-tem. However, such models often underperform experts in data-scarce settings, optimize myopically at a single decision step while ignoring inter-temporal interactions, and general-ize poorly to abrupt distribution shifts (e.g., sales promotions and new-product launches). To address these limitations, we propose KBD (Knowledge-informed Bidding with Dual-process Control), a two-stage bid optimization method. At the macro (daily) stage, we adopt Informed Machine Learning (IML) paradigm (Von Rueden et al., 2021) to embed human expertise into model across hypoth-esis, algorithm and data levels. The hypothesis level design is central to macro stage bid optimization. We construct a price-volume model with hybrid cognitive architectures (Mumuni & Mumuni, 2024) to produce base bid values that are robust to data sparsity. At the micro (hourly) stage, we introduce Decision Transformer (DT) (L. Chen et al., 2021) to optimize multi-step future rewards, mitigating the short-sightedness of step-wise optimization. To handle abrupt distribution shifts, we draw on dual-process control (Moskovitz et al., 2022): the rule-based PID controller (Bennett, 1993) (System 1) guides the complicated DT model training (System 2), and their out-puts are combined to improve robustness in extreme scenarios. In summary, our contributions are threefold: (1) We propose KBD, a two stage bid optimization method that couples expert-driven daily calibration with sequential hourly control to optimize long-term bidding rewards. (2) We improve model performance and robustness with a dual-process controller, where PID (System 1) guides and is fused with DT (System 2) to handle data distribution shifts. (3) Experiments on two datasets show the effectiveness and broad applicability of KBD across diverse environments. 
+
+# Related Works 
+
+Auto-bidding Strategies in Ad Platforms 
+
+Ad platforms offer various auto-bidding strategies to meet advertisers’ needs for ad procurement. These strategies elim-inate manual per-impression bidding, substantially reducing the complexity of ad procurement and enabling advertisers to get started with minimal effort. However, all these black-box strategies also aim to maximize platforms’ advertising revenue, so low-value impressions are always mixed with high-value impressions and sold together to advertisers. As a result, advertisers often adapt to or strategically circumvent these platform-controlled strategies. A common approach is to calibrate performance goals to optimize bids, thereby re-ducing low-value impression purchases and improving ad per-formance. Mainstream auto-bidding strategies fall into three groups: (1) rule-based controllers, e.g., RTBControl (Weinan et al., 2016), MPID (Yang et al., 2019); (2) reinforcement learning methods, e.g., USCB (Y. He et al., 2021), MAAB (Wen et al., 2022); and (3) generative-model-based methods, 
+
+> arXiv:2603.04920v1 [cs.AI] 5 Mar 2026
+
+e.g., DiffBid (Guo et al., 2024), GAVE (Gao et al., 2025). To cope with the increasingly complex strategies, advertisers be-gin to use ML models to learn bidding patterns and combine them with human expertise for efficient ad procurement. 
+
+Bid Optimization by Performance Goal Control 
+
+Following the ‘Predict, then Optimize’ (PO) paradigm (El-machtoub & Grigas, 2022), advertisers commonly adopt a two-stage approach for bid optimization. The first stage cen-ters on a price-volume model that characterizes how bid price varies with volume (e.g. cost, GMV). The model learns from historical data with monotonicity constraints as expert priors to improve model reliability. The second stage formulates an optimization problem to derive the optimal bidding decision. PUROS (Luo et al., 2024) models price-volume relationship with monotonic XGBoost model, and computes single-step optimal bids under the ‘robust satisficing’ framework. GCB-safe (Castiglioni et al., 2025) fits a Gaussian-process price-volume model with smoothness priors, and applies dynamic programming to obtain single-step optimal bids. Overall, these first-stage models are black-box ML methods learned mostly from historical data, with limited incorporation of ex-pert knowledge. Moreover, their second-stage optimization is typically myopic, maximizing single-step reward while ig-noring how current bids affect future decisions and rewards, which hinders global revenue maximization. Under data dis-tribution shifts caused by sales promotions or new product launches, due to the mismatch between online and historical data distributions, price-volume models exhibit degraded per-formance. The resulting prediction errors propagate into the second stage, amplifying the unreliability of bidding decisions and potentially causing losses for advertisers. 
+
+Dual-process Theory in Industrial Applications 
+
+Industrial implementations of dual-process theory adopt two complementary strategies to instantiate System 1 and Sys-tem 2: System 1 provides robust, low-latency decisions and learned priors to reduce the cost of acquiring complex poli-cies from historical data, while System 2 applies deliberative processing to improve overall performance. In autonomous driving, LeapAD (Mei et al., 2024) pairs an LLM-based Sys-tem 2 for rule-grounded reflection and memory curation with a lightweight System 1 that retrieves distilled knowledge for rapid control. For robotic manipulation, DP-VLA (Han et al., 2024) employs a large System 2 model to infer task-level in-tent representations that guide a compact System 1 policy for real-time motor execution. In dialogue systems, DPDP (T. He et al., 2024) dynamically switches between a fast policy lan-guage model (System 1) and an MCTS-based planner (System 2) to balance inference efficiency and planning depth. 
+
+# Problem Formulation 
+
+We consider a sequence of 𝑀 ad impressions arriving within a day, indexed by 𝑖 = 1, . . . , 𝑀 . Each impression 𝑖 is as-sociated with a predicted click-through rate ( pCTR 𝑖 ), a pre-dicted conversion rate ( pCVR 𝑖 ), a predicted payment amount (ppay 𝑖 ), and a winning price ( wp 𝑖 ). The advertiser employs the platform-provided tCPA auto-bidding strategy to maxi-mize GMV. Under the generalized second-price (GSP) auc-tion mechanism (Edelman et al., 2007), the strategy submits 
+
+bid 𝑖 and wins the impression if bid 𝑖 > wp 𝑖 . Let 𝑥 𝑖 be the win indicator and 𝑣 𝑖 = pCTR 𝑖 · pCVR 𝑖 · ppay 𝑖 the expected conversion value of impression 𝑖 . Given budget 𝐵 and tCPA target 𝐶 , the bid optimization problem is formulated as: 
+
+max   
+
+> {𝑥 𝑖 }
+> 𝑀
+
+∑︁ 
+
+> 𝑖 =1
+
+𝑥 𝑖 · 𝑣 𝑖 (1) s.t. 
+
+> 𝑀
+
+∑︁ 
+
+> 𝑖 =1
+
+𝑥 𝑖 · wp 𝑖 ≤ 𝐵 (2) 
+
+Í𝑀 𝑖 =1 𝑥 𝑖 · wp 𝑖 
+
+Í𝑀 𝑖 =1 𝑥 𝑖 · pCTR 𝑖 · pCVR 𝑖 
+
+≤ 𝐶 (3) 
+
+𝑥 𝑖 ∈ { 0, 1}, ∀𝑖. (4) Following the MPID framework (Yang et al., 2019), the opti-mal bid can be expressed as: 
+
+bid 𝑖 = 1
+
+𝑝 + 𝑞 · 𝑣 𝑖 + 𝑞 𝑝 + 𝑞 · pCTR 𝑖 · pCVR 𝑖 · 𝐶 (5) where variables 𝑝, 𝑞 ≥ 0 correspond to the budget and tCPA constraints respectively, governing spending pace and actual CPA. In practice, 𝑝 and 𝑞 are tuned by the platform’s auto-bidding system (e.g., GAVE (Gao et al., 2025)), while 𝑣 𝑖 and 
+
+ppay 𝑖 are estimated via platform ML models. For conciseness, Eq. (5) can be rewritten as: 
+
+bid 𝑖 = 𝜆 0 
+
+> 𝑖
+
++ 𝜆 1 
+
+> 𝑖
+
+· 𝐶 (6) where 𝜆 0 
+
+> 𝑖
+
+= 1 
+
+> 𝑝 +𝑞
+
+·𝑣 𝑖 and 𝜆 1 
+
+> 𝑖
+
+= 𝑞 𝑝 +𝑞 ·pCTR 𝑖 ·pCVR 𝑖 are dynam-ically set by the platform and unobservable to the advertiser. Thus, the advertiser’s only control is the tCPA target 𝐶 , and our objective is to maximize GMV by hourly adjusting 𝐶 .
+
+# Methodology 
+
+As shown in Figure 1, KBD follows the ‘Predict, then Opti-mize’ framework, and refines the task of tuning parameter C into the following formulation: 
+
+𝐶 = 𝐶 𝑚𝑎 · 𝐶 𝑚𝑖 (7) where 𝐶 𝑚𝑎 is a day-level base tCPA from the macro stage model IEFormer (Isotonic-Embedding based Transformer), and 𝐶 𝑚𝑖 is an hour-level adjustment coefficient from the mi-cro stage that combines DT model (System 2) with a PID controller (System 1) to achieve globally optimal bids. 
+
+Macro stage: IEFormer 
+
+IEFormer learns the tCPA-cost relationship to establish a near-globally optimal tCPA baseline for bid optimization. Inspired by the Knowledge Integration framework from IML (Von Rue-den et al., 2021), we incorporate human expertise into the model at the hypothesis, algorithm and data levels. Macro stage: IEFormer 
+
+Transformer 
+
+Encoder 
+
+Fully Connected 
+
+Layer 
+
+SoftPlus Layer 
+
+Weight matrix W
+
+IE module (
+
+encoding) 
+
+GLA module (
+
+segmentation) 
+
+Price vector P
+
+# ⊙        
+
+> 1……0053 ……11 6
+
+Feature extractor Price -volume 
+
+interpreter PID controller 
+
+Decision Transformer 
+
+Micro stage: Dual -process control 
+
+𝑎 !,#$% 𝑠 !&'
+
+𝑅 !&' 𝑠 !&' 𝑎 !&',%( 𝑅 ! 𝑠 ! 𝑎 !,%( 
+
+𝑎 !&',%( 𝑎 !,%(    
+
+> embedding (
+> reward, state,
+> action, position)
+> linear decoder
+> guide
+
+# ⊕
+
+# ⊙
+
+sequential decision 𝐶 
+
+daily base 𝐶 )* hourly adjustment 𝐶 )+ 
+
+System 1
+
+System 2Figure 1: The architecture of the KBD method. Blue-shaded components denote black-box modules implemented via neural networks, yellow-shaded components indicate rule-based interpretable modules, and mixed-color regions represent their fusion. 
+
+Hypothesis Level To reconcile the need for both inter-pretability (for expert validation and debugging) and expres-sive power (for capturing complex patterns), we instantiate a hybrid cognitive architecture (Mumuni & Mumuni, 2024) that explicitly integrates connectionist learning with symbolic rea-soning. Specifically, our architecture comprises two tightly coupled components: 
+
+• A connectionist module: a Transformer encoder (Vaswani et al., 2017) that acts as a feature extractor, distilling histor-ical bidding data into a dense ad embedding. This module learns statistical regularities in an end-to-end manner. 
+
+• A symbolic module: a price-volume interpreter grounded in monotonic piecewise-linear reasoning. It maps cost to tCPA via tCPA = P · W, where W ∈ R𝑁 represents inter-pretable marginal tCPA weights over 𝑁 = 10 cost segments, and P ∈ [ 0, 1] 𝑁 is generated by an Isotonic Embedding (IE) module (Shen et al., 2021). The two modules interact bidirectionally: the connectionist module provides a rich, contextualized representation (the ad embedding) that personalizes the symbolic interpreter’s pa-rameters ( W), while the symbolic structure imposes inductive biases that constrain and regularize the black-box learning process, thereby enabling diagnosis, calibration, and trust. A key challenge is avoiding skewed interval allocation (e.g., most samples falling into a few segments), which leads to poor estimation in sparse regions. To address this, we propose an entropy-driven adaptive partitioning strategy: for campaign 𝑖 
+
+with 𝑍 𝑖 historical samples, let 𝑧 𝑖 𝑗 denote the number assigned to interval 𝑗 , and define empirical probability 𝑝 𝑖 𝑗 = 𝑧 𝑖 𝑗 /𝑍 𝑖 .We then seek interval boundaries that maximize total infor-mation entropy across all campaigns: 
+
+max 
+
+> 𝑆 ∗
+
+∑︁ 𝑖 𝑁 ∑︁ 
+
+> 𝑗 =1
+
+−𝑝 𝑖 𝑗 log 𝑁 ( 𝑝 𝑖 𝑗 ) (8) which encourages near-uniform sample distribution and im-proves generalization in data-sparse regimes. This optimiza-tion is efficiently solved via the Generalized Lloyd Algorithm (GLA) from data compression literature (Chou et al., 2002), repurposed here as a novel mechanism for structuring in-terpretable cost segments grounded in information-theoretic principles. Finally, W is generated from the ad embedding via a fully connected layer, enabling joint training and campaign-specific personalization. 
+
+Algorithm Level In online advertising, domain expertise re-garding the tCPA–cost relationship typically asserts two prop-erties: monotonicity, meaning that tCPA is non-decreasing with respect to cost, and smoothness, meaning that the re-lationship exhibits no abrupt discontinuities. Through data analysis and discussions with advertising experts, we pre-serve monotonicity and smoothness, and further introduce a new inductive bias: diminishing marginal returns (Wu et al., 2022), i.e., the rate of increase in tCPA slows as cost grows. Monotonicity is implemented by appending a Softplus acti-vation layer after the fully connected layer in the price-volume interpreter, ensuring that W is non-negative. Smoothness is enforced by adding a smoothness regularizer 𝐿 smooth to the Mean Squared Error (MSE) loss to penalize differences be-tween adjacent elements of W, thereby discouraging sharp transitions 
+
+𝐿 smooth =∑︁ 
+
+> 𝑖
+
+(𝑤 𝑖 − 𝑤 𝑖 +1)2
+
+𝑤 𝑖 · 𝑤 𝑖 +1
+
+(9) To enforce the newly introduced constraint, we introduce a dedicated regularization term 𝐿 margin 
+
+𝐿 margin =∑︁ 
+
+> 𝑖
+
+𝑅𝑒𝐿𝑈 ( 𝑤 𝑖 +1
+
+𝑠𝑡𝑒 𝑝 𝑖 +1
+
+− 𝑤 𝑖 
+
+𝑠𝑡𝑒 𝑝 𝑖 
+
+) (10) where 𝑤 𝑖 denotes the 𝑖 -th element of the weight vector W and 
+
+𝑠𝑡𝑒 𝑝 𝑖 is the width of the corresponding cost interval. This loss penalizes violations of the diminishing marginal returns condition. We incorporate the marginal utility loss 𝐿 margin 
+
+into the total objective alongside the prediction loss 𝐿 𝑀𝑆𝐸 
+
+and smoothness regularizer 𝐿 smooth 
+
+𝐿 IEFormer = 𝐿 MSE + 𝛼 smooth 𝐿 smooth + 𝛼 margin 𝐿 margin (11) where 𝛼 smooth = 0.5, 𝛼 margin = 0.1.
+
+Data Level To mitigate data scarcity in online advertising, we transfer bidding knowledge from other auto-bidding strate-gies. Although these strategies optimize for different perfor-mance goals (e.g., tROI, tCPC), they all produce bids in the same unit and compete on the same platform. Leveraging this commonality, we use the platform’s unified eCPM (effective cost-per-mille) formula (Eq. (12)) to convert heterogeneous performance goals into equivalent tCPA values (K. Zhang et al., 2024). This transformation enables us to enrich the train-ing data for learning the tCPA-cost relationship, effectively augmenting supervision from diverse bidding strategies. 
+
+tCPA = eCPM 
+
+pCTR · pCVR · 1000 = 𝑝 𝑝𝑎𝑦 
+
+tROI = tCPC 
+
+pCVR (12) For tROI strategy, we instantiate 𝑝 𝑝𝑎𝑦 in Eq. (12) with the item’s listed price; for tCPC strategy, we instantiate pCVR 
+
+with the campaign’s average conversion rate. These aug-mented samples are used in training with a 0.1 weight to preserve fidelity to native tCPA data. 
+
+Micro stage: Dual-process Control with PID & DT 
+
+At the micro stage, we perform hourly tCPA adjustments to maximize GMV. Unlike prior methods that rely on myopic, single-step optimization and ignore inter-temporal dependen-cies and future ad dynamics, we frame bidding as a sequential decision problem and employ a DT model (L. Chen et al., 2021) under the offline reinforcement learning paradigm to optimize long-horizon GMV. 
+
+DT for Sequential Bid Optimization We formulate the bid optimization problem as a 24-step Markov decision process (MDP) ⟨S , A, R, P⟩ , where 𝑠 𝑡 ∈ S denotes the system state at hour 𝑡 , 𝑎 𝑡 ∈ A the bidding action, 𝑟 𝑡 the immediate re-ward, and P the state transition dynamics. The objective is to find an optimal bidding sequence 𝑎 1, . . . , 𝑎 24 that maximizes cumulative return. In our scenario, state 𝑠 𝑡 is a feature vector comprising campaign-level metadata and historical performance statistics (e.g., strategy type, remaining budget); action 𝑎 𝑡 ∈ [ 0.8, 1.2]
+
+is a multiplicative bid coefficient; reward 𝑟 𝑡 combines normal-ized cumulative GMV and a spend-utilization penalty: 
+
+𝑟 𝑡 = GMV 𝑡 
+
+GMV ∗ + min 
+
+
+
+0, 1 − cost 𝑡 
+
+𝐵 
+
+
+
+(13) where GMV 𝑡 and cost 𝑡 are cumulative GMV and spend up to hour 𝑡 , GMV ∗ is the average GMV over past 7 days. DT is trained with the following loss (K. Su et al., 2024) 
+
+𝐿 DT = 𝐿 MSE (𝑎 t,DT , 𝑎 t,gt ) (14) where 𝑎 𝑡 , DT and 𝑎 𝑡 , gt denote predicted and ground-truth bid coefficients respectively, and 𝑎 𝑡 is the abbreviation of 𝑎 𝑡 , DT .
+
+Dual-process Control with PID & DT In real-world de-ployment, we observed that DT suffers performance degrada-tion during sales promotions or new product launches, where the distributional shift between historical training data and online data renders learned policies ineffective. Inspired by dual-process theory, we propose to encode expert-derived bid-ding heuristics into a robust, rule-based controller that acts as System 1 to assist the deliberative DT (System 2) in out-of-distribution scenarios. Specifically, we integrate a rule-based PID controller (System 1) grounded in expert heuristics that regulates bids based on spending rate deviation 
+
+𝑎 t,PID = 𝑘 𝑝 (cost 𝑡 −budget 𝑡 ) + 𝑘 𝑖 𝑡 ∑︁ 
+
+> ℎ𝑖 =1
+
+(cost ℎ𝑖 −budget ℎ𝑖 ) (15) with 𝑘 𝑝 , 𝑘 𝑖 weighting current / cumulative cost errors, and cost 𝑡 , budget 𝑡 the actual / ideal cumulative costs up to hour 𝑡 .Drawing on insights from industrial applications of dual-process theory, DT and PID are fused in two dimensions: (1) during training, we regularize DT toward PID using a Minimum Description Length (MDL) prior (Moskovitz et al., 2022); (2) at inference, we dynamically blend decisions based on DT’s predictive uncertainty (Daw et al., 2005). The MDL framework posits that dual-process architectures emerge from a unified computational objective (Grünwald, 2007): maximizing reward while minimizing the descrip-tion length of behavioral policies, i.e., favoring simpler, more compressible strategies. We thus augment the DT training objective to balance expected return against policy complex-ity and deviation from the PID baseline, via a regularization term that penalizes excessive divergence from PID 
+
+𝐿 DT = 𝐿 MSE (𝑎 t,DT , 𝑎 𝑡 , gt ) + 𝛽 · 𝐿 MSE (𝑎 𝑡 , DT , 𝑎 𝑡 , PID ) (16) where 𝛽 = 0.1. At decision time, we employ an uncertainty-weighted fusion mechanism. Since the PID controller is de-terministic, uncertainty is quantified solely through the DT’s recent prediction error. Let mape ≥ 0 denote the mean abso-lute percentage error of the DT’s bid predictions over the past three hours, which serves as a proxy for model uncertainty. We then compute the final bid coefficient as 
+
+𝐶 𝑚𝑖 = max (1 − mape , 0) · 𝑎 𝑡 , DT + min (mape , 1) · 𝑎 𝑡 , PID (17) This ensures graceful degradation: as DT uncertainty in-creases, control shifts toward the robust PID policy. 
+
+# Experiments 
+
+Several experiments are conducted for the following key Re-search Questions: 
+
+RQ1: Does KBD outperform state-of-the-art methods? 
+
+RQ2: What is the impact of IML on the macro stage of KBD? 
+
+RQ3: Is IEFormer robust to the segment number N? 
+
+RQ4: How does the dual-process control affect the overall performance of KBD? Table 1: Results of click maximization on iPinYou dataset. Method 𝑅 /𝑅 ∗ ↑ constraint satisfaction ↑
+
+ARTEO (Korkmaz et al., 2022) 0.601 80.65% BOCO (Liang et al., 2023) 0.618 74.10% SPB (Y. Su et al., 2024) 0.699 75.32% PUROS (Luo et al., 2024) 0.723 81.73% GCB-safe (Castiglioni et al., 2025) 0.606 80.77% 
+
+KBD w/o DT 0.706 81.43% 
+
+KBD w/o PID 0.721 80.32% 
+
+KBD 0.730 82.78% 
+
+Experimental Setup 
+
+Datasets and Evaluation Metrics. KBD is evaluated on two datasets: the public iPinYou dataset (10-day logs from 9 ad-vertisers, tCPC strategy for click maximization) and a private E-Commerce Advertising dataset ( ECA ) from 200 advertisers (Sep-Dec 2025), optimizing GMV under tCPA / tROI strate-gies in diverse scenarios including monthly sales promotions and new product launches. Following PUROS, we report nor-malized return 𝑅 /𝑅 ∗ (actual vs. oracle clicks) on iPinYou , and model accuracy via wmape (cost-weighted mape) and perf10 (fraction of predictions ≤ 10% error) on ECA . Synthetic Con-trol Method (Abadie et al., 2015) is used in online experiments to evaluate the approach’s efficacy. 
+
+Compared Methods. On iPinYou (W. Zhang et al., 2014), we compare KBD against state-of-the-art baselines such as PUROS. On ECA , IEFormer is evaluated against two classes of price–volume models: (1) conventional regressors used in prior work such as GP; and (2) monotonic demand models such as XGBoost. To avoid harming advertisers’ revenue, only methods with PID module are deployed in online tests. 
+
+Main Results (RQ1) 
+
+The overall performance of KBD and other baselines on the 
+
+iPinYou dataset is summarized in Table 1. KBD consistently outperforms all prior approaches in both 𝑅 /𝑅 ∗ and constraint satisfaction, providing strong confidence in deploying KBD on real-world ad platforms. Online tests are conducted on a real-world platform (from which the ECA dataset was collected), and results are reported in Table 2. We observe that IEFormer alone improves cost-exhaust ratio by 8.4%, while DT con-tributes an additional 2.3% improvement. IEFormer drives the larger gain, underscoring that a well-calibrated price-volume model provides a reliable daily tCPA anchor, which in turn enables more effective hourly bid optimization. 0.00 0.25 0.50 0.75 1.00         
+
+> cost
+> 10
+> 15
+> 20
+> 25
+> tROI
+> tROI-cost curve
+> raw data
+> w/ Lmargin
+> w/o Lmargin
+> difference
+> 0.00 0.25 0.50 0.75 1.00
+> cost
+> 40
+> 60
+> 80
+> 100
+> tCPA
+> tCPA-cost curve
+> raw data
+> w/ Lmargin
+> w/o Lmargin
+> difference
+
+Figure 2: Case studies on the influence of 𝐿 margin . As high-lighted by the ellipsoidal regions, the price-volume curve is more prone to overfitting the noisy data without 𝐿 margin .
+
+Further Analysis 
+
+Ablation Study of IML (RQ2) Ablation studies on the ECA 
+
+dataset are conducted to assess the contribution of knowledge at each level of IML framework. Specifically, we consider four variants: (1) w/o IE : replaces IE module with end-to-end prediction; (2) w/o GLA : replaces GLA module with fixed segmentation; (3) w/o 𝐿 margin : disables the 𝐿 margin loss; (4) 
+
+w/o tROI data : removes training samples from tROI strategies. As shown in Table 3, all ablated variants suffer immediate performance degradation, confirming that knowledge integra-tion across all levels is essential. Notably, removing IE module leads to the largest drop, highlighting the critical role of the price-volume interpreter in the hybrid cognitive architecture. Table 3: Ablation Study of IML on ECA dataset. Method wmape ↓ mape ↓ perf10 ↑
+
+w/o IE 0.2588 0.2348 0.2738 w/o GLA 0.2412 0.2270 0.2793 w/o 𝐿 margin 0.2386 0.2268 0.2921 w/o tROI data 0.2226 0.2600 0.2976 
+
+KBD 0.2187 0.2151 0.3214 
+
+Moreover, ablating 𝐿 margin also harms performance. To illustrate its influence, we conduct a case study using the 
+
+W matrix from the price-volume interpreter to visualize the learned price-volume curves. As Figure 2 shows, 𝐿 margin acts as an effective regularizer. It prevents overfitting to noisy data Table 2: Online test results on ECA : relative lifts against control group; absolute metrics redacted for commercial confidentiality. Experimental Period Group Group Detail cost-exhaust ratio GMV Campaign Duration use PID use IEFormer use DT 2025/09/28-2025/10/18 Control Treatment 
+
+✓✓ ✓
+
+/+ 8.44% /+ 6.14% /+ 0.58% 2025/11/20-2025/12/10 Control Treatment 
+
+✓✓ ✓ ✓
+
+/+14.55% /+13.01% /+1.36% 2025/12/11-2025/12/31 Control Treatment 
+
+✓✓✓✓ ✓
+
+/+2.27% /+2.66% /+0.20% and guides the model to produce monotonic, smooth curves that align with expert expectations of diminishing returns. Table 4 shows experiments that benchmark mainstream price-volume models on the ECA dataset. Black-box ap-proaches such as IGCM (Tang et al., 2025), despite enforc-ing monotonicity, perform poorly on ECA . This underscores the necessity of using IE module as an explicit, interpretable price-volume interpreter when applying deep learning in such dynamic environments. Additionally, although DIPN (Shen et al., 2021) also employs IE module, it still underperforms IEFormer markedly, indicating that the powerful feature ex-tractor is equally crucial in our hybrid cognitive architecture. Table 4: Price-volume model performance on ECA dataset. Method wmape ↓ mape ↓
+
+IGCM (Tang et al., 2025) 0.9979 0.9949 GP (Schulz et al., 2018) 0.6414 1.8021 CMNN (Li et al., 2024) 0.6309 2.0599 DIPN (Shen et al., 2021) 0.6308 1.7647 SMNN (Kim & Lee, 2024) 0.6179 2.2503 SMM (Igel, 2023) 0.6023 1.6785 XGBoost (T. Chen, 2016) 0.4967 1.1872 
+
+IEFormer 0.2187 0.2151 Robustness of IEFormer to Number N (RQ3) To evaluate the robustness of IEFormer to the number of segments N, we vary N from 6 to 15 and measure its impact on model per-formance. As shown in Figure 3, although wmape fluctuates between 21% and 27%, IEFormer consistently outperforms all baseline price-volume models in Table 4, demonstrating strong robustness of the IE module to the choice of N. 
+
+Ablation Study of Dual-process Control (RQ4) On 
+
+iPinYou dataset, we compare the standalone DT, PID con-troller, and their integration via dual-process control. As shown in Table 1, DT improves 𝑅 /𝑅 ∗ by optimizing sequential decisions globally at the cost of reduced constraint satisfac-tion, since its System 2–like reasoning occasionally produces aggressive bids that violate advertiser constraints. In contrast, the PID controller, a System 1 rule-based policy, ensures re-liable constraint adherence across all cases but sacrifices po-tential clicks due to its myopic, stepwise optimality. The dual-process control framework reconciles these trade-offs and improves both metrics by roughly 1%: by incorpo-rating PID’s decisions as a soft constraint during DT training, DT model learns to emulate PID’s conservative behavior, re-ducing constraint violations. Simultaneously, DT calibrates PID’s bids to maximize long-term reward, yielding higher 
+
+𝑅 /𝑅 ∗ than either component alone. We observe consistent gains in online experiments on the 
+
+ECA dataset (Table 2). The dual-process control framework significantly improves cost-exhaust ratio, GMV and campaign duration over the PID baseline, demonstrating its effective-ness in real-world scenarios involving distribution shifts. The framework generalizes across multiple auto-bidding strate-gies, confirming that integrating fast, robust heuristics with slow, deliberative planning yields more adaptive and reliable decision-making in dynamic advertising environments. 6 7 8 9 10 11 12 13 14 15          
+
+> segment number N
+> 20
+> 30
+> 40
+> 50
+> wmape  (%)
+> 24.0 25.4 24.7 22.9 21.9 21.8 25.0 26.9 24.4 24.8
+> Best previous method
+> IEFormer
+> minimum
+> maximum
+
+Figure 3: Robustness of IEFormer to segment number N. 
+
+# Conclusion 
+
+We propose KBD, a two-stage bidding framework that inte-grates expert knowledge into the macro-stage price–volume model via IML and optimizes long-horizon returns in the mi-cro stage using DT. Drawing on dual-process theory, we fuse DT (System 2) with a PID controller (System 1) to balance deliberative planning and reactive control. Experiments on 
+
+iPinYou and a real-world platform show that KBD outperforms state-of-the-art methods, with gains attributed to richer knowl-edge infusion and dual-process robustness under real-world distribution shifts. Future work will leverage large language models to build bidding agents endowed with human-like cog-nitive mechanisms, capable of optimal decisions and gener-ating causal, goal-directed natural-language explanations to render its reasoning transparent and interpretable. References 
+
+Abadie, A., Diamond, A., & Hainmueller, J. (2015). Com-parative politics and the synthetic control method. 
+
+American Journal of Political Science , 59 (2), 495– 510. Bennett, S. (1993). Development of the pid controller. IEEE Control Systems Magazine , 13 (6), 58–62. Castiglioni, M., Nuara, A., Romano, G., Spadaro, G., Trovò, F., & Gatti, N. (2025). Safe online bid optimization with return on investment and budget constraints. 
+
+Proceedings of the 31st ACM SIGKDD Conference on Knowledge Discovery and Data Mining V. 1 , 73– 81. Chen, L., Lu, K., Rajeswaran, A., Lee, K., Grover, A., Laskin, M., Abbeel, P., Srinivas, A., & Mordatch, I. (2021). Decision transformer: Reinforcement learning via sequence modeling. Advances in neural information processing systems , 34 , 15084–15097. Chen, T. (2016). Xgboost: A scalable tree boosting system. 
+
+Cornell University .Chou, P. A., Lookabaugh, T., & Gray, R. M. (2002). Entropy-constrained vector quantization. IEEE Transactions on acoustics, speech, and signal processing , 37 (1), 31–42. Daw, N. D., Niv, Y., & Dayan, P. (2005). Uncertainty-based competition between prefrontal and dorsolateral stri-atal systems for behavioral control. Nature neuro-science , 8(12), 1704–1711. Edelman, B., Ostrovsky, M., & Schwarz, M. (2007). Internet advertising and the generalized second-price auc-tion: Selling billions of dollars worth of keywords. 
+
+American economic review , 97 (1), 242–259. Elmachtoub, A. N., & Grigas, P. (2022). Smart “predict, then optimize”. Management Science , 68 (1), 9–26. Gao, J., Li, Y., Mao, S., Jiang, P., Jiang, N., Wang, Y., Cai, Q., Pan, F., Jiang, P., Gai, K., et al. (2025). Gen-erative auto-bidding with value-guided explorations. 
+
+Proceedings of the 48th International ACM SIGIR Conference on Research and Development in Infor-mation Retrieval , 244–254. Grünwald, P. D. (2007). The minimum description length prin-ciple . MIT press. Guo, J., Huo, Y., Zhang, Z., Wang, T., Yu, C., Xu, J., Zheng, B., & Zhang, Y. (2024). Generative auto-bidding via conditional diffusion modeling. Proceedings of the 30th ACM SIGKDD Conference on Knowledge Dis-covery and Data Mining , 5038–5049. Han, B., Kim, J., & Jang, J. (2024). A dual process vla: Ef-ficient robotic manipulation leveraging vlm. arXiv preprint arXiv:2410.15549 .He, T., Liao, L., Cao, Y., Liu, Y., Liu, M., Chen, Z., & Qin, B. (2024). Planning like human: A dual-process framework for dialogue planning. arXiv preprint arXiv:2406.05374 .He, Y., Chen, X., Wu, D., Pan, J., Tan, Q., Yu, C., Xu, J., & Zhu, X. (2021). A unified solution to constrained bidding in online display advertising. Proceedings of the 27th ACM SIGKDD Conference on Knowledge Discovery & Data Mining , 2993–3001. Igel, C. (2023). Smooth min-max monotonic networks. arXiv preprint arXiv:2306.01147 .Kim, H., & Lee, J.-S. (2024). Scalable monotonic neural networks. The Twelfth International Conference on Learning Representations .Korkmaz, B. S., Zagórowska, M., & Mercangöz, M. (2022). Safe and adaptive decision-making for optimization of safety-critical systems: The arteo algorithm. arXiv preprint arXiv:2211.05495 .Li, B., Pei, J., Xiao, F., Zhao, Y., Zhang, Z., Liu, D., He, H., & Jia, J. (2024). Enhancing monotonic modeling with spatio-temporal adaptive awareness in diverse marketing. arXiv preprint arXiv:2406.14132 .Liang, J. C. N., Lu, H., & Zhou, B. (2023). Online ad pro-curement in non-stationary autobidding worlds. Ad-vances in Neural Information Processing Systems ,
+
+36 , 42552–42575. Luo, H., Gao, L., Huang, P., & Li, T. (2024). Puros: A cpx-ievered framework for ad procurement in autobid-ding worlds. 2024 IEEE 13th Data Driven Control and Learning Systems Conference (DDCLS) , 1399– 1406. Mei, J., Ma, Y., Yang, X., Wen, L., Cai, X., Li, X., Fu, D., Zhang, B., Cai, P., Dou, M., et al. (2024). Continuously learning, adapting, and improving: A dual-process approach to autonomous driving. arXiv preprint arXiv:2405.15324 .Mitchell-Wolf, E. (2025, February 12). Programmatic adver-tising forecast and ad tech trends h1 2025 (Report). EMARKETER Inc. Moskovitz, T., Miller, K., Sahani, M., & Botvinick, M. M. (2022). A unified theory of dual-process control. 
+
+arXiv preprint arXiv:2211.07036 .Mumuni, F., & Mumuni, A. (2024). Improving deep learning with prior knowledge and cognitive models: A survey on enhancing explainability, adversarial robustness and zero-shot learning. Cognitive Systems Research ,
+
+84 , 101188. Schulz, E., Speekenbrink, M., & Krause, A. (2018). A tutorial on gaussian process regression: Modelling, explor-ing, and exploiting functions. Journal of mathemat-ical psychology , 85 , 1–16. Shen, Y., Wang, Y., Lu, X., Qi, F., Yan, J., Mu, Y., Yang, Y., Peng, Y., & Gu, J. (2021). A framework for mas-sive scale personalized promotion. arXiv preprint arXiv:2108.12100 .Su, K., Huo, Y., Zhang, Z., Dou, S., Yu, C., Xu, J., Lu, Z., & Zheng, B. (2024). Auctionnet: A novel bench-mark for decision-making in large-scale games. Ad-vances in Neural Information Processing Systems ,
+
+37 , 94428–94452. Su, Y., Xiang, M., Chen, Y., Li, Y., Qin, T., Zhang, H., Li, Y., & Liu, X. (2024). Spending programmed bidding: Privacy-friendly bid optimization with roi constraint in online advertising. Proceedings of the 30th ACM SIGKDD Conference on Knowledge Discovery and Data Mining , 5731–5740. Tang, Y., Cheng, Y., Liu, X., Jiao, C., Zeng, Y., Luo, N., Yuan, P., Liu, X., & Jiang, P. (2025). Learning monotonic probabilities with a generative cost model. arXiv preprint arXiv:2506.03542 .Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., Kaiser, Ł., & Polosukhin, I. (2017). Attention is all you need. Advances in neural infor-mation processing systems , 30 .Von Rueden, L., Mayer, S., Beckh, K., Georgiev, B., Giessel-bach, S., Heese, R., Kirsch, B., Pfrommer, J., Pick, A., Ramamurthy, R., et al. (2021). Informed machine learning–a taxonomy and survey of integrating prior knowledge into learning systems. IEEE Transactions on Knowledge and Data Engineering , 35 (1), 614– 633. Weinan, W., Rong, Y., Wang, J., Zhu, T., & Wang, X. (2016). Feedback control of real-time display advertising. 
+
+Proceedings of the Web Search and Data Mining (WSDM) , 407–416. Wen, C., Xu, M., Zhang, Z., Zheng, Z., Wang, Y., Liu, X., Rong, Y., Xie, D., Tan, X., Yu, C., et al. (2022). A cooperative-competitive multi-agent framework for auto-bidding in online advertising. Proceedings of the Fifteenth ACM International Conference on Web Search and Data Mining , 1129–1139. Wu, Z., Wang, L., Huang, F., Zhou, L., Song, Y., Ye, C., Nie, P., Ren, H., Hao, J., He, R., et al. (2022). A frame-work for multi-stage bonus allocation in meal deliv-ery platform. Proceedings of the 28th ACM SIGKDD Conference on Knowledge Discovery and Data Min-ing , 4195–4203. Yang, X., Li, Y., Wang, H., Wu, D., Tan, Q., Xu, J., & Gai, K. (2019). Bid optimization by multivariable control in display advertising. Proceedings of the 25th ACM SIGKDD international conference on knowledge dis-covery & data mining , 1966–1974. Zhang, K., Yuan, Z., & Xiong, H. (2024). Optimized cost per click in online advertising: A theoretical analysis. 
+
+Proceedings of the 30th ACM SIGKDD Conference on Knowledge Discovery and Data Mining , 4232– 4243. Zhang, W., Yuan, S., Wang, J., & Shen, X. (2014). Real-time bidding benchmarking with ipinyou dataset. arXiv preprint arXiv:1407.7073 .
