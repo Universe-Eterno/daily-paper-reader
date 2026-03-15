@@ -1,0 +1,626 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-15T19:13:53.490273+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 4,
+    "deep_cap": 7,
+    "deep_selected": 4,
+    "quick_candidates": 26,
+    "quick_skim_target": 12,
+    "quick_selected": 12
+  },
+  "deep_dive": [
+    {
+      "id": "2603.11456v1",
+      "title": "UniHetCO: A Unified Heterogeneous Representation for Multi-Problem Learning in Unsupervised Neural Combinatorial Optimization",
+      "abstract": "Unsupervised neural combinatorial optimization (NCO) offers an appealing alternative to supervised approaches by training learning-based solvers without ground-truth solutions, directly minimizing instance objectives and constraint violations. Yet for graph node subset-selection problems (e.g., Maximum Clique and Maximum Independent Set), existing unsupervised methods are typically specialized to a single problem class and rely on problem-specific surrogate losses, which hinders learning across classes within a unified framework. In this work, we propose UniHetCO, a unified heterogeneous graph representation for constrained quadratic programming-based combinatorial optimization that encodes problem structure, objective terms, and linear constraints in a single input. This formulation enables training a single model across multiple problem classes with a unified label-free objective. To improve stability under multi-problem learning, we employ a gradient-norm-based dynamic weighting scheme that alleviates gradient imbalance among classes. Experiments on multiple datasets and four constrained problem classes demonstrate competitive performance with state-of-the-art unsupervised NCO baselines, strong cross-problem adaptation potential, and effective warm starts for a commercial classical solver under tight time limits.",
+      "authors": [
+        "Kien X. Nguyen",
+        "Ilya Safro"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-12T02:32:19+00:00",
+      "link": "https://arxiv.org/pdf/2603.11456v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "Unsupervised neural combinatorial optimization framework",
+      "llm_evidence_cn": "无监督神经组合优化框架",
+      "llm_evidence": "无监督神经组合优化框架",
+      "canonical_evidence": "无监督神经组合优化框架",
+      "llm_tldr_en": "Proposes UniHetCO, a unified heterogeneous graph representation for multi-problem unsupervised NCO.",
+      "llm_tldr_cn": "提出了UniHetCO，一种用于多问题无监督神经组合优化的统一异构图表示方法。",
+      "llm_tldr": "提出了UniHetCO，一种用于多问题无监督神经组合优化的统一异构图表示方法。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Neural Combinatorial Optimization (NCO) methods and frameworks",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.07422v2",
+      "title": "Dynamic Vehicle Routing Problem with Prompt Confirmation of Advance Requests",
+      "abstract": "Transit agencies that operate on-demand transportation services have to respond to trip requests from passengers in real time, which involves solving dynamic vehicle routing problems with pick-up and drop-off constraints. Based on discussions with public transit agencies, we observe a real-world problem that is not addressed by prior work: when trips are booked in advance (e.g., trip requests arrive a few hours in advance of their requested pick-up times), the agency needs to promptly confirm whether a request can be accepted or not, and ensure that accepted requests are served as promised. State-of-the-art computational approaches either provide prompt confirmation but lack the ability to continually optimize and improve routes for accepted requests, or they provide continual optimization but cannot guarantee serving all accepted requests. To address this gap, we introduce a novel problem formulation of dynamic vehicle routing with prompt confirmation and continual optimization. We propose a novel computational approach for this vehicle routing problem, which integrates a quick insertion search for prompt confirmation with an anytime algorithm for continual optimization. To maximize the number requests served, we train a non-myopic objective function using reinforcement learning, which guides both the insertion and the anytime algorithms towards optimal, non-myopic solutions. We evaluate our computational approach on a real-world microtransit dataset from a public transit agency in the U.S., demonstrating that our proposed approach provides prompt confirmation while significantly increasing the number of requests served compared to existing approaches.",
+      "authors": [
+        "Amutheezan Sivagnanam",
+        "Ayan Mukhopadhyay",
+        "Samitha Samaranayake",
+        "Abhishek Dubey",
+        "Aron Laszka"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-03-08T02:34:41+00:00",
+      "link": "https://arxiv.org/pdf/2603.07422v2",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Addresses dynamic vehicle routing problems with pick-up and drop-off constraints",
+      "llm_evidence_cn": "解决具有取送货约束的动态车辆路径问题",
+      "llm_evidence": "解决具有取送货约束的动态车辆路径问题",
+      "canonical_evidence": "解决具有取送货约束的动态车辆路径问题",
+      "llm_tldr_en": "Proposes a method for dynamic vehicle routing with prompt confirmation for advance trip requests.",
+      "llm_tldr_cn": "提出一种针对预约请求即时确认的动态车辆路径规划方法。",
+      "llm_tldr": "提出一种针对预约请求即时确认的动态车辆路径规划方法。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Neural combinatorial optimization for Vehicle Routing Problem VRP",
+      "matched_requirement_id": "req-17",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.07197v1",
+      "title": "$\\textbf{Re}^{2}$: Unlocking LLM Reasoning via Reinforcement Learning with Re-solving",
+      "abstract": "Reinforcement learning with verifiable rewards (RLVR) has shown promise in enhancing the reasoning performance of large language models (LLMs) by increasing test-time compute. However, even after extensive RLVR training, such models still tend to generate unnecessary and low-quality steps in their chain-of-thought (CoT), leading to inefficient overthinking and lower answer quality. We show that when the initial direction or quality of the CoT is suboptimal, the model often fails to reach the correct answer, even after generating several times more tokens than when the initial CoT is well-initialized. To this end, we introduce Reinforcement Learning with Re-solving (Re$^2$), in which LLMs learn to flexibly abandon unproductive reasoning paths and restart the solution process when necessary, rather than always committing to a final answer. Re$^2$ applies pure reinforcement learning without any preliminary supervised fine-tuning, successfully amplifying the rare redo behavior in vanilla models from only 0.5% to over 30%. This leads to substantial performance gains over standard RLVR under the same training compute budget, and also demonstrates notable improvements in test-time performance as the number of samples increases.",
+      "authors": [
+        "Pinzheng Wang",
+        "Shuli Xu",
+        "Juntao Li",
+        "Yu Luo",
+        "Dong Li",
+        "Jianye Hao",
+        "Min Zhang"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-03-07T13:17:46+00:00",
+      "link": "https://arxiv.org/pdf/2603.07197v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "reinforcement learning to optimize LLM reasoning paths and re-solving",
+      "llm_evidence_cn": "通过强化学习优化LLM推理路径和重新求解",
+      "llm_evidence": "通过强化学习优化LLM推理路径和重新求解",
+      "canonical_evidence": "通过强化学习优化LLM推理路径和重新求解",
+      "llm_tldr_en": "Introduces Re2, using RL to help LLMs abandon unproductive reasoning and re-solve problems.",
+      "llm_tldr_cn": "引入Re2，利用强化学习帮助LLM放弃无效推理并重新求解问题。",
+      "llm_tldr": "引入Re2，利用强化学习帮助LLM放弃无效推理并重新求解问题。",
+      "llm_tags": [
+        "query:nco-llm:composite"
+      ],
+      "matched_query_tag": "query:nco-llm:composite",
+      "matched_query_text": "Papers central to 查找神经组合优化结合大模型相关的论文, especially work that connects or combines: Neural Combinatorial Optimization (NCO) methods and frameworks; Large Language Models (LLM) for optimization tasks; Deep Reinforcement Learning in combinatorial optimization; LLM-based heuristic search and optimization; Integration of GNN and LLM for combinatorial optimization; Neural combinatorial optimization for vehicle routing problems; In-context learning for combinatorial optimization problems; LLM-guided heuristic search for optimization; Integrating large language models with combinatorial optimization solvers; LLM driven heuristic generation for combinatorial optimization.",
+      "matched_requirement_id": "req-composite-nco-llm",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.11270v1",
+      "title": "On the PLS-Completeness of $k$-Opt Local Search for the Traveling Salesman Problem",
+      "abstract": "The $k$-Opt algorithm is a local search algorithm for the traveling salesman problem. Starting with an initial tour, it iteratively replaces at most $k$ edges in the tour with the same number of edges to obtain a better tour. Krentel (FOCS 1989) showed that the traveling salesman problem with the $k$-Opt neighborhood is complete for the class PLS (polynomial time local search). However, his proof requires $k \\gg 1000$ and has a substantial gap. We provide the first rigorous proof for the PLS-completeness and at the same time drastically lower the value of $k$ to $k \\geq 15$, addressing an open question by Monien, Dumrauf, and Tscheuschner (ICALP 2010). Our result holds for both the general and the metric traveling salesman problem.",
+      "authors": [
+        "Sophia Heimann",
+        "Hung P. Hoang",
+        "Stefan Hougardy"
+      ],
+      "primary_category": "cs.DS",
+      "categories": [
+        "cs.DS",
+        "math.CO"
+      ],
+      "published": "2026-03-11T20:01:01+00:00",
+      "link": "https://arxiv.org/pdf/2603.11270v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "k-Opt local search algorithm for the traveling salesman problem",
+      "llm_evidence_cn": "旅行商问题的k-Opt局部搜索算法",
+      "llm_evidence": "旅行商问题的k-Opt局部搜索算法",
+      "canonical_evidence": "旅行商问题的k-Opt局部搜索算法",
+      "llm_tldr_en": "Provides a rigorous proof for the PLS-completeness of k-Opt local search in the Traveling Salesman Problem.",
+      "llm_tldr_cn": "为旅行商问题中k-Opt局部搜索的PLS完备性提供了严谨的证明。",
+      "llm_tldr": "为旅行商问题中k-Opt局部搜索的PLS完备性提供了严谨的证明。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Neural solvers for Traveling Salesman Problem TSP",
+      "matched_requirement_id": "req-16",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2603.08269v1",
+      "title": "SAIL: Test-Time Scaling for In-Context Imitation Learning with VLM",
+      "abstract": "In-context imitation learning allows robots to acquire skills from demonstrations, yet one-shot trajectory generation remains fragile under environmental variation. We propose SAIL, a framework that reframes robot imitation as an iterative refinement problem capable of scaling with test-time compute. SAIL utilizes Monte Carlo Tree Search, where each node is a complete trajectory and edges correspond to trajectory refinements. The process is guided by three core components: an automated archive of successful trajectories for contextually relevant retrieval, a vision language model-based scoring mechanism for trajectory evaluation, and a step-level feedback that provides trajectory-aligned scores for iterative refinement. Experiments across six diverse manipulation tasks in simulation and real-world validation clearly demonstrate that increasing test-time compute consistently improves success rates, achieving up to 95% on complex tasks. Our results suggest that trajectory-level test-time scaling is a robust path toward more generalizable robotic agents.",
+      "authors": [
+        "Makoto Sato",
+        "Yusuke Iwasawa",
+        "Yujin Tang",
+        "So Kuroki"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO",
+        "cs.AI"
+      ],
+      "published": "2026-03-09T11:39:40+00:00",
+      "link": "https://arxiv.org/pdf/2603.08269v1",
+      "tags": [
+        "keyword:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Utilizes Monte Carlo Tree Search and VLM-based scoring for iterative refinement",
+      "llm_evidence_cn": "利用蒙特卡洛树搜索和基于视觉语言模型的评分进行迭代优化",
+      "llm_evidence": "利用蒙特卡洛树搜索和基于视觉语言模型的评分进行迭代优化",
+      "canonical_evidence": "利用蒙特卡洛树搜索和基于视觉语言模型的评分进行迭代优化",
+      "llm_tldr_en": "Reframes robot imitation as an iterative refinement problem using MCTS and VLM guidance.",
+      "llm_tldr_cn": "利用 MCTS 和视觉语言模型指导，将机器人模仿学习重构为迭代优化问题。",
+      "llm_tldr": "利用 MCTS 和视觉语言模型指导，将机器人模仿学习重构为迭代优化问题。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM-guided heuristic search for optimization",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.07728v1",
+      "title": "A Novel Multi-Agent Architecture to Reduce Hallucinations of Large Language Models in Multi-Step Structural Modeling",
+      "abstract": "Large language models (LLMs) such as GPT and Gemini have demonstrated remarkable capabilities in contextual understanding and reasoning. The strong performance of LLMs has sparked growing interest in leveraging them to automate tasks traditionally dependent on human expertise. Recently, LLMs have been integrated into intelligent agents capable of operating structural analysis software (e.g., OpenSees) to construct structural models and perform analyses. However, existing LLMs are limited in handling multi-step structural modeling due to frequent hallucinations and error accumulation during long-sequence operations. To this end, this study presents a novel multi-agent architecture to automate the structural modeling and analysis using OpenSeesPy. First, problem analysis and construction planning agents extract key parameters from user descriptions and formulate a stepwise modeling plan. Node and element agents then operate in parallel to assemble the frame geometry, followed by a load assignment agent. The resulting geometric and load information is translated into executable OpenSeesPy scripts by code translation agents. The proposed architecture is evaluated on a benchmark of 20 frame problems over ten repeated trials, achieving 100% accuracy in 18 cases and 90% in the remaining two. The architecture also significantly improves computational efficiency and demonstrates scalability to larger structural systems.",
+      "authors": [
+        "Ziheng Geng",
+        "Jiachen Liu",
+        "Ran Cao",
+        "Lu Cheng",
+        "Dan M. Frangopol",
+        "Minghui Cheng"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-03-08T16:57:35+00:00",
+      "link": "https://arxiv.org/pdf/2603.07728v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "LLM integration with structural analysis software for modeling tasks",
+      "llm_evidence_cn": "大模型与结构分析软件集成以完成建模任务",
+      "llm_evidence": "大模型与结构分析软件集成以完成建模任务",
+      "canonical_evidence": "大模型与结构分析软件集成以完成建模任务",
+      "llm_tldr_en": "Develops a multi-agent architecture to automate structural modeling using LLMs and analysis software.",
+      "llm_tldr_cn": "开发了一种多智能体架构，利用大模型和分析软件自动化结构建模。",
+      "llm_tldr": "开发了一种多智能体架构，利用大模型和分析软件自动化结构建模。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Hybrid approaches combining deep learning and traditional optimization",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.08828v1",
+      "title": "Mobile Base Station Optimal Tour in Wide Area IoT Sensor Networks",
+      "abstract": "Wide-area IoT sensor networks require efficient data collection mechanisms when sensors are dispersed over large regions with limited communication infrastructure. Unmanned aerial vehicle (UAV)-mounted Mobile Base Stations (MBSs) provide a flexible solution; however, their limited onboard energy and the strict energy budgets of sensors necessitate carefully optimized tour planning. In this paper, we introduce the Mobile Base Station Optimal Tour (MOT) problem, which seeks a minimum-cost, non-revisiting tour over a subset of candidate stops such that the union of their coverage regions ensures complete sensor data collection under a global sensor energy constraint. The tour also avoids restricted areas. We formally model the MOT problem as a combinatorial optimization problem, which is NP-complete. Owing to its computational intractability, we develop a polynomial-time greedy heuristic that jointly considers travel cost and incremental coverage gain while avoiding restricted areas. Using simulations, we obtain tours with low cost, complete sensor coverage, and faster execution. Our proposed greedy algorithm outperforms state-of-the-art approaches in terms of a performance indicator defined as the product of tour length and algorithm execution time, achieving an improvement of 39.15%. The proposed framework provides both theoretical insight into the structural complexity of MBS-assisted data collection and a practical algorithmic solution for large-scale IoT deployments.",
+      "authors": [
+        "Sachin Kadam"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI",
+        "eess.SP"
+      ],
+      "published": "2026-03-09T18:38:25+00:00",
+      "link": "https://arxiv.org/pdf/2603.08828v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Modeling a mobile base station tour as a combinatorial optimization problem",
+      "llm_evidence_cn": "将移动基站巡检建模为组合优化问题",
+      "llm_evidence": "将移动基站巡检建模为组合优化问题",
+      "canonical_evidence": "将移动基站巡检建模为组合优化问题",
+      "llm_tldr_en": "Formulates a UAV-based data collection tour as a new combinatorial optimization problem.",
+      "llm_tldr_cn": "将基于无人机的数据采集巡检建模为一个新的组合优化问题。",
+      "llm_tldr": "将基于无人机的数据采集巡检建模为一个新的组合优化问题。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Machine learning approaches to combinatorial optimization",
+      "matched_requirement_id": "req-19",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.07961v1",
+      "title": "SGG-R$^{\\rm 3}$: From Next-Token Prediction to End-to-End Unbiased Scene Graph Generation",
+      "abstract": "Scene Graph Generation (SGG) structures visual scenes as graphs of objects and their relations. While Multimodal Large Language Models (MLLMs) have advanced end-to-end SGG, current methods are hindered by both a lack of task-specific structured reasoning and the challenges of sparse, long-tailed relation distributions, resulting in incomplete scene graphs characterized by low recall and biased predictions. To address these issues, we introduce SGG-R$^{\\rm 3}$, a structured reasoning framework that integrates task-specific chain-of-thought (CoT)-guided supervised fine-tuning (SFT) and reinforcement learning (RL) with group sequence policy optimization (GSPO), designed to engage in three sequential stages to achieve end-to-end unbiased scene graph generation. During the SFT phase, we propose a relation augmentation strategy by leveraging an MLLM and refined via embedding similarity filtering to alleviate relation sparsity. Subsequently, a stage-aligned reward scheme optimizes the procedural reasoning during RL. Specifically, we propose a novel dual-granularity reward which integrates fine-grained and coarse-grained relation rewards, simultaneously mitigating the long-tail issue via frequency-based adaptive weighting of predicates and improving relation coverage through semantic clustering. Experiments on two benchmarks show that SGG-R$^{\\rm 3}$ achieves superior performance compared to existing methods, demonstrating the effectiveness and generalization of the framework.",
+      "authors": [
+        "Jiaye Feng",
+        "Qixiang Yin",
+        "Yuankun Liu",
+        "Tong Mo",
+        "Weiping Li"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-09T04:58:03+00:00",
+      "link": "https://arxiv.org/pdf/2603.07961v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Integration of MLLM and RL for scene graph generation",
+      "llm_evidence_cn": "结合多模态大模型与强化学习进行场景图生成",
+      "llm_evidence": "结合多模态大模型与强化学习进行场景图生成",
+      "canonical_evidence": "结合多模态大模型与强化学习进行场景图生成",
+      "llm_tldr_en": "Integrates MLLMs with RL and structured reasoning for end-to-end scene graph generation.",
+      "llm_tldr_cn": "结合多模态大模型、强化学习与结构化推理，实现端到端的场景图生成。",
+      "llm_tldr": "结合多模态大模型、强化学习与结构化推理，实现端到端的场景图生成。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Integration of GNN and LLM for combinatorial optimization",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.11091v1",
+      "title": "Metaheuristic algorithm parameters selection for building an optimal hierarchical structure of a control system: a case study",
+      "abstract": "Metaheuristic algorithms are currently widely used to solve a variety of optimization problems across various industries. This article discusses the application of a metaheuristic algorithm to optimize the hierarchical architecture of an industrial distributed control system. The success of the algorithm depends largely on the choice of starting conditions and algorithm parameters. We examine the impact of parameter selection on the convergence of a modified ant colony algorithm and provide recommendations for tuning the algorithm to achieve optimal results for a specific industrial problem. The findings presented in this article can also be applied to other combinatorial optimization problems.",
+      "authors": [
+        "Ruslan Zakirzyanov"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY"
+      ],
+      "published": "2026-03-11T06:17:06+00:00",
+      "link": "https://arxiv.org/pdf/2603.11091v1",
+      "tags": [
+        "keyword:NCO"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "metaheuristic algorithm for industrial combinatorial optimization problems",
+      "llm_evidence_cn": "用于工业组合优化问题的元启发式算法",
+      "llm_evidence": "用于工业组合优化问题的元启发式算法",
+      "canonical_evidence": "用于工业组合优化问题的元启发式算法",
+      "llm_tldr_en": "Optimizes industrial control system structures using a modified ant colony metaheuristic algorithm.",
+      "llm_tldr_cn": "使用改进的蚁群元启发式算法优化工业控制系统的层次结构。",
+      "llm_tldr": "使用改进的蚁群元启发式算法优化工业控制系统的层次结构。",
+      "llm_tags": [
+        "query:nco:composite"
+      ],
+      "matched_query_tag": "query:nco:composite",
+      "matched_query_text": "Papers central to 神经组合优化（NCO）相关学术论文检索, especially work that connects or combines: Deep Reinforcement Learning for combinatorial optimization; Graph Neural Networks for solving combinatorial problems; Neural solvers for Traveling Salesman Problem TSP; Neural combinatorial optimization for Vehicle Routing Problem VRP; Attention mechanisms in neural combinatorial optimization models; Machine learning approaches to combinatorial optimization; Transformer architectures for combinatorial optimization; Learning search heuristics with neural networks; State of the art neural combinatorial optimization techniques; Deep learning models for solving NP hard combinatorial problems.",
+      "matched_requirement_id": "req-composite-nco",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.07961v2",
+      "title": "SGG-R$^{\\rm 3}$: From Next-Token Prediction to End-to-End Unbiased Scene Graph Generation",
+      "abstract": "Scene Graph Generation (SGG) structures visual scenes as graphs of objects and their relations. While Multimodal Large Language Models (MLLMs) have advanced end-to-end SGG, current methods are hindered by both a lack of task-specific structured reasoning and the challenges of sparse, long-tailed relation distributions, resulting in incomplete scene graphs characterized by low recall and biased predictions. To address these issues, we introduce SGG-R$^{\\rm 3}$, a structured reasoning framework that integrates task-specific chain-of-thought (CoT)-guided supervised fine-tuning (SFT) and reinforcement learning (RL) with group sequence policy optimization (GSPO), designed to engage in three sequential stages to achieve end-to-end unbiased scene graph generation. During the SFT phase, we propose a relation augmentation strategy by leveraging an MLLM and refined via embedding similarity filtering to alleviate relation sparsity. Subsequently, a stage-aligned reward scheme optimizes the procedural reasoning during RL. Specifically, we propose a novel dual-granularity reward which integrates fine-grained and coarse-grained relation rewards, simultaneously mitigating the long-tail issue via frequency-based adaptive weighting of predicates and improving relation coverage through semantic clustering. Experiments on two benchmarks show that SGG-R$^{\\rm 3}$ achieves superior performance compared to existing methods, demonstrating the effectiveness and generalization of the framework.",
+      "authors": [
+        "Jiaye Feng",
+        "Qixiang Yin",
+        "Yuankun Liu",
+        "Tong Mo",
+        "Weiping Li"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-09T04:58:03+00:00",
+      "link": "https://arxiv.org/pdf/2603.07961v2",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Integration of RL and LLM for structured reasoning in graphs",
+      "llm_evidence_cn": "结合强化学习与LLM进行图结构推理",
+      "llm_evidence": "结合强化学习与LLM进行图结构推理",
+      "canonical_evidence": "结合强化学习与LLM进行图结构推理",
+      "llm_tldr_en": "Integrates CoT-guided fine-tuning and RL for unbiased scene graph generation using MLLMs.",
+      "llm_tldr_cn": "结合CoT引导的微调和强化学习，利用多模态大模型生成无偏场景图。",
+      "llm_tldr": "结合CoT引导的微调和强化学习，利用多模态大模型生成无偏场景图。",
+      "llm_tags": [
+        "query:nco-llm:composite"
+      ],
+      "matched_query_tag": "query:nco-llm:composite",
+      "matched_query_text": "Papers central to 查找神经组合优化结合大模型相关的论文, especially work that connects or combines: Neural Combinatorial Optimization (NCO) methods and frameworks; Large Language Models (LLM) for optimization tasks; Deep Reinforcement Learning in combinatorial optimization; LLM-based heuristic search and optimization; Integration of GNN and LLM for combinatorial optimization; Neural combinatorial optimization for vehicle routing problems; In-context learning for combinatorial optimization problems; LLM-guided heuristic search for optimization; Integrating large language models with combinatorial optimization solvers; LLM driven heuristic generation for combinatorial optimization.",
+      "matched_requirement_id": "req-composite-nco-llm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.11099v1",
+      "title": "Graph Tokenization for Bridging Graphs and Transformers",
+      "abstract": "The success of large pretrained Transformers is closely tied to tokenizers, which convert raw input into discrete symbols. Extending these models to graph-structured data remains a significant challenge. In this work, we introduce a graph tokenization framework that generates sequential representations of graphs by combining reversible graph serialization, which preserves graph information, with Byte Pair Encoding (BPE), a widely adopted tokenizer in large language models (LLMs). To better capture structural information, the graph serialization process is guided by global statistics of graph substructures, ensuring that frequently occurring substructures appear more often in the sequence and can be merged by BPE into meaningful tokens. Empirical results demonstrate that the proposed tokenizer enables Transformers such as BERT to be directly applied to graph benchmarks without architectural modifications. The proposed approach achieves state-of-the-art results on 14 benchmark datasets and frequently outperforms both graph neural networks and specialized graph transformers. This work bridges the gap between graph-structured data and the ecosystem of sequence models. Our code is available at \\href{https://github.com/BUPT-GAMMA/Graph-Tokenization-for-Bridging-Graphs-and-Transformers}{\\color{blue}here}.",
+      "authors": [
+        "Zeyuan Guo",
+        "Enmao Diao",
+        "Cheng Yang",
+        "Chuan Shi"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-11T08:57:10+00:00",
+      "link": "https://arxiv.org/pdf/2603.11099v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Bridges graphs and transformers using tokenization for LLM compatibility",
+      "llm_evidence_cn": "通过标记化桥接图与 Transformer，以实现大模型兼容性",
+      "llm_evidence": "通过标记化桥接图与 Transformer，以实现大模型兼容性",
+      "canonical_evidence": "通过标记化桥接图与 Transformer，以实现大模型兼容性",
+      "llm_tldr_en": "Introduces a graph tokenization framework to represent structural data for pretrained transformers.",
+      "llm_tldr_cn": "提出一种图标记化框架，将结构化数据转换为适用于预训练 Transformer 的序列。",
+      "llm_tldr": "提出一种图标记化框架，将结构化数据转换为适用于预训练 Transformer 的序列。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Integration of GNN and LLM for combinatorial optimization",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.08036v1",
+      "title": "Samyama: A Unified Graph-Vector Database with In-Database Optimization, Agentic Enrichment, and Hardware Acceleration",
+      "abstract": "Modern data architectures are fragmented across graph databases, vector stores, analytics engines, and optimization solvers, resulting in complex ETL pipelines and synchronization overhead. We present \\textbf{Samyama}, a high-performance graph-vector database written in Rust that unifies these workloads into a single engine. Samyama combines a RocksDB-backed persistent store with a versioned-arena MVCC model, a vectorized query executor with 35 physical operators, a cost-based query planner with plan enumeration and predicate pushdown, a dedicated CSR-based analytics engine, and native RDF/SPARQL support. The system integrates 22 metaheuristic optimization solvers directly into its query language, implements HNSW vector indexing~\\citep{malkov2020hnsw} with Graph RAG capabilities, and introduces ``Agentic Enrichment'' for autonomous graph expansion via LLMs. The \\textbf{Enterprise Edition} adds GPU acceleration via wgpu, production-grade observability, point-in-time recovery, and hardened high availability with HTTP/2 Raft transport.   Our evaluation on commodity hardware (Mac Mini M4, 16\\,GB RAM) demonstrates: ingestion at 255K nodes/s (CPU) and 412K nodes/s (GPU-accelerated); 115K Cypher queries/sec at 1M nodes; 4.0--4.7$\\times$ latency reduction from late materialization on multi-hop traversals; 8.2$\\times$ GPU PageRank speedup at 1M nodes; and 100\\% LDBC Graphalytics validation (28/28 tests). These results demonstrate that a unified graph-vector-optimization engine can achieve competitive performance on commodity hardware while maintaining Rust's memory safety guarantees.",
+      "authors": [
+        "Madhulatha Mandarapu",
+        "Sandeep Kunkunuru"
+      ],
+      "primary_category": "cs.DB",
+      "categories": [
+        "cs.DB"
+      ],
+      "published": "2026-03-09T07:17:17+00:00",
+      "link": "https://arxiv.org/pdf/2603.08036v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "integration of metaheuristic optimization solvers into database query language",
+      "llm_evidence_cn": "将元启发式优化求解器集成到数据库查询语言中",
+      "llm_evidence": "将元启发式优化求解器集成到数据库查询语言中",
+      "canonical_evidence": "将元启发式优化求解器集成到数据库查询语言中",
+      "llm_tldr_en": "A unified database system integrating 22 metaheuristic solvers for in-database optimization.",
+      "llm_tldr_cn": "一种统一的数据库系统，集成了22个元启发式求解器以实现数据库内优化。",
+      "llm_tldr": "一种统一的数据库系统，集成了22个元启发式求解器以实现数据库内优化。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Hybrid approaches combining deep learning and traditional optimization",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.11390v1",
+      "title": "SliceFed: Federated Constrained Multi-Agent DRL for Dynamic Spectrum Slicing in 6G",
+      "abstract": "Dynamic spectrum slicing is a critical enabler for 6G Radio Access Networks (RANs), allowing the coexistence of heterogeneous services. However, optimizing resource allocation in dense, interference-limited deployments remains challenging due to non-stationary channel dynamics, strict Quality-of-Service (QoS) requirements, and the need for data privacy. In this paper, we propose SliceFed, a novel Federated Constrained Multi-Agent Deep Reinforcement Learning (F-MADRL) framework. SliceFed formulates the slicing problem as a Constrained Markov Decision Process (CMDP) where autonomous gNB agents maximize spectral efficiency while explicitly satisfying inter-cell interference budgets and hard ultra-reliable low-latency communication (URLLC) latency deadlines. We employ a Lagrangian primal-dual approach integrated with Proximal Policy Optimization (PPO) to enforce constraints, while Federated Averaging enables collaborative learning without exchanging raw local data. Extensive simulations in a dense multi-cell environment demonstrate that SliceFed converges to a stable, safety-aware policy. Unlike heuristic and unconstrained baselines, SliceFed achieves nearly 100% satisfaction of 1~ms URLLC latency deadlines and exhibits superior robustness to traffic load variations, verifying its potential for reliable and scalable 6G spectrum management.",
+      "authors": [
+        "Hossein Mohammadi",
+        "Seyed Bagher Hashemi Natanzi",
+        "Ramak Nassiri",
+        "Jamshid Hassanpour",
+        "Bo Tang",
+        "Vuk Marojevic"
+      ],
+      "primary_category": "cs.NI",
+      "categories": [
+        "cs.NI",
+        "eess.SY"
+      ],
+      "published": "2026-03-12T00:08:05+00:00",
+      "link": "https://arxiv.org/pdf/2603.11390v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Multi-Agent Deep Reinforcement Learning for resource allocation optimization",
+      "llm_evidence_cn": "用于资源分配优化的多智能体深度强化学习",
+      "llm_evidence": "用于资源分配优化的多智能体深度强化学习",
+      "canonical_evidence": "用于资源分配优化的多智能体深度强化学习",
+      "llm_tldr_en": "Proposes a federated multi-agent DRL framework for dynamic spectrum slicing and resource optimization in 6G.",
+      "llm_tldr_cn": "提出了一种用于6G动态频谱切片和资源优化的联邦多智能体深度强化学习框架。",
+      "llm_tldr": "提出了一种用于6G动态频谱切片和资源优化的联邦多智能体深度强化学习框架。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Deep Reinforcement Learning for combinatorial optimization",
+      "matched_requirement_id": "req-14",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.08037v1",
+      "title": "CEMR: An Effective Subgraph Matching Algorithm with Redundant Extension Elimination",
+      "abstract": "Subgraph matching is a fundamental problem in graph analysis with a wide range of applications. However, due to its inherent NP-hardness, enumerating subgraph matches efficiently on large real-world graphs remains highly challenging. Most existing works adopt a depth-first search (DFS) backtracking strategy, where a partial embedding is gradually extended in a DFS manner along a branch of the search trees until either a full embedding is found or no further extension is possible. A major limitation of this paradigm is the significant amount of duplicate computation that occurs during enumeration, which increases the overall runtime. To overcome this limitation, we propose a novel subgraph matching algorithm, CEMR. It incorporates two techniques to reduce duplicate extensions: common extension merging, which leverages a black-white vertex encoding, and common extension reusing, which employs common extension buffers. In addition, we design two pruning techniques to discard unpromising search branches. Extensive experiments on real-world datasets and diverse query workloads demonstrate that CEMR outperforms state-of-the-art subgraph matching methods.",
+      "authors": [
+        "Linglin Yang",
+        "Xunbin Su",
+        "Lei Zou",
+        "Xiangyang Gou",
+        "Yinnian Lin"
+      ],
+      "primary_category": "cs.DB",
+      "categories": [
+        "cs.DB"
+      ],
+      "published": "2026-03-09T07:20:24+00:00",
+      "link": "https://arxiv.org/pdf/2603.08037v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "subgraph matching algorithm for NP-hard graph problems",
+      "llm_evidence_cn": "针对NP难图问题的子图匹配算法",
+      "llm_evidence": "针对NP难图问题的子图匹配算法",
+      "canonical_evidence": "针对NP难图问题的子图匹配算法",
+      "llm_tldr_en": "Proposes CEMR, an efficient algorithm for the NP-hard subgraph matching problem using DFS.",
+      "llm_tldr_cn": "提出CEMR算法，通过消除冗余扩展高效解决NP难的子图匹配问题。",
+      "llm_tldr": "提出CEMR算法，通过消除冗余扩展高效解决NP难的子图匹配问题。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Deep learning models for solving NP hard combinatorial problems",
+      "matched_requirement_id": "req-23",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.11996v1",
+      "title": "Deterministic Algorithm for Non-monotone Submodular Maximization under Matroid and Knapsack Constraints",
+      "abstract": "Submodular maximization constitutes a prominent research topic in combinatorial optimization and theoretical computer science, with extensive applications across diverse domains. While substantial advancements have been achieved in approximation algorithms for submodular maximization, the majority of algorithms yielding high approximation guarantees are randomized. In this work, we investigate deterministic approximation algorithms for maximizing non-monotone submodular functions subject to matroid and knapsack constraints. For the two distinct constraint settings, we propose novel deterministic algorithms grounded in an extended multilinear extension framework. Under matroid constraints, our algorithm achieves an approximation ratio of $(0.385 - ε)$, whereas for knapsack constraints, the proposed algorithm attains an approximation ratio of $(0.367 -ε)$. Both algorithms run in $\\mathrm{poly}(n)$ query complexity, where $n$ is the size of the ground set, and improve upon the state-of-the-art deterministic approximation ratios of $(0.367 - ε)$ for matroid constraints and $0.25$ for knapsack constraints.",
+      "authors": [
+        "Shengminjie Chen",
+        "Yiwei Gao",
+        "Kaifeng Lin",
+        "Xiaoming Sun",
+        "Jialin Zhang"
+      ],
+      "primary_category": "cs.DS",
+      "categories": [
+        "cs.DS",
+        "cs.CC",
+        "math.OC"
+      ],
+      "published": "2026-03-12T14:46:08+00:00",
+      "link": "https://arxiv.org/pdf/2603.11996v1",
+      "tags": [
+        "keyword:NCO"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Deterministic algorithms for combinatorial optimization",
+      "llm_evidence_cn": "组合优化的确定性算法",
+      "llm_evidence": "组合优化的确定性算法",
+      "canonical_evidence": "组合优化的确定性算法",
+      "llm_tldr_en": "Develops deterministic approximation algorithms for non-monotone submodular maximization problems.",
+      "llm_tldr_cn": "为非单调子模最大化问题开发了确定性近似算法。",
+      "llm_tldr": "为非单调子模最大化问题开发了确定性近似算法。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Machine learning approaches to combinatorial optimization",
+      "matched_requirement_id": "req-19",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.09044v1",
+      "title": "Synergistic Directed Execution and LLM-Driven Analysis for Zero-Day AI-Generated Malware Detection",
+      "abstract": "The weaponization of LLMs for automated malware generation poses an existential threat to conventional detection paradigms. AI-generated malware exhibits polymorphic, metamorphic, and context-aware evasion capabilities that render signature-based and shallow heuristic defenses obsolete. This paper introduces a novel hybrid analysis framework that synergistically combines \\emph{concolic execution} with \\emph{LLM-augmented path prioritization} and \\emph{deep-learning-based vulnerability classification} to detect zero-day AI-generated malware with provable guarantees. We formalize the detection problem within a first-order temporal logic over program execution traces, define a lattice-theoretic abstraction for path constraint spaces, and prove both the \\emph{soundness} and \\emph{relative completeness} of our detection algorithm, assuming classifier correctness. The framework introduces three novel algorithms: (i) an LLM-guided concolic exploration strategy that reduces the average number of explored paths by 73.2\\% compared to depth-first search while maintaining equivalent malicious-path coverage; (ii) a transformer-based path-constraint classifier trained on symbolic execution traces; and (iii) a feedback loop that iteratively refines the LLM's prioritization policy using reinforcement learning from detection outcomes. We provide a comprehensive implementation built upon \\texttt{angr} 9.2, \\texttt{Z3} 4.12, Hugging Face Transformers 4.38, and PyTorch 2.2, with configuration details enabling reproducibility. Experimental evaluation on the EMBER, Malimg, SOREL-20M, and a novel AI-Gen-Malware benchmark comprising 2{,}500 LLM-synthesized samples demonstrates that achieves 98.7\\% accuracy on conventional malware and 97.5\\% accuracy on AI-generated threats, outperforming ClamAV, YARA, MalConv, and EMBER-GBDT baselines by margins of 8.4--52.2 percentage points on AI-generated samples.",
+      "authors": [
+        "George Edwards",
+        "Mahdi Eslamimehr"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.SE"
+      ],
+      "published": "2026-03-10T00:25:41+00:00",
+      "link": "https://arxiv.org/pdf/2603.09044v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Combines concolic execution with LLM-augmented path prioritization for search",
+      "llm_evidence_cn": "结合符号执行与大模型增强的路径优先级进行搜索",
+      "llm_evidence": "结合符号执行与大模型增强的路径优先级进行搜索",
+      "canonical_evidence": "结合符号执行与大模型增强的路径优先级进行搜索",
+      "llm_tldr_en": "Uses LLMs to guide path prioritization in malware detection, similar to LLM-guided heuristic search.",
+      "llm_tldr_cn": "利用大模型指导恶意软件检测中的路径优先级，类似于大模型引导的启发式搜索。",
+      "llm_tldr": "利用大模型指导恶意软件检测中的路径优先级，类似于大模型引导的启发式搜索。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM-guided heuristic search for optimization",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

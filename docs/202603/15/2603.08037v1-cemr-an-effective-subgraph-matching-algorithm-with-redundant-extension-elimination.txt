@@ -1,0 +1,1436 @@
+Title: CEMR: An Effective Subgraph Matching Algorithm with Redundant Extension Elimination
+
+URL Source: https://arxiv.org/pdf/2603.08037v1
+
+Published Time: Tue, 10 Mar 2026 01:53:00 GMT
+
+Number of Pages: 17
+
+Markdown Content:
+# CEMR: An Effective Subgraph Matching Algorithm with Redundant Extension Elimination (Full Version) 
+
+# Linglin Yang ∗
+
+Peking University Beijing, China linglinyang@stu.pku.edu.cn 
+
+# Xunbin Su ∗
+
+Peking University Beijing, China suxunbin@pku.edu.cn 
+
+# Lei Zou 
+
+Peking University Beijing, China zoulei@pku.edu.cn 
+
+# Xiangyang Gou 
+
+University of New South Wales Sydney, Australia xiangyang.gou@unsw.edu.au 
+
+# Yinnian Lin 
+
+Peking University Beijing, China linyinnian@pku.edu.cn 
+
+## ABSTRACT 
+
+Subgraph matching is a fundamental problem in graph analysis with a wide range of applications. However, due to its inherent NP-hardness, enumerating subgraph matches efficiently on large real-world graphs remains highly challenging. Most existing works adopt a depth-first search (DFS) backtracking strategy, where a partial embedding is gradually extended in a DFS manner along a branch of the search trees until either a full embedding is found or no further extension is possible. A major limitation of this paradigm is the significant amount of duplicate computation that occurs dur-ing enumeration, which increases the overall runtime. To overcome this limitation, we propose a novel subgraph matching algorithm, 
+
+CEMR . It incorporates two techniques to reduce duplicate extensions: 
+
+common extension merging , which leverages a black-white vertex encoding, and common extension reusing , which employs common extension buffers. In addition, we design two pruning techniques to discard unpromising search branches. Extensive experiments on real-world datasets and diverse query workloads demonstrate that 
+
+CEMR outperforms state-of-the-art subgraph matching methods. 
+
+PVLDB Reference Format: 
+
+Linglin Yang, Xunbin Su, Lei Zou, Xiangyang Gou, and Yinnian Lin. CEMR: An Effective Subgraph Matching Algorithm with Redundant Extension Elimination (Full Version). PVLDB, 19(7): XXX-XXX, 2026. doi:XX.XX/XXX.XX 
+
+PVLDB Artifact Availability: 
+
+The source code, data, and/or other artifacts have been made available at https://github.com/pkumod/CEMR. 
+
+## 1 INTRODUCTION 
+
+In recent years, graph structures have gained increasing significance in the data management community. As one of the fundamental tasks in graph analysis, subgraph matching has attracted much attention from both industry and academia [ 28 , 30 , 35 ] and is widely 
+
+> ∗Linglin Yang and Xunbin Su contributed equally to this work. This work is licensed under the Creative Commons BY-NC-ND 4.0 International License. Visit https://creativecommons.org/licenses/by-nc-nd/4.0/ to view a copy of this license. For any use beyond those covered by this license, obtain permission by emailing info@vldb.org. Copyright is held by the owner/author(s). Publication rights licensed to the VLDB Endowment. Proceedings of the VLDB Endowment, Vol. 19, No. 7 ISSN 2150-8097. doi:XX.XX/XXX.XX
+
+used in many applications, such as chemical compound search [ 44 ], social network analysis [ 12 ], protein-protein interaction network analysis [25] and RDF query processing [24, 52]. Given a data graph 𝐺 and a query graph 𝑄 , subgraph matching (isomorphism) aims to find all the subgraphs of 𝐺 that are isomor-phic to 𝑄 . The mapping between each of these subgraphs and 𝑄 is called an embedding (or match) of 𝑄 over 𝐺 . For example, given a data graph 𝐺 and a query graph 𝑄 in Figure 1, {( 𝑢 0, 𝑣 0), ( 𝑢 1, 𝑣 1), (𝑢 2, 𝑣 2), ( 𝑢 3, 𝑣 5), ( 𝑢 4, 𝑣 8), ( 𝑢 5, 𝑣 10 ), ( 𝑢 6, 𝑣 11 )} is one embedding of 𝑄 
+
+over 𝐺 . Unfortunately, subgraph matching is a well-known NP-hard problem [ 14 ] and the data graph 𝐺 is usually very large in practical applications. Thus, it is challenging to efficiently enumerate all embeddings of 𝑄 over 𝐺 .
+
+(a) Query graph (b) Data graph 
+
+(c) Search tree rooted at { ( 𝑢 0, 𝑣 0 ) } 
+
+Figure 1: Subgraph Matching 
+
+Many algorithms [ 6, 10 , 17 , 18 , 21 , 23 , 34 , 36 , 41 , 48 , 50 ] have been proposed to solve the subgraph matching problem. A typi-cal subgraph matching algorithm framework finds matches of the 
+
+> arXiv:2603.08037v1 [cs.DB] 9 Mar 2026
+
+query graph 𝑄 over the data graph 𝐺 by iteratively mapping each query vertex in 𝑄 to data vertices in 𝐺 following a certain matching order. Such a matching process can be organized as a backtracking search on a search tree. For example, Figure 1c shows a search tree when mapping 𝑢 0
+
+to 𝑣 0 from the previous example. Each tree node at level 𝑖 (𝑖 ∈{0, . . . , |𝑉 (𝑄 )| − 1}) represents an embedding 𝑀 that matches the first 𝑖 + 1 query vertices in the matching order. A green tick denotes a valid embedding, whereas a red cross denotes that the corre-sponding tree node cannot produce a valid embedding. We call an embedding at level |𝑉 (𝑄 )| − 1 full embedding and an embedding at level less than |𝑉 (𝑄 )| − 1 partial embedding . By adding matches of 𝑢 𝑖 +1 with different data vertices into a partial embedding 𝑀 at level 𝑖 , we can extend 𝑀 to its children at level 𝑖 + 1.Most existing solutions adopt the depth-first search (DFS) back-tracking approach. They gradually extend one partial embedding following a certain branch in the search tree (i.e., perform DFS on the search tree) until a full embedding is found or no extension can be made. Then they backtrack to the upper level and try to search another branch. To speed up subgraph matching, existing solutions have proposed many heuristic optimization techniques on getting good matching orders [ 6 , 17 , 22 , 38 ], generating the smaller candidate space [ 5, 6, 17 , 18 , 41 ], sharing computation among query vertices with equivalence relationship [ 18 , 23 , 34 ] and reducing duplicated computation [ 3 , 15 , 16 , 20 , 21 , 32 , 43 , 47 ]. Some of the remaining works [ 2, 26 , 37 ] adopt the breadth-first search (BFS) ap-proach where they find all partial embeddings at the same level of the search tree and then move on to the next level. BFS-based 
+
+solutions suffer from a large amount of memory consumption for storing intermediate results [ 8 , 21 , 42 ]. Furthermore, in cases where a query cannot be completed within reasonable time, DFS-based 
+
+methods are capable of obtaining a portion of the final embed-dings within the given time constraint, whereas BFS-based methods may yield no results at all. In this paper, we focus on optimizing 
+
+DFS-based approaches. 
+
+## 1.1 Motivation 
+
+During the enumeration phase, there may exist duplicate extension computations. These duplicate computations usually occur at the same level of the search tree, where the backward neighbors of the next query vertex 𝑢 share the same mappings across different partial embeddings. The root cause is that the extension of 𝑢 depends only on its backward neighbors and is independent of other query vertices. These repeated calculations enlarge the search space and hinder enumeration performance. We use the following example to illustrate this phenomenon. 
+
+Example 1. Consider the data graph and query graph in Fig-ure 1, with matching order 𝑂 = (𝑢 0, 𝑢 1, 𝑢 2, 𝑢 3, 𝑢 4, 𝑢 5, 𝑢 6). Examine two partial embeddings: 𝑀 1 = {( 𝑢 0, 𝑣 0), (𝑢 1, 𝑣 1), (𝑢 2, 𝑣 2), (𝑢 3, 𝑣 4)} 
+
+(red dashed box) and 𝑀 2 = {( 𝑢 0, 𝑣 0), (𝑢 1, 𝑣 1), (𝑢 2, 𝑣 2), (𝑢 3, 𝑣 5)} (blue dashed box). Both share the prefix (𝑢 0, 𝑢 1) ↦ → ( 𝑣 0, 𝑣 1). Notably, when extending to 𝑢 4, 𝑀 1 and 𝑀 2 perform the same extension and generate the same candidate set {𝑣 7, 𝑣 8 }, since 𝑢 4 only connects to 𝑢 0 and 𝑢 1.This redundancy implies that extending 𝑀 2 could reuse the results from 𝑀 1, allowing simultaneous or shared extension and avoiding repeated computation. 
+
+In BFS-based enumeration, it is straightforward to eliminate such redundancy by grouping partial embeddings that share the same extension patterns at the same level of the search tree, since a com-plete intermediate result table can be constructed in each iteration. However, the memory cost of BFS can be prohibitively high. In con-trast, when using DFS for enumeration, it becomes challenging to share common extension results among partial embeddings, as the repeated extensions may appear in different branches of the search tree. This necessitates a mechanism to reduce duplicate extension computations during the backtracking process. 
+
+## 1.2 Our Solution 
+
+To eliminate computation redundancy, we propose two core op-timization techniques: common extension merging (CEM ) and com-mon extension reusing (CER ), which together form our method CEMR 
+
+(Common Extension Merge and Reusing). 
+
+CEM enables joint extension of multiple search branches by merg-ing them until divergence. To support this, we introduce a black-white vertex encoding scheme (Section 4), which partitions query vertices into black and white. A white vertex can match multiple data vertices within a single partial embedding, e.g., treating 𝑢 4 as white resolves the issue illustrated in Example 1. 
+
+CER leverages common extension buffers (CEBs, see Section 5.2) to cache reusable extension results that can be shared across multiple partial embeddings, thereby reducing redundant computation. In addition, we design two pruning techniques that efficiently identify and discard unpromising search branches during the back-tracking enumeration process. To summarize, we make the following contributions in this paper. 
+
+• We propose a DFS-based subgraph matching algorithm, CEMR ,that aims to reduce redundant computation during the enumera-tion phase. 
+
+• We develop a forward-looking common extension merging tech-nique based on black-white vertex encoding, which effectively merges search branches with similar expansion behaviors. In addition, we propose a cost-driven encoding strategy designed to maximize computational cost reduction. 
+
+• We propose a backward-looking common extension reusing tech-nique that caches and reuses extension results to avoid repeated computation. 
+
+• We introduce two pruning techniques that effectively eliminate unpromising search branches and redundant partial embeddings. 
+
+• We conduct extensive experiments on several real-world graph datasets. Results show that CEMR consistently outperforms state-of-the-art algorithms. 
+
+## 2 PRELIMINARY AND RELATED WORKS 2.1 Problem Definition 
+
+In this paper, we focus on undirected, vertex-labeled, and connected graphs. Note that our techniques can be extended to more general cases (e.g., directed graphs and edge-labeled graphs, we provide some discussions on these extensions in Section 6.4). We use 𝐺 and 𝑄 to denote the data graph and the query graph, respectively. A (data) graph 𝐺 is a quadruple 𝐺 = (𝑉 , 𝐸, Σ, 𝐿 𝐺 ),where 𝑉 (𝐺 ) is the set of vertices, 𝐸 (𝐺 ) ⊆ 𝑉 (𝐺 ) × 𝑉 (𝐺 ) is the set of edges, Σ is the set of labels, and 𝐿 𝐺 is a labeling function that assigns a label from Σ to each vertex in 𝑉 . Given 𝑣 ∈ 𝑉 (𝐺 ), 𝑁 (𝑣 )
+
+denotes the set of neighbors of 𝑣 , i.e., 𝑁 (𝑣 ) = {𝑣 ′ | 𝑒 (𝑣, 𝑣 ′) ∈ 𝐸 (𝐺 )} .The degree of 𝑣 , denoted by 𝑑 (𝑣 ), is defined as 𝑑 (𝑣 ) = |𝑁 (𝑣 )| . The query graph 𝑄 is defined in the same way. 
+
+Definition 2.1 (Subgraph Isomorphism). Given a query graph 𝑄 
+
+and a data graph 𝐺 , 𝑄 is subgraph isomorphic to 𝐺 if there exists an injective mapping function 𝑀 from 𝑉 (𝑄 ) to 𝑉 (𝐺 ) such that: 
+
+• (Label constraint) ∀𝑢 ∈ 𝑉 (𝑄 ), 𝐿 𝑄 (𝑢 ) = 𝐿 𝐺 (𝑀 [𝑢 ]) ;
+
+• (Topology constraint) ∀𝑒 (𝑢, 𝑢 ′) ∈ 𝐸 (𝑄 ), 𝑒 (𝑀 [𝑢 ], 𝑀 [𝑢 ′]) ∈ 𝐸 (𝐺 ).Sometimes, the mapping function 𝑀 is also called an embedding. 
+
+Definition 2.2 (Subgraph Matching Problem). Given a query graph 
+
+𝑄 and a data graph 𝐺 , the subgraph matching problem is to find all distinct subgraphs ( embeddings ) of 𝐺 that are isomorphic to 𝑄 .An embedding of an induced subgraph of 𝑄 in 𝐺 is called a 
+
+partial embedding . In contrast, an embedding of the complete query graph 𝑄 is referred to as a full embedding .
+
+Definition 2.3 (Matching Order). A matching order is a permuta-tion of the query vertices, denoted as 𝑂 = (𝑢 0, 𝑢 1, . . . , 𝑢 𝑛 −1), where we assume |𝑉 (𝑄 )| = 𝑛 throughout the rest of the paper. A valid matching order must preserve the connectivity of the query graph. That is, for each 𝑖 ∈ { 1, . . . , 𝑛 − 1}, the subquery 𝑄 𝑖 induced by the first 𝑖 vertices {𝑢 0, 𝑢 1, . . . , 𝑢 𝑖 −1 } in 𝑂 must be connected. For clarity, we consistently use this notation throughout the paper. 
+
+Definition 2.4 (Backward (Forward) Neighbors). Given a matching order 𝑂 , the set of backward neighbors 𝑁 𝑂  
+
+> −
+
+(𝑢 ) (forward neighbors 
+
+𝑁 𝑂  
+
+> +
+
+(𝑢 )) of a query vertex 𝑢 is the set of neighbors of 𝑢 whose indices in 𝑂 are smaller (greater) than 𝑢 ’s corresponding index 𝑜 (𝑢 ) in 𝑂 .Formally, 𝑁 𝑂  
+
+> −
+
+(𝑢 𝑖 ) = {𝑢 | 𝑢 𝑗 ∈ 𝑁 (𝑢 ), 𝑗 < 𝑖 } and 𝑁 𝑂  
+
+> +
+
+(𝑢 𝑖 ) = {𝑢 𝑗 |
+
+𝑢 𝑗 ∈ 𝑁 (𝑢 ), 𝑗 > 𝑖 }.
+
+Example 2. Considering the query graph 𝑄 in Figure 1a, assume that the matching order is 𝑂 = (𝑢 0, 𝑢 1, 𝑢 2, 𝑢 3, 𝑢 4, 𝑢 5, 𝑢 6). For 𝑢 4, it has four neighbors 𝑢 0, 𝑢 1, 𝑢 5, and 𝑢 6. Among them, 𝑢 0 and 𝑢 1 are matched before 𝑢 4, which are backward neighbors of 𝑢 4 (i.e., 𝑁 𝑂  
+
+> −
+
+(𝑢 4) =
+
+{𝑢 0, 𝑢 1 }). In contrast, 𝑢 5 and 𝑢 6 are forward neighbors of 𝑢 4 (i.e., 
+
+𝑁 𝑂  
+
+> +
+
+(𝑢 4) = {𝑢 5, 𝑢 6 }). 
+
+Table 1 lists the frequently used notations in this paper. 
+
+Table 1: Frequently used notations.                                                                   
+
+> Notation Description
+> 𝐺 ,𝑄 Data graph and query graph
+> 𝑣 ,𝑢 Data vertex and query vertex
+> 𝑂 Matching order
+> 𝑄 𝑖 Induced subquery by the first 𝑖 vertices
+> 𝑁 𝑂
+> −(𝑢 ),𝑁 𝑂
+> +(𝑢 )Backward and forward neighbors of 𝑢 given 𝑂 𝐵𝐾 (𝑢 ),𝑊 𝑇 (𝑢 )Black and white backward neighbors of 𝑢 𝑀 ,𝑀 [𝑢 ]A (partial) embedding , mapping of 𝑢 in 𝑀 𝐶 (𝑢 )Candidate vertex set of 𝑢
+> AAuxiliary data structure
+> A𝑢 𝑢 ′(𝑣 )Neighbors of 𝑣 in 𝐶 (𝑢 ′)where 𝑣 ∈𝐶 (𝑢 )
+> 𝑅 𝑀 (𝑢 )Extensible vertices of 𝑢 under 𝑀 𝑅𝑆 (𝑢 )Reference set of 𝑢 𝐶𝑜𝑛 (𝑢 )Contained vertex set of 𝑢
+
+Algorithm 1: Generic framework of indexing-enumeration                        
+
+> Input: Query graph 𝑄 , data graph 𝐺 .
+> Output: All embeddings of 𝑄 in 𝐺 , denoted as M.
+> 1𝐶 ,A ← generate candidate vertices and an auxiliary index
+> 2𝑂 ←get the matching order
+> 3M ← ∅
+> 4Enumerate( 𝑄 ,A,𝑂 ,M,{ } ,0)
+> 5return M
+
+## 2.2 Background and Related Work 
+
+Most recent studies [ 4 –6 , 9, 17 , 18 , 23 , 29 , 41 ] on subgraph match-ing are based on the preprocessing-enumeration framework [ 39 ] as shown in Algorithm 1. They first find candidates of query vertices and edges to build an online auxiliary structure, then enumerate all embeddings with the help of this auxiliary structure. 
+
+2.2.1 Preprocessing Phase. In Algorithm 1, the preprocessing phase consists of filtering and matching order generation. Specifically, it first generates a candidate vertex set 𝐶 (𝐶 (𝑢 ) for each 𝑢 ∈ 𝑉 (𝑄 ))and builds an auxiliary data structure A to maintain the candidate edges between the candidate vertex sets (line 1). Then, the algorithm generates a matching order 𝑂 usually in a greedy way based on some heuristic rules (line 2). 
+
+2.2.2 Enumeration Phase. After the preprocessing phase, Algo-rithm 1 recursively enumerates matches along the matching order 
+
+𝑂 (line 4). The enumeration procedure is detailed in Algorithm 2, which consists of two key steps. Given the current partial em-bedding 𝑀 , line 3 computes all extensible vertices 𝑅 𝑀 (𝑢 𝑖 ) for the next query vertex 𝑢 𝑖 . Then, lines 4-5 recursively extend the partial embedding by exploring all candidates in 𝑅 𝑀 (𝑢 𝑖 ).
+
+Algorithm 2: Enumerate( 𝑄 , A, 𝑂 , M, 𝑀 , 𝑖 ) (Basic)                                                   
+
+> Input: The query 𝑄 , auxiliary structure A, matching order 𝑂 ,result set M, an embedding 𝑀 of 𝑄 𝑖 , and the backtracking depth 𝑖 .
+> 1if 𝑖 =|𝑉 (𝑄 ) | then
+> 2M ← M ∪ { 𝑀 },return
+> 3𝑅 𝑀 (𝑢 𝑖 )=∩𝑢 ∈𝑁 𝑂
+> −(𝑢 𝑖 )A𝑢 𝑢 𝑖 (𝑀 [𝑢 ] )
+> 4foreach 𝑣 ∈𝑅 𝑀 (𝑢 𝑖 )do
+> 5Enumerate( 𝑄 ,A,𝑂 ,M,𝑀 ∪ { ( 𝑢 𝑖 , 𝑣 ) } ,𝑖 +1)
+
+2.2.3 Related Works of Preprocessing Phase. The label degree filter (LDF) and neighbor label filter (NLF) [ 51 ] are the two most widely used filtering methods. They check the label and degree of a data vertex and its neighborhood to eliminate vertices that cannot be matched to a query vertex. In addition to vertex candidates, CFL [ 6 ]also builds an auxiliary structure to maintain the edge candidates of a BFS tree in the query graph, enabling more powerful filtering. CECI [ 5 ] and DAF [ 17 ] further consider the non-tree edges of the query graph in their auxiliary structures. RM [ 41 ] utilizes the semi-join operator to quickly eliminate dangling tuples. VC [ 40 ] and VEQ [ 23 ] adopt more sophisticated filtering rules to produce tighter candidate sets, at the cost of increased filtering time. Most existing subgraph matching methods use heuristic vertex ordering strategies. RI [ 7] and RM [ 41 ] determine the query vertex order solely based on the structure of the query graph, prioritiz-ing vertices from its dense regions. Other methods adopt different heuristics, such as selecting vertices with higher degrees and smaller candidate sets [ 6, 19 ]. DAF [ 17 ] and VEQ [ 23 ] further propose adap-tive ordering strategies, where the choice of the next query vertex may vary across different partial embeddings. 
+
+2.2.4 Related Works of Enumeration Phase. As the enumeration phase is usually the most time-consuming part of subgraph match-ing, many works have proposed various optimizations to accelerate it, mainly by reducing redundant computation. These optimizations can be broadly classified into two categories. The first is backward-looking optimization [ 4, 17 , 23 , 41 ], which caches intermediate re-sults to avoid redundant extensions. The second is forward-looking optimization [ 21 , 27 , 46 ], which merges multiple search branches and extends them simultaneously in subsequent steps. 
+
+Backward-Looking Optimization . Backward-looking opti-mization leverages historical extensions to accelerate subsequent ones. It typically serves as a pruning technique to discard unpromis-ing search branches based on past extension results. DAF [ 17 ] proposes a failing set pruning strategy to eliminate unpromising search branches. The basic idea is: Given a partial embedding 𝑀 , if 𝑀 cannot be extended to form a complete match of 
+
+𝑄 , some other search branches (satisfying the failing set conditions) can be skipped without further computation. This technique is later adopted by RM [41] and VEQ [23]. GuP [ 4] extends the failing set idea by introducing guard-based pruning, which retains discovered unpromising partial matches for repeated pruning at the cost of additional memory usage. However, these methods focus solely on pruning invalid extensions and do not reuse valid historical extension results. VEQ [ 23 ] proposes a pruning strategy based on dynamic equiva-lence, which can eliminate equivalent search subtrees, including both promising and unpromising ones. For each query vertex 𝑢 , a dynamic equivalence class is defined over the filtered candidate set 
+
+𝐶 (𝑢 ). Two candidates 𝑣 𝑖 and 𝑣 𝑗 in 𝐶 (𝑢 ) belong to the same class if they share common neighbors, i.e., A𝑢 𝑢 ′ (𝑣 𝑖 ) = A𝑢 𝑢 ′ (𝑣 𝑗 ) for every 
+
+𝑢 ′ ∈ 𝑁 (𝑢 ). This idea was later also adopted by BICE [ 9 ]. However, its effectiveness depends on the number of equivalent candidate vertices. As a result, VEQ may perform poorly on data graphs with high average degrees or limited equivalence among candidates. 
+
+Forward-Looking Optimization . Forward-looking optimiza-tion does not utilize historical results. Instead, it directly merges certain extension branches when it predicts that they will produce similar extension results. Circinus [ 21 ] proposes a merging strategy based on a vertex cover of the query graph. For a query vertex 𝑢 𝑖 not included in the vertex cover, all of its backward neighbors must be in the cover. In such cases, given a partial embedding 𝑀 , Circinus merges the candidate mappings of 𝑢 𝑖 and compresses multiple extended par-tial embeddings into a group, delaying their expansion until 𝑢 𝑖 ’s forward neighbors are processed. On the other hand, if 𝑢 𝑖 is in the vertex cover and has at least one backward neighbor not in the cover, then the compressed embeddings will be decomposed. Specifically, the merged mapping set of this backward neighbor will be split according to the different mappings of 𝑢 𝑖 , and each decomposed embedding will be handled separately. A continuous subgraph matching method, CaLiG [46], also adopts this strategy. BSX [ 29 ] models the search space as a multi-dimensional search box. During the backtracking enumeration phase, it iteratively selects one dimension, which corresponds to a query vertex from the vertex cover, and chooses several similar data vertices for that dimension. Then, it refines the other dimensions accordingly. At the final enumeration layer, the homomorphic matches within the search box are verified and form the final matching results. Some other works aim to identify unmatchable search branches in advance. For example, BICE [ 9 ] prunes branches that will re-sult in conflicts by applying bipartite matching on the bipartite graph between unmapped query vertices and their candidate data vertices. 
+
+## 3 THEORETICAL FOUNDATION 
+
+In this paper, we propose Common E xtension M erging ( CEM ) and Common Extension Reusing ( CER ) techniques, which can be viewed as forward-looking and backward-looking optimizations, respec-tively. Before diving into the details, we first study the following lemma, which lays the foundation for both CEM and CER . The proof can be found in Appendix C.1. 
+
+Lemma 1. Given a query graph 𝑄 and a matching order 𝑂 =
+
+(𝑢 0, 𝑢 1, . . . , 𝑢 𝑛 −1), let 𝑀 1 and 𝑀 2 be matches of the subquery 𝑄 𝑖 in-duced by the first 𝑖 vertices. Assume that 𝑀 1 and 𝑀 2 share the same mappings for all backward neighbors of 𝑢 𝑖 (i.e., 𝑁 𝑂  
+
+> −
+
+(𝑢 𝑖 )), and let 𝑣 be a data vertex that does not conflict with any vertex in 𝑀 1 or 𝑀 2. Then, if 𝑀 1 ⊕ 𝑣 is a valid match of the subquery 𝑄 𝑖 +1, so is 𝑀 2 ⊕ 𝑣 . Here, 
+
+𝑀 ⊕ 𝑣 denotes extending 𝑀 along the matching order by appending the mapping (𝑢 |𝑀 | , 𝑣 ).
+
+Let us revisit Example 1. Two partial embeddings 𝑀 1 and 𝑀 2 for 
+
+𝑄 4 share the same mappings for 𝑢 0 and 𝑢 1, which are the backward neighbors of 𝑢 4. Therefore, for each candidate vertex 𝑣 of 𝑢 4 (i.e., 
+
+𝑣 ∈ { 𝑣 7, 𝑣 8 }), if 𝑀 1 ⊕ 𝑣 forms a valid match of the subquery 𝑄 5, then so does 𝑀 2 ⊕ 𝑣 .Lemma 1 offers the most effective opportunity to eliminate re-dundant extensions during enumeration, as all valid extensions of 𝑢 𝑖 for 𝑀 1 can be directly reused for 𝑀 2 without any additional computation. In BFS-based approaches, when extending 𝑢 𝑖 , we can group all partial embeddings that share the same mappings for 𝑢 𝑖 ’s backward neighbors to avoid repeated work. However, doing so is non-trivial in DFS-based methods. Our proposed techniques, CEM 
+
+(Section 4) and CER (Section 5), serve as practical relaxations of this lemma to facilitate extension sharing in DFS-based enumeration. 
+
+## 4 COMMON EXTENSION MERGING 
+
+The intuition behind CEM is to merge multiple partial embeddings into an aggregated embedding and extend them together. For in-stance, if 𝑢 𝑖 is not connected to 𝑢 𝑖 +1, all mapped data vertices of 
+
+𝑢 𝑖 can be aggregated together, since extending 𝑢 𝑖 +1 does not de-pend on 𝑢 𝑖 (according to Lemma 1). Based on this, we propose the following black-white vertex encoding and aggregated embedding .4.1 Black-white Vertex Encoding & Aggregated Embedding 
+
+Definition 4.1 (Black-White Vertex Encoding & Aggregated Em-bedding). Given a query graph 𝑄 with a matching order 𝑂 =
+
+(𝑢 0, 𝑢 1, . . . , 𝑢 𝑛 −1), each query vertex 𝑢 𝑖 ∈ 𝑉 (𝑄 ) is assigned a color 
+
+𝑐 (𝑢 𝑖 ) ∈ { black , white }. An aggregated embedding 𝑀 represents multiple embeddings and satisfies: 
+
+• 𝑀 [𝑢 ] is a single data vertex if 𝑐 (𝑢 ) = black; 
+
+• 𝑀 [𝑢 ] is a set of data vertices if 𝑐 (𝑢 ) = white. If there is no ambiguity, the “embedding” mentioned in the rest of this paper refers to an aggregated embedding. And we denote the black (white) backward neighbors of 𝑢 as 𝐵𝐾 (𝑢 ) (𝑊𝑇 (𝑢 )). 
+
+Example 3. Consider again the query graph 𝑄 and data graph 𝐺 in Figure 1. Let the matching order be 𝑂 = (𝑢 0, · · · , 𝑢 6), where 𝑢 3 and 𝑢 6
+
+are encoded as white vertices. When 𝑢 0, 𝑢 1, and 𝑢 2 are mapped to 𝑣 0, 𝑣 1,and 𝑣 3, respectively, 𝑢 3 has only one candidate 𝑣 6, yielding the aggre-gated embedding {( 𝑢 0, 𝑣 0), (𝑢 1, 𝑣 1), (𝑢 2, 𝑣 3), (𝑢 3, {𝑣 6 })} . In contrast, mapping (𝑢 0, 𝑢 1, 𝑢 2) to (𝑣 0, 𝑣 1, 𝑣 2) produces {( 𝑢 0, 𝑣 0), (𝑢 1, 𝑣 1), (𝑢 2, 𝑣 2),
+
+(𝑢 3, {𝑣 4, 𝑣 5, 𝑣 6 })} , which compactly represents three embeddings. 
+
+## 4.2 Four Cases of Extension 
+
+Based on the black-white vertex encoding, we propose a common extension merging enumeration framework, as shown in Algorithm 3. This framework computes the extensions of 𝑄 𝑖 +1 in the form of aggregated embeddings, based on an aggregated embedding 𝑀 of 
+
+𝑄 𝑖 . In summary, there are four cases for extending 𝑢 𝑖 , classified according to the encoding of 𝑢 𝑖 and the encodings of its backward neighbors 𝑁 𝑂  
+
+> −
+
+(𝑢 𝑖 ).
+
+Case 1. 𝑢 𝑖 is a black vertex, and all its backward neighbors 𝑁 𝑂  
+
+> −
+
+(𝑢 𝑖 )
+
+are black vertices. Case 1 is equivalent to the standard extension framework de-scribed in Algorithm 2. In this case, we directly compute the set of extensible vertices 𝑅 𝑀 (𝑢 𝑖 ), and extend 𝑀 by mapping 𝑢 𝑖 to each data vertex 𝑣 ∈ 𝑅 𝑀 (𝑢 𝑖 ), resulting in an embedding 𝑀 ⊕ 𝑣 of 𝑄 𝑖 .Figure 2a illustrates an example of Case 1. For illustration purposes, we treat 𝑢 3 as a black vertex in this example. Case 1 Extend 
+
+(a) Case 1. Case 2 Extend (b) Case 2. 
+
+Figure 2: Illustrations of Case 1 and Case 2. 
+
+Case 2. 𝑢 𝑖 is a white vertex, and all its backward neighbors 𝑁 𝑂  
+
+> −
+
+(𝑢 𝑖 )
+
+are black vertices. White encoding of 𝑢 𝑖 indicates an opportunity for extension merging. Specifically, after computing the extensible vertices 𝑅 𝑀 (𝑢 𝑖 )
+
+(same as Case 1), we aggregate them as the mapping for 𝑢 𝑖 to form an aggregated embedding 𝑀 ⊕ 𝑅 𝑀 (𝑢 𝑖 ). Figure 2b illustrates this extension pattern. Note that in Case 2, the extension branches 
+
+{𝑀 ⊕ 𝑣 𝑖 | 𝑣 𝑖 ∈ 𝑅 𝑀 (𝑢 𝑖 )} are merged into a single aggregated embed-ding to reduce redundant extensions. 
+
+Algorithm 3: Enumerate( 𝑄 , A, 𝑂 , M, 𝑀 , 𝑖 ) (black-white enumeration framework) 
+
+Input: The query 𝑄 , auxiliary structure A, matching order 𝑂 ,result set M, an (aggregated) embedding 𝑀 of 𝑄 𝑖 , and the backtracking depth 𝑖 . 
+
+> 1
+
+if 𝑖 = |𝑉 (𝑄 ) | then  
+
+> 2
+
+Append valid full embeddings in 𝑀 to M; return  
+
+> 3
+
+𝐵𝐾 (𝑢 𝑖 ) ( 𝑊 𝑇 (𝑢 𝑖 ) ) ← { 𝑢 | 𝑐 (𝑢 ) = 𝑏𝑙𝑎𝑐𝑘 (𝑤ℎ𝑖𝑡𝑒 ), 𝑢 ∈ 𝑁 𝑂  
+
+> −
+
+(𝑢 𝑖 ) }  
+
+> 4
+
+if 𝑊 𝑇 (𝑢 𝑖 ) = ∅ then // Case 1 or Case 2  
+
+> 5
+
+𝑅 𝑀 (𝑢 𝑖 ) ← ∩ 𝑢 𝑗 ∈𝐵𝐾 (𝑢 𝑖 ) A𝑢 𝑗  
+
+> 𝑢 𝑖
+
+(𝑀 [𝑢 𝑗 ] )  
+
+> 6
+
+if 𝑐 (𝑢 𝑖 ) = 𝑏𝑙𝑎𝑐𝑘 then // Case 1  
+
+> 7
+
+foreach 𝑣 ∈ 𝑅 𝑀 (𝑢 𝑖 ) do  
+
+> 8
+
+Enumerate (𝑄 , A, 𝑂 , M, 𝑀 ⊕ 𝑣 , 𝑖 + 1) 
+
+> 9
+
+else // Case 2  
+
+> 10
+
+Enumerate (𝑄 , A, 𝑂 , M, 𝑀 ⊕ 𝑅 𝑀 (𝑢 𝑖 ), 𝑖 + 1) 
+
+> 11
+
+else // Case 3 or Case 4  
+
+> 12
+
+if 𝐵𝐾 (𝑢 𝑖 ) ≠ ∅ then  
+
+> 13
+
+𝑅 𝑀 (𝑢 𝑖 ) ← ∩ 𝑢 𝑗 ∈𝐵𝐾 (𝑢 𝑖 ) A𝑢 𝑗  
+
+> 𝑢 𝑖
+
+(𝑀 [𝑢 𝑗 ] )  
+
+> 14
+
+else  
+
+> 15
+
+𝑢 𝑗 ← arg min 𝑢 ∈𝑊 𝑇 (𝑢 𝑖 ) |𝑀 [𝑢 ] |  
+
+> 16
+
+𝑅 𝑀 (𝑢 𝑖 ) ← ∪ 𝑣 ∈𝑀 [𝑢 𝑗 ] A𝑢 𝑗  
+
+> 𝑢 𝑖
+
+(𝑣 ) 
+
+> 17
+
+if 𝑐 (𝑢 𝑖 ) = 𝑏𝑙𝑎𝑐𝑘 then // Case 3  
+
+> 18
+
+foreach 𝑣 ∈ 𝑅 𝑀 (𝑢 𝑖 ) do  
+
+> 19
+
+𝑀 𝑣 ← 𝑀  
+
+> 20
+
+foreach 𝑢 𝑗 ∈ 𝑊 𝑇 (𝑢 𝑖 ) do  
+
+> 21
+
+𝑀 𝑣 [𝑢 𝑗 ] ← 𝑀 [𝑢 𝑗 ] ∩ A 𝑢 𝑖   
+
+> 𝑢 𝑗
+
+(𝑣 ) 
+
+> 22
+
+if ∀𝑢 𝑗 ∈ 𝑊 𝑇 (𝑢 𝑖 ), 𝑀 𝑣 [𝑢 𝑗 ] ≠ ∅ then  
+
+> 23
+
+Enumerate (𝑄 , A, 𝑂 , M, 𝑀 𝑣 ⊕ 𝑣 , 𝑖 + 1) 
+
+> 24
+
+else // Case 4  
+
+> 25
+
+S ← decompose 𝑊 𝑇 (𝑢 𝑖 )’s mappings  
+
+> 26
+
+if | S | ≥ | 𝑅 𝑀 (𝑢 𝑖 ) | then // Case 4.1  
+
+> 27
+
+Same pseudocode as lines 18-23  
+
+> 28
+
+else // Case 4.2  
+
+> 29
+
+foreach 𝑀 𝑡 ∈ S do  
+
+> 30
+
+𝑅 𝑀 𝑡 (𝑢 𝑖 ) ← ∩ 𝑢 𝑗 ∈𝑁 𝑂    
+
+> −(𝑢 𝑖 )
+
+A𝑢 𝑗  
+
+> 𝑢 𝑖
+
+(𝑀 𝑡 [𝑢 𝑗 ] )  
+
+> 31
+
+Enumerate (𝑄 ,A, 𝑂 , M, 𝑀 𝑡 ⊕ 𝑅 𝑀 𝑡 (𝑢 𝑖 ), 𝑖 + 1)
+
+Case 3. 𝑢 𝑖 is a black vertex, and at least one of its backward neigh-bors is a white vertex. As illustrated in Figure 3a, 𝑀 is an aggregated embedding of 
+
+𝑄 5 in Figure 1, where the matching part {( 𝑢 0, 𝑣 0), (𝑢 1, 𝑣 1), (𝑢 2, 𝑣 2)} 
+
+is omitted for simplicity. The white vertex 𝑢 3 is mapped to three data vertices: {𝑣 4, 𝑣 5, 𝑣 6 }. When extending 𝑢 5, a naive solution may split 𝑀 into three separate embeddings for its white backward neighbor 𝑢 3 and perform the extension as in Case 1. However, this leads to redundant computations. By preserving aggregation instead, we can merge the resulting embeddings 𝑀 1, 𝑀 3, 𝑀 5 into a single 𝑀 ′, thereby facilitating more sharing opportunities for future extensions such as 𝑢 6.To address this efficiently, we propose the solution illustrated in Figure 3b. We first compute the set of extensible vertices 𝑅 𝑀 (𝑢 𝑖 ),which will be detailed later. Then, for each vertex 𝑣 𝑖 ∈ 𝑅 𝑀 (𝑢 𝑖 ), we prune the candidate vertices 𝑣 𝑗 in the aggregated mapping 𝑀 [𝑢 𝑗 ]
+
+of each white backward neighbor 𝑢 𝑗 of 𝑢 𝑖 (lines 20-21). Specifically, if 𝑣 𝑖 is not adjacent to 𝑣 𝑗 , 𝑣 𝑗 is filtered out. If the mapping set of any white backward neighbor becomes empty after pruning, 𝑣 𝑖 is removed from 𝑅 𝑀 (𝑢 𝑖 ). Otherwise, 𝑣 𝑖 is appended to the shrunk aggregated embedding to form a valid extension (lines 22-23). We now return to computing the extensible vertex set 𝑅 𝑀 (𝑢 𝑖 ),which depends on whether 𝑢 𝑖 has black backward neighbors: 
+
+• If 𝑢 𝑖 has at least one black backward neighbor (lines 12-13), the extensible vertices are obtained by intersecting the adjacency sets of all such neighbors: 𝑅 𝑀 (𝑢 𝑖 ) = Ñ𝑢 𝑗 ∈𝐵𝐾 (𝑢 𝑖 ) A𝑢 𝑗  
+
+> 𝑢 𝑖
+
+(𝑀 [𝑢 𝑗 ]) .
+
+• If 𝑢 𝑖 has no black backward neighbors (lines 14-16), we select the white neighbor 𝑢 𝑗 ∈ 𝑊𝑇 (𝑢 𝑖 ) with the minimum |𝑀 [𝑢 𝑗 ]| and compute the extensible vertices by taking the union of adjacency sets: 𝑅 𝑀 (𝑢 𝑖 ) = Ð𝑣 𝑗 ∈𝑀 [𝑢 𝑗 ] A𝑢 𝑗  
+
+> 𝑢 𝑖
+
+(𝑣 𝑗 ).Decompose 
+
+> Naive Extend
+> (a) Naive solution Case 3 Case 3 Extend
+> (b) Our solution for Case 3
+
+Figure 3: Illustrations of Case 3. 
+
+Case 4. 𝑢 𝑖 is a white vertex, and at least one of its backward neigh-bors is a white vertex. We first compute the extensible vertices 𝑅 𝑀 (𝑢 𝑖 ) in the same man-ner as in Case 3. The key challenge in this case lies in how to handle the aggregated embeddings involving 𝑢 𝑖 and its white backward neighbors. Since both 𝑢 𝑖 and some of its backward neighbors are white, we consider two alternative strategies. One is to retain the aggregated embeddings of 𝑢 𝑖 ’s white back-ward neighbors and treat 𝑢 𝑖 as a black vertex, i.e., process each mapping in 𝑅 𝑀 (𝑢 𝑖 ) individually. The other is to break the existing aggregated embeddings into finer-grained ones, and merge 𝑢 𝑖 ’s mappings into the aggregation to form new composite embeddings. In our design, the choice between these two strategies is adap-tive depending on which one leads to less redundant computation. Specifically, we divide Case 4 into two subcases: 
+
+Case 4.1 (lines 26-27). If the size of the Cartesian product of the mapping sets of 𝑢 𝑖 ’s white backward neighbors is not less than 
+
+|𝑅 𝑀 (𝑢 𝑖 )| , it is more efficient to process 𝑢 𝑖 separately. Thus, we retain the aggregated embeddings of its white backward neighbors and extend each 𝑣 𝑖 ∈ 𝑅 𝑀 (𝑢 𝑖 ) independently. This is essentially the same strategy as in Case 3. 
+
+Case 4.2 (lines 28-31). If the size of the Cartesian product of the mapping sets of 𝑢 𝑖 ’s white backward neighbors is smaller than 
+
+|𝑅 𝑀 (𝑢 𝑖 )| , merging the mappings of 𝑢 𝑖 into the aggregation may reduce redundancy. In this case, we enumerate all embeddings in the Cartesian product set S, and for each embedding 𝑀 𝑡 ∈ S , we extend it with 𝑢 𝑖 following the procedure used in Case 2. Case 4.1 
+
+> Case 4.2
+> Extend as Case 2
+> Extend as Case 3
+> …
+> …
+
+Figure 4: Illustration of Case 4. 
+
+Figure 4 illustrates an example of this extension strategy. Suppose the white vertex 𝑢 𝑖 has two white backward neighbors, 𝑢 𝑗 and 
+
+𝑢 𝑘 . If the product of their candidate set sizes satisfies |𝑅 [𝑢 𝑗 ]| × |𝑅 [𝑢 𝑘 ]| ≥ | 𝑅 𝑀 (𝑢 𝑖 )| , we apply the same strategy as in Case 3 (upper part of Figure 4) to directly extend 𝑢 𝑖 . Otherwise, we decompose the candidate sets of 𝑅 [𝑢 𝑗 ] and 𝑅 [𝑢 𝑘 ], and keep 𝑢 𝑖 ’s candidates in an aggregated form, as in Case 2 (lower part of Figure 4). 
+
+Discussions. Compared with existing methods [ 21 , 29 , 46 ], our approach does not rely on a vertex cover of the query graph and can operate with any black-white encoding of the query graph, offering greater flexibility. In particular, these methods do not handle Case 4, which may miss opportunities for merging common extensions. 
+
+## 4.3 Dealing with Vertex Conflicts 
+
+One key challenge in subgraph isomorphism is enforcing the vertex injectivity constraint, which requires that each query vertex must be mapped to a unique data vertex. We refer to any violation of this constraint as a vertex conflict . Some existing methods, such as BSX [ 29 ], postpone conflict checking until the last level of enumer-ation. However, this may miss early pruning opportunities, as our experimental results demonstrate (Section 7.2.1). Due to the existence of white vertices in our enumeration frame-work, our approach to detecting vertex conflicts differs slightly, and is not explicitly shown in Algorithm 3. In our solution, we only record the mappings of black vertices, as well as the mappings of white vertices when they are mapped to a single data vertex. This includes two situations: (i) 𝑢 𝑖 is deterministically mapped when extended under Case 3 or Case 4; and (ii) under Case 4, a white back-ward neighbor 𝑢 𝑘 of 𝑢 𝑖 becomes deterministically mapped when its candidate set is reduced to a single vertex. Such deterministi-cally mapped vertices are included in conflict checking to preserve correctness and maximize pruning opportunities. At the final level of enumeration, we obtain an aggregated em-bedding 𝑀 in which every query vertex has been assigned a map-ping. Since each white vertex may map to multiple candidate data vertices, we generate all possible full embeddings by taking the Cartesian product of their mappings. Each resulting embedding is then checked against the vertex injectivity constraint, and only valid ones are added to the result set M (lines 1-2 in Algorithm 3). 
+
+## 5 COMMON EXTENSION REUSING 
+
+CEM can share the extension computation in an aggregated em-bedding, but it still misses other optimization opportunities, as illustrated in the following example. 
+
+Example 4. In Figure 5, we extend 𝑢 4 in the query graph given in Figure 1. Because 𝑢 4’s backward neighbors are 𝑢 0 and 𝑢 1, Lemma 1 tells us that the extension of 𝑢 4 only depends on 𝑢 0 and 𝑢 1, while 𝑢 2
+
+and 𝑢 3 are irrelevant . Using CEM , assume that we have generated two partial embeddings 𝑀 1 and 𝑀 2 for subquery 𝑄 3, which have the same mappings of 𝑢 0 and 𝑢 1, but different in 𝑢 2 and 𝑢 3. When extending 𝑢 4,we need to extend 𝑀 1 and 𝑀 2, respectively. However, the extension of 
+
+𝑢 4 is the same for both 𝑀 1 and 𝑀 2. Thus, a desirable solution should avoid such duplicated extension, which cannot be achieved by CEM .
+
+To address the above problem, we propose a backward-looking 
+
+c ommon e xtension r eusing technique, called CER , which uses the historical results already generated to avoid duplicated extension. + + - - 
+
+> *
+> Irrelevant vertices
+> +
+> -
+> Reference set vertices
+> *Parent vertex
+
+Figure 5: The reference set and parent vertex of 𝑢 4
+
+## 5.1 Reference Set & Brother Embeddings 
+
+We first give the definitions of reference set and brother embeddings ,which are main concepts to introduce CER . The idea behind them is based on a relaxed version of Lemma 1. 
+
+Definition 5.1 (Reference Set). Assume that the next query ver-tex to be extended is 𝑢 𝑖 . The reference set of 𝑢 𝑖 is a subset of 
+
+{𝑢 0, · · · , 𝑢 𝑖 −1 }, denoted as 𝑅𝑆 (𝑢 𝑖 ), includes two components: 
+
+• The closure of 𝑢 𝑖 ’s backward neighbors, denoted as 𝐴𝑛𝑐 (𝑢 𝑖 ),which contains 𝑁 𝑂  
+
+> −
+
+(𝑢 𝑖 ) and all their backward neighbors recur-sively; 
+
+• All vertices 𝑢 𝑘 (with 𝑘 < 𝑖 ) that are adjacent to at least one white backward neighbor of 𝑢 𝑖 .Formally, the reference set 𝑅𝑆 (𝑢 𝑖 ) is defined as: 
+
+𝑅𝑆 (𝑢 𝑖 ) = 𝐴𝑛𝑐 (𝑢 𝑖 ) ∪ { 𝑢 𝑘 | ∃ 𝑢 𝑗 ∈ 𝑊𝑇 (𝑢 𝑖 ), 𝑒 (𝑢 𝑗 , 𝑢 𝑘 ) ∈ 𝐸 (𝑄 ), 𝑘 < 𝑖 }. (1) Intuitively, the reference set 𝑅𝑆 (𝑢 𝑖 ) contains the query vertices whose mappings affect the extensible set 𝑅 𝑀 (𝑢 𝑖 ). Besides the direct backward neighbors of 𝑢 𝑖 , it also includes vertices 𝑢 𝑘 (𝑘 < 𝑖 ) that are adjacent to any white backward neighbor 𝑢 𝑗 ∈ 𝑊𝑇 (𝑢 𝑖 ). This is because 𝑢 𝑘 is extended using Case 3 or Case 4, which could prune the mappings of 𝑢 𝑗 , and thereby influence the extension of 𝑢 𝑖 .
+
+Definition 5.2 (Brother Embeddings). Assume that 𝑀 1 and 𝑀 2 are two partial embeddings of the subquery 𝑄 𝑖 , and the next query vertex to be extended is 𝑢 𝑖 . We say that 𝑀 1 and 𝑀 2 are brother embeddings if they assign the same mapping to every vertex in the reference set of 𝑢 𝑖 , i.e., 𝑀 1 (𝑢 ) = 𝑀 2 (𝑢 ) for all 𝑢 ∈ 𝑅𝑆 (𝑢 𝑖 ).
+
+Example 5. Recall Example 1, 𝑀 1 and 𝑀 2 are two partial em-beddings of the subquery 𝑄 4. As shown in Figure 5, the next query vertex 𝑢 4 is adjacent to 𝑢 0 and 𝑢 1, both of which are black vertices. Therefore, the reference set of 𝑢 4 is 𝑅𝑆 (𝑢 4) = {𝑢 0, 𝑢 1 }. In this case, 
+
+𝑀 1 and 𝑀 2 assign the same mappings to the vertices in 𝑅𝑆 (𝑢 4), i.e., 
+
+𝑀 1 [𝑢 0] = 𝑀 2 [𝑢 0] = 𝑣 0 and 𝑀 1 [𝑢 1] = 𝑀 2 [𝑢 1] = 𝑣 1. Thus, 𝑀 1 and 
+
+𝑀 2 are brother embeddings. 
+
+## 5.2 CER Strategy for Extension Reusing 
+
+We now propose the CER strategy. Given a query graph 𝑄 , for each query vertex 𝑢 𝑖 , we define its parent vertex as the vertex 𝑢 𝑘 ∈ 𝑅𝑆 (𝑢 𝑖 )
+
+with the largest index in the matching order 𝑂 (e.g., in Figure 5, 𝑢 1
+
+is the parent vertex of 𝑢 4). Correspondingly, 𝑢 𝑖 is referred to as a 
+
+child vertex of 𝑢 𝑘 .If 𝑢 𝑘 is not the immediate predecessor of 𝑢 𝑖 in 𝑂 , i.e., 𝑘 < 𝑖 − 1,we set a flag 𝑢 𝑖 .𝑓 = true , record its parent as 𝑢 𝑖 .𝑝 = 𝑢 𝑘 , and register 
+
+𝑢 𝑖 as a child of 𝑢 𝑘 via 𝑢 𝑘 .𝑐ℎ𝑖𝑙𝑑 ← 𝑢 𝑘 .𝑐ℎ𝑖𝑙𝑑 ∪ { 𝑢 𝑖 }. Otherwise, we set 𝑢 𝑖 .𝑓 = false . The CER strategy is applied only to vertices 𝑢 𝑖 
+
+with 𝑢 𝑖 .𝑓 = true . We design a buffer structure, called the Common Extension Buffer (CEB), to cache reusable extension results. 
+
+Definition 5.3 (Common Extension Buffer (CEB)). Given a query vertex 𝑢 𝑖 with 𝑢 𝑖 .𝑓 = true , its CEB consists of two components: 
+
+𝐶𝐸𝐵 (𝑢 𝑖 ).𝑔 , a boolean flag indicating whether the buffer is valid (initialized to false ); and 𝐶𝐸𝐵 (𝑢 𝑖 ).𝑏 , which stores reusable local extensions of 𝑢 𝑖 .We now describe how to use the CEB during the CER procedure. Suppose we are processing a partial embedding 𝑀 and the next query vertex to be extended is 𝑢 𝑖 , where 𝑢 𝑖 .𝑓 = true .(1) When 𝐶𝐸𝐵 (𝑢 𝑖 ).𝑔 is false : This indicates the first time 𝑢 𝑖 is extended among 𝑀 ’s brother embeddings. We update 𝐶𝐸𝐵 (𝑢 𝑖 ).𝑏 
+
+with the current extensions and set 𝐶𝐸𝐵 (𝑢 𝑖 ).𝑔 = true after processing. The contents pushed into the buffer depend on the extension strategy, as discussed in Section 4: 
+
+• Case 1 & 2: Store 𝑅 𝑀 (𝑢 𝑖 ) directly into 𝐶𝐸𝐵 (𝑢 𝑖 ).𝑏 .
+
+• Case 3: Store {𝑀 𝑣 ⊕ 𝑣 | 𝑣 ∈ 𝑅 𝑀 (𝑢 𝑖 )} , where 𝑀 𝑣 is the shrunk embedding derived from 𝑀 associated with 𝑣 (see lines 19-21 in Algorithm 3). 
+
+• Case 4: For Case 4.1, store {𝑀 𝑣 ⊕ 𝑣 | 𝑣 ∈ 𝑅 𝑀 (𝑢 𝑖 )} as in Case 3; For Case 4.2, store {𝑀 𝑡 ⊕ 𝑅 𝑀 𝑡 (𝑢 𝑖 ) | 𝑀 𝑡 ∈ S} , where S is the Cartesian product of decomposed candidates, and 𝑅 𝑀 𝑡 (𝑢 𝑖 ) is the extensible set of 𝑢 𝑖 under 𝑀 𝑡 .(2) When 𝐶𝐸𝐵 (𝑢 𝑖 ).𝑔 is true : This means that valid extensions have already been cached. We reuse 𝐶𝐸𝐵 (𝑢 𝑖 ).𝑏 to directly extend 𝑀 
+
+based on 𝑢 𝑖 ’s different extension cases, avoiding redundant computation. (3) When backtracking from the level of 𝑢 𝑖 in the search tree, we reset the CEB flags of all child vertices of 𝑢 𝑖 , i.e., we set 
+
+𝐶𝐸𝐵 (𝑢 𝑗 ).𝑔 = false for every 𝑢 𝑗 ∈ 𝑢 𝑖 .𝑐ℎ𝑖𝑙𝑑 .Extend By CER 
+
+Figure 6: Using CEBs to eliminate duplicated computation 
+
+Example 6. Referring to the query and data graphs in Figure 1, the search tree from 𝑢 0 to 𝑢 4 rooted at 𝑣 0 is illustrated in Figure 6. Assume that the enumeration has just backtracked to the partial embedding 𝑀 = {( 𝑢 0, 𝑣 0), (𝑢 1, 𝑣 1), (𝑢 2, 𝑣 2), (𝑢 3, {𝑣 4, 𝑣 5, 𝑣 6 })} after the mappings {𝑣 7, 𝑣 8 } for 𝑢 4 are cached in 𝐶𝐸𝐵 (𝑢 4).𝑏 . Since 𝑢 1 is the parent of 𝑢 4, all partial embeddings within the red dashed box rep-resent the brother embeddings of 𝑀 . Consequently, the embedding 
+
+{( 𝑢 0, 𝑣 0), (𝑢 1, 𝑣 1), (𝑢 2, 𝑣 3), (𝑢 3, {𝑣 6 })} can be extended directly by uti-lizing the 𝐶𝐸𝐵 (𝑢 4).𝑏 . This 𝐶𝐸𝐵 of 𝑢 4 remains valid until the mapping of 𝑢 1 changes from 𝑣 1.
+
+Remark. We enable CER only for query vertices 𝑢 𝑖 whose parent vertex is not 𝑢 𝑖 −1. The reason is that if 𝑢 𝑖 ’s parent is exactly 𝑢 𝑖 −1,then each time we backtrack to the depth of 𝑢 𝑖 , the mappings of vertices in 𝑅𝑆 (𝑢 𝑖 ) may have changed due to the rematching of 𝑢 𝑖 −1.As a result, the previous extensible vertices of 𝑢 𝑖 are no longer valid, making extension reuse ineffective. 
+
+## 6 OPTIMIZATIONS AND EXTENSIONS 
+
+This section presents several key optimizations in CEMR , including two effective pruning techniques, matching order selection, and an encoding strategy. We further describe how CEMR can be extended to support directed and edge-labeled graphs. 
+
+## 6.1 Pruning Techniques 
+
+To effectively identify unpromising search branches that cannot produce any valid full embedding during enumeration, we addi-tionally propose two pruning techniques. 
+
+6.1.1 Contained Vertex Pruning. 
+
+Definition 6.1 (Contained Vertex Set). Suppose the matching order is 𝑂 = (𝑢 0, · · · , 𝑢 𝑛 −1), and 𝑢 𝑖 and 𝑢 𝑗 is two vertices with the same label, and 𝑖 < 𝑗 . If the backward neighbor set of 𝑢 𝑖 is 𝑢 𝑗 ’s subset, i.e., 
+
+𝑁 𝑂  
+
+> −
+
+(𝑢 𝑖 ) ⊆ 𝑁 𝑂  
+
+> −
+
+(𝑢 𝑗 ), then we say that 𝑢 𝑗 is contained by 𝑢 𝑖 under the matching order 𝑂 . The set of query vertices that contained by 𝑢 𝑖 under the matching order is called contained vertex set of 𝑢 𝑖 ,denoted by 𝐶𝑜𝑛 (𝑢 𝑖 ).Then we have the following pruning rule, whose proof can be found in Appendix C.2. 
+
+Lemma 2 (Contained Vertex Pruning). During the enumer-ation process of extending 𝑢 𝑖 under the partial embedding 𝑀 , if 
+
+|𝑅 𝑀 (𝑢 𝑖 )| < |𝐶𝑜𝑛 (𝑢 𝑖 )| , then the search branch rooted at 𝑀 can be safely pruned. 
+
+6.1.2 Extended Failing Set Pruning. The failing set is an effective backjumping-based pruning technique, originally proposed in DAF [17], and has been adopted by subsequent methods [9, 23, 41]. 
+
+Definition 6.2 (Failing Set). Let 𝑀 be a partial embedding. A subset of query vertices 𝐹 𝑀 is called a failing set of 𝑀 if no valid full embedding can be extended from the restriction of 𝑀 to 𝐹 𝑀 ,denoted as 𝑀 [𝐹 𝑀 ].
+
+Lemma 3 (Failing Set Pruning). Suppose 𝑀 is a partial embed-ding where the last matching is (𝑢 𝑖 , 𝑀 [𝑢 𝑖 ]) , and 𝐹 𝑀 is a non-empty failing set of 𝑀 . If 𝑢 𝑖 ∉ 𝐹 𝑀 , then all sibling branches of 𝑀 in the search tree can be safely pruned. 
+
+Intuitively, the failing set 𝐹 𝑀 indicates those query vertices whose current mappings prevent the enumeration from producing any valid embeddings. If none of the mappings in 𝐹 𝑀 are changed, subsequent search will inevitably fail. Building on this idea, we propose an extended failing set pruning technique under the black-white vertex enumeration framework. Specifically, the failing set of a partial embedding 𝑀 (where 𝑢 𝑖 is the last mapped vertex in 𝑀 )is computed as follows: (1) If 𝑀 is a leaf node in the search tree. 
+
+• 𝑀 belongs to complete embedding class if 𝑀 contains valid matchings. Then 𝐹 𝑀 = ∅.
+
+• 𝑀 belongs to insufficient candidate class if |𝑅 𝑀 (𝑢 𝑖 )| < 𝐶𝑜𝑛 (𝑢 𝑖 ).Then 𝐹 𝑀 = 𝑅𝑆 (𝑢 𝑖 ), corresponding to contained vertex pruning. 
+
+• 𝑀 belongs to vertex conflict class if the mapping of 𝑢 𝑖 con-flicts with that of some 𝑢 𝑗 where 𝑗 < 𝑖 . Then 𝐹 𝑀 = 𝐶𝑜𝑛 (𝑢 𝑖 ) ∪ 
+
+𝐶𝑜𝑛 (𝑇𝑟 (𝑢 𝑗 )) , where 𝑇𝑟 (𝑢 𝑗 ) denotes the query vertex that re-stricts the candidate set of 𝑢 𝑗 to a singleton. Specifically, if 𝑢 𝑗 is a black vertex, or a white vertex with |𝑅 𝑀 (𝑢 𝑗 )| = 1, then we set 
+
+𝑇𝑟 (𝑢 𝑗 ) = 𝑢 𝑗 . Otherwise, if 𝑢 𝑗 is a white backward neighbor of some 𝑢 𝑘 (where 𝑘 < 𝑖 ), and 𝑢 𝑘 is the first vertex in the matching order that reduces the mapping set of 𝑢 𝑗 to a single vertex, then we set 𝑇𝑟 (𝑢 𝑗 ) = 𝑢 𝑘 .(2) If 𝑀 is an internal node in the search tree, and 𝑀 1, . . . , 𝑀 𝑘 are all its children. 
+
+• First, if there exists a child 𝑀 𝑙 such that 𝐹 𝑀 𝑙 = ∅ (i.e., 𝑀 𝑙 leads to a valid embedding), then 𝐹 𝑀 = ∅.
+
+• Else if there exists some 𝑀 𝑙 such that 𝑢 𝑖 ∉ 𝐹 𝑀 𝑙 , then 𝐹 𝑀 = 𝐹 𝑀 𝑙 .
+
+• Otherwise, 𝐹 𝑀 = Ð𝑘 𝑙 =1 𝐹 𝑀 𝑙 .
+
+Remark. Compared with the original failing set proposed in DAF [ 17 ], our solution introduces two main extensions. First, we incor-porate the contained vertex pruning rule, which enables earlier detection of failure. Second, our approach is compatible with the black-white vertex enumeration framework, where a batch of data vertices may be mapped to a single white query vertex. 
+
+## 6.2 Matching Order Selection 
+
+We decouple the matching order from the encoding strategy to reduce complexity. Our goal in matching order selection is to mini-mize the size of intermediate results during backtracking, thereby reducing the search space. After the filtering phase, each query vertex 𝑢 is associated with a candidate set 𝐶 (𝑢 ). We prioritize vertices with smaller candi-date sizes and stronger connectivity to the current partial order. Specifically, the first vertex in the matching order is selected as: 
+
+𝑢 0 = arg min    
+
+> 𝑢 ∈𝑉 (𝑄 )
+
+|𝐶 (𝑢 )| 
+
+𝑑 (𝑢 ) . (2) Given a partial matching order 𝑂 𝑖 = (𝑢 0, 𝑢 1, · · · , 𝑢 𝑖 −1), denote 
+
+𝑁 (𝑂 𝑖 ) = ∪𝑢 ∈𝑂 𝑖 𝑁 (𝑢 ), and the next vertex is chosen by: 
+
+𝑢 𝑖 = arg min    
+
+> 𝑢 ∈𝑁 (𝑂 𝑖 )\ 𝑂 𝑖
+
+|𝐶 (𝑢 )| |𝑁 (𝑢 ) ∩ 𝑂 𝑖 | . (3) 
+
+## 6.3 Encoding Strategy 
+
+Given a matching order 𝑂 , CEMR searches for embeddings by consid-ering the encoding types (black or white) of the current query ver-tex 𝑢 𝑖 and its backward neighbors 𝑁 𝑂  
+
+> −
+
+(𝑢 𝑖 ). These encoding choices influence both pruning strategies and the degree to which inter-mediate computations can be shared. An effective encoding for a query vertex 𝑢 should balance the following factors: • A large number of forward neighbors or forward-neighbor candi-dates increases the case 3 and 4 situations, resulting in redundant splitting costs. 
+
+• Encoding 𝑢 as white is less beneficial if it has many white back-ward neighbors, since fewer constraints are enforced. In contrast, more black backward neighbors help confirm the matching of 𝑢 ,but reduce the possibility of computation sharing. 
+
+• Vertices with common labels are likely to cause conflicts during backtracking, and assigning them as white vertices would under-mine the algorithm’s ability to find such vertex conflict during intermediate search. 
+
+• A large candidate size for 𝑢 suggests more potential for compu-tation reuse among its candidates. To jointly consider these factors, we propose a cost model that compares the white risk 𝑊 𝑅 (𝑢 ) and the black risk 𝐵𝑅 (𝑢 ):
+
+𝑊 𝑅 (𝑢 ) = (1 +∑︁     
+
+> 𝑢 ′∈𝑁 𝑂
+> +(𝑢 )
+
+|𝐶 (𝑢 ′)|) × | 𝑉 (𝑄, 𝐿 (𝑢 ))| × | 𝑊𝑇 (𝑢 )| ; (4) 
+
+𝐵𝑅 (𝑢 ) = |𝐶 (𝑢 )| × | 𝐵𝐾 (𝑢 )| , (5) where |𝑉 (𝑄, 𝐿 (𝑢 ))| is the number of query vertices of label 𝑢 . We encode 𝑢 as white if 𝑊 𝑅 (𝑢 ) < 𝐵𝑅 (𝑢 ), and as black otherwise. 
+
+## 6.4 Extensions 
+
+Although CEMR is described under the undirected, vertex-labeled graph model, it can be readily extended to directed and edge-labeled graphs. Only two components require modification: 
+
+• Filtering stage. Candidate edges must respect both the direction and the label of query edges during the filtering process. 
+
+• Definition of containing vertex. During enumeration, edge directions must be considered for containing vertices. For two vertices 𝑢 𝑖 and 𝑢 𝑗 (𝑖 < 𝑗 ), if both the in- and out-backward neighbors of 𝑢 𝑖 are subsets of those of 𝑢 𝑗 , then 𝑢 𝑗 is said to be contained by 𝑢 𝑖 , enabling containing pruning. 
+
+## 7 EXPERIMENTS 7.1 Experimental Setup 
+
+7.1.1 Datasets. We conduct our experiments on eight real-world datasets: Yeast, Human, HPRD, WordNet, DBLP, EU2005, YouTube, and Patents. These datasets are widely used in previous studies [4 , 9, 17 , 23 , 41 ] and surveys [ 39 , 49 ], and they span a variety of do-mains, including biology (Yeast, Human, HPRD), lexical semantics (WordNet), social networks (DBLP, YouTube), the web (EU2005), and citation networks (Patents). They differ in scale and complexity (e.g., topology and density), and their detailed statistics are summa-rized in Table 2. 
+
+7.1.2 Queries. We use 10,000 queries for each dataset in our ex-periments, covering a wide range of sizes and densities. Following prior work [ 4 , 17 , 39 , 49 ], we generate query graphs by performing random walks on the data graphs and extracting the induced sub-graphs. This procedure guarantees that every query graph has at least one valid embedding. For Human and WordNet (challenging due to topology denseness and label sparseness, respectively), we use query sizes of {4, 8, 12 , 16 , 20 }, and for the other six datasets, we use {4, 8, 16 , 24 , 32 }. For each query size 𝑛 , we denote the corre-sponding query set as Q𝑛 , which contains 2,000 queries. Thus, each 
+
+Table 2: Datasets statistics                                       
+
+> Dataset |𝑉 ||𝐸 ||Σ|average degree Yeast 3,112 12,519 71 8.0 Human 4,674 86,282 44 36.9 HPRD 9,460 34,998 307 7.4 WordNet 76,853 120,399 53.1 DBLP 317,080 1,049,866 15 6.6 EU2005 862,664 16,138,468 40 37.4 YouTube 1,134,890 2,987,624 25 5.3 Patents 3,774,768 16,518,947 20 8.8
+
+dataset comprises a total of 2000 × 5 = 10000 query graphs. When 
+
+𝑛 > 4, Q𝑛 is further divided into a sparse subset Q𝑛𝑆 (average de-gree < 3) and a dense subset Q𝑛𝐷 (otherwise), i.e., Q𝑛 = Q𝑛𝑆 ∪ Q 𝑛𝐷 ,with 1,000 queries in each subset. 
+
+7.1.3 Compared Methods. For performance comparison, we evalu-ate our CEMR algorithm with six state-of-the-art subgraph matching algorithms: DAF [ 17 ], RM [ 41 ], VEQ [ 23 ], GuP [ 4], BICE [ 9] and BSX [ 29 ]. All the source codes of the compared algorithms come from the original authors. 
+
+7.1.4 Experiment Environment. Except for GuP, which is imple-mented in Rust, all other algorithms are implemented in C++. We compile all C++ source code using g++ 13.1.0 with the -O2 flag. All experiments are conducted on an Ubuntu Linux server with an Intel Xeon Gold 6326 2.90 GHz CPU and 256 GB of RAM. Each ex-periment is repeated three times, and the mean values are reported. 
+
+7.1.5 Metrics. To evaluate performance, we measure the elapsed time in milliseconds (ms) for processing each query, which consists of two components: preprocessing time and enumeration time. Specifically, the preprocessing time includes filtering and ordering steps (lines 1-2 of Algorithm 1), and for CEMR , it also includes the encoding step. The enumeration time refers to the duration of the backtracking search (line 4 of Algorithm 1). Except for the experiment in Section 7.2.4, we terminate the algorithm after finding the first 10 6 results as default. To ensure queries complete within a reasonable time, we impose a timeout limit of 6 minutes; if a query exceeds this limit, its elapsed time is recorded as 6 minutes. 
+
+## 7.2 Comparison with Existing Methods 
+
+7.2.1 Total Time Comparison. Figure 7 presents the total query processing time of all compared methods. For clarity, we sepa-rate the enumeration time (bottom bars with hatching) from the preprocessing time (top solid bars). Except for HPRD, CEMR con-sistently outperforms all other methods, achieving a speedup of 1.39 × to 9.80 × over the second fastest method. This improvement is mainly achieved in the enumeration stage, owing to the extension-reduction techniques of CEMR , and it becomes more pronounced for queries with large result sizes (see Section 7.2.4). HPRD is a relatively simple dataset with a large number of labels. In such cases, most of the runtime is dominated by filtering, and DAF performs filtering more efficiently on HPRD, resulting in a shorter total time than CEMR . However, as shown in Section 7.2.2, 
+
+CEMR still surpasses DAF in enumeration on HPRD. Yeast Human HPRD WordNet DBLP EU2005 YouTube Patents         
+
+> 10 2
+> 10 1
+> 10 0
+> 10 1
+> 10 2
+> 10 3
+> 10 4
+> 10 5
+> Average Query Time (ms)
+> CEMR DAF RM VEQ GuP BICE BSX
+
+Figure 7: Average query time comparison. The bottom bars with hatching represent enumeration time, while the solid bars above represent preprocessing times. 
+
+Some methods involve additional preprocessing steps. For ex-ample, BICE clusters vertices that share the same neighbors after filtering, and GuP calculates guards for all candidates. These extra steps can lead to poor total performance on certain datasets (e.g., BICE on WorNet, GuP on Patents). 
+
+CEMR also outperforms BSX in terms of efficiency in our experi-ments. We attribute this performance gap to two main factors. First, 
+
+CEMR incorporates highly effective pruning strategies, such as the failing set pruning, which are absent in BSX. Second, BSX only guarantees homomorphism during the batch search and postpones the injectivity check to the final enumeration stage. Consequently, it incurs unnecessary overhead by processing many intermediate candidates that appear feasible but ultimately fail to satisfy the injectivity constraint. 
+
+7.2.2 Enumeration Time Comparison. Since CEMR is primarily de-signed to accelerate the enumeration phase, we conduct a detailed evaluation of its enumeration performance. From the results in Figure 7, CEMR processes queries faster than other methods in most cases (with the exception of Patents, due to one additional timeout query, as discussed in Section 7.2.3). Compared with the second-best method, CEMR achieves a speedup ranging from 1.67x to 108.52x. As will be shown in Section 7.3, this advantage largely stems from the proposed CEM and CER techniques. We further analyze enumeration time under different query sizes. The results in Figure 8a show a consistent trend across datasets: enu-meration time increases with query size for all methods, and CEMR 
+
+generally outperforms its competitors. A notable case is EU2005, where the correlation between query size and enumeration time does not strictly hold. In this dataset, larger query graphs, after filtering, almost always yield matches with large result sets. Conse-quently, CEMR can quickly generate embeddings and enumerate a substantial number of results by redundant extension elimination, leading to comparable or even shorter enumeration times for larger queries compared with smaller ones. To better understand the performance of CEMR , we compare the enumeration time of each query with that of the second-best method based on the average enumeration time on the largest-size queries in the corresponding dataset. The scatter plots in Figure 9 present the results for Yeast and YouTube, where the second-best methods are VEQ and DAF, respectively. In both cases, all queries are processed within the time limit by both methods. Most points lie above the diagonal line, indicating that CEMR achieves shorter enumeration times on the vast majority of queries. The improvement is particularly pronounced for queries with large result sets, where CEMR benefits from rapid embedding generation. For smaller queries, the advantage is smaller but still consistent, suggesting that CEMR not only scales well with query size but also maintains low per-query overhead. These results confirm that the performance gain of CEMR is not limited to a few extreme cases but is robust across different query characteristics. 
+
+Table 3: Number of unsolved queries                                         
+
+> Methods Human WordNet DBLP EU2005 Patents DAF 25 16 86 50 56 RM 33 458 22 34 VEQ 14 913 022 GUP 748 006
+> BICE 516 0010 BSX 774 5155 171 666 1042 CEMR 500010
+
+7.2.3 Unsolved Queries Number Comparison. The number of un-solved queries is an important metric for evaluating the perfor-mance of subgraph matching algorithms, as it reflects the algo-rithm’s capability to handle difficult queries. Table 3 reports the number of unsolved queries across five datasets, excluding HPRD, Yeast, and YouTube, where all methods, except BSX, successfully return results within the time limit due to the simplicity of these datasets (BSX encounters 0, 179, and 1236 timeouts on HPRD, Yeast, and YouTube, respectively). A query is considered unsolved if it can-not be answered within 6 minutes. On most datasets, CEMR yields fewer unsolved queries than other methods, demonstrating its ef-fectiveness in reducing redundant computation and in applying pruning strategies that prevent excessive exploration of unpromis-ing branches. 
+
+7.2.4 Enumeration Time Comparison Varying the Limit Number. To test the embedding generation speed of different algorithms, we vary the limit number from 10 5 to 5 × 10 7 and record the enumera-tion times to generate 100K, 1M, 5M, 10M, and 50M embeddings for each algorithm. Note that we report the total enumeration time instead of the EPS (embeddings per second) metric in our ex-periments, as the mean EPS is often dominated by extreme values (detailed EPS results are provided in Appendix D). Figure 8b shows the enumeration time comparison as the limit number varies. We observe that as the limit number increases, CEMR exhibits a lower runtime growth rate, mainly due to the black-white encoding tech-nique, which allows CEMR to generate a batch of results at the same time. In contrast, GuP lacks a grouping technique, while DAF and RM only group matches of leaf vertices, causing their enumeration time to increase significantly with the limit number. 
+
+7.2.5 Memory Usage Comparison. Memory consumption is a criti-cal factor in the practical deployment of subgraph matching algo-rithms. In this experiment, we compare the average peak memory consumption of CEMR with that of other methods. The results are presented in Table 4. To reduce the overhead of memory alloca-tion during execution, we pre-allocate a fixed amount of memory. 4 8 16 24 32  
+
+> 10 0
+> 10 2
+> 10 4
+
+Yeast     
+
+> 4812 16 20
+> 10 2
+> 10 4
+
+Human       
+
+> 4816 24 32
+> 10 2
+> 10 1
+> 10 0
+
+HPRD      
+
+> 4812 16 20
+> 10 2
+> 10 3
+> 10 4
+> 10 5
+
+WordNet     
+
+> 4816 24 32
+> 10 1
+> 10 3
+
+DBLP     
+
+> 4816 24 32
+> 10 0
+> 10 2
+> 10 4
+
+EU2005      
+
+> 4816 24 32
+> 10 1
+> 10 3
+> 10 5
+
+YouTube      
+
+> 4816 24 32
+> 10 1
+> 10 3
+> 10 5
+
+Patents       
+
+> Average Enumeration Time (ms)
+> CEMR DAF RM VEQ GuP BICE BSX
+
+(a) Enumeration time comparison across different query sizes. 10 5 10 6 10 7
+
+> 10 1
+> 10 3
+
+yeast   
+
+> 10 510 610 7
+> 10 3
+> 10 4
+
+human      
+
+> 10 510 610 7
+> 10 2
+> 10 1
+> 10 0
+> 10 1
+
+hprd    
+
+> 10 510 610 7
+> 10 2
+> 10 3
+> 10 4
+> 10 5
+
+wordnet   
+
+> 10 510 610 7
+> 10 1
+> 10 2
+> 10 3
+> 10 4
+
+dblp   
+
+> 10 510 610 7
+> 10 1
+> 10 3
+
+eu2005   
+
+> 10 510 610 7
+> 10 1
+> 10 3
+
+youtube   
+
+> 10 510 610 7
+> 10 3
+> 10 4
+
+patents       
+
+> Average Enumeration Time (ms)
+> CEMR DAF RM VEQ GuP BICE BSX
+
+(b) Enumeration time comparison under different result size limits. 
+
+Figure 8: Detailed enumeration time comparison results. (a) Varying query sizes; (b) Varying result size limits. 10 2 10 1 10 0 10 1 10 2 10 3  
+
+> CEMR Enumeration Time (ms)
+> 10 2
+> 10 1
+> 10 0
+> 10 1
+> 10 2
+> 10 3
+> VEQ Enumeration Time (ms)
+
+(a) Yeast 10 1 10 0 10 1 10 2 10 3 10 4  
+
+> CEMR Enumeration Time (ms)
+> 10 1
+> 10 0
+> 10 1
+> 10 2
+> 10 3
+> 10 4
+> DAF Enumeration Time (ms)
+
+(b) YouTube 
+
+Figure 9: Enumeration time comparison on Yeast and YouTube against VEQ and DAF, respectively. 
+
+Consequently, CEMR consumes more memory than other methods for small data graphs (e.g., Yeast, Human, and HPRD). However, as the data graph size increases, the memory usage of CEMR becomes comparable to DAF and RM, and is slightly lower in practice due to a more efficient implementation. Compared to VEQ and GuP, CEMR 
+
+uses less memory because it does not require storing additional information in the auxiliary structure A for pruning. 
+
+## 7.3 Ablation Studies of CEMR 
+
+In this section, we conduct experiments to evaluate the effectiveness of our proposed techniques, including CEM , CER , pruning techniques, and matching orders. 
+
+Table 4: Average Peak Memory Usage (MB) 
+
+Datasets CEMR DAF RM VEQ GuP BICE BSX Yeast 30.8 6.0 6.4 9.6 5.2 9.9 33.2 Human 36.3 7.7 9.6 15.2 12.2 15.4 18.2 HPRD 42.1 28.0 9.2 16.6 8.3 18.3 10.0 WordNet 116.2 27.4 62.8 125.8 130.1 151.8 1249.5 DBLP 92.2 84.5 110.9 261.1 112.4 248.1 178.0 EU2005 536.6 639.8 726.3 1194.6 881.8 1399.6 1287.0 YouTube 297.5 372.3 349.1 838.2 351.7 771.6 488.3 Patents 1028.0 1189.6 1336.7 3180.8 1553.8 3169.9 2082.4 
+
+7.3.1 Effectiveness of CEM . We design a black-white vertex encod-ing scheme for common extension merging ( CEM in Section 4), and propose an encoding strategy guided by a cost model as described in Section 6.3. To investigate the effect of CEM , we compare the average enumeration time of CEMR with three variants, as shown in Figure 10a. In Figure 10a, All-black and All-white encode every query vertex as black and white, respectively, while Case12 en-codes only the query vertices without forward neighbors as white, so there are no case 3 or case 4 extensions in Case12 .On easy datasets (e.g., Yeast, HPRD, YouTube, and Patents), most queries generate a large number of embeddings, and only a few search branches fail to yield valid results. In such scenarios, the aggregated mappings of white vertices help produce results more Yeast Human HPRD WordNet DBLP EU2005 YouTube Patents      
+
+> 10 2
+> 10 1
+> 10 0
+> 10 1
+> 10 2
+> 10 3
+> Average Enumeration Time (ms)  CEMR All-black All-white Case12
+
+(a) Ablation study of CEM under different vertex encodings. Yeast Human HPRD WordNet DBLP EU2005 YouTube Patents    
+
+> 10 2
+> 10 1
+> 10 0
+> 10 1
+> 10 2
+> Average Enumeration Time (ms)  CEMR CEMR-noCER
+
+(b) Ablation study of CER .Yeast Human HPRD WordNet DBLP EU2005 YouTube Patents      
+
+> 10 2
+> 10 1
+> 10 0
+> 10 1
+> 10 2
+> 10 3
+> Average Enumeration Time (ms)  CEMR No-cv No-fs No-prune
+
+(c) Ablation study of pruning techniques. Yeast Human HPRD WordNet DBLP EU2005 YouTube Patents       
+
+> 10 2
+> 10 1
+> 10 0
+> 10 1
+> 10 2
+> 10 3
+> 10 4
+> Average Enumeration Time (ms)  CEMR O-RM O-GuP O-RI O-GQL
+
+(d) Ablation study of matching order. O-* uses orders from other methods. 
+
+Figure 10: Ablation studies. 
+
+quickly, so both CEMR and All-white accelerate the enumeration process compared with All-black . On difficult datasets (e.g., Hu-man, WordNet, DBLP, and EU2005), many redundant candidates arise from complex query topologies or vertex conflicts. Here, map-ping certain query vertices to a single data vertex can better expose opportunities for pruning, and thus All-black performs better than All-white . We also observe that Case12 consistently out-performs All-black . Overall, since CEMR selects vertex encoding based on a cost model, it achieves the best performance among all four strategies. 
+
+7.3.2 Effectiveness of CER . CER uses common extension buffers to reuse extension results across different search branches. CEMR-noCER 
+
+in Figure 10b disables the CER component of CEMR . The results in Figure 10b show that CER accelerates the enumeration process, achieving a 1.11x-1.23x speedup. This improvement comes from the reduced redundant computations and the efficient sharing of partial embeddings among search branches. 
+
+7.3.3 Effectiveness of Two Pruning Techniques. We conduct an ablation study on CEMR with three variants: No-cv , No-fs , and 
+
+No-prune , which denote the variants without contained vertex pruning (Section 6.1.1), extended failing set pruning (Section 6.1.2), and both pruning techniques, respectively. As shown in Figure 10c, the full version of CEMR consistently outperforms all variants, indi-cating that both pruning techniques effectively reduce the search space and improve overall efficiency. 
+
+7.3.4 Effectiveness of Matching Order. To evaluate the matching order described in Section 6.2, we replace the original order in CEMR 
+
+with those generated by RM [ 41 ] and GuP [ 4 ]. In addition, we in-clude two well-established ordering methods recommended by a widely used survey [ 39 ], namely RI [ 7] and GQL [ 19 ]. We do not compare with DAF, VEQ, BICE, or BSX, since they adopt dynamic ordering strategies, where the next matched vertex may vary dur-ing execution. From the results shown in Figure 10d, we observe that the matching order produced by CEMR leads to more stable SF0.1 SF0.3 SF1 SF3 
+
+> Dataset Scale
+> 10 4
+> 10 5
+> 10 6
+> Execution Time (ms)
+> CEMR
+> Kùzu
+
+Figure 11: Execution time comparison on LSQB across differ-ent data scales. 
+
+performance in most cases. Moreover, RM and GuP usually achieve faster enumeration time than those in Figure 7 (up to 203.9x). This indicates that these methods can also benefit from the redundant computation reduction techniques proposed in CEMR .
+
+## 7.4 Experiments on LSQB 
+
+To better demonstrate the effectiveness of our method, we conduct evaluations beyond comparisons with state-of-the-art subgraph query algorithms. Specifically, we compare CEMR with the high-performance open-source graph database Kùzu [ 13 ] on the LSQB benchmark [ 31 ]. LSQB is a subgraph query benchmark derived from LDBC SNB [ 11 ], which consists of directed graphs with both vertex and edge labels and focuses on complex multi-join queries typical in social network analysis. It contains 9 queries, and we modified the optional and negative clauses in q7, q8, and q9 into standard clauses, resulting in 9 connected query graphs. We did not set a running time threshold and terminated execution only when the method retrieved all matches. As shown in Figure 11, which reports the total enumeration time aggregated over all nine LSQB queries, CEMR consistently outper-forms Kùzu across all data scales, achieving speedups of 2.12x to 4.00x. These results demonstrate CEMR ’s efficacy on directed, multi-labeled complex workloads. The performance advantage stems from several factors: (1) our preprocessing-enumeration strategy uses effective filtering to prune unpromising search branches, reducing computational costs; and (2) as a lightweight prototype, CEMR avoids the overhead inherent in full-featured graph databases like Kùzu. 
+
+## 8 CONCLUSION 
+
+In this paper, we propose a subgraph matching algorithm CEMR for redundant extension elimination. We propose a forward-looking optimization CEM based on black-white vertex encoding and a backward-looking optimization CER based on common extension buffers. They effectively improve the performance of enumeration. The experimental results show the effectiveness of CEMR .
+
+## ACKNOWLEDGMENTS 
+
+This work was supported by New Generation Artificial Intelli-gence National Science and Technology Major Project under grant 2025ZD0123304 and NSFC under grant 62532001. This is a research achievement of National Engineering Research Center of New Elec-tronic Publishing Technologies. The corresponding author of this work is Lei Zou (zoulei@pku.edu.cn). REFERENCES 
+
+[1] Christopher R Aberger, Andrew Lamb, Susan Tu, Andres Nötzli, Kunle Olukotun, and Christopher Ré. 2017. Emptyheaded: A relational engine for graph processing. 
+
+ACM Transactions on Database Systems (TODS) 42, 4 (2017), 1–44. [2] Foto N Afrati, Dimitris Fotakis, and Jeffrey D Ullman. 2013. Enumerating sub-graph instances using map-reduce. In 2013 IEEE 29th International Conference on Data Engineering (ICDE) . IEEE, 62–73. [3] Khaled Ammar, Frank McSherry, Semih Salihoglu, and Manas Joglekar. 2018. Distributed evaluation of subgraph queries using worstcase optimal lowmemory dataflows. arXiv preprint arXiv:1802.03760 (2018). [4] Junya Arai, Yasuhiro Fujiwara, and Makoto Onizuka. 2023. Gup: Fast subgraph matching by guard-based pruning. Proceedings of the ACM on Management of Data 1, 2 (2023), 1–26. [5] Bibek Bhattarai, Hang Liu, and H Howie Huang. 2019. Ceci: Compact embed-ding cluster index for scalable subgraph matching. In Proceedings of the 2019 International Conference on Management of Data . 1447–1462. [6] Fei Bi, Lijun Chang, Xuemin Lin, Lu Qin, and Wenjie Zhang. 2016. Efficient subgraph matching by postponing cartesian products. In Proceedings of the 2016 International Conference on Management of Data . 1199–1214. [7] Vincenzo Bonnici, Rosalba Giugno, Alfredo Pulvirenti, Dennis Shasha, and Al-fredo Ferro. 2013. A subgraph isomorphism algorithm and its application to biochemical data. BMC bioinformatics 14, Suppl 7 (2013), S13. [8] Hongzhi Chen, Miao Liu, Yunjian Zhao, Xiao Yan, Da Yan, and James Cheng. 2018. G-miner: an efficient task-oriented graph mining system. In Proceedings of the Thirteenth EuroSys Conference . 1–12. [9] Yunyoung Choi, Kunsoo Park, and Hyunjoon Kim. 2023. Bice: Exploring compact search space by using bipartite matching and cell-wide verification. Proceedings of the VLDB Endowment 16, 9 (2023), 2186–2198. [10] Luigi P Cordella, Pasquale Foggia, Carlo Sansone, and Mario Vento. 2004. A (sub) graph isomorphism algorithm for matching large graphs. IEEE transactions on pattern analysis and machine intelligence 26, 10 (2004), 1367–1372. [11] Orri Erling, Alex Averbuch, Josep Larriba-Pey, Hassan Chafi, Andrey Gubichev, Arnau Prat, Minh-Duc Pham, and Peter Boncz. 2015. The LDBC social net-work benchmark: Interactive workload. In Proceedings of the 2015 ACM SIGMOD International Conference on Management of Data . 619–630. [12] Wenfei Fan. 2012. Graph pattern matching revised for social network analysis. In Proceedings of the 15th International Conference on Database Theory . 8–21. [13] Xiyang Feng, Guodong Jin, Ziyi Chen, Chang Liu, and Semih Salihoğlu. 2023. Kùzu graph database management system. In The Conference on Innovative Data Systems Research , Vol. 7. 25–35. [14] Michael R Garey. 1979. A Guide to the Theory of NP-Completeness. Computers and intractability (1979). [15] Wentian Guo, Yuchen Li, Mo Sha, Bingsheng He, Xiaokui Xiao, and Kian-Lee Tan. 2020. Gpu-accelerated subgraph enumeration on partitioned graphs. In 
+
+Proceedings of the 2020 ACM SIGMOD International Conference on Management of Data . 1067–1082. [16] Wentian Guo, Yuchen Li, and Kian-Lee Tan. 2020. Exploiting reuse for GPU subgraph enumeration. IEEE Transactions on Knowledge and Data Engineering 
+
+34, 9 (2020), 4231–4244. [17] Myoungji Han, Hyunjoon Kim, Geonmo Gu, Kunsoo Park, and Wook-Shin Han. 2019. Efficient subgraph matching: Harmonizing dynamic programming, adaptive matching order, and failing set together. In Proceedings of the 2019 International Conference on Management of Data . 1429–1446. [18] Wook-Shin Han, Jinsoo Lee, and Jeong-Hoon Lee. 2013. Turboiso: towards ultrafast and robust subgraph isomorphism search in large graph databases. In 
+
+Proceedings of the 2013 ACM SIGMOD International Conference on Management of Data . 337–348. [19] Huahai He and Ambuj K Singh. 2008. Graphs-at-a-time: query language and access methods for graph databases. In Proceedings of the 2008 ACM SIGMOD international conference on Management of data . 405–418. [20] Kasra Jamshidi, Rakesh Mahadasa, and Keval Vora. 2020. Peregrine: a pattern-aware graph mining system. In Proceedings of the Fifteenth European Conference on Computer Systems . 1–16. [21] Tatiana Jin, Boyang Li, Yichao Li, Qihui Zhou, Qianli Ma, Yunjian Zhao, Hongzhi Chen, and James Cheng. 2023. Circinus: Fast redundancy-reduced subgraph matching. Proceedings of the ACM on Management of Data 1, 1 (2023), 1–26. [22] Alpár Jüttner and Péter Madarasi. 2018. VF2++—An improved subgraph isomor-phism algorithm. Discrete Applied Mathematics 242 (2018), 69–81. [23] Hyunjoon Kim, Yunyoung Choi, Kunsoo Park, Xuemin Lin, Seok-Hee Hong, and Wook-Shin Han. 2021. Versatile equivalences: Speeding up subgraph query processing and subgraph matching. In Proceedings of the 2021 International Con-ference on Management of Data . 925–937. [24] Jinha Kim, Hyungyu Shin, Wook-Shin Han, Sungpack Hong, and Hassan Chafi. 2015. Taming subgraph isomorphism for RDF query processing. arXiv preprint arXiv:1506.01973 (2015). [25] Wooyoung Kim, Min Li, Jianxin Wang, and Yi Pan. 2011. Biological network motif detection and evaluation. BMC systems biology 5, 3 (2011), 1–13. [26] Longbin Lai, Lu Qin, Xuemin Lin, and Lijun Chang. 2015. Scalable subgraph enumeration in mapreduce. Proceedings of the VLDB Endowment 8, 10 (2015), 974–985. [27] Ziming Li, Youhuan Li, Xinhuan Chen, Lei Zou, Yang Li, Xiaofeng Yang, and Hongbo Jiang. 2024. NewSP: A New Search Process for Continuous Subgraph Matching over Dynamic Graphs. In 2024 IEEE 40th International Conference on Data Engineering (ICDE) . IEEE, 3324–3337. [28] Lorenzo Livi and Antonello Rizzi. 2013. The graph matching problem. Pattern Analysis and Applications 16 (2013), 253–283. [29] Yujie Lu, Zhijie Zhang, and Weiguo Zheng. 2025. BSX: Subgraph Matching with Batch Backtracking Search. Proceedings of the ACM on Management of Data 3, 1 (2025), 1–27. [30] Azka Mahmood, Hina Farooq, and Javed Ferzund. 2017. Large Scale Graph Matching (LSGM): Techniques, Tools, Applications and Challenges. International Journal of Advanced Computer Science and Applications 8, 4 (2017), 494–499. [31] Amine Mhedhbi, Matteo Lissandrini, Laurens Kuiper, Jack Waudby, and Gábor Szárnyas. 2021. LSQB: a large-scale subgraph query benchmark. In Proceedings of the 4th ACM SIGMOD Joint International Workshop on Graph Data Management Experiences & Systems (GRADES) and Network Data Analytics (NDA) . 1–11. [32] Amine Mhedhbi and Semih Salihoglu. 2019. Optimizing subgraph queries by combining binary and worst-case optimal joins. arXiv preprint arXiv:1903.02076 
+
+(2019). [33] Hung Q Ngo, Ely Porat, Christopher Ré, and Atri Rudra. 2018. Worst-case optimal join algorithms. Journal of the ACM (JACM) 65, 3 (2018), 1–40. [34] Xuguang Ren and Junhu Wang. 2015. Exploiting vertex relationships in speeding up subgraph isomorphism over large graphs. Proceedings of the VLDB Endowment 
+
+8, 5 (2015), 617–628. [35] Siddhartha Sahu, Amine Mhedhbi, Semih Salihoglu, Jimmy Lin, and M Tamer Özsu. 2017. The ubiquity of large graphs and surprising challenges of graph processing. Proceedings of the VLDB Endowment 11, 4 (2017), 420–431. [36] Haichuan Shang, Ying Zhang, Xuemin Lin, and Jeffrey Xu Yu. 2008. Taming verification hardness: an efficient algorithm for testing subgraph isomorphism. 
+
+Proceedings of the VLDB Endowment 1, 1 (2008), 364–375. [37] Yingxia Shao, Bin Cui, Lei Chen, Lin Ma, Junjie Yao, and Ning Xu. 2014. Parallel subgraph listing in a large-scale graph. In Proceedings of the 2014 ACM SIGMOD International Conference on Management of Data . 625–636. [38] Tianhui Shi, Mingshu Zhai, Yi Xu, and Jidong Zhai. 2020. Graphpi: High per-formance graph pattern matching through effective redundancy elimination. In SC20: International Conference for High Performance Computing, Networking, Storage and Analysis . IEEE, 1–14. [39] Shixuan Sun and Qiong Luo. 2020. In-memory subgraph matching: An in-depth study. In Proceedings of the 2020 ACM SIGMOD International Conference on Management of Data . 1083–1098. [40] Shixuan Sun and Qiong Luo. 2020. Subgraph matching with effective matching order and indexing. IEEE Transactions on Knowledge and Data Engineering 34, 1 (2020), 491–505. [41] Shixuan Sun, Xibo Sun, Yulin Che, Qiong Luo, and Bingsheng He. 2020. Rapid-match: a holistic approach to subgraph query processing. Proceedings of the VLDB Endowment 14, 2 (2020), 176–188. [42] Carlos HC Teixeira, Alexandre J Fonseca, Marco Serafini, Georgos Siganos, Mo-hammed J Zaki, and Ashraf Aboulnaga. 2015. Arabesque: a system for distributed graph mining. In Proceedings of the 25th Symposium on Operating Systems Princi-ples . 425–440. [43] Vasileios Trigonakis, Jean-Pierre Lozi, Tomáš Faltín, Nicholas P Roth, Iraklis Psaroudakis, Arnaud Delamare, Vlad Haprian, Călin Iorgulescu, Petr Koupy, Jin-soo Lee, et al . 2021. {aDFS }: An Almost {Depth-First-Search } Distributed 
+
+{Graph-Querying } System. In 2021 USENIX Annual Technical Conference (USENIX ATC 21) . 209–224. [44] Xifeng Yan, Philip S Yu, and Jiawei Han. 2004. Graph indexing: A frequent structure-based approach. In Proceedings of the 2004 ACM SIGMOD international conference on Management of data . 335–346. [45] Linglin Yang, Lei Yang, Yue Pang, and Lei Zou. 2022. gCBO: A Cost-based Optimizer for Graph Databases. In Proceedings of the 31st ACM International Conference on Information & Knowledge Management . 5054–5058. [46] Rongjian Yang, Zhijie Zhang, Weiguo Zheng, and Jeffrey Xu Yu. 2023. Fast continuous subgraph matching over streaming graphs via backtracking reduction. 
+
+Proceedings of the ACM on Management of Data 1, 1 (2023), 1–26. [47] Zhengyi Yang, Longbin Lai, Xuemin Lin, Kongzhang Hao, and Wenjie Zhang. 2021. Huge: An efficient and scalable subgraph enumeration system. In Proceed-ings of the 2021 International Conference on Management of Data . 2049–2062. [48] Shijie Zhang, Shirong Li, and Jiong Yang. 2009. GADDI: distance index based subgraph matching in biological networks. In Proceedings of the 12th International Conference on Extending Database Technology: Advances in Database Technology .192–203. [49] Zhijie Zhang, Yujie Lu, Weiguo Zheng, and Xuemin Lin. 2024. A Comprehensive Survey and Experimental Study of Subgraph Matching: Trends, Unbiasedness, and Interaction. Proceedings of the ACM on Management of Data 2, 1 (2024), 1–29. [50] Peixiang Zhao and Jiawei Han. 2010. On graph query optimization in large networks. Proceedings of the VLDB Endowment 3, 1-2 (2010), 340–351. [51] Gaoping Zhu, Xuemin Lin, Ke Zhu, Wenjie Zhang, and Jeffrey Xu Yu. 2012. TreeSpan: efficiently computing similarity all-matching. In Proceedings of the 2012 ACM SIGMOD international conference on management of data . 529–540. [52] Lei Zou, Jinghui Mo, Lei Chen, M Tamer Özsu, and Dongyan Zhao. 2011. gStore: answering SPARQL queries via subgraph matching. Proceedings of the VLDB Endowment 4, 8 (2011), 482–493. A PSEUDOCODE OF ENUMERATION COMBINING CEM AND CER 
+
+Algorithm 3 in Section 4 only incorporates the CEM technique, while the CER technique is described in textual form in Section 5. In this appendix, we present the complete pseudocode of the enumeration method that integrates both CEM and CER , as shown in Algorithm 4. For clarity, several components of the algorithm are extracted into helper functions, including CompExtensions , CacheBuf , and 
+
+ReuseBuf .Specifically, CompExtensions computes the set of possible exten-sions E for a partial embedding 𝑀 , following the same procedure as in Algorithm 3. If 𝑢 𝑖 .𝑓 = true , the computed extensions are cached for future reuse by invoking CacheBuf (line 6). When the algorithm later encounters a brother embedding branch, the cached exten-sions can be directly retrieved via ReuseBuf (line 3). The boolean flag 𝐶𝐸𝐵 (𝑢 𝑖 ).𝑔 , which indicates whether the buffer is valid, is set to true when CacheBuf is invoked (line 45), and is reset to false 
+
+when the mapping of the parent of 𝑢 𝑖 changes (line 9). 
+
+## B THEORETICAL ANALYSIS B.1 Reduced Search Space Size by CEM 
+
+CEM merges multiple search branches, thereby reducing the number of invocations of the Enumerate function (shown in Algorithm 4) as well as the computation of extensible sets. In this section, we provide a theoretical analysis of the search space reduction achieved by CEM . We first introduce several definitions. 
+
+Definition B.1 (Search tree and search node). Given a matching order 𝑂 of a query graph 𝑄 , the search tree for subgraph matching of 𝑄 on a data graph 𝐺 is a tree structure in which each node represents a partial embedding. For clarity, we use the term node 
+
+to denote a vertex in the search tree corresponding to a partial embedding. For a node 𝑀 , we use 𝑇 𝑀 to denote the search subtree rooted at 𝑀 , and denote its size (excluding 𝑀 itself) by 𝑆 𝑀 .
+
+Definition B.2 (Extension width). Given a query graph 𝑄 , a match-ing order 𝑂 = (𝑢 0, 𝑢 1, . . . , 𝑢 |𝑉 (𝑄 ) | − 1), and a partial embedding 𝑀 ,suppose the next query vertex to be extended is 𝑢 𝑖 . For any query vertex 𝑢 𝑘 with 𝑘 ≥ 𝑖 along this extension process, the extension width from 𝑀 to 𝑢 𝑘 , denoted as 𝑊 𝑀 (𝑢 𝑘 ), is defined as the number of search tree nodes at the level corresponding to 𝑢 𝑘 in the subtree 
+
+𝑇 𝑀 . Among these nodes, the number of distinct mappings of 𝑢 𝑘 at this level is denoted as 𝐷 𝑀 (𝑢 𝑘 ).
+
+Example 7. Figure 12 illustrates a search tree rooted at {( 𝑢 0, 𝑣 0)} 1.For simplicity, we omit the complete partial embedding and only display the newly added mapping at each level. At the level corre-sponding to query vertex 𝑢 1, the node labeled by 𝑣 1 represents the partial embedding 𝑀 = {( 𝑢 0, 𝑣 0), (𝑢 1, 𝑣 1)} . For this embedding, we have 𝑊 𝑀 (𝑢 3) = 4 and 𝐷 𝑀 (𝑢 3) = 2, since there are four nodes at the 
+
+𝑢 3 level in 𝑇 𝑀 , while the distinct mappings of 𝑢 3 in 𝑇 𝑀 are only 𝑣 5
+
+and 𝑣 6.
+
+Using the above definitions, we now analyze the reduction in the number of search tree nodes achieved by CEM compared with     
+
+> 1There is actually a virtual node ∅above { ( 𝑢 0, 𝑣 0) } , which is used to organize the search space into a single search tree when the first query vertex has multiple candidates.
+
+Algorithm 4: Enumerate( 𝑄 , A, 𝑂 , M, 𝑀 , 𝑖 ) (black-white enumeration framework with common extension reusing) 
+
+Input: The query 𝑄 , auxiliary structure A, matching order 𝑂 ,result set M, an (aggregated) embedding 𝑀 of 𝑄 𝑖 , and the backtracking depth 𝑖 . 
+
+> 1
+
+if 𝑖 = |𝑉 (𝑄 ) | then  
+
+> 2
+
+Append valid full embeddings in 𝑀 to M; return  
+
+> 3
+
+if 𝑢 𝑖 .𝑓 ∧ 𝐶𝐸𝐵 (𝑢 𝑖 ).𝑔 then E ← ReuseBuf (𝑂 , 𝑀 , 𝑖 ) 
+
+> 4
+
+else  
+
+> 5
+
+E ← CompExtensions (𝑄, A, 𝑂, 𝑀, 𝑖 ) 
+
+> 6
+
+if 𝑢 𝑖 .𝑓 then CacheBuf (E, 𝑂 , 𝑖 ) 
+
+> 7
+
+foreach 𝑀 ′ ∈ E do  
+
+> 8
+
+Enumerate (𝑄 , A, 𝑂 , M, 𝑀 ′, 𝑖 + 1) 
+
+> 9
+
+foreach 𝑢 𝑗 ∈ 𝑢 𝑖 .𝑐ℎ𝑖𝑙𝑑 do 𝐶𝐸𝐵 (𝑢 𝑗 ).𝑔 ← false  
+
+> 10
+
+Procedure CompExtensions( 𝑄, A, 𝑂, 𝑀, 𝑖 ) 
+
+> 11
+
+if 𝑊 𝑇 (𝑢 𝑖 ) = ∅ then // Case 1 or Case 2  
+
+> 12
+
+𝑅 𝑀 (𝑢 𝑖 ) ← ∩ 𝑢 𝑗 ∈𝐵𝐾 (𝑢 𝑖 ) A𝑢 𝑗  
+
+> 𝑢 𝑖
+
+(𝑀 [𝑢 𝑗 ] )  
+
+> 13
+
+if 𝑐 (𝑢 𝑖 ) = 𝑏𝑙𝑎𝑐𝑘 then return {𝑀 ⊕ 𝑣 | 𝑣 ∈ 𝑅 𝑀 (𝑢 𝑖 ) }  
+
+> 14
+
+else return {𝑀 ⊕ 𝑅 𝑀 (𝑢 𝑖 ) }  
+
+> 15
+
+else // Case 3 or Case 4  
+
+> 16
+
+if 𝐵𝐾 (𝑢 𝑖 ) ≠ ∅ then  
+
+> 17
+
+𝑅 𝑀 (𝑢 𝑖 ) ← ∩ 𝑢 𝑗 ∈𝐵𝐾 (𝑢 𝑖 ) A𝑢 𝑗  
+
+> 𝑢 𝑖
+
+(𝑀 [𝑢 𝑗 ] )  
+
+> 18
+
+else  
+
+> 19
+
+𝑢 𝑗 ← arg min 𝑢 ∈𝑊 𝑇 (𝑢 𝑖 ) |𝑀 [𝑢 ] |  
+
+> 20
+
+𝑅 𝑀 (𝑢 𝑖 ) ← ∪ 𝑣 ∈𝑀 [𝑢 𝑗 ] A𝑢 𝑗  
+
+> 𝑢 𝑖
+
+(𝑣 ) 
+
+> 21
+
+E ← ∅  
+
+> 22
+
+if 𝑐 (𝑢 𝑖 ) = 𝑏𝑙𝑎𝑐𝑘 then // Case 3  
+
+> 23
+
+foreach 𝑣 ∈ 𝑅 𝑀 (𝑢 𝑖 ) do  
+
+> 24
+
+𝑀 𝑣 ← 𝑀  
+
+> 25
+
+foreach 𝑢 𝑗 ∈ 𝑊 𝑇 (𝑢 𝑖 ) do  
+
+> 26
+
+𝑀 𝑣 [𝑢 𝑗 ] ← 𝑀 [𝑢 𝑗 ] ∩ A 𝑢 𝑖   
+
+> 𝑢 𝑗
+
+(𝑣 ) 
+
+> 27
+
+if ∀𝑢 𝑗 ∈ 𝑊 𝑇 (𝑢 𝑖 ), 𝑀 𝑣 [𝑢 𝑗 ] ≠ ∅ then  
+
+> 28
+
+E ← E ∪ { 𝑀 𝑣 ⊕ 𝑣 } 
+
+> 29
+
+else // Case 4  
+
+> 30
+
+S ← decompose 𝑊 𝑇 (𝑢 𝑖 )’s mappings  
+
+> 31
+
+if | S | ≥ | 𝑅 𝑀 (𝑢 𝑖 ) | then // Case 4.1  
+
+> 32
+
+Same pseudo-code as lines 23-28  
+
+> 33
+
+else // Case 4.2  
+
+> 34
+
+foreach 𝑀 𝑡 ∈ S do  
+
+> 35
+
+𝑅 𝑀 𝑡 (𝑢 𝑖 ) ← ∩ 𝑢 𝑗 ∈𝑁 𝑂    
+
+> −(𝑢 𝑖 )
+
+A𝑢 𝑗  
+
+> 𝑢 𝑖
+
+(𝑀 𝑡 [𝑢 𝑗 ] )  
+
+> 36
+
+E ← E ∪ { 𝑀 𝑡 ⊕ 𝑅 𝑀 𝑡 (𝑢 𝑖 ) }  
+
+> 37
+
+return E 
+
+> 38
+
+Procedure CacheBuf( E, 𝑂, 𝑖 ) 
+
+> 39
+
+Clear 𝐶𝐸𝐵 (𝑢 𝑖 ).𝑏  
+
+> 40
+
+if 𝑊 𝑇 (𝑢 𝑖 ) = ∅ then // Case 1 or Case 2  
+
+> 41
+
+𝑅 𝑀 (𝑢 𝑖 ) ← ∪ 𝑀 ′ ∈E 𝑀 ′ [𝑢 𝑖 ] 
+
+> 42
+
+Cache 𝑅 𝑀 (𝑢 𝑖 ) in 𝐶𝐸𝐵 (𝑢 𝑖 ).𝑏  
+
+> 43
+
+else // Case 3 or Case 4  
+
+> 44
+
+Cache E in 𝐶𝐸𝐵 (𝑢 𝑖 ).𝑏  
+
+> 45
+
+𝐶𝐸𝐵 (𝑢 𝑖 ).𝑔 ← true  
+
+> 46
+
+Procedure ReuseBuf( 𝑂, 𝑀, 𝑖 ) 
+
+> 47
+
+if 𝑊 𝑇 (𝑢 𝑖 ) = ∅ then // Case 1 or Case 2  
+
+> 48
+
+if 𝑐 (𝑢 𝑖 ) = 𝑏𝑙𝑎𝑐𝑘 then return {𝑀 ⊕ 𝑣 | 𝑣 ∈ 𝐶𝐸𝐵 (𝑢 𝑖 ).𝑏 } 
+
+> 49
+
+else return {𝑀 ⊕ 𝐶𝐸𝐵 (𝑢 𝑖 ).𝑏 } 
+
+> 50
+
+else // Case 3 or Case 4  
+
+> 51
+
+Recover E from 𝐶𝐸𝐵 (𝑢 𝑖 ).𝑏  
+
+> 52
+
+return E(a) Query graph. 
+
+(b) Data graph. 
+
+(c) An example of search tree (All vertices are black). 
+
+Figure 12: Illustration of search tree. 
+
+the case without CEM , which corresponds to the traditional method where all query vertices are treated as black. 
+
+Theorem B.3. Suppose we are extending a partial embedding 𝑀 ,and the next vertex to be extended is a white vertex 𝑢 𝑖 2. Then the following results hold. 
+
+• If 𝑢 𝑖 has no forward neighbor, let the size of the search subtree 𝑇 𝑀 
+
+under the traditional method be denoted by 𝑆 𝑀 . When employing 
+
+CEM , the size of the search subtree is reduced to 𝑆 𝑀 /| 𝑅 𝑀 (𝑢 𝑖 )| .
+
+• If 𝑢 𝑖 has a forward neighbor 𝑢 𝑘 , the vertices {𝑢 𝑗 | 𝑖 < 𝑗 < 𝑘 } do not connect to 𝑢 𝑖 , and 𝑢 𝑘 is either a black vertex (Case 3) or a white vertex extended in Case 4.1, then under the traditional method the extension width at level 𝑢 𝑗 is 𝑊 𝑀 (𝑢 𝑗 ) for 𝑖 ≤ 𝑗 ≤ 𝑘 . When employing CEM , the extension width is reduced to 𝑊 𝑀 (𝑢 𝑗 )/| 𝑅 𝑀 (𝑢 𝑖 )| 
+
+for 𝑖 ≤ 𝑗 < 𝑘 , and becomes (𝑊 𝑀 (𝑢 𝑘 −1)/| 𝑅 𝑀 (𝑢 𝑖 )|) × 𝐷 𝑀 (𝑢 𝑘 ) at level 𝑢 𝑘 .
+
+• If 𝑢 𝑖 has a forward neighbor 𝑢 𝑘 , the vertices {𝑢 𝑗 | 𝑖 < 𝑗 < 𝑘 } do not connect to 𝑢 𝑖 , and 𝑢 𝑘 is a white vertex extended in Case 4.2, then the extension width is reduced to 𝑊 𝑀 (𝑢 𝑗 )/| 𝑅 𝑀 (𝑢 𝑖 )| for 𝑖 ≤ 𝑗 < 𝑘 , and becomes (𝑊 𝑀 (𝑢 𝑘 −1)/| 𝑅 𝑀 (𝑢 𝑖 )|) × Î𝑢 𝑙 ∈𝑊 𝑇 (𝑢 𝑘 ) |𝑀 [𝑢 𝑙 ]| at level 𝑢 𝑘 .
+
+Example 8. Figure 13 illustrates Theorem B.3 using three small examples. 
+
+• Compared with the search tree in Figure 12c, merging the mappings of the white vertex 𝑢 1 reduces the search subtree size 𝑆 { ( 𝑢 0,𝑣 0 ) } by half, since |𝑅 { ( 𝑢 0,𝑣 0 ) } (𝑢 1)| = 2 (Figure 13a). 
+
+• When both 𝑢 1 and 𝑢 2 are encoded as white, the last level of the search tree in Figure 13c is derived from the partial search tree in Figure 13b. Since the mapping of 𝑢 4 is used to trim the mappings of the white vertex 𝑢 2, we use abbreviated notation in the figure for simplicity. Let 𝑀 = {( 𝑢 0, 𝑣 0), (𝑢 1, {𝑣 1, 𝑣 2 })} . Compared with Figure   
+
+> 2If 𝑢 𝑖 is black, there is no difference from the traditional method shown in Algorithm 2.
+
+(a) Search tree ( 𝑢 1 is white). ，
+
+(b) Partial search tree ( 𝑢 1 and 𝑢 2
+
+are white). ，
+
+(c) Search tree ( 𝑢 1 and 𝑢 2 are white). ，
+
+(d) Search tree ( 𝑢 1, 𝑢 2, and 𝑢 4 are white). 
+
+Figure 13: Examples illustrating the reduction of search trees achieved by CEM under different vertex encoding. 
+
+13a, encoding 𝑢 2 as white reduces the extension widths 𝑊 𝑀 (𝑢 2)
+
+and 𝑊 𝑀 (𝑢 3) by half, and the extension width at level 𝑢 4 becomes 
+
+(4/2) × 2 = 4, instead of 6 in Figure 13a. 
+
+• If 𝑢 4 is further encoded as white, as shown in Figure 13d, the exten-sion width at the final level is also reduced to (4/2) × 2 = 4.
+
+## B.2 Space Complexity of CER 
+
+We analyze the space complexity of extending a partial embedding 
+
+𝑀 with a query vertex 𝑢 , assuming that 𝑢.𝑓 = true , which indicates that the common extension buffer for 𝑢 is enabled. 
+
+• If 𝑢 falls into Case 1 or Case 2, we store 𝑅 𝑀 (𝑢 ) in 𝐶𝐸𝐵 (𝑢 ).𝑏 . The resulting space complexity is 𝑂 (| 𝑅 𝑀 (𝑢 )|) , which is bounded by 
+
+𝑂 (| 𝐶 (𝑢 )|) or 𝑂 (| 𝑉 (𝐺 )|) .
+
+• If 𝑢 falls into Case 3, we need to store E = {𝑀 𝑣 ⊕ 𝑣 | 𝑣 ∈ 𝑅 𝑀 (𝑢 )} 
+
+(see Appendix A), where 𝑀 𝑣 denotes the reduced embedding derived from 𝑀 and associated with 𝑣 ∈ 𝑅 𝑀 (𝑢 ). The space com-plexity is therefore 𝑂 (Í𝑣 ∈𝑅 𝑀 (𝑢 ) |𝑀 𝑣 ⊕ 𝑣 |) , which is bounded by 
+
+𝑂 (| 𝐶 (𝑢 )| × | 𝑉 (𝐺 )| |𝑉 (𝑄 ) | − 1), and hence 𝑂 (| 𝑉 (𝐺 )| |𝑉 (𝑄 ) | ) in the worst case, since the match size of each white vertex in 𝑀 𝑣 is at most 𝑂 (| 𝑉 (𝐺 )|) .
+
+• If 𝑢 falls into Case 4, the space complexity is identical to that of Case 3, namely 𝑂 (| 𝑉 (𝐺 )| |𝑉 (𝑄 ) | ).Note that the above analysis represents the worst case. In practice, the actual space consumption is typically much smaller due to effective filtering and pruning strategies. 
+
+## C PROOFS OF LEMMAS C.1 Proof of Lemma 1 
+
+Proof. If 𝑀 1 ⊕ 𝑣 is a valid match of 𝑄 𝑖 +1, then by the definition of extensible vertices, we have 𝑣 ∈ Ñ𝑢 ∈𝑁 𝑂    
+
+> −(𝑢 𝑖 )
+
+A𝑢 𝑢 𝑖 (𝑀 1 [𝑢 ]) . Since 
+
+𝑀 1 [𝑢 ] = 𝑀 2 [𝑢 ] for each 𝑢 ∈ 𝑁 𝑂  
+
+> −
+
+(𝑢 𝑖 ), 𝑣 is also extensible for 𝑢 𝑖 under 𝑀 2. Given that 𝑣 does not conflict with any vertex in 𝑀 2, we conclude that 𝑀 2 ⊕ 𝑣 is also a valid match of 𝑄 𝑖 +1. □
+
+## C.2 Proof of Lemma 2 
+
+Proof. We first claim that the extensible vertices for each 𝑢 𝑗 ∈
+
+𝐶𝑜𝑛 (𝑢 𝑖 ) must be a subset of 𝑅 𝑀 (𝑢 𝑖 ). This follows from the following containment chain: 
+
+Ù    
+
+> 𝑢 ∈𝑁 𝑂
+> −(𝑢 𝑗 )
+
+A𝑢 𝑢 𝑗 (𝑀 ′ [𝑢 ]) ⊆ 
+
+Ù       
+
+> 𝑢 ∈𝑁 𝑂
+> −(𝑢 𝑗 )∩{ 𝑢 0,··· ,𝑢 𝑖 −1}
+
+A𝑢 𝑢 𝑗 (𝑀 [𝑢 ]) ⊆
+
+Ù    
+
+> 𝑢 ∈𝑁 𝑂
+> −(𝑢 𝑖 )
+
+A𝑢 𝑢 𝑖 (𝑀 [𝑢 ]) ⊆ 𝑅 𝑀 (𝑢 𝑖 ), (6) where 𝑀 ′ denotes an extension of 𝑀 (i.e., 𝑀 ⊆ 𝑀 ′). This means that any extensible vertex of 𝑢 𝑗 must belong to 𝑅 𝑀 (𝑢 𝑖 ).If |𝑅 𝑀 (𝑢 𝑖 )| < |𝐶𝑜𝑛 (𝑢 𝑖 )| , one of the following two situations must occur during the future enumeration: (1) Some 𝑢 𝑗 ∈ 𝐶𝑜𝑛 (𝑢 𝑖 ) will have an empty extensible set; (2) Two vertices in 𝐶𝑜𝑛 (𝑢 𝑖 ) are forced to share the same mapping in 𝑅 𝑀 (𝑢 𝑖 ), violating the injectivity constraint. In either case, no valid embedding can be constructed, and thus the current search branch can be safely pruned. □
+
+## D EXPERIMENTS USING EPS METRIC 
+
+The embeddings-per-second (EPS) metric is not included in the main paper due to its sensitivity to extreme values. For complete-ness, we report the EPS comparison in Figure 14. Overall, CEMR 
+
+achieves higher EPS than other methods in most cases, indicating competitive execution efficiency. For BSX, the EPS values can be strongly influenced by a few extreme cases. For instance, on the EU2005 dataset, certain queries result in more than 10 53 embeddings in a single batch, which can lead to misleading averages. While BSX experiences a number of timeout cases, their effect on the averaged EPS is negligible in comparison to that of extreme values. 
+
+## D.1 Discussions 
+
+Modern graph database systems commonly rely on worst-case-optimal joins (WCOJ) [ 33 ] as the core execution paradigm for sub-graph queries. WCOJ evaluates multiway joins in a vertex-at-a-time manner and has been shown to achieve optimal worst-case complex-ity for join processing, making it particularly suitable for subgraph matching workloads. It is straightforward to incorporate CEMR into existing engines that employ DFS-based WCOJ, such as gStore for processing limit-k queries [ 45 ], where limit-k queries refer to queries containing a LIMIT clause. In these systems, query execution incrementally expands a partial match by introducing one additional query ver-tex at each step. This execution pattern is essentially identical to enumeration-based subgraph query processing, as illustrated in Algorithm 1 [41]. Within this class of systems, CEMR can be integrated by extending the standard ExtendOneNode operator. When the operator processes a query vertex 𝑢 , we augment it with two auxiliary indicators. The first indicator specifies the extending case of 𝑢 , corresponding to the four cases defined in Section 4.2. The second indicator determines Yeast Human HPRD WordNet DBLP EU2005 YouTube Patents       
+
+> 10 6
+> 10 12
+> 10 18
+> 10 24
+> 10 30
+> 10 36
+> 10 42
+> 10 48
+> Average EPS (embeddings/ms)
+> CEMR RM DAF VEQ BSX BICE GuP
+
+(a) Mean EPS shown as a bar plot. Yeast Human HPRD WordNet DBLP EU2005 YouTube Patents       
+
+> 10 0
+> 10 7
+> 10 14
+> 10 21
+> 10 28
+> 10 35
+> 10 42
+> 10 49
+> EPS (embeddings/ms)
+> CEMR RM DAF VEQ BSX BICE GuP
+
+(b) Distribution of EPS shown as a box plot, with outliers marked as circles. 
+
+Figure 14: EPS comparison. EPS is set to zero for timeout cases. 
+
+whether the CER mechanism (Section 5) is enabled for 𝑢 during extension. Although CEMR is designed for DFS-based enumeration, it can also be applied to systems that originally adopt BFS-based enu-meration by switching their execution mode to DFS-based. More-over, some systems employ hybrid execution plans that combine worst-case-optimal joins with binary joins, such as Kùzu [ 13 ] and EmptyHeaded [ 1]. In these systems, CEMR can be applied to pure WCOJ subplan trees, where no binary joins are involved, or where the binary join appears only as the left-deep operator.
