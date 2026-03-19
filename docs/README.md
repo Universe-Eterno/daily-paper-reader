@@ -6,70 +6,88 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-15
-- 运行时间：2026-03-15 19:15:39 UTC
+- 最新运行日期：2026-03-19
+- 运行时间：2026-03-19 20:25:37 UTC
 - 运行状态：成功
-- 本次总论文数：16
-- 精读区：4
+- 本次总论文数：22
+- 精读区：10
 - 速读区：12
 
 ### 今日简报（AI）
-今日深度研读16篇前沿成果，聚焦神经组合优化与大模型推理能力的跨越式提升。
-重点关注 UniHetCO 带来的统一异构表示突破，以及通过重解机制（$Re^2$）解锁 LLM 逻辑推理的新路径。
-建议开发者探索如何利用强化学习与统一架构，优化复杂决策与多任务学习场景。
-- 详情：[/202603/15/README](/202603/15/README)
+1) 今日深度解析 22 篇 AI 论文，重点聚焦 LLM 与符号规划及群体智能的跨界融合。
+2) 混合 LLM 符号规划与蚁群算法路由在适应性与可解释性上表现卓越，双双斩获 9.0 高分。
+3) 建议关注大模型如何结合传统优化算法，突破复杂决策与资源受限场景下的性能瓶颈。
+- 详情：[/202603/19/README](/202603/19/README)
 
 ### 精读区论文标签
-1. [UniHetCO: A Unified Heterogeneous Representation for Multi-Problem Learning in Unsupervised Neural Combinatorial Optimization](/202603/15/2603.11456v1-unihetco-a-unified-heterogeneous-representation-for-multi-problem-learning-in-unsupervised-neural-combinatorial-optimization)  
-   标签：评分：10.0/10、query:nco-llm
-   evidence：无监督神经组合优化框架
-2. [$\textbf{Re}^{2}$: Unlocking LLM Reasoning via Reinforcement Learning with Re-solving](/202603/15/2603.07197v1-textbfre2-unlocking-llm-reasoning-via-reinforcement-learning-with-re-solving)  
-   标签：评分：8.0/10、query:nco-llm
-   evidence：通过强化学习优化LLM推理路径和重新求解
-3. [Dynamic Vehicle Routing Problem with Prompt Confirmation of Advance Requests](/202603/15/2603.07422v2-dynamic-vehicle-routing-problem-with-prompt-confirmation-of-advance-requests)  
-   标签：评分：8.0/10、query:nco
-   evidence：解决具有取送货约束的动态车辆路径问题
-4. [On the PLS-Completeness of $k$-Opt Local Search for the Traveling Salesman Problem](/202603/15/2603.11270v1-on-the-pls-completeness-of-k-opt-local-search-for-the-traveling-salesman-problem)  
-   标签：评分：8.0/10、query:nco
-   evidence：旅行商问题的k-Opt局部搜索算法
+1. [Novelty Adaptation Through Hybrid Large Language Model (LLM)-Symbolic Planning and LLM-guided Reinforcement Learning](/202603/19/2603.11351v1-novelty-adaptation-through-hybrid-large-language-model-llm-symbolic-planning-and-llm-guided-reinforcement-learning)  
+   标签：评分：9.0/10、query:nco-llm
+   evidence：LLM引导的强化学习和奖励函数生成
+2. [Efficient and Interpretable Multi-Agent LLM Routing via Ant Colony Optimization](/202603/19/2603.12933v1-efficient-and-interpretable-multi-agent-llm-routing-via-ant-colony-optimization)  
+   标签：评分：9.0/10、query:nco-llm
+   evidence：通过蚁群算法启发式进行大模型路由
+3. [Retrieve, Schedule, Reflect: LLM Agents for Chip QoR Optimization](/202603/19/2603.13767v1-retrieve-schedule-reflect-llm-agents-for-chip-qor-optimization)  
+   标签：评分：9.0/10、query:nco-llm
+   evidence：用于芯片设计优化和调度的LLM智能体
+4. [LLM-Guided Safe Reinforcement Learning for Energy System Topology Reconfiguration](/202603/19/2603.14018v1-llm-guided-safe-reinforcement-learning-for-energy-system-topology-reconfiguration)  
+   标签：评分：9.0/10、query:nco-llm
+   evidence：LLM引导的拓扑优化安全强化学习
+5. [Learning to Order: Task Sequencing as In-Context Optimization](/202603/19/2603.14550v1-learning-to-order-task-sequencing-as-in-context-optimization)  
+   标签：评分：9.0/10、query:nco-llm
+   evidence：使用Transformer将任务排序视为上下文优化
+6. [POLCA: Stochastic Generative Optimization with LLM](/202603/19/2603.14769v1-polca-stochastic-generative-optimization-with-llm)  
+   标签：评分：9.0/10、query:nco-llm
+   evidence：LLM 作为复杂系统的生成式优化器
+7. [Towards Foundation Models for Consensus Rank Aggregation](/202603/19/2603.15218v1-towards-foundation-models-for-consensus-rank-aggregation)  
+   标签：评分：9.0/10、query:nco
+   evidence：基于Transformer和强化学习的NP-hard排名聚合
+8. [Deep Reinforcement Learning for Fano Hypersurfaces](/202603/19/2603.15437v1-deep-reinforcement-learning-for-fano-hypersurfaces)  
+   标签：评分：9.0/10、query:nco
+   evidence：深度强化学习用于代数几何中的组合搜索
+9. [NeSy-Route: A Neuro-Symbolic Benchmark for Constrained Route Planning in Remote Sensing](/202603/19/2603.16307v1-nesy-route-a-neuro-symbolic-benchmark-for-constrained-route-planning-in-remote-sensing)  
+   标签：评分：9.0/10、query:nco-llm
+   evidence：使用多模态大模型的约束路径规划神经符号基准
+10. [CODMAS: A Dialectic Multi-Agent Collaborative Framework for Structured RTL Optimization](/202603/19/2603.17204v1-codmas-a-dialectic-multi-agent-collaborative-framework-for-structured-rtl-optimization)  
+   标签：评分：9.0/10、query:nco-llm
+   evidence：用于结构化RTL优化的多智能体大模型框架
 
 ### 速读区论文标签
-1. [SAIL: Test-Time Scaling for In-Context Imitation Learning with VLM](/202603/15/2603.08269v1-sail-test-time-scaling-for-in-context-imitation-learning-with-vlm)  
+1. [Resource-constrained Amazons chess decision framework integrating large language models and graph attention](/202603/19/2603.10512v1-resource-constrained-amazons-chess-decision-framework-integrating-large-language-models-and-graph-attention)  
+   标签：评分：8.0/10、query:nco-llm
+   evidence：结合大语言模型与图注意力进行战略决策
+2. [GNN-DIP: Neural Corridor Selection for Decomposition-Based Motion Planning](/202603/19/2603.12361v1-gnn-dip-neural-corridor-selection-for-decomposition-based-motion-planning)  
+   标签：评分：8.0/10、query:nco
+   evidence：用于运动规划中组合走廊选择的图神经网络
+3. [Binary Latent Protein Fitness Landscapes for Quantum Annealing Optimization](/202603/19/2603.17247v1-binary-latent-protein-fitness-landscapes-for-quantum-annealing-optimization)  
+   标签：评分：8.0/10、query:nco-llm
+   evidence：利用预训练蛋白质语言模型通过启发式算法进行组合搜索
+4. [Physics-informed offline reinforcement learning eliminates catastrophic fuel waste in maritime routing](/202603/19/2603.17319v1-physics-informed-offline-reinforcement-learning-eliminates-catastrophic-fuel-waste-in-maritime-routing)  
+   标签：评分：8.0/10、query:nco
+   evidence：用于燃油效率海运路径规划的离线强化学习框架
+5. [Towards Cold-Start Drafting and Continual Refining: A Value-Driven Memory Approach with Application to NPU Kernel Synthesis](/202603/19/2603.10846v1-towards-cold-start-drafting-and-continual-refining-a-value-driven-memory-approach-with-application-to-npu-kernel-synthesis)  
    标签：评分：7.0/10、query:nco-llm
-   evidence：利用蒙特卡洛树搜索和基于视觉语言模型的评分进行迭代优化
-2. [Mobile Base Station Optimal Tour in Wide Area IoT Sensor Networks](/202603/15/2603.08828v1-mobile-base-station-optimal-tour-in-wide-area-iot-sensor-networks)  
-   标签：评分：7.0/10、query:nco
-   evidence：将移动基站巡检建模为组合优化问题
-3. [Metaheuristic algorithm parameters selection for building an optimal hierarchical structure of a control system: a case study](/202603/15/2603.11091v1-metaheuristic-algorithm-parameters-selection-for-building-an-optimal-hierarchical-structure-of-a-control-system-a-case-study)  
-   标签：评分：7.0/10、query:nco
-   evidence：用于工业组合优化问题的元启发式算法
-4. [Graph Tokenization for Bridging Graphs and Transformers](/202603/15/2603.11099v1-graph-tokenization-for-bridging-graphs-and-transformers)  
+   evidence：基于大模型的代理通过强化学习进行合成
+6. [UtilityMax Prompting: A Formal Framework for Multi-Objective Large Language Model Optimization](/202603/19/2603.11583v1-utilitymax-prompting-a-formal-framework-for-multi-objective-large-language-model-optimization)  
    标签：评分：7.0/10、query:nco-llm
-   evidence：通过标记化桥接图与 Transformer，以实现大模型兼容性
-5. [SliceFed: Federated Constrained Multi-Agent DRL for Dynamic Spectrum Slicing in 6G](/202603/15/2603.11390v1-slicefed-federated-constrained-multi-agent-drl-for-dynamic-spectrum-slicing-in-6g)  
-   标签：评分：7.0/10、query:nco
-   evidence：用于资源分配优化的多智能体深度强化学习
-6. [Deterministic Algorithm for Non-monotone Submodular Maximization under Matroid and Knapsack Constraints](/202603/15/2603.11996v1-deterministic-algorithm-for-non-monotone-submodular-maximization-under-matroid-and-knapsack-constraints)  
-   标签：评分：7.0/10、query:nco
-   evidence：组合优化的确定性算法
-7. [A Novel Multi-Agent Architecture to Reduce Hallucinations of Large Language Models in Multi-Step Structural Modeling](/202603/15/2603.07728v1-a-novel-multi-agent-architecture-to-reduce-hallucinations-of-large-language-models-in-multi-step-structural-modeling)  
+   evidence：多目标LLM优化的形式化框架
+7. [Resource-Efficient Iterative LLM-Based NAS with Feedback Memory](/202603/19/2603.12091v1-resource-efficient-iterative-llm-based-nas-with-feedback-memory)  
+   标签：评分：7.0/10、query:nco-llm
+   evidence：基于大模型的架构搜索迭代生成与优化
+8. [A Neuro-Symbolic Framework Combining Inductive and Deductive Reasoning for Autonomous Driving Planning](/202603/19/2603.12421v1-a-neuro-symbolic-framework-combining-inductive-and-deductive-reasoning-for-autonomous-driving-planning)  
+   标签：评分：7.0/10、query:nco-llm
+   evidence：大模型为规划中的符号求解器提取规则
+9. [GaLoRA: Parameter-Efficient Graph-Aware LLMs for Node Classification](/202603/19/2603.10298v1-galora-parameter-efficient-graph-aware-llms-for-node-classification)  
    标签：评分：6.0/10、query:nco-llm
-   evidence：大模型与结构分析软件集成以完成建模任务
-8. [SGG-R$^{\rm 3}$: From Next-Token Prediction to End-to-End Unbiased Scene Graph Generation](/202603/15/2603.07961v1-sgg-rrm-3-from-next-token-prediction-to-end-to-end-unbiased-scene-graph-generation)  
-   标签：评分：6.0/10、query:nco-llm
-   evidence：结合多模态大模型与强化学习进行场景图生成
-9. [SGG-R$^{\rm 3}$: From Next-Token Prediction to End-to-End Unbiased Scene Graph Generation](/202603/15/2603.07961v2-sgg-rrm-3-from-next-token-prediction-to-end-to-end-unbiased-scene-graph-generation)  
-   标签：评分：6.0/10、query:nco-llm
-   evidence：结合强化学习与LLM进行图结构推理
-10. [Samyama: A Unified Graph-Vector Database with In-Database Optimization, Agentic Enrichment, and Hardware Acceleration](/202603/15/2603.08036v1-samyama-a-unified-graph-vector-database-with-in-database-optimization-agentic-enrichment-and-hardware-acceleration)  
-   标签：评分：6.0/10、query:nco-llm
-   evidence：将元启发式优化求解器集成到数据库查询语言中
-11. [CEMR: An Effective Subgraph Matching Algorithm with Redundant Extension Elimination](/202603/15/2603.08037v1-cemr-an-effective-subgraph-matching-algorithm-with-redundant-extension-elimination)  
+   evidence：将大语言模型与图神经网络集成
+10. [Optimising two-block averaging kernels to speed up Markov chains](/202603/19/2603.10318v1-optimising-two-block-averaging-kernels-to-speed-up-markov-chains)  
    标签：评分：6.0/10、query:nco
-   evidence：针对NP难图问题的子图匹配算法
-12. [Synergistic Directed Execution and LLM-Driven Analysis for Zero-Day AI-Generated Malware Detection](/202603/15/2603.09044v1-synergistic-directed-execution-and-llm-driven-analysis-for-zero-day-ai-generated-malware-detection)  
+   evidence：针对马尔可夫链混合的结构化组合优化
+11. [COHORT: Hybrid RL for Collaborative Large DNN Inference on Multi-Robot Systems Under Real-Time Constraints](/202603/19/2603.10436v1-cohort-hybrid-rl-for-collaborative-large-dnn-inference-on-multi-robot-systems-under-real-time-constraints)  
+   标签：评分：6.0/10、query:nco
+   evidence：用于动态调度和任务分配的混合强化学习
+12. [ADMM-based Continuous Trajectory Optimization in Graphs of Convex Sets](/202603/19/2603.11335v1-admm-based-continuous-trajectory-optimization-in-graphs-of-convex-sets)  
    标签：评分：6.0/10、query:nco-llm
-   evidence：结合符号执行与大模型增强的路径优先级进行搜索
+   evidence：基于ADMM的混合整数轨迹优化求解器
 
 
 <div class="dpr-home-promo-card">
