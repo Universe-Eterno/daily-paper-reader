@@ -1,0 +1,773 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-20T20:17:17.137791+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 11,
+    "deep_cap": 7,
+    "deep_selected": 7,
+    "quick_candidates": 52,
+    "quick_skim_target": 12,
+    "quick_selected": 12
+  },
+  "deep_dive": [
+    {
+      "id": "2603.19074v1",
+      "title": "CAMO: A Conditional Neural Solver for the Multi-objective Multiple Traveling Salesman Problem",
+      "abstract": "Robotic systems often require a team of robots to collectively visit multiple targets while optimizing competing objectives, such as total travel cost and makespan. This setting can be formulated as the Multi-Objective Multiple Traveling Salesman Problem (MOMTSP). Although learning-based methods have shown strong performance on the single-agent TSP and multi-objective TSP variants, they rarely address the combined challenges of multi-agent coordination and multi-objective trade-offs, which introduce dual sources of complexity. To bridge this gap, we propose CAMO, a conditional neural solver for MOMTSP that generalizes across varying numbers of targets, agents, and preference vectors, and yields high-quality approximations to the Pareto front (PF). Specifically, CAMO consists of a conditional encoder to fuse preferences into instance representations, enabling explicit control over multi-objective trade-offs, and a collaborative decoder that coordinates all agents by alternating agent selection and node selection to construct multi-agent tours autoregressively. To further improve generalization, we train CAMO with a REINFORCE-based objective over a mixed distribution of problem sizes. Extensive experiments show that CAMO outperforms both neural and conventional heuristics, achieving a closer approximation of PFs. In addition, ablation results validate the contributions of CAMO's key components, and real-world tests on a mobile robot platform demonstrate its practical applicability.",
+      "authors": [
+        "Fengxiaoxiao Li",
+        "Xiao Mao",
+        "Mingfeng Fan",
+        "Yifeng Zhang",
+        "Yi Li",
+        "Tanishq Duhan",
+        "Guillaume Sartoretti"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO",
+        "cs.AI"
+      ],
+      "published": "2026-03-19T15:59:45+00:00",
+      "link": "https://arxiv.org/pdf/2603.19074v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "Neural solver for Multi-objective Multiple Traveling Salesman Problem",
+      "llm_evidence_cn": "多目标多旅行商问题的神经求解器",
+      "llm_evidence": "多目标多旅行商问题的神经求解器",
+      "canonical_evidence": "多目标多旅行商问题的神经求解器",
+      "llm_tldr_en": "Proposes CAMO, a conditional neural solver for complex multi-objective and multi-agent TSP variants.",
+      "llm_tldr_cn": "提出了CAMO，一种用于复杂多目标和多智能体TSP变体的条件神经求解器。",
+      "llm_tldr": "提出了CAMO，一种用于复杂多目标和多智能体TSP变体的条件神经求解器。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Neural solvers for Traveling Salesman Problem TSP",
+      "matched_requirement_id": "req-16",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.18314v1",
+      "title": "Approximate Subgraph Matching with Neural Graph Representations and Reinforcement Learning",
+      "abstract": "Approximate subgraph matching (ASM) is a task that determines the approximate presence of a given query graph in a large target graph. Being an NP-hard problem, ASM is critical in graph analysis with a myriad of applications ranging from database systems and network science to biochemistry and privacy. Existing techniques often employ heuristic search strategies, which cannot fully utilize the graph information, leading to sub-optimal solutions. This paper proposes a Reinforcement Learning based Approximate Subgraph Matching (RL-ASM) algorithm that exploits graph transformers to effectively extract graph representations and RL-based policies for ASM. Our model is built upon the branch-and-bound algorithm that selects one pair of nodes from the two input graphs at a time for potential matches. Instead of using heuristics, we exploit a Graph Transformer architecture to extract feature representations that encode the full graph information. To enhance the training of the RL policy, we use supervised signals to guide our agent in an imitation learning stage. Subsequently, the policy is fine-tuned with the Proximal Policy Optimization (PPO) that optimizes the accumulative long-term rewards over episodes. Extensive experiments on both synthetic and real-world datasets demonstrate that our RL-ASM outperforms existing methods in terms of effectiveness and efficiency. Our source code is available at https://github.com/KaiyangLi1992/RL-ASM.",
+      "authors": [
+        "Kaiyang Li",
+        "Shihao Ji",
+        "Zhipeng Cai",
+        "Wei Li"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-18T21:53:23+00:00",
+      "link": "https://arxiv.org/pdf/2603.18314v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Neural graph representations and RL for NP-hard subgraph matching",
+      "llm_evidence_cn": "神经图表示与强化学习解决NP-hard子图匹配",
+      "llm_evidence": "神经图表示与强化学习解决NP-hard子图匹配",
+      "canonical_evidence": "神经图表示与强化学习解决NP-hard子图匹配",
+      "llm_tldr_en": "Combines graph transformers and reinforcement learning to solve the NP-hard approximate subgraph matching problem.",
+      "llm_tldr_cn": "结合图Transformer和强化学习来解决NP-hard近似子图匹配问题。",
+      "llm_tldr": "结合图Transformer和强化学习来解决NP-hard近似子图匹配问题。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Graph Neural Networks for solving combinatorial problems",
+      "matched_requirement_id": "req-15",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.13147v1",
+      "title": "A common parallel framework for LLP combinatorial problems",
+      "abstract": "Traditional lock-free parallel algorithms for combinatorial optimization problems, such as shortest paths, stable matching, and job scheduling require programmers to write problem-specific routines and synchronization code. We propose a general-purpose lock-free runtime, LLP-FW that can solve all combinatorial optimization problems that can be formulated as a Lattice-Linear Predicate by advancing all forbidden local states in parallel until a solution emerges. The only problem-specific code is a definition of the forbiddenness check and a definition of the advancement. We show that LLP-FW can solve several different combinatorial optimization problems, such as Single Source Shortest Paths (SSSP), Breadth-First Search (BFS), Stable Marriage, Job Scheduling, Transitive Closure, Parallel Reduction, and 0-1 Knapsack. We compare LLP-FW against hand-tuned, custom solutions for these seven problems and show that it compares favorably in the majority of cases.",
+      "authors": [
+        "David Ribeiro Alves",
+        "Vijay K. Garg"
+      ],
+      "primary_category": "cs.DC",
+      "categories": [
+        "cs.DC"
+      ],
+      "published": "2026-03-13T16:34:57+00:00",
+      "link": "https://arxiv.org/pdf/2603.13147v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Parallel framework for solving combinatorial optimization problems like shortest paths",
+      "llm_evidence_cn": "解决最短路径等组合优化问题的并行框架",
+      "llm_evidence": "解决最短路径等组合优化问题的并行框架",
+      "canonical_evidence": "解决最短路径等组合优化问题的并行框架",
+      "llm_tldr_en": "Presents a general-purpose parallel runtime for solving various combinatorial optimization problems.",
+      "llm_tldr_cn": "提出了一种通用的并行运行时框架，用于解决多种组合优化问题。",
+      "llm_tldr": "提出了一种通用的并行运行时框架，用于解决多种组合优化问题。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Machine learning approaches to combinatorial optimization",
+      "matched_requirement_id": "req-19",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.12634v1",
+      "title": "Spend Less, Reason Better: Budget-Aware Value Tree Search for LLM Agents",
+      "abstract": "Test-time scaling has become a dominant paradigm for improving LLM agent reliability, yet current approaches treat compute as an abundant resource, allowing agents to exhaust token and tool budgets on redundant steps or dead-end trajectories. Existing budget-aware methods either require expensive fine-tuning or rely on coarse, trajectory-level heuristics that cannot intervene mid-execution. We propose the Budget-Aware Value Tree (BAVT), a training-free inference-time framework that models multi-hop reasoning as a dynamic search tree guided by step-level value estimation within a single LLM backbone. Another key innovation is a budget-conditioned node selection mechanism that uses the remaining resource ratio as a natural scaling exponent over node values, providing a principled, parameter-free transition from broad exploration to greedy exploitation as the budget depletes. To combat the well-known overconfidence of LLM self-evaluation, BAVT employs a residual value predictor that scores relative progress rather than absolute state quality, enabling reliable pruning of uninformative or redundant tool calls. We further provide a theoretical convergence guarantee, proving that BAVT reaches a terminal answer with probability at least $1-ε$ under an explicit finite budget bound. Extensive evaluations on four multi-hop QA benchmarks across two model families demonstrate that BAVT consistently outperforms parallel sampling baselines. Most notably, BAVT under strict low-budget constraints surpasses baseline performance at $4\\times$ the resource allocation, establishing that intelligent budget management fundamentally outperforms brute-force compute scaling.",
+      "authors": [
+        "Yushu Li",
+        "Wenlong Deng",
+        "Jiajin Li",
+        "Xiaoxiao Li"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-13T04:10:27+00:00",
+      "link": "https://arxiv.org/pdf/2603.12634v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "LLM-based value tree search for multi-hop reasoning",
+      "llm_evidence_cn": "基于LLM的价值树搜索用于多步推理",
+      "llm_evidence": "基于LLM的价值树搜索用于多步推理",
+      "canonical_evidence": "基于LLM的价值树搜索用于多步推理",
+      "llm_tldr_en": "Proposes a budget-aware value tree search framework to improve LLM agent reasoning efficiency at inference time.",
+      "llm_tldr_cn": "提出了一种预算感知的价值树搜索框架，以提高LLM智能体在推理时的效率。",
+      "llm_tldr": "提出了一种预算感知的价值树搜索框架，以提高LLM智能体在推理时的效率。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM-based heuristic search and optimization",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.13778v2",
+      "title": "Optimality and annealing path planning of dynamical analog solvers",
+      "abstract": "Recently proposed analog solvers based on dynamical systems, such as Ising machines, are promising platforms for large-scale combinatorial optimization. Yet, given the heuristic nature of the field, there is very limited insight on optimality guarantees of the solvers, as well as how parameter schedules shape dynamics and outcomes. Here, we develop a dynamical mean-field framework to analyze Ising-machine dynamics for finding the ground state energy of the Sherrington-Kirkpatrick(SK) model of spin glasses and identify mechanisms that enable rapid convergence to provenly near-optimal energies. For a fixed target energy density Ec, we show that solutions are typically reached within O(1) matrix vector multiplications, indicating constant time complexity. We further delineate theoretical limitations arising from different parameter-scheduling trajectories and demonstrate a pronounced benefit of temperature-only annealing for the Coherent Ising Machine. Building on these insights, we propose a general framework for designing optimized parameter schedules, thereby improving the practical effectiveness of Ising machines for complex optimization tasks. The superior performance of the dynamical solvers is illustrated by the attainment of the ground state energy of the SK model.",
+      "authors": [
+        "Shu Zhou",
+        "K. Y. Michael Wong",
+        "Juntao Wang",
+        "David Shui Wing Hui",
+        "Daniel Ebler",
+        "Jie Sun"
+      ],
+      "primary_category": "cond-mat.dis-nn",
+      "categories": [
+        "cond-mat.dis-nn",
+        "cond-mat.stat-mech",
+        "math.DS",
+        "physics.data-an"
+      ],
+      "published": "2026-03-14T06:14:32+00:00",
+      "link": "https://arxiv.org/pdf/2603.13778v2",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "analog solvers for large-scale combinatorial optimization",
+      "llm_evidence_cn": "用于大规模组合优化的模拟求解器",
+      "llm_evidence": "用于大规模组合优化的模拟求解器",
+      "canonical_evidence": "用于大规模组合优化的模拟求解器",
+      "llm_tldr_en": "Analyzes the dynamics and optimality of Ising machines for solving combinatorial optimization problems.",
+      "llm_tldr_cn": "分析了用于解决组合优化问题的 Ising 机动力学和最优性。",
+      "llm_tldr": "分析了用于解决组合优化问题的 Ising 机动力学和最优性。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "State of the art neural combinatorial optimization techniques",
+      "matched_requirement_id": "req-22",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.15541v1",
+      "title": "Bridging Local and Global Knowledge: Cascaded Mixture-of-Experts Learning for Near-Shortest Path Routing",
+      "abstract": "While deep learning models that leverage local features have demonstrated significant potential for near-optimal routing in dense Euclidean graphs, they struggle to generalize well in sparse networks where topological irregularities require broader structural awareness. To address this limitation, we train a Cascaded Mixture of Experts (Ca-MoE) to solve the all-pairs near-shortest path (APNSP) routing problem. Our Ca-MoE is a modular two-tier architecture that supports the decision-making for forwarder selection with lower-tier experts relying on local features and upper-tier experts relying on global features. It performs adaptive inference wherein the upper-tier experts are triggered only when the lower-tier ones do not suffice to achieve adequate decision quality. Computational efficiency is thus achieved by escalating model capacity only when necessitated by topological complexity, and parameter redundancy is avoided. Furthermore, we incorporate an online meta-learning strategy that facilitates independent expert fine-tuning and utilizes a stability-focused update mechanism to prevent catastrophic forgetting as new graph environments are encountered. Experimental evaluations demonstrate that Ca-MoE routing improves accuracy by up to 29.1% in sparse networks compared to single-expert baselines and maintains performance within 1%-6% of the theoretical upper bound across diverse graph densities.",
+      "authors": [
+        "Yung-Fu Chen",
+        "Anish Arora"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.NI"
+      ],
+      "published": "2026-03-16T17:06:34+00:00",
+      "link": "https://arxiv.org/pdf/2603.15541v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Deep learning for near-shortest path routing in graphs",
+      "llm_evidence_cn": "用于图中近最短路径路由的深度学习",
+      "llm_evidence": "用于图中近最短路径路由的深度学习",
+      "canonical_evidence": "用于图中近最短路径路由的深度学习",
+      "llm_tldr_en": "Uses a Mixture-of-Experts architecture to solve the all-pairs near-shortest path routing problem.",
+      "llm_tldr_cn": "采用混合专家架构解决全源近最短路径路由这一组合优化问题。",
+      "llm_tldr": "采用混合专家架构解决全源近最短路径路由这一组合优化问题。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Deep learning models for solving NP hard combinatorial problems",
+      "matched_requirement_id": "req-23",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.16401v1",
+      "title": "Deep Reinforcement Learning-Assisted Automated Operator Portfolio for Constrained Multi-objective Optimization",
+      "abstract": "Constrained multi-objective optimization problems (CMOPs) are of great significance in the context of practical applications, ranging from scientific to engineering domains. Most existing constrained multi-objective evolutionary algorithms (CMOEAs) usually employ fixed operators all the time, which exhibit poor versatility in handling various CMOPs. Therefore, some recent studies have focused on adaptively selecting the best operators for the current population states during the search process. The evolutionary algorithms proposed in these studies learn the value of each operator and recommend the operator with the highest value for the current population, resulting in only a single operator being recommended at each generation, which can potentially lead to local optima and inefficient utilization of function evaluations. To address the dilemma in operator adaptation, this paper proposes a reinforcement learning-based automated operator portfolio approach to learn an allocation scheme of operators at each generation. This approach considers the optimization-related and constraint-related features of the current population as states, the overall improvement in population convergence and diversity as rewards, and different operator portfolios as actions. By utilizing deep neural networks to establish a mapping model between the population states and the expected cumulative rewards, the proposed approach determines the optimal operator portfolio during the evolutionary process. By embedding the proposed approach into existing CMOEAs, a deep reinforcement learning-assisted automated operator portfolio based evolutionary algorithm for solving CMOPs, abbreviated as CMOEA-AOP, is developed. Empirical studies on 33 benchmark problems demonstrate that the proposed algorithm significantly enhances the performance of CMOEAs and exhibits more stable performance across different CMOPs.",
+      "authors": [
+        "Shuai Shao",
+        "Ye Tian",
+        "Shangshang Yang",
+        "Xingyi Zhang"
+      ],
+      "primary_category": "cs.NE",
+      "categories": [
+        "cs.NE"
+      ],
+      "published": "2026-03-17T11:39:19+00:00",
+      "link": "https://arxiv.org/pdf/2603.16401v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Deep reinforcement learning for selecting operators in multi-objective optimization",
+      "llm_evidence_cn": "深度强化学习用于多目标优化中的算子选择",
+      "llm_evidence": "深度强化学习用于多目标优化中的算子选择",
+      "canonical_evidence": "深度强化学习用于多目标优化中的算子选择",
+      "llm_tldr_en": "Uses DRL to adaptively select operators for constrained multi-objective evolutionary algorithms.",
+      "llm_tldr_cn": "利用深度强化学习为约束多目标进化算法自适应选择算子。",
+      "llm_tldr": "利用深度强化学习为约束多目标进化算法自适应选择算子。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Deep Reinforcement Learning in combinatorial optimization",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2603.16809v1",
+      "title": "CABTO: Context-Aware Behavior Tree Grounding for Robot Manipulation",
+      "abstract": "Behavior Trees (BTs) offer a powerful paradigm for designing modular and reactive robot controllers. BT planning, an emerging field, provides theoretical guarantees for the automated generation of reliable BTs. However, BT planning typically assumes that a well-designed BT system is already grounded -- comprising high-level action models and low-level control policies -- which often requires extensive expert knowledge and manual effort. In this paper, we formalize the BT Grounding problem: the automated construction of a complete and consistent BT system. We analyze its complexity and introduce CABTO (Context-Aware Behavior Tree grOunding), the first framework to efficiently solve this challenge. CABTO leverages pre-trained Large Models (LMs) to heuristically search the space of action models and control policies, guided by contextual feedback from BT planners and environmental observations. Experiments spanning seven task sets across three distinct robotic manipulation scenarios demonstrate CABTO's effectiveness and efficiency in generating complete and consistent behavior tree systems.",
+      "authors": [
+        "Yishuai Cai",
+        "Xinglin Chen",
+        "Yunxin Mao",
+        "Kun Hu",
+        "Minglong Li",
+        "Yaodong Yang",
+        "Yuanpei Chen"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO",
+        "cs.AI"
+      ],
+      "published": "2026-03-17T17:12:46+00:00",
+      "link": "https://arxiv.org/pdf/2603.16809v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Large Models for heuristic behavior tree grounding",
+      "llm_evidence_cn": "大模型用于启发式行为树落地",
+      "llm_evidence": "大模型用于启发式行为树落地",
+      "canonical_evidence": "大模型用于启发式行为树落地",
+      "llm_tldr_en": "Leverages pre-trained Large Models to provide heuristics for automated behavior tree construction in robotics.",
+      "llm_tldr_cn": "利用预训练大模型为机器人自动化行为树构建提供启发式引导。",
+      "llm_tldr": "利用预训练大模型为机器人自动化行为树构建提供启发式引导。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM-guided heuristic search for optimization",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2603.12151v1",
+      "title": "IsoCompute Playbook: Optimally Scaling Sampling Compute for LLM RL",
+      "abstract": "While scaling laws guide compute allocation for LLM pre-training, analogous prescriptions for reinforcement learning (RL) post-training of large language models (LLMs) remain poorly understood. We study the compute-optimal allocation of sampling compute for on-policy RL methods in LLMs, framing scaling as a compute-constrained optimization over three resources: parallel rollouts per problem, number of problems per batch, and number of update steps. We find that the compute-optimal number of parallel rollouts per problem increases predictably with compute budget and then saturates. This trend holds across both easy and hard problems, though driven by different mechanisms: solution sharpening on easy problems and coverage expansion on hard problems. We further show that increasing the number of parallel rollouts mitigates interference across problems, while the number of problems per batch primarily affects training stability and can be chosen within a broad range. Validated across base models and data distributions, our results recast RL scaling laws as prescriptive allocation rules and provide practical guidance for compute-efficient LLM RL post-training.",
+      "authors": [
+        "Zhoujun Cheng",
+        "Yutao Xie",
+        "Yuxiao Qu",
+        "Amrith Setlur",
+        "Shibo Hao",
+        "Varad Pimpalkhute",
+        "Tongtong Liang",
+        "Feng Yao",
+        "Zhengzhong Liu",
+        "Eric Xing",
+        "Virginia Smith",
+        "Ruslan Salakhutdinov",
+        "Zhiting Hu",
+        "Taylor Killian",
+        "Aviral Kumar"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-12T16:49:21+00:00",
+      "link": "https://arxiv.org/pdf/2603.12151v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Optimally scaling sampling compute for LLM reinforcement learning",
+      "llm_evidence_cn": "优化LLM强化学习的采样计算缩放",
+      "llm_evidence": "优化LLM强化学习的采样计算缩放",
+      "canonical_evidence": "优化LLM强化学习的采样计算缩放",
+      "llm_tldr_en": "Studies compute-optimal allocation for on-policy reinforcement learning post-training of large language models.",
+      "llm_tldr_cn": "研究了大语言模型在线强化学习后训练中的计算最优分配问题。",
+      "llm_tldr": "研究了大语言模型在线强化学习后训练中的计算最优分配问题。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Fine tuning language models for neural combinatorial optimization tasks",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.11600v1",
+      "title": "Hybrid Energy-Aware Reward Shaping: A Unified Lightweight Physics-Guided Methodology for Policy Optimization",
+      "abstract": "Deep reinforcement learning excels in continuous control but often requires extensive exploration, while physics-based models demand complete equations and suffer cubic complexity. This study proposes Hybrid Energy-Aware Reward Shaping (H-EARS), unifying potential-based reward shaping with energy-aware action regularization. H-EARS constrains action magnitude while balancing task-specific and energy-based potentials via functional decomposition, achieving linear complexity O(n) by capturing dominant energy components without full dynamics. We establish a theoretical foundation including: (1) functional independence for separate task/energy optimization; (2) energy-based convergence acceleration; (3) convergence guarantees under function approximation; and (4) approximate potential error bounds. Lyapunov stability connections are analyzed as heuristic guides. Experiments across baselines show improved convergence, stability, and energy efficiency. Vehicle simulations validate applicability in safety-critical domains under extreme conditions. Results confirm that integrating lightweight physics priors enhances model-free RL without complete system models, enabling transfer from lab research to industrial applications.",
+      "authors": [
+        "Qijun Liao",
+        "Jue Yang",
+        "Yiting Kang",
+        "Xinxin Zhao",
+        "Yong Zhang",
+        "Mingan Zhao"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "eess.SY",
+        "math.OC"
+      ],
+      "published": "2026-03-12T06:47:01+00:00",
+      "link": "https://arxiv.org/pdf/2603.11600v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Reward shaping for reinforcement learning policy optimization",
+      "llm_evidence_cn": "用于强化学习策略优化的奖励塑造",
+      "llm_evidence": "用于强化学习策略优化的奖励塑造",
+      "canonical_evidence": "用于强化学习策略优化的奖励塑造",
+      "llm_tldr_en": "A physics-guided reward shaping methodology to accelerate convergence in deep reinforcement learning.",
+      "llm_tldr_cn": "一种物理引导的奖励塑造方法，旨在加速深度强化学习中的收敛。",
+      "llm_tldr": "一种物理引导的奖励塑造方法，旨在加速深度强化学习中的收敛。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Reinforcement learning frameworks for combinatorial optimization",
+      "matched_requirement_id": "req-24",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.17468v1",
+      "title": "Efficient Soft Actor-Critic with LLM-Based Action-Level Guidance for Continuous Control",
+      "abstract": "We present GuidedSAC, a novel reinforcement learning (RL) algorithm that facilitates efficient exploration in vast state-action spaces. GuidedSAC leverages large language models (LLMs) as intelligent supervisors that provide action-level guidance for the Soft Actor-Critic (SAC) algorithm. The LLM-based supervisor analyzes the most recent trajectory using state information and visual replays, offering action-level interventions that enable targeted exploration. Furthermore, we provide a theoretical analysis of GuidedSAC, proving that it preserves the convergence guarantees of SAC while improving convergence speed. Through experiments in both discrete and continuous control environments, including toy text tasks and complex MuJoCo benchmarks, we demonstrate that GuidedSAC consistently outperforms standard SAC and state-of-the-art exploration-enhanced variants (e.g., RND, ICM, and E3B) in terms of sample efficiency and final performance.",
+      "authors": [
+        "Hao Ma",
+        "Zhiqiang Pu",
+        "Xiaolin Ai",
+        "Huimu Wang"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-18T08:22:31+00:00",
+      "link": "https://arxiv.org/pdf/2603.17468v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "LLM-based action-level guidance for reinforcement learning",
+      "llm_evidence_cn": "基于大模型的强化学习动作级引导",
+      "llm_evidence": "基于大模型的强化学习动作级引导",
+      "canonical_evidence": "基于大模型的强化学习动作级引导",
+      "llm_tldr_en": "Introduces GuidedSAC, using LLMs as supervisors to provide action-level guidance for efficient RL exploration.",
+      "llm_tldr_cn": "引入 GuidedSAC，利用大模型作为监督者提供动作级引导，以实现高效的强化学习探索。",
+      "llm_tldr": "引入 GuidedSAC，利用大模型作为监督者提供动作级引导，以实现高效的强化学习探索。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM-guided heuristic search for optimization",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2603.12740v1",
+      "title": "ToolTree: Efficient LLM Agent Tool Planning via Dual-Feedback Monte Carlo Tree Search and Bidirectional Pruning",
+      "abstract": "Large Language Model (LLM) agents are increasingly applied to complex, multi-step tasks that require interaction with diverse external tools across various domains. However, current LLM agent tool planning methods typically rely on greedy, reactive tool selection strategies that lack foresight and fail to account for inter-tool dependencies. In this paper, we present ToolTree, a novel Monte Carlo tree search-inspired planning paradigm for tool planning. ToolTree explores possible tool usage trajectories using a dual-stage LLM evaluation and bidirectional pruning mechanism that enables the agent to make informed, adaptive decisions over extended tool-use sequences while pruning less promising branches before and after the tool execution. Empirical evaluations across both open-set and closed-set tool planning tasks on 4 benchmarks demonstrate that ToolTree consistently improves performance while keeping the highest efficiency, achieving an average gain of around 10\\% compared to the state-of-the-art planning paradigm.",
+      "authors": [
+        "Shuo Yang",
+        "Soyeon Caren Han",
+        "Yihao Ding",
+        "Shuhe Wang",
+        "Eduard Hoy"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-03-13T07:37:06+00:00",
+      "link": "https://arxiv.org/pdf/2603.12740v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "LLM agent tool planning via Monte Carlo Tree Search",
+      "llm_evidence_cn": "通过蒙特卡洛树搜索进行大模型智能体工具规划",
+      "llm_evidence": "通过蒙特卡洛树搜索进行大模型智能体工具规划",
+      "canonical_evidence": "通过蒙特卡洛树搜索进行大模型智能体工具规划",
+      "llm_tldr_en": "Proposes ToolTree, an MCTS-inspired planning paradigm for efficient LLM agent tool selection and trajectory search.",
+      "llm_tldr_cn": "提出 ToolTree，一种受 MCTS 启发的规划范式，用于高效的大模型智能体工具选择和轨迹搜索。",
+      "llm_tldr": "提出 ToolTree，一种受 MCTS 启发的规划范式，用于高效的大模型智能体工具选择和轨迹搜索。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM-based heuristic search and optimization",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.11658v1",
+      "title": "Coupling Tensor Trains with Graph of Convex Sets: Effective Compression, Exploration, and Planning in the C-Space",
+      "abstract": "We present TANGO (Tensor ANd Graph Optimization), a novel motion planning framework that integrates tensor-based compression with structured graph optimization to enable efficient and scalable trajectory generation. While optimization-based planners such as the Graph of Convex Sets (GCS) offer powerful tools for generating smooth, optimal trajectories, they typically rely on a predefined convex characterization of the high-dimensional configuration space-a requirement that is often intractable for general robotic tasks. TANGO builds further by using Tensor Train decomposition to approximate the feasible configuration space in a compressed form, enabling rapid discovery and estimation of task-relevant regions. These regions are then embedded into a GCS-like structure, allowing for geometry-aware motion planning that respects both system constraints and environmental complexity. By coupling tensor-based compression with structured graph reasoning, TANGO enables efficient, geometry-aware motion planning and lays the groundwork for more expressive and scalable representations of configuration space in future robotic systems. Rigorous simulation studies on planar and real robots reinforce our claims of effective compression and higher quality trajectories.",
+      "authors": [
+        "Gerhard Reinerth",
+        "Riddhiman Laha",
+        "Marcello Romano"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-03-12T08:28:06+00:00",
+      "link": "https://arxiv.org/pdf/2603.11658v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Hybrid approach combining tensor compression and graph optimization",
+      "llm_evidence_cn": "结合张量压缩与图优化的混合方法",
+      "llm_evidence": "结合张量压缩与图优化的混合方法",
+      "canonical_evidence": "结合张量压缩与图优化的混合方法",
+      "llm_tldr_en": "Integrates tensor-based compression with graph optimization for scalable motion planning.",
+      "llm_tldr_cn": "将基于张量的压缩与图优化相结合，实现可扩展的运动规划。",
+      "llm_tldr": "将基于张量的压缩与图优化相结合，实现可扩展的运动规划。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Hybrid approaches combining deep learning and traditional optimization",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.19117v1",
+      "title": "Variational and Annealing-Based Approaches to Quantum Combinatorial Optimization",
+      "abstract": "In this work, we review quantum approaches to combinatorial optimization, with the aim of bridging theoretical developments and industrial relevance. We first survey the main families of quantum algorithms, including Quantum Annealing, the Quantum Approximate Optimization Algorithm (QAOA), Quantum Reinforcement Learning (QRL), and Quantum Generative Modeling (QGM). We then examine the problem classes where quantum technologies currently show evidence of quantum advantage, drawing on established benchmarking initiatives such as QOBLIB, QUARK, QASMBench, and QED-C. These problem classes are subsequently mapped to representative industrial domains, including logistics, finance, and telecommunications. Our analysis indicates that quantum annealing currently exhibits the highest level of operational maturity, while QAOA shows promising potential on NISQ-era hardware. In contrast, QRL and QGM emerge as longer-term research directions with significant potential for future industrial impact.",
+      "authors": [
+        "Hala Hawashin",
+        "Deep Nath",
+        "Marco Alberto Javarone"
+      ],
+      "primary_category": "quant-ph",
+      "categories": [
+        "quant-ph",
+        "cs.ET"
+      ],
+      "published": "2026-03-19T16:41:38+00:00",
+      "link": "https://arxiv.org/pdf/2603.19117v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Review of quantum approaches to combinatorial optimization including reinforcement learning",
+      "llm_evidence_cn": "量子组合优化方法综述，包括强化学习",
+      "llm_evidence": "量子组合优化方法综述，包括强化学习",
+      "canonical_evidence": "量子组合优化方法综述，包括强化学习",
+      "llm_tldr_en": "Surveys quantum algorithms like QAOA and QRL for solving industrial combinatorial optimization problems.",
+      "llm_tldr_cn": "综述了QAOA和量子强化学习等用于解决工业组合优化问题的量子算法。",
+      "llm_tldr": "综述了QAOA和量子强化学习等用于解决工业组合优化问题的量子算法。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Deep learning models for solving NP hard combinatorial problems",
+      "matched_requirement_id": "req-23",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2603.13607v1",
+      "title": "The Quest for Quantum Advantage in Combinatorial Optimization: End-to-end Benchmarking of Quantum Solvers vs. Multi-core Classical Solvers",
+      "abstract": "We perform an end-to-end benchmark of a hybrid sequential quantum computing (HSQC) solver for higher-order unconstrained binary optimization (HUBO), executed on IBM Heron r3 quantum processors to evaluate the potential of current quantum hardware for combinatorial optimization with sub-second end-to-end runtimes. All reported runtimes include the complete pipeline--from preprocessing to QPU execution and postprocessing--under strict wall-clock accounting. Across 20 benchmark instances, a single hybrid attempt produces high-quality solutions in less than one second, matching the ground-state energy in 14 cases. At the same runtime, CPU-based solvers, including simulated annealing, memetic tabu search, and EasySolve, do not reach the value obtained by HSQC, whereas an enhanced parallel tempering method and the GPU-accelerated solver ABS3 reach or surpass it. These results show that HSQC, executed on a single QPU, can achieve performance competitive with strong classical solvers running on 128 vCPUs or 8 NVIDIA A100 GPUs, while also providing a reproducible system-level benchmark for tracking progress as quantum hardware and hybrid sequential workflows improve.",
+      "authors": [
+        "Pranav Chandarana",
+        "Alejandro Gomez Cadavid",
+        "Enrique Solano",
+        "Thorsten Koch",
+        "Stefan Woerner",
+        "Narendra N. Hegade"
+      ],
+      "primary_category": "quant-ph",
+      "categories": [
+        "quant-ph",
+        "cond-mat.mes-hall"
+      ],
+      "published": "2026-03-13T21:29:20+00:00",
+      "link": "https://arxiv.org/pdf/2603.13607v1",
+      "tags": [
+        "keyword:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "benchmarking hybrid quantum-classical solvers for combinatorial optimization",
+      "llm_evidence_cn": "组合优化的量子-经典混合求解器基准测试",
+      "llm_evidence": "组合优化的量子-经典混合求解器基准测试",
+      "canonical_evidence": "组合优化的量子-经典混合求解器基准测试",
+      "llm_tldr_en": "Benchmarks hybrid quantum solvers against classical ones for binary optimization problems.",
+      "llm_tldr_cn": "对二元优化问题的量子-经典混合求解器与传统求解器进行了端到端基准测试。",
+      "llm_tldr": "对二元优化问题的量子-经典混合求解器与传统求解器进行了端到端基准测试。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Hybrid approaches combining deep learning and traditional optimization",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.12567v1",
+      "title": "Accelerating materials discovery using foundation model based In-context active learning",
+      "abstract": "Active learning (AL) has emerged as a powerful paradigm for accelerating materials discovery by iteratively steering experiments toward the most promising candidates, reducing costly synthesis-and-characterization cycles. However, current AL relies predominantly on Gaussian Process (GP) and Random Forest (RF) surrogates with complementary limitations: GP underfits complex composition--property landscapes due to rigid kernel assumptions, while RF produces unreliable uncertainty estimates in small-data regimes, precisely where most materials datasets reside (with < 500 samples). Here we propose foudaiton model based In-Context Active Learning (ICAL), replacing conventional surrogates with TabPFN, a transformer-based foundation model pre-trained on millions of synthetic tasks to meta-learn a universal prior over tabular data. TabPFN performs principled Bayesian inference in a single forward pass without dataset-specific retraining, delivering well-calibrated predictive uncertainty where GP and RF fail most severely. Benchmarked against GP and RF across 10 materials datasets spanning copper alloy hardness and electrical conductivity, bulk metallic glass-forming ability, and crystal lattice thermal conductivity, TabPFN wins on 8 out of 10 datasets, achieving a mean saving of 52\\% in extra experiments/evaluations relative to GP and 29.77% relative to RF. Cross-validation analysis confirms that TabPFN's advantage stems from superior uncertainty calibration,achieving the lowest Negative Log-Likelihood and Area Under the Sparsification Error curve among all surrogates. Our work demonstrates that a pre-trained foundation model can serve as a highly effective surrogate for accelerating active learning-based materials discovery.",
+      "authors": [
+        "Jeffrey Hu",
+        "Rongzhi Dong",
+        "Ying Feng",
+        "Ming Hu",
+        "Jianjun Hu"
+      ],
+      "primary_category": "cond-mat.mtrl-sci",
+      "categories": [
+        "cond-mat.mtrl-sci",
+        "cs.LG"
+      ],
+      "published": "2026-03-13T01:57:09+00:00",
+      "link": "https://arxiv.org/pdf/2603.12567v1",
+      "tags": [
+        "keyword:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "foundation model based in-context learning for discovery",
+      "llm_evidence_cn": "基于基础模型的上下文学习用于发现任务",
+      "llm_evidence": "基于基础模型的上下文学习用于发现任务",
+      "canonical_evidence": "基于基础模型的上下文学习用于发现任务",
+      "llm_tldr_en": "Applies transformer-based foundation models for in-context active learning to accelerate materials discovery.",
+      "llm_tldr_cn": "应用基于Transformer的基础模型进行上下文主动学习，以加速材料发现过程。",
+      "llm_tldr": "应用基于Transformer的基础模型进行上下文主动学习，以加速材料发现过程。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "In-context learning for combinatorial optimization problems",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.19163v1",
+      "title": "cuGenOpt: A GPU-Accelerated General-Purpose Metaheuristic Framework for Combinatorial Optimization",
+      "abstract": "Combinatorial optimization problems arise in logistics, scheduling, and resource allocation, yet existing approaches face a fundamental trade-off among generality, performance, and usability. We present cuGenOpt, a GPU-accelerated general-purpose metaheuristic framework that addresses all three dimensions simultaneously.   At the engine level, cuGenOpt adopts a \"one block evolves one solution\" CUDA architecture with a unified encoding abstraction (permutation, binary, integer), a two-level adaptive operator selection mechanism, and hardware-aware resource management. At the extensibility level, a user-defined operator registration interface allows domain experts to inject problem-specific CUDA search operators. At the usability level, a JIT compilation pipeline exposes the framework as a pure-Python API, and an LLM-based modeling assistant converts natural-language problem descriptions into executable solver code.   Experiments across five thematic suites on three GPU architectures (T4, V100, A800) show that cuGenOpt outperforms general MIP solvers by orders of magnitude, achieves competitive quality against specialized solvers on instances up to n=150, and attains 4.73% gap on TSP-442 within 30s. Twelve problem types spanning five encoding variants are solved to optimality. Framework-level optimizations cumulatively reduce pcb442 gap from 36% to 4.73% and boost VRPTW throughput by 75-81%.   Code: https://github.com/L-yang-yang/cugenopt",
+      "authors": [
+        "Yuyang Liu"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.DC"
+      ],
+      "published": "2026-03-19T17:19:21+00:00",
+      "link": "https://arxiv.org/pdf/2603.19163v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "GPU-accelerated framework for combinatorial optimization metaheuristics",
+      "llm_evidence_cn": "用于组合优化的GPU加速通用元启发式框架",
+      "llm_evidence": "用于组合优化的GPU加速通用元启发式框架",
+      "canonical_evidence": "用于组合优化的GPU加速通用元启发式框架",
+      "llm_tldr_en": "Presents cuGenOpt, a high-performance GPU framework for general-purpose combinatorial optimization.",
+      "llm_tldr_cn": "推出cuGenOpt，一个兼顾通用性与高性能的GPU加速组合优化元启发式框架。",
+      "llm_tldr": "推出cuGenOpt，一个兼顾通用性与高性能的GPU加速组合优化元启发式框架。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Neural Combinatorial Optimization (NCO) methods and frameworks",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2603.13612v1",
+      "title": "LLM Routing as Reasoning: A MaxSAT View",
+      "abstract": "Routing a query through an appropriate LLM is challenging, particularly when user preferences are expressed in natural language and model attributes are only partially observable. We propose a constraint-based interpretation of language-conditioned LLM routing, formulating it as a weighted MaxSAT/MaxSMT problem in which natural language feedback induces hard and soft constraints over model attributes. Under this view, routing corresponds to selecting models that approximately maximize satisfaction of feedback-conditioned clauses. Empirical analysis on a 25-model benchmark shows that language feedback produces near-feasible recommendation sets, while no-feedback scenarios reveal systematic priors. Our results suggest that LLM routing can be understood as structured constraint optimization under language-conditioned preferences.",
+      "authors": [
+        "Son Nguyen",
+        "Xinyuan Liu",
+        "Ransalu Senanayake"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-03-13T21:39:22+00:00",
+      "link": "https://arxiv.org/pdf/2603.13612v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "LLM routing formulated as a MaxSAT combinatorial optimization problem",
+      "llm_evidence_cn": "将大模型路由建模为 MaxSAT 组合优化问题",
+      "llm_evidence": "将大模型路由建模为 MaxSAT 组合优化问题",
+      "canonical_evidence": "将大模型路由建模为 MaxSAT 组合优化问题",
+      "llm_tldr_en": "Interprets LLM routing as a weighted MaxSAT problem to satisfy natural language constraints.",
+      "llm_tldr_cn": "将大模型路由解释为加权 MaxSAT 问题，以满足自然语言约束。",
+      "llm_tldr": "将大模型路由解释为加权 MaxSAT 问题，以满足自然语言约束。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Integrating large language models with combinatorial optimization solvers",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.12677v2",
+      "title": "MetaKE: Meta-learning Aligned Knowledge Editing via Bi-level Optimization",
+      "abstract": "Knowledge editing (KE) aims to precisely rectify specific knowledge in Large Language Models (LLMs) without disrupting general capabilities. State-of-the-art methods suffer from an open-loop control mismatch. We identify a critical \"Semantic-Execution Disconnect\": the semantic target is derived independently without feedback from the downstream's feasible region. This misalignment often causes valid semantic targets to fall within the prohibited space, resulting in gradient truncation and editing failure. To bridge this gap, we propose MetaKE (Meta-learning Aligned Knowledge Editing), a new framework that reframes KE as a bi-level optimization problem. Departing from static calculation, MetaKE treats the edit target as a learnable meta-parameter: the upper-level optimizer seeks a feasible target to maximize post-edit performance, while the lower-level solver executes the editing. To address the challenge of differentiating through complex solvers, we derive a Structural Gradient Proxy, which explicitly backpropagates editability constraints to the target learning phase. Theoretical analysis demonstrates that MetaKE automatically aligns the edit direction with the model's feasible manifold. Extensive experiments confirm that MetaKE significantly outperforms strong baselines, offering a new perspective on knowledge editing.",
+      "authors": [
+        "Shuxin Liu",
+        "Ou Wu"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI"
+      ],
+      "published": "2026-03-13T05:47:00+00:00",
+      "link": "https://arxiv.org/pdf/2603.12677v2",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "LLM knowledge editing via bi-level optimization",
+      "llm_evidence_cn": "通过双层优化进行大语言模型知识编辑",
+      "llm_evidence": "通过双层优化进行大语言模型知识编辑",
+      "canonical_evidence": "通过双层优化进行大语言模型知识编辑",
+      "llm_tldr_en": "Reframes LLM knowledge editing as a bi-level optimization problem to align semantic targets.",
+      "llm_tldr_cn": "将大语言模型知识编辑重构为双层优化问题，以对齐语义目标。",
+      "llm_tldr": "将大语言模型知识编辑重构为双层优化问题，以对齐语义目标。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Large Language Models (LLM) for optimization tasks",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

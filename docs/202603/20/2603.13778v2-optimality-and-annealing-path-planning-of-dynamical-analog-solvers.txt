@@ -1,0 +1,542 @@
+Title: Optimality and annealing path planning of dynamical analog solvers
+
+URL Source: https://arxiv.org/pdf/2603.13778v2
+
+Published Time: Wed, 18 Mar 2026 00:40:06 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+# Optimality and annealing path planning of dynamical analog solvers 
+
+Shu Zhou, 1 K. Y. Michael Wong, 1, ∗ Juntao Wang, 1 David Shui Wing Hui, 2 Daniel Ebler, 2 and Jie Sun 2
+
+> 1
+
+Department of Physics, The Hong Kong University of Science and Technology, Hong Kong SAR, China. 
+
+> 2
+
+Theory Lab, Central Research Institute, 2012 Labs, Huawei Technologies Co. Ltd., Hong Kong SAR, China. 
+
+Recently proposed analog solvers based on dynamical systems, such as Ising machines, are promis-ing platforms for large-scale combinatorial optimization. Yet, given the heuristic nature of the field, there is very limited insight on optimality guarantees of the solvers, as well as how parameter schedules shape dynamics and outcomes. Here, we develop a dynamical mean-field framework to analyze Ising-machine dynamics for finding the ground state energy of the Sherrington-Kirkpatrick (SK) model of spin glasses and identify mechanisms that enable rapid convergence to provenly near-optimal energies. For a fixed target energy density Ec, we show that solutions are typically reached within O(1) matrix vector multiplications, indicating constant time complexity. We further delin-eate theoretical limitations arising from different parameter-scheduling trajectories and demonstrate a pronounced benefit of temperature-only annealing for the Coherent Ising Machine. Building on these insights, we propose a general framework for designing optimized parameter schedules, thereby improving the practical effectiveness of Ising machines for complex optimization tasks. The superior performance of the dynamical solvers is illustrated by the attainment of the ground state energy of the SK model. 
+
+I. INTRODUCTION 
+
+Discrete optimization problems that can be formu-lated as Ising Hamiltonians have found broad applicabil-ity across various real-world domains, including informa-tion processing [1], route planning [2], protein folding[3], and machine learning [4]. The problem objective can be written as min 
+
+> σ∈{− 1,+1 }N
+
+− 12
+
+X
+
+> ij
+
+σiJij σj
+
+ , (1) where the optimization variables are Ising spins σ ∈{± 1}N , which are coupled through the problem matrix [Jij ]N ×N . The search for the spin configurations that minimize this Hamiltonian is widely regarded as compu-tationally intractable for classical computers [5, 6]. Recently, with the development of new computational paradigms such as quantum and quantum-inspired com-puting, there is an upsurge of interest in non-Von-Neumann computing schemes to solve discrete optimiza-tion problems efficiently. Concretely, such schemes sim-ulate the dynamics of classical or quantum variables, re-ferred to as (analog) spins, and map them to their Ising counterparts via nonlinear activation functions. The Ising energy after mapping is referred to as the decoded energy. Various types of such devices have emerged, leveraging different physical spin hardware [7]. Examples include quantum annealers based on superconducting cir-cuits [8–11], digital systems utilizing special-purpose clas-sical processors [12–17], and optical Ising machines em-ploying pulse lasers [18–20]. Among these, the Coher- 
+
+> ∗phkywong@ust.hk
+
+ent Ising Machine (CIM) stands out as a notable ex-ample, demonstrating superior scalability and efficiency [21, 22]. Numerous CIM variations [7, 23–26] and theo-retical studies [27–29] have recently been proposed. Yet, despite advances in understanding steady states, the de-sign of dynamical algorithms remains largely intuitive. The annealing schedule, crucial for guiding the system from high to low entropy via gain parameter adjust-ment [20], is often obstructed by metastable states [28] and gaps in spin distributions [29] that restrict necessary spin flips. To circumvent these convergence issues, a tech-nique known as Chaotic Amplitude Control (CAC) [27] was introduced, utilizing sophisticated parameter tuning and specially designed dynamics, and has shown promise in numerical scaling experiments [17]. Nevertheless, the systematic scaling of Ising machine precision with net-work size remains unknown from both theoretical and experimental perspectives. This highlights the necessity for a systematic dynamical framework to evaluate per-formance—specifically, to determine how solution quality correlates with the machine’s dynamical evolution. In this paper, we derive an annealing schedule that is optimal for a given machine. In contrast to the widely used approach in the literature of varying only the linear gain a with weak noise during the dynamics [7, 20, 27, 28], our analysis shows that gain-only schedules are generally suboptimal for typical platforms (e.g., CIMs) and, cru-cially, do not guarantee the polynomial-time performance indicated above. This highlights the importance of coor-dinated scheduling—most notably, slow temperature an-nealing—in achieving robust, scalable optimization. A key insight is the pivotal role of the density of near-zero soft spins during the evolution. To capture this effect, we introduce the concept of the effective gap, which connects theory to experiment and provides infor-mation for parameter scheduling. For CIMs, our analysis 
+
+> arXiv:2603.13778v2 [cond-mat.dis-nn] 17 Mar 2026
+
+2provide an optimal schedule that anneals only the noise, without tuning the linear gain a—in contrast to common practice [7, 20, 27, 28]. We also extend the framework to broader Ising-machine architectures and find an excep-tion where theory does recommend dynamically tuning the linear gain a during operation. Our study of how the dynamics of Ising machines determines the accuracy of the output in optimization tasks is based on the search for ground state energy of the Sherrington-Kirkpatrick (SK) model [30, 31] of spin glasses. As a prototype of an optimization prob-lem, the complex energy landscape of the SK model is typical of general combinatorial optimization prob-lems [32–34], and the numerical value of its ground state energy is well known for benchmarking [32–34]. Us-ing the dynamical mean-field theory developed by Som-polinsky et al. [35, 36], we model the CIM using a soft-spin Ginzburg–Landau mean-field dynamics. This yields time-dependent expressions for the decoded energy across several Ising-machine protocols. Using these expressions, together with Monte Carlo and numerical experiments, we find that the decoded energy reaches the target value in an average of O(1) steps of matrix vector multipli-cation, each with O(N 2) operations. Furthermore, we found that the required precision of the CIM dynamics at finite time scales with the system size in the same man-ner as the finite-size scaling of the ground state energy. The significance of this result is highlighted by consid-ering recent algorithmic developments, in which message-passing methods produce solutions that are arbitrarily close to the ground state with time complexity C(ϵ)N 2
+
+where ϵ is the fractional discrepancy with the ground state [37–39]. This demonstrates that despite the NP-hardness of Ising optimization in the worst case, near-optimal solutions are attainable in polynomial time for mean-field models. These schemes rely on oracle access to the Parisi functional minimizer [40, 41]. Although this minimizer has been extensively studied within the con-text of the SK model, such a dependency may limit the applicability of these methods to more general practi-cal scenarios. [40, 41]. In this context, our results suc-cessfully capture the desired behavior in physical Ising machines, thereby translating this theoretical advantage into experimentally relevant dynamics. The remainder of this paper is organized as follows: In Section 2, we introduce our methodology and derive the dynamic mean-field expression for the decoded Ising en-ergy. Section 3 presents an analysis of the system’s time complexity, raising the fundamental question on the ac-cessibility of a target energy for a given Ising machine. To address this, Sections 4 and 5 unveil the soft-hard spin dichotomy mechanism and identify the dynamical bar-rier to evolution, which we define as the ‘effective gap’. Based on these findings, we propose an optimal anneal-ing path through temperature annealing for CIMs that outperforms conventional approaches via gain annealing. In Section 6, we demonstrate that this framework can yield different optimal annealing paths for different sys-tems and illustrate the phenomenon of barrier exposure. Finally, in Section 8, utilizing the techniques developed in previous sections, we answer the question raised in Sec-tion 3 through asymptotic numerical analysis, providing evidence that Ising machines can access the ground state with an error margin ϵ ≪ 1 within polynomial time.  
+
+> II. DYNAMICAL MEAN-FIELD THEORY (DMFT)
+
+We first consider the example of CIM, which is gov-erned by the following dynamical equation: 
+
+dx i
+
+dt = −x3 
+
+> i
+
++ ax i + ξ
+
+> N
+
+X 
+
+> j=1 ,j ̸=i
+
+Jij xj + hi + ζi. (2) where xi represents the state of the i-th spin, a is a gain coefficient, and ξ denotes the coupling strength [20]. The noise term ζi is modeled as white noise characterized by a temperature T , satisfying ⟨ζi(t)⟩ = 0 and ⟨ζi(t)ζj (t′)⟩ =2T δ ij δ(t − t′). Additionally, we focus on Ising problems defined by the SK model, where the couplings Jij are drawn from a Gaussian distribution with zero mean and variance J2/N [30, 31]. hi is an external field set to be 0. Such a system shares the mathematical structure of the time-dependent soft-spin Ginzburg–Landau model, ana-lyzed by Sompolinsky and Zippelius to characterize the spin-glass phase of the SK model in equilibrium [35, 36]. Referred to as the dynamical mean-field theory (DMFT), this methodology traces the evolution of a generating functional to extract the dynamical variables of the sys-tem [42–44]. It was later applied to the dynamics of models such as the p-spin glass [45]. The Ising configuration is read out from the signs of the analog spins si = sgn( xi). The associated Ising energy is then HN := − 12N
+
+P 
+
+> ij
+
+sgn( xi)Jij sgn( xj ). We refer to this quantity as the decoded energy. Extending this frame-work, we incorporate a dummy source field into the gen-erating functional; this field is conjugate to the decoded energy and serves to track its dynamical evolution. Using DMFT [42–44] (see Appendix A for details), the mean field effective expression for the CIM is obtained in the spirit of Refs. [35, 36]: 
+
+∂tx(t) = −x3(t) + ax (t) + J2ξ2
+
+Z tt0
+
+dt ′G(t, t ′)x(t′) + ϕ(t).
+
+(3) Here, ϕ represents a colored noise with ⟨ϕi(t)ϕi(t′)⟩ =2T δ (t − t′) + J2ξ22Q(t, t ′). The term Q(t, t ′) := 
+
+⟨x(t)x(t′)⟩ is the correlation function, which character-izes the mean similarity between the soft spin states at times t and t′. Meanwhile, G(t, t ′) := ⟨∂x (t)/∂h (t′)⟩3                
+
+> FIG. 1. (a) Comparison of the diagonal terms of the corre-lation function Qand the variance of soft spins measured in CIM experiments. (b) Comparison of the decoded energy ob-tained from Eq. (4) with experimental results from the CIM. The dashed line represents the ground state energy of the SK model in the thermodynamic limit. (c) Dependence of the response function ∂x (t)/∂h (t′) on the value of soft spins
+> x(t). All above simulations were executed using the Euler-Maruyama method with a step size 0.02, a= 0, T= 1 e−5,
+> N= 2000. (d) SimCIM’s dependence of the response func-tion ∂x (t)/∂h (t′) on the value of the soft spins x(t).
+
+is the response function, describing how the system at time t responds to an infinitesimal perturbation applied at time t′. Due to causality, G(t, t ′) = 0 when t′ > t . In comparison with Eq. (2), this mapping replaces spatial couplings among soft spins with temporal correlations to their history. This construction extends naturally to other Ising machines such as those in Eq. (5), and (E1). For instance, adding a pre-processing clipping function 
+
+φ(x) = max( −1, min(1 , x )) to Eq. (3) yields clipCIM [23], while removing the cubic term leads to simCIM [25, 29] (i.e. Eq. (5)). We also obtain a closed DMFT expression for the de-coded energy: 
+
+Edec (t) = −
+
+Z t
+
+> 0
+
+ ∂ sgn x(t)
+
+∂h (t′)
+
+
+
+⟨sgn x(t)x(t′)⟩ dt ′, (4) This formulation clarifies the interplay between the re-sponse function and the time correlations between a soft spin and its decoded value.  
+
+> III. TIME DEPENDENCE OF THE DECODED ENERGY
+
+We benchmark the theory by Monte Carlo simulations of both Eq. (2) and Eq. (3). As shown in Fig. 1(a, b), the predictions for the diagonal of the correlation matrix Q and the early-time decoded energy are in ex-cellent agreement. We note that the response function 
+
+∂x (t)/∂h (t′) of individual nodes in CIM exhibit large variance in Fig. 1. Nevertheless, the Green’s function 
+
+G(t, t ′) is well behaved after averaging ∂x (t)/∂h (t′). The term ⟨∂ sgn x(t)/∂h (t′)⟩ in Eq. (3) has the same behav-ior. Hence, the decoded energy can be obtained directly from Eq. (3). As shown in Eq. (4) in the large-N limit, both the decay of the expected decoded energy toward its target and the expected time to reach it are inde-pendent of system size (see the blue line in Fig. 1(b) ) for a fixed parameter set, the expected hitting time for a target decoded energy Edec is also size-independent, i.e., t(Edec )N ≡ t(Edec ). In our numerical experiments, we confirmed that convergence of the dynamics can be achieved in O(1) iterations. Each iteration involves ma-trix vector multiplication with O(N 2) operations. Thus, the total number of operations required is t(Edec )N 2[46]. Even with a size-independent hitting time, the accessi-bility of a target decoded energy Edec remains nontrivial. In particular, a practical issue is to determine the accessi-ble target decoded energy window that an Ising machine can attain within a limited number of iterations. From Fig. 1(b), within 500 steps and for the considered param-eter set, the lowest decoded energy reached remains far above the SK model’s mean-field ground state. A prag-matic approach is to benchmark by sampling a sufficient number of long-time runs, as we will show later. Be-low, we first provide theoretical insights that reveal fun-damental mechanisms and performance barriers of Ising machines.  
+
+> IV. SOFT AND HARD SPINS
+
+An important element in the dynamics of the mean-field model is the history-dependent response function (or so called Onsager reaction [47]) for each spin xi, de-fined as the Green’s function Gi(t, t ′) := ∂x i(t)/∂h i(t′). In Fig. 1(c)[48], the heterogeneity of the responses in-creases with time. Figure 1(d) shows that the situation in simCIM (to be presented in a later section) is similar, except that bands of response functions appear due to the presence of bounds. More significantly, Fig. 1(c) illustrates the different be-haviors of spins with small and large amplitudes. In the figure, spins with smaller amplitudes |x| exhibit larger responses, while large-amplitude spins are more robust to perturbations and display weaker history dependence. A closely related soft–hard dichotomy was reported nu-4merically in [49], where spins with smaller amplitudes are more likely to flip their signs when the gain a in-creases and are thus labeled as ”swing nodes”. On the other hand, spins with larger amplitudes are more likely to keep their signs during gain increase, and are labeled as ”trapped nodes”. Here, we observe similar behaviors but at fixed gains during the dynamical process. These observations lead us to interpret the dynamical process as follows: spins with large amplitudes will first stabilize, reducing the dynamics to a subspace spanned by the smaller-amplitude (soft) spins. These soft spins can then evolve rapidly and in parallel, consistent with the elevated response values observed in Fig. 1. Notably, this dichotomy can be even more pronounced in Ising ma-chines that employ clipping mechanism φ(x): once hard spins hit the boundary, they become effectively response-less and make zero contributions to the Onsager reaction (see Fig. 1(d) and Eq. (6)).  
+
+> V. GAP OPENING
+
+In the above discussion, we argued that the final ap-proach to the target decoded energy is dominated by the dynamics of soft spins within the reduced subspace. In the extreme limit where soft spins vanish altogether, the system freezes and the decoded energy stops evolv-ing. At equilibrium, we refer to this phenomenon as “gap opening” as discussed in our previous work [29], or ”hard phase” according to [28]. Dynamically, this behavior can be further understood via Eq. (4). As derived in Appendix B, the zero-crossing rate μ(t) is proportional to the spin density at x = 0. When a gap opens in the distribution at a specific instant t′,the spin density at x(t′) = 0 vanishes, rendering fur-ther spin flips impossible. Consequently, the response term ⟨∂ sgn x(t)/∂h (t′)⟩ = 2⟨δ(x(t)) ∂x (t)/∂h (t′)⟩ also vanishes for all subsequent times t > t ′, as the trajec-tory x(t) no longer contributes to the Dirac delta distri-bution at 0. Under these conditions, the decoded energy ceases to decrease. Therefore, maintaining a finite den-sity of near-zero spins throughout the evolution is crucial to avoid dynamical stagnation and ensure continuous en-ergy reduction. Equilibrium analysis shows that, in the thermody-namic limit, a true gap (vanishing zero-crossing rate) opens only in the noiseless limit, β → ∞ . In practice, however, CIM dynamics always operate with a small but nonzero noise level, either via deliberate injection or imposed by hardware constraints [20]. Under these conditions, any gapped spin-amplitude distribution is smoothed: noise continually replenishes the zero-crossing rate, which therefore never strictly vanishes. As a result, a rigorously defined gap does not arise in dynamics, and the updating of Ising states never fully halts. Even so, for finite systems the evolution can become      
+
+> FIG. 2. The decoded energy contours and effective gap lines of the CIM. Path 1 represents the conventional strategy of adjusting the parameter a, while Path 2 represents annealing solely by temperature. Both paths aim at the same termina-tion point (the red dot at high aand T) but are prematurely halted by the effective gap. Notably, path 2 reaches a lower decoded energy than path 1 when they are halted at the same effective gap contour.
+
+too slow to matter, i.e., a practical infinity for t(Edec ) for desired values of Edec . While updates persist in principle, the density of near-zero spins can drop to negligible lev-els, rendering the dynamics effectively frozen. We refer to this as an effective gap and use the ensemble zero-crossing rate μ(t) as its primary indicator. For an N -spin quasi-equilibrium system, the expected waiting time to flip an Ising spin scales as 1 /(N μ (t)) [50]. Thus, a sufficiently small μ(t) signals the onset of the effective gap, where meaningful evolution has essentially ceased, and provides a sufficient condition for the practical inaccessibility of a target energy Edec .
+
+Figure 2 shows the contours of the effective gap given by chosen values of P0 for small zero-crossing rates in the ( a, T ) phase space for the CIM at quasi-equilibrium, based on our theoretical calculations [51]. This contour plot elucidates the discrepancy between zero-temperature equilibrium theory and experimental observations, while providing practical guidance for pa-rameter scheduling in Ising machines. Our analysis par-ticularly demonstrates that slow temperature annealing constitutes a better strategy for CIM . A common CIM implementation initializes the param-eter a with a small value where the energy landscape is sufficiently simple to facilitate finding the global mini-mum at the beginning. The parameter a is subsequently increased gradually [7], while maintaining constant low noise. It is commonly assumed that sufficiently slow adjustment of a enables the Ising machine to preserve its ground state despite increasing landscape complexity, 5consistent with adiabatic evolution principles [20, 27]. However, equilibrium analysis reveals that the ground 
+
+> FIG. 3. An illustration of the distributional evolution of CIM. Panel (a) fixes T = 0.03 and anneals a; panel (b) fixes a = 0.5 and anneals T.
+
+state of the CIM can only be reached at significantly large a and T = 0 [49]. As demonstrated by [28], in the noiseless case, the parameter a schedule should ter-minate at −0.45 for the SK model in CIMs, correspond-ing to the true gap, where all near-zero soft spins van-ish. While noise enables Ising machines to progress be-yond this threshold, the effective gap nevertheless im-pedes further reduction in decoded energy. Specifically, once the system traverses the effective gap boundary, the timescale required to maintain the ground state or target energy Edec becomes computationally prohibitive, scaling at least as O(1 /N μ ). Beyond this critical point, further increasing parameter a yields no performance en-hancement and instead induces additional computational slowdown. The process of gap formation demonstrated in Fig. 3 illustrates the difference. For gain annealing illustrated in Fig. 3(a), the gap has already opened before the CIM reaches the target decoded energy, whereas for tempera-ture annealing in Fig. 3(b), the spin density at x = 0 re-mains nonzero up to the instant the CIM reaches the tar-get decoded energy, ensuring nonzero equilibration prob-abilities. With the help of the effective gap contours in the phase space, we are able to design a more effective annealing schedule that involves not only adjusting the parameter 
+
+a but also the temperature. From the previous analysis, one can overlay the effective gap contours with theoret-ically achievable decoded energy contours. As shown in Fig. 2, we observe that the energy contours are more slanted compared to the effective gap contours. This in-dicates that strategies involving horizontal adjustments of parameters (modifying a alone) are more likely to be halted early by the effective gap. In contrast, vertical strategies (temperature annealing) are affected at a later stage and offer a more reliable path to optimization [52]. This result is consistent with numerical experiments. As shown in Fig. 4 for the SK model, we compare three       
+
+> FIG. 4. Comparison of decoded energy profiles obtained via different parameter-tuning strategies across varying time scales. Data points represent the mean value of the decoded energy from the final step across 20 independent runs with the same annealing protocol for SK models of N= 2000. De-tailed parameter settings can be found in Appendix C. The dashed line represents the ground truth. aemarks the termi-nal point of a. Panel (a) corresponds to the gapless regime, (b) aligns with the gap opening at zero temperature, and (c) and (d) represent gap-opened regime. Shaded areas indicate the range of maximum and minimum values observed.
+
+parameter-tuning strategies: (i) increasing a to ae at a fixed, low temperature (Path 1 in Fig. 2), (ii) anneal-ing the temperature while keeping ae high and constant (Path 2 in Fig. 2), and (iii) maintaining both T and ae
+
+as constants. Each strategy was independently tested with varying total run times, as represented on the x-axis. Longer time scales yield smoother parameter ad-justments and improved performance. In Fig. 4(a) and (b), the terminal points lie out-side the region enclosed by the effective gap contour of 
+
+O( 1 
+
+> N
+
+), avoiding early termination by the contour. Conse-quently, with sufficiently long run times, adjusting either 
+
+T or a achieves comparable performance. In contrast, in Fig. 4(c) and (d), early termination by the effective gap causes T annealing to outperform a tuning on longer time scales. More details about experiment settings and results are provided in the Appendix C.  
+
+> VI. EXPOSED VERSUS HIDDEN DECODED ENERGY
+
+As described in the previous section, if the state of the target decoded energy is hidden in the region enclosed by the effective gap contour in the space of a and T , then the annealing process, either by annealing the gain or temperature or both, cannot access the target state, and 6we observe that for CIM, temperature annealing ends up at a lower decoded energy on the effective gap contour. On the other hand, if the state with the target decoded energy is exposed by the effective gap contour, i.e., lo-cated at the boundary or outside the hidden region, then scheduling a can achieve comparable or even better per-formance than scheduling T .We demonstrate such a behavior in simCIM [25], which has been implemented on digitized hardware. Its dynam-ics is governed by 
+
+dx i
+
+dt = aφ (xi) + X
+
+> j
+
+Jij φ(xj ), (5) where the clipping function is defined as φ(x) = x for 
+
+|x| ≤ 1 and sgn x otherwise, and the cubic saturation term is avoided in the dynamics. The DMFT expression of simCIM can be derived as the same manner, it reads: 
+
+∂tx(t) = ax (t) + J2ξ2
+
+Z tt0
+
+dt ′G(t, t ′)x(t′) + ϕ(t); 
+
+x(t) = φ(x(t)) .
+
+(6) The decoded energy expression is also consistent with Eq. (4), while the soft–hard spin classification and the response function distribution are shown in Fig. 3(d). In simCIM, the optimal target decoded energy is lo-cated at the gapless-binary transition point ( a, T ) =(0 , 0) [29], implying that it lies exactly on the effective gap contour with P (0) = 0. Envisaging the adoption of an effective gap contour with P (0) approaching 0 in numerical experiments, it is possible that the annealed states can get arbitrarily close to the optimal point. In such cases, appropriately annealing by either tempera-ture or gain can lead to decoded energies approaching optimum, as shown in Fig. 5(a).   
+
+> FIG. 5. Comparison of decoded energy profiles obtained via different parameter-tuning strategies across varying time scales for simCIM. Each data point consists of 20 independent trials conducted under different total running time scales, as represented on the x-axis.
+
+Apparently, this picture of an exposed optimal state is inconsistent with the gap-opening scenario presented in the previous section, which is common in many Ising ma-chines. This is because normally the spins of the optimal state has a binary distribution separated by a wide gap, implying that P (0) should have vanished in the vicinity of the optimal state in the space of a and T .
+
+> FIG. 6. Schematic plot of the decoded energy contour at the ground state (blue line) and an effective gap contour (red line) of simCIM. The effective gap contour is closely aligned with the ground-state contour near the origin.
+
+How can the optimal state in simCIM be exposed by the effective gap? Remarkably, gap formation in simCIM goes through an alternative scenario, in which the spin distribution in the neighborhood of x = 0 is continuously reduced when a increases, instead of disappearing discon-tinuously. From equilibrium analysis [29], we establish that at zero temperature, near-zero soft spins in the sim-CIM system vanish only when the ground state becomes accessible, corresponding to ( a, T ) = (0 , 0) [53]. Prior to this point, a finite zero-crossing rate persists even in the absence of noise. We conceptually illustrate the relation-ship between the decoded energy contours and the effec-tive gap contour for simCIM in Fig. 6. Consequently, near ( a, T ) = (0 , 0), the effective gap boundary closely coincides with the lowest decoded energy contour, as il-lustrated at the terminal of Path 1 and Path 2 in Fig. 6. This alignment implies that slow annealing of a yields comparable performance to temperature annealing when terminating at ( a, T ) = (0 , 0), as evidenced by Fig. 5(a). However, for termination at a > 0 and T = 0, continu-ous annealing of a provides no performance enhancement. Conversely, temperature annealing exhibits reduced effi-cacy due to the effective gap emergence (see Path 3 and the blue curve in Fig. 5(b)). We observe that the strategies and conclusions dis-cussed above are not limited to the SK model but have general applicability. We validated this on the Gset benchmark; the results are available in Appendix D.  
+
+> VII. SCALING FUNCTION OF DECODED ENERGY
+
+We have discussed the planning of optimal pathways for annealing in Ising machines. The remaining issue is how the resultant decoded energy depends on time. Re-7                       
+
+> FIG. 7. Energies obtained by simCIM using the Eu-ler–Maruyama method (step size 0.1) with 100,000 and 1,000,000 iterations. For each system size, N = 750, 1000, 1250, 2000, and 4000, we evaluate 200 independent SK in-stances and perform 30 runs per instance. Data points report the decoded energy averaged over the 30 runs and then av-eraged across instances. Error bars show, for each instance, the mean of the minimum and maximum decoded energies observed over the 30 runs. The red line denotes the mean ground-state energy with finite-size corrections reported in Ref. [54]. The green dotted line indicates the fit for the ex-pected minimum value after 10 6iterations, yielding an ex-trapolated infinite-size value of −0.76307 ±0.00018
+
+markably, for a family of models, we note that the finite-time decoded energy of a model approaches its asymp-totic value at the same rate as the family of models in the large N limit. This implies that knowing the convergence behavior of the large N models is useful for estimating the convergence behavior of the models of arbitrary size. To see this, we note that Eq. (4), derived from DMFT, implies that the decoded energy decay is independent of system size. While strictly valid only in the thermody-namic limit ( N → ∞ ), we observe that the energy den-sity evolution is largely insensitive to finite-size effects for large N . This justifies the approximation: 
+
+Edec (t, N )−Edec (∞, N ) ≈ lim   
+
+> N→∞
+
+(Edec (t, N ) − Edec (∞, N )) ,
+
+(7) where Edec (t, N ) denotes the decoded energy obtained by the Ising machine at time t for a system of size N . Essen-tially, the relaxation of the decoded energy toward equi-librium in a finite-size system approximates the behavior of the system in the thermodynamic limit. Consequently, in conjunction with the well-characterized scaling behav-ior of the SK model, one can investigate the solution qual-ity at finite time for arbitrary N . The finite-size scaling of the equilibrium ground-state energy for the SK model follows an N −2/3 power law, as derived theoretically [55] and numerically [32–34]: 
+
+Edec (∞, N ) ≈ E∞ + AN −2/3, (8) where E∞ = −0.7632 represents the ground-state energy of the infinite-size SK model and A = 0 .701. Here, we apply simCIM, generally believed to outper-form CIM [24, 29], by running 30 trials for each of 100 relaxations of SK instances at various system sizes, using path 2 as described in Fig. 6. As shown in Fig. 7, the decoded energies for given val-ues of t have linear relationships with N −2/3, sharing the same slope A with the finite-size scaling of the ground state energy. Extrapolating the linear relations to the intercept, we obtain the thermodynamic limit of the de-coded energies of finite times. We observed that the av-erage and minimum values of Edec (t, ∞) versus t can be approximated as power laws. In particular, 
+
+Edec (t, ∞) ≈ E∞ + Bt −ξ . (9) As shown in Fig. 8, Edec (t, ∞) has a very good power-law fit with t after subtracting the bias term E∞. For average values of Edec (t, ∞), we obtain E∞ = −0.7626 ± 0.0003, 
+
+B = 4 .657, and ξ = 0 .713, whereas for minimum values of Edec (t, ∞), we get E∞ = −0.7632 ±0.0003, B = 4 .656, and ξ = 0 .763. Thus, Eqs. (8 - 9) allow us to estimate the decoded energy at finite time for arbitrary N .Finally, applying the scaling relations of the dynamical cases enables us to compute the ground state energy of the Ising model at the thermodynamic limit with accu-racy matching state-of-the-art measurements [32–34, 54]. This is achieved by directly reading the value of E∞ from Eq. 9 for fitting the minimum values of Edec (t, ∞), as finding the minimal decoded energy in practice is a more common decoding method than finding the mean value. The value of E∞ = −0.76317 ± 0.00029 is close to the numerical estimate of the ground-state energy of -0.7632 [32–34, 54] and the theoretical estimate of -0.76317 [56]. It is also numerically consistent with the results of Ref. [37], where a message-passing algorithm is claimed to achieve near-optimal solutions arbitrarily close to the ground state in O(N 2) time. An even more accurate estimate of the ground-state energy is provided by digCIM [29] with shorter conver-gence time and higher success probability. The estimate by digCIM is −0.76317 ± 0.00015 (see Appendix E). Be-sides our work, several experimental variants of Ising machines report superior performance, including digCIM [29], dSBM [26], and CAC [27].  
+
+> VIII. CONCLUSION
+
+In summary, we analyzed the behaviors of dynamical optimization solvers by deriving their dynamical mean-field descriptions. To obtain a theoretically meaningful 8
+
+FIG. 8. The decoded energy lim N →∞ Edec (t, N ) ≡
+
+Edec (t, ∞), extrapolated to the infinite-size limit ( N → ∞ ) at various iteration steps for simCIM and digCIM. Experimen-tal parameters are consistent with Figs. 7 and 11. Squares indicate the mean energy, extrapolated from the average of 30 trials across 200 independent SK instances. Dots repre-sent the minimum energy, extrapolated from the best result obtained in 30 trials. Error bars indicate the standard error of the extrapolated values. Solid lines indicate fits to Eq. 9 for each dataset. Data are offset by -0.76323[32, 54], a slightly lower estimate of the SK ground-state energy, rather than by the individual fitted bias parameters. The y-axis represents the deviation from this reference value on a logarithmic scale. 
+
+description for finite-size systems, we introduced the con-cept of an effective gap, which can impede further energy reduction. We proposed using the density of near-zero soft spins as an indicator for the onset of this effective gap. By comparing decoded-energy contours with the emergence of the gap, we designed an optimal parameter-scheduling strategy for Ising machines. Notably, in con-trast to the conventional approach of annealing the gain, the optimal schedule for CIM annealing is through an-nealing the temperature. We also showed that this frame-work naturally generalizes to other platforms. On the other hand, our analysis of simCIM indicates that if the target decoded energy is exposed by the effective gap con-tour, annealing the parameter a is also effective. Across all cases, our theoretical predictions are in strong agree-ment with numerical experiments. We mention in passing that temperature annealing is also more advantageous than gain annealing in digCIM. We have shown that since system states in the regime of negative gain are isomor-phic with each other in digCIM [29], annealing the gain offers little help for convergence to the optimal solution, in contrast with temperature annealing. Building on this, we argued that Ising machines can reach near-optimal energies within time complex-ity t(Edec )N 2, exhibiting an algorithmic advantage com-parable to that of rigorously analyzed message-passing methods [38]. We further identified two key ingredients underlying this performance: the fixing of hard spins and simultaneous updating soft spins. In addition, we clari-fied the pivotal role of the zero-crossing rate of soft spins in driving improvements of the decoded energy. This study focused on gradient-descent dynamics. In machines using Hamiltonian dynamics with momentum, we expect similar asymptotic time-complexity advan-tages but with smaller constant factors, and extra pa-rameter scheduling; exploring this regime is an interest-ing direction for future work. 
+
+Acknowledgments This work is partially supported by a Huawei CSTT project. During the finalization of this manuscript, we became aware of a parallel work analyz-ing the CIM’s energy landscape for the SK model with ferromagnetic coupling via the laser gain parameter a
+
+[57]. That study provides valuable insights into the ge-ometry of annealed optimization, offering a perspective complementary to the one presented here. 
+
+[1] M. V. LeVine and H. Weinstein, Entropy 17 , 2895 (2015). [2] S. Bao, M. Tawada, S. Tanaka, and N. Togawa, in 2021 IEEE International Intelligent Transportation Systems Conference (ITSC) (2021) pp. 3704–3709. [3] K. Ooka and M. Arai, Nat. Commun. 14 , 6338 (2023). [4] J. D. Bryngelson and P. G. Wolynes, Proc. Natl. Acad. Sci. USA 84 , 7524 (1987). [5] F. Barahona, J. Phys. A: Math. Gen. 15 , 3241 (1982). [6] S. Arora, E. Berger, E. Hazan, G. Kindler, and M. Safra, in 46th Annual IEEE Symposium on Foundations of Computer Science (FOCS’05) (2005) pp. 206–215. [7] N. Mohseni, P. L. McMahon, and T. Byrnes, Nat. Rev. Phys. 4, 363 (2022). [8] T. Kadowaki and H. Nishimori, Phys. Rev. E 58 , 5355 (1998). [9] M. Johnson, M. Amin, S. Gildert, T. Lanting, F. Hamze, N. Dickson, R. Harris, A. Berkley, J. Johansson, P. Bunyk, E. Chapple, C. Enderud, J. Hilton, K. Karimi, E. Ladizinsky, N. Ladizinsky, T. Oh, I. Perminov, C. Rich, and G. Rose, Nature 473 , 194 (2011). [10] S. Boixo, T. F. Rønnow, S. Isakov, Z. Wang, D. Wecker, D. Lidar, J. Martinis, and M. Troyer, Nat. Phys. 10 
+
+(2013). [11] P. Hauke, H. G. Katzgraber, W. Lechner, H. Nishimori, and W. D. Oliver, Rep. Prog. Phys. 83 , 054401 (2020). [12] Y. Salath´ e, M. Mondal, M. Oppliger, J. Heinsoo, P. Kurpiers, A. Potoˇ cnik, A. Mezzacapo, U. Las Heras, L. Lamata, E. Solano, S. Filipp, and A. Wallraff, Phys. Rev. X 5, 021027 (2015). [13] J. Chou, S. Bramhavar, S. Ghosh, and W. Herzog, Sci. Rep. 9, 14786 (2019). [14] M. Yamaoka, C. Yoshimura, M. Hayashi, T. Okuyama, H. Aoki, and H. Mizuno, IEEE J. Solid-State Circuits 
+
+51 , 1 (2015). [15] M. Aramon, G. Rosenberg, E. Valiante, T. Miyazawa, H. Tamura, and H. Katzgraber, Front. Phys. 7, 48 (2019). [16] K. Yamamoto, k. kawamura, K. Ando, N. Mertig, T. Takemoto, M. Yamaoka, H. Teramoto, A. Sakai, 9
+
+S. Takamaeda-Yamazaki, and M. Motomura, IEEE J. Solid-State Circuits PP (2020). [17] T. Leleu, F. Khoyratee, T. Levi, R. Hamerly, T. Kohno, and K. Aihara, Commun. Phys. 4 (2021). [18] A. Marandi, Z. Wang, K. Takata, R. Byer, and Y. Ya-mamoto, Nat. Photonics 8, 937 (2014). [19] Y. Yamamoto, K. Aihara, T. Leleu, K.-i. Kawarabayashi, S. Kako, M. Fejer, K. Inoue, and H. Takesue, npj Quan-tum Inf. 3, 49 (2017). [20] Z. Wang, A. Marandi, K. Wen, R. Byer, and Y. Ya-mamoto, Phys. Rev. A 88 (2013). [21] T. Inagaki, Y. Haribara, K. Igarashi, T. Sonobe, S. Ta-mate, T. Honjo, A. Marandi, P. McMahon, T. Umeki, K. Enbutsu, O. Tadanaga, H. Takenouchi, K. Aihara, K.-i. Kawarabayashi, K. Inoue, S. Utsunomiya, and H. Take-sue, Science 354 (2016). [22] T. Honjo, T. Sonobe, K. Inaba, T. Inagaki, T. Ikuta, Y. Yamada, T. Kazama, K. Enbutsu, T. Umeki, R. Kasa-hara, K. ichi Kawarabayashi, and H. Takesue, Sci. Adv. 
+
+7, eabh0952 (2021). [23] F. B¨ ohm, T. Vaerenbergh, G. Verschaffelt, and G. Van der Sande, Commun. phys. 4, 149 (2021). [24] F. B¨ ohm, G. Verschaffelt, and G. Van der Sande, Nat. Commun. 10 , 3538 (2019). [25] E. S. Tiunov, A. E. Ulanov, and A. I. Lvovsky, Opt. Express 27 , 10288 (2019). [26] H. Goto, K. Endo, M. Suzuki, Y. Sakai, T. Kanao, Y. Hamakawa, R. Hidaka, M. Yamasaki, and K. Tat-sumura, Sci. Adv. 7, eabe7953 (2021). [27] T. Leleu, Y. Yamamoto, P. McMahon, and K. Aihara, Phys. Rev. Lett. 122 (2019). [28] A. Yamamura, H. Mabuchi, and S. Ganguli, Phys. Rev. X 14 , 031054 (2024). [29] S. Zhou, K. Y. M. Wong, J. Wang, D. S. W. Hui, D. Ebler, and J. Sun, arXiv preprint arXiv:2507.08533 (2025). [30] D. Sherrington and S. Kirkpatrick, Phys. Rev. Lett. 35 ,1792 (1975). [31] S. Kirkpatrick and D. Sherrington, Phys. Rev. B 16 , 4630 (1977). [32] S. Boettcher, Eur. Phys. J. B 46 , 501 (2005). [33] S. Kim, S. Lee, and J. Lee, Phys. Rev. B 76 , 184412 (2007). [34] M. Palassini, J. Stat. Mech: Theory Exp. 2008 , P10005 (2008). [35] H. Sompolinsky and A. Zippelius, Phys. Rev. Lett. 47 ,359 (1981). [36] H. Sompolinsky and A. Zippelius, Phys. Rev. B 25 , 6860 (1982). [37] A. E. Alaoui and A. Montanari, arXiv preprint arXiv:2009.11481 (2020). [38] A. Alaoui, A. Montanari, and M. Sellke, Ann. Probab. 
+
+49 (2021). [39] A. Montanari, SICOMP. 54 , FOCS19 (2025). [40] A. Auffinger and W.-K. Chen, Comm. Math. Phys. 335 ,1429 (2015). [41] M. Talagrand, Ann. Math. 163 , 221 (2006). [42] P. C. Martin, E. D. Siggia, and H. A. Rose, Phys. Rev. A 8, 423 (1973). [43] C. Chow and M. Buice, J. Math. Neurosci. 5 (2010). [44] D. Grzetic, R. Wickham, and A.-C. Shi, J. Chem. Phys. 
+
+140 , 244907 (2014). [45] L. F. Cugliandolo and J. Kurchan, Phys. Rev. Lett. 71 ,173 (1993). [46] The non-monotonicity observed in the theoretical re-sults at later evolutionary stages in Fig. 1 is attributed to the finite sampling inherent in the Monte Carlo method. With increasing time, the response matrix grows quadratically while the near-zero density dimin-ishes. This leads to increased variance in the estimator 
+
+⟨∂ sgn x(t)/∂h (t′)⟩, resulting in statistical fluctuations. [47] M. Opper and D. Saad, Advanced mean field methods : theory and practice (Cambridge (Mass.) : MIT press, 2001). [48] Because Gi(t, t ′) depends on the full trajectory, the figure appears as a scatter plot. [49] J. Wang, D. Ebler, K. Y. M. Wong, D. S. W. Hui, and J. Sun, Nat. Commun. 14 , 2510 (2023). [50] S. O. Rice, Bell Syst. tech. j. 23 , 282 (1944). [51] We utilized the first-step replica symmetry-breaking (1RSB) formula derived in our previous work to gener-ate the curve [29]. The theoretical values may exhibit a small bias relative to the true full-RSB results, but they are sufficient to capture the overall trend. More precise but qualitatively similar results can be obtained by run-ning Monte Carlo simulations according to Eq. 3 for suf-ficiently long durations and large samples. [52] This also suggests choosing the gain at the point where the decoded energy contour is tangent to the effective gap contour. [53] See the evolving spin distribution in Fig. 4(c) of Supple-mentary Material in [29]. [54] S. Boettcher, J. Stat. Mech. 2010 , P07002 (2010). [55] T. Aspelmeier, A. Billoire, E. Marinari, and M. Moore, J. Phys. A-Math. Theor. 41 , 205005 (2007). [56] R. Oppermann, M. J. Schmidt, and D. Sherrington, Phys. Rev. Lett. 98 , 127201 (2007). [57] F. Ghimenti, A. Sriram, A. Yamamura, H. Mabuchi, and S. Ganguli, arXiv preprint arXiv:2510.21109 (2025). [58] H.-K. Janssen, Z. Phys. B 23 , 377 (1976). [59] C. d. Dominicis, J. Phys., Colloq 37 , 247 (1976). [60] C. d. Dominicis and L. Peliti, Phys. Rev. B 18 , 353 (1978). [61] R. Bausch, H.-K. Janssen, and H. Wagner, Z. Phys. B 
+
+24 , 113 (1976). [62] Y. Ye, The gset dataset (2003). 
+
+Appendix A: DMFT Calculation 
+
+We first reformulate Eq. 2 as a Martin-Siggia-Rose-Janssen-De Dominicis functional integral [42, 58–60]. This expression closely resembles the equation in Som-polinsky’s early work [35, 36], except for the extra de-coded energy term, which, as will show shortly, intro-duces additional order parameters, 10 
+
+Z[t|t0] = 
+
+Z
+
+DxD ˆx Y
+
+> i
+
+exp 
+
+Z
+
+dt l i(t)xi(t) + le(t) X
+
+> i<j
+
+Jij sgn xj (t) sgn xi(t)+i ˆxi(t)
+
+−∂txi(t) − x3 
+
+> i
+
+(t) + ax i(t) + ξ X
+
+> j
+
+Jij xj (t)
+
+ − 12
+
+ 3x2 
+
+> i
+
+(t) − a − T ˆxi2(t)
+
+ ,
+
+(A1) where ˆ xi(t) is an Martin-Siggia-Rose auxiliary variable; while li and le are conjugate variables of xi and local decoded energy P 
+
+> i<j
+
+Jij sgn xj (t) sgn xi(t), respectively. Notably, the term exp  − 12
+
+R dt 3x2 
+
+> i
+
+(t) − a serves as the Jacobian transforming the argument of the δ func-tion from noise variables to dynamical variables [60, 61] due to Stratonovich interpretation. By integrating over the coupling matrix and leveraging the properties of the SK model, we reorganize the terms to obtain the disorder average: 
+
+EJij (Z[t|t0]) = 
+
+Z
+
+DxD ˆx Y
+
+> i
+
+exp( S0 
+
+> i
+
+) × Y
+
+> i<j
+
+exp 
+
+ J2
+
+2N Σ2
+
+> ij
+
+
+
+,S0 
+
+> i
+
+=
+
+Z
+
+dt 
+
+
+
+li(t)xi(t) + i ˆxi(t) −∂txi(t) − x3 
+
+> i
+
+(t) + ax i(t) − 12
+
+3x2 
+
+> i
+
+(t) − a − T ˆxi2(t)
+
+
+
+,
+
+Σij =
+
+Z
+
+dt [ξi ˆxi(t)xj (t) + ξi ˆxj (t)xi(t) + le(t) sgn xi(t) sgn xj (t)] .
+
+(A2) The interaction terms can be decoupled using the Hubbard-Stratonovich transformation. After reorganiza-tion, we obtain 
+
+Y
+
+> i<j
+
+exp 
+
+ J2
+
+2N Σ2
+
+> ij
+
+
+
+= C
+
+> 7
+
+Y
+
+> k=1
+
+Z
+
+dq k(t1, t 2)
+
+!
+
+exp 
+
+
+
+−N J 2
+
+Z
+
+dt 1
+
+Z
+
+dt 2
+
+ ξ2
+
+2 q1q2 + ξ
+
+2 q3a4 + q5q6 + 14 q27
+
++ J2 X
+
+> i
+
+ ξ2
+
+2 q1iˆxi(t1)iˆxi(t2) + ξ2
+
+2 q2xi(t1)xi(t2) + ξ2
+
+2 q3iˆxi(t1)xi(t2) + ξ2
+
+2 q4xi(t1)iˆxi(t2)+le(t1)q5sgn x1(t1)iˆxi(t2) + q6sgn xi(t1)xi(t2) + 12
+
+ple(t1)le(t2)q7sgn xi(t1)sgn xi(t2)
+
+ 
+
+.
+
+(A3) where C is a constant generated by the transformations and does not affect subsequent calculations. The aux-iliary variables qk are introduced to decouple quadratic terms such as iˆx(t), x j (t) and can be validated via the saddle-point conditions, e.g., ∂E(Z)/∂q k = 0. Here, D
+
+denotes the Gaussian measure. After enforcing causality and integrating out the auxiliary variables, the only order parameters with direct physical meaning are the corre-lation functions ( q1 and q5) and the response functions (q3, q4 and q6). Since we can always set the auxiliary variables le and ˆ x to zero, the remaining auxiliary order parameters can likewise be taken to vanish. From the saddle-point equations, their explicit forms are given by 
+
+q1(t1, t 2) = ⟨x(t1)x(t2)⟩ ;
+
+q3(t1, t 2) = ⟨x(t1)iˆx(t2)⟩ for t1 > t 2;
+
+q4(t1, t 2) = ⟨iˆx(t1)x(t2)⟩ for t1 < t 2;
+
+q5(t1, t 2) = ⟨sgn x(t1)x(t2)⟩;
+
+q6(t1, t 2) = le(t1) ⟨sgn x(t1)iˆx(t2)⟩ for t1 > t 2.
+
+(A4) The first three terms can be used to recover the mean-field dynamics, Eq. (3), as derived by Sompolinsky [36]. Meanwhile, the latter order parameter provides the dy-namical mean-field expression for the decoded energy, 11 Eq. (4), as follows: 
+
+Edec (t) = ∂EJij (Z[t|t0]) 
+
+∂l e(t)= −J2
+
+Z t
+
+> 0
+
+dt ′ ⟨sgn x(t)x(t′)⟩ ⟨ sgn x(t)iˆx(t′)⟩ .
+
+(A5) 
+
+> Appendix B: The Zero-crossing Rate
+
+Consider the dynamical equation Eq. (3) when the Ising machine approaches equilibrium, which becomes 
+
+dx dt ≈ (a + χ)x + ϕ(t), (B1) where the susceptibility χ is the steady-state value of the integral R dt ′G(t, t ′). In discrete-step dynamics, the dynamics becomes 
+
+x(t + ∆ t) = x(t) + ∆ t(aeff x(t) + p⟨ϕ(t)2⟩z(t), (B2) where we further denote the effective gain aeff = a +
+
+χ, and z(t) is a Gaussian variable of mean 0 and unit variance. Suppose the spin at time t is x(t) = −ϵ. Then the condition that x(t + ∆ t) changes sign is 
+
+−ϵ = ∆ t
+
+
+
+−aeff ϵ + p⟨ϕ(t)2⟩z(t)
+
+
+
+> 0. (B3) This implies that 
+
+z(t) > (1 + aeff ∆t)ϵ
+
+∆tp⟨ϕ(t)2⟩ ≈ ϵ
+
+∆tp⟨ϕ(t)2⟩ . (B4) Averaging over the Gaussian distribution of z(t), the av-erage transition rate becomes 
+
+R(ϵ) = P (−ϵ)∆t
+
+Z ∞
+
+> ϵ/
+> 
+> ∆t
+
+√⟨ϕ(t)2⟩ 
+
+> 
+
+Dz. (B5) Noting that P (−ϵ) ≈ P (0), the zero-crossing rate (in positive or negative direction) becomes 
+
+μ(t) = P (0) ∆t
+
+Z ∞
+
+> 0
+
+Dzz ∆tp⟨ϕ(t)2⟩ =
+
+p⟨ϕ(t)2⟩√2π P (0) .
+
+(B6) In the above equation, the factor of 2 accounts for both transitions from ± to ∓. Hence, we have shown that the zero-crossing rate is proportional to P (0). 
+
+> Appendix C: Numerical Experiments Setting
+
+The annealing schedule for the temperature T is de-fined as T (τ ) = T0 − (T0 − Te)τ /S , where τ = 1 , 2, . . . ,and S represents discrete time steps. The initial and final temperatures are set to T0 = 2 and Te = 0 .01, re-spectively, while the drive parameter is fixed at a = ae.For the linear annealing of a (red curve), the parameter starts at a0 = −2 and evolves to various final values, ae,as shown in the different sub-figures. During this process, the temperature is held constant at T = 0 .01. The an-nealing schedule for a is given by a(τ ) = a0−(a0−ae)τ /S .For the constant parameter scenario, both a and T are fixed at a = 2 and T = 0 .01, respectively, over the same time scale. All experiments were performed independently 20 times using the Euler–Maruyama method with a time step of 0 .05, following the same annealing protocol for SK models with N = 1 ,000 spins.      
+
+> FIG. 9. Trajectory of the decoded energy and P(0) from a single experiment with ae= 2. Due to the results being nu-merically sampled from a single trial, the curve shown exhibits fluctuations.
+
+The evolution trajectory of the decoded energy and its numerical value of P (0) for a single experiment is shown in Fig. 9. As predicted, the zero-crossing rate for an-nealing by a quickly drops to zero, causing the decoded energy to plateau. In contrast, annealing by T delays the emergence of the effective gap, allowing it to gradu-ally suppress other strategies and achieve the best per-formance. 
+
+> Appendix D: Gset Experiments
+
+The energy barrier and related strategies, such as tem-perature annealing, are applicable beyond the SK model; we observe similar phenomena in general benchmarks and datasets. Here, we use the G1 and G6 instance from the popular Max-Cut benchmark dataset Gset [62] as exam-ples. As shown in Fig. 10, similar to the SK model, tem-perature annealing in the CIM benefits from the delayed appearance of the dynamical barrier, resulting in better performance. In contrast, for simCIM, which benefits from the exposure of the optimal point, both temper-12 
+
+FIG. 10. Comparison of cut values profiles obtained via dif-ferent parameter-tuning strategies for CIM and simCIM on G1 and G6. The solid lines represent the average over 20 in-dependent trials, while the shaded areas indicate the range between the maximum and minimum observed values. The 
+
+y-axis shows the difference between the obtained energy and the known best solution. 
+
+ature annealing and linear gain ( a) annealing yield the same mean energy, outperforming the standard CIM. No-tably, although the mean values for simCIM are identi-cal, temperature annealing exhibits larger fluctuations. This leads to worse maximum values but better mini-mum values (obtained the exact solution on G1 and G6). This potentially suggests that in practice, given compu-tational resources for multiple trials and post-selection of the best result, temperature annealing remains the supe-rior choice. 
+
+Appendix E: DigCIM Results 
+
+DigCIM takes a form similar to simCIM: 
+
+dx i
+
+dt = aφ (xi) + ξ
+
+> N
+
+X 
+
+> j=1 ,j ̸=i
+
+Jij sgn xj + ζi. (E1) In our previous work [29], we showed that this dynam-ics attains the SK ground state uniformly for any neg-ative a. It also exhibits superior dynamical properties. As shown in Fig. 11, it also obeys the finite-size scal-ing relation as in Eq. (8). Similarly, in Fig. 8, we plot the average and minimum values of Edec (t, ∞) versus 
+
+t, confirming the scaling relations in Eq. (9), where 
+
+E∞,ave = −0.76245 ±0.00018, Bave = 3 .644, ξave = 0 .879, 
+
+E∞,min = −0.76317 ± 0.00015, Bmin = 3 .641, and ξmin =0.934. Hence, applying the scaling relations enables us to compute the ground state energy of the Ising model at 
+
+FIG. 11. Energies obtained by digCIM using the Eu-ler–Maruyama method (step size 0.1) with 100,000 and 1,000,000 iterations. It sets a = −5, with temperature an-nealing from 0.5 to 0. For each system size, N = 750, 1000, 1250, 2000, and 4000, we evaluate 200 independent SK in-stances and perform 30 runs per instance. Data points report the minimum decoded energy averaged over the 30 runs and then averaged across instances. Error bars show, for each instance, the mean of the minimum and maximum decoded energies observed over the 30 runs. The red line denotes the mean ground-state energy with finite-size corrections reported in Ref. [54]. The green dotted line indicates the fit for the expected minimum value after 10 6 iterations, yielding an ex-trapolated infinite-size value of −0.763203 ± 0.00017. 
+
+the thermodynamic limit even more accurate than sim-CIM. Comparing the solution quality of simCIM and digCIM under limited computational resources in Fig. 8, we see that, although they share the same asymptotic time com-plexity, digCIM benefits from a superior proportionality constant of the power law, resulting in a faster rate of energy decay.

@@ -1,47 +1,6 @@
 {
-  "generated_at": "2026-03-19T20:16:01.092749+00:00",
-  "updated_date": "20260319",
+  "generated_at": "2026-03-20T20:17:17.139111+00:00",
+  "updated_date": "20260320",
   "carryover_days": 9,
-  "items": [
-    {
-      "id": "2603.17468v1",
-      "title": "Efficient Soft Actor-Critic with LLM-Based Action-Level Guidance for Continuous Control",
-      "abstract": "We present GuidedSAC, a novel reinforcement learning (RL) algorithm that facilitates efficient exploration in vast state-action spaces. GuidedSAC leverages large language models (LLMs) as intelligent supervisors that provide action-level guidance for the Soft Actor-Critic (SAC) algorithm. The LLM-based supervisor analyzes the most recent trajectory using state information and visual replays, offering action-level interventions that enable targeted exploration. Furthermore, we provide a theoretical analysis of GuidedSAC, proving that it preserves the convergence guarantees of SAC while improving convergence speed. Through experiments in both discrete and continuous control environments, including toy text tasks and complex MuJoCo benchmarks, we demonstrate that GuidedSAC consistently outperforms standard SAC and state-of-the-art exploration-enhanced variants (e.g., RND, ICM, and E3B) in terms of sample efficiency and final performance.",
-      "authors": [
-        "Hao Ma",
-        "Zhiqiang Pu",
-        "Xiaolin Ai",
-        "Huimu Wang"
-      ],
-      "primary_category": "cs.LG",
-      "categories": [
-        "cs.LG"
-      ],
-      "published": "2026-03-18T08:22:31+00:00",
-      "link": "https://arxiv.org/pdf/2603.17468v1",
-      "tags": [
-        "keyword:NCO",
-        "keyword:NCO+LLM",
-        "query:NCO",
-        "query:NCO+LLM"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "LLM-based action-level guidance for reinforcement learning exploration",
-      "llm_evidence_cn": "基于LLM的动作级指导用于强化学习探索",
-      "llm_evidence": "基于LLM的动作级指导用于强化学习探索",
-      "canonical_evidence": "基于LLM的动作级指导用于强化学习探索",
-      "llm_tldr_en": "Uses LLMs as supervisors to provide action-level guidance for Soft Actor-Critic in continuous control.",
-      "llm_tldr_cn": "利用LLM作为监督者，为连续控制中的SAC算法提供动作级指导以优化探索。",
-      "llm_tldr": "利用LLM作为监督者，为连续控制中的SAC算法提供动作级指导以优化探索。",
-      "llm_tags": [
-        "query:nco-llm"
-      ],
-      "matched_query_tag": "query:nco-llm",
-      "matched_query_text": "LLM-guided heuristic search for optimization",
-      "matched_requirement_id": "req-8",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.17468v1",
-      "carry_days": 1
-    }
-  ]
+  "items": []
 }

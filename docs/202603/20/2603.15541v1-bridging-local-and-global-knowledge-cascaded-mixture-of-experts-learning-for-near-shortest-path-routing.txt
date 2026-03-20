@@ -1,0 +1,372 @@
+Title: Bridging Local and Global Knowledge: Cascaded Mixture-of-Experts Learning for Near-Shortest Path Routing
+
+URL Source: https://arxiv.org/pdf/2603.15541v1
+
+Published Time: Tue, 17 Mar 2026 06:20:17 GMT
+
+Number of Pages: 8
+
+Markdown Content:
+# Bridging Local and Global Knowledge: Cascaded Mixture-of-Experts Learning for Near-Shortest Path Routing 
+
+Yung-Fu Chen 
+
+The Ohio State University 
+
+Columbus, OH, USA chen.6655@osu.edu 
+
+Anish Arora 
+
+The Ohio State University 
+
+Columbus, OH, USA anish@cse.ohio-state.edu 
+
+Abstract —While deep learning models that leverage local fea-tures have demonstrated significant potential for near-optimal routing in dense Euclidean graphs, they struggle to generalize well in sparse networks where topological irregularities require broader structural awareness. To address this limitation, we train a Cascaded Mixture of Experts (Ca-MoE) to solve the all-pairs near-shortest path (APNSP) routing problem. Our Ca-MoE is a modular two-tier architecture that supports the decision-making for forwarder selection with lower-tier experts relying on local fea-tures and upper-tier experts relying on global features. It performs adaptive inference wherein the upper-tier experts are triggered only when the lower-tier ones do not suffice to achieve adequate decision quality. Computational efficiency is thus achieved by escalating model capacity only when necessitated by topological complexity, and parameter redundancy is avoided. Furthermore, we incorporate an online meta-learning strategy that facilitates independent expert fine-tuning and utilizes a stability-focused update mechanism to prevent catastrophic forgetting as new graph environments are encountered. Experimental evaluations demonstrate that Ca-MoE routing improves accuracy by up to 29.1% in sparse networks compared to single-expert baselines and maintains performance within 1%–6% of the theoretical upper bound across diverse graph densities. 
+
+Index Terms —Mixture of Experts, Online Meta-learning 
+
+I. I NTRODUCTION 
+
+In graph routing —especially when formulated for mobile, ad hoc and wireless networks— achieving both scalability and accuracy fundamentally involves a trade-off between local and global knowledge. Machine learning models for graph routing typically choose one over the other, yielding distinct limitations. Models leveraging local features —such as inter-node distance, as in Greedy-Tensile [1]— are computationally efficient and scalable because they require only locally available or imme-diate neighbor information. Although these models effectively predict next-hop forwarders in dense Euclidean graphs 1, outper-forming standard geographic routing algorithms in that context, they struggle to generalize to sparse networks (density ρ ≤ 2), where topological irregularities necessitate broader structural awareness [3]. Specifically, they lack the context necessary to detour around structural holes. Conversely, approaches that use global features —such as spectral Laplacian-based features [4], [5]— can navigate these complex topologies, but they are often impractical for real-time distributed routing because of the prohibitive cost of maintaining the entire network state. 
+
+> 1Euclidean graphs serve as an effective model for mapping the physical topologies found in mobile, ad hoc, and wireless networks [2].
+
+Thus, a static reliance on local only or global only features fails to simultaneously satisfy the demands of efficiency and generalization. To reconcile this trade-off, a Mixture of Experts (MoE) archi-tecture [6] offers a robust solution. By decomposing the routing policy into specialized modules, the framework circumvents the limitations inherent in monolithic models. Instead of requiring a single model to generalize across heterogeneous topologies, MoE enables “selective inference”: it prioritizes using one or more lightweight expert models for deciding the forwarder in routes where local knowledge suffices, and prioritizes activat-ing one or more resource-intensive experts —augmented with global context— for other routes. This selection of experts serves to bridge the gap between local and global knowledge, preserving the low latency of local heuristics while still being able to handle complex topologies. This approach draws inspiration from the significant success of MoE architectures in enhancing specialization and com-putational efficiency. Operating on the “divide-and-conquer” principle [7], [8], MoE dynamically selects and engages only a subset of experts based on input characteristics. Recent architectures, such as DeepSeek [9], have further refined this by emphasizing the decoupling of common knowledge from domain-specific nuances, facilitating a modular design where universal patterns are structurally isolated from complex, task-specific information. Moreover, modern MoE frameworks have increasingly adopted “adaptive inference” to optimize the trade-off between accuracy and efficiency [10], [11]. Unlike static activation, this paradigm employs a cascading strategy that initiates inference with a lightweight model tailored for common scenarios. A deferral rule 2 is subsequently applied to assess prediction adequacy, triggering escalation to a resource-intensive expert only when necessary. This ensures substantial computational resources are allocated exclusively to complex scenarios. We find that adaptive inference with such a Cascaded Mixture of Experts (Ca-MoE) architecture suffices to solve the all-pairs near-shortest path (APNSP) routing problem. Although adaptive inference has proven effective in opti-mizing efficiency for computer vision [10], [12] and language                              
+
+> 2The deferral mechanism is typically implemented via asmall neural network, which is computationally efficient, introducing negligible latency relative to the primary model execution.
+> arXiv:2603.15541v1 [cs.LG] 16 Mar 2026 Fig. 1. The Ca-MoE framework for forwarder selection. The Router directs the graph sample ⟨O, D, v, nbr (v)⟩to a selected lower-tier expert that predicts a
+> Q-value for each neighbor node uin nbr (v), where nbr (v)denotes the set of v’s neighbors. The candidate forwarder ˆufor a near-shortest path from node v
+> to destination node Dis identified as a node in nbr (v)with the highest Q-value. This candidate is validated by the Deferral rule : the sample is cascaded to the upper-tier expert only if the confidence is insufficient. Dashed lines denote conditional execution paths, illustrating selective activation based on the graph sample (in orange) and the adaptive activation based on the candidate forwarder for the graph sample (in purple).
+
+modeling [13], its application to graph routing has not yet been explored. To the best of our knowledge, no existing research leverages machine learning to address the near-shortest path problem by learning an adaptive switching policy between local and global knowledge. Specifically, prior work has not estab-lished a mechanism that autonomously decides based on local knowledge only when to rely on inexpensive local heuristics versus when to escalate to costly global computations, which we demonstrate is feasible with our Ca-MoE solution. To facilitate rapid adaptation to new graph topologies and reduce reliance on extensive pre-training, we employ an online meta-learning strategy that continuously updates both common and specialized experts as new graphs are encountered. To en-sure robustness, we maintain an evaluation dataset that verifies whether fine-tuned experts retain performance on previously seen environments, thereby preventing catastrophic forgetting. Note that not all graphs are equally effective training seeds, this incremental learning process allows Ca-MoE to progressively accumulate diverse structural knowledge. Consequently, as the system observes more graphs, it converges toward higher ac-curacy and stronger generalization across a broad spectrum of graph classes. The main contributions and findings of this paper are sum-marized as follows: (a) Cascaded Mixture of Experts (Ca-MoE) for solving graph routing: We adopt a modular multi-tier architecture that bridges the gap between local and global knowledge for the all-pairs near-shortest path (APNSP) problem. By utilizing adaptive inference between lightweight experts and conditionally activated resource-intensive experts, the framework optimizes both accuracy and computational efficiency. (b) Efficient online learning and continual adaptation: We introduce an incremental learning strategy that fine-tunes experts independently using small sample sets. This ap-proach facilitates rapid adaptation to new graph topologies and utilizes a stability-focused update mechanism (via an evaluation dataset) to prevent catastrophic forgetting as the network environment evolves. (c) Significant Performance Gains in Sparse Networks: 
+
+Experimental evaluations demonstrate that Ca-MoE sig-nificantly resolves the generalization limitations of single-expert baselines in sparse networks. Specifically, the framework improves routing accuracy by up to 29.1% compared to local-feature models (e.g., Greedy-Tensile )by effectively navigating topological holes through spe-cialized expert activation. (d) Consistency and Near-Optimality: The framework main-tains robust performance across diverse graph densities. It achieves up to a 5% improvement in dense graphs and consistently maintains routing accuracy within 1%–6% of the theoretical upper bound (MoE OPT), demonstrating its ability to approximate optimal routing policies without incurring significant overhead. (e) Robustness to Initialization: Our evaluations show that the online meta-learning strategy effectively mitigates the need for high-quality initial pre-training. Arbitrarily initial-ized experts are shown to rapidly converge to performance levels comparable to carefully optimized baselines after observing only a limited number of graphs. II. R ELATED WORK 
+
+A. Machine Learning for Graph Routing 
+
+Recent advances in knowledge-guided machine learning have demonstrated that deep neural networks (DNNs) can effectively solve the all-pairs near-shortest path (APNSP) problem by learning local routing policies [1]. Approaches in this domain generally fall into two categories: geometric and structural. Geometric methods, such as Greedy-Tensile [1], leverage local features to achieve high scalability in high-density wireless networks. However, as noted in recent studies on local rout-ing [3], these heuristics often fail in sparse networks where topological holes require detouring capabilities that exceed the local receptive field. Conversely, structural approaches typically employ Graph Neural Networks (GNNs) or spectral methods to capture global connectivity. For instance, RouteNet [14] demonstrates that Message Passing Neural Networks (MPNNs) can accurately model complex end-to-end delays and rout-ing metrics. Similarly, spectral approaches utilizing Laplacian-based features [15], specifically the resistance distance [16], [17], reliably identify shortest paths by mathematically encod-ing global network connectivity. However, these global meth-ods often incur prohibitive computational and communication overheads for real-time routing. Our work seeks to reconcile this dichotomy by learning a policy that dynamically switches between these computationally distinct paradigms. 
+
+B. Online Meta-Learning and Continual Adaptation 
+
+Online meta-learning provides a robust framework for models to continuously adapt to non-stationary environments through incremental knowledge accumulation [18]. Unlike tra-ditional batch learning, online meta-learning strategies allow for rapid adaptation to new tasks as they arrive sequentially, which is critical for evolving network topologies. Recent developments in online cascade learning [11] have further demonstrated that models can optimize performance over data streams by continuously updating their deferral policies. In the context of routing, Ca-MoE leverages this modularity to restrict fine-tuning to only the most relevant experts. This selective updating acts as a stability-focused mechanism, mitigating the catastrophic forgetting often observed in continual learning scenarios [19], while preserving the model’s specialized knowl-edge across diverse graph environments. III. P ROBLEM STATEMENT 
+
+We consider a class of graphs G where each graph G =(V, E ) consists of n nodes distributed according to a uni-form random distribution in a 2-dimensional Euclidean square region. Each node v ∈ V is locally aware of its global coordinates. An edge (v, u ) ∈ E exists if and only if the Euclidean distance between them does not exceed a predefined communication radius R. The network density is denoted by ρ,defined as the average number of nodes within an area of R2.Consequently, the side length of the square region is given by pnR 2/ρ .
+
+A. All-Pairs Near-Shortest Path Problem (APNSP) 
+
+The objective of the APNSP problem is to derive a routing policy π for any graph G ∈ G that identifies paths between all node pairs (O, D ) that are close to the optimal shortest path. A path is considered “near-shortest” if its total length falls within a specified approximation factor, ϵ ≥ 0, of the actual shortest path length. Let de(O, D ) represent the Euclidean distance and dsp (O, D )
+
+represent the shortest path length between an origin O and destination D. We define the path stretch ζ(O, D ) as the ratio: 
+
+ζ(O, D ) = dsp (O, D )
+
+de(O, D ) (1) 
+
+The APNSP Problem Definition: We seek to learn a routing policy π(O, D, v ) = u that selects the next hop u to construct a path p(O, D ). The goal is to maximize the routing accuracy, defined as the proportion of paths that satisfy the near-shortest constraint: 
+
+max Accuracy G,π = 1
+
+|V |2
+
+X
+
+> O,D ∈V
+
+η(O, D ), (2) where the indicator function η(O, D ) is defined as: 
+
+(1, if dp(O,D ) 
+
+> dsp (O,D )
+
+≤ ζ(O, D )(1 + ϵ)0, otherwise . (3) The inclusion of the stretch factor ζ(O, D ) serves to nor-malize performance across varying network densities, which is critical in sparse networks where topological holes cause significant variance in path lengths. 
+
+B. MDP Formulation for the APNSP Problem 
+
+To solve the APNSP problem, we model the routing process as a Markov Decision Process (MDP). We assume a determinis-tic state transition P (s′|s, a ) = 1 , where a state s represents the features of the current node v holding a packet for destination 
+
+D, and an action a ∈ A(s) represents the selection of a neighbor u as the next forwarder. To align the MDP objective with the shortest path goal, we define the instantaneous reward r(s, a ) as the negative Euclidean length of the edge (v, u ). We set the discount factor 
+
+γ = 1 . The Q-value, representing the total expected reward from state s following action a, is defined as: 
+
+Q(st, a t) = 
+
+> L
+
+X
+
+> i=t
+
+r(si, a i) = −
+
+> L
+
+X
+
+> i=t
+
+de(vi, v i+1 ), (4) where L is the number of hops to the destination. Consequently, the optimal Q-value, Q∗(s, a ), corresponds to the negative length of the shortest path from the current node to the destination. We employ Deep Neural Networks (DNNs) to approximate these optimal Q-values via a data-driven approach. By selecting actions that yield the highest Q-values (i.e., the least negative cumulative distance), the policy minimizes the total path length, thereby satisfying the APNSP accuracy condition defined in Eq. 3. IV. C A-M OE F RAMEWORK FOR SOLVING APNSP 
+
+A. Overview 
+
+As shown in Figure 1, the Cascaded Mixture of Experts (Ca-MoE) framework employs a modular two-tier architecture designed to balance computational efficiency with the gener-alization required for the all-pairs near-shortest path (APNSP) problem. By decoupling decision-making, Ca-MoE allows rou-tine routing decisions to be handled by lightweight, lower-tier experts using local features, while computationally intensive upper-tier experts are adaptively triggered only when topolog-ical irregularities necessitate global structural awareness. The forwarder selection process employs a cascading strat-egy. The Lower-Tier comprises multiple lightweight experts that infer ranking metrics ( Q-values) using local Euclidean features. A Router dynamically assigns the input to the most suitable expert via a Top-1 strategy. To ensure reliability, a 
+
+Deferral Rule evaluates the quality of this initial decision. If the predicted next-hop forwarder is deemed insufficient — typical of sparse regions with structural holes— the task is (a) v in sparse graphs (b) v near shortest paths in dense graphs (c) v far from shortest paths in dense graphs Fig. 2. Comparative performance of the Greedy-Tensile , Greedy-Lax , and Greedy-Spectral routing policies across different densities of Euclidean graphs. Each sub-figure illustrates a set of graphs where a different routing policy dominates: different graphs are enumerated on the x-axis; for each graph, the y-axis denotes the frequency with which each expert selects the best next forwarder for nodes v given samples ⟨O, D, v, nbr (v)⟩ from that graph. In sub-figures (b) and (c), the choices for v are constrained relative to the shortest paths from origin O to D. Recall that a forwarder is determined to be the “best” if it yields the maximal optimal Q-value, Q∗(O, D, v, u ).
+
+cascaded to the Upper-Tier . This tier activates a resource-intensive expert that integrates global spectral features to refine the decision 3.To support continuous adaptation, Ca-MoE employs an on-line meta-learning strategy that incrementally fine-tunes experts as new graph environments are encountered. This modularity enables independent updates using small sample sets, thereby minimizing retraining costs by isolating adjustments to the relevant experts. To ensure stability, the framework maintains an evaluation dataset ( ED ), which is dynamically updated to verify that fine-tuned models retain high performance on previously seen instances. By conditioning expert updates on this validation, Ca-MoE progressively accumulates meta-knowledge, yielding stronger generalization across diverse graph classes without the overhead of full model retraining. 
+
+B. Lower-Tier Experts with Local Knowledge 
+
+The Lower-Tier comprises two distinct experts — Greedy-Tensile (H1) and Greedy-Lax (H2)— and a router that dynami-cally assigns the most suitable expert for a given graph sample 
+
+⟨O, D, v, nbr (v)⟩.
+
+1) Complementary Expert Strategies: The deployment of multiple experts within the lower-tier is non-trivial and is necessitated by the distinct forwarding behaviors required in differing local contexts, as empirically demonstrated in Figures 2(b) and 2(c). Because a lightweight policy is not readily optimized for both routine traversal and obstacle avoidance, we architect two complementary experts to handle specific scenarios of routing:  
+
+> •
+
+Greedy-Tensile (H1)—Routine Forwarding: Optimized for standard Euclidean environments, this expert prioritizes low-stretch forwarding. It serves as the primary policy when the current node v lies proximal to the shortest path between O and D (i.e., the “on-track” scenario).  
+
+> •
+
+Greedy-Lax (H2)—Recovery Forwarding: Designed to ad-dress the limitations of Greedy-Tensile , this expert allows higher-stretch forwarding decisions. When a packet is forced to deviate from the shortest path due to topological 
+
+> 3To maintain parameter efficiency, Ca-MoE employs a single upper-tier expert, as empirical evidence suggests that subsequent tiers yield diminishing returns on routing accuracy.
+
+holes, Greedy-Lax functions as a specialized recovery strategy. By allowing trajectories that temporarily diverge from the direct line to the destination, it effectively navi-gates around obstacles to steer the packet back toward a routine forwarding region. 
+
+2) Feature Selectors for Greedy-Tensile and Greedy-Lax: To maintain computational efficiency, both common experts utilize a shared set of local features to construct their input vectors. For a routing request with origin O and destination D, where the packet is currently at node v, the feature selector constructs an input vector based on the following embeddings:  
+
+> •
+
+State feature, fs(v): A vector characterizing the current node v relative to the destination: (a) Distance to destination: d(v, D ), the distance between 
+
+v and D.(b) Node Stretch: ns (O, D, v ) = d(O,v )+ d(v,D ) 
+
+> d(O,D )
+
+. This ratio represents the deviation of the path through v relative to the direct Euclidean distance between O and D..  
+
+> •
+
+Action feature, fa(u): For each candidate neighbor u ∈
+
+nbr (v), the action feature corresponds to the state feature of that neighbor, such that fa(u) = fs(u).The inputs to the expert networks are the concatenated vectors ⟨fs(v), f a(u)⟩, which are used to predict the Q-value for forwarding to neighbor u.
+
+3) Training of Router: The router employs a Top-1 strategy to select the expert that maximizes the expected routing effi-ciency (i.e., the one predicting the highest valid Q-value). Un-like the experts, which focus on evaluating specific neighbors, the router evaluates the broader context of the node to determine which policy ( Greedy-Tensile or Greedy-Lax ) is required. Upon the arrival of a new graph Gt, the router undergoes incremental retraining using a sample set: 
+
+X = S 
+
+> v∈Vsample
+
+{f eat router (O, D, v, nbr (v)) } and 
+
+Y = S 
+
+> v∈Vsample
+
+yv ∈ { 0, 1},where yv is a binary label indicating the expert that yielded the superior routing decision for that instance. The router’s feature vector, f eat router , encapsulates broader local context, including:  
+
+> •
+
+Network density ( ρ) and the node degrees of v.Fig. 3. The online meta-learning pipeline. Upon the arrival of a new graph Gt, experts are selectively fine-tuned via a fine-tuning sampler. To prevent catastrophic forgetting, updated models ( H′) are validated against a persistent Evaluation Dataset ( ED ) before replacing the current experts ( Ht−1).  
+
+> •
+
+Node stretch ( ns (v, O, D )) of the current node v relative to the (O, D ) pair..  
+
+> •
+
+The Euclidean distances d(O, D ), d(O, v ), and d(v, D ).This multi-dimensional input allows the router to learn a meta-policy —for example, preferring Greedy-Lax in lower-density regions where detours are likely required— thereby minimizing the computational overhead of the inference pro-cess. 
+
+C. Upper-Tier Expert with Global Knowledge 
+
+While the lower-tier handles the majority of routine routing decisions, certain graph instances —particularly those in sparse regions or containing significant topological irregularities— require broader structural awareness that local features cannot provide. The upper-tier is designed to resolve these complex scenarios by adaptively activating the Greedy-Spectral (H3)expert. 
+
+1) Global Expert Strategy ( H3): The necessity of the upper-tier is empirically substantiated by Figure 2(a), where local-feature experts ( Greedy-Tensile and Greedy-Lax ) exhibit signif-icant performance degradation in sparse environments. In these scenarios, topological holes frequently trap local heuristics in local minima. To resolve these bottlenecks, the upper-tier activates the Greedy-Spectral expert. 
+
+Greedy-Spectral incorporates global structural knowledge by leveraging the resistance distance Ω( i, j ). Derived from the graph Laplacian matrix, this metric mathematically encodes the global connectivity between nodes. By optimizing for resistance distance, Greedy-Spectral effectively identifies forwarders that avoid dead-end or excessively long trajectories, ensuring struc-turally reliable forwarding in complex topologies where lower-tier experts may fail. 
+
+2) Feature Selector for Greedy-Spectral: To enable this global reasoning, the feature selector constructs input vectors based on resistance distance. For a routing request (O, D ) at current node v: 
+
+> •
+
+State feature: 
+
+fs(v) = Ω( v, D )
+
+. 
+
+> •
+
+Action feature: 
+
+fa(u) = Ω( u, D )
+
+for each neighbor u ∈ nbr (v).
+
+3) Computational Feasibility: Although calculating the full resistance distance matrix scales cubically ( O(N 3)), the pro-posed framework requires only specific pairwise queries. In sparse networks, the utilization of nearly-linear time Lapla-cian solvers [20] and labeling schemes optimized for small-treewidth graphs [17] reduces the query complexity to a near-linear complexity of ˜O(|E|). This efficiency ensures that global feature extraction remains feasible for real-time routing when the upper-tier is activated. 
+
+D. Adaptive Activation via Deferral Rule 
+
+The Deferral Rule serves as a lightweight gating mechanism that governs the transition between the local and global tiers. Implemented as a pre-trained binary classification DNN, it evaluates whether the forwarder ˆu selected by the lower-tier expert is likely to yield a globally near-shortest path. During online inference, the model relies exclusively on the local observation vectors X (as defined in Section IV-B3) to approximate global path quality. This design bridges the infor-mation gap, allowing the system to predict global optimality without incurring the cost of global state maintenance. To bridge this gap, the deferral rule is trained using ground-truth labels derived from global metrics. A positive label yv = 1 
+
+is assigned if the path through neighbor u satisfies the near-optimality condition: 
+
+dsp (O, v ) + de(v, u ) + dsp (u, D ) ≤ dsp (O, D ) × (1 + ∆) ,
+
+where ∆ represents the tolerable deviation threshold. 
+
+E. Online Meta-learning 
+
+To ensure the Ca-MoE framework adapts to evolving graph topologies without suffering from catastrophic forgetting, we employ an online meta-learning strategy. This process main-tains a persistent Evaluation Dataset (ED) for stability val-idation and performs targeted fine-tuning on arriving graph instances to continuously update the experts. 
+
+1) Evaluation Dataset ( ED ) Maintenance: ED serves as a consistency benchmark, preserving a diverse history of routing scenarios. Upon the arrival of a new graph Gt, we update the ED to reflect the shifting distribution of network envi-ronments. We sample a small subset of instances (O, D, v )
+
+from Gt and compute the corresponding ground-truth Q-values, 
+
+Q∗(O, D, v, u ), for all neighbors u ∈ nbr (v). These samples are stored as tuples of state features, action features, and optimal Q-values: ⟨fs(v), {fa(u)}u, {Q∗}u⟩. To prevent un-bounded growth and ensure the dataset remains representative of both historical and recent samples, ED operates as a fixed-size sliding window buffer. 
+
+2) Targeted Expert Fine-Tuning: To facilitate rapid adap-tation, we derive expert-specific training sets from Gt using differentiated sampling strategies. This ensures that each expert is fine-tuned only on scenarios relevant to its specialization, and prevents noise injection when relevant samples are unavailable:  
+
+> •
+
+Greedy-Tensile (H1): This expert is fine-tuned on (O, D )
+
+pairs characterized by low path stretch and short Euclidean distances. The training set minimizes prediction error in “on-track” scenarios where local greedy heuristics suffice.  
+
+> •
+
+Greedy-Lax (H2) and Greedy-Spectral (H3): These ex-perts specialize in navigating topological irregularities. Consequently, their fine-tuning set consists of (O, D ) pairs exhibiting high path stretch and large source-destination distances. This exposes the models to non-routine cases (e.g., structural holes) where standard greedy forwarding fails. If a graph Gt does not contain samples matching an expert’s criteria (e.g., a dense graph yielding no high-stretch shortest paths), fine-tuning for that specific expert is skipped. 
+
+3) Stability-Aware Update Mechanism: We employ a rigor-ous validation step to determine if updated parameters should be committed. Let Ht−1 
+
+> i
+
+denote an expert at time t − 1
+
+and H′ 
+
+> i
+
+denote the candidate fine-tuned version. Both models are evaluated on the ED using the Discounted Cumulative Gain (DCG) metric, which measures the alignment between the predicted ranking of neighbor nodes and the ground-truth ranking derived from Q∗. The update is governed by a strict improvement criterion: 
+
+Hti =
+
+(
+
+H′ 
+
+> i
+
+, if Eval (H′ 
+
+> i
+
+, ED ) > Eval (Ht−1 
+
+> i
+
+, ED )
+
+Ht−1 
+
+> i
+
+, otherwise , .
+
+where Eval (·, ED ) calculates the average ranking similarity across all sampled instances in the ED . This conditional mechanism ensures that the meta-model evolves only when the candidate expert demonstrates superior ranking fidelity across both historical and current data V. P ERFORMANCE EVALUATION 
+
+In this section, we evaluate the Ca-MoE framework in predicting all-pairs near-shortest paths across heterogeneous graph topologies. We assess its ability to balance accuracy with generalization compared to single-expert baselines and a theoretical upper bound. 
+
+Implementation Details: All components, including the experts and the router, are implemented as deep neural networks (DNNs) using PyTorch 2.9.0. The simulation parameters for initial training and online fine-tuning are detailed in Table I. 
+
+A. Comparative Baselines 
+
+To assess the efficacy of the cascading architecture, we compare Ca-MoE against the following policies:                                    
+
+> TABLE I SIMULATION PARAMETERS
+> Symbol Meaning Value
+> Ntrain size of seed graphs for training experts 50
+> ρGT density of seed graph 5for training Greedy-Tensile
+> ρGL/GS density of seed graphs 2for training Greedy-Lax and Greedy-Spectral
+> Rcommunication radius 1000
+> IGT /GL # of input features 4for Greedy-Tensile and Greedy-Lax
+> IGS # of input features 2for Greedy-Spectral
+> K# of hidden layers for DNNs 2
+> Ne[] # of neurons in each hidden layer [50 I, I ]
+> ϵmargin for shortest paths prediction 0.05
+> ϕ# of sampled nodes for updating ED 10
+> IterN um F T # of iterations in fine-tuning 1000
+> •
+
+Greedy-Tensile [1] : A local-feature baseline optimized for on-track scenarios with low path stretch.  
+
+> •
+
+Greedy-Lax : A secondary local expert designed for high-stretch recovery forwarding when nodes deviate from the shortest path.  
+
+> •
+
+Greedy-Spectral : A global-knowledge expert using resis-tance distance features, designed for high accuracy in sparse or complex environments.  
+
+> •
+
+MoE OPT : An idealized oracle that perfectly selects the best-performing expert for every routing decision, serving as the theoretical upper bound for the modular framework. 
+
+B. Generalization over Diverse Graphs 
+
+We benchmark the framework across three distinct scenarios to test robustness against topological shifts: (a) Sparse/Challenging Topologies: Graphs where local heuristics ( Greedy-Tensile ) typically underperform (accu-racy ∼75% ). (b) Dense Topologies: Graphs where local knowledge is gen-erally sufficient (accuracy > 90% ). (c) Mixed Densities: A set spanning both sparse and dense configurations ( ρ ∈ { 2, 5}) to evaluate meta-knowledge accumulation. 
+
+1) Single-Graph Prediction Accuracy: Figure 4 illustrates the routing accuracy on individual graph instances. In sparse networks containing topological holes (Figure 4(a)), local-feature experts degrade significantly. In contrast, Ca-MoE achieves parity with the global Greedy-Spectral expert, improv-ing accuracy by up to 29.1% over Greedy-Tensile .Even in dense topologies where local heuristics dominate (Figs. 5(b) and 5(c)), Ca-MoE yields a performance gain of up to 6%. This indicates that the router successfully iden-tifies specific nodes requiring specialized recovery strategies (Greedy-Lax ) or global context ( Greedy-Spectral ), even within generally simple graphs. Notably, Ca-MoE consistently main-tains performance within 1%–6% of the theoretical upper bound (MOE OPT). 
+
+2) Continual Generalization: Figure 5 demonstrates the efficacy of the online meta-learning strategy. As new graphs are (a) Graphs where Greedy-Tensile underperforms (b) Graphs where Greedy-Tensile outperforms (c) Graphs with various density ρ ∈ { 2, 5}              
+
+> Fig. 4. Comparative APNSP prediction accuracy on individual graph instances ( Gt) for Ca-MoE against single-expert baselines. The x-axis enumerates specific graph instances, while the y-axis reports the routing accuracy.
+> (a) Graphs where Greedy-Tensile underperforms (b) Graphs where Greedy-Tensile outperforms (c) Graphs with various density ρ∈ { 2,5}
+> Fig. 5. Evolution of average APNSP prediction accuracy across the sequence of seen graphs G1..G tshown in Figure 4. The figure illustrates the continual generalization capability of the framework. The x-axis represents the chronological sequence of arriving graphs, and the y-axis denotes the average accuracy on all graphs encountered up to time t.
+
+encountered, Ca-MoE progressively accumulates and maintains structural knowledge.  
+
+> •
+
+Sparse networks: The framework maintains ∼ 95% gen-eralization accuracy across previously seen sparse graphs (Figure 5(a)).  
+
+> •
+
+Dense networks: It maintains ∼ 96% accuracy across dense environments (Figure 5(b)).  
+
+> •
+
+Robustness: Most importantly, it demonstrates high adapt-ability in mixed environments (Figure 5(c)), maintaining 
+
+∼ 96% accuracy even when the network density shifts drastically between ρ = 2 and ρ = 5 . 
+
+> •
+
+Larger networks: It maintains high accuracy for larger networks (we tested up to n=200 nodes).    
+
+> Fig. 6. Comparative APNSP prediction accuracy across the sequence of seen graphs G1..G tshown in Figure 5(a). This comparison highlights the framework’s robustness to initialization by tracking the convergence of Ca-MoE(Random) (arbitrarily initialized experts) against the standard Ca-MoE framework and other baselines.
+
+C. Robustness to Initialization 
+
+To assess whether the Ca-MoE framework depends heav-ily on high-quality pre-training, we evaluated its convergence capabilities starting from a “cold start” configuration. We intro-duced a specific variant, Ca-MoE (Random), where all expert models were initialized with arbitrary parameters rather than pre-trained weights. As illustrated in the experimental results (Figure 6), the performance of this randomly initialized model demonstrates remarkably rapid convergence. Despite beginning without prior knowledge, the model achieves an APNSP accu-racy exceeding 90% after observing only a small sequence of graph instances. This trajectory indicates that the online meta-learning strategy successfully extracts and accumulates meta-knowledge from incoming data streams, allowing the experts to progressively refine their policies. These findings confirm that the fine-tuning mechanism is highly data-efficient and effec-tively mitigates the cold-start problem, enabling the framework to adapt to new environments without the computational burden of extensive offline pre-training. 
+
+D. MoE Overhead 
+
+A primary motivation for the Ca-MoE architecture is to minimize the computational overhead associated with global feature extraction by limiting its use to necessary scenarios. To quantify this efficiency, we analyzed the frequency with which each expert was selected to make the final forwarding decision across diverse topologies. (We note the overhead of the router and evaluator is relatively small.) The utilization patterns shown in Figure 7 reveal distinct behaviors based on network density. Compared with the result in Figure 7(b), Figure 7(a) shows that the frequency of activating Greedy-Spectral increases as the density decreases. However, compared (a) Graphs where Greedy-Tensile underperforms (b) Graphs where Greedy-Tensile outperforms Fig. 7. Ca-MoE’s expert utilization on individual graph instances. The x-axis enumerates specific graph instances, while the y-axis reports the the frequency with which each expert is activated for contributing the final selection of forwarder. 
+
+to Greedy-Spectral which has 100% frequency to retrieve global feature, Ca-MoE avoids expensive computation in up to ∼80% of the forwarding instances by only using Greedy-Tensile or 
+
+Greedy-Lax for those graph samples. Notably, the utilization of Greedy-Lax emerges as the demand for performing recovery forwarding in sparse network increases. In dense networks, 
+
+Greedy-Tensile significantly dominate the utilization of key experts. This further implies the adaptive activation of Ca-MoE effectively prevent using resource-intensive expert in the network configurations where the necessity of using global knowledge for near-optimal routing is rare. VI. C ONCLUSION 
+
+Experimental evaluations demonstrate that Ca-MoE signifi-cantly improves routing performance compared to single-expert baselines, achieving up to a 29.1% accuracy gain in sparse graphs and consistently outperforming local-feature models in dense environments. Furthermore, our integrated online meta-learning strategy ensures that the framework continuously adapts to newly encountered graph classes without the overhead of full model retraining. We attribute the 1%-6% performance difference between MoE OPT and Ca-MOE to the intentional use of local knowledge only in training the router, for reasons of compute efficiency. Individual experts can be made even more efficient by symbolic distillation. Overall, Ca-MoE provides a scalable and robust solution for near-shortest path routing, maintaining stability and high accuracy across diverse and evolving network distributions. The framework is suitable for light-weight, near real time processing for dynamic networks, which are commonly found in mobile, ad hoc, and wireless networks. REFERENCES [1] Y.-F. Chen, S. Lin, and A. Arora, “Knowledge-guided machine learning for stabilizing near-shortest path routing,” in International Symposium on Stabilizing, Safety, and Security of Distributed Systems . Springer, 2025, pp. 128–145. [2] S. K. Iyer and D. Manjunath, “Topological properties of random wireless networks,” Sadhana , vol. 31, no. 2, pp. 117–139, 2006. [3] V. Ashvinkumar, J. Gudmundsson, C. Levcopoulos, B. J. Nilsson, and A. v. Renssen, “Local routing in sparse and lightweight geometric graphs,” Algorithmica , vol. 84, no. 5, pp. 1316–1340, 2022. [4] S. Maskey, A. Parviz, M. Thiessen, H. St¨ ark, Y. Sadikaj, and H. Maron, “Generalized laplacian positional encoding for graph representation learn-ing,” arXiv preprint arXiv:2210.15956 , 2022. [5] Y. He, C. Bodnar, and P. Lio, “Sheaf-based positional encodings for graph neural networks,” in NeurIPS 2023 Workshop on Symmetry and Geometry in Neural Representations , vol. 9, 2023. [6] S. Mu and S. Lin, “A comprehensive survey of mixture-of-experts: Algorithms, theory, and applications,” arXiv preprint arXiv:2503.07137 ,2025. [7] R. A. Jacobs, M. I. Jordan, S. J. Nowlan, and G. E. Hinton, “Adaptive mixtures of local experts,” Neural computation , vol. 3, no. 1, pp. 79–87, 1991. [8] M. I. Jordan and R. A. Jacobs, “Hierarchical mixtures of experts and the em algorithm,” Neural computation , vol. 6, no. 2, pp. 181–214, 1994. [9] A. Liu, B. Feng, B. Xue, B. Wang, B. Wu, C. Lu, C. Zhao, C. Deng, C. Zhang, C. Ruan et al. , “Deepseek-v3 technical report,” arXiv preprint arXiv:2412.19437 , 2024. [10] S. Kolawole, D. Dennis, A. Talwalkar, and V. Smith, “Agreement-based cascading for efficient inference,” arXiv preprint arXiv:2407.02348 , 2024. [11] L. Nie, Z. Ding, E. Hu, C. Jermaine, and S. Chaudhuri, “Online cascade learning for efficient inference over streams,” arXiv preprint arXiv:2402.04513 , 2024. [12] S. Kolawole, D. Dennis, A. Talwalkar, and V. Smith, “Revisiting cascaded ensembles for efficient inference,” in Workshop on Efficient Systems for Foundation Models II at ICML2024 , 2024. [13] D. Raposo, S. Ritter, B. Richards, T. Lillicrap, P. C. Humphreys, and A. Santoro, “Mixture-of-depths: Dynamically allocating compute in transformer-based language models,” arXiv preprint arXiv:2404.02258 ,2024. [14] K. Rusek, J. Su´ arez-Varela, P. Almasan, P. Barlet-Ros, and A. Cabellos-Aparicio, “Routenet: Leveraging graph neural networks for network modeling and optimization in SDN,” IEEE Journal on Selected Areas in Communications , vol. 38, no. 10, pp. 2260–2270, 2020. [15] S. Steinerberger, “A spectral approach to the shortest path problem,” 
+
+Linear Algebra and its Applications , vol. 620, pp. 182–200, 2021. [16] P. Tetali, “Random walks and the effective resistance of networks,” 
+
+Journal of Theoretical Probability , vol. 4, no. 1, pp. 101–109, 1991. [17] M. Liao, Y. Pan, R.-H. Li, and G. Wang, “Efficient exact resistance distance computation on small-treewidth graphs: a labelling approach,” 
+
+Proceedings of the ACM on Management of Data , vol. 3, no. 6, pp. 1– 27, 2025. [18] C. Finn, P. Abbeel, and S. Levine, “Model-agnostic meta-learning for fast adaptation of deep networks,” in International conference on machine learning . PMLR, 2017, pp. 1126–1135. [19] J. Kirkpatrick, R. Pascanu, N. Rabinowitz, J. Veness, G. Desjardins, A. A. Rusu, K. Milan, J. Quan, T. Ramalho, A. Grabska-Barwinska et al. ,“Overcoming catastrophic forgetting in neural networks,” Proceedings of the national academy of sciences , vol. 114, no. 13, pp. 3521–3526, 2017. [20] D. A. Spielman and S.-H. Teng, “Nearly linear time algorithms for pre-conditioning and solving symmetric, diagonally dominant linear systems,” 
+
+SIAM Journal on Matrix Analysis and Applications , vol. 35, no. 3, pp. 835–885, 2014.
