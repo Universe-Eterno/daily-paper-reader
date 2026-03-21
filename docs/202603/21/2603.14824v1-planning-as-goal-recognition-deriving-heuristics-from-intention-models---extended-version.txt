@@ -1,0 +1,667 @@
+Title: Planning as Goal Recognition: Deriving Heuristics from Intention Models - Extended Version
+
+URL Source: https://arxiv.org/pdf/2603.14824v1
+
+Published Time: Tue, 17 Mar 2026 03:58:35 GMT
+
+Number of Pages: 9
+
+Markdown Content:
+# Planning as Goal Recognition: Deriving Heuristics from Intention Models 
+
+# Giacomo Rosa †,* , Jean Honorio †,* , Nir Lipovetzky †,* , Sebastian Sardina ‡,§ 
+
+> †
+
+The University of Melbourne, ‡ RMIT University Melbourne, Australia 
+
+> *
+
+{first.last }@unimelb.edu.au , §sebastian.sardina@rmit.edu.au 
+
+Abstract 
+
+Classical Planning aims to find a sequence of actions, a plan, that maps a starting state into one of the goal states. If a tra-jectory appears to be leading to the goal, should we priori-tise exploring it? Seminal work in goal recognition (GR) has defined GR in terms of a classical planning problem, adopt-ing classical solvers and heuristics to recognise plans. We come full circle, and study the adoption and properties of GR-derived heuristics for seeking solutions to classical planning problems. We propose a new framework for assessing goal in-tention, which informs a new class of efficiently-computable heuristics. As a proof of concept, we derive two such heuris-tics, and show that they can already yield improvements for top-scoring classical planners. Our work provides founda-tional knowledge for understanding and deriving probabilistic intention-based heuristics for planning. 
+
+# Introduction 
+
+We study the connection between goal recognition (GR) and classical planning by characterizing planning heuristics as mechanisms for assessing their “goal-intentionality,” thus doing a full loop from Ramirez and Geffner (2009, 2010)’s seminal work on GR as planning. Classical planning is the field of AI that seeks to find a sequence of actions, a plan ,that maps an initial state in a problem into a state that sat-isfies a specific goal condition. In classical planning, ac-tions are deterministic, states are fully observable and rep-resented through binary variables ( facts ), and no other ac-tions occur outside the plan (i.e., static environment). A common strategy adopted by solvers is to perform a search over the state space, using heuristics which estimate the dis-tance to the goal, such as the FF (Bonet and Geffner 2001; Hoffmann and Nebel 2001) and Landmark (Porteous, Se-bastia, and Hoffmann 2001) heuristics, to guide the search. Other techniques have also proven to be effective in enhanc-ing search efficiency. These include identifying helpful ac-tions (Hoffmann and Nebel 2001), which prioritise operators likely to contribute to goal achievement, leveraging novelty 
+
+measures (Lipovetzky and Geffner 2012, 2017), which fa-vor exploration of states exhibiting previously unseen com-binations of features, and dominance pruning (Torralba and Hoffmann 2015), which prunes states that provably cannot yield better solutions than previously explored states. These techniques do not estimate goal distance directly; rather, they prioritize states or nodes that aid the search through alternative mechanisms. The goal recognition task involves an observer inferring an acting agent’s goals or plans based on partial observa-tions of its behaviour (Sukthankar et al. 2014). 1 Traditional approaches rely on a predefined plan library , which encodes known plans for implicit goals, allowing recognition through matching observed actions to entries in the library (Kautz and Allen 1986). More recent formulations, such as goal recognition as planning (Ramirez and Geffner 2009, 2010), cast recognition as a planning problem itself: a (declarative) goal is considered more likely if the observed actions align with an optimal or near-optimal plan to achieve it. Recent contributions have extended this paradigm to account for irrational behaviour of agents (Masters and Sardi˜ na 2021), as well as adopting estimated measures and using informa-tion contained in the effects of observed actions to recognise goals and plans (Pereira, Oren, and Meneguzzi 2017; Wilken et al. 2024). In light of these recent developments, we revisit search for resource-bounded agents that seek to perform an intelligent exploration. Due to resource limitations, such agents bias the search towards some fragment of all possible traces (Pol-lack 1992; Bratman, Israel, and Pollack 1988). We analyze the intentionality of these traces with the lens of work in GR, under the intuition that some traces are seen as ob-servations that are “more intended” towards the goal than others, and push our search algorithms to explore “more intended paths”. This process is framed as a GR problem where, rather than estimating the intentionality of one obser-vation towards multiple goals, we aim to assign and compare the intentionality of different observations towards a distin-guished goal. 
+
+Contributions. Our primary objective is to establish a novel conceptual framework that views heuristics as judges of the intentionality of discovered trajectories in a planning problem. We first present a plan-library model of GR for a resource-bounded agent in a planning domain. This allows us to define the “goal-intentionality” of observed traces, and study the properties of solvers that use this quantity to seek 
+
+> 1
+
+Other common terms are Plan Recognition (PR) or Intention Recognition (IR). While subtle differences exists among them, in this paper, we shall use these terms interchangeably. 
+
+> arXiv:2603.14824v1 [cs.AI] 16 Mar 2026
+
+plans. A core contribution that separates our work from prior GR approaches is a new formulation of intentionality in which the likelihood is derived from the divergence between information in the observation, and a description of goal-intended information. Our plan-library model and proposed heuristics are both shown to belong to this family of estima-tors. Our theory then informs a new class of intention-based 
+
+heuristics for classical planning. As a proof of concept, we present two such heuristics, which we show help improve the state of the art in classical planning benchmarks. We tie our results to our framework, providing experimental evi-dence of theorised properties of our search paradigm. 
+
+# Preliminaries 
+
+The classical planning model is defined as Φ =
+
+⟨S, s 0, S G, A, f ⟩, where S is the discrete finite state space, 
+
+s0 ∈ S is the initial state, SG ⊆ S is the set of goal states, 
+
+A is the set of (deterministic) actions, and f : A × S 7 → S
+
+denotes the model partial transition function, with f (a, s )
+
+denoting the next state s′ ∈ S after applying action a ∈ A in state s ∈ S. When f is undefined, the action is not applicable in the state. We write A(s) to denote the set of actions appli-cable in state s, i.e., A(s) = {a ∈ A | f (a, s ) is defined }. A solution to a classical planning model is given by a plan ,a sequence of actions ⟨a0, . . . , a m⟩ that induces a state sequence ⟨s0, . . . , s m+1 ⟩ such that ai ∈ A(si), si+1 =
+
+f (ai, s i), and sm+1 ∈ SG for i ∈ { 0, . . . , m }.A STRIPS 2 (Fikes and Nilsson 1971) problem is defined through tuple P = ⟨F, A, I, G ⟩, where F denotes the set of boolean variables, or fluents, A is the set of actions a, I ⊆ F
+
+is the set of atoms that fully describe the initial state, and 
+
+G ⊆ F is the partial assignment that describes goal states. We assume unit cost actions in this work. 
+
+Planning Model Notation. Given a Classical Planning problem P, a trajectory denotes a sequence of alternating states and actions ⟨sk, a k, s k+1 , a k+1 , . . . , s m, a m, s m+1 ⟩,where both the first and last elements are states, such that 
+
+si ∈ S, ai ∈ A(si), and si+1 = f (si, a i); where 
+
+k ≤ i < m + 1 . Every trajectory induces two projec-tions: an a-trajectory , which is the sequence of actions 
+
+⟨ak, a k+1 , . . . , a m⟩, and an s-trajectory , which is the se-quence of states ⟨sk, s k+1 , . . . , s m+1 ⟩. We use T (si, π ) to represent the s-trajectory induced by an a-trajectory π ap-plied from state si. We use L(s, π ) to denote the last state 
+
+sm+1 ∈ S in the s-trajectory T (s, π ). For simplicity, when 
+
+s is s0 (the initial state of P as per I), we just write T (π)
+
+and L(π), resp. We place two constraints on considered trajectories: 1) 
+
+acyclic : no state may appear more than once in a trajectory; and 2) non-goal-extending : goal states can only appear as the last state of the trajectory. These are reasonable assump-tions, as any cycle is redundant and extending a-trajectories beyond a goal state is superfluous for finding plans towards a single goal. Given Si, S j ⊆ S, we use Π( Si, S j ) to de-note the set of acyclic and non-goal-extending a-trajectories that can be applied to a state si ∈ Si to yield a valid s-
+
+> 2Stanford Research Institute Problem Solver
+
+trajectory that begins at state si and ends at state sj ∈ Sj .A plan is then an a-trajectory π ∈ Π( {s0}, S G); in other words, an a-trajectory that, when applied to s0, reaches a valid goal state sg ∈ SG. Note that more than one se-quence of actions (a-trajectories) may yield the same his-tory of states (s-trajectories). Similarly, we use I-reachable a-trajectory to refer to all a-trajectories π ∈ Π( {s0}, S ).We adopt the definition of an observation sequence from previous plan and goal recognition literature (Ramirez and Geffner 2009; Masters and Sardi˜ na 2021) as any sequence of actions ⟨o1, ..., o m⟩, with oi ∈ A. An action sequence 
+
+satisfies an observation sequence iff it embeds it, meaning that there is a monotonic function g that maps each observa-tion oi ∈ A to the index of an identical action in the action sequence such that g(oi) < g (oj ) for all j > i . It follows from the above definitions that, given the set O of all pos-sible observation sequences for problem P, Π( {s0}, S G) ⊆
+
+Π( {s0}, S ) ⊆ Π( S, S ) ⊆ O .An a-trajectory π′ contains a-trajectory π, written π ⊑ π′,iff there exist, possibly empty, sequences of actions α and 
+
+β such that π′ = α · π · β. This relation is reflexive, i.e., an a-trajectory contains itself. An a-trajectory π′ extends an a-trajectory π, written π ⊑pfx π′, iff there exists a, possi-bly empty, suffix β such that π′ = π · β. We define the set of maximal a-trajectories M as the set of I-reachable a-trajectories that are not extended by any other I-reachable a-trajectory in Π( {s0}, S ) : M = {π ∈ Π( {s0}, S ) | ∀π′ ∈
+
+(Π( {s0}, S ) \ { π}), π ̸ ⊑pfx π′}. Thus, Π( {s0}, S G) ⊆M ⊆ Π( {s0}, S ). We also define the operator ∝rank , which indicates that two quantities induce the same ranking (the ordering is preserved): k ∝rank l := k(x) < k (y) ⇐⇒ 
+
+l(x) < l (y).
+
+# Intention-Based Search 
+
+Goal recognition problems assume two agents: an acting agent, which follows a (hidden) trajectory, and an observer agent, whose task is to infer the intention of the acting agent given an observation, a partial trace of the actor’s full tra-jectory. We adapt this idea to the search problem in planning by imagining a one-vs-all GR problem, where the actor is ei-ther directed or not directed towards a single goal, and with known initial state. The observer must determine whether the actor is following a plan that satisfies the problem’s goal given a partial trace, and can therefore be thought of as a heuristic that determines the goal intention of an observa-tion. Given multiple observations in an open list, we can then rank them based on their assigned probability of being intended towards the goal, preferring higher ranked observa-tions for expansion as a means of guiding the search. We be-gin by assuming that the observer may be resource bounded, and as such may not have knowledge of all maximal a-trajectories starting from s0. Rather, it has prior knowledge of a non-empty subset ˆM ⊆ M of sampled candidate max-imal a-trajectories, which it uses to infer the actor’s goal-intention. The observer is also subject to beliefs regarding the behaviour of the acting agent, which are expressed by assigning a weight to every maximal a-trajectory, a measure of “preference” for that a-trajectory. For example, if the ob-server believes that the actor is rational, it will assume that it is more likely to follow optimal or near-optimal paths to-wards its objective, and as such assign greater weights to shorter maximal a-trajectories. Alternatively, it may assign uniform weights if its belief is that the actor prioritizes all maximal a-trajectories equally. 
+
+IRPL Model 
+
+We provide the I-Reachable Plan-Library (IRPL) model, that only considers I-reachable a-trajectories in a planning problem as valid observation sequences, and derives prob-abilities relative to an implicit library of sampled maximal a-trajectories, and the subset of those a-trajectories that con-stitute plans. This allows us to illustrate the usefulness of adopting such probabilities as “heuristic signals” in a plan-ning problem, under the simplified scenario where prob-abilistic events are explicitly observable. Given problem description ⟨F, A, I, G ⟩ and the set of all I-reachable a-trajectories Π( {s0}, S ), the observer samples a set ˆM of known maximal a-trajectories starting at the initial state s0,and assigns a weight to each maximal a-trajectory according to a weight function w : M → R+. Let the set of sam-pled plans be ˆMG = Π( {s0}, S G) ∩ ˆM. For I-reachable a-trajectories O ∈ Π( {s0}, S ), let C(O) = {π′ ∈ ˆM | 
+
+O ⊑pfx π′} be the set of all sampled maximal a-trajectories that extend O. Let CG(O) = {π′ ∈ ˆMG | O ⊑pfx π′}
+
+be the set of sampled plans that extend O, and C¬G(O) = 
+
+{π′ ∈ ( ˆM \ ˆMG) | O ⊑pfx π′} be the sampled maxi-mal non-plans extending O, such that CG(O) S C¬G(O) = 
+
+C(O) and CG(O) T C¬G(O) = ∅.We define sets of maximal a-trajectories E ⊆ ˆM that im-ply underlying events of interest, with probability 
+
+P (E) = X
+
+> π′∈E
+
+w(π′)/ X 
+
+> π′′ ∈ˆM
+
+w(π′′ )
+
+Thus, P (G) is the event that π ∈ ˆM is a plan: 
+
+P (G) := P ( ˆMG) = X 
+
+> π′∈ˆMG
+
+w(π′)/ X 
+
+> π′′ ∈ˆM
+
+w(π′′ ) (1) Similarly, P (¬G) := P ( ˆM \ ˆMG).
+
+P (O) is the event that π ∈ ˆM extends O:
+
+P (O) := P (C(O)) = X
+
+> π′∈C(O)
+
+w(π′)/ X 
+
+> π′′ ∈ˆM
+
+w(π′′ ) (2) We can then obtain conditional probability P (O | G) := 
+
+P (C(O) | ˆMG):
+
+P (O | G) = X
+
+> π′∈CG(O)
+
+w(π′)/ X 
+
+> π′′ ∈ˆMG
+
+w(π′′ ) (3) where CG(O) = C(O) T ˆMG.3                                    
+
+> 3These probabilities are well-defined: P(G) + P(¬G) = 1 ,and P(O) + P(¬O) = 1 , where P(¬O) := P( ˆM \ C(O)) ;calculating P(O, G ) = P(O|G)·P(G)and using P(¬G)to obtain P(O, ¬G), then P(O, G ) + P(O, ¬G) = P(O).
+
+Finally, Bayesian posterior P (G | O) becomes the weight of all sampled plans to the goal extending O, over the weight of all sampled maximal a-trajectories extending O:
+
+P (G | O) = p(O | G)p(G)
+
+p(O) =
+
+P 
+
+> π′′ ∈CG(O)
+
+w(π′′ )
+
+P 
+
+> π′∈C(O)
+
+w(π′) (4) For any set of a-trajectories for which probabilities P (O |
+
+G) and P (G | O) are defined for all elements in the set, we can then obtain a ranking through either of equations 5 or 6, 
+
+arg max 
+
+> O
+
+P (O | G) = arg max 
+
+> O
+
+X
+
+> π′∈CG(O)
+
+w(π′) (5) 
+
+arg max 
+
+> O
+
+P (G | O) = arg max 
+
+> O
+
+P (O | G)
+
+P (O | ¬ G) (6) where equation 6 is obtained by simplifying 
+
+arg max O P (G | O)/P (¬G | O) and noting that 
+
+P (G) and P (¬G) are constant when considering a single goal in planning problems. When extending the domain of conditional probabilities to the set of all possible observa-tions in a planning problem, we adopt the convention of setting undefined probabilities to 0. This reflects an observer that assumes unknown trajectories are not goal directed. 
+
+Framework Properties 
+
+We first state the results, followed by analysis. 
+
+Claim 1. Given non-empty ˆM and ˆMG, any w, and a-trajectories Oe extending an a-trajectory Op by one action, 
+
+P (Oe | G) ≤ P (Op | G), as CG(Oe) ⊆ CG(Op).
+
+Claim 2. P (O | G) = 0 and P (G | O) = 0 for all a-trajectories O that are not extended by any plan π′ ∈ ˆMG.
+
+Lemma 1. Given non-empty ˆM and ˆMG, and any w,
+
+max Oe P (G | Oe) ≥ P (G | Op).Proof sketch. Every maximal a-trajectory extending Op ex-tends exactly one child Oe; hence C(Op) = S 
+
+> Oe
+
+C(Oe)
+
+and CG(Op) = S 
+
+> Oe
+
+CG(Oe), and these unions are dis-joint. Let X(O) = P 
+
+> π′∈C(O)
+
+w(π′) and define XG(O)
+
+analogously. Then X(Op) = P 
+
+> Oe
+
+X(Oe) and XG(Op) = 
+
+P 
+
+> Oe
+
+XG(Oe), so 
+
+P (G | Op) = XG(Op)
+
+X(Op) = X
+
+> Oe
+
+X(Oe)
+
+X(Op)
+
+XG(Oe)
+
+X(Oe) .
+
+Thus P (G | Op) is a weighted average of its children and therefore cannot exceed all of them. 
+
+Theorem 1. Given non-empty ˆM and ˆMG, and any w,a planner that expands max P (G | O) and breaks ties by greater trajectory length, will find a plan in number of ex-pansions m ≤ max π′∈ ˆMG |π′|.Proof. The first expanded node has P (G | O) greater than or equal to all others. Since P (G | O) > 0, Claim 2 ensures that at least one plan to the goal exists, and by Lemma 1 its best child has probability ≥ that of its parent. Since it also has greater trajectory length, it is expanded next; induction completes the argument. Lemma 2. Let | ˆMG| > 0. Suppose w is a weight function such that w(π) > w (π′) ⇐⇒ cost (π) < cost (π′). For a planner that expands a-trajectories in order of max P (O |
+
+G), the first expanded goal node is guaranteed to be a minimal-cost plan among all plans in the sample ˆM. The result also holds under the weaker condition cost (π) ≤
+
+cost (π′) ⇒ w(π) ≥ w(π′), provided ties in P (O | G) are broken by preferring shorter trajectories. Proof sketch. Assume the first goal-reaching a-trajectory π
+
+expanded is not minimal cost, and let π∗ be a cheaper plan. If π∗ is fully generated, then P (π∗ | G) > P (π | G)
+
+since w(π∗) > w (π), contradicting that π was expanded first. If instead only its prefix ρ is generated, then P (ρ |
+
+G) ≥ P (π∗ | G) because prefixes aggregate the weight of all their extensions and these values decrease monoton-ically with depth. Thus ρ (or π∗ when complete) would have been expanded before π. Hence the first expanded goal-achieving trajectory must correspond to a minimal-cost plan. When different-cost plans have equal weight, tie-breaking by shorter length selects the minimal-cost one first. 
+
+Lemma 3. A planner that expands a-trajectories in order of 
+
+max P (O | G) will expand at most P  
+
+> π∈ˆMG
+
+(|π| − 1) + 1 
+
+nodes before expanding a goal, and P  
+
+> π∈ˆMG
+
+(|π| − 2) + 1 
+
+nodes before generating a goal. Proof. Follows from Claim 2 that at most all non-goal nodes in s-trajectories implied by plans in ˆMG will be expanded before expanding a goal node. In the worst case, plans in 
+
+ˆMG do not overlap and only share the initial state, which is counted once. 
+
+Theorem 2. Given non-empty ˆM and ˆMG. For a planner that expands a-trajectories in order of max P (O | G); as samples are added to ˆMG, the length of the first expanded plan is non-increasing, and the worst-case number of expan-sions is non-decreasing. Proof. Follows from previous Lemmas 2 and 3, and consid-ering that as samples are added, the minimum plan cost in the set can only decrease. 
+
+Remarks. We briefly summarise general properties de-rived from the presented theorems. Claim 2 implies that following any a-trajectory with both P (O | G) > 0 and 
+
+P (G | O) > 0 is a valid strategy for reaching a goal. Theorem 1 shows that expanding nodes according to Equa-tion 6 follows a hill climbing strategy when ties are broken by larger g and is strongly goal directed. If ties are broken by smaller g, then it may perform local searches when ties are encountered, until it finds an exit to the plateau. In contrast, Equation 5 follows the maximum a posteriori path, inducing an exploratory strategy akin to an A* search with a consis-tent heuristic, as shorter a-trajectories tend to have higher 
+
+P (O | G) probability, noted in Claim 1. This approach ex-pands sampled solution trajectories until it selects a sample optimal plan. Theorem 2 reflects the sampling exploration-exploitation trade-off for P (O | G): increasing the number of samples in ˆMG can improve solution quality, but also in-creases the worst case number of expansions, reflecting the larger exploratory effort required. 
+
+Uniform Regimes 
+
+In what follows, we introduce and analyze the properties of two “basic” weight functions. We consider these as the two general uniform weighting processes, where we assign equal probability to, respectively (1) every sampled maximal a-trajectory, (2) every action choice in state transitions. We define a Uniform Maximal a-trajectory Probability 
+
+(UMP) weight function as a weight function w(π) = c
+
+where c is a non-zero constant, implying a uniform prefer-ence of the agent towards any sampled maximal a-trajectory in ˆM. Let us define quantities NT = | ˆM| , NG = | ˆMG|,
+
+NC (O) = |C(O)|, and NCG (O) = |CG(O)|.
+
+Corollary 1. Given non-empty ˆM and ˆMG, and aUMP weight function w, the probabilities obtained become 
+
+P (O) = NC (O) 
+
+> NT
+
+, P (G) = NG 
+
+> NT
+
+, P (O | G) = NCG (O) 
+
+> NG
+
+∝
+
+NCG (O), P (G | O) = p(O|G)p(G) 
+
+> p(O)
+
+= NCG (O)  
+
+> NC(O)
+
+.Proof. Follows from Equations 1,2,3, and 4; setting weight function w(π) = 1 , then the value of each summation is equivalent to the number of elements in the relevant sets. Corollary 1 shows that under a UMP weight function, 
+
+P (O | G) is proportional to the number of plans extending 
+
+O, and ordering the open list by arg max P (O | G) favours such prefixes. Ordering by arg max P (G | O) favours pre-fixes with a higher ratio of plan completions to non-plan continuations. Both quantities can be seen as measures of robustness of a partial solution, biasing the search towards directions with more valid outcomes. A Uniform Transition Probability (UTP) weight func-tion assigns to a maximal I-reachable a-trajectory π =
+
+⟨a0, . . . , a k−1⟩ the product of uniform action probabilities at each step, w(π) = Qk−1
+
+> i=0
+
+|A(si)|−1, where s0 is the ini-tial state, si+1 = f (ai, s i), and A (si) is the set of applicable actions at state si. That is, at each step the agent selects an applicable action with uniform probability. 
+
+Lemma 4. Given non-empty ˆM and ˆMG, a UTP weight function w, and an a-trajectory O that is extended by single solution plan πs, the number of nodes generated to find πs by a planner that expands according to max P (O | G) is lower bounded by − ln [ P (O | G) · P (G)] · e ∝ − ln[ P (O | G)] .Proof. The lower bound on nodes generated is given by the minimum possible number of nodes generated while follow-ing πs that achieves UTP weight w(πs) = P (O | G)·P (G).For each expanded state si ∈ T (πs), the number of gener-ated nodes increases by |A(si)|, and the weight of the a-trajectory to si is multiplied by 1 
+
+> |A(si)|
+
+. For w(πs) = 1 
+
+> X
+
+the minimum number of generated nodes is thus given by solv-ing min P 
+
+> si∈T (πs)
+
+(|A(si)|) s.t. Q  
+
+> si∈T (πs)
+
+|A(si)| = X. A lower bound to the integer solution is achieved by solving the real version of the problem, which can be solved analyti-cally through the AM-GM Inequality to yield e · ln( X).Theorem 3. Given non-empty ˆM and ˆMG, a UTP weight function w, and a planner that expands according to 
+
+max P (O | G), a lower-bound number of node generations required to achieve any plan that extends O is − ln[ P (O |
+
+G) · P (G)] · e.Proof. P (O | G) is equivalent to the sum of the weight of all plans extending O, over a common denominator. From Lemma 4, it follows that the number of node generations required to solve any plan increases inversely to the plan’s weight. Thus, the minimum number of node generations oc-curs when a single solution plan extends O.Theorem 3 shows that expanding nodes according to Equation 5 with a UTP weight function follows the a-trajectory that minimises the best-case number of node gen-erations to find a plan in ˆM. This strategy can be seen as op-timistic in the face of uncertainty, where uncertainty refers to unexplored regions of the state space. It assumes the sub-graph extending the selected trajectory has an ideal shape; as new information is revealed, this estimate may worsen, leading the search to prefer other sub-graphs. Such a bound cannot be obtained with a UMP weight function, as uniform weights are not tied to the number of node generations. 
+
+# Estimating Measures of Goal Intention 
+
+The IRPL model helps us characterize intention-based heuristics and their search behaviour. The prior knowledge we have assumed so far is, however, unrealistic, as we can-not expect to have access to a maximal trajectory library ˆM
+
+and plan library ˆMG. To obtain a practically relevant frame-work, we need to account for an observer that estimates goal intentionality using approximate measures. Existing work in GR-as-planning defines the likelihood 
+
+P (O | G) through the use of cost estimates (Ramirez and Geffner 2010; Masters and Sardi˜ na 2021). Intuitively they assume that rational agents are more likely to prefer lower-cost plans to their selected goal, basing their estimation pro-cess then on the sub-optimality of plans to each goal that incorporate observed events. We avoid following this direc-tion, because adopting such formulations would lead us back to using (heuristic) cost estimates to direct the search. In-stead, we propose a novel formulation for approximating and interpreting goal intentionality which provides: 1) a the-oretical background for alternative directions for estimating heuristics in classical planning, and 2) a generalisation of the IRPL model in terms of a larger class of approximate goal-intended models. 
+
+General Model of Divergence-based Likelihood 
+
+We define a divergence-based generalisation of goal-intended likelihood through Equation 7, 
+
+˜P (O | G) := e−DKL (dO,G ∥dG) (7) 
+
+dG denotes a distribution that estimates goal-intended out-come probabilities (intuitively capturing likelihoods of out-comes in MG, P (π | G)), and dO,G denotes a specific pos-terior distribution over the same space obtained by incorpo-rating observed evidence (intuitively capturing updated like-lihoods of outcomes given observation O, P (π | O, G )). To illustrate the characteristics of the adopted probability distributions with respect to their domains, consider the fol-lowing simplified example of rolling a dice 10 times, where the goal G is a total sum of values > 30 . A complete out-come is the sequence r = ( r1, . . . , r 10 ) of the random vari-able R = ( R1, . . . , R 10 ), where each ri denotes the value of one roll, and the distribution dG := ρ(r | G) assigns proba-bilities to all such sequences. An observation reveals the val-ues of a subset of these variables, e.g., (R1 = 3 , R 2 = 5) ,and observations are non-exclusive: observing (3 , 5) does not exclude observing (3 , 5, 4) as a longer trace. The ob-servation instead belongs to the marginal domain induced by the variables it reveals, with the marginal distribution 
+
+ρ(r1, r 2 | G) assigning probabilities to the exclusive out-comes of that sub-domain. The posterior distribution then incorporates observations: dO,G := ρ(r | R1 = 3 , R 2 =5, G ). Whereas in the IRPL model observations are defined as i-reachable a-trajectories, now the domain of dG defines the outcomes that determine the events in observations. To illustrate this, following the previous example, assume each roll outcome ri no longer represents the value of the dice roll, but rather whether the roll gives a number > 3. Ob-servations would then take the form (R1 = true, R 2 =
+
+f alse, ... ). While approximate, such events still contain use-ful information for estimating goal achievement. A well-defined KL-divergence requires matching the do-mains of dO,G and dG. So far we have described dO,G over the domain of dG, but this need not be the case. Since the notation O does not specify the domain of the observa-tion, we instead adopt x ∈ X , y ∈ Y, and z ∈ Z to denote outcomes explicitly associated with their domains. Let X = X1 × · · · × X v be the domain of complete out-comes, with x = ( x1, . . . , x v ) denoting a full outcome. For any index sets J ⊆ K ⊆ { 1, . . . , v }, define the marginal domains Y = ×i∈J Xi and Z = ×i∈K Xi , with tuples 
+
+y = ( xi)i∈J and z = ( xi)i∈K , xi ∈ X i, denoting out-comes in Y and Z. We write ρ(x) for the distribution over complete outcomes, and ρ(y) and ρ(z) for the corresponding marginals. Let y∗ ∈ Y be the discrete deterministic observa-tion O. We add superscripts to specify the domain of dO,G 
+
+and dG. Let dX 
+
+> G
+
+:= ρ(x | G) and dY 
+
+> O,G
+
+:= ρ(y | y∗, G ). Let 
+
+dZ 
+
+> G
+
+and dZ 
+
+> O,G
+
+denote any domain-matched representation of 
+
+dX 
+
+> G
+
+and dY 
+
+> O,G
+
+on an intermediate domain Z. dZ 
+
+> G
+
+is marginal-isation ρ(z | G) = ρ(z|x,G )·ρ(x|G) 
+
+> ρ(x|z,G )
+
+; dZ 
+
+> O,G
+
+is Bayesian update 
+
+ρ(z | y∗, G ) = ρ(y∗|z,G )·ρ(z|G) 
+
+> ρ(y∗|G)
+
+.
+
+Theorem 4. The KL divergence is invariant to the choice of Z, and coincides with the negative log-likelihood of the observation conditional on the goal: 
+
+DKL (dZ 
+
+> O,G
+
+∥ dZ
+
+> G
+
+) = − log ρ(y∗ | G)
+
+Proof. Expanding ρ(z | y∗, G ), simplifying, and marginal-ising, we have 
+
+DKL (dZ 
+
+> O,G
+
+∥ dZ
+
+> G
+
+) = X
+
+> z∈Z
+
+ρ(z | y∗, G ) log ρ(z | y∗, G )
+
+ρ(z | G)= X
+
+> z∈Z
+
+h
+
+ρ(z | y∗, G ) log ρ(y∗ | z, G )
+
+i
+
+− log ρ(y∗ | G)Since y∗ is a projection of some z onto observed coordi-nates, for all z ∈ Z if any variable value in y∗ is different from the corresponding variable in z, ρ(z | y∗, G ) = 0 , and if all variables in y∗ have same value with corresponding variables in z, ρ(y∗ | z, G ) = 1 , so log ρ(y∗ | z, G ) = 0 .Thus, 
+
+DKL (dZ 
+
+> O,G
+
+∥ dZ
+
+> G
+
+) = − log ρ(y∗ | G)
+
+Through Theorem 4, the specific choice of intermedi-ate domain used to align distributions, required for com-puting the KL-divergence, does not affect the derivation of 
+
+− log ρ(y∗ | G). This justifies Equation 7, and points at mul-tiple possible strategies to estimate − log ρ(y∗|G).
+
+Special cases. We briefly present cases of interest: 
+
+1) Marginalising dX 
+
+> G
+
+to Y. We can make dX 
+
+> G
+
+match the marginal distribution of dY 
+
+> O,G
+
+by marginalising all domain factors not in Y, directly obtaining likelihood dY 
+
+> G
+
+:= ρ(y |
+
+G) = ρ(y|x,G )·dX 
+
+> G
+> ρ(x|y,G )
+
+= P 
+
+> x
+
+ρ(y, x |G); dY 
+
+> O,G
+
+is then a degen-erate PMF ρ(y | y∗, G ), i.e., a one-hot distribution over its domain, assigning 1 to observation y∗, and 0 to all others. 
+
+2) Mapping dO,G to X . We can map the observation dis-tribution to the full domain X through Bayesian update 
+
+dX 
+
+> O
+
+:= ρ(x | y∗, G ) = ρ(y∗|x,G )·ρ(x|G) 
+
+> ρ(y∗|G)
+
+.
+
+3) Consistency with IRPL Model. When dX 
+
+> G
+
+perfectly de-scribes the plan library, through a bijective mapping of every sampled plan to a possible outcome with its relative weight as probability, and dY 
+
+> O,G
+
+describes an observed I-reachable a-trajectory, Equation 7 then derives the IRPL likelihood. It thus generalises Equation 3. 
+
+Assumptions. The result holds whenever (i) the observation is discrete and deterministic over Y, i.e., dY
+
+> O,G
+
+(y) = 1[y =
+
+y∗], and (ii) the observation map m : X → Y is surjective onto its image, ensuring that at least one complete trace is consistent with y∗. These are consistent with the GR model. 
+
+Interpretation. The cost based formulation of goal recogni-tion (Ramirez and Geffner 2010; Masters and Sardi˜ na 2021) is grounded in the assumption of agent rationality: observa-tions that align with near optimal plans are considered evi-dence of goal intended behaviour. Similarly, Equation 7 in-terprets rationality in terms of the divergence of observed information dO,G from the distribution dG, which captures statistical evidence of goal intendedness from estimated so-lution paths. It is intuitive that observations consistent with goal intended behaviour, when normalised by the likelihood of the observation, reflect intent towards a goal. In our ex-periments, we show that estimating such information can provide a signal for informing an efficient state-space ex-ploration and traversal, whose behaviour still correlates with results from the simpler and “ideal” IRPL model. 
+
+# Planning Heuristics 
+
+We demonstrate the practical relevance of our conceptual framework by proposing two variants of a novel intention-based heuristic which align with our theory, allowing us to correlate results with our predictions of search behaviour ob-tained through analysis of the IRPL model. We follow recent work in GR (Pereira, Oren, and Meneguzzi 2017; Wilken et al. 2024), which represents observations through the facts implied by underlying action sequences or trajectories. In a GR setting, this would represent facts added by actions in action sequence O. In a planning context, it may also include facts present in the initial state. Our heuristic uses fact observation probability estimation 
+
+as described in (Wilken et al. 2024) to estimate, for each fact 
+
+q ∈ F , a Bernoulli distribution q ∼ Bernoulli( Prel (q | G)) ,representing the probability that q is achieved at any point in a delete-relaxed plan. Prel (q | G) then refers to the con-ditional probability in the relaxed problem. This is done by first sampling a set of delete-relaxed plans to the goal to ob-tain the probability of observing each action in a sampled relaxed plan. The probability of observing facts is then in-directly derived as the probability of not observing any sup-porter action for the fact in a relaxed plan; thus, even if a fact is supported in all sampled relaxed plans, it may still get an observation probability less than 1. Pseudocode for the original algorithm, and a few modifications we make, are in-cluded in Appendix B. This estimation technique was shown to be effective in GR problems, where fact observation prob-abilities weight vectors in a feature space, and the Euclidean norm of the vectors is then used to estimate the distance cov-ered by an agent towards a goal. Our divergence-based inter-pretation of goal intendedness instead informs us to use fact observation probabilities to directly estimate the likelihood. 
+
+Likelihood Estimation. Let OF represent a set of observed facts. If we assume conditional independence between fact occurrences, the likelihood is simply 
+
+˜P (OF | G) = Y
+
+> q∈OF
+
+Prel (q | G)
+
+According to our model, this likelihood can be interpreted in terms of a Boltzmann distribution of the marginalisation of 
+
+dG := ˜ ρ(q1, ..., q |F |) = Q 
+
+> q∈F
+
+Bernoulli( Prel (q | G)) with respect to facts in OF . It represents the divergence between distribution ˜ρ(q1, ..., q |F |) and the observation OF , and is thus in the same “class” of divergence-based measures as the IRPL likelihood. This aspect justifies our comparison of solver behaviour with theory from our IRPL analysis. In practice, we calculate the relative ranking of observa-tions through the sum of log-probabilities. As the fact oc-currence probability computation is only performed once at the beginning of the search (at the initial state), ˜P (OF | G)
+
+is then computable in time linear in |OF | during the search, providing quick evaluation. In our experiments, we set the number of sampled relaxed plans to 100. This value was se-lected through analysis of results in the context of GR in (Wilken et al. 2024), and empirical testing. We refer to this heuristic as relaxed plan observation likelihood (ol rp ). 
+
+Posterior Estimation. A Bayesian posterior is also derived from P (G | O) ∝rank P (O|G)  
+
+> P(O|¬ G)
+
+(from Equation 6): 
+
+˜P (G | OF ) ∝rank 
+
+X
+
+> q∈OF
+
+log Prel (q | G) − log Prel (q | ¬ G)This requires an additional estimation of Prel (q | ¬G),which uses a modification of the procedure used to ob-tain Prel (q | G): rather than sampling delete-relaxed plans, the heuristic samples delete-relaxed action sequences that achieve all non-goal facts in the instance. Fact probabilities 
+
+Prel (q | ¬ G) are then extracted from this set of supporter ac-tions. We still sample 100 fact sets each for both Prel (q | G)
+
+and Prel (q | ¬ G), and call this variant relaxed plan observa-tion posterior (op rp ). 
+
+Adding Goal-intentionality to BFWS 
+
+We integrate our proposed heuristics with a BFWS solver (Lipovetzky and Geffner 2017), which balances exploration of the search space and exploitation of heuristics, to evaluate improvements in its search behaviour. BFWS( f 5) uses Par-titioned Novelty (Lipovetzky and Geffner 2017) as primary heuristic to partition each planning problem into multiple sub-problems and prioritize exploration, and the goal-count heuristic hGC , that counts the number of unachieved goal facts, is used both to inform such partitioning, and as tie-breaking heuristic. These heuristics are quickly computable, but often not very granular, creating a large number of ties. Minimum distance g is used to break final ties, and has a big impact on the overall performance of the planner. We implement our proposed variants as third tie-breakers after hGC to provide a fast but more informed tie-breaking mechanism that seeks progress by directing the search to-wards the goal. Our aim is for this to lead to states that im-prove the other heuristics more effectively than g. Follow-ing our reasoning from the IRPL model, ol rp is supposed to exhibit an A*-like exploratory behaviour, “augmenting” the original tie-breaking mechanism, whereas op rp should induce a more greedy and goal-directed search. 
+
+Partial Observation Trajectories. We adapt ol rp and 
+
+op rp to BFWS through ol rp -restart (ol rp r ) and op rp -restart 
+
+(op rp r ). These adaptations add log probabilities from facts that have been observed only in the trajectory from the last state that improved hGC , as opposed to all facts achieved from the start. By “restarting” at the most recent hGC im-provement, it regains informedness in the cases where it was lost. Otherwise, if a fact that did not appear in any sampled relaxed plan to the goal is observed, it would strongly pe-nalise the probability of all descendant nodes. This helps account for inaccuracies in fact occurrence estimates intro-duced by adopting distributions derived from relaxed plans. 
+
+# Experimental Results 
+
+We run our experiments on an AMD EPYC 7763 processor, with each test running on a single core. We adopt Downward Lab’s experiment module (Seipp et al. 2017), whereas our proposed solvers and heuristics are implemented in C++ us-ing the LAPKT planning module (Ramirez et al. 2015). Our adopted branch of LAPKT uses the FD grounder (Helmert 2009), with the exception of problems that produce ax-ioms, which are not currently supported in LAPKT. In such problems, our planners automatically fallback to the Tarski grounder (Franc´ es, Ramirez, and Collaborators 2018; Singh et al. 2021b). All experiments are limited to 1800 seconds and 8 GB time and memory constraints, following the satis-ficing track of the International Planning Competition (IPC) (Taitler et al. 2024). The problem set is composed of all IPC satisficing track benchmarks, selecting the latest prob-lem sets for recurrent domains. 
+
+Experimental Analysis. Table 1 highlights performance gains from our proposed techniques. Both ol rp r and op rp r
+
+improve coverage and reduce the number of expansions on a significant portion of problems compared to BFWS( f 5)baseline. This confirms that the goal-intendedness encoded by our heuristics induces a more efficient exploration of the state space. In direct comparison, op rp r shows a small advantage over ol rp r in node expansions, aligning with our IRPL analysis that P (G | O) drives a more goal directed greedy search. However, the more exploratory nature of 
+
+P (O | G) leads ol rp r to solve more instances overall. In regards to the exploration-exploitation dilemma, it is rea-sonable to expect that that the effectiveness of exploitation declines as the quality of the underlying estimate worsens. Thus, the more exploratory heuristic may be better suited to handle the approximation noise. The additional overhead from computing fact observation probabilities is offset by improved search efficiency, resulting in lower average solu-tion times than BFWS( f 5). By contrast, the extra compu-tation of P (O | ¬ G) required by op rp r introduces a small penalty relative to ol rp r , but differences are within the mea-surements’ standard deviation. The main drawback of both techniques is their effect on plan cost, which is expected due to the bias toward shorter plans induced by the original g
+
+tie-breaker. Suboptimal plan costs may also be influenced by the trajectory-restart policy of ol rp r , which loses the “global” negative bias towards shorter trajectories from Claim 1. 
+
+SOTA Variants. Our best performing BFWS solver BFWS( f 5)-Landmarks-ol rp r (OL rp r ) substitutes hGC with the Landmarks heuristic (Porteous, Sebastia, and Hoff-mann 2001), and uses a single trimmed open list (Rosa and Lipovetzky 2024) for greater memory efficiency. We note that both the coverage and average solution time gap be-tween ol rp r and op rp r widen when using this configuration. We also test variant OL rp r -UTP with modified fact observa-tion probability sampling, to highlight the practical impact of the weighting scheme in the IRPL model. When calcu-lating supporter action probabilities for ol rp r , each sampled relaxed plan is given an equal weight. OL rp r -UTP re-weights sampled relaxed plans according to a UTP weight function, giving more importance to relaxed plans with greater UTP weight. Lastly, we provide a comparison with recent high-coverage dual strategy solvers − that run an initial search and, if this fails, fall back to a backend solver − by replac-ing the frontend solver in BFNoS-Dual (Rosa and Lipovet-zky 2024) with OL rp r (OL rp r -Dual ). 
+
+Results. Table 2 compares the best-performing vari-ants with multiple SoTA Novelty planners BFNoS-Dual 
+
+(Rosa and Lipovetzky 2024), Dual-BFWS (Lipovetzky and Geffner 2017), and Approximate Novelty Tarski (Singh et al. 2021a), as well as past IPC satisficing track winners LAMA 
+
+(Richter and Westphal 2010) and Scorpion-Maidu (Corrˆ ea f 5 f 5-ol rp r f 5 f 5-op rp r f 5-ol rp r f 5-op rp r                                    
+
+> Coverage (1831) 1510 1560 (5.03) 1510 1556 (1.5) 1560 (5.03) 1556 (1.5) % Score 76.77% 80.20% (0.35) 76.77% 79.90% (0.15) 80.20% (0.35) 79.90% (0.15) N Fewer Expansions 368.2 (6.7) 1134.4 (8.7) 341.4 (9.1) 1159.4 (8.0) 412.0 (7.3) 716.6 (6.5) N Lower Time 582.4 (99.5) 897.0 (92.2) 658.8 (117.3) 814.6 (102.4) 811.8 (130.1) 658.0 (122.6) N Lower Plan Cost 760.6 (8.9) 369.6 (7.6) 763.6 (2.9) 375.8 (1.7) 375.2 (4.5) 349.2 (13.4) Average EpS 40111 35680 40111 33626 35680 33626
+
+Table 1: Performance comparison between BFWS( f 5) and variants with ol rp r and op rp r heuristics. % score is the average of the % of instances solved in each problem domain. Results for comparisons and solvers with a randomised component represent the mean, and include the standard deviation across 5 measurements. N Fewer Expansions, N Lower Time and N Lower Plan Cost 
+
+represent the number of problems where a variant scores better in the respective metrics (ignoring ties). Avg. EpS represents the average number of expansions per second across problems solved by all planners, and proxies computational overhead. Results indicate that ol rp r and op rp r reduce the number of expansions across a significant portion of problems, on average improving also coverage and solution time. Such improvements come at the cost of on average worse plan quality compared to the baseline.                              
+
+> Planner Coverage (1831) % score Agile score
+> Dual-BFWS 1607 83.6% 1200.8 ApxNoveltyT 1611 (3.5) 83.8% (0.2) 1233.7 (0.2) LAMA 1535 79.1% 1192.3 Scorpion-M 1591 82.9% 1206.4 OL rp r1621 (3.2) 84.6% (0.3) 1229.4 (3.4) OL rp r-UTP 1616 (2.1) 84.2% (0.1) 1236.0 (1.9)
+> BFNoS-Dual 1641 (0.6) 86.2% (0.1) 1173.3 (3.5) OL rp r-Dual 1655 (1.5) 87.0% (0.1) 1232.6 (2.9)
+
+Table 2: Mean coverage and Agile score 4 of our pro-posed planners. OL rp r and OL rp r -UTP refer to BFWS t-f 5-Landmarks adopting the respective heuristics. OL rp r -Dual is a modification of BFNoS-Dual that replaces the BFNoS frontend with OL rp r . Our enhancements of BFWS( f 5) out-perform SoTA planners, on average solving more problems, more quickly, without using multiple open lists or runs. OL rp r -Dual then provides an improved dual-strategy solver. et al. 2023). Results indicate improved coverage of our proposed modifications of BFWS( f 5). OL rp r -UTP also im-proves Agile score over the base OL rp r , at the cost of some problem coverage. Agile score is a performance metric that jointly evaluates coverage and runtime. We further note correlation between our experimental re-sults for OL rp r -UTP and Theorem 3, suggesting that priori-tising sampled relaxed plans with better estimated bounds on the number of node generations to find the goal can accel-erate the search, albeit at the expense of problem coverage, losing some of the robustness mentioned in the discussion of Corollary 1. UTP weights promote a more “committed” search, whereby a focus on optimistic relaxed plan samples can solve problems earlier when these estimates are accu-rate, but also mislead the search when they are not. The lat-ter case may occur when sampled relaxed plans diverge from correct plans, potentially missing important actions or facts. As fact probability extraction relies on the sampling of re-
+
+> 4
+
+Agile score is 1 for problems solved in T ≤ 1s, and 1 −  
+
+> log( T)log(300)
+
+for 1 < T ≤ 300 .
+
+laxed plans, we expect the quality of approximations to align with that of well-studied relaxed heuristics. For instance, our planners perform strongly on Settlers (Long and Fox 2003), a challenging domain where relaxed-plan-heuristic planners LAMA and Maidu outperform BFWS baselines (Appendix D). We also note sets of relatively poor plan-cost cases for variants in Table 1 appear to be domain-specific. We do not exclude that additional mechanisms related to the probabil-ity estimation process, such as observing sets of facts rather than a-trajectories, may impact per-domain amenability, in-forming future directions to improve proposed heuristics. 
+
+# Concluding Remarks 
+
+We introduce a model that provides an intuitive description of goal-intendedness given a set of underlying plans in an instance, and use it to study the behaviour of planners that adopt goal intentionality as heuristic signal. Our model and proposed heuristics are shown to belong to a general class of divergence-based goal recognition estimates. As a proof of concept, we propose two heuristics which improve the base performance of BFWS, matching complex IPC planners in Agile scores, while exceeding their coverage. We provide empirical evidence of correlation between our results and the theorised properties of our search paradigm. Our proposed planning-as-goal-recognition theoretical framework offers a new perspective on heuristic search, in-terpreting evaluation functions as processes that infer the in-tention of trajectories to the current state with respect to the goal. Such trajectories, therefore, do not only reveal the cost so far, but also their goal intendedness. This aspect may also provide a new perspective for analysing properties of well-established classical planning heuristics. The one-off time cost of the information extraction phase opens the door to potentially more informed and expen-sive estimation methods to further improve problem solv-ing capability. The probabilistic nature of the intentionality framework can also lead to new solutions in related prob-lems, such as learned heuristics for planning, and facilitate connections between planning, goal recognition, and non-symbolic fields of AI, such as statistical machine learning. Acknowledgments 
+
+We thank the reviewers for their valuable feedback. Gia-como Rosa is supported by the Melbourne Research Schol-arship established by the University of Melbourne. This re-search was supported by use of the Nectar Research Cloud and by the Melbourne Research Cloud. The Nectar Re-search Cloud is a collaborative Australian research platform supported by the NCRIS-funded Australian Research Data Commons (ARDC). 
+
+# References 
+
+Bonet, B.; and Geffner, H. 2001. Planning as heuristic search. Artificial Intelligence , 129(1-2): 5–33. Bratman, M. E.; Israel, D. J.; and Pollack, M. E. 1988. Plans and Resource-Bounded Practical Reasoning. COMPINT ,4(3): 349–355. Corrˆ ea, A. B.; Franc` es, G.; Hecher, M.; Longo, D. M.; and Seipp, J. 2023. Scorpion Maidu: Width Search in the Scor-pion Planning System. In Tenth International Planning Competition (IPC-10): Planner Abstracts .Fikes, R. E.; and Nilsson, N. J. 1971. STRIPS: A new ap-proach to the application of theorem proving to problem solving. Artificial intelligence , 2(3-4): 189–208. Franc´ es, G.; Ramirez, M.; and Collaborators. 2018. Tarski: An AI Planning Modeling Framework. https://github.com/ aig-upf/tarski. Helmert, M. 2009. Concise finite-domain representations for PDDL planning tasks. Artificial Intelligence , 173(5-6): 503–535. Hoffmann, J.; and Nebel, B. 2001. The FF planning system: Fast plan generation through heuristic search. Journal of Artificial Intelligence Research , 14: 253–302. Kautz, H. A.; and Allen, J. F. 1986. Generalized plan recog-nition. In AAAI , 32–37. Lipovetzky, N.; and Geffner, H. 2012. Width and serializa-tion of classical planning problems. In ECAI 2012 , 540–545. IOS Press. Lipovetzky, N.; and Geffner, H. 2017. Best-first width search: Exploration and exploitation in classical planning. In Proceedings of the AAAI Conference on Artificial Intelli-gence , volume 31. Long, D.; and Fox, M. 2003. The 3rd international plan-ning competition: Results and analysis. Journal of Artificial Intelligence Research , 20: 1–59. Masters, P.; and Sardi˜ na, S. 2021. Expecting the unexpected: Goal recognition for rational and irrational agents. AIJ , 297: 103490. Pereira, R.; Oren, N.; and Meneguzzi, F. 2017. Landmark-based heuristics for goal recognition. In Proceedings of the AAAI Conference on Artificial Intelligence , volume 31. Pollack, M. E. 1992. The Uses of Plans. AIJ , 57(1): 43–68. Porteous, J.; Sebastia, L.; and Hoffmann, J. 2001. On the extraction, ordering, and usage of landmarks in planning. In 
+
+Proc. ECP , volume 1. Ramirez, M.; and Geffner, H. 2009. Plan recognition as planning. In IJCAI , 1778–1783. Ramirez, M.; and Geffner, H. 2010. Probabilistic plan recog-nition using off-the-shelf classical planners. In AAAI , 1121– 1126. Ramirez, M.; Lipovetzky, N.; Singh, A.; and Muise, C. 2015. Lightweight Automated Planning ToolKiT. http://lapkt.org/. Accessed: 2025. Richter, S.; and Westphal, M. 2010. The LAMA planner: Guiding cost-based anytime planning with landmarks. Jour-nal of Artificial Intelligence Research , 39: 127–177. Rosa, G.; and Lipovetzky, N. 2024. Count-based novelty exploration in classical planning. In Proceedings of the Eu-ropean Conference on Artificial Intelligence , volume 392, 4181–4189. Seipp, J.; Pommerening, F.; Sievers, S.; and Helmert, M. 2017. Downward Lab. Singh, A.; Lipovetzky, N.; Ramirez, M.; and Segovia-Aguas, J. 2021a. Approximate novelty search. In Proceedings of the International Conference on Automated Planning and Scheduling , volume 31, 349–357. Singh, A.; Lipovetzky, N.; Ramirez, M.; Segovia-Aguas, J.; and Frances, G. 2021b. Grounding Schematic Representa-tion with GRINGO for Width-based Search. Sukthankar, G.; Geib, C.; Bui, H. H.; Pynadath, D.; and Goldman, R. P. 2014. Plan, activity, and intent recognition: Theory and practice . Newnes. Taitler, A.; Alford, R.; Espasa, J.; Behnke, G.; Fiˇ ser, D.; Gimelfarb, M.; Pommerening, F.; Sanner, S.; Scala, E.; Schreiber, D.; et al. 2024. The 2023 International Planning Competition. Torralba, A.; and Hoffmann, J. 2015. Simulation-Based Ad-missible Dominance Pruning. In IJCAI , 1689–1695. Wilken, N.; Cohausz, L.; Bartelt, C.; and Stuckenschmidt, H. 2024. Fact Probability Vector Based Goal Recognition. In ECAI 2024 , 4254–4261. IOS Press.

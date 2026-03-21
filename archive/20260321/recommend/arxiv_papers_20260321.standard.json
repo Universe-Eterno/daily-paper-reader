@@ -1,0 +1,788 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-21T19:14:24.571863+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 7,
+    "deep_cap": 7,
+    "deep_selected": 7,
+    "quick_candidates": 42,
+    "quick_skim_target": 12,
+    "quick_selected": 12
+  },
+  "deep_dive": [
+    {
+      "id": "2603.13778v1",
+      "title": "Optimality and annealing path planning of dynamical analog solvers",
+      "abstract": "Recently proposed analog solvers based on dynamical systems, such as Ising machines, are promising platforms for large-scale combinatorial optimization. Yet, given the heuristic nature of the field, there is very limited insight on optimality guarantees of the solvers, as well as how parameter schedules shape dynamics and outcomes. Here, we develop a dynamical mean-field framework to analyze Ising-machine dynamics for finding the ground state energy of the Sherrington-Kirkpatrick(SK) model of spin glasses and identify mechanisms that enable rapid convergence to provenly near-optimal energies. For a fixed target energy density Ec, we show that solutions are typically reached within O(1) matrix vector multiplications, indicating constant time complexity. We further delineate theoretical limitations arising from different parameter-scheduling trajectories and demonstrate a pronounced benefit of temperature-only annealing for the Coherent Ising Machine. Building on these insights, we propose a general framework for designing optimized parameter schedules, thereby improving the practical effectiveness of Ising machines for complex optimization tasks. The superior performance of the dynamical solvers is illustrated by the attainment of the ground state energy of the SK model.",
+      "authors": [
+        "Shu Zhou",
+        "K. Y. Michael Wong",
+        "Juntao Wang",
+        "David Shui Wing Hui",
+        "Daniel Ebler",
+        "Jie Sun"
+      ],
+      "primary_category": "cond-mat.dis-nn",
+      "categories": [
+        "cond-mat.dis-nn",
+        "cond-mat.stat-mech",
+        "math.DS",
+        "physics.data-an"
+      ],
+      "published": "2026-03-14T06:14:32+00:00",
+      "link": "https://arxiv.org/pdf/2603.13778v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Analog solvers for large-scale combinatorial optimization",
+      "llm_evidence_cn": "用于大规模组合优化的模拟求解器",
+      "llm_evidence": "用于大规模组合优化的模拟求解器",
+      "canonical_evidence": "用于大规模组合优化的模拟求解器",
+      "llm_tldr_en": "Analyzes the dynamics and optimality of Ising machines for combinatorial optimization problems.",
+      "llm_tldr_cn": "分析了用于组合优化问题的伊辛机（Ising machines）的动力学和最优性。",
+      "llm_tldr": "分析了用于组合优化问题的伊辛机（Ising machines）的动力学和最优性。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Deep learning models for solving NP hard combinatorial problems",
+      "matched_requirement_id": "req-23",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.16648v1",
+      "title": "Domain-Independent Dynamic Programming with Constraint Propagation",
+      "abstract": "There are two prevalent model-based paradigms for combinatorial problems: 1) state-based representations, such as heuristic search, dynamic programming (DP), and decision diagrams, and 2) constraint and domain-based representations, such as constraint programming (CP), (mixed-)integer programming, and Boolean satisfiability. In this paper, we bridge the gap between the DP and CP paradigms by integrating constraint propagation into DP, enabling a DP solver to prune states and transitions using constraint propagation. To this end, we implement constraint propagation using a general-purpose CP solver in the Domain-Independent Dynamic Programming framework and evaluate using heuristic search on three combinatorial optimisation problems: Single Machine Scheduling with Time Windows, the Resource Constrained Project Scheduling Problem (RCPSP), and the Travelling Salesperson Problem with Time Windows (TSPTW). Our evaluation shows that constraint propagation significantly reduces the number of state expansions, causing our approach to solve more instances than a DP solver for Single Machine Scheduling and RCPSP, and showing similar improvements for tightly constrained TSPTW instances. The runtime performance indicates that the benefits of propagation outweigh the overhead for constrained instances, but that further work into reducing propagation overhead could improve performance further. Our work is a key step in understanding the value of constraint propagation in DP solvers, providing a model-based approach to integrating DP and CP.",
+      "authors": [
+        "Imko Marijnissen",
+        "J. Christopher Beck",
+        "Emir Demirović",
+        "Ryo Kuroiwa"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-03-17T15:19:47+00:00",
+      "link": "https://arxiv.org/pdf/2603.16648v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Integrating constraint propagation into dynamic programming for optimization",
+      "llm_evidence_cn": "将约束传播集成到动态规划中进行优化",
+      "llm_evidence": "将约束传播集成到动态规划中进行优化",
+      "canonical_evidence": "将约束传播集成到动态规划中进行优化",
+      "llm_tldr_en": "Bridges DP and CP paradigms by integrating constraint propagation into heuristic search for combinatorial problems.",
+      "llm_tldr_cn": "通过将约束传播集成到启发式搜索中，桥接了动态规划与约束规划范式。",
+      "llm_tldr": "通过将约束传播集成到启发式搜索中，桥接了动态规划与约束规划范式。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Hybrid approaches combining deep learning and traditional optimization",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.18859v1",
+      "title": "RewardFlow: Topology-Aware Reward Propagation on State Graphs for Agentic RL with Large Language Models",
+      "abstract": "Reinforcement learning (RL) holds significant promise for enhancing the agentic reasoning capabilities of large language models (LLMs) with external environments. However, the inherent sparsity of terminal rewards hinders fine-grained, state-level optimization. Although process reward modeling offers a promising alternative, training dedicated reward models often entails substantial computational costs and scaling difficulties. To address these challenges, we introduce RewardFlow, a lightweight method for estimating state-level rewards tailored to agentic reasoning tasks. RewardFlow leverages the intrinsic topological structure of states within reasoning trajectories by constructing state graphs. This enables an analysis of state-wise contributions to success, followed by topology-aware graph propagation to quantify contributions and yield objective, state-level rewards. When integrated as dense rewards for RL optimization, RewardFlow substantially outperforms prior RL baselines across four agentic reasoning benchmarks, demonstrating superior performance, robustness, and training efficiency. The implementation of RewardFlow is publicly available at https://github.com/tmlr-group/RewardFlow.",
+      "authors": [
+        "Xiao Feng",
+        "Bo Han",
+        "Zhanke Zhou",
+        "Jiaqi Fan",
+        "Jiangchao Yao",
+        "Ka Ho Li",
+        "Dahai Yu",
+        "Michael Kwok-Po Ng"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CL",
+        "cs.LG"
+      ],
+      "published": "2026-03-19T13:07:12+00:00",
+      "link": "https://arxiv.org/pdf/2603.18859v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "RL with LLMs using state graphs for agentic reasoning tasks",
+      "llm_evidence_cn": "结合大模型与状态图的强化学习用于智能体推理",
+      "llm_evidence": "结合大模型与状态图的强化学习用于智能体推理",
+      "canonical_evidence": "结合大模型与状态图的强化学习用于智能体推理",
+      "llm_tldr_en": "Introduces RewardFlow to propagate rewards on state graphs for LLM-based reinforcement learning.",
+      "llm_tldr_cn": "提出RewardFlow，通过状态图拓扑结构为大模型强化学习提供细粒度奖励传播。",
+      "llm_tldr": "提出RewardFlow，通过状态图拓扑结构为大模型强化学习提供细粒度奖励传播。",
+      "llm_tags": [
+        "query:nco-llm:composite"
+      ],
+      "matched_query_tag": "query:nco-llm:composite",
+      "matched_query_text": "Papers central to 查找神经组合优化结合大模型相关的论文, especially work that connects or combines: Neural Combinatorial Optimization (NCO) methods and frameworks; Large Language Models (LLM) for optimization tasks; Deep Reinforcement Learning in combinatorial optimization; LLM-based heuristic search and optimization; Integration of GNN and LLM for combinatorial optimization; Neural combinatorial optimization for vehicle routing problems; In-context learning for combinatorial optimization problems; LLM-guided heuristic search for optimization; Integrating large language models with combinatorial optimization solvers; LLM driven heuristic generation for combinatorial optimization.",
+      "matched_requirement_id": "req-composite-nco-llm",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.17075v1",
+      "title": "CircuitBuilder: From Polynomials to Circuits via Reinforcement Learning",
+      "abstract": "Motivated by auto-proof generation and Valiant's VP vs. VNP conjecture, we study the problem of discovering efficient arithmetic circuits to compute polynomials, using addition and multiplication gates. We formulate this problem as a single-player game, where an RL agent attempts to build the circuit within a fixed number of operations. We implement an AlphaZero-style training loop and compare two approaches: Proximal Policy Optimization with Monte Carlo Tree Search (PPO+MCTS) and Soft Actor-Critic (SAC). SAC achieves the highest success rates on two-variable targets, while PPO+MCTS scales to three variables and demonstrates steady improvement on harder instances. These results suggest that polynomial circuit synthesis is a compact, verifiable setting for studying self-improving search policies.",
+      "authors": [
+        "Weikun K. Zhang",
+        "Rohan Pandey",
+        "Bhaumik Mehta",
+        "Kaijie Jin",
+        "Naomi Morato",
+        "Archit Ganapule",
+        "Michael Ruofan Zeng",
+        "Jarod Alper"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.CC"
+      ],
+      "published": "2026-03-17T19:04:37+00:00",
+      "link": "https://arxiv.org/pdf/2603.17075v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Reinforcement learning for arithmetic circuit discovery",
+      "llm_evidence_cn": "用于算术电路发现的强化学习",
+      "llm_evidence": "用于算术电路发现的强化学习",
+      "canonical_evidence": "用于算术电路发现的强化学习",
+      "llm_tldr_en": "Uses RL agents to discover efficient arithmetic circuits, formulated as a combinatorial search game.",
+      "llm_tldr_cn": "使用强化学习代理发现高效算术电路，将其建模为组合搜索游戏。",
+      "llm_tldr": "使用强化学习代理发现高效算术电路，将其建模为组合搜索游戏。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Deep Reinforcement Learning for combinatorial optimization",
+      "matched_requirement_id": "req-14",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.18157v1",
+      "title": "Learning-Augmented Algorithms for $k$-median via Online Learning",
+      "abstract": "The field of learning-augmented algorithms seeks to use ML techniques on past instances of a problem to inform an algorithm designed for a future instance. In this paper, we introduce a novel model for learning-augmented algorithms inspired by online learning. In this model, we are given a sequence of instances of a problem and the goal of the learning-augmented algorithm is to use prior instances to propose a solution to a future instance of the problem. The performance of the algorithm is measured by its average performance across all the instances, where the performance on a single instance is the ratio between the cost of the algorithm's solution and that of an optimal solution for that instance. We apply this framework to the classic $k$-median clustering problem, and give an efficient learning algorithm that can approximately match the average performance of the best fixed $k$-median solution in hindsight across all the instances. We also experimentally evaluate our algorithm and show that its empirical performance is close to optimal, and also that it automatically adapts the solution to a dynamically changing sequence.",
+      "authors": [
+        "Anish Hebbar",
+        "Rong Ge",
+        "Amit Kumar",
+        "Debmalya Panigrahi"
+      ],
+      "primary_category": "cs.DS",
+      "categories": [
+        "cs.DS",
+        "cs.LG"
+      ],
+      "published": "2026-03-18T18:00:34+00:00",
+      "link": "https://arxiv.org/pdf/2603.18157v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Learning-augmented algorithms for k-median clustering using ML techniques",
+      "llm_evidence_cn": "利用机器学习技术为k-中值聚类提供学习增强算法",
+      "llm_evidence": "利用机器学习技术为k-中值聚类提供学习增强算法",
+      "canonical_evidence": "利用机器学习技术为k-中值聚类提供学习增强算法",
+      "llm_tldr_en": "Introduces a model for learning-augmented algorithms applied to the classic k-median clustering problem.",
+      "llm_tldr_cn": "引入了一种应用于经典k-中值聚类问题的学习增强算法模型。",
+      "llm_tldr": "引入了一种应用于经典k-中值聚类问题的学习增强算法模型。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Machine learning approaches to combinatorial optimization",
+      "matched_requirement_id": "req-19",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.17919v1",
+      "title": "Training Diffusion Language Models for Black-Box Optimization",
+      "abstract": "We study offline black-box optimization (BBO), aiming to discover improved designs from an offline dataset of designs and labels, a problem common in robotics, DNA, and materials science with limited labeled samples. While recent work applies autoregressive LLMs to BBO by formatting tasks as natural-language prompts, their left-to-right design generation struggles to capture the strong bidirectional dependencies inherent in design problems. To address this, we propose adapting diffusion LLMs to offline BBO to leverage their bidirectional modeling capabilities. However, a domain gap exists between the natural text pre-training of diffusion LLMs and the heterogeneous signals in BBO (prompts, designs, and labels). To bridge this gap, we construct a unified prompt-response corpus and introduce delimiter tokens to explicitly mark field boundaries for domain adaptation. We further propose a two-stage post-training framework to align the diffusion LLM generation with high-label designs. The first stage performs supervised fine-tuning on the unified dataset via masked-response prediction, and the second stage adopts reinforcement learning with rewards defined by label improvements. Our method achieves state-of-the-art results on Design-Bench small-data settings.",
+      "authors": [
+        "Zipeng Sun",
+        "Can Chen",
+        "Ye Yuan",
+        "Haolun Wu",
+        "Jiayao Gu",
+        "Christopher Pal",
+        "Xue Liu"
+      ],
+      "primary_category": "cs.CE",
+      "categories": [
+        "cs.CE"
+      ],
+      "published": "2026-03-18T16:56:23+00:00",
+      "link": "https://arxiv.org/pdf/2603.17919v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "diffusion language models for black-box optimization",
+      "llm_evidence_cn": "用于黑盒优化的扩散语言模型",
+      "llm_evidence": "用于黑盒优化的扩散语言模型",
+      "canonical_evidence": "用于黑盒优化的扩散语言模型",
+      "llm_tldr_en": "Adapts diffusion language models to solve offline black-box optimization problems by capturing dependencies.",
+      "llm_tldr_cn": "通过捕捉双向依赖关系，将扩散语言模型应用于解决离线黑盒优化问题。",
+      "llm_tldr": "通过捕捉双向依赖关系，将扩散语言模型应用于解决离线黑盒优化问题。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Large Language Models (LLM) for optimization tasks",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.18477v1",
+      "title": "Leveraging Large Language Models for Generalizing Peephole Optimizations",
+      "abstract": "Peephole optimizations are a core component of modern optimizing compilers. It rewrites specific instruction into semantically equivalent but more efficient forms. In practice, creating a new peephole optimization often starts from a concrete optimization instance and requires lifting it into a more general rewrite rule that matches a wider range of instruction patterns. This generalization step is critical to optimization effectiveness, but it is also difficult: producing rules that are both correct and sufficiently general typically demands substantial manual effort and domain expertise. Existing approaches such as Hydra attempt to automate this task with program synthesis, but their generalization capability is often limited by search-space explosion, under-generalization, and restricted support for diverse instruction domains.   We present LPG, large language model aided peephole optimization generalization, a framework that uses large language models (LLMs) to generalize peephole optimizations. The design of LPG is motivated by the observation that LLMs are effective at semantic abstraction and exploratory reasoning, while formal analyses are necessary to ensure that generated rules are sound and profitable. Based on this observation, LPG adopts a closed-loop workflow that integrates LLM-driven symbolic constant generalization, structural generalization, constraint relaxation, and bitwidth/precision generalization with feedback from syntactic validation, semantic verification, and profitability checking.   We evaluate LPG on real-world peephole optimization issues drawn from the LLVM ecosystem. Overall, LPG successfully generalizes 90 out of 102 optimizations. On the integer-focused subset that is directly comparable to Hydra, LPG generalizes 74 out of 81 optimizations, whereas Hydra generalizes 35.",
+      "authors": [
+        "Chunhao Liao",
+        "Hongxu Xu",
+        "Xintong Zhou",
+        "Zhenyang Xu",
+        "Chengnian Sun"
+      ],
+      "primary_category": "cs.PL",
+      "categories": [
+        "cs.PL"
+      ],
+      "published": "2026-03-19T04:19:51+00:00",
+      "link": "https://arxiv.org/pdf/2603.18477v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "LLM driven generation and generalization of optimization rules",
+      "llm_evidence_cn": "大模型驱动的优化规则生成与泛化",
+      "llm_evidence": "大模型驱动的优化规则生成与泛化",
+      "canonical_evidence": "大模型驱动的优化规则生成与泛化",
+      "llm_tldr_en": "Uses LLMs to automate and generalize peephole optimizations in compilers, reducing manual expertise requirements.",
+      "llm_tldr_cn": "利用大模型自动泛化编译器的窥孔优化规则，减少对人工专家经验的依赖。",
+      "llm_tldr": "利用大模型自动泛化编译器的窥孔优化规则，减少对人工专家经验的依赖。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM driven heuristic generation for combinatorial optimization",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2603.13853v2",
+      "title": "APEX-Searcher: Augmenting LLMs' Search Capabilities through Agentic Planning and Execution",
+      "abstract": "Retrieval-augmented generation (RAG), based on large language models (LLMs), serves as a vital approach to retrieving and leveraging external knowledge in various domain applications. When confronted with complex multi-hop questions, single-round retrieval is often insufficient for accurate reasoning and problem solving. To enhance search capabilities for complex tasks, most existing works integrate multi-round iterative retrieval with reasoning processes via end-to-end training. While these approaches significantly improve problem-solving performance, they are still faced with challenges in task reasoning and model training, especially ambiguous retrieval execution paths and sparse rewards in end-to-end reinforcement learning (RL) process, leading to inaccurate retrieval results and performance degradation. To address these issues, in this paper, we proposes APEX-Searcher, a novel Agentic Planning and Execution framework to augment LLM search capabilities. Specifically, we introduce a two-stage agentic framework that decouples the retrieval process into planning and execution: It first employs RL with decomposition-specific rewards to optimize strategic planning; Built on the sub-task decomposition, it then applies supervised fine-tuning on high-quality multi-hop trajectories to equip the model with robust iterative sub-task execution capabilities. Extensive experiments demonstrate that our proposed framework achieves significant improvements in both multi-hop RAG and task planning performances across multiple benchmarks.",
+      "authors": [
+        "Kun Chen",
+        "Qingchao Kong",
+        "Zhao Feifei",
+        "Wenji Mao"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI"
+      ],
+      "published": "2026-03-14T09:17:12+00:00",
+      "link": "https://arxiv.org/pdf/2603.13853v2",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Augmenting LLMs search capabilities through agentic planning and reinforcement learning",
+      "llm_evidence_cn": "通过代理规划和强化学习增强大语言模型的搜索能力",
+      "llm_evidence": "通过代理规划和强化学习增强大语言模型的搜索能力",
+      "canonical_evidence": "通过代理规划和强化学习增强大语言模型的搜索能力",
+      "llm_tldr_en": "Enhances LLM search for complex tasks using agentic planning and reinforcement learning to handle sparse rewards.",
+      "llm_tldr_cn": "利用代理规划和强化学习增强大语言模型在复杂任务中的搜索和推理能力。",
+      "llm_tldr": "利用代理规划和强化学习增强大语言模型在复杂任务中的搜索和推理能力。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM-based heuristic search and optimization",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.12698v1",
+      "title": "EvolveCoder: Evolving Test Cases via Adversarial Verification for Code Reinforcement Learning",
+      "abstract": "Reinforcement learning with verifiable rewards (RLVR) is a promising approach for improving code generation in large language models, but its effectiveness is limited by weak and static verification signals in existing coding RL datasets. In this paper, we propose a solution-conditioned and adversarial verification framework that iteratively refines test cases based on the execution behaviors of candidate solutions, with the goal of increasing difficulty, improving discriminative power, and reducing redundancy. Based on this framework, we introduce EvolveCoder-22k, a large-scale coding reinforcement learning dataset constructed through multiple rounds of adversarial test case evolution. Empirical analysis shows that iterative refinement substantially strengthens verification, with pass@1 decreasing from 43.80 to 31.22. Reinforcement learning on EvolveCoder-22k yields stable optimization and consistent performance gains, improving Qwen3-4B by an average of 4.2 points across four downstream benchmarks and outperforming strong 4B-scale baselines. Our results highlight the importance of adversarial, solution-conditioned verification for effective and scalable reinforcement learning in code generation.",
+      "authors": [
+        "Chi Ruan",
+        "Dongfu Jiang",
+        "Huaye Zeng",
+        "Ping Nie",
+        "Wenhu Chen"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-03-13T06:26:50+00:00",
+      "link": "https://arxiv.org/pdf/2603.12698v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "reinforcement learning for code generation in LLMs",
+      "llm_evidence_cn": "大语言模型代码生成的强化学习",
+      "llm_evidence": "大语言模型代码生成的强化学习",
+      "canonical_evidence": "大语言模型代码生成的强化学习",
+      "llm_tldr_en": "Proposes an adversarial verification framework to improve code generation in LLMs via reinforcement learning.",
+      "llm_tldr_cn": "提出一种对抗性验证框架，通过强化学习改进大语言模型的代码生成能力。",
+      "llm_tldr": "提出一种对抗性验证框架，通过强化学习改进大语言模型的代码生成能力。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Fine tuning language models for neural combinatorial optimization tasks",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.13963v1",
+      "title": "SeqTG: Scalable Combinatorial Test Generation via Sequential Integer Linear Programming",
+      "abstract": "Combinatorial Testing (CT) is essential for detecting interaction-triggered faults, yet generating minimal Covering Arrays under complex constraints remains an unresolved NP-hard challenge. Current greedy algorithms are highly scalable but suffer from severe ``diminishing returns'': they efficiently cover initial interactions but produce bloated, redundant test suites when struggling to pack the final few difficult pairs. While exact mathematical programming could theoretically address this inefficiency, it has historically been intractable due to combinatorial explosion. In this paper, we pioneer the application of exact mathematical modeling to CT by introducing SeqTG, a scalable framework based on Sequential Integer Linear Programming (ILP). To circumvent the scalability barrier, SeqTG employs a novel Warm-Start strategy: a rapid greedy initialization first clears the ``easy'' interactions, allowing the rigorous ILP solver to exclusively optimize the fragmented, difficult-to-cover remainder. The pipeline operates in three stages: (1) a Constraint-First phase grouping must-include requirements via graph partitioning; (2) an Incremental Optimization phase targeting the remaining interactions with sequential ILP; and (3) a Global Minimization phase eliminating redundancies via set-covering. Extensive evaluations across standard benchmarks and 200 large-scale configurations validate the framework's efficacy. The results demonstrate that SeqTG effectively eradicates late-stage bloat, achieving state-of-the-art test suite compactness and strict constraint adherence.",
+      "authors": [
+        "Sitong Yang",
+        "Wanying Bao",
+        "Yinyin Song",
+        "Yueting Cheng",
+        "Qian Li",
+        "Chao Wei"
+      ],
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE"
+      ],
+      "published": "2026-03-14T14:18:43+00:00",
+      "link": "https://arxiv.org/pdf/2603.13963v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Combinatorial testing as NP-hard challenge solved via sequential integer linear programming",
+      "llm_evidence_cn": "通过顺序整数线性规划解决组合测试这一NP-hard挑战",
+      "llm_evidence": "通过顺序整数线性规划解决组合测试这一NP-hard挑战",
+      "canonical_evidence": "通过顺序整数线性规划解决组合测试这一NP-hard挑战",
+      "llm_tldr_en": "Introduces SeqTG, a scalable framework using exact mathematical modeling for combinatorial test generation.",
+      "llm_tldr_cn": "引入SeqTG框架，利用精确数学建模解决组合测试生成中的NP-hard问题。",
+      "llm_tldr": "引入SeqTG框架，利用精确数学建模解决组合测试生成中的NP-hard问题。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Hybrid approaches combining deep learning and traditional optimization",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.12725v1",
+      "title": "Graph In-Context Operator Networks for Generalizable Spatiotemporal Prediction",
+      "abstract": "In-context operator learning enables neural networks to infer solution operators from contextual examples without weight updates. While prior work has demonstrated the effectiveness of this paradigm in leveraging vast datasets, a systematic comparison against single-operator learning using identical training data has been absent. We address this gap through controlled experiments comparing in-context operator learning against classical operator learning (single-operator models trained without contextual examples), under the same training steps and dataset. To enable this investigation on real-world spatiotemporal systems, we propose GICON (Graph In-Context Operator Network), combining graph message passing for geometric generalization with example-aware positional encoding for cardinality generalization. Experiments on air quality prediction across two Chinese regions show that in-context operator learning outperforms classical operator learning on complex tasks, generalizing across spatial domains and scaling robustly from few training examples to 100 at inference.",
+      "authors": [
+        "Chenghan Wu",
+        "Zongmin Yu",
+        "Boai Sun",
+        "Liu Yang"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-13T07:16:55+00:00",
+      "link": "https://arxiv.org/pdf/2603.12725v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "In-context operator learning for spatiotemporal systems using graph networks",
+      "llm_evidence_cn": "利用图网络进行时空系统的上下文算子学习",
+      "llm_evidence": "利用图网络进行时空系统的上下文算子学习",
+      "canonical_evidence": "利用图网络进行时空系统的上下文算子学习",
+      "llm_tldr_en": "Proposes GICON for in-context operator learning on graphs to generalize spatiotemporal predictions.",
+      "llm_tldr_cn": "提出GICON框架，利用图上下文算子学习实现时空预测的几何泛化。",
+      "llm_tldr": "提出GICON框架，利用图上下文算子学习实现时空预测的几何泛化。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "In-context learning for combinatorial optimization problems",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.14730v1",
+      "title": "GNNVerifier: Graph-based Verifier for LLM Task Planning",
+      "abstract": "Large language models (LLMs) facilitate the development of autonomous agents. As a core component of such agents, task planning aims to decompose complex natural language requests into concrete, solvable sub-tasks. Since LLM-generated plans are frequently prone to hallucinations and sensitive to long-context prom-pts, recent research has introduced plan verifiers to identify and correct potential flaws. However, most existing approaches still rely on an LLM as the verifier via additional prompting for plan review or self-reflection. LLM-based verifiers can be misled by plausible narration and struggle to detect failures caused by structural relations across steps, such as type mismatches, missing intermediates, or broken dependencies. To address these limitations, we propose a graph-based verifier for LLM task planning. Specifically, the proposed method has four major components: Firstly, we represent a plan as a directed graph with enriched attributes, where nodes denote sub-tasks and edges encode execution order and dependency constraints. Secondly, a graph neural network (GNN) then performs structural evaluation and diagnosis, producing a graph-level plausibility score for plan acceptance as well as node/edge-level risk scores to localize erroneous regions. Thirdly, we construct controllable perturbations from ground truth plan graphs, and automatically generate training data with fine-grained annotations. Finally, guided by the feedback from our GNN verifier, we enable an LLM to conduct local edits (e.g., tool replacement or insertion) to correct the plan when the graph-level score is insufficient. Extensive experiments across diverse datasets, backbone LLMs, and planners demonstrate that our GNNVerifier achieves significant gains in improving plan quality. Our data and code is available at https://github.com/BUPT-GAMMA/GNNVerifier.",
+      "authors": [
+        "Yu Hao",
+        "Qiuyu Wang",
+        "Cheng Yang",
+        "Yawen Li",
+        "Zhiqiang Zhang",
+        "Chuan Shi"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-16T02:05:21+00:00",
+      "link": "https://arxiv.org/pdf/2603.14730v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Graph-based verifier for LLM task planning and structural relations",
+      "llm_evidence_cn": "基于图的验证器用于大模型任务规划和结构关系处理",
+      "llm_evidence": "基于图的验证器用于大模型任务规划和结构关系处理",
+      "canonical_evidence": "基于图的验证器用于大模型任务规划和结构关系处理",
+      "llm_tldr_en": "Introduces a graph-based verifier to correct LLM task planning failures caused by structural relations.",
+      "llm_tldr_cn": "引入一种基于图的验证器，以纠正大模型在任务规划中因结构关系导致的错误。",
+      "llm_tldr": "引入一种基于图的验证器，以纠正大模型在任务规划中因结构关系导致的错误。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Integration of GNN and LLM for combinatorial optimization",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.13035v1",
+      "title": "Association-Aware GNN for Precoder Learning in Cell-Free Systems",
+      "abstract": "Deep learning has been widely recognized as a promising approach for optimizing multi-user multi-antenna precoders in traditional cellular systems. However, a critical distinction between cell-free and cellular systems lies in the flexibility of user equipment (UE)-access point (AP) associations. Consequently, the optimal precoder depends not only on channel state information but also on the dynamic UE-AP association status. In this paper, we propose an association-aware graph neural network (AAGNN) that explicitly incorporates association status into the precoding design. We leverage the permutation equivariance properties of the cell-free precoding policy to reduce the training complexity of AAGNN and employ an attention mechanism to enhance its generalization performance. Simulation results demonstrate that the proposed AAGNN outperforms baseline learning methods in both learning performance and generalization capabilities while maintaining low training and inference complexity.",
+      "authors": [
+        "Mingyu Deng",
+        "Shengqian Han"
+      ],
+      "primary_category": "eess.SP",
+      "categories": [
+        "eess.SP",
+        "cs.LG"
+      ],
+      "published": "2026-03-13T14:45:00+00:00",
+      "link": "https://arxiv.org/pdf/2603.13035v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "GNN for optimizing associations and precoding in systems",
+      "llm_evidence_cn": "GNN用于优化系统中的关联与预编码",
+      "llm_evidence": "GNN用于优化系统中的关联与预编码",
+      "canonical_evidence": "GNN用于优化系统中的关联与预编码",
+      "llm_tldr_en": "Uses an association-aware GNN to optimize multi-antenna precoders in cell-free systems.",
+      "llm_tldr_cn": "使用关联感知图神经网络优化无小区系统中的多天线预编码。",
+      "llm_tldr": "使用关联感知图神经网络优化无小区系统中的多天线预编码。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Graph Neural Networks for solving combinatorial problems",
+      "matched_requirement_id": "req-15",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.14730v2",
+      "title": "GNNVerifier: Graph-based Verifier for LLM Task Planning",
+      "abstract": "Large language models (LLMs) facilitate the development of autonomous agents. As a core component of such agents, task planning aims to decompose complex natural language requests into concrete, solvable sub-tasks. Since LLM-generated plans are frequently prone to hallucinations and sensitive to long-context prom-pts, recent research has introduced plan verifiers to identify and correct potential flaws. However, most existing approaches still rely on an LLM as the verifier via additional prompting for plan review or self-reflection. LLM-based verifiers can be misled by plausible narration and struggle to detect failures caused by structural relations across steps, such as type mismatches, missing intermediates, or broken dependencies. To address these limitations, we propose a graph-based verifier for LLM task planning. Specifically, the proposed method has four major components: Firstly, we represent a plan as a directed graph with enriched attributes, where nodes denote sub-tasks and edges encode execution order and dependency constraints. Secondly, a graph neural network (GNN) then performs structural evaluation and diagnosis, producing a graph-level plausibility score for plan acceptance as well as node/edge-level risk scores to localize erroneous regions. Thirdly, we construct controllable perturbations from ground truth plan graphs, and automatically generate training data with fine-grained annotations. Finally, guided by the feedback from our GNN verifier, we enable an LLM to conduct local edits (e.g., tool replacement or insertion) to correct the plan when the graph-level score is insufficient. Extensive experiments across diverse datasets, backbone LLMs, and planners demonstrate that our GNNVerifier achieves significant gains in improving plan quality. Our data and code is available at https://github.com/BUPT-GAMMA/GNNVerifier.",
+      "authors": [
+        "Yu Hao",
+        "Qiuyu Wang",
+        "Cheng Yang",
+        "Yawen Li",
+        "Zhiqiang Zhang",
+        "Chuan Shi"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-16T02:05:21+00:00",
+      "link": "https://arxiv.org/pdf/2603.14730v2",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Graph-based verifier for LLM task planning and structural relations",
+      "llm_evidence_cn": "基于图的大模型任务规划与结构关系验证器",
+      "llm_evidence": "基于图的大模型任务规划与结构关系验证器",
+      "canonical_evidence": "基于图的大模型任务规划与结构关系验证器",
+      "llm_tldr_en": "GNNVerifier uses graph structures to identify and correct flaws in LLM-generated task plans.",
+      "llm_tldr_cn": "GNNVerifier利用图结构识别并纠正大模型生成的任务规划中的缺陷。",
+      "llm_tldr": "GNNVerifier利用图结构识别并纠正大模型生成的任务规划中的缺陷。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Integration of GNN and LLM for combinatorial optimization",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.13042v1",
+      "title": "OpenACMv2: An Accuracy-Constrained Co-Optimization Framework for Approximate DCiM",
+      "abstract": "Digital Compute-in-Memory (DCiM) accelerates neural networks by reducing data movement. Approximate DCiM can further improve power-performance-area (PPA), but demands accuracy-constrained co-optimization across coupled architecture and transistor-level choices. Building on OpenYield, we introduce Accuracy-Constrained Co-Optimization (ACCO) and present OpenACMv2, an open framework that operationalizes ACCO via two-level optimization: (1) accuracy-constrained architecture search of compressor combinations and SRAM macro parameters, driven by a fast GNN-based surrogate for PPA and error; and (2) variation- and PVT-aware transistor sizing for standard cells and SRAM bitcells using Monte Carlo. By decoupling ACCO into architecture-level exploration and circuit-level sizing, OpenACMv2 integrates classic single- and multi-objective optimizers to deliver strong PPA-accuracy tradeoffs and robust convergence. The workflow is compatible with FreePDK45 and OpenROAD, supporting reproducible evaluation and easy adoption. Experiments demonstrate significant PPA improvements under controlled accuracy budgets, enabling rapid \"what-if\" exploration for approximate DCiM. The framework is available on https://github.com/ShenShan123/OpenACM.",
+      "authors": [
+        "Yiqi Zhou",
+        "Yue Yuan",
+        "Yikai Wang",
+        "Bohao Liu",
+        "Qinxin Mei",
+        "Zhuohua Liu",
+        "Shan Shen",
+        "Wei Xing",
+        "Daying Sun",
+        "Li Li",
+        "Guozhu Liu"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AR"
+      ],
+      "published": "2026-03-13T14:50:52+00:00",
+      "link": "https://arxiv.org/pdf/2603.13042v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "GNN-based surrogate for architecture search",
+      "llm_evidence_cn": "用于架构搜索的基于 GNN 的代理模型",
+      "llm_evidence": "用于架构搜索的基于 GNN 的代理模型",
+      "canonical_evidence": "用于架构搜索的基于 GNN 的代理模型",
+      "llm_tldr_en": "Uses GNN surrogates for accuracy-constrained co-optimization in digital compute-in-memory design.",
+      "llm_tldr_cn": "在数字内存计算设计中使用 GNN 代理进行精度约束的协同优化。",
+      "llm_tldr": "在数字内存计算设计中使用 GNN 代理进行精度约束的协同优化。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Graph Neural Networks for solving combinatorial problems",
+      "matched_requirement_id": "req-15",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.14824v1",
+      "title": "Planning as Goal Recognition: Deriving Heuristics from Intention Models - Extended Version",
+      "abstract": "Classical planning aims to find a sequence of actions, a plan, that maps a starting state into one of the goal states. If a trajectory appears to be leading to the goal, should we prioritise exploring it? Seminal work in goal recognition (GR) has defined GR in terms of a classical planning problem, adopting classical solvers and heuristics to recognise plans. We come full circle, and study the adoption and properties of GR-derived heuristics for seeking solutions to classical planning problems. We propose a new framework for assessing goal intention, which informs a new class of efficiently-computable heuristics. As a proof of concept, we derive two such heuristics, and show that they can already yield improvements for top-scoring classical planners. Our work provides foundational knowledge for understanding and deriving probabilistic intention-based heuristics for planning.",
+      "authors": [
+        "Giacomo Rosa",
+        "Jean Honorio",
+        "Nir Lipovetzky",
+        "Sebastian Sardina"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-03-16T04:58:28+00:00",
+      "link": "https://arxiv.org/pdf/2603.14824v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Deriving heuristics for classical planning problems",
+      "llm_evidence_cn": "为经典规划问题推导启发式算法",
+      "llm_evidence": "为经典规划问题推导启发式算法",
+      "canonical_evidence": "为经典规划问题推导启发式算法",
+      "llm_tldr_en": "Develops a framework to derive efficient heuristics for classical planning from goal recognition models.",
+      "llm_tldr_cn": "开发了一个从目标识别模型中为经典规划问题推导高效启发式算法的框架。",
+      "llm_tldr": "开发了一个从目标识别模型中为经典规划问题推导高效启发式算法的框架。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Learning search heuristics with neural networks",
+      "matched_requirement_id": "req-21",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.13434v1",
+      "title": "Modality-free Graph In-context Alignment",
+      "abstract": "In-context learning (ICL) converts static encoders into task-conditioned reasoners, enabling adaptation to new data from just a few examples without updating pretrained parameters. This capability is essential for graph foundation models (GFMs) to approach LLM-level generality. Yet current GFMs struggle with cross-domain alignment, typically relying on modality-specific encoders that fail when graphs are pre-vectorized or raw data is inaccessible. In this paper, we introduce Modality-Free Graph In-context Alignment (MF-GIA), a framework that makes a pretrained graph encoder promptable for few-shot prediction across heterogeneous domains without modality assumptions. MF-GIA captures domain characteristics through gradient fingerprints, which parameterize lightweight transformations that align pre-encoded features and indexed labels into unified semantic spaces. During pretraining, a dual prompt-aware attention mechanism with episodic objective learns to match queries against aligned support examples to establish prompt-based reasoning capabilities. At inference, MF-GIA performs parameter-update-free adaptation using only a few-shot support set to trigger cross-domain alignment and enable immediate prediction on unseen domains. Experiments demonstrate that MF-GIA achieves superior few-shot performance across diverse graph domains and strong generalization to unseen domains.",
+      "authors": [
+        "Wei Zhuo",
+        "Siqiang Luo"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-13T07:45:34+00:00",
+      "link": "https://arxiv.org/pdf/2603.13434v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Graph In-context Alignment for few-shot prediction",
+      "llm_evidence_cn": "图上下文对齐用于少样本预测",
+      "llm_evidence": "图上下文对齐用于少样本预测",
+      "canonical_evidence": "图上下文对齐用于少样本预测",
+      "llm_tldr_en": "Introduces a modality-free framework for graph in-context learning across heterogeneous domains.",
+      "llm_tldr_cn": "引入了一种无模态图上下文学习框架，用于跨异构领域的少样本预测。",
+      "llm_tldr": "引入了一种无模态图上下文学习框架，用于跨异构领域的少样本预测。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Graph Neural Networks for solving combinatorial problems",
+      "matched_requirement_id": "req-15",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.14937v1",
+      "title": "LLM as Graph Kernel: Rethinking Message Passing on Text-Rich Graphs",
+      "abstract": "Text-rich graphs, which integrate complex structural dependencies with abundant textual information, are ubiquitous yet remain challenging for existing learning paradigms. Conventional methods and even LLM-hybrids compress rich text into static embeddings or summaries before structural reasoning, creating an information bottleneck and detaching updates from the raw content. We argue that in text-rich graphs, the text is not merely a node attribute but the primary medium through which structural relationships are manifested. We introduce RAMP, a Raw-text Anchored Message Passing approach that moves beyond using LLMs as mere feature extractors and instead recasts the LLM itself as a graph-native aggregation operator. RAMP exploits the text-rich nature of the graph via a novel dual-representation scheme: it anchors inference on each node's raw text during each iteration while propagating dynamically optimized messages from neighbors. It further handles both discriminative and generative tasks under a single unified generative formulation. Extensive experiments show that RAMP effectively bridges the gap between graph propagation and deep text reasoning, achieving competitive performance and offering new insights into the role of LLMs as graph kernels for general-purpose graph learning.",
+      "authors": [
+        "Ying Zhang",
+        "Hang Yu",
+        "Haipeng Zhang",
+        "Peng Di"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.CL"
+      ],
+      "published": "2026-03-16T07:40:09+00:00",
+      "link": "https://arxiv.org/pdf/2603.14937v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Integration of LLM as a graph-native aggregation operator",
+      "llm_evidence_cn": "将LLM集成为图原生聚合算子",
+      "llm_evidence": "将LLM集成为图原生聚合算子",
+      "canonical_evidence": "将LLM集成为图原生聚合算子",
+      "llm_tldr_en": "Recasts LLMs as graph kernels for message passing on text-rich graphs, bridging LLMs and graph structures.",
+      "llm_tldr_cn": "将LLM重塑为图内核，用于富文本图上的消息传递，连接了LLM与图结构。",
+      "llm_tldr": "将LLM重塑为图内核，用于富文本图上的消息传递，连接了LLM与图结构。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Integration of GNN and LLM for combinatorial optimization",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.13459v1",
+      "title": "Reconciling In-Context and In-Weight Learning via Dual Representation Space Encoding",
+      "abstract": "In-context learning (ICL) is a valuable capability exhibited by Transformers pretrained on diverse sequence tasks. However, previous studies have observed that ICL often conflicts with the model's inherent in-weight learning (IWL) ability. By examining the representation space learned by a toy model in synthetic experiments, we identify the shared encoding space for context and samples in Transformers as a potential source of this conflict. To address this, we modify the model architecture to separately encode the context and samples into two distinct spaces: a task representation space and a sample representation space. We model these two spaces under a simple yet principled framework, assuming a linear representational structure and treating them as a pair of dual spaces. Both theoretical analysis and empirical results demonstrate the effectiveness of our proposed architecture, CoQE, in the single-value answer setting. It not only enhances ICL performance through improved representation learning, but also successfully reconciles ICL and IWL capabilities across synthetic few-shot classification and a newly designed pseudo-arithmetic task. Code: https://github.com/McGuinnessChen/dual-representation-space-encoding",
+      "authors": [
+        "Guanyu Chen",
+        "Ruichen Wang",
+        "Tianren Zhang",
+        "Feng Chen"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-13T16:58:05+00:00",
+      "link": "https://arxiv.org/pdf/2603.13459v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "reconciling in-context learning via dual representation",
+      "llm_evidence_cn": "通过双重表示空间协调上下文学习",
+      "llm_evidence": "通过双重表示空间协调上下文学习",
+      "canonical_evidence": "通过双重表示空间协调上下文学习",
+      "llm_tldr_en": "Investigates and improves in-context learning in Transformers by separating task and sample representation spaces.",
+      "llm_tldr_cn": "通过分离任务和样本表示空间，研究并改进了Transformer中的上下文学习。",
+      "llm_tldr": "通过分离任务和样本表示空间，研究并改进了Transformer中的上下文学习。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "In-context learning for combinatorial optimization problems",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

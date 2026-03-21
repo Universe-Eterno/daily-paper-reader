@@ -1,0 +1,1163 @@
+Title: Association-Aware GNN for Precoder Learning in Cell-Free Systems
+
+URL Source: https://arxiv.org/pdf/2603.13035v1
+
+Published Time: Mon, 16 Mar 2026 01:05:08 GMT
+
+Number of Pages: 5
+
+Markdown Content:
+> 1
+
+# Association-Aware GNN for Precoder Learning in Cell-Free Systems 
+
+Mingyu Deng and Shengqian Han School of Electronics and Information Engineering, Beihang University, Beijing 100191, China Email: {mingyudeng, sqhan }@buaa.edu.cn 
+
+Abstract —Deep learning has been widely recognized as apromising approach for optimizing multi-user multi-antenna precoders in traditional cellular systems. However, a critical distinction between cell-free and cellular systems lies in the flexibility of user equipment (UE)-access point (AP) associations. Consequently, the optimal precoder depends not only on channel state information but also on the dynamic UE–AP association status. In this paper, we propose an association-aware graph neural network (AAGNN) that explicitly incorporates association status into the precoding design. We leverage the permutation equivariance properties of the cell-free precoding policy to reduce the training complexity of AAGNN and employ an attention mechanism to enhance its generalization performance. Simulation results demonstrate that the proposed AAGNN outperforms baseline learning methods in both learning performance and generalization capabilities while maintaining low training and inference complexity. 
+
+Index Terms —Cell-free, precoding, graph neural network, permutation equivariance 
+
+I. I NTRODUCTION 
+
+Cell-free multi-antenna systems effectively mitigate inter-cell interference by jointly serving user equipments (UEs) via coordinated precoding across adjacent access points (APs) [1]. However, the joint optimization required for this coordination introduces significant computational overhead. Although var-ious numerical algorithms have been developed for precoder optimization [1], their high complexity makes it challenging to meet the real-time requirements of practical systems. In recent years, deep learning methods have been widely used to learn precoding policies in cellular networks to reduce online inference latency [2, 3]. For example, fully-connected neural networks (FNNs) can achieve near-optimal performance with low inference complexity [2]. Convolutional neural networks (CNNs), originally designed to exploit the shift-invariant property of image processing tasks [4], also perform well in precoder learning [3]. Compared to these conventional deep neural networks (DNNs), graph neural net-works (GNNs) typically offer superior learning performance, lower training complexity, and better generalizability across varying system sizes [5]. These advantages stem from the permutation equivariance (PE) properties of GNNs, which inherently align with the PE properties of precoding policies. Precoding policies in cell-free systems exhibit a 3D-PE property with respect to UEs, APs, and AP antennas. Specif-ically, if the indices of UEs, APs, or antennas in the channel matrix are permuted, the corresponding indices in the output precoder matrix must be permuted accordingly. However, existing DNNs for cell-free precoding have not fully exploited this property. For instance, the FNN and CNN architectures in [6] and [7] do not satisfy any PE properties, while the heterogeneous GNN in [8] lacks PE with respect to AP antennas. The model-driven FNN in [9] based on regularized zero-forcing only satisfies PE with respect to UEs. Furthermore, unlike cellular systems where a UE is served by a single AP, a cell-free UE can be served by a variable subset of APs. Consequently, the precoding policy depends on both channel state information and the association status. Existing learning methods for cell-free systems often assume that a UE is associated with all APs and perform joint opti-mization of precoding and association based on instantaneous channel state information [6–9]. These approaches lead to association decisions that fluctuate with small-scale chan-nels, potentially causing significant signaling overhead due to frequent handovers in real-world deployments. In contrast, practical systems typically determine the association based on large-scale channel gains to reduce this overhead. Thus, existing learning methods are unsuitable for scenarios with flexible UE-AP associations. In this paper, we propose an association-aware GNN (AAGNN) that satisfies the 3D-PE property of the precod-ing policy in cell-free systems. To capture the relationship between the precoding policy and UE-AP associations, we first formulate the sum-rate maximization problem with inputs that explicitly reflect the association status. We then derive a parameter-sharing structure for AAGNN weight matrix to guarantee the 3D-PE property, based on which the update equation and graph for AAGNN are developed. Finally, we design an attention mechanism to enhance the generaliz-ability across varying numbers of UEs. Simulation results demonstrate the superiority of the AAGNN in learning and generalization performance with low sample, time, and space complexity. II. S YSTEM MODEL 
+
+Consider a cell-free multi-user multi-antenna system where 
+
+M APs, each with N antennas, serve K randomly located single-antenna UEs. Let D ∈ { 0, 1}K×M denote the UE-AP association matrix, with dkm being the element at the k-th row and m-th column, where dkm = 1 if AP m serves UE k
+
+and dkm = 0 otherwise. Let hkm ∈ CN ×1 and vkm ∈ CN ×1
+
+denote the channel vector and the precoding vector from AP m
+
+to UE k. Define Hm = [ h1m, . . . , hKm ] ∈ CN ×K and Vm =[v1m, . . . , vKm ] ∈ CN ×K as the channel and precoding matri-ces of AP m. The channel and precoding matrices from all APs to all UEs are expressed as H = HT 
+
+> 1
+
+, . . . , HT
+
+> M
+
+T ∈ CN M ×K
+
+and V = VT 
+
+> 1
+
+, . . . , VT
+
+> M
+
+T ∈ CN M ×K .The precoder optimization problem, aimed at maximizing the sum rate of UEs, subject to per-AP power constraints, can be formulated as 
+
+max 
+
+> V
+> K
+
+X
+
+> k=1
+
+log (1 + γk) (1a) s.t. 
+
+> K
+
+X
+
+> k=1
+
+∥vkm ∥22 ≤ P, m = 1 , . . . , M, (1b) 
+
+> arXiv:2603.13035v1 [eess.SP] 13 Mar 2026 2
+
+where 
+
+γk =
+
+> M
+
+P
+
+> m=1
+
+hH
+
+> km
+
+dkm vkm 
+
+> 2
+
+P
+
+> i̸=k
+> M
+
+P
+
+> m=1
+
+hH
+
+> km
+
+dim vim 
+
+> 2
+
++ δ2
+
+(2) is the signal to interference plus noise ratio (SINR) of UE k,
+
+δ2 is the noise power, and P is the total transmit power of each AP. III. D ESIGN OF AAGNN 
+
+A. UE-AP Association-Aware Precoding Policy 
+
+It can be observed from (2) that the UE-AP associa-tion status dkm determines the role of the channel hkm .Specifically, if dkm = 1 , hkm represents a desired signal channel; otherwise, it represents an interference channel. To explicitly differentiate them, we define ˜hkm ≜ dkm hkm and 
+
+ˆhkm ≜ (1 − dkm ) hkm . Consequently, hkm and dkm can be reconstructed as hkm = ˜hkm + ˆhkm and dkm = ∥˜hkm ∥2
+
+∥˜hkm +ˆhkm ∥2
+
+.Then, γk in (2) can be rewritten as 
+
+γk =
+
+> M
+
+P
+
+> m=1
+
+˜hH
+
+> km
+
+vkm 
+
+> 2
+
+P
+
+> i̸=k
+> M
+
+P
+
+> m=1
+
+˜hkm + ˆhkm 
+
+H ∥˜him ∥2
+
+∥˜him +ˆhim ∥2
+
+vim 
+
+> 2
+
++ δ2
+
+.
+
+(3) By substituting (3) into (1), the optimal precoding policy can be formulated as the mapping V∗ = F (HD , H ¯D ), where 
+
+HD ∈ CN M ×K and H ¯D ∈ CN M ×K are variants of the channel matrix H, constructed by replacing each element hkm 
+
+with ˜hkm and ˆhkm , respectively. The PE property of the precoding policy F (·) is analyzed as follows. We examine how the optimal precoder V∗ transforms when the indices of antennas, APs, and UEs in HD and H ¯D
+
+are permuted. Specifically, we permute the antenna indices of AP m using a permutation matrix ΠN,m ∈ RN ×N , the AP indices using ΠM ∈ RM ×M , and the UE indices using 
+
+ΠK ∈ RK×K . Under the 3D permutation, the input matrices 
+
+HD and H ¯D become AH D ΠT 
+
+> K
+
+and AH ¯D ΠT 
+
+> K
+
+, respectively, where A ≜ (ΠM ⊗ IN ) diag ( ΠN, 1, . . . , ΠN,M ). By sub-stituting these permuted inputs into problem (1), it can be verified that the objective function and constraints should hold invariant if the precoder is transformed to AV ∗ΠT 
+
+> K
+
+. Thus, the precoding policy satisfies the following 3D-PE property. 
+
+AV ∗ΠT 
+
+> K
+
+= F  AH D ΠT 
+
+> K
+
+, AH ¯D ΠT
+
+> K
+
+ . (4) Next, we design the AAGNN to satisfy this 3D-PE property. 
+
+B. Parameter-Sharing Structure for the Weight Matrix 
+
+The PE property of a GNN is achieved by enforcing the property at every layer, which is accomplished by appropri-ately designing the weight matrix [10]. Specifically, each layer applies a linear transformation to the input via a learnable weight matrix that must satisfy a specific parameter-sharing structure to ensure the PE property. Let X(l) =
+
+h
+
+x(l)11 , . . . , x(l)
+
+> K1
+
+iT
+
+, . . . , 
+
+h
+
+x(l)1M , . . . , x(l)
+
+> KM
+
+iTT
+
+∈
+
+CN M ×K denote the output of the l-th layer, where 
+
+l = 1 , . . . , L and L is the total number of layers. x(l) 
+
+> km
+
+∈ CN ×1
+
+is the hidden representation, which corresponds to the precoder 
+
+vkm in the output layer. Given that the policy F (·) takes 
+
+HD and H ¯D as input, we select the input to the l-th layer similarly as X(l−1)  
+
+> D
+
+∈ CN M ×K and X(l−1) ¯D ∈ CN M ×K ,which are constructed by replacing each element x(l−1)  
+
+> km
+
+in 
+
+X(l−1) with dkm x(l−1)  
+
+> km
+
+and (1 − dkm ) x(l−1)  
+
+> km
+
+, respectively. Then, the relationship between the output and input of the 
+
+l-th layer can be expressed as 
+
+−→
+
+X(l) = σ(l)
+
+
+
+ψ(l)
+
+−→
+
+X(l−1)  
+
+> D
+
+, −→
+
+X(l−1) ¯D
+
+ 
+
+, (5) where σ(l) (·) is a nonlinear activation function, ψ(l) (·) is a linear transformation function, and −→
+
+X(l) = vec  X(l) ∈
+
+CN M K ×1, −→
+
+X(l−1)  
+
+> D
+
+= vec 
+
+
+
+X(l−1) 
+
+> D
+
+
+
+∈ CN M K ×1 and 
+
+−→
+
+X(l−1) ¯D = vec 
+
+
+
+X(l−1) ¯D
+
+
+
+∈ CN M K ×1 denote the vectorization of X(l−1) , X(l−1)  
+
+> D
+
+and X(l−1) ¯D , respectively. To ensure the 3D-PE property of each layer, both σ(l) (·)
+
+and ψ(l) (·) need to satisfy the property [10]. Since σ(l) (·) is typically a point-wise function that naturally satisfies the 3D-PE property, we focus on designing ψ(l) (·), which has the following form 
+
+ψ(l)
+
+−→
+
+X(l−1)  
+
+> D
+
+, −→
+
+X(l−1) ¯D
+
+
+
+= W(l)
+
+> ψ
+
+−→
+
+X(l−1) 
+
+> D
+
+T −→
+
+X(l−1) ¯D
+
+TT
+
+,
+
+(6) where W(l) 
+
+> ψ
+
+∈ CN M K ×2N M K is the weight matrix. W(l)
+
+> ψ
+
+can be partitioned into two sub-matrices as W(l) 
+
+> ψ
+
+=
+
+h ˜W ˆW
+
+i
+
+,where ˜W, ˆW ∈ CN M K ×N M K (we omit their subscripts (l)
+
+for simplicity). Then, (6) can be rewritten as 
+
+ψ(l)
+
+−→
+
+X(l−1)  
+
+> D
+
+, −→
+
+X(l−1) ¯D
+
+
+
+= ˜W−→
+
+X(l−1)  
+
+> D
+
++ ˆW−→
+
+X(l−1) ¯D . (7) According to the 3D-PE property defined in (4), ˜W and ˆW
+
+must satisfy the following condition 
+
+(ΠK ⊗ A) ψ(l)
+
+−→
+
+X(l−1)  
+
+> D
+
+, −→
+
+X(l−1) ¯D
+
+
+
+= ˜W (ΠK ⊗ A) −→
+
+X(l−1)  
+
+> D
+
++ ˆW (ΠK ⊗ A) −→
+
+X(l−1) ¯D .
+
+(8) Substituting (7) into the left-hand side of (8) yields 
+
+(ΠK ⊗ A)
+
+ ˜W−→
+
+X(l−1)  
+
+> D
+
++ ˆW−→
+
+X(l−1) ¯D
+
+
+
+= ˜W (ΠK ⊗ A) −→
+
+X(l−1)  
+
+> D
+
++ ˆW (ΠK ⊗ A) −→
+
+X(l−1) ¯D .
+
+(9) The condition in (9) must hold for arbitrary −→
+
+X(l−1)  
+
+> D
+
+and 
+
+−→
+
+X(l−1) ¯D . To characterize the structures of ˜W, we consider a special case where −→
+
+X(l−1) ¯D = 0. In this case, (9) reduces to 
+
+(ΠK ⊗ A) ˜W−→
+
+X(l−1)  
+
+> D
+
+= ˜W (ΠK ⊗ A) −→
+
+X(l−1)  
+
+> D
+
+. (10) To make this condition hold for arbitrary −→
+
+X(l−1)  
+
+> D
+
+, ˜W needs to satisfy the condition 
+
+(ΠK ⊗ A) ˜W = ˜W (ΠK ⊗ A) . (11) Similarly, by setting −→
+
+X(l−1)  
+
+> D
+
+= 0, we can obtain an analogous condition for ˆW, which is 
+
+(ΠK ⊗ A) ˆW = ˆW (ΠK ⊗ A) . (12) 3:::W1 :o2 :o:p1 :q2 :q:r
+
+Fig. 1: Parameter-sharing structure of ˜W ( ˆW has the same structure). It is evident that if (11) and (12) hold, the condition in (9) holds. Thus, these two conditions are necessary and sufficient for ensuring the 3D-PE property. The conditions (11) and (12) must hold for arbitrary permutation matrices ΠM , ΠK and 
+
+ΠN,m , m = 1 , . . . , M . This imposes a strict parameter-sharing structure on ˜W and ˆW. Following the methods in [10] and [11], we obtain that ˜W consists of 6 free parameters, denoted by ˜o1, ˜o2, ˜p, ˜q1, ˜q2, and ˜r. Similarly, ˆW also consists of 6 free parameters, denoted by ˆo1, ˆo2, ˆp, ˆq1, ˆq2, and ˆr. The resulting parameter-sharing structure is illustrated in Fig. 1. By substituting the structures of ˜W and ˆW into (6) and then into (5), we can derive that x(l)
+
+> kmn
+
+, the n-th element of 
+
+x(l)
+
+> km
+
+, is updated by 
+
+x(l) 
+
+> kmn
+
+= σ(l)
+
+˜o1dkm x(l−1)  
+
+> kmn
+
++ ˆ o1 (1 − dkm ) x(l−1)  
+
+> kmn
+
++˜o2
+
+X
+
+> c̸=n
+
+dkm x(l−1)  
+
+> kmc
+
++ ˆ o2
+
+X
+
+> c̸=n
+
+(1 − dkm ) x(l−1)  
+
+> kmc
+
++˜p X
+
+> b̸=m
+
+X
+
+> c
+
+dkb x(l−1)  
+
+> kbc
+
++ ˆ p X
+
+> b̸=m
+
+X
+
+> c
+
+(1 − dkb ) x(l−1)  
+
+> kbc
+
++˜q1
+
+X
+
+> a̸=k
+
+dam x(l−1)  
+
+> amn
+
++ ˆ q1
+
+X
+
+> a̸=k
+
+(1 − dam ) x(l−1)  
+
+> amn
+
++˜q2
+
+X
+
+> a̸=k
+
+X
+
+> c̸=n
+
+dam x(l−1)  
+
+> amc
+
++ ˆ q2
+
+X
+
+> a̸=k
+
+X
+
+> c̸=n
+
+(1 − dam ) x(l−1)  
+
+> amc
+
++˜r X
+
+> a̸=k
+
+X
+
+> b̸=m
+
+X
+
+> c
+
+dab x(l−1)  
+
+> abc
+
++ ˆ r X
+
+> a̸=k
+
+X
+
+> b̸=m
+
+X
+
+> c
+
+(1 − dab ) x(l−1) 
+
+> abc
+
+
+
+.
+
+(13) 
+
+C. Graph Construction and Update Equation 
+
+To implement the update equation (13), we construct a heterogeneous graph consisting of AP antenna vertices and UE vertices, with edges connecting the two types of vertices. The graph is illustrated in Fig. 2, where the edges between antenna vertices of an AP and its served UE vertices are depicted by solid lines, while other edges are shown as dashed lines. The vertices have no features or actions. For the edge connecting the k-th UE vertex and the n-th antenna vertex of AP m, its feature is the n-th element of hkm , denoted by 
+
+hkmn . At the l-th layer, its hidden representation is x(l)
+
+> kmn
+
+, and at the output layer, it generates action vkmn , which is the n-th element of vkm .For GNNs where features and actions are defined on edges, the update of the hidden representations consists of aggrega-tion and combination steps [5, 12]. Specifically, for the edges connected to the same vertex, their hidden representations of the previous layer (say the (l−1) -th layer) are first aggregated. Then, each edge combines the aggregated information from its adjacent edges (i.e., edges that share a common vertex) 1UE 11TX 21TX 31TX 2UE 3UE 12TX 22TX 32TX 13TX 23TX 33TX 1AP 2AP 3AP 
+
+Fig. 2: Illustration of the graph of AAGNN with K = 3 ,
+
+N = 3 and M = 3 (TX mn denotes the n-th antenna vertex of AP m). to update its own hidden representation. When mapping the update equation (13) to these two steps, we find that the terms associated with parameters ˜q2, ˜r, ˆq2, and ˆr correspond to the aggregation from non-adjacent edges. Therefore, to avoid such aggregation, we set parameters ˜q2, ˜r, ˆq2, and ˆr to zero and finally obtain the aggregation and combination steps as follows. (i) Aggregation :
+
+u(l) 
+
+> kmn
+
+=˜ o2
+
+X
+
+> c̸=n
+
+dkm x(l−1)  
+
+> kmc
+
++ ˆ o2
+
+X
+
+> c̸=n
+
+(1 − dkm ) x(l−1)  
+
+> kmc
+
++˜p X
+
+> b̸=m
+
+X
+
+> c
+
+dkb x(l−1)  
+
+> kbc
+
++ ˆ p X
+
+> b̸=m
+
+X
+
+> c
+
+(1 − dkb ) x(l−1)  
+
+> kbc
+
+,w(l) 
+
+> kmn
+
+=˜ q1
+
+X
+
+> a̸=k
+
+dam x(l−1)  
+
+> amn
+
++ ˆ q1
+
+X
+
+> a̸=k
+
+(1 − dam ) x(l−1)  
+
+> amn
+
+.
+
+(14) (ii) Combination :
+
+x(l) 
+
+> kmn
+
+=σ(l)
+
+˜o1dkm x(l−1)  
+
+> kmn
+
++ ˆ o1 (1 − dkm ) x(l−1)  
+
+> kmn
+
++
+
+u(l) 
+
+> kmn
+
++ w(l)
+
+> kmn
+
+
+
+.
+
+(15) 
+
+D. Design of Attention Mechanism 0 : :O1 :o2 :o:p1 :q:P:Q
+
+Fig. 3: Parameter-sharing structures of ˜O, ˜P and ˜Q ( ˆO, ˆP
+
+and ˆQ have the same structures). Attention mechanism can enhance the generalization per-formance of precoding to the number of UEs in cellular systems [13]. In this subsection, we develop a specialized attention mechanism for AAGNN in cell-free systems. First, by expressing the representations of all edges con-nected to the antenna vertices of the same AP m as a vector 
+
+x(l)
+
+> km
+
+, (15) can be rewritten as 
+
+x(l) 
+
+> km
+
+= ˜Odkm x(l−1)  
+
+> km
+
++ ˆO (1 − dkm ) x(l−1)  
+
+> km
+
++˜P X
+
+> b̸=m
+
+dkb x(l−1)  
+
+> kb
+
++ ˆP X
+
+> b̸=m
+
+(1 − dkb ) x(l−1)  
+
+> kb
+
++˜Q X
+
+> a̸=k
+
+dam x(l−1)  
+
+> am
+
++ ˆQ X
+
+> a̸=k
+
+(1 − dam ) x(l−1)  
+
+> am
+
+,
+
+(16) where the parameter-sharing structures of the matrices ˜O, ˜P,
+
+˜Q, ˆO, ˆP, and ˆQ are illustrated in Fig. 3. To facilitate the 4
+
+attention design, we decompose (16) as 
+
+x(l) 
+
+> km
+
+= t(l−1)  
+
+> km
+
++ X
+
+> a̸=k
+
+z(l−1)  
+
+> am
+
+, (17) where t(l−1)  
+
+> km
+
+and z(l−1)  
+
+> am
+
+are defined as 
+
+t(l−1)  
+
+> km
+
+= ˜Odkm x(l−1)  
+
+> km
+
++ ˆO (1 − dkm ) x(l−1)  
+
+> km
+
++˜P X
+
+> b̸=m
+
+dkb x(l−1)  
+
+> kb
+
++ ˆP X
+
+> b̸=m
+
+(1 − dkb ) x(l−1)  
+
+> kb
+
+, (18a) 
+
+z(l−1)  
+
+> am
+
+= ˜Qdam x(l−1)  
+
+> am
+
++ ˆQ (1 − dam ) x(l−1)  
+
+> am
+
+. (18b) It can be observed that t(l−1)  
+
+> km
+
+represents the features from the edges themselves and the edges connected to the same UE vertices, while z(l−1)  
+
+> am
+
+represents the features from the edges connected to the same antenna vertices. Instead of directly combining them as in (17), we introduce attention coefficients to weight t(l−1)  
+
+> km
+
+and z(l−1)  
+
+> am
+
+, leading to the following update equation 
+
+x(l) 
+
+> km
+
+= λ(l−1)  
+
+> kkm
+
+t(l−1)  
+
+> km
+
++ X
+
+> a̸=k
+
+λ(l−1)  
+
+> akm
+
+z(l−1)  
+
+> am
+
+, (19) where λ(l−1)  
+
+> kkm
+
+and λ(l−1)  
+
+> akm
+
+are scalar attention coefficients re-flecting the importance of t(l−1)  
+
+> km
+
+and z(l−1)  
+
+> am
+
+for the update of 
+
+x(l)
+
+> km
+
+.Since the output x(L) 
+
+> km
+
+(the precoder) should have a high correlation with the channel hkm to enhance signal power, we define the attention coefficients based on the correla-tion between hkm and t(l−1)  
+
+> km
+
+or z(l−1)  
+
+> am
+
+. Specifically, we set 
+
+λ(l−1)  
+
+> kkm
+
+= α(l)hH
+
+> km
+
+t(l−1)  
+
+> km
+
+and λ(l−1)  
+
+> akm
+
+= β(l)hH
+
+> km
+
+z(l−1)  
+
+> am
+
+, where 
+
+α(l) and β(l) are learnable parameters. Substituting these into (19) yields the final update equation for AAGNN as 
+
+x(l) 
+
+> km
+
+=  α(l)hH
+
+> km
+
+t(l−1) 
+
+> km
+
+t(l−1)  
+
+> km
+
++ X
+
+> a̸=k
+
+ β(l)hH
+
+> km
+
+z(l−1) 
+
+> am
+
+z(l−1)  
+
+> am
+
+.
+
+(20) It is straightforward to verify that the update equation in (20) satisfies the 3D-PE property in (4). IV. SIMULATION RESULTS In this section, we evaluate the learning performance, generalization performance, and complexity of AAGNN by comparing it with baseline numerical algorithms and learning-based methods. The compared methods are as follows.  
+
+> •
+
+WMMSE : This is a near-optimal numerical algorithm for solving the sum-rate maximization problem [14].  
+
+> •
+
+AAGNN-woA : This is a variant of the proposed GNN without the attention mechanism.  
+
+> •
+
+EGAT : This GNN applies the attention mechanism in [15] to the above AAGNN-woA.  
+
+> •
+
+SUNet : This is the CNN proposed in [7] to solve the sum-rate maximization problem in cell-free systems.  
+
+> •
+
+GNN in [16] : This is the GNN proposed in [16] to solve the sum-rate maximization problem in cell-free systems.  
+
+> •
+
+MRT +GNN : This is the method proposed in [17] for precoding design in cell-free systems, which utilizes maximum ratio transmission (MRT) beamforming vectors and employs a GNN to learn the power allocation. In simulations, all APs are placed within a square with an inter-site distance of 400 m. UEs are randomly located from the union of discs with a radius of 400 /√3 m centered at the APs. Each UE is served by the set of APs located within a radius of 300 m. The small-scale fading follows the Rayleigh distribution, and the large-scale fading (dB) follows the 3GPP specification [18], given by PL = 13 .54 + 39 .08 log 10 (d3D ),where d3D is the UE-AP distance in meters. Unless otherwise specified, the signal-to-noise ratio (SNR) at the cell edge is set to 10 dB. All learning-based methods are trained via unsupervised learning, with a batch size of 64 and a learning rate of 0.005. The training dataset consists of 12,800 samples, and the test dataset consists of 1,000 samples. To evaluate learning and generalization performance, the sum rate achieved by all methods is normalized by the sum rate achieved by WMMSE. All results are obtained on a personal computer with an Intel Core i9-13900KF CPU and an NVIDIA RTX 4080 GPU. 
+
+A. Performance Comparison 
+
+In Fig. 4, the learning performance is compared under different numbers of training samples, where K = 8 and 
+
+K = 16 are considered in two subfigures, respectively. It can be observed that as the number of training samples decreases, all methods exhibit performance degradation, while AAGNN consistently achieves the best learning performance. Even with only 16 training samples, AAGNN can maintain performance over 80% .16 32 64 128 1280          
+
+> Number of training samples
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> Normalized sum rate  (%)
+> 12800
+> AAGNN
+> AAGNN-woA
+> EGAT
+> SUNet
+> GNN in [16]
+> MRT+GNN
+> (a) K= 8 16 32 64 128 1280 12800
+> Number of training samples
+> AAGNN AAGNN-woA EGAT SUNet GNN in [16] MRT+GNN (b) K= 16
+
+Fig. 4: Learning performance vs. the number of training samples with N = 16 and M = 4 .In Fig. 5(a), we compare the generalization performance to the number of UEs. All methods are trained with K = 8 and tested for K ∈ [2 , 16] . It can be seen that AAGNN generalizes well, achieving performance close to WMMSE across the varying number of UEs, whereas AAGNN-woA and EGAT exhibit significant performance degradation. In Fig. 5(b), we compare the generalization performance to the number of AP antennas, where SUNet and GNN in [16] are not included because they cannot generalize to the number of AP antennas. All methods are trained with N = 16 and tested for N ∈ [8 , 24] . It is shown that all methods exhibit good generalizability to the number of AP antennas. In Fig. 6, we compare the generalization performance to the number of APs. All methods are trained with M = 4 and tested for M ∈ [1 , 7] . AAGNN maintains performance close to WMMSE across the varying number of APs, while other methods suffer from performance degradation as the number of APs decreases. 5
+
+TABLE I: Training Complexity and Inference Time. 
+
+AAGNN AAGNN-woA EGAT SUNet GNN in [16] MRT +GNN Sample complexity 12 500 900 >12800 ∗ >12800 ∗ >12800 ∗
+
+Time complexity (GPU) 6.683s 44.735s 181.74s >303.993s >212.304s >419.969s Space complexity 115617 397313 399365 >444160 >776545 >305528 Inference time (GPU) 2.432ms 1.806ms 1.973ms >2.236ms >1.139ms >5.242ms Inference time (CPU) 3.731ms 6.767ms 9.077ms >4.082ms >1.815ms >8.681ms 
+
+> ∗
+
+: For the case marked by ∗, the DNN cannot achieve the target performance of 90% with 12800 training samples. For these DNNs, we record the time complexity to complete 100 training epochs. 2 4 6 8 10 12 14 16 
+
+Number of UEs 
+
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> Normalized sum rate  (%)
+> AAGNN
+> AAGNN-woA
+> EGAT
+> SUNet
+> GNN in [16]
+> MRT+GNN
+
+(a) 8 10 12 14 16 18 20 22 24 
+
+Number of antennas  
+
+> AAGNN AAGNN-woA EGAT MRT+GNN
+
+(b) 
+
+Fig. 5: Generalization performance: (a) generalization to the number of UEs with N = 16 and M = 4 , and (b) generaliza-tion to the number of antennas with K = 8 and M = 4 .1 2 3 4 5 6 7
+
+> Number of APs
+> 0
+> 20
+> 40
+> 100
+> 80
+> 60
+> Normalized sum rate (%)
+> AAGNN
+> AAGNN-woA
+> EGAT
+> SUNet
+> GNN in [16]
+> MRT+GNN
+
+Fig. 6: Generalization performance to the number of APs with 
+
+K = 8 and N = 16 .
+
+B. Complexity Comparison 
+
+In Table I, we evaluate the sample, time, and space complex-ity of all DNNs, which are defined respectively as the minimal number of training samples, the time used for training, and the number of free parameters required to achieve the target per-formance. The target performance is set to 90 % of WMMSE. To ensure that multiple learning methods attain this target, we consider the setup with K = 4 , N = 16 , M = 4 , and 
+
+SNR = 5 dB . Among the evaluated methods, only AAGNN, AAGNN-woA, and EGAT can meet the target performance. AAGNN has much lower sample, time, and space complexity compared to AAGNN-woA and EGAT while maintaining a comparable inference time. V. CONCLUSION In this paper, we proposed the AAGNN for precoder learn-ing in cell-free systems, which can explicitly adapt to the dynamic association between UEs and APs. The proposed architecture satisfies the 3D-PE property that significantly reduces the training complexity, and incorporates a tailored attention mechanism that effectively enhances the generaliza-tion performance to the number of UEs. Simulation results demonstrate that AAGNN achieves better learning and gen-eralization performance than baseline learning methods, with much lower sample, time, and space complexity. REFERENCES [1] ¨O. T. Demir, E. Bj¨ ornson, and L. Sanguinetti, “Foundations of User-Centric Cell-Free Massive MIMO,” Found. Trends Signal Process. ,vol. 14, no. 3-4, pp. 162–472, 2021. [2] H. Sun, X. Chen, Q. Shi, M. Hong, X. Fu, and N. D. Sidiropoulos, “Learning to Optimize: Training Deep Neural Networks for Interference Management,” IEEE Trans. Signal Process. , vol. 66, no. 20, pp. 5438– 5453, Oct. 2018. [3] J. Kim, H. Lee, S.-E. Hong, and S.-H. Park, “Deep Learning Methods for Universal MISO Beamforming,” IEEE Wireless Commun. Lett. , vol. 9, no. 11, pp. 1894–1898, Nov. 2020. [4] M. M. Bronstein, J. Bruna, T. Cohen, and P. Veliˇ ckovi´ c, “Geomet-ric Deep Learning: Grids, Groups, Graphs, Geodesics, and Gauges,” 
+
+arXiv:2104.13478 , 2021. [5] B. Zhao, J. Guo, and C. Yang, “Learning Precoding Policy: CNN or GNN?” IEEE WCNC , 2022. [6] M. Aggarwal, S. Deshpande, P. Sharma, and S. Ahuja, “Beyond 5G: Exploiting Learning Aided Precoder for Downlink Cell-Free Networks,” 
+
+Authorea Preprints , 2023. [7] G. Chen, Z. Wang, Y. Jia, Y. Huang, and L. Yang, “An Efficient Architecture Search for Scalable Beamforming Design in Cell-Free Systems,” IEEE Trans. Veh. Technol. , vol. 73, no. 7, pp. 10 241–10 253, July 2024. [8] Z. Wang and V. Wong, “Heterogeneous Graph Neural Network for Co-operative ISAC Beamforming in Cell-Free MIMO Systems,” MobiCom ,2024. [9] S. Liu, Z. Gao, C. Hu, S. Tan, L. Fang, and L. Qiao, “Model-Driven Deep Learning Based Precoding for FDD Cell-Free Massive MIMO with Imperfect CSI,” IEEE IWCMC , 2022. [10] H. Maron, H. Ben-Hamu, N. Shamir, and Y. Lipman, “Invariant and Equivariant Graph Networks,” ICLR , 2019. [11] R. Wang, M. Albooyeh, and S. Ravanbakhsh, “Equivariant Networks for Hierarchical Structures,” NeurIPS , 2020. [12] J. Guo and C. Yang, “Learning Power Allocation for Multi-Cell-Multi-User Systems with Heterogeneous Graph Neural Networks,” IEEE Trans. Wireless Commun. , vol. 21, no. 2, pp. 884–897, Feb. 2021. [13] Y. Li, Y. Lu, B. Ai, O. A. Dobre, Z. Ding, and D. Niyato, “GNN-Based Beamforming for Sum-Rate Maximization in MU-MISO Networks,” 
+
+IEEE Trans. Wireless Commun. , vol. 23, no. 8, pp. 9251–9264, Aug. 2024. [14] Q. Shi, M. Razaviyayn, Z.-Q. Luo, and C. He, “An Iteratively Weighted MMSE Approach to Distributed Sum-Utility Maximization for A MIMO Interfering Broadcast Channel,” IEEE Trans. Signal Process. , vol. 59, no. 9, pp. 4331–4340, Sept. 2011. [15] Z. Wang, J. Chen, and H. Chen, “EGAT: Edge-Featured Graph Attention Network,” ICANN , 2021. [16] L. Wang, C. Chen, J. Zhang, and C. Fischione, “Learning-Based Joint Antenna Selection and Precoding Design for Cell-Free MIMO Networks,” arXiv:2404.08607 , 2024. [17] R. Raghunath, B. Peng, and E. A. Jorswieck, “Energy-Efficient Power Allocation in Cell-Free Massive MIMO via Graph Neural Networks,” 
+
+IEEE ICMLCN , 2024. [18] ETSI, “Study on Channel Model for Frequencies From 0.5 to 100 GHz,” 3rd Generation Partnership Project (3GPP), Tech. Rep., 2020.
