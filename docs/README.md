@@ -6,79 +6,59 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-21
-- 运行时间：2026-03-21 19:16:29 UTC
+- 最新运行日期：2026-03-22
+- 运行时间：2026-03-22 19:23:49 UTC
 - 运行状态：成功
-- 本次总论文数：19
-- 精读区：7
+- 本次总论文数：12
+- 精读区：0
 - 速读区：12
 
 ### 今日简报（AI）
-今日精选 19 篇论文聚焦复杂规划与求解，深度探讨动态模拟求解器与约束传播下的动态规划。
-重点推荐两篇 8 分佳作，分别揭示了退火路径规划的最优性及通用动态规划的性能飞跃。
-建议关注 LLM 搜索增强与 GNN 验证技术，把握大模型在自动化测试与任务规划中的最新应用趋势。
-- 详情：[/202603/21/README](/202603/21/README)
+今日速读 12 篇前沿论文，重点聚焦知识图谱推理、自动化实验分析及复杂查询优化等核心领域。
+值得关注通过万次实验揭示的自动化研究收敛规律，以及 MCTS 算法在处理稀疏知识图谱与复杂数据库查询中的性能突破。
+建议深入探索自动化科研工具与搜索算法的跨界结合，以应对现实场景中数据噪声与复杂结构的挑战。
+- 详情：[/202603/22/README](/202603/22/README)
 
 ### 精读区论文标签
-1. [Optimality and annealing path planning of dynamical analog solvers](/202603/21/2603.13778v1-optimality-and-annealing-path-planning-of-dynamical-analog-solvers)  
-   标签：评分：8.0/10、query:nco
-   evidence：用于大规模组合优化的模拟求解器
-2. [Domain-Independent Dynamic Programming with Constraint Propagation](/202603/21/2603.16648v1-domain-independent-dynamic-programming-with-constraint-propagation)  
-   标签：评分：8.0/10、query:nco-llm
-   evidence：将约束传播集成到动态规划中进行优化
-3. [CircuitBuilder: From Polynomials to Circuits via Reinforcement Learning](/202603/21/2603.17075v1-circuitbuilder-from-polynomials-to-circuits-via-reinforcement-learning)  
-   标签：评分：8.0/10、query:nco
-   evidence：用于算术电路发现的强化学习
-4. [Training Diffusion Language Models for Black-Box Optimization](/202603/21/2603.17919v1-training-diffusion-language-models-for-black-box-optimization)  
-   标签：评分：8.0/10、query:nco-llm
-   evidence：用于黑盒优化的扩散语言模型
-5. [Learning-Augmented Algorithms for $k$-median via Online Learning](/202603/21/2603.18157v1-learning-augmented-algorithms-for-k-median-via-online-learning)  
-   标签：评分：8.0/10、query:nco
-   evidence：利用机器学习技术为k-中值聚类提供学习增强算法
-6. [Leveraging Large Language Models for Generalizing Peephole Optimizations](/202603/21/2603.18477v1-leveraging-large-language-models-for-generalizing-peephole-optimizations)  
-   标签：评分：8.0/10、query:nco-llm
-   evidence：大模型驱动的优化规则生成与泛化
-7. [RewardFlow: Topology-Aware Reward Propagation on State Graphs for Agentic RL with Large Language Models](/202603/21/2603.18859v1-rewardflow-topology-aware-reward-propagation-on-state-graphs-for-agentic-rl-with-large-language-models)  
-   标签：评分：8.0/10、query:nco-llm
-   evidence：结合大模型与状态图的强化学习用于智能体推理
+- 本次无精读推荐。
 
 ### 速读区论文标签
-1. [APEX-Searcher: Augmenting LLMs' Search Capabilities through Agentic Planning and Execution](/202603/21/2603.13853v2-apex-searcher-augmenting-llms-search-capabilities-through-agentic-planning-and-execution)  
+1. [Beyond Explicit Edges: Robust Reasoning over Noisy and Sparse Knowledge Graphs](/202603/22/2603.14006v1-beyond-explicit-edges-robust-reasoning-over-noisy-and-sparse-knowledge-graphs)  
    标签：评分：7.0/10、query:nco-llm
-   evidence：通过代理规划和强化学习增强大语言模型的搜索能力
-2. [SeqTG: Scalable Combinatorial Test Generation via Sequential Integer Linear Programming](/202603/21/2603.13963v1-seqtg-scalable-combinatorial-test-generation-via-sequential-integer-linear-programming)  
+   evidence：LLM引导的图结构导航与搜索
+2. [Auto Researching, not hyperparameter tuning: Convergence Analysis of 10,000 Experiments](/202603/22/2603.15916v1-auto-researching-not-hyperparameter-tuning-convergence-analysis-of-10000-experiments)  
    标签：评分：7.0/10、query:nco-llm
-   evidence：通过顺序整数线性规划解决组合测试这一NP-hard挑战
-3. [GNNVerifier: Graph-based Verifier for LLM Task Planning](/202603/21/2603.14730v1-gnnverifier-graph-based-verifier-for-llm-task-planning)  
-   标签：评分：7.0/10、query:nco-llm
-   evidence：基于图的验证器用于大模型任务规划和结构关系处理
-4. [GNNVerifier: Graph-based Verifier for LLM Task Planning](/202603/21/2603.14730v2-gnnverifier-graph-based-verifier-for-llm-task-planning)  
-   标签：评分：7.0/10、query:nco-llm
-   evidence：基于图的大模型任务规划与结构关系验证器
-5. [Planning as Goal Recognition: Deriving Heuristics from Intention Models - Extended Version](/202603/21/2603.14824v1-planning-as-goal-recognition-deriving-heuristics-from-intention-models---extended-version)  
+   evidence：LLM智能体在组合配置空间中自主设计机器学习实验
+3. [Practical MCTS-based Query Optimization: A Reproducibility Study and new MCTS algorithm for complex queries](/202603/22/2603.16474v1-practical-mcts-based-query-optimization-a-reproducibility-study-and-new-mcts-algorithm-for-complex-queries)  
    标签：评分：7.0/10、query:nco
-   evidence：为经典规划问题推导启发式算法
-6. [LLM as Graph Kernel: Rethinking Message Passing on Text-Rich Graphs](/202603/21/2603.14937v1-llm-as-graph-kernel-rethinking-message-passing-on-text-rich-graphs)  
+   evidence：基于MCTS的查询优化搜索启发式方法
+4. [Complementary Reinforcement Learning](/202603/22/2603.17621v1-complementary-reinforcement-learning)  
    标签：评分：7.0/10、query:nco-llm
-   evidence：将LLM集成为图原生聚合算子
-7. [EvolveCoder: Evolving Test Cases via Adversarial Verification for Code Reinforcement Learning](/202603/21/2603.12698v1-evolvecoder-evolving-test-cases-via-adversarial-verification-for-code-reinforcement-learning)  
+   evidence：用于训练大模型智能体的强化学习
+5. [RE-SAC: Disentangling aleatoric and epistemic risks in bus fleet control: A stable and robust ensemble DRL approach](/202603/22/2603.18396v1-re-sac-disentangling-aleatoric-and-epistemic-risks-in-bus-fleet-control-a-stable-and-robust-ensemble-drl-approach)  
+   标签：评分：7.0/10、query:nco
+   evidence：用于公交车队控制优化的集成深度强化学习方法
+6. [Quantum and classical approaches to the optimization of highway platooning: the two-vehicle matching problem](/202603/22/2603.18919v1-quantum-and-classical-approaches-to-the-optimization-of-highway-platooning-the-two-vehicle-matching-problem)  
+   标签：评分：7.0/10、query:nco
+   evidence：用于车辆匹配的经典和量子启发式算法
+7. [A Mathematical Programming Approach to Computing and Learning Berk--Nash Equilibria in Infinite-Horizon MDPs](/202603/22/2603.13641v1-a-mathematical-programming-approach-to-computing-and-learning-berk--nash-equilibria-in-infinite-horizon-mdps)  
    标签：评分：6.0/10、query:nco-llm
-   evidence：大语言模型代码生成的强化学习
-8. [Graph In-Context Operator Networks for Generalizable Spatiotemporal Prediction](/202603/21/2603.12725v1-graph-in-context-operator-networks-for-generalizable-spatiotemporal-prediction)  
+   evidence：MDP 的数学规划与双层优化方法
+8. [Minimizers of the Maximum Distance Problem via an Analyst's Traveling Salesperson Algorithm](/202603/22/2603.14119v1-minimizers-of-the-maximum-distance-problem-via-an-analysts-traveling-salesperson-algorithm)  
+   标签：评分：6.0/10、query:nco
+   evidence：用于距离问题最小化器的旅行商算法
+9. [Diffusion Reinforcement Learning via Centered Reward Distillation](/202603/22/2603.14128v1-diffusion-reinforcement-learning-via-centered-reward-distillation)  
+   标签：评分：6.0/10、query:nco
+   evidence：用于奖励最大化的扩散强化学习
+10. [From $\boldsymbol{\logπ}$ to $\boldsymbolπ$: Taming Divergence in Soft Clipping via Bilateral Decoupled Decay of Probability Gradient Weight](/202603/22/2603.14389v1-from-boldsymbollog-to-boldsymbol-taming-divergence-in-soft-clipping-via-bilateral-decoupled-decay-of-probability-gradient-weight)  
    标签：评分：6.0/10、query:nco-llm
-   evidence：利用图网络进行时空系统的上下文算子学习
-9. [Association-Aware GNN for Precoder Learning in Cell-Free Systems](/202603/21/2603.13035v1-association-aware-gnn-for-precoder-learning-in-cell-free-systems)  
-   标签：评分：6.0/10、query:nco
-   evidence：GNN用于优化系统中的关联与预编码
-10. [OpenACMv2: An Accuracy-Constrained Co-Optimization Framework for Approximate DCiM](/202603/21/2603.13042v1-openacmv2-an-accuracy-constrained-co-optimization-framework-for-approximate-dcim)  
-   标签：评分：6.0/10、query:nco
-   evidence：用于架构搜索的基于 GNN 的代理模型
-11. [Modality-free Graph In-context Alignment](/202603/21/2603.13434v1-modality-free-graph-in-context-alignment)  
-   标签：评分：6.0/10、query:nco
-   evidence：图上下文对齐用于少样本预测
-12. [Reconciling In-Context and In-Weight Learning via Dual Representation Space Encoding](/202603/21/2603.13459v1-reconciling-in-context-and-in-weight-learning-via-dual-representation-space-encoding)  
+   evidence：LLM推理与训练的优化动力学
+11. [SAGE: Multi-Agent Self-Evolution for LLM Reasoning](/202603/22/2603.15255v1-sage-multi-agent-self-evolution-for-llm-reasoning)  
    标签：评分：6.0/10、query:nco-llm
-   evidence：通过双重表示空间协调上下文学习
+   evidence：结合强化学习和可验证奖励的大模型推理
+12. [SAGE: Multi-Agent Self-Evolution for LLM Reasoning](/202603/22/2603.15255v2-sage-multi-agent-self-evolution-for-llm-reasoning)  
+   标签：评分：6.0/10、query:nco-llm
+   evidence：结合强化学习和规划的大模型推理
 
 
 <div class="dpr-home-promo-card">

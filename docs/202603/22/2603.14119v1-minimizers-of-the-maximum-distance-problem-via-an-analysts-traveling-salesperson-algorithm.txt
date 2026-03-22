@@ -1,0 +1,1479 @@
+Title: Minimizers of the Maximum Distance Problem via an Analyst's Traveling Salesperson Algorithm
+
+URL Source: https://arxiv.org/pdf/2603.14119v1
+
+Published Time: Tue, 17 Mar 2026 01:30:20 GMT
+
+Number of Pages: 16
+
+Markdown Content:
+MINIMIZERS OF THE MAXIMUM DISTANCE PROBLEM VIA AN ANALYST’S TRAVELING SALESPERSON ALGORITHM  
+
+> ENRIQUE ALVARADO, SILVIA GHINASSI, AND LISA NAPLES
+> Abstract. We provide an upper and lower bound for the length of Maximum Distance Prob-lem minimizers in terms of a finite scale geometric square sum.
+
+1. Introduction 
+
+Let E ⊂ R2 be a set. Although there are many sets in Euclidean space that cannot be contained in any curve Γ of finite length, for any r > 0, there are many curves of finite length whose closed r-neighborhood N (Γ , r ) := ∪x∈ΓB(x, r ) contains every point in E.The Maximum Distance Problem (MDP) is the problem of finding the shortest such curve: 
+
+(
+
+minimize H1(Γ) 
+
+among curves of finite length Γ ⊂ R2 such that N (Γ , r ) ⊃ E. 
+
+Here and throughout, we define a curve of finite length to be a connected set of finite 1-dimensional Hausdorff measure H1. Not knowing the existence of a minimizer a priori, we define 
+
+Λ( E, r ) := inf {H 1(Γ) : Γ ⊂ R2 is a curve of finite length and N (Γ , r ) ⊃ E}.
+
+However, when E is compact, standard compactness arguments prove the existence of mini-mizers (see [AKV, Theorem 2.15]). The problem was first introduced by Buttazzo, Oudet, and Stepanov [BOS] in the context of the study optimal urban transportation networks in cities. Alvarado, Catalano, Merchán, and Naples [ACMN] show that if E is contained in a compact connected set of finite H1-measure, that is, a curve of finite H1, then the r-maximum dis-tance minimizers converge in both Hausdorff distance and H1-measure to a curve of smallest measure that contains our original set. This is reminiscent of a classical result in harmonic analysis, the so-called Analyst’s Traveling Salesperson Theorem. In the early 1990s, Jones [J]        
+
+> 2020 Mathematics Subject Classification. 49Q20, 28A75, 28A78.
+> Key words and phrases. length, square function, maximum distance problem, minimizers, beta numbers. Department of Mathematics, Iowa State University, Ames IA, USA enrique3@iastate.edu .Rome, Italy silvia.ghinassi@gmail.com .Mathematics Department, Fairfield University, Fairfield CT, USA lisa.naples@fairfield.edu .
+> 1
+> arXiv:2603.14119v1 [math.MG] 14 Mar 2026 MINIMIZERS OF MDP VIA AN ATST ALGORITHM 2
+
+and Okikiolu [O] obtained an important breakthrough with the celebrated Analyst’s Traveling Salesperson Theorem (ATST). They provided necessary and sufficient geometric conditions for a set in Rn, which may be thought of as an infinite list of cities, to be contained in a curve (or path between cities) of finite length. Since then, the tools developed by Jones have garnered immense interest among geometric measure theorists, and many contributions to the study of qualitative and quantitative rectifiability rely on the ideas behind ATST. Before introducing the Analyst’s Traveling Salesperson Theorem, we need a few definitions. For a subset E of R2, we define |E| to be the diameter of E, that is, |E| = sup x,y ∈E dist( x, y ).
+
+Definition 1.1 (Dyadic cubes) . We let D denote the collection of dyadic cubes; that is, 
+
+D = [k2−n, (k + 1)2 −n) × [j2−n, (j + 1)2 −n) : k, j, n ∈ Z .
+
+The collection of all dyadic cubes Q for which side( Q) = 2 −n is denoted by 
+
+Dn = [k2−n, (k + 1)2 −n) × [j2−n, (j + 1)2 −n) : k, j ∈ Z .
+
+Definition 1.2 (Hausdorff measure) . For any E ⊂ R2, δ > 0 and s ≥ 0, define 
+
+Hsδ(E) = inf 
+
+( ∞X
+
+> i=1
+
+|Ui|s : E ⊂
+
+> ∞
+
+[
+
+> i=1
+
+Ui, |Ui| < δ 
+
+)
+
+.
+
+The s-dimensional Hausdorff measure of a measurable set E ⊂ R2 is defined as 
+
+Hs(E) = lim  
+
+> δ↓0
+
+Hsδ(E).
+
+Definition 1.3 ( β-numbers) . Given E ⊂ R2 and Q ∈ D , define 
+
+βE (Q) := 
+
+
+
+inf   
+
+> ℓline
+
+sup 
+
+> x∈E∩Q
+
+|Q|−1dist (x, ℓ ) if E ∩ Q̸ = ∅,
+
+0 if E ∩ Q = ∅.
+
+Theorem 1.4 (Analyst’s Traveling Salesperson Theorem [J, Theorem 1]) . A bounded set E ⊂
+
+R2 is contained in a curve of finite length if and only if 
+
+X
+
+> Q∈D
+
+β2 
+
+> E
+
+(3 Q)|Q| < ∞.
+
+More precisely, if P 
+
+> Q∈D
+
+β2 
+
+> E
+
+(3 Q)|Q| < ∞, then there exist a curve of finite length I and a universal constant c1 > 0 so that I ⊃ E and H1(I) ≤ c1
+
+
+
+|E| + P 
+
+> Q∈D
+
+β2 
+
+> E
+
+(3 Q)|Q|
+
+
+
+. If I is any curve of finite length containing E, then there exists a universal constant c2 > 0 such that 
+
+|E| + P 
+
+> Q∈D
+
+β2 
+
+> E
+
+(3 Q)|Q| ≤ c2H1(I).
+
+Motivated by the connection between the asymptotics of MDP minimizers and ATST-type results for sufficiently regular sets E established in [ACMN], we investigate in this paper the connection between finite scale square functions and the MDP. MINIMIZERS OF MDP VIA AN ATST ALGORITHM 3
+
+Theorem 1.5 (Main theorem) . Given a compact set E ⊂ R2,
+
+|E| − 2r + X
+
+> Q∈D
+
+max {βE (Q) − r/ |Q|, 0}2|Q| ≲ Λ( E, r ) ≲ |E| + X
+
+> Q∈D
+
+max {βE (Q) − r/ |Q|, 0}2|Q|.
+
+Here and throughout the paper we say that A ≲ B if there exists a constant c > 1 such that 
+
+A ≤ cB . Note that, in the above theorem, βE (Q) − r/ |Q| ≤ 0 for all Q with |Q| < r . Therefore, the sums that appear here are nonzero for finitely many generations (at most ⌈− log( r)/ log(2) ⌉
+
+generations). 
+
+Remark 1.6 . The lower and upper bound differ by an additive factor of −2r. We cannot improve the lower bound by removing such factor. In fact, consider the case where E is made up of two points, at a distance d > 2r apart. The segment contained in the line passing through the two points, of length d − 2r, whose endpoints are at distance r from each of the two points in E, is a minimizer for the MDP and has length exactly |E| − 2r.Rather than Jones’s original proof, our techniques rely heavily on a substantially different proof by Bishop and Peres, [BP]. Bishop and Peres construct a nested family of convex sets, which act as neighborhoods enclosing E at each fixed generation. For the reader’s convenience, we include proofs for the results we use, in the notation of our construction and with details filled in. 1.1. Acknowledgments. This material is based upon work supported by the National Science Foundation under Grant No. DMS-1928930 while the authors participated in the SRiM program hosted by the Simons Laufer Mathematical Sciences Institute (formerly Mathematical Sciences Research Institute) in Berkeley, California, during the summer of 2025. 2. Lower bound 
+
+For the lower bound, it is sufficient to rely on the lower bound of Theorem 1.4 (ATST). 
+
+Definition 2.1 . Given E ⊂ R2 compact and Q ∈ D , define 
+
+rE (Q) := 
+
+
+
+inf   
+
+> ℓline
+
+sup 
+
+> x∈E∩Q
+
+dist (x, ℓ ) if E ∩ Q̸ = ∅,
+
+0 if E ∩ Q = ∅.
+
+Remark 2.2 . Note that rE (Q) = βE (Q)|Q|. Because of our proof techniques, βE (Q) will be featured more often than rE (Q) below. However, the latter is a more relevant quantity as we are dealing with a scale-dependent problem, as opposed to the problem dealt with by Jones in [J], who first introduced βE (Q). It is interesting to note that rE (Q) is the same quantity defined by Okikiolu in [O]. 
+
+Lemma 2.3. Let E ⊂ R2 be a compact set and Γ be any curve such that N (Γ , r ) ⊃ E. Then 
+
+|E| − 2r ≤ | Γ|.MINIMIZERS OF MDP VIA AN ATST ALGORITHM 4
+
+Proof. Because E is compact, there exist two points x1, x 2 ∈ E such that dist( x1, x 2) = |E|.Since E ⊂ N (Γ , r ), x1, x 2 ∈ N (Γ , r ). Then 
+
+|E| = dist( x1, x 2) ≤ dist( x1, Γ) + |Γ| + dist( x2, Γ) ≤ r + |Γ| + r = |Γ| + 2 r. □
+
+We can now prove the lower bound from Theorem 1.5. 
+
+Theorem 2.4. Given a compact set E in R2,
+
+|E| − 2r + X
+
+> Q∈D
+
+max {βE (Q) − r/ |Q|, 0}2|Q| ≲ Λ( E, r ).
+
+Proof. Let Γ be an r-maximum distance minimizer of E. First note for any cube Q ∈ D ,
+
+rE (Q) ≤ rN (Γ ,r )(Q) ≤ rΓ(Q) + r. Hence, 
+
+βE (Q) ≤ βN (Γ ,r )(Q) ≤ βΓ(Q) + r
+
+|Q|.
+
+Thus, 
+
+max 
+
+
+
+βE (Q) − r
+
+|Q|, 0
+
+
+
+≤ βΓ(Q) for all Q ∈ D .
+
+Thus, applying the Analyst’s Traveling Salesperson Theorem to Γ, we get 
+
+|Γ| + X
+
+> Q∈D
+
+max {βE (Q) − r/ |Q|, 0}2|Q| ≤ | Γ| + X
+
+> Q∈D
+
+βΓ(Q)2|Q|
+
+≲ H1(Γ) = Λ( E, r ).
+
+Finally, since |E| − 2r ≤ | Γ|, by Lemma 2.3, we get 
+
+|E| − 2r + X
+
+> Q∈D
+
+max {βE (Q) − r/ |Q|, 0}2|Q| ≲ Λ( E, r ). □
+
+Remark 2.5 . If |E| < 2r, then max {βE (Q) − r/ |Q|, 0} = 0 for all dyadic cubes Q, which makes the lower bound in Theorem 2.4 negative. However, in this case, the minimizing curve for MDP is a single point, which has H1 measure 0. 3. Upper bound 
+
+We construct a candidate curve Γ∗ for Λ( E, r ), when E ⊂ R2 is compact. We then show that 
+
+Γ∗ satisfies the desired upper estimate in Theorem 1.5. 3.1. Building convex hulls. Recall that the convex hull of a set F is the small convex set con-taining F . We use the notation conv( F ) to indicate the convex hull of the set F . We construct a nested family C of convex hulls that are indexed using binary strings σ ∈ S∞
+
+> i=1
+
+{0, 1}i.MINIMIZERS OF MDP VIA AN ATST ALGORITHM 5
+
+3.1.1. Initialization and first generation of construction. Initialize C0 = {C∅} where C∅ =conv( E). Fix a diameter line segment ˆL∅ given by ˆβ(C∅). Let a∅ and b∅ be the endpoints of ˆL∅. Because C∅ is the convex hull of E, and we are taking a diameter line, observe that 
+
+a∅ and b∅ are both in E. With a mildly improper use of the interval notation, we can write 
+
+ˆL∅ = [ a∅, b ∅]. Let π∅ be the orthogonal projection onto the line ˆL∅. Because E = E ∩ C∅,observe that π∅(E) ⊂ ˆL∅. Partition ˆL∅ into three intervals of equal length. Label the the (open) middle interval K∅, and label the remaining (closed) intervals as I0 ∋ a∅ and I1 ∋ b∅.We consider two cases (P1) π∅(E ∩ C∅) ∩ K∅̸ = ∅. Pick z∅ ∈ π∅(E ∩ C∅) ∩ K∅ and let 
+
+C0 = conv( π−1 
+
+> ∅
+
+([ a∅, z ∅]) ∩ (E ∩ C∅)) and C1 = conv( π−1 
+
+> ∅
+
+([ z∅, b ∅]) ∩ (E ∩ C∅)) .
+
+(P2) π∅(E ∩ C∅) ∩ K∅ = ∅. Let 
+
+C0 = conv( π−1 
+
+> ∅
+
+(I0) ∩ (E ∩ C∅)) and C1 = conv( π−1 
+
+> ∅
+
+(I1) ∩ (E ∩ C∅)) .C0
+
+C1
+
+B∅
+
+ˆL∅ C0
+
+C1
+
+B∅
+
+ˆL∅
+
+Figure 1. Cases (P1) and (P2) of the first generation of the construction inside C∅.In either case, let C1 = {C0, C 1}. Let B∅ be a shortest line segment connecting a point 
+
+e0 ∈ E ∩ C0 to a point e1 ∈ E ∩ C1. Note that in case of (P1), B∅ is a single point, and hence has zero length. In the case of (P2), dist( C0, C 1) ≥ 13 | ˆL∅|, and hence B∅ has positive length. 3.1.2. Inductive Construction. Suppose j generations of convex hulls and bridges have been constructed. For each σ ∈ Dj , let ˆLσ be a diameter line segment given by ˆβ(Cσ). Using the same notation as above, let ˆLσ = [ aσ, b σ]. Now we consider the orthogonal projection onto the line containing ˆLσ. By construction, πσ(E ∩ Cσ) ⊂ ˆLσ. Partition ˆLσ into three intervals, 
+
+Iσ∗0, K σ, I σ∗1. We consider two cases (P1) πσ(E ∩ Cσ) ∩ Kσ̸ = ∅. Pick zσ ∈ πσ(E ∩ Cσ) ∩ Kσ and let 
+
+Cσ∗0 = conv( π−1 
+
+> σ
+
+([ aσ, z σ]) ∩ (E ∩ Cσ)) and Cσ∗1 = conv( π−1 
+
+> σ
+
+([ zσ, b σ]) ∩ (E ∩ Cσ)) .MINIMIZERS OF MDP VIA AN ATST ALGORITHM 6
+
+(P2) πσ(E ∩ Cσ) ∩ Kσ = ∅. Let 
+
+Cσ∗0 = conv( π−1 
+
+> σ
+
+(Iσ∗0) ∩ (E ∩ Cσ)) and Cσ∗1 = conv( π−1 
+
+> σ
+
+(Iσ∗1) ∩ (E ∩ Cσ)) .
+
+Let Bσ be a shortest line segment connecting a point eσ∗0 ∈ E ∩ Cσ∗0 to a point eσ∗1 ∈ E ∩ Cσ∗1.Repeat the same for all other convex hulls in Cj . Let Cj+1 = {Cσ∗i : |σ| = j, i ∈ { 0, 1}} .Following standard terminology, we say Cσ∗i is a child of Cσ for i = 0 , 1.3.2. Properties of the collection of convex hulls. Before constructing the candidate curve 
+
+Γ∗, we need to show a few properties of the collection C .
+
+Definition 3.1 ( ˆβ-number) . For any convex region C ⊂ R2, define 
+
+ˆβ(C) = sup   
+
+> ˆLdiameter line segment of C
+
+sup 
+
+> y∈C
+
+dist( y, ˆL).
+
+Lemma 3.2. (C1) E ⊂ [
+
+> |σ|=k
+
+Cσ.(C2) If |τ | = |σ|, then Cτ ∩ Cσ = ∅.(C3) If C ∈ C , then there is a triangle with height ˆβ(C)|C| and base |C| contained in C.(C4) Each C ∈ C is contained in a rectangle with height 2 ˆβ(C)|C| and width |C|.(C5) Cσ∗i, for i ∈ { 0, 1} is contained in a rectangle with height 2 ˆβ(Cσ)|Cσ| and width 23 |Cσ|.Proof. (C1) and (C2) follow immediately from the construction of the collection C . (C3) follows from the definition of ˆβ(C) and the convexity of C. (C4) follows from the definition of ˆβ(C).To prove (C5), recall that Cσ∗i ⊂ Cσ and that in both cases of the construction, Cσ∗i projects onto a portion of ˆLσ that is at most 23 of the total length of ˆLσ. □
+
+Corollary 3.3. For C ∈ C .
+
+12 ˆβ(C)|C|2 ≤ area( C) ≤ 2 ˆβ(C)|C|2.
+
+Proof. The lower bound follows from (C3) and the upper bound follows from (C4). □
+
+Lemma 3.4 ([BP, Lemma 10.5.3]) . There is M < ∞ such that if Cσ ∈ Cj and Cσ∗τ ∈ Cj+M
+
+then |Cσ∗τ | ≤ 12 |Cσ|.MINIMIZERS OF MDP VIA AN ATST ALGORITHM 7
+
+ˆβ(C)|C|
+
+|C|
+
+Q
+
+3Q 
+
+> ℓ3Q
+> βE(3 Q)|3Q|
+
+Figure 2. A comparison of ˆβ(C) and βE (3 Q), for C ∈ C (Q).
+
+Proof. Consider the triangle given by Lemma 3.2 (C3). The part of the triangle that projects onto Iσ∗1 has base length at least |Cσ|/3 and height at least ˆβ(Cσ)|Cσ|/3. Thus the area of the portion of the triangle that projects onto Iσ∗1 is at least 
+
+12
+
+|Cσ|
+
+3
+
+ ˆβ(Cσ)|Cσ|
+
+3
+
+!
+
+= ˆβ(Cσ)|Cσ|2
+
+18 ≥ area (Cσ)36 ,
+
+where the last inequality uses Corollary 3.3. Since Cσ∗2 does not contain any part of Cσ that projects onto Iσ∗1,area (Cσ∗2) ≤ 35 36 area (Cσ).
+
+An analogous argument can be used to show that area (Cσ∗1) ≤ 35 36 area (Cσ).
+
+Obverse that for |τ | = m,area (Cσ∗τ ) ≤
+
+35 36 
+
+m
+
+area (Cσ).
+
+If follows that 
+
+12 ˆβ(Cσ∗τ )|Cσ∗τ |2 ≤ area (Cσ∗τ ) ≤
+
+35 36 
+
+m
+
+area (Cσ) ≤
+
+35 36 
+
+m
+
+2 ˆβ(Cσ)|Cσ|2.
+
+If |Cσ∗τ | > 12 |Cσ|, then 
+
+18 ˆβ(Cσ∗τ )|Cσ|2 ≤ 2
+
+35 36 
+
+m
+
+ˆβ(Cσ)|Cσ|2,
+
+so 
+
+ˆβ(Cσ∗τ ) ≤ 16 
+
+35 36 
+
+m
+
+ˆβ(Cσ) ≤ 16 
+
+35 36 
+
+m
+
+.MINIMIZERS OF MDP VIA AN ATST ALGORITHM 8
+
+However, for ˆβ(Cσ∗τ ) sufficiently small, it must be the case that 
+
+|Cσ∗τ ∗i| < 34|Cσ∗τ |.
+
+To see this, note that, by Lemma 3.2 (C5), Cσ∗τ ∗i is contained in a rectangle of width less than or equal to 23 |Cσ∗τ | and height less than or equal to 2 ˆβ(Cσ∗τ )|Cσ∗τ |. We have 
+
+|Cσ∗τ ∗i| ≤ 
+
+s
+
+2 ˆβ(Cσ∗τ )|Cσ∗τ |
+
+2
+
++
+
+23|Cσ∗τ |
+
+2
+
+=
+
+s
+
+2 ˆβ(Cσ∗τ )
+
+2
+
++
+
+23
+
+2
+
+|Cσ∗τ |.
+
+Therefore, it is enough to choose an m so that 
+
+s
+
+2 ˆβ(Cσ∗τ )
+
+2
+
++
+
+23
+
+2
+
+≤
+
+vuut4 16 2
+
+35 36 
+
+2m!
+
++ 49 ≤ 34.
+
+Accordingly, we set m0 = log 
+
+ 11024 
+
+q 17 576 
+
+
+
+/ log(35 /36) . Since  34
+
+3 < 12 , after M = 3( m0 + 1) 
+
+iterations of construction, it is necessarily the case that the diameter has decreased by a factor of 12 . □
+
+Corollary 3.5. Fix a dyadic cube Q. For any x ∈ E ∩ Q, there are at most M convex hulls C
+
+such that C ∈ C (Q) and x ∈ C.Proof. This result follows immediately as a consequence of (C1), (C2), and Lemma 3.4. □
+
+3.3. Labeling convex hulls as good and bad. To construct a curve Γ∗ we need to identify the convex hulls which are sufficiently flat (in terms of r). We do so by relating convex hulls to dyadic cubes, and looking at the relationship between rE (Q) and r.
+
+Definition 3.6 . For each dyadic cube Q, we say that a convex hull C is associated to Q if 
+
+C ∩ Q̸ = ∅ and side( Q)/2 < |C| ≤ side( Q). For any cube Q ∈ D we call C (Q) the collection of convex hulls associated to Q.
+
+Definition 3.7 (good and bad cube) . We say that a dyadic cube Q ∈ D and write Q ∈ D good is a good cube if rE (3 Q) < 2r. We say that Q is bad and write Q ∈ D bad if it is not good. Let 
+
+G = S 
+
+> Q∈D good
+
+C (Q) and B = S 
+
+> Q∈D bad
+
+C (Q).
+
+Definition 3.8 (good and bad convex hull) . We say that a convex hull C is good if there exists a good cube Q such that C ∈ C (Q). If C is not good, we say that C is bad. For a good convex hull Cσ, fix one good cube Q with Cσ ∈ C (Q). Let Lσ = Cσ ∩ ℓσ where 
+
+ℓσ is a line satisfying sup y∈E∩3Q dist( y, ℓ σ) ≤ 2r, which is guaranteed to exist by the fact that 
+
+βE (3 Q) < 2r.MINIMIZERS OF MDP VIA AN ATST ALGORITHM 9
+
+3.4. Building candidate curves. We iteratively construct finitely many subsets Γ0, . . . , ΓN
+
+of R2, each of which is a union of line segment and convex hulls. After construction terminates, we set Γ∗ = Γ N , where ΓN is only a union of finitely many line segments. We show that Γ∗ is a candidate belonging to the class of minimizers for E.3.4.1. Initialization and first generation construction. If C∅ is good, let G0 = {C∅}, B0 = ∅,and let Γ0 = ∂C ∅ ∪ L∅. In this case, we set Γ∗ = Γ 0, and the construction of a candidate curve is complete. If C∅ is bad, let G0 = ∅ and B0 = {C∅} and let Γ0 = C∅.To construct Γ1, we look at C0, C 1 ⊂ C∅. We define G1 = {C∅∗i|C∅∗i is good } and B1 =
+
+{C∅∗i|C∅∗i is bad }. Then we define 
+
+Γ1 = [ 
+
+> Cτ∈G1
+
+∂C τ ∪ Lτ
+
+!
+
+∪ [ 
+
+> Cσ∈B1
+
+Cσ
+
+!
+
+∪ B∅.
+
+3.4.2. Inductive Construction. Let j ≥ 1. Suppose that Gj and Bj have been established and 
+
+Γj defined by 
+
+Γj =
+
+> j
+
+[
+
+> k=1
+
+[ 
+
+> Cτ∈Gk
+
+∂C τ ∪ Lτ
+
+!
+
+∪
+
+ [ 
+
+> Cσ∈Bj
+
+Cσ
+
+ ∪
+
+> j−1
+
+[
+
+> k=0
+
+[  
+
+> τ:Cτ∈Bk
+
+Bτ
+
+!
+
+.
+
+For each Cσ ∈ Bj , we define Gj+1 = {Cσ∗i | Cσ∗i is good }, and Bj+1 = {Cσ∗i | Cσ∗i is bad }.Intuitively, Gj+1 (resp. Bj+1 ) contains the “good (resp. bad) convex children of bad convex parents.” Note that we do not continue the construction inside the convex hulls in Gj , so children of Cσ ∈ Gj are contained in neither Gj+1 nor Bj+1 .We define 
+
+Γj+1 =
+
+> j
+
+[
+
+> k=1
+
+[ 
+
+> Cτ∈Gk
+
+∂C τ ∪ Lτ
+
+!
+
+∪
+
+ [ 
+
+> Cτ∈Gj+1
+
+∂C τ ∪ Lτ
+
+∪
+
+ [ 
+
+> Cσ∈Bj+1
+
+Cσ
+
+∪
+
+> j−1
+
+[
+
+> k=0
+
+[  
+
+> τ:Cτ∈Bk
+
+Bτ
+
+!
+
+∪ [ 
+
+> Cτ∈Bj
+
+Bτ
+
+=
+
+> j+1
+
+[
+
+> k=1
+
+[ 
+
+> Cτ∈Gk
+
+∂C τ ∪ Lτ
+
+!
+
+∪
+
+ [ 
+
+> Cσ∈Bj+1
+
+Cσ
+
+ ∪
+
+> j
+
+[
+
+> k=0
+
+[  
+
+> τ:Cτ∈Bk
+
+Bτ
+
+!
+
+.
+
+3.4.3. Termination of construction. By Lemma 3.4, after finitely many, N , (where N is bounded above in terms of r) iterations of the construction, |Cσ| ≤ r 
+
+> 3
+
+for all convex hulls Cσ, σ ∈S∞
+
+> i=1
+
+{0, 1}i. Then there is Q such that Cσ ∩ Q̸ = ∅ and 
+
+side( Q)/2 ≤ | Cσ| < side( Q).MINIMIZERS OF MDP VIA AN ATST ALGORITHM 10 
+
+Figure 3. Two steps of the construction of the Γj ’s (shown in purple). Since side( Q) ≤ r 
+
+> 3
+
+, it is necessarily the case that rE (3 Q) ≤ r because rE (3 Q) is bounded by 
+
+side(3 Q). Therefore BN = ∅. Then we define 
+
+Γ∗ = Γ N =
+
+> N
+
+[
+
+> k=1
+
+[ 
+
+> Cτ∈Gk
+
+∂C τ ∪ Lτ
+
+!
+
+∪ 
+
+> N−1
+
+[
+
+> k=0
+
+[  
+
+> τ:Cτ∈Bk
+
+Bτ
+
+!
+
+.
+
+3.5. Verifying that Γ∗ is a candidate curve. The class of objects that MDP minimizes on is curves of finite length whose r-neighborhood covers E. By construction, Γ∗ has finite length, as it is the union of finitely many line segments. To show that it is in fact a curve, we must show it is connected. 
+
+Lemma 3.9. Γ∗ is connected. Proof. To see that Γ∗ is connected, suppose that Cσ ∈ Bj and Bτ is a bridge with an endpoint 
+
+eτ in E ∩Cσ. To construct Γj+1 from Γj , we first remove Cσ and replace it with Cσ∗0 ∪Bσ ∪Cσ∗1,so that Cσ∗0 is connected to Cσ∗1 via Bσ. Because eτ ∈ Cσ∗0 ∪ Cσ∗1, we get that (Γ j \ Cσ) ∪
+
+Cσ∗0 ∪ Bσ ∪ Cσ∗1 is connected. If both children of Cσ are bad, then we move on to the next bad convex hull. If a child, say 
+
+Cσ∗0, is good, then we remove Cσ∗0 and replace it with ∂C σ∗0 ∪ Lσ∗0. For any bridge Bτ with an endpoint eτ ∈ E ∩ Cσ∗0, the bridge Bτ will intersect ∂C σ∗0. Thus, since ∂C σ∗0 ∪ Lσ∗0 is connected, the replacement (Γ j \ Cσ∗∗ 0) ∪ (∂C σ∗0 ∪ Lσ∗0) is also connected. □
+
+Lemma 3.10. Let C be a convex set in R2 and let ℓ be a line in R2.(a) If sup x∈C dist( x, ℓ ) ≤ r then N (∂C, r ) ⊃ C.(b) If sup x∈C dist( x, ℓ ) ≤ 2r then N (∂C ∪ (C ∩ ℓ), r ) ⊃ C.Proof. (a) Let π be the orthogonal projection of R2 onto ℓ. For any x ∈ ℓ, let ℓ⊥ 
+
+> x
+
+∩ C
+
+by the line perpendicular to ℓ containing x. By assumption sup y∈ℓ⊥  
+
+> x∩C
+
+|x − y| ≤ r. If MINIMIZERS OF MDP VIA AN ATST ALGORITHM 11 
+
+ℓ⊥ 
+
+> x
+
+∩ C ∩ H± is not empty, then (ℓ⊥ 
+
+> x
+
+∩ ∂C ) ∩ H± is also not empty. Then for any point 
+
+b± 
+
+> x
+
+∈ (ℓ⊥ 
+
+> x
+
+∩ ∂C ) ∩ H±, we have that the ball B(b± 
+
+> x
+
+, r ) contains (ℓ⊥ 
+
+> x
+
+∩ ∂C ) ∩ H±. Therefore 
+
+N (∂C, r ) = [
+
+> b∈∂C
+
+B(b, r ) ⊃ [
+
+> x∈ℓ
+
+B(b− 
+
+> x
+
+∪ b+ 
+
+> x
+
+, r ) ⊃ [
+
+> x∈ℓ
+
+ℓ⊥ 
+
+> x
+
+∩ C = C. 
+
+(b) First, let H+ and H− be the two half-spaces in R2 with ∂H ± = ℓ, let n be the unit normal vector to ℓ pointing in the direction of H+, and let C± = C ∩ H±.Then, the r-neighborhood N (ℓ + rn, r ) contains C+, and similarly, the r-neighborhood 
+
+N (ℓ − rn, r ) contains C−. Since C± are convex sets, part (a) implies N (∂C ±, r ) ⊃ C±.Thus 
+
+N (∂C + ∪ ∂C −, r ) = N (∂C +, r ) ∪ N (∂C −, r ) ⊃ C+ ∪ C− = C. 
+
+Since ∂C + ∪ ∂C − = ∂C ∪ (C ∩ ℓ), we are done. □
+
+Proposition 3.11. Γ∗ is a candidate curve for MDP. Proof. By Lemma 3.9, it suffices to show that N (Γ ∗, r ) ⊃ E. To this end, let x ∈ E. By construction, for each k ∈ N, there is a τk such that |τk| = k and x ∈ Cτk . Furthermore, there exists some kx such that Cτkx ∈ Gkx . Recall that Cτkx ∈ Gτkx implies Cτkx ⊂ 3Q for some Q with 
+
+rE (3 Q) < 2r. Since E ∩ 3Q ⊂ ℓτkx × (−2r, 2r), it is also the case that Cτkx ⊂ ℓτkx × (−2r, 2r).By Lemma 3.10, we have N (∂C τkx ∪ Lτkx , r ) ⊃ Cτkx , and it follows that x ∈ N (Cτkx ∪ Lτkx , r ).Note that 
+
+N (Γ ∗, r ) = N
+
+> N
+
+[
+
+> k=1
+
+[ 
+
+> Cτ∈Gk
+
+∂C τ ∪ Lτ
+
+!
+
+∪ 
+
+> N−1
+
+[
+
+> k=0
+
+[  
+
+> τ:Cτ∈Bk
+
+Bτ
+
+!
+
+, r 
+
+!
+
+⊃ N (Cτkx ∪ Lτkx , r ).
+
+Thus x ∈ N (Γ ∗, r ). Since x was chosen arbitrarily, we conclude that E ⊂ N (Γ ∗, r ). □
+
+3.6. Estimating Length of the Candidate. Finally we show that the curve Γ∗ has length bounded above by the left hand side of Theorem 1.5. 
+
+Lemma 3.12 ([BP, Lemma 10.5.2]) . Suppose that Cσ∗1 and Cσ∗2 are both bad children of Cσ.If Cσ is replaced by Cσ∗1, Bσ, and Cσ∗2, then there exists K > 0 such that 
+
+|Cσ∗0| + 12|Bσ| + |Cσ∗1| ≤ | Cσ| + K ˆβ2(Cσ)|Cσ|.
+
+Proof. (1) First suppose that Cσ∗0, Cσ∗1, and Bσ were constructed via Case 1, i.e., |Bσ| = 0 
+
+and |[aσ, z σ]|, |[zσ, b σ]| are both greater than or equal to that |Cσ | 
+
+> 3
+
+. Then Cσ∗0 is contained in the rectangle [aσ, z σ] × 2 ˆβ(Cσ)|Cσ|. The diameter of this rectangle is 
+
+q
+
+|[aσ, z σ]|2 + (2 ˆβ(Cσ)|Cσ|)2.MINIMIZERS OF MDP VIA AN ATST ALGORITHM 12 
+
+If 2 ˆβ(Cσ )|Cσ ||[aσ ,z σ ]| < 1 we can use Taylor approximation to obtain 
+
+q
+
+|[aσ, z σ]|2 + (2 ˆβ(Cσ)|Cσ|)2 = |[aσ, z σ]|
+
+vuut1 + 2 ˆβ(Cσ)|Cσ||[aσ, z σ]|
+
+!2
+
+≤ | [aσ, z σ]|
+
+1 + K1
+
+2 ˆβ(Cσ)|Cσ||[aσ, z σ]|
+
+!2
+
+≤ | [aσ, z σ]| + 6 2K1 ˆβ(Cσ)2|Cσ|.
+
+If 2 ˆβ(Cσ )|Cσ ||[aσ ,z σ ]| > 1, then ˆβ(Cσ) > |[aσ ,z σ ]|  
+
+> 2|Cσ|
+
+≥ 16 , which implies that 2 ˆβ(Cσ) ≤ 12 ˆβ(Cσ)2.Then 
+
+q
+
+|[aσ, z σ]|2 + (2 ˆβ(Cσ)|Cσ|)2 ≤ | [aσ, z σ]| + 2 ˆβ(Cσ)|Cσ| ≤ | [aσ, z σ]| + 12 ˆβ2(Cσ)|Cσ|,
+
+because √a2 + b2 ≤ a + b, if a, b ≥ 0.The same is true for Cσ∗1 using the line segment [zσ, b σ]. Putting it together we obtain 
+
+|Cσ∗0| + |Cσ∗1| ≤ | Cσ| + 2(6 2K1 + 12) ˆβ2(Cσ)|Cσ|,
+
+because |[aσ, z σ]| + |[zσ, b σ]| = |[aσ, b σ]| ≤ | Cσ|.(2) Next suppose that Cσ∗1, Cσ∗2, and Bσ were constructed via Case 2. If ˆβ(Cσ) ≥ 130 , then 
+
+|Cσ∗0| + |Cσ∗1| + 12|Bσ| ≤ 52|Cσ| ≤ | Cσ| + 1350 ˆβ2(Cσ)|Cσ|,
+
+where 1350 = 3 /2 ∗ (30 2).On the other hand, if ˆβ(Cσ) < 130 , because √a2 + b2 ≤ a + b, if a, b ≥ 0, we have 
+
+|Cσ∗0| ≤ | I0| + 2 ˆβ(Cσ)|Cσ|
+
+the analogous for Cσ∗0, and 
+
+|Bσ| ≤ | Cσ| − | I0| − | I1| + 2 ˆβ(Cσ)|Cσ|.
+
+Then 
+
+|Cσ∗0| + |Cσ∗1| + 12|Bσ| ≤ | I0| + |I1| + 4 ˆβ(Cσ)|Cσ| + 12
+
+
+
+|Cσ| − | I0| − | I1| + 2 ˆβ(Cσ)|Cσ|
+
+
+
+= 12|Cσ| + 12|I0| + 12|I1| + 5 ˆβ(Cσ)|Cσ|MINIMIZERS OF MDP VIA AN ATST ALGORITHM 13 
+
+≤ 12|Cσ| + 16|Cσ| + 16|Cσ| + 16|Cσ|
+
+= |Cσ|.
+
+Choosing K = max {2(36 2K1 + 12) , 1350 } the proof is complete. □
+
+Lemma 3.13. For a convex hull Cσ
+
+H1(∂C σ ∪ ˆLσ) ≤ 7 |Cσ|.
+
+Proof. First, 
+
+H1(∂C σ ∪ ˆLσ) ≤ H 1(∂C σ) + |Cσ|.
+
+Since Cσ is contained in two squares of side length |Cσ| which share a side equal to ˆLσ, we have 
+
+H1(∂C σ) ≤ 6 |Cσ|. □
+
+Next, we follow [BP] to compare the quantities ˆβ(C) to the quantity β(Q) for all convex hulls C
+
+that are associated to a cube Q. While the proof of the lemma below follows exactly as in [BP], we note the collection of convex hulls C (Q) here may be strictly smaller than the collection of convex hulls summed over in [BP] due to the fact that we associate each convex hull to a single dyadic cube. 
+
+Lemma 3.14 ([BP, Lemma 10.5.4]) .
+
+X 
+
+> C∈C(Q)
+
+ˆβ2(C)|C| ≤ (288 M )2 (βE (3 Q)) 2 |Q|,
+
+where M is as in Lemma 3.4. Proof. Using the definition of βE (3 Q), fix some minimizing line ℓ3Q so that 
+
+dist( x, ℓ 3Q) ≤ βE (3 Q)|3Q| for all x ∈ E, 
+
+and then set W := ℓ3Q × [−rE (3 Q), r E (3 Q)] ∩ 3Q. This is the strip shown on the left in Figure 2. Let C ∈ C (Q). Recall that by definition of C (Q), C ∩Q̸ = ∅ and side( Q)/2 ≤ | C| ≤ side( Q)
+
+which implies that C ⊂ 3Q. More precisely, W is convex, E ∩ 3Q ⊂ W , and C is a convex hull of a subset of points in E ∩ 3Q, C ⊂ W which means that 
+
+area( C) ≤ area( W ) ≤ 2rE (3 Q)|3Q| = 18 βE (3 Q)|Q|2.
+
+On the other hand, by Corollary 3.3 and |C| ≥ side( Q)/2,
+
+area( C) ≥ 12 ˆβ(C)|C|2 ≥ 116 ˆβ(C)|Q|2.MINIMIZERS OF MDP VIA AN ATST ALGORITHM 14 
+
+By Corollary 3.5 point x ∈ W is in no more M convex hulls. Thus 
+
+X 
+
+> C∈C(Q)
+
+ˆβ(C)|Q|2 ≤ 16 X 
+
+> C∈C(Q)
+
+area( C) ≤ 16 M area(3 Q ∩ W ) ≤ 288 M β E (3 Q)|Q|2.
+
+By dividing the string of inequalities by |Q|2 and applying Cauchy-Schwartz Inequality, we obtain 
+
+X 
+
+> C∈C(Q)
+
+ˆβ(C)2 ≤
+
+ X 
+
+> C∈C(Q)
+
+ˆβ(C)
+
+
+
+> 2
+
+≤ (288 M )2βE (3 Q)2.
+
+Finally, since C ∈ C (Q) implies |C| ≤ side( Q) ≤ | Q|,
+
+X 
+
+> C∈C(Q)
+
+ˆβ(C)2|C| ≤ X 
+
+> C∈C(Q)
+
+ˆβ(C)2|Q| ≤ (288 M )2βE (3 Q)2|Q|. □
+
+Corollary 3.15. If Q is a bad cube, then 
+
+X 
+
+> C∈C(Q)
+
+ˆβ2(C)|C| ≤ (288 M )2(βE (3 Q) − r/ |3Q|)2|Q|.
+
+Proof. Recall r3Q = βE (3 Q)|3Q|. Because Q is a bad cube, rE (3 Q) > 2r; that is, rE (3 Q)/2 > r .It follows that 
+
+rE (3 Q) − r > rE (3 Q)2 .
+
+Dividing both sides by |3Q|, we may write the inequality in terms of β-numbers as 
+
+βE (3 Q) − r
+
+|3Q| > βE (3 Q)2 ,
+
+and a rearrangement yields 
+
+βE (3 Q) < 2
+
+
+
+βE (3 Q) − r
+
+|3Q|
+
+
+
+.
+
+Finally, we invoke Lemma 3.14 to conclude that 
+
+X 
+
+> C∈C(Q)
+
+ˆβ(C)2|C| ≤ (288 M )2βE (3 Q)2|Q| ≤ (288 M )2
+
+
+
+βE (3 Q) − r
+
+|3Q|
+
+2
+
+|Q|. □
+
+Theorem 3.16. Given a set E in R2,
+
+Λ( E, R ) ≲ |E| + X
+
+> Q∈D
+
+max {βE (Q) − r/ |Q|, 0}2|Q|.MINIMIZERS OF MDP VIA AN ATST ALGORITHM 15 
+
+Proof. The estimates in Lemma 3.12 do not depend on whether a convex hull is good or bad. This implies that 
+
+X
+
+> Cσ∗i∈Gj+1
+
+|Cσ∗i| + X
+
+> Cσ∗i∈Bj+1
+
+|Cσ∗i| + 12
+
+X
+
+> |σ|=j+1
+
+|Bσ| ≤ X 
+
+> Cσ∈Bj
+
+|Cσ| + X 
+
+> Cσ∈Bj
+
+β2(Cσ)|Cσ|.
+
+Here we are using the fact that we only add convex hulls to the set Gj+1 and Bj+1 if their parent is bad. We can rearrange this as 
+
+X
+
+> Cσ∗i∈Gj+1
+
+|Cσ∗i| + X
+
+> Cσ∗i∈Bj+1
+
+|Cσ∗i| + 12
+
+X
+
+> |σ|=j+1
+
+|Bσ| − X 
+
+> Cσ∈Bj
+
+|Cσ| ≤ X 
+
+> Cσ∈Bj
+
+β2(Cσ)|Cσ|.
+
+Adding up over all N generations yields 
+
+> N
+
+X
+
+> j=1
+
+X
+
+> Cσ∗i∈Gj+1
+
+|Cσ∗i|+
+
+> N
+
+X
+
+> j=1
+
+X
+
+> Cσ∗i∈Bj+1
+
+|Cσ∗i|+
+
+> N
+
+X
+
+> j=1
+
+12
+
+X
+
+> |σ|=j+1
+
+|Bσ|− 
+
+> N
+
+X
+
+> j=1
+
+X
+
+> Cσ∈Bj
+
+|Cσ| ≤ 
+
+> N
+
+X
+
+> j=1
+
+X 
+
+> Cσ∈Bj
+
+β2(Cσ)|Cσ|.
+
+Next, we telescope the bad convex hull terms, which reduces the estimate to 
+
+> N
+
+X
+
+> j=1
+
+X
+
+> Cσ∗i∈Gj+1
+
+|Cσ∗i| + X 
+
+> Cσ∗i∈BN+1
+
+|Cσ∗i| +
+
+> N
+
+X
+
+> j=1
+
+12
+
+X
+
+> |σ|=j+1
+
+|Bσ| − | E| ≤ 
+
+> N
+
+X
+
+> j=1
+
+X 
+
+> Cσ∈Bj
+
+β2(Cσ)|Cσ|.
+
+However, BN +1 = ∅. Therefore we get 
+
+> N
+
+X
+
+> j=1
+
+X
+
+> Cσ∗i∈Gj+1
+
+|Cσ∗i| + 12
+
+> N
+
+X
+
+> j=1
+
+X
+
+> |σ|=j+1
+
+|Bσ| ≤ | E| +
+
+> N
+
+X
+
+> j=1
+
+X 
+
+> Cσ∈Bj
+
+β2(Cσ)|Cσ|.
+
+Finally, using Lemma 3.13 
+
+H1(Γ ∗) = 
+
+> N
+
+X
+
+> j=1
+
+X 
+
+> Cσ∈Gk
+
+(H1(∂C σ ∪ (Cσ ∩ Lσ))) + 
+
+> N
+
+X
+
+> j=1
+
+X
+
+> |σ|=j
+
+|Bσ|≤ 7
+
+
+
+> N
+
+X
+
+> j
+
+X 
+
+> Cσ∈Gj
+
+|Cσ| + 12
+
+> N
+
+X
+
+> j=1
+
+X
+
+> |σ|=j+1
+
+|Bσ|
+
+
+
+≤ 7
+
+|E| +
+
+> N
+
+X
+
+> j=1
+
+X 
+
+> Cσ∈Bj
+
+β2(Cσ)|Cσ|
+
+
+
+= 7 
+
+|E| + X 
+
+> Cσ∈∪ Nj=1 Bj
+
+β2(Cσ)|Cσ|
+
+MINIMIZERS OF MDP VIA AN ATST ALGORITHM 16 
+
+≤ 7
+
+|E| + X
+
+> Q∈D bad
+
+X  
+
+> Cσ∈C(Q)
+
+β2(Cσ)|Cσ|
+
+
+
+≤ 14(288 M )2
+
+|E| + X
+
+> Q∈D bad
+
+X  
+
+> Cσ∈C(Q)
+
+(βE (Q) − r/ |Q|)2|Q|
+
+
+
+≤ 14(288 M )2 |E| + X
+
+> Q∈D bad
+
+max {βE (Q) − r/ |Q|, 0}2|Q|
+
+!
+
+.
+
+Note that because we are taking the maximum of βE (Q) − r/ |Q| and 0, we are only adding up over the bad cubes. □
+
+By looking at the asymptotics for r → 0, we recover the classical estimate of the Analyst’s Traveling Salesperson Theorem [J]. 
+
+Corollary 3.17. If E is contained in a connected set of finite length, Γ∗,
+
+|E| + X
+
+> Q∈D
+
+β2 
+
+> E
+
+(3 Q)|Q| ≲ H1(Γ ∗) ≲ |E| + X
+
+> Q∈D
+
+β2 
+
+> E
+
+(3 Q)|Q|.
+
+Remark 3.18 . If r = 0 , our constructive algorithm recovers exactly the algorithm in [BP] to construct a curve for the Analyst’s Traveling Salesperson Theorem [J]. In such case all convex hulls would be good, so our construction would not stop after finitely many steps. For a fixed r > 0, let Γ∗ 
+
+> r
+
+be the curve constructed in Section 3.4. If Γ∗ is the curve constructed in [BP, Section 10.5], we have that dist H (Γ ∗, Γ∗ 
+
+> r
+
+) ≤ 2r, where dist H (·, ·) denotes the Hausdorff distance. By letting r → 0, the curves Γ∗ 
+
+> r
+
+converge to Γ∗.
+
+References 
+
+[ACMN] E. G. Alvarado, L.Catalano, T. Merchán, L. Naples, Asymptotics of maximum distance minimizers ,arXiv preprint arXiv:2309.08055 (2023). [AKV] E. G. Alvarado, B. Krishnamoorthy, K. R. Vixie, The Maximum Distance Problem and Minimum Spanning Trees , Int. J. Anal. Appl., 19 (5) (2021), 633–659. [BP] Bishop, Christopher J.; Peres, Yuval. Fractals in probability and analysis. Cambridge Studies in Advanced Mathematics, 162. Cambridge University Press , Cambridge, 2017. ix+402 pp. ISBN: 978-1-107-13411-9 MR3616046 [BOS] G. Buttazzo, E. Oudet, and E. Stepanov. Optimal transportation problems with free Dirichlet regions .Variational Methods for Discontinuous Structures (2002), 41–65. [J] P. W. Jones, Rectifiable sets and traveling salesman problem , Invent. Math. 102 (1990), 1–15. [O] K. Okikiolu, Characterization of subsets of rectifiable curves in Rn, J. London Math. Soc. (2) 46 (1992), 336-348.
