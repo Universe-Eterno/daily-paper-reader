@@ -1,0 +1,2738 @@
+Title: Learning Decision-Sufficient Representations for Linear Optimization
+
+URL Source: https://arxiv.org/pdf/2603.18551v1
+
+Published Time: Fri, 20 Mar 2026 00:52:04 GMT
+
+Number of Pages: 45
+
+Markdown Content:
+# Learning Decision-Sufficient Representations for Linear Optimization 
+
+Yuhan Ye MIT 
+
+yyh03@mit.edu 
+
+Saurabh Amin MIT 
+
+amins@mit.edu 
+
+Asuman ¨ Ozda˘ glar MIT 
+
+asuman@mit.edu 
+
+Abstract 
+
+We study how to construct compressed datasets that suffice to recover optimal decisions in linear programs with an unknown cost vector c lying in a prior set C. Recent work by Bennouna et al. (2025a) provides an exact geometric characterization of sufficient decision datasets (SDDs) via an intrinsic decision-relevant dimension d⋆. However, their algorithm for constructing minimum-size SDDs requires solving mixed-integer programs. In this paper, we establish hardness results showing that computing d⋆ is NP-hard and deciding whether a dataset is globally sufficient is coNP-hard, thereby resolving an open problem posed in Bennouna et al. (2026). To address this worst-case intractability, we introduce pointwise sufficiency , a relaxation that requires sufficiency for an individual cost vector. Under nondegeneracy, we provide a polynomial-time cutting-plane algorithm for constructing pointwise-sufficient decision datasets. In a data-driven regime with i.i.d. costs, we further propose a cumulative algorithm that aggregates decision-relevant directions across samples, yielding a stable compression scheme of size at most d⋆. This leads to a distribution-free PAC guarantee: with high probability over the training sample, the pointwise sufficiency failure probability on a fresh draw is at most ˜O(d⋆/n ), and this rate is tight up to logarithmic factors. Finally, we apply decision-sufficient representations to contextual linear optimization, obtaining compressed predictors with generalization bounds scaling as ˜O(pd⋆/n ) rather than ˜O(pd/n ), where d
+
+is the ambient cost dimension. 
+
+Keywords: Linear programming, Sample compression, PAC learning, Computational complexity, Decision-focused learning, Contextual optimization, Polyhedral geometry 
+
+# 1 Introduction 
+
+In many real-world decision problems, the optimization objective depends on parameters that are not directly observable and must be inferred from data. With the surge in available data, it has become common to use empirical evidence alongside contextual knowledge to support decision-making. The main challenge is to characterize the smallest set of information needed to identify an optimal decision and to recover it efficiently from finite samples via computationally tractable algorithms. Motivated by this, this paper studies the following fundamental question: 
+
+Which and how many objective measurements are sufficient to identify an optimal decision, and can we learn such measurements with provable guarantees in polynomial time? 
+
+We formulate the decision-making problem as a linear optimization with an unknown cost vector and a known feasible region. The decision-maker solves 
+
+min  
+
+> x∈X
+
+c⊤x, (1) 1
+
+> arXiv:2603.18551v1 [math.OC] 19 Mar 2026
+
+where X := {x ∈ Rd : Ax = b, x ≥ 0} is a nonempty bounded polytope for some A ∈ Rm×d with full row rank and b ∈ Rm. The objective vector c ∈ Rd is unknown, but it is known a priori to lie in an uncertainty set C ⊂ Rd. Rather than observing c directly, the decision-maker may adaptively choose query directions 
+
+D = {q1, . . . , q l} ⊂ Rd sequentially and observe inner products s(c; D) := ( q⊤ 
+
+> 1
+
+c, . . . , q ⊤ 
+
+> l
+
+c) ∈ Rl, as linear measurements for objective c. Given observations s ∈ Rl, we restrict plausible cost vectors to the fiber 
+
+C(D, s ) := {c′ ∈ C : q⊤ 
+
+> i
+
+c′ = si, i = 1 , . . . , l }.Acquiring objective information is often the bottleneck: observing or predicting the full d-dimensional vector c can be unnecessary when optimal decisions only depend on a few decision-relevant directions. A central geometric message is that decision-making depends on c only through a low-dimensional set of decision-relevant directions. In particular, for open convex C, Bennouna et al. (2025a) provide an exact geometric characterization: a dataset is globally sufficient on C if and only if its span contains the decision-relevant subspace W⋆ (formally introduced in Equation (3)), whose intrinsic dimension d⋆ is often much smaller than the ambient dimension d. However, turning this characterization into an efficient procedure appears difficult; their Algorithm 2 constructs a minimum-size global sufficient dataset by solving a mixed-integer program at each iteration. In a recent work (Bennouna et al., 2026), whether a basis of W⋆ can be constructed by a polynomial-time algorithm is stated as an open problem. In Section 4, we show that computing d⋆ is NP -hard (Theorem 5) and that even the weakest global sufficiency test—deciding whether the empty dataset D = ∅ is globally sufficient—is coNP -hard already when C is an open polyhedron specified in H-representation 1 (Theorem 10). Under P̸ = NP , this gives a negative answer to the open problem in Bennouna et al. (2026): it is computationally hard in general to construct a basis of W⋆ and hence a minimum-size global sufficient dataset. The hardness results establish a computational barrier for worst-case global sufficiency but leave open two important questions: (i) Can we efficiently construct sufficient datasets for individual cost instances? (ii) In a data-driven regime with typical costs, can we learn datasets with good average-case guarantees? We answer both affirmatively, demonstrating a computational-statistical gap between worst-case com-plexity and average-case learnability. Following the data-driven algorithm design paradigm (Gupta and Roughgarden, 2017, 2020; Balcan, 2021), we relax from global (uniform) sufficiency over all c ∈ C to a 
+
+distributional notion: we assume costs are drawn i.i.d. from an unknown distribution Pc supported on C, and aim to learn a dataset ˆD that is sufficient for a fresh draw c ∼ Pc with high probability. We address this via two intermediate steps: (i) a tractable pointwise relaxation for individual instances (answering question (i) above), and (ii) a cumulative learning algorithm with PAC guarantees (answering question (ii)). This leads to a sample-complexity question: 
+
+How many training instances are needed to learn such a ˆD in polynomial time? 
+
+To obtain a polynomial-time learning algorithm at the level of realized cost vector samples, we first introduce pointwise sufficiency : a dataset D is pointwise sufficient at c if every c′ ∈ C (D, s (c; D)) induces the same set of optimal decisions. This relaxation is tractable because it only requires the fiber to lie within one optimality cone rather than distinguishing decisions across all c in C. Under a standard nondegeneracy assumption on X , checking pointwise sufficiency reduces to a geometric containment test that solves at most 
+
+d − m instances of the face-intersection (FI) subproblem for a fixed optimal basis. When C is a polytope given in explicit H-representation or an ellipsoid, each FI call can be solved in polynomial time, yielding an overall polynomial-time routine; see Property 21. In Section 5, we develop an adaptive cutting-plane algorithm (Algorithm 1) that discovers pointwise-sufficient datasets. The key algorithmic innovation is our facet-hit cutting-plane rule: when the containment test fails, we identify the first facet of the optimality cone encountered along the segment joining an interior                  
+
+> 1An H-polyhedron is specified by finitely many linear inequalities, e.g., P={x∈Rd:Hx ≤h}. A polytope is a bounded polyhedron; we use H-polytope when emphasizing an inequality representation of a polytope. An open polyhedron is obtained by replacing non-strict inequalities by strict ones.
+
+2point to the witness of failure. This ensures the queried facet normal is genuinely decision-relevant. A naive approach querying arbitrary violated constraints can fail, as we demonstrate via a counterexample in Example 15. Each query produces a direction linearly independent of previous ones, and the procedure terminates after at most d⋆ queries. In Section 6, in a data-driven regime with i.i.d. costs, we run the pointwise routine cumulatively with warm starts (Algorithm 2) and expand the measurement set only on a small subset of “hard” instances. This yields a realizable stable compression scheme (Hanneke and Kontorovich, 2021) with compression size at most d⋆. Consequently, with probability at least 1 − δ over n training samples, the pointwise-sufficiency failure probability on a fresh draw is at most eO(d⋆/n ) (Theorem 25). This fast rate exploits realizability: our algorithm achieves zero empirical sufficiency loss via the compression framework, contrasting with data-driven projection approaches (Balcan et al., 2024a; Sakaue and Oki, 2024) that control objective value gaps and obtain characteristic eO(1 /√n) rates via uniform convergence. The frameworks are complementary: ours certifies when projections preserve decisions; theirs bound how close projected values are to optimal. In practice, many decision systems repeatedly solve linear programs over a fixed feasible polytope X
+
+while the cost vector c ∈ C varies. Examples include (i) repeated LP with time-varying costs (routing, resource allocation), (ii) contextual linear optimization , where one learns a predictor for c and plugs it into the LP, and (iii) preference-based decision making, where feedback is limited to comparisons or other aggregate signals. This motivates the two-stage pipeline below: • Stage I (Representation Discovery). Learn W⋆ from i.i.d. training instances via adaptive linear queries, together with a distribution-free certificate on the probability of sufficiency failure. • Stage II (Task-Specific Deployment). Use the learned subspace for dimension reduction in repeated LPs, contextual LPs, and preference-based decision making. In Section 7, as an illustration, we integrate this framework into SPO + training for contextual linear optimization by restricting to the discovered decision-relevant subspace. This reduces the dimension parameter appearing in the generalization bound (see Theorem 27). We summarize our main contributions as follows. • Hardness results. Building on the SDD geometry of Bennouna et al. (2025a), we show that computing the intrinsic decision-relevant dimension d⋆ is NP -hard (Theorem 5). We also prove that deciding whether the empty dataset D = ∅ is globally sufficient (in the decision sense) is coNP -hard (Theorem 10); for open convex C, this yields that constructing a minimum-size global SDD is NP - and coNP -hard (Corollary 11). Finally, verifying pointwise sufficiency is coNP -hard in general (Theorem 9). • Per-instance level: finding pointwise SDDs in polynomial time. Under nondegeneracy, we design a facet-hit cutting-plane algorithm (Algorithm 1) that adaptively queries decision-relevant directions. The facet-hit rule ensures each query is linearly independent and lies in W⋆, returning a pointwise-sufficient dataset (Theorem 20) in polynomial time. • Distributional level: learning decision-sufficient representations with fast rates. Warm-starting the pointwise routine over i.i.d. costs (Algorithm 2) yields a realizable stable compression scheme (Hanneke and Kontorovich, 2021) with compression size at most d⋆. This leads to a distribution-free PAC certificate scaling as eO(d⋆/n ) (Theorem 25), matching our lower bound (Theorem 26). The fast rate exploits zero empirical loss and linear independence of decision-relevant queries. • Application to contextual linear optimization. We integrate decision-sufficient representation into predictor training for contextual linear optimization, yielding a compressed prediction model with improved generalization guarantees. In particular, the dimension term in the bound is reduced from d to d⋆
+
+(Theorem 27). 32 Related literature 
+
+Dimension reduction and model compression for LP. Dimension reduction is a classical tool for coping with high-dimensional optimization and learning. Random projections and sketching preserve geometry with high probability (e.g., Johnson–Lindenstrauss (Johnson and Lindenstrauss, 1984); see (Woodruff, 2014)) and are ubiquitous in numerical linear algebra as well as learning-theoretic analyses (Bartlett et al., 2022). For linear programs, random projections can reduce problem size while approximately preserving feasibility and objective values (Vu et al., 2018; Poirion et al., 2023), and Sakaue and Oki (2024) propose data-driven projections with generalization guarantees. In contrast, we seek exact optimizer recovery over a known polytope X by identifying the directions that can change the optimal solution; we quantify the intrinsic decision dimension by d⋆. Our work is most closely related to Bennouna et al. (2025a, 2026), which characterizes global sufficient decision datasets for LP under convex open priors and gives an iterative construction with a mixed-integer program at each step. 
+
+Data-driven algorithm design. Beyond worst-case analysis argues that worst-case complexity can be overly pessimistic and instead advocates structured or distributional models of “relevant” instances (Roughgarden, 2019, 2021). Representative examples include perturbation-resilient instances (Bilu and Linial, 2012), smoothed analysis (Spielman and Teng, 2004), and planted or semi-random models (Blum and Spencer, 1995). Data-driven algorithm design is a principled ML instantiation of this viewpoint, learning an algorithmic object (e.g., an algorithm family or configuration) from i.i.d. samples while retaining provable performance guarantees (Gupta and Roughgarden, 2020; Balcan, 2021; Gupta and Roughgarden, 2017; Balcan et al., 2017, 2024a,b). Under bounded loss, typical results yield uniform-convergence generalization gaps on the order of ˜O(pPdim( A)/n ), and sharper bounds can be obtained via refined complexity notions such as dispersion and “knife-edge” structure (Balcan et al., 2018, 2020). Our setting fits this paradigm by treating the queried directions as the learned object. For our specific problem, we exploit LP geometry to derive a stable compression scheme, yielding fast-rate certificates scaling as eO(d⋆/n ). At a technical level, our geometry-aware cutting-plane viewpoint is also reminiscent of oracle-based frameworks that access constraints through separation (Mhammedi, 2025). 
+
+Compression-based generalization. Compression-based analyses provide distribution-free general-ization and scenario-type certificates, often yielding fast k/n -type rates when the learned object admits a small compression of size k (Valiant, 1984; Littlestone and Warmuth, 1986; Floyd and Warmuth, 1995; Moran and Yehudayoff, 2016; Graepel et al., 2005). In the realizable regime, stable compression can further sharpen logarithmic factors (Bousquet et al., 2020; Hanneke and Kontorovich, 2021). In fully agnostic settings, however, 1/n rates are impossible in general: sharp lower bounds show worst-case rates of order 
+
+Θ p k log( n/k )/n  (Hanneke and Kontorovich, 2019). Our cumulative algorithm in Section 6 fits naturally into this view: each newly queried direction is triggered by a “hard” sample revealing a genuinely new decision-relevant facet, producing a compression set of size at most d⋆ and a fast-rate certificate. 
+
+Polyhedral containment. Our hardness results rely on classical complexity phenomena in polyhedral computation. In particular, deciding containment of an H-polytope in a V -polytope is coNP -complete (Freund and Orlin, 1985; Gritzmann and Klee, 1993). Sum-of-squares certificates provide powerful relaxations for containment questions and yield refined results for structured instances (Kellner and Theobald, 2016). Since pointwise sufficiency can be phrased as a containment statement that a data-consistent slice lies within an optimality region, these results naturally connect to the verification problem studied in our paper. 
+
+Contextual optimization. Our paper is also motivated by decision-focused (predict-then-optimize) learning, where one learns predictive models to support downstream optimization (Elmachtoub and Grigas, 2022; El Balghiti et al., 2023); see also the survey (Sadana et al., 2025). Beyond the batch setting, recent work studies online and active learning variants of contextual linear optimization, including margin-based active learning (Liu et al., 2023) and online contextual decision-making with SPO-type surrogates (Liu and Grigas, 2022); for background on active learning, see Dasgupta (2011); Hanneke (2014). Bandit/partial-feedback 4formulations are studied in Hu et al. (2024), and related safe-exploration objectives appear in safe linear bandits over unknown polytopes (Gangrade et al., 2024). On the statistical side, El Balghiti et al. (2023) derive uniform generalization bounds for the SPO loss via the Natarajan dimension of the induced decision class; in the polyhedral case, their bounds depend only logarithmically on the number of extreme points, yielding rates on the order of ˜O
+
+p pd log( n|X ∠|)/n 
+
+
+
+for linear predictors. Recent work addresses model misspecification in contextual optimization (Bennouna et al., 2025b) and benign generalization behavior in stochastic linear optimization under quadratically bounded losses (Telgarsky, 2022); see also Schutte et al. (2025) on sufficient proxy representations. 
+
+Active learning and adaptive measurement. Active learning studies how to adaptively acquire information—labels, features, or more general tests—to reduce query cost relative to passive sampling. A central idea is to query only where candidate hypotheses disagree, as formalized by disagreement-based active learning (Hanneke, 2014); see also Dasgupta (2011). Classical work distinguishes sample complexity from label (query) complexity in agnostic active learning (Balcan et al., 2006, 2009). Our per-instance model is closer in spirit to arbitrary-query and experimental-design views of active learning (Kulkarni et al., 1993; Cohn et al., 1996), since we design linear measurements q⊤c of a possibly unknown c. Frameworks accounting for heterogeneous query costs are also related to our measurement budget (Guillory and Bilmes, 2009, 2010). At the intersection with decision-focused learning, Liu et al. (2023) studies margin-based active learning for contextual linear optimization. In contrast, we leverage polyhedral LP geometry: our facet-hit rule queries a violated optimality-cone facet normal, guaranteeing exact decision identification after at most 
+
+d⋆ measurements and enabling a stable-compression view across i.i.d. instances. 
+
+# 3 Preliminaries: Characterizing sufficient datasets via LP geometry 
+
+Recall that the fundamental question we address is: which datasets D are sufficient to solve the LP ? More precisely, when do the observations s(c; D), together with the prior restriction c ∈ C , contain enough information to recover an optimal decision? Following Bennouna et al. (2025a), we adopt a global notion of informativeness in which a single fixed dataset D must work uniformly for all c ∈ C . We now formalize this notion. 
+
+Definition 1 (Global sufficient decision dataset) . A dataset D := {q1, . . . , q l} ⊆ Rd is a sufficient decision dataset (SDD) for the uncertainty set C ⊆ Rd and decision set X if there exists a decision rule bX : Rl →P(X ), where P(X ) denotes the collection of subsets of X , such that 
+
+∀ c ∈ C , bX c⊤q1, . . . , c ⊤ql
+
+ = arg min 
+
+> x∈X
+
+c⊤x. 
+
+To characterize sufficient datasets, we recall a few notions from LP geometry. Let X ∠ denote the set of extreme points of X . For x⋆ ∈ X ∠, define the feasible direction cone F D (x⋆) := {δ ∈ Rd : ∃ε > 
+
+0, x ⋆ + εδ ∈ X } and define the optimality cone Λ( x⋆) := {c ∈ Rd : x⋆ ∈ arg min x∈X c⊤x}.Let D(x⋆) be the set of extreme directions of the polyhedral cone F D (x⋆). For δ ∈ D(x⋆), define the corresponding boundary face F (x⋆, δ ) := Λ( x⋆) ∩ { δ}⊥ = {c ∈ Λ( x⋆) : c⊤δ = 0 }, and the set of relevant extreme directions 
+
+∆( X , C) := 
+
+n
+
+δ ∈ Rd : ∃x⋆ ∈ X ∠, δ ∈ D(x⋆), and F (x⋆, δ ) ∩ C̸ = ∅
+
+o
+
+. (2) Equivalently, δ is relevant if the corresponding boundary face between optimality regions is attainable by some cost in C. For any cost vector c, let X ⋆(c) := arg min x∈X c⊤x denote the (possibly set-valued) set of optimal solutions. For a set C ⊆ Rd, define 
+
+X ⋆(C) := [
+
+> c∈C
+
+ X ⋆(c) ∩ X ∠, dir( X ⋆(C)) := span {x − x′ : x, x ′ ∈ X ⋆(C)}. (3) 5We refer to W⋆ := dir( X ⋆(C)) as the decision-relevant subspace , and set d⋆ := dim( W⋆). The following two results are due to Bennouna et al. (2025a). The first theorem states that global sufficiency is equivalent to spanning all directions along which optimality can change, as formalized by ∆( X , C).
+
+Theorem 2 (Bennouna et al. (2025a), Theorem 1) . Let C be open and convex. A dataset D is an SDD for 
+
+(X , C) if and only if 
+
+∆( X , C) ⊆ span( D).
+
+While ∆( X , C) is defined via faces of optimality cones, the next theorem gives an equivalent character-ization directly in decision space: the span of these relevant directions matches the span of differences of reachable optima .
+
+Theorem 3 (Bennouna et al. (2025a), Theorem 2) . For any convex set C ⊂ Rd,
+
+span ∆( X , C) = dir( X ⋆(C)) .
+
+Combining Theorems 2 and 3 yields the following subspace characterization, which we will use through-out. 
+
+Corollary 4 (Subspace characterization Bennouna et al. (2025a), Corollary 1) . Let C be open and convex. A dataset D is an SDD for (X , C) if and only if 
+
+dir( X ⋆(C)) ⊆ span( D),
+
+hence, the minimal size of global SDD is d⋆.
+
+In particular, the necessity direction of Theorem 2 uses that C is open. Accordingly, any argument or algorithm that invokes this direction requires an openness assumption on C. In contrast, Theorem 3 requires only convexity and applies to both open and closed convex sets. 2
+
+# 4 Hardness and Relaxation 
+
+4.1 Computational hardness. 
+
+The geometric characterizations in Section 3 are information-theoretic in nature: they identify the subspace that any global sufficient dataset must capture. Algorithmically, a natural goal is to compute the minimum size of a global SDD and to construct one. By Corollary 4, when C is open and convex, this minimum size equals the intrinsic decision-relevant dimension d⋆ = dim dir  X ⋆(C). We state informal versions of our hardness results below and provide brief proof sketches to highlight the structure of the reductions; full formal statements and complete proofs are deferred to Appendix A. Our reductions construct highly structured instances: shortest-path flow polytopes with budgeted arc-length perturbations. 
+
+Theorem 5 (Informal) . It is NP -hard to compute the intrinsic decision-relevant dimension d⋆, given as input a polytope X ⊆ Rd and a polyhedral uncertainty set C specified in H-representation. This hardness persists whether C is given as a closed polyhedron or as an open polyhedron.   
+
+> 2This distinction is important: our pointwise-sufficiency algorithms (Section 5) leverage Theorem 3 under a closed convex prior, while the global SDD size characterization requires Cto be open and convex.
+
+6Proof sketch for Theorem 5. We start from 3-SAT and use the PISPP-W+ construction of (Ley and Merkert, 2025, Theorem 3.1). Given a formula φ, the reduction outputs a directed acyclic graph (DAG) together with baseline arc-lengths d, a budget vector κ, a budget B, and a required arc r, defining a budgeted uncertainty set of admissible length vectors c = d + w (with w ∈ QA 
+
+> ≥0
+
+and κ⊤w ≤ B). The formula φ is satisfiable if and only if there exists such a modification w for which some shortest s–t path with respect to d + w contains the required arc r. We then show that deciding the feasibility of the resulting PISPP-W+ instance reduces to checking whether dim dir( X⋆(C)) > dim dir( X⋆r (C)) , where Xr := {x ∈ X : xr = 0 };see (16) . Geometrically, restricting to the face xr = 0 removes a decision-relevant extreme direction if and only if there exists a feasible modification that makes some shortest s–t path use r. For the open set 
+
+Cop , Lemma 32 “opens” the budget via a small topological perturbation without changing the shortest-path structure and thus maintaining the answer. □
+
+When C is open and convex (in particular, for the open polyhedral instances in Theorem 5), combining Corollary 4 and Theorem 5 implies that both computing the size of a minimum global SDD and constructing a minimum global SDD are NP -hard. 
+
+4.2 A relaxation: pointwise sufficient datasets 
+
+The computational hardness of finding minimum global SDDs motivates us to relax the concept to an instance-wise notion: 
+
+Definition 6 (Pointwise sufficient decision dataset) . Fix a (possibly unknown) c ∈ C . A finite query dataset 
+
+D is pointwise sufficient at c if there exists a decision x⋆ ∈ X such that 
+
+x⋆ ∈ X ⋆(c′) ∀ c′ ∈ C  D, s (c; D).
+
+Equivalently, the data-consistent fiber C(D, s (c; D)) is contained in a single optimality region of X .
+
+Remark 7. Since c ∈ C (D, s (c; D)) , Definition 6 can equivalently be stated as: D is pointwise sufficient at c
+
+if there exists x⋆ ∈ X ⋆(c) such that x⋆ remains optimal for every c′ ∈ C that produces the same measurements, i.e., s(c′; D) = s(c; D). This parallels the structure of Definition 1 but applies to a single cost vector rather than all c ∈ C .
+
+The following basic properties of pointwise sufficiency follow immediately from the definition. 
+
+Property 8. (i) Monotonicity. If D is pointwise sufficient at c and D′ ⊇ D , then D′ is also pointwise sufficient at c, since C(D′, s (c; D′)) ⊆ C (D, s (c; D)) . (ii) Global ⇒ pointwise. If D is an SDD for (X , C), then D is pointwise sufficient at every c ∈ C .Proof of Property 8(i). Let D ⊆ D ′ and fix c ∈ C . Write s := s(c; D) and s′ := s(c; D′). By the definition of the fiber, 
+
+C(D′, s ′) = {c′ ∈ C : q⊤c′ = q⊤c ∀q ∈ D ′}.
+
+Since D ⊆ D ′, any c′ ∈ C (D′, s ′) satisfies q⊤c′ = q⊤c for all q ∈ D , and hence c′ ∈ C (D, s ). Therefore 
+
+C(D′, s ′) ⊆ C (D, s ).Now assume D is pointwise sufficient at c. Then there exists x⋆ ∈ X such that x⋆ ∈ X ⋆(c′′ ) for all 
+
+c′′ ∈ C (D, s ). By the containment above, the same x⋆ is optimal for all c′′ ∈ C (D′, s ′), so D′ is also pointwise sufficient at c.
+
+Proof of Property 8(ii). Let D be a global SDD for (X , C) in the sense of Definition 1. By definition, there exists a mapping bX : R|D| → P (X ) such that for every c ∈ C ,
+
+bX s(c; D) = X ⋆(c).
+
+7Fix any c ∈ C and write s := s(c; D). For any c′ ∈ C (D, s ) we have s(c′; D) = s by definition of the fiber, and therefore bX(s) = bX s(c′; D) = X ⋆(c′).
+
+In particular, bX(s) is nonempty, and any choice of x⋆ ∈ bX(s) satisfies x⋆ ∈ X ⋆(c′) for all c′ ∈ C (D, s ).Thus the single decision x⋆ is optimal for all costs in the fiber, meaning that D is pointwise sufficient at c in the sense of Definition 6. A natural verification problem is: given (X , C), a dataset D, and a cost vector c ∈ C , decide whether 
+
+s(c; D) already suffices to determine an optimal decision. The next theorem shows that even the verification problem is intractable in full generality. 
+
+Theorem 9 (Informal) . It is coNP -hard to decide, given a bounded polytope X ⊆ Rd, a polyhedral uncertainty set C ⊆ Rd specified in H-representation, a dataset D, and a cost vector c ∈ C , whether D is pointwise sufficient at c.
+
+Proof sketch for Theorem 9. We reduce from the classical H-in-V polytope containment problem. 3 This problem is coNP -complete (Freund and Orlin, 1985; Gritzmann and Klee, 1993) even for the restricted family 
+
+P = [ −1, 1] d ⊆ Q with 0 ∈ int( Q). Given such an instance, we construct a bounded standard-form polytope 
+
+X = {z : Az = b, z ≥ 0} with a distinguished vertex x0 whose optimality cone encodes Q via a lifting: 
+
+(( y, 1) , 0, 0) ∈ Λ( x0) ⇐⇒ (y, 1) ∈ cone {(vi, 1) }Mi=1 ⇐⇒ y ∈ Q. 
+
+We then set C := {(( y, 1) , 0, 0) : y ∈ P } and take D = ∅, so the data-consistent fiber equals all of C. Since 
+
+x0 is the unique minimizer for a reference cost c0 = ((0 , 1) , 0, 0) , pointwise sufficiency at c0 reduces to the containment C ⊆ Λ( x0), which holds if and only if P ⊆ Q. See Appendix A.2. □
+
+The same containment-based construction can be strengthened to show that even the weakest global 
+
+problem—deciding whether no data (D = ∅) already suffices—is coNP -hard under an open, full-dimensional polyhedral prior, as stated next. 
+
+Theorem 10 (Informal) . It is coNP -hard to decide whether the empty dataset D = ∅ is globally sufficient for (X , C), when X ⊆ Rd is a bounded polytope and C is an open polyhedron specified in H-representation. Moreover, computing the intrinsic decision-relevant dimension d⋆ is coNP -hard. 
+
+Proof sketch for Theorem 10. Starting from the same containment instance, we replace the low-dimensional slice prior in the pointwise reduction by an open, full-dimensional polyhedron Cop constructed through an 
+
+effective-cost linear map T . The LP over X is designed so that its objective depends on c only through 
+
+T (c). We choose an open polyhedron Bop of effective costs with strictly positive last coordinate and set 
+
+Cop := {c : T (c) ∈ Bop }. In the YES case P ⊆ Q, openness implies Bop ⊆ int cone {(vi, 1) }Mi=1 , making 
+
+x0 the unique optimizer for every c ∈ C op and hence allowing a decoder with |D| = 0 . In the NO case, Bop 
+
+contains an effective cost outside cone {(vi, 1) }Mi=1 , producing two costs in Cop with different optimizers and ruling out zero-query global sufficiency. See Appendix A.3 for details. □
+
+Consequently, computing the minimum size of global SDDs and outputting such a dataset are coNP -hard. Combining Theorems 5 and 10 with Corollary 4 yields the following final statement. 
+
+Corollary 11. For convex and open C, constructing a minimum-size global SDD and computing its minimum size are both NP -hard and coNP -hard.                
+
+> 3AV-polytope is a polytope specified by its vertices (a vertex representation), e.g., Q= conv {v1, . . . , v M}. The H-in-V
+> containment problem asks whether P⊆Qgiven (H, h )and {vj}Mj=1 .
+
+8The coNP -hardness in Theorem 9 arises from degenerate LP geometry, where a single optimal extreme point may correspond to many bases, and its optimality region can have a complicated representation. Going forward, we adopt a standard nondegeneracy assumption to recover tractability. 
+
+Assumption 12. The polytope X = {x ∈ Rd : Ax = b, x ≥ 0} is nondegenerate: every extreme point 
+
+x⋆ ∈ X ∠ has exactly m strictly positive components. 
+
+Under Assumption 12, each extreme point has a single associated optimality cone that admits a simple linear inequality description. This makes it possible to test whether a fiber C(D, s ) is contained in a candidate cone by solving only a polynomial number of LPs (as we do in Algorithm 1). In contrast, without Assumption 12, even deciding pointwise sufficiency is coNP -hard by Theorem 9. 
+
+# 5 A Tractable Algorithm that Finds Pointwise SDD 
+
+In this section, we present an adaptive cutting-plane routine that, for a fixed (and possibly unknown) cost vector c ∈ C , sequentially queries inner products q⊤c and outputs a dataset that is pointwise sufficient at c.The routine maintains the data-consistent fiber Ck = C(D, s (c; D)) and repeatedly checks whether Ck lies inside the optimality cone of a single LP basis; when containment fails, it queries the normal of a reachable violated facet to shrink the fiber. Under Assumption 12, each iteration solves one LP over X and at most 
+
+d − m convex minimization subproblems over the current fiber. Moreover, every new queried direction is decision-relevant (lies in dir( X ⋆(C)) ) and is linearly independent of the previous queries; consequently, the procedure makes at most d⋆ queries. Unlike the global SDD characterization in Section 3, pointwise sufficiency is a containment statement about a single fiber C(D, s (c; D)) and does not require C to be open. Accordingly, the only structural assumption we use in this section for the prior set is convexity; we take it closed only for algorithmic convenience (Remark 14). Remaining proofs for this section appear in Appendix B. 
+
+Assumption 13. The uncertainty set C ⊆ Rd is convex. 
+
+5.1 Pointwise sufficiency as optimality-cone containment 
+
+Fix a basis B ⊆ { 1, . . . , d } with |B| = m and let N denote its complement. Write A = [ AB AN ], and let Aj be the jth column of A. The corresponding basic feasible solution is x(B) with xN (B) = 0 and 
+
+xB (B) = A−1 
+
+> B
+
+b. For each nonbasic index j ∈ N , let δ(B, j ) ∈ Rd denote the standard edge direction obtained by increasing xj from 0, i.e., δN (B, j ) = ej and δB (B, j ) = −A−1 
+
+> B
+
+Aj .Under Assumption 12, feasible bases are in one-to-one correspondence with vertices of X . Moreover, for any feasible basis B, the corresponding x(B) is optimal for a cost vector c if and only if all reduced costs (with respect to B) are nonnegative. Equivalently, the optimality region of x(B) is the polyhedral cone 
+
+Λ( B) := {c ∈ Rd : c⊤δ(B, j ) ≥ 0 ∀j ∈ N }. (4) After querying directions q1, . . . , q k, let Qk = [ q1 · · · qk] ∈ Rd×k and sk = Q⊤ 
+
+> k
+
+c. The current fiber is 
+
+Ck := {c′ ∈ C : Q⊤ 
+
+> k
+
+c′ = sk}. By Definition 6, the dataset is pointwise sufficient at c once there exists a basis 
+
+B such that Ck ⊆ Λ( B). Using (4) , this containment reduces to checking that min c′∈C k (c′)⊤δ(B, j ) ≥ 0 for all j ∈ N , which motivates the face-intersection subproblem below. 
+
+5.2 The face-intersection (FI) subproblem 
+
+For a direction δ ∈ Rd and a fiber Ck, define the face-intersection subproblem FI( δ; Ck) as 
+
+mk(δ) := min 
+
+> c′∈C k
+
+(c′)⊤δ, cout  
+
+> k
+
+(δ) ∈ arg min 
+
+> c′∈C k
+
+(c′)⊤δ. (5) 9Geometrically, FI( δ; Ck) checks whether Ck intersects the open halfspace {c : c⊤δ < 0}. If mk(δ) < 0,the minimizer cout  
+
+> k
+
+(δ) certifies that Ck̸ ⊆ { c : c⊤δ ≥ 0}. Under Assumption 13, each call to FI( δ; Ck) is a convex optimization problem. When C is polyhedral it is an LP; when C is an ellipsoid, FI( δ; Ck) admits a closed form (Proposition 37), which can speed up implementations. 
+
+Remark 14 (Closedness is not necessary) . Pointwise sufficiency and Algorithm 1 interact with the prior only through containment tests of the form Ck ⊆ Λ( B). Since Λ( B) is closed, Ck ⊆ Λ( B) holds iff cl( Ck) ⊆ Λ( B).Thus, for these containment tests, one may replace a (possibly nonclosed) fiber by its closure without changing any certification outcome. Moreover, any violating witness cout  
+
+> j
+
+∈ C k \ Λ( B) (whenever it exists) remains valid after this replacement. 
+
+5.3 A facet-hit cutting-plane algorithm 
+
+Algorithm 1 A cutting-plane algorithm that finds pointwise SDD 
+
+Input: LP data (A, b ), prior set C, a cost vector c ∈ C , and an initial dataset Dinit ⊂ Rd. 
+
+> 1:
+
+Initialize D ← D init . 
+
+> 2:
+
+Let k ← |D| ; form Qk = [ q1 · · · qk] from D (any fixed order) and set sk ← Q⊤ 
+
+> k
+
+c. 
+
+> 3:
+
+while true do  
+
+> 4:
+
+Set Ck := {c′ ∈ C : Q⊤ 
+
+> k
+
+c′ = sk} and set cin ← c. 
+
+> 5:
+
+Solve min {(cin )⊤x : Ax = b, x ≥ 0} and obtain an optimal basis B with nonbasis N . 
+
+> 6:
+
+(Containment test via face-intersection subproblem) For each j ∈ N , form δj := δ(B, j ) and compute 
+
+mj := min 
+
+> c′∈C k
+
+(c′)⊤δj , cout  
+
+> j
+
+∈ arg min 
+
+> c′∈C k
+
+(c′)⊤δj . (FI( δj ; Ck)) 
+
+> 7:
+
+Let j0 ∈ arg min j∈N mj , set mmin := mj0 , cout := cout  
+
+> j0
+
+. 
+
+> 8:
+
+if mmin ≥ 0 then  
+
+> 9:
+
+Return dataset D and certificate basis B (decision x(B)); break . 
+
+> 10:
+
+else  
+
+> 11:
+
+(Facet-hit rule) For each j ∈ N with (cout )⊤δj < 0, set αj := (cin )⊤δj  
+
+> (cin )⊤δj−(cout )⊤δj
+
+∈ [0 , 1) . 
+
+> 12:
+
+Let α⋆ := min αj and pick any j⋆ ∈ arg min αj . 
+
+> 13:
+
+Set qk+1 := δj⋆ and set σk+1 ← q⊤
+
+> k+1
+
+c. 
+
+> 14:
+
+Update: D ← D ∪ { qk+1 }, Qk+1 ← [Qk qk+1 ], sk+1 ← (s⊤ 
+
+> k
+
+, σ k+1 )⊤, k ← k + 1 . 
+
+> 15:
+
+end if  
+
+> 16:
+
+end while 
+
+Algorithm 1 gives the full procedure. At each iteration it anchors at the realized cost vector c (i.e., we take cin := c ∈ C k), solves the LP under cin to obtain an optimal vertex solution x(B); by Assumption 12, this vertex uniquely determines the corresponding feasible basis B, and tests whether every cost vector in the fiber is contained in the corresponding cone Λ( B). This is done by evaluating each facet inequality via the face-intersection subproblem. If the minimum violation is nonnegative, the fiber is fully inside Λ( B) and pointwise sufficiency holds. Otherwise, a witness point cout ∈ C k may violate several facet inequalities of 
+
+Λ( B).The facet-hit rule identifies the first facet of Λ( B) encountered along the segment [cin , c out ], and thus guarantees the existence of a boundary point chit ∈ C k ∩ Λ( B) with (chit )⊤δ(B, j ⋆) = 0 (Lemma 18), which is what makes the new query direction decision-relevant. A concrete counterexample showing that an arbitrary violated facet can fail is given below: 
+
+Example 15 (A counterexample motivating the facet-hit rule) . Let X = [0 , 1] 2 and consider the vertex 
+
+x = (0 , 0) , whose optimality cone is Λ = {c ∈ R2 : c1 ≥ 0, c 2 ≥ 0}, with facet hyperplanes c1 = 0 and 
+
+10 c2 = 0 . Let ε ∈ (0 , 1) and define cin = (1 , ε ) and cout = ( −1, −1) . Consider any convex fiber Ck whose intersection with Λ is the segment conv {cin , c out } (e.g., take Ck to be exactly this segment). Then cout violates both inequalities c1 ≥ 0 and c2 ≥ 0. Along the segment cα = (1 − α)cin + αc out , the coordinate c2,α hits 
+
+0 at a very small α while c1,α is still strictly positive; thus Ck ∩ Λ reaches the boundary only through the facet c2 = 0 . In contrast, cα intersects c1 = 0 only after c2,α has already become negative, i.e., outside Λ.Therefore, querying the normal of the “wrong” violated facet ( c1 = 0 ) does not correspond to a boundary that the fiber can reach while keeping x optimal. The facet-hit rule avoids this issue by selecting the first facet reached from an interior anchor point. 
+
+Remark 16 (Picking arbitrary cin ∈ C k). Algorithm 1 is stated in a fixed-anchor form (we set cin := c at each iteration). The same facet-hit cutting-plane idea and all results in this section also apply when the cost vector c is unknown and one only has oracle access to inner products q⊤c: in that case, line 4 may pick any 
+
+anchor cin ∈ C k, and then proceed identically. 
+
+Remark 17 (A deterministic tie-breaking convention) . Throughout Algorithms 1, whenever a choice is non-unique, we can further assume that ties are resolved according to a fixed deterministic rule. 
+
+5.4 Correctness and basic properties 
+
+We now record a few basic facts about Algorithm 1. The next two lemmas are technical but important for our later analysis in Section 6: Lemma 18 shows that every new queried direction is genuinely decision-relevant. Lemma 19 guarantees that the dataset grows with linearly independent directions. Theorem 20 shows the algorithm terminates and indeed certifies pointwise sufficiency. 
+
+Lemma 18. In Algorithm 1, any newly added direction qk+1 lies in ∆( X , C) ⊆ dir( X ⋆(C)) .Proof. Because B is an optimal basis for cin ∈ C k, we have cin ∈ Λ( B), i.e. (cin )⊤δ(B, j ) ≥ 0 for all 
+
+j ∈ N . Since we are in the Else branch, there exists cout ∈ C k with (cout )⊤δ(B, j 0) = mmin < 0 for at least one j0. Define the segment cα := (1 − α)cin + αc out , α ∈ [0 , 1] . Because Ck is convex, cα ∈ C k for all 
+
+α ∈ [0 , 1] .By construction of α⋆ and j⋆, we have (cα⋆ )⊤δ(B, j ⋆) = 0 and (cα⋆ )⊤δ(B, j ) ≥ 0 for all j ∈ N
+
+(first-hit property). Thus chit := cα⋆ ∈ C k ∩ Λ( B) and lies on the face Λ( B) ∩ { δ(B, j ⋆)}⊥.By Equation (2) (with x⋆ = x(B) and C = Ck), this implies δ(B, j ⋆) ∈ ∆( X , Ck). Since Ck ⊆ C , we also have ∆( X , Ck) ⊆ ∆( X , C). Finally, by Theorem 3, 
+
+δ(B, j ⋆) ∈ span ∆( X , C) = dir( X ⋆(C)) ,
+
+and in particular δ(B, j ⋆) ∈ dir( X ⋆(C)) .
+
+Lemma 19. In Algorithm 1, the queried directions are linearly independent. In particular, the algorithm makes at most d⋆ queries. Proof. Assume for contradiction that qk+1 ∈ span( Qk). Then (qk+1 )⊤c′ is constant over Ck = {c′ ∈C : Q⊤ 
+
+> k
+
+c′ = sk}. In particular, (qk+1 )⊤cin = ( qk+1 )⊤cout . But cin ∈ Λ( B) implies (qk+1 )⊤cin ≥ 0,while the facet-hit rule guarantees (qk+1 )⊤cout < 0. This contradiction shows qk+1 /∈ span( Qk), and therefore rank( Qk+1 ) = rank( Qk) + 1 . Moreover, since d⋆ = dim(dir( X ⋆(C))) and qk+1 ∈ dir( X ⋆(C)) 
+
+by Lemma 18, the algorithm makes at most d⋆ queries. 
+
+Theorem 20 (Correctness) . Algorithm 1 terminates after at most d⋆ + 1 iterations and returns a dataset D
+
+that is pointwise sufficient at the (possibly unknown) c.
+
+11 Proof. At termination we have mmin ≥ 0, hence for every j ∈ N ,
+
+min 
+
+> c′∈C k
+
+(c′)⊤δ(B, j ) ≥ 0 ⇒ (c′)⊤δ(B, j ) ≥ 0 ∀c′ ∈ C k.
+
+By (4) , this implies Ck ⊆ Λ( B). Therefore the fixed decision x(B) is optimal for every c′ ∈ C k =
+
+C(D, s (c; D)) , so D is pointwise sufficient at c.By Lemma 19, the algorithm makes at most d⋆ new queries. Since each non-terminating iteration adds exactly one new query direction, the while loop executes at most d⋆ + 1 iterations. 
+
+Property 21. Assume that C is either (i) a polytope given in H-representation, or (ii) an ellipsoid. Then Algorithm 1 can be implemented to run in time polynomial in the input size. In particular, it makes at most d⋆
+
+oracle queries of the form q⊤c and solves at most (d⋆ + 1) LPs over X and (d⋆ + 1)( d − m) face-intersection subproblems (LPs in case (i), and closed form in case (ii)). 
+
+# 6 Learning from Distributional Data 
+
+Section 5 constructs a pointwise-sufficient query set for a single cost vector c. We now move to a data-driven regime in which the LP (1) is solved repeatedly with random c ∼ Pc supported on C, and we observe i.i.d. samples c1, . . . , c n. Our goal is to learn a compressed, decision-sufficient representation : a small set of query directions that are pointwise sufficient for a fresh draw from Pc with high probability, together with a 
+
+distribution-free certificate on its failure probability. For a given dataset D as query directions, define the 0–1 sufficiency loss 
+
+ℓ(D, c ) := 1{D is not pointwise sufficient at c}. (6) We aim to output a dataset D with small risk R(D) := Pc∼Pc [ℓ(D, c ) = 1] .
+
+6.1 A cumulative algorithm 
+
+We now run the pointwise cutting-plane routine sequentially on each training sample ci and accumulate the queried directions. Algorithm 2 initializes with an empty dataset and, for i = 1 , . . . , n , invokes Algorithm 1 on ci using the current dataset as a warm start. If ci is already certified by the current dataset, nothing changes; otherwise, new directions are added until ci becomes pointwise sufficient. We call an index i hard if processing ci adds at least one new direction, i.e., Di̸ = Di−1.
+
+Algorithm 2 Learning sufficient decision datasets over samples                                             
+
+> Input: Prior C, LP data (A, b ), i.i.d. samples c1, . . . , c n(via oracle access to q⊤ci).
+> 1: Initialize dataset D0← ∅ , hard index set T← ∅ .
+> 2: for i= 1 to ndo
+> 3: Run Algorithm 1 on ciwith initialization Dinit =Di−1. Let the returned dataset be Di.
+> 4: if Di̸=Di−1then
+> 5: Mark ias hard: T←T∪ { i}.
+> 6: end if
+> 7: end for
+> 8: Return final dataset Dnand hard set T.
+
+The next three lemmas formalize the learning-theoretic structure underlying this cumulative procedure. Together, they show that Algorithm 2 induces a stable, realizable sample compression scheme (Hanneke and Kontorovich, 2021, Definitions 7–8) of compression size at most d⋆. This is the key mechanism we use in the next subsection to obtain a distribution-free fast-rate certificate on the true failure probability 
+
+R(Dn) = Pr c∼Pc [ℓ(Dn, c ) = 1] .12 Lemma 22 (Realizability) . Algorithm 2 returns Dn with ℓ(Dn, c i) = 0 for all i = 1 , . . . , n .Proof. When processing ci, the inner run of Algorithm 1 certifies pointwise sufficiency for ci, so ℓ(Di, c i) = 0. For t > i , the cumulative procedure only enlarges the dataset, Dt ⊇ D i, and Property 8(i) implies 
+
+ℓ(Dt, c i) = 0 for all later t, hence also at t = n.
+
+Lemma 23 (Stability) . The final dataset Dn returned by Algorithm 2 is fully determined by the compressed subsequence (ci)i∈T , independent of the remaining samples. Proof. By the deterministic tie-breaking convention (Remark 17), Algorithm 1 defines a deterministic update map, and hence Algorithm 2 is a deterministic function of the sample sequence. In Algorithm 2, the dataset only changes at indices in T by definition. Removing an index t / ∈ T
+
+removes an iteration that would have run Algorithm 1 with initialization Dt−1 and returned the same dataset 
+
+Dt = Dt−1. Therefore, deleting all non-hard iterations leaves the dataset entering each hard iteration unchanged, and thus reproduces the same sequence of dataset updates and the same final dataset. 
+
+Lemma 24 (Compression size bound) . Under Assumption 12, |T | ≤ |D n| ≤ d⋆.Proof. By Lemma 19, each time Algorithm 1 appends a new query, that direction is linearly independent of the previously queried directions in that run. Since Algorithm 2 warm-starts each run at Di−1, this implies by induction over i = 1 , . . . , n that the cumulative datasets Di remain linearly independent. By definition, i ∈ T implies Di̸ = Di−1, hence at least one new independent direction was added while processing ci, so |T | ≤ |D n|.Finally, by Lemma 18, every query direction that Algorithm 1 can append lies in dir( X ⋆(C)) . Since Dn
+
+is the union of all appended directions across the cumulative run, we have Dn ⊆ dir( X ⋆(C)) . Therefore, linear independence yields |D n| = dim span( Dn) ≤ dim dir( X ⋆(C)) = d⋆.
+
+6.2 A distribution-free certificate via stable compression 
+
+We can now invoke the clean stable-compression generalization bound of Hanneke and Kontorovich (2021, Corollary 11) to certify the true failure probability R(Dn) = Pc∼Pc [ℓ(Dn, c ) = 1] . For an alternative viewpoint, see Campi and Garatti, 2023; Paccagnan et al., 2025. 
+
+Theorem 25 (Certificate via stable compression) . For any δ ∈ (0 , 1) , with probability at least 1 − δ over the draw of c1, . . . , c n, the output (Dn, T ) of Algorithm 2 satisfies 
+
+R(Dn) ≤ 4
+
+n
+
+
+
+6|T | + ln eδ
+
+
+
+≤ 4
+
+n
+
+
+
+6d⋆ + ln eδ
+
+
+
+, (7) 
+
+where the second inequality uses |T | ≤ d⋆ from Lemma 24. Proof. We apply the stable sample compression bound of Hanneke and Kontorovich (2021, Corollary 11). To be specific, we view any queried dataset D as inducing a binary prediction rule hD : C → { 0, 1}
+
+defined by hD(c) := ℓ(D, c ) ∈ { 0, 1}. Thus R(D) = Pr C∼Pc [hD(C) = 1] = Pr C∼Pc [ℓ(D, C ) = 1] is exactly the associated 0–1 risk. Equivalently, one may regard this as a supervised distribution over (C, Y )
+
+with C ∼ Pc and Y = 0 almost surely. Let S = ( c1, . . . , c n) be the training sequence and let (Dn, T ) be the output of Algorithm 2 on S. Define a compression function κ by letting κ(S) be the subsequence of hard samples (ci)i∈T (in their original order). Define a reconstruction function ρ that maps any subsequence S′ to the prediction rule hD′ induced by the final dataset D′ returned by running Algorithm 2 on S′.By Lemma 23, running Algorithm 2 on κ(S) reproduces the same final dataset Dn, so ρ(κ(S)) = hDn .Moreover, Lemma 23 also implies the stability property of Hanneke and Kontorovich (2021, Definition 8): 13 removing any subset of the non-hard samples (i.e., elements of S \ κ(S)) does not affect the reconstructed output. Lemma 22 gives ℓ(Dn, c i) = 0 for all i = 1 , . . . , n , i.e., the empirical 0–1 risk of ρ(κ(S)) = hDn on 
+
+S is zero. Apply Corollary 11 of Hanneke and Kontorovich, 2021, with probability at least 1 − δ over the draw of S ∼ P nc ,
+
+R(Dn) = R(hDn ) = R(ρ(κ(S))) ≤ 4
+
+n
+
+
+
+6|κ(S)| + ln eδ
+
+
+
+= 4
+
+n
+
+
+
+6|T | + ln eδ
+
+
+
+.
+
+Finally, Lemma 24 implies |T | ≤ d⋆, which gives the last sentence of Theorem 25. Equation (7) gives the fast-rate certificate R(Dn) ≤ O (d⋆ + ln(1 /δ )) /n . Recent data-driven projection approaches for LPs learn a low-dimensional embedding that preserves feasibility and objective values approximately and then control a downstream error via uniform-convergence-style analyses; this leads to the characteristic 1/√n dependence on sample size and complexity terms tied to the pseudo-dimension of the learned projection family (Balcan et al., 2024a; Sakaue and Oki, 2024). Our guarantee is complementary. We target decision sufficiency (a binary property) and exploit polyhedral geometry to ensure only decision-relevant directions can ever be queried. This guarantees a stable compression scheme, yielding eO(d⋆/n )
+
+certificates that depend on the intrinsic dimension d⋆. This fast rate is also characteristic of realizability; in agnostic settings where zero empirical loss is unattainable, compression-based methods are subject to 
+
+Ω p k log( n/k )/n  lower bounds (Hanneke and Kontorovich, 2019), where k is the compression size. Finally, it is natural to ask whether the dependence on d⋆ and n can be improved. The next theorem shows that, at least for the concrete cumulative procedure in Algorithm 2, the fast-rate certificate is tight up to constants: one needs n = Ω( d⋆/ε ) samples to drive the pointwise-sufficiency failure probability below ε
+
+with constant confidence. 
+
+Theorem 26. Fix any integer d⋆ ≥ 2 and any ε ∈ (0 , 1/4) . There exist an ambient dimension d ≥ d⋆, a nondegenerate LP polytope X ⊆ Rd, a convex uncertainty set C ⊆ Rd with dim(dir( X ⋆(C))) = d⋆, and a distribution Pc supported on C such that the following holds. If Dn is the output of Algorithm 2 on n i.i.d. samples from Pc and n ≤ d⋆−18ε , then P(R(Dn) > ε ) ≥ 12 .
+
+Proof of Theorem 26 and additional technical details appear in Appendix C. At a high level, the proof follows the classical “rare-types” construction used to obtain lower bounds for realizable sample-compression schemes (Littlestone and Warmuth, 1986). However, we cannot simply import a generic compression lower bound as a black box, because here the compression map is not arbitrary: it must arise from LP optimality geometry through Algorithm 1. Accordingly, we explicitly construct a linear program, a convex prior set C
+
+with dim(dir( X ⋆(C))) = d⋆, and a distribution Pc over c such that each rare event forces the discovery of a distinct decision-relevant direction. 
+
+# 7 Application: Model Compression for Contextual Linear Optimization 
+
+In this section, we illustrate how decision-sufficient representations yield a principled model-compression guarantee for contextual linear optimization (CLO). Let (ξ, c ) ∼ P , where ξ ∈ Ξ ⊆ Rp is a context and 
+
+c ∈ C ⊆ Rd (a.s.) is the cost vector of a downstream linear program over a known bounded polytope X ⊆ Rd.We assume that C is convex. Let Pc denote the marginal distribution of c. The goal in CLO is to train a predictor f : Ξ → Rd from contextual data so that the induced plug-in decisions x⋆(f (ξ)) achieve low out-of-sample loss. Throughout, we fix a deterministic oracle x⋆ : Rd → X ∠ such that x⋆(v) ∈ arg min x∈X v⊤x
+
+for all v (e.g., with lexicographic tie-breaking rule). 14 Ellipsoidal prior with a canonical lifting map. Throughout this section, we specialize the prior set C to an ellipsoid C := {c ∈ Rd : ( c − c0)⊤Σ−1(c − c0) ≤ 1}, for some Σ ≻ 0, c 0 ∈ Rd. Let W ⊆ Rd be any t-dimensional subspace with orthonormal basis U ∈ Rd×t. We define the lifting matrix LU := Σ U (U ⊤ΣU )−1,and the corresponding canonical lifting map (Appendix D.1) 
+
+lift U (s) := c0 + LU s, s ∈ Rt. (8) The lifting map is introduced for a simple but important reason: To use such a prediction in the original optimization problem, we must map it back to a full cost vector in Rd. When C is not centered at the origin, a purely linear compressed predictor would typically have range contained in a linear subspace through the origin and hence may not lie in C. The canonical lifting map provides a principled way to “complete” a low-dimensional coordinate into a cost vector that is feasible for the prior set C.
+
+Two-stage pipeline. Our deployment follows a two-stage pipeline that separates decision-sufficient repre-sentations from predictor training. In Stage I , we construct a dataset ˆD that is decision-sufficient on the prior set C, and then form the induced subspace ˆW := span( ˆD) with orthonormal basis ˆU . In Stage II , we draw independent contextual samples S := {(ξi, c i)}ni=1 ∼ P and train a predictor that first predicts a coordinate in the learned subspace ˆW .To highlight the role of the decision-relevant subspace, we first analyze Stage II under an idealized assumption that Stage I has recovered the global decision-relevant subspace. Concretely, let D be a minimal-size global sufficient dataset on C and define W⋆ := span( D) with intrinsic dimension d⋆ := dim( W⋆).Let U⋆ ∈ Rd×d⋆
+
+be an orthonormal basis for W⋆. In Section 7.3, we then show how to implement Stage I from contextual samples (ξ, c ) via conditional-mean regression and Algorithm 2, yielding an additional representation-estimation term. 
+
+7.1 SPO training in a decision-sufficient subspace 
+
+Given a predictor ˆc = f (ξ), the plug-in decision is x⋆(ˆ c) and the SPO loss is ℓSPO (ˆ c, c ) := c⊤x⋆(ˆ c) −
+
+c⊤x⋆(c) ≥ 0. The corresponding SPO risk of a predictor f : Ξ → Rd is RSPO (f ) := E(ξ,c )∼P
+
+ℓSPO (f (ξ), c ) =
+
+E(ξ,c )∼P
+
+c⊤x⋆(f (ξ)) − c⊤x⋆(c). In practice, given i.i.d. samples S = {(ξi, c i)}ni=1 in Stage II, we train θ by minimizing either the empirical SPO risk ˆRSPO (f ) := 1
+
+> n
+
+Pni=1 ℓSPO (f (ξi), c i) or its con-vex surrogate ˆRSPO+ (f ) := 1
+
+> n
+
+Pni=1 ℓSPO+ (f (ξi), c i). Following Elmachtoub and Grigas (2022), the convex surrogate ℓSPO+ (ˆ c, c ) := max x∈X (c − 2ˆ c)⊤x + 2ˆ c⊤x⋆(c) − c⊤x⋆(c). Let x0 = x⋆(c) and let 
+
+x1 ∈ arg max x∈X (c − 2ˆ c)⊤x, equivalently x1 = x⋆(2ˆ c − c). By Danskin’s theorem, 
+
+2( x0 − x1) ∈ ∂ˆc ℓSPO+ (ˆ c, c ), (9) so each stochastic subgradient step requires at most two oracle calls, at c and 2ˆ c − c. Focusing on the decision-sufficient subspace, one can parametrize a cost predictor by first predicting a d⋆-dimensional centered coordinate gθ : Ξ → Rd⋆
+
+and then lifting it back to Rd via 
+
+ˆcθ(ξ) = lift U⋆ (gθ(ξ)) = c0 + LU⋆ gθ(ξ), LU⋆ := Σ U⋆(U ⊤ 
+
+> ⋆
+
+ΣU⋆)−1.
+
+For linear coordinate models of the form gθ(ξ) = Bθξ with Bθ ∈ Rd⋆×p, this reduces the number of trainable parameters from dp to d⋆p. Composing (9) with the affine lifting map and applying the subgradient chain rule yields a valid update in the compressed coordinates: for any choice of v ∈ ∂ˆc ℓSPO+ (ˆ cθ(ξ), c ), the linearity of the lifting map implies L⊤ 
+
+> U⋆
+
+v ∈ ∂g ℓSPO+ (c0 + LU⋆ g, c ) g=gθ (ξ). If gθ is differentiable in θ, then 
+
+(∇θgθ(ξ)) ⊤L⊤ 
+
+> U⋆
+
+v ∈ ∂θ ℓSPO+ (ˆ cθ(ξ), c ), v := 2  x⋆(c) − x⋆ 2( c0 + LU⋆ gθ(ξ)) − c .
+
+For the linear coordinate model gθ(ξ) = Bθξ, a valid stochastic subgradient for Bθ at sample (ξ, c ) is 
+
+(L⊤ 
+
+> U⋆
+
+v) ξ⊤. Algorithm 3 summarizes the resulting Stage II training routine. 15 Algorithm 3 Compressed SPO + training (Stage II) 
+
+Input: Compressed dataset ˆD, basis U ∈ Rd×t for ˆW = span( ˆD), stepsizes {ηk}k≥0 
+
+> 1:
+
+Compute LU ← ΣU (U ⊤ΣU )−1 and define lift U (s) = c0 + LU s 
+
+> 2:
+
+for k = 0 , 1, 2, . . . do  
+
+> 3:
+
+Sample (ξk, c k) uniformly from S 
+
+> 4:
+
+Predict a centered coordinate in Rt: ˆsk ← gθ(ξk) 
+
+> 5:
+
+Lift to Rd: ˆck ← lift U (ˆ sk) = c0 + LU ˆsk 
+
+> 6:
+
+x0 ← x⋆(ck), x1 ← x⋆(2ˆ ck − ck) 
+
+> 7:
+
+vk ← 2( x0 − x1) 
+
+> 8:
+
+θ ← θ − ηk(∇θgθ(ξk)) ⊤L⊤ 
+
+> U
+
+vk 
+
+> 9:
+
+end for 
+
+7.2 Improved generalization bound 
+
+Consider the compressed affine-linear hypothesis class HU⋆,d ⋆ := {fB (ξ) = c0 + LU⋆ Bξ : B ∈ Rd⋆×p}.
+
+We define the SPO range constant ωX (C) := sup c∈C 
+
+ max x∈X c⊤x − min x∈X c⊤x . With these notations in place, we can state the following guarantee for Stage II training. 
+
+Theorem 27. Let HU⋆,d ⋆ be as above and define the C-valued affine-linear classes 
+
+H(C) := {fA(ξ) = c0 + Aξ : A ∈ Rd×p, f A(ξ) ∈ C a.s. }, HU⋆,d ⋆ (C) := {f ∈ H U⋆,d ⋆ : f (ξ) ∈ C a.s. }.
+
+(1) No misspecification loss. Let f⋆ ∈ arg min f ∈H (C) RSPO (f ) and define its compressed version 
+
+ˆf⋆(ξ) := lift U⋆
+
+ U ⊤ 
+
+> ⋆
+
+(f⋆(ξ) − c0) = c0 + LU⋆ U ⊤ 
+
+> ⋆
+
+(f⋆(ξ) − c0) ∈ H U⋆,d ⋆ (C).
+
+Then ˆf⋆ ∈ arg min f ∈H U⋆,d ⋆ (C) RSPO (f ) and RSPO (f⋆) = RSPO ( ˆf⋆).(2) Improved generalization bound in the compressed class. For any δ ∈ (0 , 1) , with probability at least 
+
+1 − δ over S, the following bound holds simultaneously for all f ∈ H U⋆,d ⋆ :
+
+RSPO (f ) ≤ ˆRSPO (f ) + 2 ωX (C)
+
+r 2( d⋆p + 1) log( n|X ∠|2)
+
+n + ωX (C)
+
+r log(1 /δ )2n . (10) 
+
+Proof sketch. The proof has three ingredients: (i) we bound the complexity of the induced decision class 
+
+x⋆ ◦ H U⋆,d ⋆ via its Natarajan dimension, (ii) we plug this bound into the Natarajan-dimension generalization theorem for the SPO loss due to El Balghiti et al. (2023), and (iii) we show that under a global sufficient dataset, projecting to W⋆ and lifting back is decision-preserving, so restricting to the compressed class incurs no approximation error. A complete proof is in Appendix D.2. Compared to El Balghiti et al. (2023), the bound in (10) replaces the ambient dimension d in the dominant 
+
+eO(1 /√n) generalization error term by the decision-relevant intrinsic dimension d⋆.
+
+7.3 Learning decision-sufficient representation from contextual samples 
+
+So far, our Stage II analysis assumed access to the global decision-relevant subspace W⋆. We now explain how Stage I can be implemented from labeled contextual samples {(ξi, c i)}Ni=1 and quantify the resulting 
+
+representation-estimation error. Recall that for contextual linear optimization under the SPO loss, the Bayes-optimal decision rule is 
+
+x⋆(μ(ξ)) , where μ(ξ) := E[c | ξ]. Since C is convex and c ∈ C a.s., we have μ(ξ) ∈ C a.s. If we could draw i.i.d. samples from the (unobserved) distribution of μ(ξ), then we could run Algorithm 2 on those 16 samples and—by our certificate guarantee (Theorem 25)—obtain a dataset that is pointwise sufficient with high probability under the distribution of μ(ξ). In practice, we only observe noisy costs c, so we proceed in two steps: (i) estimate μ from contextual samples via a C-valued regression model ˆμ, and (ii) treat the predictions ˆμ(ξ) on fresh contexts as pseudo-cost samples and run Algorithm 2. The process is summarized in Algorithm 4. 
+
+Algorithm 4 Learning decision-sufficient representation from contextual samples (Stage I) 
+
+Input: Regression sample {(ξi, c i)}nμ
+
+> i=1
+
+, discovery contexts {ξdisc  
+
+> j
+
+}ndisc  
+
+> j=1
+
+. 
+
+> 1:
+
+Fit a regression model ˆμ for μ(ξ) := E[c | ξ] (e.g., the centered linear model as discussed).  
+
+> 2:
+
+Form pseudo-costs ˆcj ← ˆμ(ξdisc  
+
+> j
+
+) for j = 1 , . . . , n disc . 
+
+> 3:
+
+Run Algorithm 2 on {ˆcj }ndisc  
+
+> j=1
+
+and return ( ˆD, T ).
+
+A centered linear conditional-mean model. A convenient choice for ˆμ is multi-response ordinary least squares (OLS). Because the prior set is the shifted ellipsoid C = {c : ( c − c0)⊤Σ−1(c − c0) ≤ 1}, it is natural to write the conditional-mean model in centered form around c0:
+
+c − c0 = Aμξ + ϵ, E[ϵ | ξ] = 0 , μ(ξ) = E[c | ξ] = c0 + Aμξ. (11) Equivalently, we regress the centered response y := c − c0 onto ξ, and then set ˆμ(ξ) := c0 + ˆAμξ. We quantify the regression accuracy via the mean-squared prediction error ε2 
+
+> μ
+
+:= Eξ
+
+∥ˆμ(ξ) − μ(ξ)∥22
+
+. For the sharpened Stage I analysis below, we will use a stronger high-probability control: under bounded-design OLS, Appendix D.3 (Lemma 45) provides simultaneous bounds on ∥ ˆAμ − Aμ∥F , on the uniform prediction radius sup ∥ξ∥2≤1 ∥ˆμ(ξ) − μ(ξ)∥2, and hence on εμ.
+
+A lifted compressed predictor. Let ˆW := span( ˆD) and let ˆU ∈ Rd×t be an orthonormal basis of ˆW ,where t := dim( ˆW ). Define the lifted compressed conditional-mean predictor 
+
+˜μ(ξ) := lift ˆU
+
+ ˆU ⊤ ˆμ(ξ) − c0
+
+
+
+= c0 + L ˆU ˆU ⊤ ˆμ(ξ) − c0
+
+. (12) Under the centered linear model (11), we have ˆμ(ξ) − c0 = ˆAμξ by the definition of ˆμ, hence 
+
+˜μ(ξ) = c0 + L ˆU ( ˆU ⊤ ˆAμ) ξ. (13) Therefore ˜μ belongs to the compressed affine-linear class H ˆU ,t := {fB (ξ) = c0 + L ˆU Bξ : B ∈ Rt×p}.
+
+A cone-boundary margin condition. The oracle x⋆(·) is locally constant on the interior of each optimality cone of X and may change discontinuously on boundaries between cones. Define the cone-boundary set 
+
+BX := 
+
+
+
+c ∈ Rd : ∃ x̸ = x′ ∈ X ∠ s.t. x, x ′ ∈ arg min 
+
+> x∈X
+
+c⊤x
+
+
+
+.
+
+Our transfer argument from regression error to decision error relies on the standard margin assumption: 
+
+Assumption 28 (Margin condition) . There exist constants Cmarg > 0 and α > 0 such that, for all η > 0,
+
+Pξ
+
+dist  μ(ξ), BX
+
+ ≤ η ≤ Cmarg ηα.
+
+Moreover, almost surely over the realized Stage-I samples, the Stage-I regression predictor satisfies 
+
+Pξ[ˆ μ(ξ) ∈ C ] = 1 , Pξ[˜ μ(ξ) ∈ B X ] = 0 .
+
+17 Stage-I representation error. The next theorem bounds the additional decision loss introduced by learning the representation from contextual samples. Under the bounded-design OLS conditions from Appendix D.3, the decision error decomposes into (i) a certificate error term due to running Algorithm 2 on finitely many pseudo-costs, and (ii) a regression-to-decision term controlled by a uniform prediction radius and the cone-boundary margin. 
+
+Theorem 29 (Stage-I representation error under bounded-design OLS) . Suppose Stage I runs Algorithm 4 with discovery sample size ndisc and returns ( ˆD, T ), where T is the compression subsequence produced by Algorithm 2. Under Assumption 28, suppose in addition that the bounded-design OLS conditions of Lemma 45 hold. Fix δμ, δ ∈ (0 , 1) and define 
+
+rμ,δ μ := Creg · σ
+
+√κ
+
+vuut d
+
+
+
+p + log 4dδμ
+
+
+
+nμ
+
+.
+
+Then, with probability at least 1 − δμ − δ over the regression sample and the i.i.d. discovery contexts, 
+
+Pξ
+
+x⋆(˜ μ(ξ)) ̸ = x⋆(μ(ξ))  ≤ 4
+
+ndisc 
+
+(6 |T | + log( e/δ )) + Cmarg rαμ,δ μ . (14) 
+
+In particular, since |T | ≤ | ˆD| ≤ d⋆,
+
+4
+
+ndisc 
+
+(6 |T | + log( e/δ )) ≤ 4
+
+ndisc 
+
+(6 d⋆ + log( e/δ )) .
+
+Moreover, letting f⋆(ξ) := μ(ξ) be a Bayes-optimal SPO predictor and letting ˆf⋆ ∈ arg min f ∈H ˆU ,t RSPO (f )
+
+be the best predictor restricted to the learned representation, we have the representation error bound 
+
+0 ≤ RSPO ( ˆf⋆) − RSPO (f⋆) ≤ ωX (C) ·
+
+ 4
+
+ndisc 
+
+(6 d⋆ + log( e/δ )) + Cmarg rαμ,δ μ
+
+
+
+. (15) 
+
+Proof idea. The certificate term in (14) follows by applying Theorem 25 to the pseudo-cost sample {ˆcj =ˆμ(ξdisc  
+
+> j
+
+)}ndisc  
+
+> j=1
+
+. The regression-to-decision term uses the tail-form transfer bound proved in Appendix D.4 together with the uniform prediction-radius bound (27) from Lemma 45: on the OLS high-probability event, we take η = rμ,δ μ so that the regression tail vanishes and only the cone-boundary margin term remains. The complete proof is in Appendix D.4. 
+
+Stage I representation error rate under OLS. In Algorithm 4, we use nμ contextual samples for regression and ndisc contextual samples for discovery. Under the centered linear model (11) , Theorem 29 yields an explicit bound for the representation term in (14) : up to logarithmic factors, the additional Stage I representation error scales as 
+
+eO
+
+
+
+n−α/ 2 
+
+> μ
+
++ n−1disc 
+
+
+
+.
+
+Let nI := nμ + ndisc denote the total sample size used in Stage I. Under a constant-fraction split (e.g., 
+
+nμ = ⌊nI /2⌋ and ndisc = nI − nμ), we have nμ = Θ( nI ) and ndisc = Θ( nI ); hence this term simplifies to 
+
+eO
+
+
+
+n−1 
+
+> I
+
++ n−α/ 2
+
+> I
+
+
+
+= eO
+
+
+
+n− min {1,α/ 2}
+
+> I
+
+
+
+.
+
+Therefore, if α > 1 and Stage I and Stage II use comparable sample sizes (e.g., nI = Θ( ntrain )), the additional Stage I representation error is lower-order than the n−1/2train generalization term in Stage II. Consequently, the overall statistical rate is governed by Stage II, whose dominant term depends on the intrinsic dimension d⋆
+
+rather than the ambient dimension d; see Theorem 27. This improves sample efficiency for CLO. Moreover, our decision-sufficient representation learning framework reduces the number of trainable parameters in Stage II from dp to d⋆p as an additional advantage. 18 7.4 Numerical experiment 
+
+We provide a small synthetic shortest-path CLO experiment to illustrate the sample-efficiency gains suggested by the intrinsic d⋆ dependence in Theorem 27. We consider a monotone shortest-path instance on a 5 × 5
+
+grid ( g = 5 ), so the cost dimension is d = 2 g(g − 1) = 40 . The feasible polytope has |X ∠| =  2( g−1) 
+
+> g−1
+
+ = 70 
+
+extreme points, each corresponding to a monotone path. Contexts are drawn i.i.d. as ξ ∼ N (0 , I p) with 
+
+p = 5 . We take C = {c ∈ Rd : ∥c − c0∥2 ≤ 1}, where c0 assigns cost 10 on a fixed low-cost corridor and 
+
+100 elsewhere. This forces all shortest paths to remain within the corridor, and by enumeration on the 5 × 5
+
+grid, the resulting intrinsic dimension is d⋆ = 7 .We compare (i) full-d SPO +: a linear predictor ˆc(ξ) ∈ Rd trained by SGD on the SPO + surrogate, and (ii) ours (learn ˆW then SPO +): first learn a subspace ˆW online from observed contexts and costs, and then train a reduced predictor in the learned subspace. We use ntrain = 300 labeled context–cost pairs for Stage II and an independent test set of size ntest = 2000 , repeating over 10 random trials and reporting mean ± 90% 
+
+confidence intervals. Stage I: Figure 1 reports the learned dimension t = dim( ˆW ). Stage II: Figure 2 plots the test SPO risk versus the number of labeled samples used to train the predictor. Consistent with our theory, restricting training to the learned subspace improves performance at a fixed sample size, and ˆW quickly stabilizes near the true intrinsic dimension d⋆ = 7 .
+
+Figure 1: Stage I. Learned dimension t = dim( ˆW ) (mean over 10 trials). 19 Figure 2: Stage II. SPO risk vs. number of labeled samples (mean ± 90% CIs over 10 trials). 
+
+# 8 Concluding Remarks and Open Problems 
+
+Our current hardness results for computing the intrinsic decision-relevant dimension d⋆ (and hence con-structing minimum-size global SDDs) rely on highly degenerate hard instances. It therefore remains open whether our hardness results persist under the nondegeneracy assumption on X . Second, our framework focuses on the noiseless setting, where each linear measurement q⊤ 
+
+> i
+
+c is observed exactly. Extending our algorithms to noisy observations and characterizing the resulting sample complexity are open directions. Intuitively, such an extension would likely require an additional margin condition on Pc that controls how often c lies close to the boundary of an optimality cone. Finally, we restrict attention to linear optimization in this paper. Extending the decision-sufficient representation framework to broader problem classes, such as mixed-integer or convex programs, is an important direction for future work, potentially via approximate notions of sufficiency. 
+
+# References 
+
+Maria-Florina Balcan. Data-driven algorithm design. In Tim Roughgarden, editor, Beyond the Worst-Case Analysis of Algorithms , pages 626–645. Cambridge University Press, 2021. Maria-Florina Balcan, Alina Beygelzimer, and John Langford. Agnostic active learning. In Proceedings of the 23rd International Conference on Machine Learning , pages 65–72, 2006. Maria-Florina Balcan, Alina Beygelzimer, and John Langford. Agnostic active learning. Journal of Computer and System Sciences , 75(1):78–89, 2009. Maria-Florina Balcan, Vaishnavh Nagarajan, Ellen Vitercik, and Colin White. Learning-theoretic foundations of algorithm configuration for combinatorial partitioning problems. In Proceedings of the 30th Conference 
+
+20 on Learning Theory (COLT) , volume 65 of Proceedings of Machine Learning Research , pages 213–274. PMLR, 2017. Maria-Florina Balcan, Travis Dick, and Ellen Vitercik. Dispersion for data-driven algorithm design, online learning, and private optimization. In 2018 IEEE 59th Annual Symposium on Foundations of Computer Science (FOCS) , pages 603–614. IEEE Computer Society, 2018. Maria-Florina Balcan, Tuomas Sandholm, and Ellen Vitercik. Refined bounds for algorithm configuration: The knife-edge of dual class approximability. In Proceedings of the 37th International Conference on Machine Learning (ICML) , volume 119 of Proceedings of Machine Learning Research , pages 580–590. PMLR, 2020. Maria-Florina Balcan, Dan DeBlasio, Travis Dick, Carl Kingsford, Tuomas Sandholm, and Ellen Vitercik. How much data is sufficient to learn high-performing algorithms? Generalization guarantees for data-driven algorithm design. Journal of the ACM , 71(5):32:1–32:58, 2024a. Maria-Florina Balcan, Travis Dick, Tuomas Sandholm, and Ellen Vitercik. Learning to branch: Generalization guarantees and limits of data-independent discretization. Journal of the ACM , 71(2):13:1–13:73, 2024b. Peter Bartlett, Piotr Indyk, and Tal Wagner. Generalization bounds for data-driven numerical linear algebra. In Po-Ling Loh and Maxim Raginsky, editors, Proceedings of Thirty Fifth Conference on Learning Theory ,volume 178 of Proceedings of Machine Learning Research , pages 2013–2040. PMLR, 2022. Omar Bennouna, Amine Bennouna, Saurabh Amin, and Asuman Ozdaglar. What data enables optimal decisions? An exact characterization for linear optimization. In Advances in Neural Information Processing Systems , 2025a. NeurIPS 2025. arXiv:2505.21692. Omar Bennouna, Jiawei Zhang, Saurabh Amin, and Asuman E. Ozdaglar. Contextual optimization under model misspecification: A tractable and generalizable approach. In Proceedings of the 42nd International Conference on Machine Learning , volume 267 of Proceedings of Machine Learning Research , pages 3749–3775. PMLR, 2025b. Omar Bennouna, Amine Bennouna, Saurabh Amin, and Asuman Ozdaglar. Data informativeness in linear optimization under uncertainty, 2026. URL https://arxiv.org/abs/2602.15365 .Yonatan Bilu and Nathan Linial. Are stable instances easy? Combinatorics, Probability and Computing , 21 (5):643–660, 2012. Avrim Blum and Joel Spencer. Coloring random and semi-random k-colorable graphs. Journal of Algorithms ,19(2):204–234, 1995. Olivier Bousquet, Steve Hanneke, Shay Moran, and Nikita Zhivotovskiy. Proper learning, helly number, and an optimal SVM bound. In Jacob Abernethy and Shivani Agarwal, editors, Proceedings of the 33rd Conference on Learning Theory (COLT) , volume 125 of Proceedings of Machine Learning Research ,pages 582–609. PMLR, 2020. Marco C. Campi and Simone Garatti. Compression, generalization and learning. Journal of Machine Learning Research , 24(339):1–74, 2023. David A. Cohn, Zoubin Ghahramani, and Michael I. Jordan. Active learning with statistical models. Journal of Artificial Intelligence Research , 4:129–145, 1996. Sanjoy Dasgupta. Two faces of active learning. Theoretical Computer Science , 412(19):1767–1781, 2011. 21 Othman El Balghiti, Adam N. Elmachtoub, Paul Grigas, and Ambuj Tewari. Generalization bounds in the predict-then-optimize framework. Mathematics of Operations Research , 48(4):2043–2065, 2023. Adam N. Elmachtoub and Paul Grigas. Smart “predict, then optimize”. Management Science , 68(1):9–26, 2022. Sally Floyd and Manfred K. Warmuth. Sample compression, learnability, and the vapnik-chervonenkis dimension. Machine Learning , 21(3):269–304, 1995. Robert M. Freund and James B. Orlin. On the complexity of four polyhedral set containment problems. 
+
+Mathematical Programming , 33(2):139–145, 1985. Aditya Gangrade, Tianrui Chen, and Venkatesh Saligrama. Safe linear bandits over unknown polytopes. In Shipra Agrawal and Aaron Roth, editors, Proceedings of the 37th Conference on Learning Theory (COLT) ,volume 247 of Proceedings of Machine Learning Research , pages 1755–1795. PMLR, 2024. Thore Graepel, Ralf Herbrich, and John Shawe-Taylor. Pac-bayesian compression bounds on the prediction error of learning algorithms for classification. Machine Learning , 59(1-2):55–76, 2005. Peter Gritzmann and Victor Klee. Computational complexity of inner and outer j-radii of polytopes in finite-dimensional normed spaces. Mathematical Programming , 59(2):163–213, 1993. Andrew Guillory and Jeff A. Bilmes. Average-case active learning with costs. In Algorithmic Learning Theory, 20th International Conference, ALT 2009. Proceedings , volume 5809 of Lecture Notes in Computer Science , pages 141–155. Springer, 2009. Andrew Guillory and Jeff A. Bilmes. Interactive submodular set cover. In Proceedings of the 27th Inter-national Conference on Machine Learning (ICML-10), June 21-24, 2010, Haifa, Israel , pages 415–422, 2010. Rishi Gupta and Tim Roughgarden. A PAC approach to application-specific algorithm selection. SIAM Journal on Computing , 46(3):992–1017, 2017. Rishi Gupta and Tim Roughgarden. Data-driven algorithm design. Communications of the ACM , 63(6): 87–94, 2020. Steve Hanneke. Theory of disagreement-based active learning. Foundations and Trends in Machine Learning ,7(2-3):131–309, 2014. Steve Hanneke and Aryeh Kontorovich. A sharp lower bound for agnostic learning with sample compression schemes. In Proceedings of the 30th International Conference on Algorithmic Learning Theory , volume 98 of Proceedings of Machine Learning Research , pages 489–505. PMLR, 2019. Steve Hanneke and Aryeh Kontorovich. Stable sample compression schemes: New applications and an optimal SVM margin bound. In Vitaly Feldman, Katrina Ligett, and Sivan Sabato, editors, Proceedings of the 32nd International Conference on Algorithmic Learning Theory , volume 132 of Proceedings of Machine Learning Research , pages 697–721. PMLR, 2021. Yichun Hu, Nathan Kallus, Xiaojie Mao, and Yanchen Wu. Contextual linear optimization with bandit feedback. In Advances in Neural Information Processing Systems , volume 37, 2024. William B. Johnson and Joram Lindenstrauss. Extensions of Lipschitz mappings into a Hilbert space. In 
+
+Conference in Modern Analysis and Probability , volume 26 of Contemporary Mathematics , pages 189–206. American Mathematical Society, 1984. 22 Kai Kellner and Thorsten Theobald. Sum of squares certificates for containment of H-polytopes in V-polytopes. SIAM Journal on Discrete Mathematics , 30(2):763–776, 2016. S. R. Kulkarni, S. K. Mitter, and J. N. Tsitsiklis. Active learning using arbitrary binary valued queries. 
+
+Machine Learning , 11(1):23–35, 1993. Eva Ley and Maximilian Merkert. Solution methods for partial inverse combinatorial optimization problems in which weights can only be increased. Journal of Global Optimization , 93(1):263–298, 2025. Nick Littlestone and Manfred K. Warmuth. Relating data compression and learnability. Technical report, University of California, Santa Cruz, 1986. Technical report. Heyuan Liu and Paul Grigas. Online contextual decision-making with a smart predict-then-optimize method, 2022. Mo Liu, Paul Grigas, Heyuan Liu, and Zuo-Jun Max Shen. Active learning for contextual linear optimization: A margin-based approach, 2023. arXiv:2305.06584v2 (Jan 2025). Zakaria Mhammedi. Online convex optimization with a separation oracle. In Nika Haghtalab and Ankur Moitra, editors, Proceedings of the 38th Conference on Learning Theory (COLT) , volume 291 of Proceed-ings of Machine Learning Research , pages 4033–4077. PMLR, 2025. Shay Moran and Amir Yehudayoff. Sample compression schemes for VC classes. Journal of the ACM , 63(3): 21:1–21:10, 2016. Dario Paccagnan, Daniel Marks, Marco C. Campi, and Simone Garatti. Pick-to-learn for systems and control: Data-driven synthesis with state-of-the-art safety guarantees, 2025. Pierre-Louis Poirion, Bruno F. Louren c¸ o, and Akiko Takeda. Random projections of linear and semidefinite problems with linear inequalities. Linear Algebra and its Applications , 664:24–60, 2023. Tim Roughgarden. Beyond worst-case analysis. Communications of the ACM , 62(3):88–96, 2019. Tim Roughgarden, editor. Beyond the Worst-Case Analysis of Algorithms . Cambridge University Press, 2021. ISBN 9781108637435. Utsav Sadana, Abhilash Chenreddy, Erick Delage, Alexandre Forel, Emma Frejinger, and Thibaut Vidal. A survey of contextual optimization methods for decision-making under uncertainty. European Journal of Operational Research , 320(2):271–289, 2025. Shinsaku Sakaue and Taihei Oki. Generalization bound and learning methods for data-driven projections in linear programming. In Advances in Neural Information Processing Systems , volume 37, 2024. Noah Schutte, Grigorii Veviurko, Krzysztof Postek, and Neil Yorke-Smith. Sufficient decision proxies for decision-focused learning, 2025. Shai Shalev-Shwartz and Shai Ben-David. Understanding Machine Learning: From Theory to Algorithms .Cambridge University Press, 2014. ISBN 9781107057135. Daniel A. Spielman and Shang-Hua Teng. Smoothed analysis of algorithms: Why the simplex algorithm usually takes polynomial time. Journal of the ACM , 51(3):385–463, 2004. 23 Matus Telgarsky. Stochastic linear optimization never overfits with quadratically-bounded losses on general data. In Po-Ling Loh and Maxim Raginsky, editors, Proceedings of the 35th Conference on Learning Theory (COLT) , volume 178 of Proceedings of Machine Learning Research , pages 5453–5488. PMLR, 2022. Joel A. Tropp. User-friendly tail bounds for sums of random matrices. Foundations of Computational Mathematics , 12(4):389–434, 2012. Leslie G. Valiant. A theory of the learnable. Communications of the ACM , 27(11):1134–1142, 1984. Roman Vershynin. High-Dimensional Probability: An Introduction with Applications in Data Science .Cambridge University Press, 2018. Ky Khac Vu, Pierre-Louis Poirion, and Leo Liberti. Random projections for linear programming. Mathematics of Operations Research , 43(4):1051–1071, 2018. David P. Woodruff. Sketching as a tool for numerical linear algebra. Foundations and Trends in Theoretical Computer Science , 10(1-2):1–157, 2014. 24 A Formal statement for hardness and other proofs for Section 4 
+
+A.1 Proof of Theorem 5 
+
+Theorem 30 (Formal version of Theorem 5) . Fix a coordinate index r ∈ [n]. The following decision problem is NP -hard: given a bounded polytope X ⊆ Rn and a polyhedral uncertainty set C ⊆ Rn specified in 
+
+H-representation, decide whether 
+
+dim dir( X⋆(C)) > dim dir( X⋆r (C)) , (16) 
+
+where Xr := {x ∈ X : xr = 0 } and X⋆r (C) is defined as in Equation (3) with X replaced by Xr.Consequently, computing dim dir( X⋆(C)) is NP -hard under polynomial-time Turing reductions. The hardness persists even when X is the s–t unit-flow polytope of a directed acyclic graph and C is a budgeted set of arc-length increases of the form 
+
+Ccl = {d + w : w ≥ 0, κ ⊤w ≤ B} or Cop = {d + w : w > 0, κ ⊤w < B + η},
+
+for any fixed rational η ∈ (0 , 1) .Proof. We prove NP-hardness via the 3-SAT ⇔PISPP-W+ construction of Ley and Merkert (2025, Theo-rem 3.1). Given a 3-SAT instance φ, their reduction produces a partial inverse shortest path instance with only weight increases (PISPP-W+), consisting of a directed acyclic graph G = ( V, A ) with source s and sink 
+
+t, initial arc-lengths d ∈ QA
+
+> ≥0
+
+, modification costs κ ∈ QA>0, a budget B ∈ Q>0, and a single required arc 
+
+r ∈ A. The equivalent PISPP-W+ decision question is whether there exists a modification vector w ∈ QA
+
+> ≥0
+
+with κ⊤w ≤ B such that some shortest s–t path with respect to the modified arc-lengths d + w contains r.We proceed with the proof in three steps. (1) Restating the hard instance and key properties: recall the explicit 3-SAT →PISPP-W+ construction and the structural properties we will use. (2) Openifying the uncertainty set: show that passing from the closed budgeted set Ccl to the slightly relaxed open set Cop does not change the answer to the PISPP-W+ decision question on these instances. (3) Dimension comparison: encode s–t paths as extreme points of a flow polytope and reduce the PISPP-W+ decision question to the strict inequality (16). 
+
+Step 1: Hard instance and structural properties. We first restate the explicit 3-SAT →PISPP-W+ construction in the notation needed here. Let φ have variables x1, . . . , x n and clauses B1, . . . , B m. Write each clause as Bj = {ℓj1, ℓ j2, ℓ j3} where each literal ℓjk ∈ { xi, ¯xi : i ∈ [n]} (if a clause has fewer than three literals, duplicate one). For each ℓjk we create a clause–literal vertex bjk labeled by ℓjk .
+
+Vertices. Let V consist of 
+
+{s0, . . . , s n} ∪ { t0, . . . , t m} ∪ { xi, ¯xi : i ∈ [n]} ∪ { bjk : j ∈ [m], k ∈ [3] }.
+
+Set the source s := s0 and the sink t := tm.25 Arcs. We build a DAG G = ( V, A ) with a variable layer (from s0 to sn) and a clause layer (from t0 to tm), connected by one required arc and additional shortcut arcs. • Variable gadgets: for each i ∈ [n], add the four arcs 
+
+(si−1, x i), (xi, s i), (si−1, ¯xi), (¯ xi, s i).
+
+Thus, any s0–sn path chooses exactly one of {xi, ¯xi} for each i.• Clause gadgets: for each j ∈ [m] and k ∈ [3] , add 
+
+(tj−1, b jk ), (bjk , t j ).
+
+Thus, any t0–tm path chooses exactly one literal vertex bjk per clause j.• Required arc: add r := ( sn, t 0), which is the unique required arc ( R = {r}). • Shortcut arcs: for each clause–literal vertex bjk labeled by a literal on variable xi, add exactly one arc from the opposite variable vertex into bjk :
+
+ℓjk = xi ⇒ (¯ xi, b jk ) ∈ A, ℓjk = ¯ xi ⇒ (xi, b jk ) ∈ A. 
+
+Equivalently, the tail of the shortcut arc is the variable vertex that makes ℓjk false .
+
+Initial arc-lengths and modification costs. Set the initial lengths d by 
+
+d(a) = 1 for every non-shortcut arc a, d(a) = 2( n−i+j) for a shortcut arc a = ( ·, b jk ) with ℓjk ∈ { xi, ¯xi}.
+
+Let the budget be B := n + 2 m and set modification costs κ by 
+
+κa = 1 for every non-shortcut arc a, κa = B + 1 for every shortcut arc a. 
+
+Lemma 31 (Structural properties) . The above instance satisfies the following properties (cf. Observations 1–4 and the claim in the proof of (Ley and Merkert, 2025, Theorem 3.1)): (i) Degree constraints. Each xi and ¯xi has exactly one ingoing arc (from si−1), and each bjk has exactly one outgoing arc (to tj ). (ii) Path structure (“ r or one shortcut”). Every s–t path contains either the required arc r or exactly one shortcut arc (but not both). (iii) Unit gap under d. Every s–t path using r has length 2n + 2 m + 1 under d, while every s–t path using a shortcut arc has length 2n + 2 m under d. In particular (with w = 0 ), all shortest s–t paths avoid r.(iv) Encoding of assignments + “false literal ⇒ available shortcut”. If an s–t path P uses r, then it visits exactly one of {xi, ¯xi} for every i ∈ [n] and exactly one bjk in every clause gadget j ∈ [m]. Define the induced truth assignment by xPi = 1 iff xi ∈ P . If P visits a literal vertex bjk that is false under xP , then the unique shortcut arc entering bjk has its tail on P .(v) 3-SAT ⇔ PISPP-W+. The mapping φ 7 → (G, d, κ, B, r ) is computable in polynomial time and satisfies the following equivalence: the formula φ is satisfiable if and only if there exists a modification vector 
+
+w ∈ QA 
+
+> ≥0
+
+with κ⊤w ≤ B such that some shortest s–t path with respect to the modified arc-lengths d + w
+
+contains the required arc r. Equivalently, if φ is unsatisfiable then for every w ∈ QA 
+
+> ≥0
+
+with κ⊤w ≤ B,every shortest s–t path under d + w avoids r.
+
+26 Proof. (i) is immediate from the arc construction. (ii) The only arcs that can enter the clause layer are 
+
+r = ( sn, t 0) and the shortcut arcs into some bjk . Once the path enters the clause layer, it cannot return to the variable layer (there are no such arcs), and each bjk has only the outgoing arc (bjk , t j ); hence no s–t
+
+path can use two shortcuts, and no path can use both r and a shortcut. (iii) Any s–t path using r traverses 
+
+2n unit-length arcs in the variable gadgets, then r (length 1), then 2m unit-length arcs in the clause gadgets, totaling 2n + 2 m + 1 . A path using a shortcut from variable i into clause j has prefix length 2( i − 1) + 1 up to the tail variable vertex, then shortcut length 2( n − i + j), then suffix length 1 + 2( m − j) in the clause layer, totaling 
+
+(2( i − 1) + 1) + 2( n − i + j) + (1 + 2( m − j)) = 2 n + 2 m. 
+
+(iv) The first statement follows since each variable gadget offers exactly two disjoint choices and each clause gadget offers exactly three disjoint choices. For the last statement, if bjk is false under xP , then P
+
+must have visited the opposite variable vertex ( ¯xi if ℓjk = xi, and xi if ℓjk = ¯ xi), which is exactly the tail of the unique shortcut arc into bjk .(v) is exactly the claim of Theorem 3.1 in Ley and Merkert (2025), which shows NP-completeness of PISPP-W+. We provide a proof sketch here: (⇒) Let x∗ satisfy φ. W.l.o.g. reorder literals in each clause so that bj1 is true. Build the s–t path P
+
+that uses r by following x∗ in the variable gadgets and bj1 in each clause gadget. Set w = 1 on the unique entry arc into the unchosen variable vertex (one per variable) and set w = 1 on (bj2, t j ) and (bj3, t j ) (two per clause); set w = 0 on all remaining arcs (in particular on shortcut arcs). Then κ⊤w = n + 2 m = B, and any shortcut path must traverse at least one penalized arc, so its length increases by ≥ 1, closing the initial gap 
+
+d(Q) = d(P ) − 1 and implying P is (one of) the shortest paths. (⇐) Suppose κ⊤w ≤ B and some shortest path P under d + w uses r; let xP be the assignment induced by P . If some clause is false under xP , then the visited literal vertex bjk is false, and by (iv) the entering shortcut arc e has its tail on P . Replacing the corresponding subpath R of P by e gives a shortcut path Q with 
+
+d(Q) = d(P )−1 (by (iii)). Thus (d+w)( Q)−(d+w)( P ) = −1+ w(e)−w(R) ≤ − 1+ w(e), so shortestness of P forces w(e) ≥ 1. Since e is a shortcut arc with κe = B + 1 , this implies κ⊤w ≥ κew(e) > B , a contradiction. 
+
+Step 2: Openifying the uncertainty set does not change the answer. This step is only needed to ensure hardness persists for an open uncertainty set. We consider two uncertainty sets of admissible arc-length vectors: 
+
+Ccl := { c = d + w : w ∈ RA
+
+> ≥0
+
+, κ ⊤w ≤ B } and Cop := { c = d + w : w ∈ RA>0, κ ⊤w < B + η },
+
+where we fix any rational constant η ∈ (0 , 1) (e.g. η = 12 ). The lemma below shows that for the hard instances above, replacing Ccl by Cop does not change the answer to the underlying question. 
+
+Lemma 32. Fix any η ∈ (0 , 1) . For the PISPP-W+ instance produced by Ley and Merkert (2025) from φ,the formula φ is satisfiable if and only if there exists c ∈ C op such that some shortest s–t path with respect to 
+
+c contains r.Proof. (⇒) Suppose φ is satisfiable. By Lemma 31(v), there exists w0 ∈ QA 
+
+> ≥0
+
+with κ⊤w0 ≤ B such that for 
+
+c0 := d + w0 there is a shortest s–t path using r.Since G is a DAG, fix any topological ordering ρ : V → { 0, 1, . . . , |V | − 1}. For (a rational) ε > 0,define a perturbation δ ∈ QA by 
+
+δ(u, v ) := ε(ρ(v) − ρ(u)) ∀(u, v ) ∈ A. 
+
+27 Then δ > 0 componentwise. Moreover, for any s–t path P = ( v0 = s, v 1, . . . , v k = t), the perturbation telescopes: k−1X
+
+> i=0
+
+δ(vi, v i+1 ) = ε
+
+> k−1
+
+X
+
+> i=0
+
+(ρ(vi+1 ) − ρ(vi)) = ε(ρ(t) − ρ(s)) ,
+
+which is a constant independent of P . Hence, adding δ shifts the length of every s–t path by the same constant, so the set of shortest s–t paths is unchanged when we replace c0 by c0 + δ.Finally, choose ε small enough so that κ⊤δ < η . For instance, since ρ(v) − ρ(u) ≤ | V | − 1 for every arc, 
+
+κ⊤δ = X
+
+> a∈A
+
+κaδa ≤ ε(|V | − 1) X
+
+> a∈A
+
+κa,
+
+so it suffices to take ε := η/  2( |V | − 1) P 
+
+> a∈A
+
+κa
+
+. With this choice, w := w0 + δ satisfies w > 0 and 
+
+κ⊤w < B + η, i.e. c := d + w ∈ C op , and there still exists a shortest path using r.(⇐) We prove the contrapositive. Suppose φ is not satisfiable, assume that there exists a shortest s–t path 
+
+P with respect to c := d + w ∈ C op that contains r.By Lemma 31(ii), P contains no shortcut arc. Define the induced assignment xP as in Lemma 31(iv). Since φ is unsatisfiable, there exists a clause index j that is not satisfied by xP . By Lemma 31(iv), P visits exactly one literal vertex bjk in clause gadget j; because clause j is unsatisfied, this visited literal vertex bjk 
+
+is false under xP . Therefore Lemma 31(iv) yields that the unique shortcut arc e entering bjk has its tail on P .Let R denote the (nonempty) subpath of P from the tail of e to the vertex bjk , and define a new s–t path 
+
+Q by following P up to the tail of e, then traversing e, and then following P from bjk to t. Then Q uses a shortcut arc, so by Lemma 31(iii) we have d(Q) = d(P ) − 1.Since P and Q coincide outside of R and e, we obtain 
+
+(d + w)( Q) − (d + w)( P ) = ( d(Q) − d(P )) + ( w(Q) − w(P )) = −1 + w(e) − w(R).
+
+Because R contains at least one arc and w > 0 componentwise, we have w(R) > 0. Thus if P is shortest we must have 0 ≤ (d + w)( Q) − (d + w)( P ), implying w(e) > 1.As e is a shortcut arc, κe = B + 1 , hence 
+
+κ⊤w ≥ κew(e) > (B + 1) · 1 = B + 1 .
+
+In particular, for any η ∈ (0 , 1) we have κ⊤w > B + η, contradicting the assumption κ⊤w < B + η required for d + w ∈ C op . Therefore, no such w > 0 can make a shortest s–t path use r.
+
+Step 3: Reduction from PISPP-W+ to a comparison of decision-relevant dimensions. We now translate the PISPP-W+ instance into a linear optimization problem over the s–t unit-flow polytope. The coordinate indexed by the required arc r will play the role of the distinguished coordinate in (16) , and we will compare (the dimensions of) reachable optimal directions with and without imposing xr = 0 .Given the instance (G, d, κ, B, r ), let p := |A| and index coordinates of Rp by arcs. Define the s–t
+
+unit-flow polytope 
+
+X := 
+
+n
+
+x ∈ Rp 
+
+> ≥0
+
+: X
+
+> a∈δ+(v)
+
+xa − X
+
+> a∈δ−(v)
+
+xa =
+
+
+
+1 v = s, 
+
+−1 v = t, 
+
+0 otherwise, 
+
+o
+
+.
+
+Because G is acyclic, the extreme points of X are exactly the incidence vectors of s–t paths. Let Xr := {x ∈
+
+X : xr = 0 } be the face of flows that avoid the required arc. Note that Xr is a face of X, hence 
+
+X∠ 
+
+> r
+
+= X∠ ∩ Xr = {x ∈ X∠ : xr = 0 }. (17) 28 For C ∈ {C cl , Cop }, define the reachable optimal sets X⋆(C) and X⋆r (C) as in Equation (3). The next lemma is the key structural property for the dimension comparison: it identifies the reachable optimal extreme points of the restricted face Xr and shows that all of them are also reachable for X.
+
+Lemma 33. For C ∈ {C cl , Cop } constructed above, we have 
+
+X⋆r (C) = X∠ 
+
+> r
+
+and X∠ 
+
+> r
+
+⊆ X⋆(C).
+
+Proof. For C = Ccl , let c0 := d ∈ C (take w = 0 ). For C = Cop , let δ be the topological perturbation from the proof of Lemma 32 and set c0 := d + δ ∈ C op . In either case, by the unit-gap property under d and by telescoping of δ, every s–t path that avoids r is shortest under c0, and every path that uses r is strictly longer. Combine with (17), we have 
+
+X⋆(c0) = {x ∈ X∠ : xr = 0 } = X∠ 
+
+> r
+
+,
+
+and in particular X∠ 
+
+> r
+
+⊆ X⋆(C).Moreover, for this same c0, every extreme point of Xr (i.e., every s–t path avoiding r) is optimal for 
+
+min {(c0)⊤x : x ∈ Xr}, so X∠ 
+
+> r
+
+⊆ X⋆r (C). The reverse inclusion X⋆r (C) ⊆ X∠ 
+
+> r
+
+holds by definition, hence 
+
+X⋆r (C) = X∠ 
+
+> r
+
+.We are now ready to complete the reduction. To prove Theorem 30, it suffices to establish the following claim. 
+
+Claim 34. The formula φ is satisfiable if and only if dim dir( X⋆(C)) > dim dir( X⋆r (C)) .Proof. By Lemma 33, we always have X⋆r (C) ⊆ X⋆(C), hence 
+
+dir( X⋆r (C)) ⊆ dir( X⋆(C)) . (18) 
+
+(⇒) Assume φ is satisfiable. We claim that there exists c+ ∈ C such that some shortest s–t path w.r.t. c+
+
+contains r. If C = Ccl , this follows from Lemma 31(v) (equivalently, Ley and Merkert (2025, Theorem 3.1)); if C = Cop , it follows from Lemma 32. Let x+ ∈ X⋆(c+) ∩ X∠ ⊆ X⋆(C) be the incidence vector of such a shortest path, so x+ 
+
+> r
+
+= 1 . By Lemma 33, we also have X∠ 
+
+> r
+
+⊆ X⋆(C); pick any x0 ∈ X∠ 
+
+> r
+
+, so x0 
+
+> r
+
+= 0 . Then v := x+ − x0 ∈ dir  X⋆(C)
+
+and satisfies vr = 1 .On the other hand, every u ∈ dir  X⋆r (C) satisfies ur = 0 , and therefore v / ∈ dir  X⋆r (C). Combining this with (18) yields 
+
+dir  X⋆r (C) ⊊ dir  X⋆(C),
+
+and thus dim dir( X⋆(C)) > dim dir( X⋆r (C)) .
+
+(⇐) We prove the contrapositive. Assume φ is not satisfiable. Then, for C = Ccl the corresponding PISPP-W+ instance is infeasible by Ley and Merkert (2025), and for C = Cop it is infeasible by Lemma 32. Equivalently, for every c ∈ C , every extreme optimal solution of min {c⊤x : x ∈ X} avoids the arc r, i.e., satisfies xr = 0 . Since Xr is a face of X, we have X∠ 
+
+> r
+
+= {x ∈ X∠ : xr = 0 }, and therefore 
+
+X⋆(c) ∩ X∠ ⊆ X∠ 
+
+> r
+
+∀ c ∈ C .
+
+Taking the union over c ∈ C gives X⋆(C) ⊆ X∠ 
+
+> r
+
+. On the other hand, Lemma 33 yields X∠ 
+
+> r
+
+⊆ X⋆(C) and 
+
+X⋆r (C) = X∠ 
+
+> r
+
+. Hence X⋆(C) = X⋆r (C), and thus dir( X⋆(C)) = dir( X⋆r (C)) .This completes the reduction. Therefore deciding whether (16) holds is NP -hard. Finally, to deduce the hardness of computing dim dir( X⋆(C)) as a function problem, note that if we could compute dim dir( X⋆(C)) in polynomial time, we could compute both sides of (16) (one call on (X, C)
+
+and one call on (Xr, C)) and decide the inequality, implying NP -hardness under polynomial-time Turing reductions. 29 A.2 Proof of Theorem 9 
+
+Theorem 35 (Formal version of Theorem 9) . The following decision problem is coNP -hard: given a bounded polytope X ⊆ Rn, a polyhedral uncertainty set C ⊆ Rn specified in H-representation, a dataset D, and a cost vector c ∈ C , decide whether D is pointwise sufficient at c in the sense of Definition 6. Consequently, computing the size of a minimum pointwise SDD (and the corresponding search problem of finding one) is 
+
+coNP -hard. 
+
+The H-in-V polytope containment problem. An instance consists of two polytopes P, Q ⊆ Rd, where 
+
+P = {z ∈ Rd : Hz ≤ h} and Q = conv {v1, . . . , v M },
+
+i.e., P is given in H-representation and Q is given in V -representation . The decision problem asks whether 
+
+P ⊆ Q. This problem is coNP -complete (Freund and Orlin, 1985). Moreover, the coNP -hardness persists under strong structural restrictions; in particular, it is already coNP -complete to decide whether the standard cube is contained in an affine image of a cross polytope (Gritzmann and Klee, 1993). A convenient modern reference is Kellner and Theobald (2016, Proposition 2.1). In our reduction, we work with the following convenient hard family: given Q = conv {v1, . . . , v M } ⊆ Rd that is full-dimensional and satisfies 0 ∈ int( Q),decide whether the hypercube P = [ −1, 1] d is contained in Q.
+
+Construction of a standard-form LP instance. Let P = [ −1, 1] d and Q = conv {v1, . . . , v M } be such a hard instance. Set n0 := d + 1 and define the homogenized vectors ¯vi := ( vi, 1) ∈ Rn0 . Let ¯V ∈ RM ×n0
+
+be the matrix whose ith row is ¯v⊤ 
+
+> i
+
+, and set β := ¯V 1 ∈ RM , where 1 denotes the all-ones vector. We introduce variables w, r ∈ Rn0 and s ∈ RM , and write z := ( w, r, s ) ∈ Rn with n := 2 n0 + M . Define the standard-form polytope 
+
+X := 
+
+n
+
+z ∈ Rn :
+
+In0 In0 0¯V 0 −IM
+
+| {z }
+
+> =: A
+
+z =
+
+2 · 1
+
+β
+
+| {z } 
+
+> =: b
+
+, z ≥ 0
+
+o
+
+. (19) The matrix A has full row rank, and X is nonempty and bounded (indeed, w + r = 2 · 1 implies 0 ≤ w ≤ 2 · 1
+
+and 0 ≤ r ≤ 2 · 1, while s = ¯V w − β is then bounded as well). Let 
+
+z0 := ( 1, 1, 0) ∈ X. 
+
+We consider the empty dataset D = ∅ and the cost vector 
+
+c0 := ( en0 , 0, 0) ∈ Rn,
+
+where en0 ∈ Rn0 is the last standard basis vector. Finally, define the polyhedral uncertainty set 
+
+C :=  (( y, 1) , 0, 0) ∈ Rn : y ∈ P .
+
+Note that c0 ∈ C since 0 ∈ [−1, 1] d.We claim that D = ∅ is pointwise sufficient at c0 if and only if P ⊆ Q.
+
+Step 1: the optimality cone at z0. For a standard-form polytope X = {z : Az = b, z ≥ 0} and an extreme point z0, the optimality cone can be written via KKT as 
+
+Λ( z0) = 
+
+n
+
+c ∈ Rn : ∃ y, ρ s.t. c = A⊤y + ρ, ρ ≥ 0, ρ j = 0 whenever (z0)j > 0
+
+o
+
+. (20) 30 Here z0 = ( 1, 1, 0) has strictly positive components on the w- and r-coordinates and zeros on the s-coordinates. Writing y = ( α, μ ) ∈ Rn0 × RM , we have 
+
+A⊤y =  α + ¯V ⊤μ, α, −μ.
+
+Therefore, for costs of the form ((˜ y, ˜t), 0, 0) we obtain the characterization 
+
+((˜ y, ˜t), 0, 0) ∈ Λ( z0) ⇐⇒ (˜ y, ˜t) ∈ cone {¯v1, . . . , ¯vM }. (21) 
+
+Step 2: z0 is the unique minimizer for c0. Let u := ( x, t ) := w − 1 ∈ Rd × R. From (19) , feasibility implies w ∈ [0 , 2] n0 and 
+
+si = ¯ v⊤ 
+
+> i
+
+w − βi = ¯ v⊤ 
+
+> i
+
+(w − 1) = v⊤ 
+
+> i
+
+x + t ≥ 0 ∀i ∈ [M ].
+
+Thus the projection z 7 → u = w − 1 identifies X with the bounded polytope 
+
+eX := {(x, t ) ∈ Rd × R : v⊤ 
+
+> i
+
+x + t ≥ 0 ∀i ∈ [M ], −1 ≤ (x, t ) ≤ 1}.
+
+Moreover, minimizing c⊤ 
+
+> 0
+
+z over X is equivalent (up to an additive constant) to minimizing t over eX, since 
+
+c⊤ 
+
+> 0
+
+z = e⊤ 
+
+> n0
+
+w = t + 1 .We now show that (0 , 0) is the unique minimizer of min {t : ( x, t ) ∈ eX}. First, we claim that every feasible point satisfies t ≥ 0. Indeed, if t < 0 then v⊤ 
+
+> i
+
+x ≥ − t > 0 for all i, hence z⊤x > 0 for all 
+
+z ∈ Q = conv {v1, . . . , v M }. But 0 ∈ int( Q) implies that for any x̸ = 0 there exists ε > 0 such that 
+
+−εx/ ∥x∥ ∈ Q, which yields (−εx/ ∥x∥)⊤x < 0, a contradiction. Thus t ≥ 0.Therefore the minimum value of t equals 0 (since (0 , 0) ∈ eX). When t = 0 , feasibility requires v⊤ 
+
+> i
+
+x ≥ 0
+
+for all i, which again forces x = 0 by the same argument using 0 ∈ int( Q). Hence (x, t ) = (0 , 0) is the unique minimizer in eX, and consequently z0 = ( 1, 1, 0) is the unique minimizer in X:
+
+X⋆(c0) = {z0}.
+
+Step 3: pointwise sufficiency reduces to cone containment. Since D = ∅, the data-consistent fiber equals 
+
+C. Pointwise sufficiency at c0 requires a decision z⋆ ∈ X that is optimal for all costs in C (and in particular for c0). By Step 2, this forces z⋆ = z0. Therefore, 
+
+D = ∅ is pointwise sufficient at c0 ⇐⇒ z0 ∈ X⋆(c) ∀c ∈ C ⇐⇒ C ⊆ Λ( z0).
+
+Step 4: C ⊆ Λ( z0) iff P ⊆ Q. By (21), for any y ∈ Rd we have 
+
+(( y, 1) , 0, 0) ∈ Λ( z0) ⇐⇒ (y, 1) ∈ cone {¯v1, . . . , ¯vM } ⇐⇒ y ∈ Q, 
+
+where the last equivalence uses that (y, 1) = PMi=1 αi(vi, 1) with αi ≥ 0 holds if and only if PMi=1 αi = 1 
+
+and y = PMi=1 αivi. Applying this pointwise over y ∈ P = [ −1, 1] d yields C ⊆ Λ( z0) ⇐⇒ P ⊆ Q.This completes a polynomial-time reduction from H-in-V containment to checking pointwise sufficiency, proving coNP -hardness. Finally, since our reduction uses D = ∅, deciding whether the minimum pointwise SDD size equals 0
+
+is already coNP -hard; hence, computing the minimum size (and producing a minimum pointwise SDD) is 
+
+coNP -hard. 31 A.3 Proof of Theorem 10 
+
+Theorem 36 (Formal version of Theorem 10) . The following decision problem is coNP -hard: given a bounded polytope X ⊆ Rn and a polyhedral uncertainty set C ⊆ Rn specified in H-representation, decide whether the empty dataset D = ∅ is a global SDD for (X, C) in the sense of Definition 1. The hardness persists even when C is an open, full-dimensional polyhedron. Consequently, computing the size of a minimum global SDD (and the corresponding search problem of finding one) is coNP -hard. Proof. We reduce from the same restricted H-in-V polytope containment problem used in the proof of Theorem 9: given a full-dimensional polytope Q = conv {v1, . . . , v M } ⊆ Rd with 0 ∈ int( Q), decide whether P = [ −1, 1] d ⊆ Q, which is coNP -complete. We reuse the standard-form polytope X from (19) .In particular, X = {z = ( w, r, s ) ∈ Rn : Az = b, z ≥ 0} with n = 2( d + 1) + M , and it contains the distinguished vertex z0 = ( 1, 1, 0) .
+
+A full-dimensional open uncertainty set. Write costs as c = ( cw, c r, c s) ∈ Rn0 × Rn0 × RM with 
+
+n0 = d + 1 . Define the effective cost on w by the linear map 
+
+T (c) := cw − cr + ¯V ⊤cs ∈ Rn0 . (22) Indeed, for any feasible z = ( w, r, s ) ∈ X we have r = 2 · 1 − w and s = ¯V w − β, so 
+
+c⊤z = c⊤ 
+
+> w
+
+w + c⊤ 
+
+> r
+
+(2 · 1 − w) + c⊤ 
+
+> s
+
+( ¯V w − β) = T (c)⊤w + 2 c⊤ 
+
+> r
+
+1 − c⊤ 
+
+> s
+
+β
+
+| {z } 
+
+> constant over X
+
+. (23) Therefore arg min z∈X c⊤z depends on c only through T (c).Let Bop ⊆ Rn0 denote the open polyhedron 
+
+Bop := 
+
+n
+
+(˜ y, ˜t) ∈ Rd × R : 12 < ˜t < 32 , −˜t < ˜yj < ˜t ∀j ∈ [d]
+
+o
+
+.
+
+We define the uncertainty set as the preimage 
+
+Cop := { c ∈ Rn : T (c) ∈ Bop }. (24) Since T is linear and Bop is an open polyhedron, Cop is also an open polyhedron. Moreover, it is full-dimensional because it is open and nonempty (e.g., ((0 , 1) , 0, 0) ∈ C op ). We claim that 
+
+D = ∅ is a global SDD for (X, Cop ) ⇐⇒ P ⊆ Q. (25) Since P ⊆ Q is coNP -hard, this proves the theorem. 
+
+Step 1: Containment is equivalent to a cone inclusion. Recall that cone {¯v1, . . . , ¯vM } = {(tz, t ) : t ≥
+
+0, z ∈ Q}. In particular, for any ˜t > 0 we have 
+
+(˜ y, ˜t) ∈ cone {¯v1, . . . , ¯vM } ⇐⇒ ˜y/ ˜t ∈ Q. 
+
+Therefore, 
+
+Bop ⊆ cone {¯v1, . . . , ¯vM } ⇐⇒ (−1, 1) d ⊆ Q. 
+
+Because Q is closed, (−1, 1) d ⊆ Q holds if and only if [−1, 1] d ⊆ Q, i.e., P ⊆ Q.32 Step 2: If P ⊆ Q, then D = ∅ is a global SDD. Assume P ⊆ Q. By Step 1 we have Bop ⊆
+
+cone {¯v1, . . . , ¯vM }, and since Bop is open this implies 
+
+Bop ⊆ int  cone {¯v1, . . . , ¯vM }.
+
+Next, note that w uniquely determines (r, s ) via the equalities w + r = 2 · 1 and ¯V w − s = β. Thus minimizing c⊤z over X is equivalent to minimizing T (c)⊤w over the projected feasible set 
+
+W := {w ∈ Rn0 : ∃(r, s ) ≥ 0 s.t. (w, r, s ) ∈ X}.
+
+Equivalently, with the change of variables u := w − 1 = ( x, t ), this projected set corresponds to the bounded polytope eX = {(x, t ) ∈ Rd × R : v⊤ 
+
+> i
+
+x + t ≥ 0 ∀i ∈ [M ], −1 ≤ (x, t ) ≤ 1}.
+
+At u0 := (0 , 0) ∈ eX, the box constraints are slack and the active constraints are v⊤ 
+
+> i
+
+x + t ≥ 0, i.e., 
+
+−¯v⊤ 
+
+> i
+
+u ≤ 0. Hence Λ( u0) = cone {¯v1, . . . , ¯vM }. If (˜ y, ˜t) ∈ int(Λ( u0)) , then u0 is the unique minimizer for this cost: for any u ∈ eX \{ u0} the direction u−u0 is a nonzero feasible direction at u0, so (˜ y, ˜t)⊤(u−u0) > 0
+
+and hence (˜ y, ˜t)⊤u > (˜ y, ˜t)⊤u0.Now fix any c ∈ C op . Then T (c) ∈ Bop ⊆ int(Λ( u0)) , so the unique minimizer of min {T (c)⊤u : u ∈
+
+eX} is u0. By (23) , the minimizer set of min z∈X c⊤z is therefore the singleton {z0}. Thus X⋆(c) = {z0} for all c ∈ C op , and the constant rule bX(∅) := {z0} makes D = ∅ a global SDD. 
+
+Step 3: If P̸ ⊆ Q, then no zero-query global SDD exists. Now assume P̸ ⊆ Q. By Step 1 there exists 
+
+(˜ y, ˜t) ∈ Bop such that (˜ y, ˜t) /∈ cone {¯v1, . . . , ¯vM }. Let c1 := ((˜ y, ˜t), 0, 0) ∈ C op , so T (c1) = (˜ y, ˜t). Since 
+
+(˜ y, ˜t) /∈ Λ( u0), we have u0 /∈ eX⋆((˜ y, ˜t)) , and thus z0 /∈ X⋆(c1).On the other hand, c0 := ((0 , 1) , 0, 0) ∈ C op and by the argument in the proof of Theorem 9 (Step 2 there), we have X⋆(c0) = {z0}. Therefore X⋆(c1)̸ = X⋆(c0), i.e., the optimal solution set is not constant over c ∈ C op .Since |D| = 0 , any candidate decoder bX : R|D| → P (X) is necessarily constant. It cannot match two distinct optimal solution sets, so no such map can satisfy Definition 1. This establishes (25). 
+
+Consequence for minimum-size global SDDs. Finally, if one could compute the size of a minimum global SDD (or output such a dataset) in polynomial time, then one could decide whether the optimum size equals 0,which is exactly the coNP -hard decision problem in (25). 
+
+# B Proofs and technical details for Section 5 
+
+B.1 Closed-form FI for ellipsoids 
+
+Recall the face-intersection subproblem 
+
+FI( δ; Q, s ) := min {δ⊤c : c ∈ C, Q ⊤c = s}.
+
+Proposition 37. Let C = {c ∈ Rd : (c − ¯c)⊤Σ−1(c − ¯c) ≤ R2} with Σ ≻ 0. Fix Q ∈ Rd×k with 
+
+rank( Q) = k and s ∈ Rk, and assume C(Q, s ) := {c ∈ C : Q⊤c = s}̸ = ∅. Define 
+
+c⊥ := ¯ c + Σ Q(Q⊤ΣQ)−1(s − Q⊤¯c), M ⊥ := Σ − ΣQ(Q⊤ΣQ)−1Q⊤Σ ⪰ 0,
+
+and 
+
+ρ := 
+
+q
+
+R2 − (c⊥ − ¯c)⊤Σ−1(c⊥ − ¯c).
+
+33 Then for any δ ∈ Rd,
+
+min  
+
+> c∈C(Q,s )
+
+δ⊤c = δ⊤c⊥ − ρ√δ⊤M ⊥δ. 
+
+If δ⊤M ⊥δ > 0, a minimizer is 
+
+cout (δ) = c⊥ − ρ M ⊥δ
+
+√δ⊤M ⊥δ .
+
+If δ⊤M ⊥δ = 0 , then δ⊤c is constant over C(Q, s ).Proof. Let Σ1/2 be the symmetric square root of Σ (so Σ = Σ 1/2Σ1/2). Change variables 
+
+z := Σ −1/2(c − ¯c) ⇐⇒ c = ¯ c + Σ 1/2z. 
+
+Then the ellipsoid constraint becomes ∥z∥2 ≤ R. The equality constraint becomes 
+
+Q⊤c = s ⇐⇒ Q⊤(¯ c + Σ 1/2z) = s ⇐⇒ (Σ 1/2Q)⊤z = s − Q⊤¯c. 
+
+Define eQ := Σ 1/2Q and es := s − Q⊤¯c, and also eδ := Σ 1/2δ. Up to the constant δ⊤¯c, the FI problem is equivalent to 
+
+min {eδ⊤z : ∥z∥2 ≤ R, eQ⊤z = es}.
+
+Let 
+
+z0 := eQ( eQ⊤ eQ)−1es, 
+
+the unique minimum-ℓ2-norm solution of eQ⊤z = es. Every feasible z can be written uniquely as z = z0 + v
+
+with v ∈ ker( eQ⊤). Since z0 ∈ span( eQ) and ker( eQ⊤) = span( eQ)⊥, we have the orthogonal decomposition 
+
+∥z∥22 = ∥z0∥22 + ∥v∥22. Thus feasibility is equivalent to ∥z0∥2 ≤ R (which holds since the fiber is nonempty) and 
+
+∥v∥2 ≤ ρz := 
+
+q
+
+R2 − ∥ z0∥22.
+
+Let P := I − eQ( eQ⊤ eQ)−1 eQ⊤ denote the orthogonal projector onto ker( eQ⊤). Then for v ∈ ker( eQ⊤),
+
+eδ⊤v = ( P eδ)⊤v. Therefore, 
+
+min  
+
+> v∈ker( eQ⊤)
+> ∥v∥2≤ρz
+
+eδ⊤v = min 
+
+> ∥v∥2≤ρz
+
+(P eδ)⊤v = −ρz ∥P eδ∥2,
+
+with minimizer v⋆ = −ρz P eδ 
+
+> ∥Peδ∥2
+
+when P eδ̸ = 0 (and any v when P eδ = 0 ). Hence, the optimal value in z-space is 
+
+eδ⊤z0 − ρz ∥P eδ∥2,
+
+and the optimal c is c = ¯ c + Σ 1/2(z0 + v⋆).It remains to express everything back in the original variables. First, note that eQ⊤ eQ = Q⊤ΣQ and 
+
+Σ1/2z0 = Σ 1/2 eQ( eQ⊤ eQ)−1es = Σ Q(Q⊤ΣQ)−1(s − Q⊤¯c).
+
+Thus 
+
+c⊥ = ¯ c + Σ 1/2z0 = ¯ c + Σ Q(Q⊤ΣQ)−1(s − Q⊤¯c).
+
+Second, 
+
+∥z0∥22 = z⊤ 
+
+> 0
+
+z0 = ( c⊥ − ¯c)⊤Σ−1(c⊥ − ¯c),
+
+so ρz = ρ as defined in the statement. 34 Finally, 
+
+∥P eδ∥22 = eδ⊤P eδ = δ⊤
+
+Σ − ΣQ(Q⊤ΣQ)−1Q⊤Σ
+
+
+
+δ = δ⊤M ⊥δ. 
+
+Also, 
+
+Σ1/2P eδ =
+
+
+
+Σ − ΣQ(Q⊤ΣQ)−1Q⊤Σ
+
+
+
+δ = M ⊥δ. 
+
+Substituting these identities yields the claimed closed-form expressions for the minimum value and the optimizer. 
+
+B.2 Proof of Property 21 
+
+Proof. We bound the computational work in one iteration of Algorithm 1. Each iteration performs the following optimization subroutines. (i) One LP over X . Line 5 solves 
+
+min {(cin )⊤x : Ax = b, x ≥ 0}.
+
+Since X is given in standard form, this LP can be solved in time polynomial in the bit complexity of the input. (ii) d − m face-intersection subproblems over C. For each j ∈ N (so |N | = d − m), line 6 of Algorithm 1 solves 
+
+min {δ⊤ 
+
+> j
+
+c′ : c′ ∈ C , Q ⊤ 
+
+> k
+
+c′ = sk}.
+
+If C is a polytope given in H-representation, C = {c : Gc ≤ h}, then this is the LP 
+
+min {δ⊤ 
+
+> j
+
+c′ : Gc ′ ≤ h, Q ⊤ 
+
+> k
+
+c′ = sk},
+
+whose size is polynomial in the input (in particular, it has dimension d and k ≤ d⋆ equality constraints). Hence, each FI call can be solved in polynomial time. If instead C is an ellipsoid, Proposition 37 gives a closed-form expression for the optimal value and a minimizer, which can be computed in polynomial time (it amounts to solving a k × k linear system and basic matrix–vector operations). Thus, each iteration runs in polynomial time and makes at most d − m FI calls. Finally, by Theorem 20, Algorithm 1 executes at most d⋆ + 1 ≤ d + 1 iterations and makes at most d⋆ oracle queries of the form q⊤c.Combining the per-iteration bound with the iteration bound yields the claimed overall polynomial running time. 
+
+# C Proofs and technical details for Section 6 
+
+Proof of Theorem 26. We give an explicit construction in which the intrinsic dimension d⋆ and the ambient dimension can be chosen independently. 
+
+Feasible region. Fix integers d ≥ d⋆ ≥ 2. Let m := d, set A := [ Id Id] ∈ Rd×2d and b := 1 ∈ Rd, and define the lifted polytope 
+
+X := {z = ( x, s ) ∈ R2d : Az = b, z ≥ 0} = {(x, s ) : x + s = 1, x ≥ 0, s ≥ 0},
+
+which is an extended formulation of the hypercube [0 , 1] d obtained by introducing slack variables. Then X is bounded and nondegenerate: at every extreme point, for each j ∈ [d] exactly one of xj , s j equals 1 and the other equals 0, so every extreme point has exactly m = d strictly positive components. 35 Prior set and a rare-types distribution. Let μ ∈ Rd be defined coordinatewise by 
+
+μj =
+
+(
+
+0.99 , j ∈ { 1, . . . , d ⋆},
+
+10 , j ∈ { d⋆ + 1 , . . . , d },
+
+and define the lifted center ¯μ := ( μ, 0) ∈ R2d. Let the convex prior set be the lifted radius-1 Euclidean ball 
+
+C := {(c, 0) ∈ R2d : ∥c − μ∥2 ≤ 1}.
+
+For each i ∈ { 1, . . . , d ⋆} define the lifted costs and query directions 
+
+c(i) := ( μ − ei, 0) ∈ C , δi := ( −ei, e i) ∈ R2d.
+
+Fix ε ∈ (0 , 1/4) and let k := d⋆ − 1. Define a distribution Pc supported on {c(1) , . . . , c (d⋆)} ⊆ C by 
+
+P(c = c(1) ) = 1 − 2ε, P(c = c(i)) = 2εk , i = 2 , . . . , d ⋆.
+
+We call c(1) the common type and {c(2) , . . . , c (d⋆)} the rare types. 
+
+Step 1: Prove that dim dir( X ⋆(C)) = d⋆.Lemma 38. For every (c, 0) ∈ C , every minimizer z⋆ = ( x⋆, s ⋆) ∈ arg min (x,s )∈X (c, 0) ⊤(x, s ) satisfies 
+
+x⋆j = 0 and s⋆j = 1 for all j > d ⋆. Moreover, X ⋆(C) ⊇ { (0 , 1), (e1, 1 − e1), . . . , (ed⋆ , 1 − ed⋆ )}.Consequently, 
+
+dim dir( X ⋆(C)) = d⋆.
+
+Proof. Fix (c, 0) ∈ C and any feasible (x, s ) ∈ X . Since x + s = 1, we have 
+
+(c, 0) ⊤(x, s ) = c⊤x. 
+
+Thus, the LP objective depends only on x ∈ [0 , 1] d. For each j > d ⋆ we have cj ≥ μj − 1 = 9 > 0, hence any minimizer must set x⋆j = 0 (and therefore s⋆j = 1 ) for all j > d ⋆.Next, ¯μ = ( μ, 0) ∈ C and μ has strictly positive coordinates, so the unique minimizer is (x, s ) = (0 , 1).For each i ≤ d⋆, the cost c(i) = ( μ − ei, 0) has c(i) 
+
+> i
+
+= −0.01 < 0 and all other c(i) 
+
+> j
+
+> 0, so the unique minimizer is (x, s ) = ( ei, 1 − ei). This proves the stated inclusion of X ⋆(C).Therefore dir( X ⋆(C)) contains span {(ei, −ei) : i = 1 , . . . , d ⋆}, so dim dir( X ⋆(C)) ≥ d⋆. On the other hand, we already showed that every optimizer has xj = 0 for j > d ⋆, hence every difference of reachable optima lies in span {(ei, −ei) : i = 1 , . . . , d ⋆}, giving dim dir( X ⋆(C)) ≤ d⋆.
+
+Step 2: Without querying δi, type i cannot be certified. Lemma 39. Fix any i ∈ { 2, . . . , d ⋆} and let D ⊆ R2d be any dataset that does not contain δi. If D ⊆ {δ1, . . . , δ d⋆ }, then 
+
+¯μ ∈ C  D, s (c(i); D).
+
+Consequently, D is not pointwise sufficient at c(i).Proof. Assume D ⊆ { δ1, . . . , δ d⋆ } and δi /∈ D . Every query in D is of the form δj = ( −ej , e j ) with j̸ = i.For such j,
+
+δ⊤ 
+
+> j
+
+¯μ = ( −ej , e j )⊤(μ, 0) = −μj = −(μ − ei)j = ( −ej , e j )⊤(μ − ei, 0) = δ⊤ 
+
+> j
+
+c(i).
+
+Hence ¯μ is consistent with the same measurements as c(i), i.e., ¯μ ∈ C (D, s (c(i); D)) .But by Lemma 38, x⋆(¯ μ) = 0 (so the unique optimizer is (0 , 1)) while x⋆(c(i)) = ei (unique optimizer 
+
+(ei, 1 − ei)). Thus, the fiber contains two costs with different unique minimizers, so no single decision can be optimal for all costs in the fiber. Therefore D is not pointwise sufficient at c(i).36 Step 2’: On type i, the pointwise routine adds only δi.Lemma 40. Fix i ∈ { 1, . . . , d ⋆}. Run Algorithm 1 on c = c(i) = ( μ − ei, 0) with initialization Dinit ⊆{δ1, . . . , δ d⋆ } such that δi /∈ Dinit . Then the call performs exactly one augmentation and returns D =
+
+Dinit ∪ { δi}. In particular, during this call, the algorithm cannot add any δj with j̸ = i.Proof. Let Qk be the matrix whose columns are the directions in Dinit and set sk := Q⊤ 
+
+> k
+
+c(i). Since each 
+
+δj = ( −ej , e j ), the fiber 
+
+Ck := {c′ ∈ C : Q⊤ 
+
+> k
+
+c′ = sk}
+
+fixes the coordinates c′ 
+
+> j
+
+= ( μ − ei)j = μj for every δj ∈ Dinit and leaves coordinate i unconstrained; all 
+
+c′ ∈ C k have the form (˜ c, 0) with ˜c ∈ Rd.
+
+(a) The first LP solve yields the vertex (ei, 1 − ei) and its cone. With cin = c(i) = ( μ − ei, 0) , we have 
+
+(μ − ei)i < 0 and (μ − ei)j > 0 for all j̸ = i, so the LP over X has the unique minimizer 
+
+z⋆ = ( x⋆, s ⋆) = ( ei, 1 − ei).
+
+For the matrix A = [ Id Id], this vertex corresponds to the unique feasible basis 
+
+B(i) := {xi} ∪ { sj : j̸ = i}, N (i) := {si} ∪ { xj : j̸ = i}.
+
+For j̸ = i, increasing the nonbasic variable xj from 0 decreases sj from 1 to 0, hence 
+
+δ(B(i), x j ) = ( ej , −ej ).
+
+Increasing the nonbasic variable si from 0 decreases xi from 1 to 0, hence 
+
+δ(B(i), s i) = ( −ei, e i) = δi.
+
+Therefore, the optimality cone (4) takes the explicit form 
+
+Λ( B(i)) = 
+
+n
+
+(u, v ) ∈ R2d : ( uj − vj ) ≥ 0 ∀j̸ = i, (−ui + vi) ≥ 0
+
+o
+
+.
+
+Since every c′ ∈ C k has v = 0 , we have 
+
+Ck ⊆ { (u, 0) : u ∈ Rd}, Λ( B(i)) ∩ { (u, 0) } = {(u, 0) : uj ≥ 0 ∀j̸ = i, u i ≤ 0}.
+
+(b) Among facets of Λ( B(i)) , only the facet for δi can be hit from within Ck. Because coordinate i is free in Ck, the point ˜c := ( μ + ei, 0) belongs to Ck (and to C) but has ˜ci > 0, hence ˜c / ∈ Λ( B(i)) ∩ { (u, 0) }.Therefore Ck̸ ⊆ Λ( B(i)) , the containment test fails, and Algorithm 1 enters the E LSE branch, producing some witness cout ∈ C k \ Λ( B(i)) and considering the segment cα := (1 − α)cin + αc out .We claim that for every j̸ = i,
+
+ C ∩ Λ( B(i))  ∩ { (u, v ) : ( uj − vj ) = 0 } = ∅.
+
+Indeed, take any c = ( u, v ) ∈ C ∩ Λ( B(i)) . Since c ∈ C we have v = 0 and ∥u − μ∥2 ≤ 1. Moreover, 
+
+c ∈ Λ( B(i)) implies ui ≤ 0. Since μi = 0 .99 > 0,
+
+(ui − μi)2 ≥ (0 − μi)2 = μ2 
+
+> i
+
+.
+
+37 Thus, X
+
+> t̸=i
+
+(ut − μt)2 ≤ 1 − (ui − μi)2 ≤ 1 − μ2 
+
+> i
+
+,
+
+and hence for every j̸ = i,
+
+|uj − μj | ≤ 
+
+q
+
+1 − μ2 
+
+> i
+
+⇒ uj ≥ μj −
+
+q
+
+1 − μ2 
+
+> i
+
+.
+
+With μj ∈ { 0.99 , 10 } and 
+
+q
+
+1 − μ2 
+
+> i
+
+= √1 − 0.99 2 < 0.15 , we get uj > 0 for all j̸ = i. Therefore 
+
+uj − vj = uj > 0 for all j̸ = i, proving the claim. Now let α⋆ be the first parameter where the segment leaves relint(Λ( B(i))) . Then cα⋆ ∈ C k ∩ Λ( B(i)) 
+
+lies on a facet hyperplane of Λ( B(i)) . By the claim above, it cannot lie on any facet (uj − vj ) = 0 with 
+
+j̸ = i; hence, it must lie on the facet (−ui + vi) = 0 , whose normal is exactly δ(B(i), s i) = δi. Therefore, the facet-hit rule appends qk+1 = δi.
+
+(c) After adding δi, the fiber becomes a singleton and the routine terminates. Appending δi = ( −ei, e i)
+
+adds the constraint δ⊤ 
+
+> i
+
+(c′, 0) = δ⊤ 
+
+> i
+
+(μ−ei, 0) , i.e., −ui = (1 −μi) and hence ui = μi −1. Then (ui −μi)2 = 1 ,and the radius-1 constraint ∥u − μ∥22 ≤ 1 forces P
+
+> t̸=i
+
+(ut − μt)2 = 0 , hence u = μ − ei and c′ = c(i).Therefore the updated fiber is the singleton {c(i)}, the containment test succeeds, and Algorithm 1 terminates after exactly one augmentation, returning D = Dinit ∪ { δi}.
+
+Step 3: A coupon-collector lower bound for Algorithm 2. Let I ⊆ { 2, . . . , d ⋆} be the set of rare indices that appear at least once among the n i.i.d. samples. By Lemma 40, Algorithm 2 learns δi if and only if i ∈ I.By Lemma 39, the final dataset Dn fails on every rare type i / ∈ I. Therefore 
+
+R(Dn) ≥ X
+
+> i∈{ 2,...,d ⋆}\ I
+
+P(c = c(i)) = 2εk {2, . . . , d ⋆} \ I .
+
+Let N be the number of rare samples among c1, . . . , c n:
+
+N =
+
+> n
+
+X
+
+> t=1
+
+1{ct̸ = c(1) } ∼ Binomial( n, 2ε).
+
+Since |I| ≤ N , the event N < k/ 2 implies |{ 2, . . . , d ⋆} \ I| ≥ k/ 2, and hence R(Dn) ≥ ε. It remains to lower bound P(N < k/ 2) . If n ≤ k/ (8 ε), then E[N ] = 2 εn ≤ k/ 4, and Markov’s inequality gives 
+
+P
+
+
+
+N ≥ k
+
+2
+
+
+
+≤ E[N ]
+
+k/ 2 ≤ k/ 4
+
+k/ 2 = 12 .
+
+Hence P(N < k/ 2) ≥ 1/2, and on this event we have R(Dn) ≥ ε. This concludes the proof of Theorem 26. 
+
+# D Proofs and technical details for Section 7 
+
+D.1 Ellipsoidal lifting 
+
+Throughout this appendix, we assume the shifted ellipsoidal prior 
+
+C := {c ∈ Rd : ( c − c0)⊤Σ−1(c − c0) ≤ 1}, Σ ≻ 0, c 0 ∈ Rd.
+
+38 For any orthonormal basis U ∈ Rd×t we define the lifting matrix 
+
+LU := Σ U (U ⊤ΣU )−1,
+
+and the associated canonical lifting map lift U : Rt → Rd by 
+
+lift U (s) := c0 + LU s. 
+
+Lemma 41. For any s ∈ Rt, lift U (s) is the unique solution to 
+
+min 
+
+> c∈Rd
+
+12 (c − c0)⊤Σ−1(c − c0) s.t. U ⊤(c − c0) = s. 
+
+In particular, it satisfies U ⊤(lift U (s) − c0) = s and 
+
+(lift U (s) − c0)⊤Σ−1(lift U (s) − c0) = s⊤(U ⊤ΣU )−1s. 
+
+Consequently, lift U (s) ∈ C whenever s ∈ U ⊤(C − c0). When Σ = I, we have lift U (s) = c0 + U s .Proof. Let z := c − c0. The problem becomes 
+
+min 
+
+> z∈Rd
+
+12 z⊤Σ−1z s.t. U ⊤z = s, 
+
+which is exactly the centered-ellipsoid case after the change of variables. The Lagrangian is L(z, λ ) =  
+
+> 12
+
+z⊤Σ−1z − λ⊤(U ⊤z − s). Stationarity gives Σ−1z − U λ = 0 , hence z = Σ U λ . Imposing the constraint yields s = U ⊤z = U ⊤ΣU λ , so λ = ( U ⊤ΣU )−1s and z = Σ U (U ⊤ΣU )−1s = LU s. The claimed identities follow by direct substitution. 
+
+D.2 SPO generalization in the decision-sufficient subspace (Proof of Theorem 27) 
+
+We now prove the Stage II generalization bound in Theorem 27. The proof has three ingredients: (i) we bound the complexity of the induced decision class x⋆ ◦ H U⋆,d ⋆ via its Natarajan dimension, (ii) we plug this bound into the Natarajan-dimension generalization theorem for the SPO loss due to El Balghiti et al. (2023), and (iii) we show that under a global sufficient dataset, projecting to W⋆ and lifting back is decision-preserving, so restricting to the compressed class incurs no approximation error. 
+
+Step 1: Natarajan dimension of the compressed decision class. We begin by translating compressed affine predictors into a multiclass linear prediction problem over labels X ∠. This is the only place where the intrinsic dimension d⋆ enters the analysis. 
+
+Lemma 42 (Natarajan dimension bound) . Let X ⊆ Rd be a bounded polytope with extreme points X ∠. Let 
+
+Haff  
+
+> U⋆,d ⋆
+
+be the class of compressed affine predictors 
+
+Haff  
+
+> U⋆,d ⋆
+
+:= 
+
+n
+
+fB,b (ξ) := bc 0 + LU⋆ Bξ : B ∈ Rd⋆×p, b ∈ R
+
+o
+
+,
+
+and let Faff  
+
+> U⋆,d ⋆
+
+:= x⋆ ◦ H aff  
+
+> U⋆,d ⋆
+
+be the induced decision class. Then the Natarajan dimension satisfies 
+
+dN (Faff  
+
+> U⋆,d ⋆
+
+) ≤ d⋆p + 1 .
+
+39 Proof. For any x ∈ X ∠,
+
+fB,b (ξ)⊤x = bc ⊤ 
+
+> 0
+
+x +  LU⋆ Bξ ⊤x = bc ⊤ 
+
+> 0
+
+x +
+
+D⃗
+
+(B),⃗ 
+
+
+
+(L⊤ 
+
+> U⋆
+
+x)ξ⊤E 
+
+.
+
+Define the feature map 
+
+Ψaff (ξ, x ) := 
+
+"⃗  (L⊤ 
+
+> U⋆
+
+x)ξ⊤
+
+c⊤ 
+
+> 0
+
+x
+
+#
+
+∈ Rd⋆p+1 , wB,b := 
+
+⃗
+
+(B)
+
+b
+
+
+
+∈ Rd⋆p+1 .
+
+Then Faff  
+
+> U⋆,d ⋆
+
+is a subset of the multiclass linear hypothesis class 
+
+HΨaff := {ξ 7 → arg min  
+
+> x∈X ∠
+
+⟨w, Ψaff (ξ, x )⟩ : w ∈ Rd⋆p+1 },
+
+because each fB,b induces the decision rule x⋆(fB,b (ξ)) = arg min x∈X ∠ ⟨wB,b , Ψaff (ξ, x )⟩. Finally, by Shalev-Shwartz and Ben-David (2014, Theorem 29.7), the Natarajan dimension of HΨaff is at most d⋆p + 1 ,and the same bound holds for its subset Faff  
+
+> U⋆,d ⋆
+
+.
+
+Step 2: Uniform SPO generalization in the compressed class. We now combine Lemma 42 with the SPO generalization bound of El Balghiti et al. (2023). This yields a uniform convergence guarantee over 
+
+HU⋆,d ⋆ with leading complexity term scaling as d⋆p.
+
+Lemma 43. For any δ ∈ (0 , 1) , with probability at least 1 − δ over an i.i.d. sample S = {(ξi, c i)}ni=1 , we have 
+
+RSPO (f ) ≤ ˆRSPO (f ) + 2 ωX (C)
+
+r 2( d⋆p + 1) log( n|X ∠|2)
+
+n + ωX (C)
+
+r log(1 /δ )2n ,
+
+simultaneously for all f ∈ H U⋆,d ⋆ , where ωX (C) := sup c∈C 
+
+ max x∈X c⊤x − min x∈X c⊤x.Proof. This follows from the Natarajan-dimension generalization bound for SPO loss in El Balghiti et al. (2023). The SPO loss is uniformly bounded by ωX (C) when c ∈ C . Using Lemma 42 and the inclusion 
+
+HU⋆,d ⋆ ⊆ H aff  
+
+> U⋆,d ⋆
+
+(take b = 1 ), we have dN (x⋆ ◦ H U⋆,d ⋆ ) ≤ dN (Faff  
+
+> U⋆,d ⋆
+
+) ≤ d⋆p + 1 , which yields the stated bound. 
+
+Step 3: Global sufficiency implies lossless compression. To prove the first statement in Theorem 27, we show that if D is globally sufficient on C, then compressing any cost vector to W⋆ and lifting it back to C
+
+leaves the oracle decision unchanged. 
+
+Lemma 44. Assume D is globally sufficient on C, W⋆ := span( D) and let U⋆ ∈ Rd×d⋆
+
+be an orthonormal basis of W⋆. Recall that LU⋆ := Σ U⋆(U ⊤ 
+
+> ⋆
+
+ΣU⋆)−1 and lift U⋆ (s) := c0 + LU⋆ s.Fix a deterministic tie-breaking rule so that x⋆(·) is single-valued. Then for any ˆc ∈ C , letting 
+
+˜c := lift U⋆
+
+ U ⊤ 
+
+> ⋆
+
+(ˆ c − c0),
+
+we have x⋆(ˆ c) = x⋆(˜ c).Consequently, for any predictor f : Ξ → C , the compressed predictor ˆf (ξ) := lift U⋆
+
+ U ⊤ 
+
+> ⋆
+
+(f (ξ) − c0)
+
+induces the same decisions and satisfies ℓSPO (f (ξ), c ) = ℓSPO ( ˆf (ξ), c ) for all c ∈ C .
+
+40 Proof. Fix ˆc ∈ C and set s := U ⊤ 
+
+> ⋆
+
+(ˆ c − c0) and ˜c := lift U⋆ (s) = c0 + LU⋆ s. By the definition of LU⋆ ,
+
+U ⊤ 
+
+> ⋆
+
+(˜ c − c0) = U ⊤ 
+
+> ⋆
+
+LU⋆ s = U ⊤ 
+
+> ⋆
+
+ΣU⋆ (U ⊤ 
+
+> ⋆
+
+ΣU⋆)−1s = s = U ⊤ 
+
+> ⋆
+
+(ˆ c − c0). (⋆)Now take any q ∈ D ⊆ W⋆ = span( U⋆). Write q = U⋆a for some a ∈ Rd⋆
+
+. Then using (⋆),
+
+q⊤˜c − q⊤ˆc = a⊤U ⊤ 
+
+> ⋆
+
+(˜ c − ˆc) = a⊤
+
+U ⊤ 
+
+> ⋆
+
+(˜ c − c0) − U ⊤ 
+
+> ⋆
+
+(ˆ c − c0)
+
+
+
+= 0 .
+
+Hence s(˜ c; D) = s(ˆ c; D). Moreover, since ˆc ∈ C we have s ∈ U ⊤ 
+
+> ⋆
+
+(C − c0) and thus Lemma 41 implies 
+
+˜c ∈ C . Global sufficiency of D on C then yields arg min x∈X ˆc⊤x = arg min x∈X ˜c⊤x, and the deterministic tie-breaking rule gives x⋆(ˆ c) = x⋆(˜ c).The predictor claim follows by applying the above argument pointwise to ˆc = f (ξ) ∈ C .With Lemmas 43 and 44 in hand, we can now complete the proof of Theorem 27. 
+
+Proof of Theorem 27. Part (1) follows from Lemma 44 by taking f = f⋆ ∈ H (C): the compressed predictor 
+
+ˆf⋆(ξ) = lift U⋆ (U ⊤ 
+
+> ⋆
+
+(f⋆(ξ) − c0)) induces the same decisions as f⋆, hence has the same population SPO risk, and is a risk minimizer in HU⋆,d ⋆ (C).For part (2), apply Lemma 43, which gives a uniform generalization bound over the larger class HU⋆,d ⋆
+
+(and therefore also over its subset HU⋆,d ⋆ (C)). 
+
+D.3 A concrete bound for ordinary least squares 
+
+Suppose ∥ξ∥2 ≤ 1 almost surely and the population design covariance satisfies Σξ := E[ξξ ⊤] ⪰ κI p for some κ > 0. More generally, if ∥ξ∥2 ≤ Cξ almost surely, the same proof yields the same bound up to an additional multiplicative factor Cξ.Assume the regression noise ϵ := c − μ(ξ) is conditionally mean-zero and σ-subgaussian in every direction, i.e., for all λ ∈ R and all u ∈ Rd with ∥u∥2 = 1 ,
+
+E
+
+h
+
+exp  λ u ⊤ϵ | ξ
+
+i
+
+≤ exp( λ2σ2/2) .
+
+Under the centered linear model (11) , let ˆAμ be the (multi-response) OLS estimator based on nμ i.i.d. samples 
+
+{(ξi, c i)}nμ 
+
+> i=1
+
+by regressing yi := ci − c0 on ξi, and define 
+
+ˆμ(ξ) := c0 + ˆAμξ, ε2 
+
+> μ
+
+:= Eξ
+
+∥ˆμ(ξ) − μ(ξ)∥22
+
+ = Eξ
+
+∥( ˆAμ − Aμ)ξ∥22
+
+.
+
+Lemma 45. Fix δμ ∈ (0 , 1) and assume 
+
+nμ ≥ 8
+
+κ log 2pδμ
+
+.
+
+Then, with probability at least 1 − δμ over the regression sample, the OLS estimator is well-defined and 
+
+∥ ˆAμ − Aμ∥F ≤ Creg · σ
+
+√κ
+
+vuut d
+
+
+
+p + log 4dδμ
+
+
+
+nμ
+
+, where one may take Creg = 4 √2. (26) 
+
+Consequently, 
+
+sup 
+
+> ∥ξ∥2≤1
+
+∥ˆμ(ξ) − μ(ξ)∥2 ≤ Creg · σ
+
+√κ
+
+vuut d
+
+
+
+p + log 4dδμ
+
+
+
+nμ
+
+, (27) 41 and, in particular, 
+
+εμ ≤ Creg · σ
+
+√κ
+
+vuut d
+
+
+
+p + log 4dδμ
+
+
+
+nμ
+
+. (28) 
+
+Proof. Write the regression sample in centered form yi = ci − c0 = Aμξi + ϵi, where E[ϵi | ξi] = 0 and ϵi is 
+
+σ-subgaussian in every direction. Let 
+
+ˆΣ := 1
+
+nμnμ
+
+X
+
+> i=1
+
+ξiξ⊤ 
+
+> i
+
+and X ∈ Rnμ×p be the design matrix with rows ξ⊤ 
+
+> i
+
+.
+
+Then X⊤X = nμ ˆΣ.This proof follows a standard non-asymptotic OLS argument: we first lower bound the minimum eigenvalue of the empirical Gram matrix via a matrix Chernoff bound (Tropp, 2012), and then control the self-normalized noise term ∥(X⊤X)−1/2X⊤ϵ(j)∥2 using sub-Gaussian concentration together with an ε-net (sphere covering) argument (Vershynin, 2018). 
+
+Step 1: a lower bound on λmin ( ˆΣ) . Set Yi := ξiξ⊤ 
+
+> i
+
+, so each Yi ⪰ 0 and λmax (Yi) = ∥ξi∥22 ≤ 1 a.s. Moreover, 
+
+E[Yi] = E[ξξ ⊤] = Σ ξ ⪰ κI p.
+
+Applying the matrix Chernoff bound (Tropp, 2012, Theorem 1.1) with δ = 1 /2 yields 
+
+P λmin 
+
+> nμ
+
+X
+
+> i=1
+
+Yi
+
+!
+
+≤ 12 λmin 
+
+> nμ
+
+X
+
+> i=1
+
+EYi
+
+!! 
+
+≤ p
+
+"
+
+e−1/2
+
+(1 /2) 1/2
+
+#nμκ
+
+≤ p e −nμκ/ 8.
+
+Under the assumed sample size condition, p e −nμκ/ 8 ≤ δμ/2; hence with probability at least 1 − δμ/2,
+
+λmin (X⊤X) = nμλmin ( ˆΣ) ≥ nμκ
+
+2 .
+
+In particular, X⊤X is invertible, and OLS is well-defined on this event. 
+
+Step 2: row-wise OLS coefficient error. Let β⊤ 
+
+> j
+
+denote the j-th row of Aμ and ˆβ⊤ 
+
+> j
+
+the j-th row of ˆAμ.Then the scalar response model for coordinate j is yi,j = β⊤ 
+
+> j
+
+ξi + ϵi,j , and the OLS error satisfies 
+
+ˆβj − βj = ( X⊤X)−1X⊤ϵ(j),
+
+where ϵ(j) := ( ϵ1,j , . . . , ϵ nμ,j ) ∈ Rnμ .Define the normalized noise vector 
+
+gj := ( X⊤X)−1/2X⊤ϵ(j) ∈ Rp.
+
+Conditioned on X, for any u ∈ Rp with ∥u∥2 = 1 ,
+
+u⊤gj = u⊤(X⊤X)−1/2X⊤ϵ(j) = a⊤ϵ(j), where a := X(X⊤X)−1/2u ∈ Rnμ .
+
+Note ∥a∥22 = u⊤(X⊤X)−1/2X⊤X(X⊤X)−1/2u = ∥u∥22 = 1 . Since {ϵi,j }nμ 
+
+> i=1
+
+are independent and each is 
+
+σ-subgaussian, we have for all λ ∈ R,
+
+E
+
+h
+
+exp  λ u ⊤gj
+
+ | X
+
+i
+
+=
+
+> nμ
+
+Y
+
+> i=1
+
+E[exp( λa iϵi,j ) | X] ≤
+
+> nμ
+
+Y
+
+> i=1
+
+exp( λ2σ2a2 
+
+> i
+
+/2) = exp( λ2σ2/2) .
+
+42 Thus, conditional on X, u⊤gj is σ-subgaussian for every unit vector u.Let N be a 1/2-net of the Euclidean unit sphere in Rp with |N | ≤ 5p (Vershynin, 2018). For any fixed 
+
+u ∈ N and any t > 0, subgaussian tails imply P |u⊤gj | ≥ σ√2t | X ≤ 2e−t. Taking a union bound over 
+
+N and choosing t := p log 5 + log(2 /δ j ) gives 
+
+P
+
+
+
+max  
+
+> u∈N
+
+|u⊤gj | ≥ σ√2t X
+
+
+
+≤ |N | 2e−t ≤ δj .
+
+On the complementary event, the standard net argument yields ∥gj ∥2 ≤ 2 max u∈N |u⊤gj |, so with conditional probability at least 1 − δj ,
+
+∥gj ∥2 ≤ 2σ√2t = 2 σ
+
+r
+
+2
+
+
+
+p log 5 + log(2 /δ j )
+
+
+
+≤ 4σ
+
+q
+
+p + log(2 /δ j ),
+
+where we used log 5 ≤ 2 and log(2 /δ j ) ≥ 0.Set δj := δμ/(2 d), so log(2 /δ j ) = log(4 d/δ μ). Then, with probability at least 1 − δμ/2 over the noise (and conditional on X), the above bound holds simultaneously for all j = 1 , . . . , d by a union bound. 
+
+Step 3: combine and translate to prediction error. On the intersection of the events from Steps 1 and 2 (which has probability at least 1 − δμ), for each j,
+
+∥ ˆβj − βj ∥2 = ∥(X⊤X)−1/2gj ∥2 ≤ ∥gj ∥2
+
+pλmin (X⊤X) ≤ 4σpp + log(4 d/δ μ)
+
+pnμκ/ 2 = 4√2 σ
+
+√κ
+
+s
+
+p + log(4 d/δ μ)
+
+nμ
+
+.
+
+Therefore, 
+
+∥ ˆAμ − Aμ∥2 
+
+> F
+
+=
+
+> d
+
+X
+
+> j=1
+
+∥ ˆβj − βj ∥22 ≤ 32 σ2
+
+κ · d p + log(4 d/δ μ)
+
+nμ
+
+.
+
+Taking square roots yields (26). Moreover, for every ξ with ∥ξ∥2 ≤ 1,
+
+∥ˆμ(ξ) − μ(ξ)∥2 = ∥( ˆAμ − Aμ)ξ∥2 ≤ ∥ ˆAμ − Aμ∥F ∥ξ∥2 ≤ ∥ ˆAμ − Aμ∥F ,
+
+which implies (27). Finally, since ∥ξ∥2 ≤ 1 a.s., 
+
+ε2 
+
+> μ
+
+= Eξ
+
+∥( ˆAμ − Aμ)ξ∥22
+
+ ≤ ∥ ˆAμ − Aμ∥2 
+
+> F
+
+,
+
+which implies (28). 
+
+D.4 Stage-I representation error bound (Proof of Theorem 29) 
+
+We first relate the regression error of ˆμ to the probability that the induced plug-in decision disagrees with the Bayes rule. Fix η > 0. On the event that μ(ξ) lies at distance > η from the cone boundary BX , the optimal extreme point is constant throughout the ball B(μ(ξ), η ). Hence, if the regression estimate is η-accurate and the learned dataset ˆD is pointwise sufficient at ˆμ(ξ), then the lifted predictor ˜μ(ξ) induces the same unique decision as μ(ξ). The lemma below formalizes this decomposition. 
+
+Lemma 46. Assume c ∈ C almost surely, and let ˜μ be defined in (12) . Under Assumption 28, define for η > 0
+
+τμ(η) := Pξ
+
+∥ˆμ(ξ) − μ(ξ)∥2 > η .
+
+Then, for any η > 0,
+
+Pξ
+
+x⋆(˜ μ(ξ)) ̸ = x⋆(μ(ξ))  ≤ Pξ
+
+ ˆD is not pointwise sufficient at ˆμ(ξ) + τμ(η) + Cmarg ηα. (29) 43 Proof. Define the events 
+
+A(ξ) := { ˆD is pointwise sufficient at ˆμ(ξ)},B(ξ) := {∥ ˆμ(ξ) − μ(ξ)∥2 ≤ η},C(ξ) := {dist( μ(ξ), BX ) > η },D(ξ) := {˜μ(ξ) /∈ B X }.
+
+Note that Pξ[D(ξ)c] = 0 by Assumption 28. 
+
+Step 1: ˜μ(ξ) is fiber-equivalent to ˆμ(ξ) under ˆD. Since ˆμ(ξ) ∈ C a.s. and ˆU spans ˆD, we have ˆU ⊤(ˆ μ(ξ) −
+
+c0) ∈ ˆU ⊤(C − c0) and thus Lemma 41 implies ˜μ(ξ) ∈ C . Moreover, using the definition of ˜μ and the lifting operator lift ˆU (s) = c0 + L ˆU s (see (8)), we have 
+
+ˆU ⊤(˜ μ(ξ) − c0) = ˆU ⊤L ˆU ˆU ⊤(ˆ μ(ξ) − c0) =   ˆU ⊤Σ ˆU   ˆU ⊤Σ ˆU −1 ˆU ⊤(ˆ μ(ξ) − c0) = ˆU ⊤(ˆ μ(ξ) − c0).
+
+Therefore, for any q ∈ ˆD ⊆ span( ˆU ) we can write q = ˆU a for some a ∈ Rt, and thus 
+
+q⊤ ˜μ(ξ) − q⊤ ˆμ(ξ) = a⊤ ˆU ⊤ ˜μ(ξ) − ˆμ(ξ) = a⊤ ˆU ⊤(˜ μ(ξ) − c0) − ˆU ⊤(ˆ μ(ξ) − c0)
+
+
+
+= 0 .
+
+In particular, ˜μ(ξ) and ˆμ(ξ) lie in the same fiber C
+
+ ˆD, s (ˆ μ(ξ); ˆD)
+
+
+
+.
+
+Step 2: On A(ξ) ∩ B(ξ) ∩ C(ξ) ∩ D(ξ), the oracle decisions coincide. On A(ξ), pointwise sufficiency at 
+
+ˆμ(ξ) means that there exists some decision xps (ξ) ∈ X such that 
+
+xps (ξ) ∈ X ⋆(c′) ∀ c′ ∈ C 
+
+ ˆD, s (ˆ μ(ξ); ˆD)
+
+
+
+.
+
+Since ˜μ(ξ) is in the same fiber, we have xps (ξ) ∈ X ⋆(˜ μ(ξ)) and also xps (ξ) ∈ X ⋆(ˆ μ(ξ)) .Next, on B(ξ) ∩ C(ξ) we have ˆμ(ξ) ∈ B(μ(ξ), η ) while B(μ(ξ), η ) is contained in the interior of a single normal cone. Hence, the optimal extreme point is unique throughout this ball, and in particular 
+
+X ⋆(ˆ μ(ξ)) = {x⋆(ˆ μ(ξ)) } and x⋆(ˆ μ(ξ)) = x⋆(μ(ξ)) .Finally, on D(ξ) we have ˜μ(ξ) /∈ B X , so X ⋆(˜ μ(ξ)) = {x⋆(˜ μ(ξ)) } is also a singleton. Since xps (ξ) is optimal for both ˆμ(ξ) and ˜μ(ξ), uniqueness forces x⋆(˜ μ(ξ)) = xps (ξ) = x⋆(ˆ μ(ξ)) = x⋆(μ(ξ)) .
+
+Step 3: Conclude by a union bound. Thus, on A(ξ) ∩ B(ξ) ∩ C(ξ) ∩ D(ξ) we have x⋆(˜ μ(ξ)) = x⋆(μ(ξ)) ,and therefore 
+
+Pξ
+
+x⋆(˜ μ(ξ)) ̸ = x⋆(μ(ξ))  ≤ Pξ[A(ξ)c] + Pξ[B(ξ)c] + Pξ[C(ξ)c] + Pξ[D(ξ)c].
+
+The first term is the pointwise-sufficiency failure probability at ˆμ(ξ). The second term is exactly τμ(η).The third term is controlled by Assumption 28, giving P[C(ξ)c] ≤ Cmarg ηα. Finally, P[D(ξ)c] = 0 by Assumption 28, which yields (29). Combining the tail-form transfer bound (29) , the certificate guarantee of Theorem 25 for Algorithm 2, and the bounded-design OLS control of Lemma 45 yields the main finite-sample bound on the representation-induced error of Stage I. 
+
+Proof of Theorem 29. On the regression event from Lemma 45, equation (27) implies that 
+
+∥ˆμ(ξ) − μ(ξ)∥2 ≤ rμ,δ μ for every ξ with ∥ξ∥2 ≤ 1.
+
+Since ∥ξ∥2 ≤ 1 almost surely, this gives 
+
+τμ
+
+ rμ,δ μ
+
+ = Pξ
+
+∥ˆμ(ξ) − μ(ξ)∥2 > r μ,δ μ
+
+ = 0 .
+
+44 Applying (29) with η = rμ,δ μ therefore yields 
+
+Pξ
+
+x⋆(˜ μ(ξ)) ̸ = x⋆(μ(ξ))  ≤ Pξ
+
+ ˆD is not pointwise sufficient at ˆμ(ξ) + Cmarg rαμ,δ μ .
+
+On the same regression event, Theorem 25 applied to the pseudo-cost sample {ˆcj }ndisc  
+
+> j=1
+
+gives, with probability at least 1 − δ over the discovery contexts, 
+
+Pξ
+
+ ˆD is not pointwise sufficient at ˆμ(ξ) ≤ 4
+
+ndisc 
+
+(6 |T | + log( e/δ )) .
+
+Combining the two displays and taking a union bound over the regression and discovery samples proves (14) .For the SPO misspecification bound, note that for any predictor f ,
+
+RSPO (f ) − RSPO (f⋆) = Eξ
+
+h
+
+μ(ξ)⊤x⋆(f (ξ)) − μ(ξ)⊤x⋆(μ(ξ)) 
+
+i
+
+≥ 0,
+
+and for each ξ the bracketed difference is at most ωX (C) and is zero whenever the two decisions coincide. Hence RSPO (f ) − RSPO (f⋆) ≤ ωX (C) Pξ[x⋆(f (ξ)) ̸ = x⋆(μ(ξ))] .Apply this to the specific candidate f = ˜ μ. By (13) we have ˜μ ∈ H ˆU ,t , so the optimality of ˆf⋆ in H ˆU ,t 
+
+yields RSPO ( ˆf⋆) ≤ RSPO (˜ μ). Combining these facts with (14) gives (15). 45

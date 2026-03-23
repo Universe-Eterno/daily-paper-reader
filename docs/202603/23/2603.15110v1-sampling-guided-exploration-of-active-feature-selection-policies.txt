@@ -1,0 +1,577 @@
+Title: Sampling-guided exploration of active feature selection policies
+
+URL Source: https://arxiv.org/pdf/2603.15110v1
+
+Published Time: Tue, 17 Mar 2026 05:59:15 GMT
+
+Number of Pages: 25
+
+Markdown Content:
+# Sampling-guided exploration of active feature selection policies 
+
+## Gabriel Bernardino ∗1,2 , Anders Jonsson 1, Patrick Clarysse 
+
+2, and Nicolas Duchateau 2,3 1Department of Engineering, Universitat Pompeu Fabra, Barcelona, Spain 
+
+2Univ Lyon, Université Claude Bernard Lyon 1, INSA-Lyon, CNRS, Inserm, CREATIS UMR 5220, U1294, F-69621, Lyon, France 
+
+3Institut Universitaire de France (IUF) March 17, 2026 
+
+Abstract 
+
+Determining the most appropriate features for machine learning pre-dictive models is challenging regarding performance and feature acquisi-tion costs. In particular, global feature choice is limited given that some features will only benefit a subset of instances. In previous work, we pro-posed a reinforcement learning approach to sequentially recommend which modality to acquire next to reach the best information/cost ratio, based on the instance-specific information already acquired. We formulated the problem as a Markov Decision Process where the state’s dimensionality changes during the episode, avoiding data imputation, contrary to existing works. However, this only allowed processing a small number of features, as all possible combinations of features were considered. Here, we address these limitations with two contributions: 1) we expand our framework to larger datasets with a heuristic-based strategy that focuses on the most promising feature combinations, and 2) we introduce a post-fit regularisa-tion strategy that reduces the number of different feature combinations, leading to compact sequences of decisions. We tested our method on four binary classification datasets (one involving high-dimensional variables), the largest of which had 56 features and 4500 samples. We obtained bet-ter performance than state-of-the-art methods, both in terms of accuracy and policy complexity. 
+
+> ∗
+
+Corresponding Author: gabriel.bernardino@upf.edu 
+
+1
+
+> arXiv:2603.15110v1 [cs.LG] 16 Mar 2026
+
+# 1 Introduction 
+
+Computer-aided diagnosis has potential to improve clinical workflows, allow-ing to take advantage of large amounts of data to detect patterns associated with disease. As in human-based diagnosis, it involves the combination of dif-ferent sources of information, such as tests or imaging modalities, and, there-fore, algorithms have been proposed to map all the information to a common space [2, 16, 23]. A drawback of most approaches is that they generally require homogeneous and complete datasets where all descriptors are acquired, while in a real setting not all available modalities contribute for diagnosis of all individ-uals. Besides, the acquisition of unnecessary modalities should be minimized, since they are associated with costs [1, 12, 13] Such costs can involve the eco-nomic price of acquiring the data itself, but can also include other concepts: for instance in medical diagnosis, many tests are dangerous or uncomfortable for the patient such as tissue biopsy or nuclear imaging. Despite the importance of minimizing acquisition cost at inference time, most machine learning methods still consider input data as a fixed part of the problem. Classical methods for feature selection, such as lasso regularization which promotes coefficient sparsity, work at a population level, selecting a subset of features that are enough to do the prediction for every data instance [18, 22]. However, this approach is not optimal since some features are relevant for only part of the instances, and thus feature selection needs to be performed for each instance individually at inference time to obtain a cost-effective data acquisition. On the other hand, other approaches also address this by sequentially propos-ing instance-specific features to be acquired, similar to a clinician referring to an informative test, minimizing the cost-information gain trade-off [9,17,19,26]. A challenge for these approaches is that acquired features evolve during the process; thus estimators have to cope with inputs of varying dimensionality. A possible solution is to treat not-acquired data as missing, and use data impu-tation strategies to derive a complete view from partial information; however, these solutions might produce bias and fail when features cannot be estimated from each other. Some authors pre-specified different models, each associated with a different budget for feature acquisition, [3, 5, 10], and used some basic features to decide the optimal model. This approach obtained good results in practical applications, but requires domain knowledge and assumes that the cost is the main factor to select features, while there can be pathologies presenting several etiologies that require different features for their diagnosis. Another ap-proach is to estimate the joint probability distribution of all features, as done in [15], but this is a difficult task that requires high computational power and large datasets. Other approaches, such as [25], try to build different models for each possible combination of features, but the number of possible features combinations grows exponentially, and the approach turns computationally in-feasible for medium/large number of features. Several works addressed active feature selection using greedy strategies, it-eratively acquiring the feature that maximises the expected information gain in a stepwise fashion [8, 17]. However, these might avoid acquiring features that 2state : acquired measurements      
+
+> reward :accuracy -λcost
+> action :acquire measurement many levels heuristic Regularisation (a) (b) (c)
+
+Figure 1: Overview of our proposed reinforcement learning approach for active feature selection, in the context of medical data. (a) The decision of using a new acquisition/measurement represents the action at each state, guided by a reward that combines the diagnosis accuracy and the cost associated to acquiring these features, as introduced in our previous work [4] and consolidated here (Sections 2.1 and 2.2. (b) Proposed policy exploration based on a heuristic, very relevant for large number of features (Section 2.3). (c) Proposed regularisation strategy to reduce the total number of different action sequences (Section 2.4). are not informative by themselves, but become very informative when combined with other variables. To derive optimal acquisition planning, which considers not only immediate gain but also future improvements, the acquisition sequence can be seen as an Markov Decision Process (MDP). An MDP is a mathemat-ical setting to represent sequential processes, called episodes. An episode is a sequence of states and rewards, where each reward and state depends on the previous state and an action that was taken at this step. Reinforcement learning aims to estimate optimal policies, which given a state compute the best action to take for maximising final rewards. However, reinforcement learning algorithms typically require a large amount of training instances, while for many clinical problems only a few hundreds of instances are available. 
+
+Related works 
+
+In previous work [4], we demonstrated the relevance of Reinforcement learn-ing (RL) for active feature selection on specific medical imaging problems in-volving a small number of high-dimensional variables and costs associated to the input features, but the approach required considering all possible combina-tions. Here, we substantially extend this work to datasets involving a medium number of variables, addressing key issues related to this increase in the amount of variables, and compare to the state-of-the-art methods discussed below. EDDI [17] is an algorithm based on data imputation using variational au-toencoders, which are deep learning models that can estimate missing features from partial views. This is done via a mask that sets to 0 the values of the non-acquired data. This model can also be used for prediction by treating the objective label as a variable that is always unobserved during inference. To ob-3tain the next feature to acquire, different instances with possible values of each candidate feature are sampled, and the one that reduces the most uncertainty over the target variable is chosen. The clustering heuristic proposed by Wang et al. [25] shares many similari-ties with our approach. The authors used an offline heuristic to group a subset of the features in sets, limiting the amount of effective features during dynamic selection, while our approach restricts the search space. Also, their approach groups different features, forcing them to be acquired simultaneously, thus re-ducing the effective number of features. This feature grouping is the same for the whole population and is learnt offline before inference, by forcing that each instance can be correctly classified by at least one of these groups. The choice of groups is also constrained by the features’ cost, whose sum cannot exceed a prescribed maximum. This forces that the total amount of different features acquired among the different individuals is bounded. A problem is that this heuristic does not promote the features to be split in different groups, and it tends to concentrate all selected features in few groups, reducing the capacity of the method to select features at an instance level. 
+
+Contributions 
+
+An overview of our methodology, and the experiments, is given in Figure 1. More specifically, our main contributions are: • A graph-exploration heuristic that focuses on the most promising feature combinations, and incrementally builds a policy constrained to the visited spaces (Section 2.3), • A regularisation strategy that reduces the total number of different action sequences, improving the model interpretability and reducing overfitting (Section 2.4), • Extensive evaluation of the accuracy and policy cost on three public datasets and a private dataset, three of them involving medical data (Sec-tion 3). 
+
+# 2 Methodology 
+
+## 2.1 Markov Decision Process 
+
+In this subsection, we provide a quick summary of the general notation of RL we use in this paper. An MDP [24] is a tuple (S, T, R, A), where: • S and A represent the set of possible states and actions respectively, • T is the transition function, which associates each combination of the current state and chosen action to a probability distribution over the next state, 4• R is the reward function, which associates the current state, chosen action and next state to a probability of the reward obtained. An episode is a trajectory of states, actions, and rewards: 
+
+(s0, a 0, r 0, s 1, a 1, r 1, . . . , s N −1, a N −1, r N −1, s N , r N ),
+
+where the sequences of states and rewards respectively follow T and R, and sN
+
+is an ending state 1.The objective is to find an optimal policy π : S → A , which is a mapping from the state space to the action space that maximises the return (sum of re-wards during the episode ret = ∑Ni=0 ri). This optimal policy can be found by computing the optimal Q-functions, which contain the expected return achiev-able for trajectories starting at state s and whose next action is a. Optimal 
+
+Q-functions have to satisfy Bellman’s optimality equation: 
+
+Q(s, a ) = E
+
+> s′
+
+[
+
+R(s, a, s ′) + max  
+
+> a′
+
+Q(s′, a ′)
+
+]
+
+, (1) where s′ corresponds to the next state. Note that this recurrence formulation (since Q appears both in the left and right sides of Equation 1) is challenging to solve, and typically iterative sampling methods need to be used. Finally, a policy π that maximises the Q-value is optimal: 
+
+π(s) = argmax 
+
+> a
+
+Q(s, a ). (2) 
+
+## 2.2 Active feature selection as a Markov Decision Process 
+
+In this subsection we define active feature selection as an MDP. Each episode corresponds to the diagnosis of a specific patient (instance), and thus the tran-sitions and reward are deterministic once the patient is fixed. At each step, the possible actions to choose are to either acquire a specific new feature (for ex-ample, a given measurement from a specific imaging modality), or to finish the exploration and diagnose. The state space encodes all information acquired so far. Note that the transition and reward functions during inference are stochas-tic, since they depend on the current state (which only contains the acquired features), and there might be patients who exactly coincide in the acquired fea-tures but have different numerical values for the non-acquired features; thus adding uncertainty to the label/missing information prediction from a partial state. The methods exposed in this subsection correspond to a more detailed ex-planation of our previous work [4]. In the next two subsections, we detail the extensions to this framework that consist of the main contributions of the cur-rent paper. 
+
+> 1In a more general case, episodes might not have an ending state and might continue indefinitely, however in our case, we will only consider finite episodes.
+
+52.2.1 Superstates 
+
+Unlike the most common frameworks used by other authors, we do not work in a fused connected space that represents all features together, but in a collection of disconnected domains, one for each possible combination of acquired features, avoiding the need for data imputation. We will call each of these domains a 
+
+superstate . This means our state space will consist of elements with distinct dimensionality. Note that transitions between superstates are completely de-terministic and do not depend on the instance, just on the action taken (since they only encode which modalities were acquired, but not the measurement ob-served). Superstates (and states) form a directed acyclic graph (DAG) denoted 
+
+G, with every superstate as a node, and edges between nodes if and only if there is a direct transition between them. Formally, the state space S is defined as: 
+
+S = ˙⋃ 
+
+> f⊆F
+
+Sf , (3) where f is a subset of features taken from F (set of all possible features), ˙⋃ is the disjoint union, and Sf encodes all possible combinations of values taken by the features f . Namely, Sf ∼ RNdim (f ) , where Ndim (f ) is the sum of all feature dimensionalities ( Ndim (f ) = |f | if all features are scalars). At the population level and in particular for the regression used during the policy training, we consider the matrix Sf ∈ RNpatients ×Ndim (f ) , which groups the data for the Npatients instances for a given subset of features f .
+
+2.2.2 Rewards 
+
+In our case, the reward function is defined for each instance (patient) as: 
+
+R(si, a i, s i + 1) = 
+
+{
+
+0 if i̸ = Nend ,acc i − λ cost i otherwise (4) where acc i is a random variable denoting if the instance was correctly clas-sified by an external classifier with features available at state si (the accuracy), 
+
+cost i is the cost associated to acquiring these features, and λ is a weighting fac-tor. This formulation is possible as our episodes are guaranteed to finish after 
+
+|F| steps. At the population level, acc f ∈ RNpatients is a vector grouping the accuracy for all instances, and cost f = cost i as the cost depends on the features in f and not instances. 
+
+2.2.3 Solving Bellman’s equation 
+
+Since we can sort the states, given the DAG structure, a direct solution of Bell-man’s optimality equation can be obtained without sampling as explained in our previous work [4]. Algorithm 1 summarizes this procedure. Superstates are vis-ited in postorder. The expectation in the right hand side of Equation 1 is taken 6over the whole population, and the optimal Q-values are estimated using a re-gression model, as s belongs to a continuous state space S. Since the state space includes elements of different dimensions, the algorithm trains a Q-estimator for each superstate (combination of features) f and action a, each trained using the features Sf (the matrix containing the features available at said superstate for the whole population). These estimators are trained independently. We denote them QS , the subindex corresponding to the superstate Sf . Once the optimal 
+
+Q-estimators are constructed, we derive the optimal policy by taking the action with the highest Q-value. 
+
+2.2.4 Values 
+
+We can also define the value of each state, measuring the future rewards acces-sible from this state, as: 
+
+V (s) = max  
+
+> a
+
+Q(s, a ). (5) For actions corresponding to acquiring a feature that has been already acquired, the associated Q-value is set to −∞ .At the population level, values are grouped into a vector Vf ∈ RNpatients ,which takes the values of max a Qf (Sf , a ).
+
+Algorithm 1 Pseudo-code for training the policy. It requires two external functions, train_regressor and predict , which train and evaluate an arbitrary regression model, respectively. Bold variables refer to population data consisting of Npatients instances: Sf is the matrix with all features corresponding to the superstate Sf , Vf is the vector of corresponding values, and acc f and cost f are the population accuracy and cost. max a refers to the instance-wise maximum, and F IN ISH stands for the finishing action.  
+
+> 1:
+
+for all f ⊆ F , sorted by |f | do  
+
+> 2:
+
+Qf (·, F IN ISH ) ← acc f − λ cost f 
+
+> 3:
+
+for all a|a̸ = F IN ISH do  
+
+> 4:
+
+Qf (·, a ) ← ∞  
+
+> 5:
+
+if a / ∈ f then  
+
+> 6:
+
+Qf (·, a ) ← train _regressor (Sf , Vf ∪{ a}) 
+
+> 7:
+
+end if  
+
+> 8:
+
+end for  
+
+> 9:
+
+Vf ← max a Qf .predict (Sf , a ) 
+
+> 10:
+
+end for 2.2.5 Additional considerations 
+
+To add more stability and avoid overfitting, we can split the training set in two parts, one used to estimate the optimal Q-values and the other to fit the 
+
+V -estimators. This is analogous to double Q-learning. However, we have not observed any benefit for this strategy in the experiments performed on our data. 72.3 Sampling-guided policy exploration for large number of features 
+
+A drawback of the previously defined MDP is that optimising a policy involves training exponentially-many (on the number of modalities) estimators, since a 
+
+Q-model, and potentially a classifier, is learnt for each combination of modalities (referred to as superstate). However, many superstates correspond to subop-timal feature combinations that can be removed without affecting the perfor-mance of the optimal policy. In this subsection, we present a sampling-based method to identify the most promising superstates, and build a restricted pol-icy that only considers a subset of superstates; thus avoiding the training of low-quality Q-value estimators. To select a subset of superstates T capturing the highest value regions, we use a root-to-leafs approach. This set T is initialised with the root of the superstate graph G, and iteratively expanded, adding one direct descendant of 
+
+T at a time. At each step, we compute an optimal policy πT , which only visits the superstates of T . The decision of which descendant to add is guided by a sampling estimation. A possible choice is to estimate the expected return of episodes starting at the candidate superstate Sf , noted as ̂ Ret (Sf ), by randomly generating a sequence of superstates Sk, with k ⊃ f . For each k and each element j of the population, we compute its value sjk (based on the prediction accuracy and cost), with the features available at superstate Sk. The final reward is obtained by estimating the maximum value for each individual, and averaging over all individuals: ̂
+
+Ret (Sf ) = Ej [max  
+
+> k
+
+V (sjk)] = Ej [max  
+
+> k
+
+[acc jk − λcost k]] (6) Algorithm 2 summarizes the steps of this sequential heuristic expansion of T .Our algorithm bears resemblance to heuristic solvers of the graph traversal prob-lem, where the objective is to find a minimal path from a root to an objective, as in [11]. Unlike the exhaustive exploration of all nodes seen in Dijkstra’s algorithm, heuristic graph traversal selectively analyzes a subset of nodes. In their approach, nodes are sequentially chosen and incorporated into the subset through a heuristic process that estimates the distance to the target from each potential node. 
+
+2.3.1 Sampling-based estimation of the return 
+
+To compute the heuristic, our algorithm requires an estimation of the return from a given superstate Si. An option is sampling: a series of superstates reachable from Si are randomly selected, and the returns of finishing at those superstates are computed. Note that this is possible since in our MDP the return only depends on the finishing state, but not the path towards it (Equation 4). We take the instance-wise maximum value of the different visited superstates, assuming that the optimal policy is able to direct each instance to the highest-8Algorithm 2 Pseudo-code for sample-guided policy exploration, based on a heuristic-based search. Nmax is the number of maximum allowed explorations, 
+
+G refers to the full graph of superstates.  
+
+> 1:
+
+T ← {∅} {Initialise}  
+
+> 2:
+
+N ← adjacents (∅) {Set with the neighbours of the current graph}  
+
+> 3:
+
+{Iteratively choose the best Nmax node subset}  
+
+> 4:
+
+while |T | < N max do  
+
+> 5:
+
+{Compute the heuristic for all neighbouring nodes}  
+
+> 6:
+
+for all n ∈ N do 
+
+> 7:
+
+̂ Ret (Sn) ← heuristic (Sn), as in Eq 6  
+
+> 8:
+
+end for  
+
+> 9:
+
+nchosen ← arg max n∈N } 
+
+> 10:
+
+T ← T ∪ { nchosen } 
+
+> 11:
+
+Remove nchosen from N 
+
+> 12:
+
+N ← N ∪ { m ∈ adjacents (nchosen ) ∩ m / ∈ N }  
+
+> 13:
+
+end while 
+
+reward superstate. Note that as the total number of superstates with exactly 
+
+n acquired features follows Newton’s binomial, a naive sampling strategy over-represents states close to Nf eatures /2. To compensate for this bias, we use a logarithmic sampling strategy, first sampling the number of acquired features of the superstate uniformly, and afterwards the specific features. 
+
+2.3.2 Policy update 
+
+Each time a new superstate is added to the restricted set T , the new optimal policy πT needs to be updated. Algorithm 3 shows an efficient computation using the previous policy πT ′ . The algorithm is very similar to the usual policy optimisation, in which the predicted values for each of the actions are propagated from the leafs to the root. However, we stop the propagation if the instance-wise maximum value V of a superstate has not changed at this iteration. 
+
+## 2.4 Sparse policy regularisation 
+
+In this section, we introduce a regularisation technique for reducing the number of different superstates visited for all the population. Compact policies that in-volve less superstates not only are more interpretable, but can also be visualised more easily, and are less prone to overfitting. To promote sparsity, we add a new term to the policy loss (which until now corresponds to the expected return). The section is organised as follows. First, we define a policy-level regularisa-tion term. Then, we break it into instance-level contributions to the reward. Finally, we propose an iterative algorithm to solve the regularised MDP. The theoretical background of these derivations can be found in Appendix A, where we show that it can be seen as a particular case of Relative Entropy Policy Search (REPS), as described in [20]. 9Algorithm 3 Pseudo-code for updating restricted policy πT after adding a new superstate Sn.
+
+Require: New node Snew , and its end-values Vnew  
+
+> 1:
+
+U pdate ← Queue {new } 
+
+> 2:
+
+while U pdate ̸ = ∅ do  
+
+> 3:
+
+Choose and remove a superstate n from the U pdate set.  
+
+> 4:
+
+Update Vn as in Algorithm 1  
+
+> 5:
+
+if Vn has not changed then  
+
+> 6:
+
+continue  
+
+> 7:
+
+else  
+
+> 8:
+
+for all m ∈ ancesters (n) do  
+
+> 9:
+
+a is the action needed to transition from superstate Sm to Sn 
+
+> 10:
+
+Qm(·, a ) ← train _regressor (Sm, Vn) 
+
+> 11:
+
+end for  
+
+> 12:
+
+end if  
+
+> 13:
+
+end while 2.4.1 Policy-level regularisation 
+
+As in REPS, we consider the occupancy measure of a given policy π, a ”function” that associates each subset of states to a real number expressing the expected (over all the instances) number of visits per episode at each (set of) state fol-lowing policy π. We denote this measure μ instead of μπ by abusing notation. With this notation, we can express an L0 regularisation term that penalises the number of visited superstates (from a population-level) as: 
+
+Ereg (μ) = ∑
+
+> n
+
+H(μ(Sp)) , (7) where H is the Heaviside function and Sf ⊆ S refers to superset associated to the features f .Since minimising a function that includes the function H produces theoret-ical and numerical problems, as it is equal to 1 almost everywhere, we instead optimise its smooth relaxation Lq , with 0 < q < 1:
+
+Eqreg (μ) = ∑ |μ(Sf )|q . (8) 
+
+2.4.2 Virtual reward 
+
+To be integrated to the RL framework, the previous regularisation term needs to be transformed from its policy-level formulation to an instance-level definition. We therefore add a virtual term to the original reward, which only depends on the new superstate of the transition, representing the variation of H under a new policy that takes that action. If the change to the policy is infinitesimal, this variation is proportional to the derivative of Eqreg . So, the virtual reward 10 Rvirtual is defined as: 
+
+Rvirtual (s, a, s ′) = α q μ (S′ 
+
+> f
+
+)1−q , (9) with α an hyper-parameter to smooth the problem and make it solvable by con-tinuous optimisation techniques. This virtual reward is added to the traditional reward R defined in Equation 9, which is non-zero only at the final state and is based on the cost and the correctness of the prediction. 
+
+2.4.3 Optimisation 
+
+We initialise the algorithm with a non-regularised policy, and then run an it-erative scheme, in which we add the virtual reward previously presented, using the measure from the current iteration’s policy. We can then optimise the new MDP, and obtain a new policy, which visits less superstates. This is repeated until convergence. Given that the regularisation term is non-concave and the optimisation is a maximisation, we cannot ensure convergence towards a global maxima (and it might not be unique), but only to a local one. In our setting, the α introduced in Equation 9 has a role similar to as the step-size of a gradient method, and therefore can influence the convergence rate, if convergence is achieved. 
+
+# 3 Experimental setting 
+
+## 3.1 Datasets 
+
+We used three publicly available datasets from the University of California at Irving (UCI) repository to test our methodology: 
+
+• the ”Heart” dataset (predicting whether a patient admitted to the inten-sive care unit suffers from myocardial infarction based on vital signs and laboratory biomarkers), 
+
+• the ”Wisconsin breast cancer” dataset (detect cancer in breast histological images from predefined biomarkers), 
+
+• the ”spambase” dataset (classify spam mail based on the appearance fre-quency of different words). From these datasets, only the ”Heart” one included real costs of each feature. We also used a private dataset (”HTA”) consisting of 5 different temporal measurements of the cardiac motion and flow along a full cycle, acquired us-ing 2D echocardiography of the left ventricle. These measurements included the blood velocity at the aortic and mitral valves (acquired using Doppler ul-trasound), tissue velocity at the basal free wall (Tissue Doppler Imaging), and speckle tracking derived deformation of the cardiac muscle, both at the global and regional levels (focusing on the septal free wall, a region that typically 11 Table 1: Characteristics of the used datasets.                               
+
+> Dataset public contains costs # Features # Samples # Class prevalence [%] Figure Heart yes yes 11 531 61 2,3,4 Breast yes no 8683 34 2Spam yes no 56 4601 39 2,5 HTA no no 5 (multi-dim.) 248 70 2,6,7
+
+presents alteration in hypertension-related pathologies). For each of these mea-surements, we extracted its waveform which were used in the analysis. These waveforms were temporally aligned and resampled to be in correspondence among different individuals, and afterwards were treated as a multidimensional feature: we used PCA to reduce their dimensionality before the RL method we propose, keeping the first 5 modes. Table 1 summarizes the main characteris-tics of these datasets. For all, we used the area under curve (AUC) and mean accuracy as metrics in independent test-sets, repeated in different bootstrap samples. 
+
+## 3.2 Base estimators 
+
+Our state-action value estimator was a kernel ridge regression with an RBF Gaussian kernel for each feature, using the standard choice of bandwidth. We used Nyström approximation to reduce the footprint of computing the kernel. For the final classification, which determines the predicted class during inference and the value of each instance at training, we chose a kernel logistic regression model. To improve computational performance, the weights were shared among the different superstates, but only the weights associated to acquired features were used during inference, and the non-acquired features are set to the popu-lation average. To avoid overfitting, we used a 10 fold cross-validation approach to obtain the predicted value of each instance, and this prediction was used to compute the reward at the final nodes. 
+
+## 3.3 Comparisons with SOTA 
+
+We compared our method to the following state-of-the-art algorithms, discussed in the Introduction (Section 1): 
+
+• The EDDI algorithm (Efficient Dynamic Discovery of high value Informa-tion) [17], 
+
+• The clustering heuristic proposed by Wang et al. [25] We extended the EDDI original algorithm to work with multidimensional variables, which is the case for the HTA dataset, by allowing sampling and acquiring a group of scalar features simultaneously (corresponding to a sin-gle multidimensional-feature). We reimplemented Wang’s algorithm, using the same base estimators as in our algorithm, instead the decision trees they pro-posed in their paper. 12 Finally, since both EDDI and Wang’s heuristic require a maximum budget, instead of minimising the population average acquisition cost, we reformulated our method to have a maximal number of acquisitions to allow comparisons. This was implemented by forcing the policy to take the end-action from all states where the maximum amount of modalities has already been acquired. 
+
+# 4 Results 
+
+## 4.1 Diagnosis accuracy 
+
+Figure 2 compares the diagnostic accuracy of our method to EDDI and Wang’s methods, on the four studied datasets. It corresponds to the result of acquiring a maximum of 3 features. Both our algorithm and Wang’s clustering approach outperform EDDI on the three datasets with a small number (around 10) of fea-tures, namely ”Heart”, ”Breast”, and ”HTA”), with a much better performance in the multidimensional one (”HTA”). EDDI fails in HTA, since HTA has high-dimensional data with highly uncorrelated features and EDDI fails to impute the missing features from the available ones. We must highlight, however, that the available public implementation of EDDI is not optimised for predicting discrete variables, which might have resulted in a loss of prediction accuracy. Wang’s clustering approach slightly outperforms ours on the three datasets with a small number of features, but fails on the dataset with a higher number of features (”Spam”, which contains around 50 features). This inadequacy stems from the heuristic employed by Wang’s approach, which imposes a maximum limit on the total number of features acquired by the policy. Consequently, this constraint proves overly restrictive for datasets with a larger number of variables, as each feature plays a critical role in accurately classifying diverse individuals. 
+
+## 4.2 Feature’s acquisition cost 
+
+In this section, we focus on the ”Heart” dataset, as it was the only dataset with real costs available, and compare our method with Wang’s approach in a more realistic setting, in which we try to minimise the average cost instead of having a hard limit on the number of modalities per individual. Costs represent the economic cost, in Canadian dollars, of performing each test. The features consist of demographic information (age and medical history), the vital signs at admission (resting ECG and blood pressure), blood parameters that require a laboratory test, and an exercise test 2.We first compared the result of setting the same cost to each feature versus using the real ones (Figure 3). This comparison is particularly relevant since there are some features, such as ”slope” that are very informative, but costly to acquire (since it involves the patient undergoing an exercise testing). Results 
+
+> 2The original dataset also includes imaging, but we have discarded this feature since it was only available at one of the four centers that provided data.
+
+13 H " !"  H 
+
+#  
+
+#  
+
+#  
+
+#  
+
+#  
+
+#  
+
+#  
+
+> #  $
+
+#     # ! #!"    "  Figure 2: Diagnostic accuracy, measured by the AUC, of our method compared to EDDI and Wang’s methods, on the four studied datasets (result of acquiring a maximum of 3 features). 14 a 
+
+> !$
+> " !"!
+> !"
+> 
+> !
+> "aa
+> $a
+> a
+> ! 
+> 
+> 
+> 
+>  !"  
+> !"
+> 
+> !$
+> " !"!
+> !"
+> 
+> !
+> "
+> $
+> 
+> ! 
+> 
+> 
+> 
+> 
+>  "% #!
+>  !"!
+> 
+> !$
+> " !"!
+> !"
+> 
+> !
+> "
+> $
+> 
+> ! 
+> 
+> 
+> 
+> 
+>  "% #!
+> #! !"!
+
+Figure 3: Modality usage (probability that a modality is acquired,averaged over the full testing population in 10 different train-test splits) in the ”Heart” dataset. Features are sorted by their cost (from left to right), whose values are summarized in the first plot. We can see that when real costs are used (middle column), the algorithm prefers cheaper variables (the ones located on the left area of the plot), while when each variable has the same cost (right column), then more expensive variables are used (the ones located on the right area of the plot). show that when the costs are set to homogeneous, the algorithm prefers to take expensive variables (third column), but when costs are non-homogeneous, it will prefer cheaper variables (second column). Then, we compared our method with Wang’s clustering approach, testing for various values of the λ hyperparameter, therefore obtaining several balances of accuracy and cost (Figure 4). A limitation of Wang’s approach is that, even if the policy learning allows selectively acquiring groups of features, features tend to be concentrated in a few groups. Indeed, Wang’s clustering does not promote distributing features in different groups. This leads to results simi-lar to using L0 feature selection at a population-level. Results show that our method outperforms Wang’s, the accuracy being higher for similar average cost. A remarkable difference is that increases in cost and accuracy in our method are gradual, since only a portion of the population can access the expensive features; in contrast, Wang’s method increments are more stepwise, as groups are obtained at a population level. 
+
+## 4.3 Analysis of the heuristic exploration 
+
+We studied how the heuristic allowed a faster exploration in the Spam dataset, which had the highest number of variables (56 features). Thus, we compared to a dummy strategy, in which the same number of nodes was added by randomly selecting the next node to open. At each step, we added a new superstate to our restricted set, neighbouring our current subgraph, based on the estimation given by the heuristic. This was repeated a prescribed number of times (200 open nodes), but a stop criterion could be added when no changes on the policy return are observed. We tested these strategies for sequentially generating the policy on the 15 0 2 4 6 8 10 
+
+Cost [Dollars] 
+
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+> 0.8
+> Accuracy
+
+Clustering 
+
+Sampling [ours] Figure 4: Mean accuracy as a function of the mean cost for our method (”sam-pling”, blue) and Wang’s (”clustering”, red), for different values of the parameter 
+
+λ, for the ”Heart” dataset. We tested different λ which means steering the bal-ance between cost and accuracy in the reward (each represented as a point). Our approach allows smoother transition, where expensive features are acquired only for difficult cases, whereas Wang’s approach has a more dichotomic behaviour between high and low cost. 16 ”Spam” dataset. This was repeated for two different feature costs: 10 −2 (low cost), and 5 · 10 −2 (high cost), reflecting two balances between accuracy and acquisition cost (the cost of a mis-classification is 1). At each step, we com-puted the return obtained in an independent test set (Equation 4) as well as the policy complexity, measured by the maximal depth (i.e., the maximal number of acquired modalities) of the found policy. Results are summarized in Figure 5, where we repeated the process over 10 different splits of the training-testing sets for increased statistical stability. We can observe that random exploration quickly increases the policy depth, while the heuristic explores more nodes from those closest to the root before advancing to the next level, as the maximal policy depth increases slower (Figure 5, left). This can be explained as the heuristic overestimates the real value, and does not account for uncertainty in nodes far away from the current policy. This makes that our search strategy promotes exploration over exploitation. When acquisition costs are low and therefore acquiring many modalities is not penalised, a random heuristic outperforms the heuristic strategy. This is because the random exploration rapidly increases the depth as the number of nodes for a given level k is the number of possible combinations of k features, meaning that the number of nodes at each level increases until reaching Nf eatures /2.For higher cost, acquiring many modalities is no longer optimal, and the other two strategies outperform the random search. The heuristic (blue), which explores regions that produce an average high value for all instances, outper-forms the dummy random selection. This can be explained because the random strategy can reach solutions that have high accuracy, but requires a large num-ber of features and thus has a high cost. This can be seen in Figure 5 
+
+## 4.4 Regularisation 
+
+We evaluated on the ”HTA” dataset the effect of our regularisation technique to simplify policies. Our regularisation penalises policies with a large number of hyperstates visited by at least one sample of the population. The regularisa-tion algorithm behaves similarly to pruning, identifying hyperstates that can be removed without much influence to the global return (either because they are visited by few instances, or because instances visiting them can be de-routed to other superstates that grant a similar return). The sequential process is explained in Section 2.4. It consisted in training first a policy without any reg-ularisation, computing the number of visits to each node following that policy, and subsequently introducing regularisation based on the visits. This process was repeated until convergence, which was attained in less than 5 iterations. In Figure 6, we can see an example of an unregularised (above) and a regu-larised policy (below), for the ”HTA” dataset. In both policies, the first modality chosen is the Doppler waveform of the mitral valve, which offers a global view of the diastolic cardiac phase. This modality can detect filling abnormalities, which are well known to be a consequence of an impaired relaxation in hyper-tensive individuals, as the heart needs to develop more force during ejection to compensate for the increased arterial resistance. As Doppler is a low-cost and 17 0 50 100 150                
+
+> Number Explorations
+> 0.65
+> 0.70
+> 0.75
+> 0.80
+> Accuracy
+> Random
+> Heuristic
+> 050 100 150
+> Number Explorations
+> 0.02
+> 0.04
+> 0.06
+> 0.08
+> Cost
+> 050 100 150
+> Number Explorations
+> 2
+> 4
+> 6
+> 8
+> 10
+> Policy depth 050 100 150
+> Number Explorations
+> 0.55
+> 0.60
+> 0.65
+> 0.70
+> 0.75
+> Accuracy
+> Random
+> Heuristic
+> 050 100 150
+> Number Explorations
+> 0.00
+> 0.05
+> 0.10
+> 0.15
+> Cost
+> 050 100 150
+> Number Explorations
+> 2
+> 4
+> 6
+> 8
+> 10
+> Policy depth
+
+Figure 5: Evolution of the mean return accuracy (left), mean total cost of all acquired features (center) and policy depth (right) for two exploration strategies: random (blue) and heuristic (orange), on the ”Spam” dataset. The upper row depicts an example with a low acquisition cost per modality ( 0.01 for each modality, while the cost of a misclassification is set to a unit), while the lower corresponds to a greater acquisition cost ( 0.05 ). readily available modality, it makes sense to be a first choice to try to diagnose. For cases with still an uncertain diagnosis, more modalities were acquired ac-cording to the estimated policy. Since the recommended acquisition depends on the patient specificities, this leads to a high number of feature combina-tions. After regularisation, most of these nodes are removed, and the policy is compacted to only 3 nodes and 2 levels, allowing easier visualisation. Figure 7 shows quantitative results on the return in the regularised and unregularised policies, as well as the number of different visited hyperstates. We can see that regularised policies decrease the number of visited superstates, and regularisation does not reduce the total reward (based on the accuracy and cost). A challenge in this approach is that the amount of regularisation depends on the hyperparameters α and q, that modulate the penalisation the penalisation of using different nodes that have to be selected. 
+
+# 5 Discussion 
+
+We presented an original RL method for instance-specific feature selection, and demonstrated its relevance on several medical and non-medical datasets (in-cluding a dataset with high-dimensional temporal signals). Also, some of these datasets quantified the costs associated to the different modalities acquired or the measurements performed. We proposed a heuristic to reduce the expo-18 (a) Non regularised policy 
+
+> (b) Regularised policy
+
+Figure 6: Original (a) and regularised (b) versions of the policy for a given training sample. The graph represents the different modalities acquired by following the resulting policy, and the node color is darker if more instances visited this node. In each node, we also indicated the amount of instances that visited it, and the amount of samples whose final prediction was taken at that node. 
+
+Figure 7: Average return (accuracy minus cost, left) and number of nodes (right). We can see that both returns are comparable, while regularisition sig-nificantly decreases the number visited nodes. 19 nentially large search space and specifically evaluated different choices of this heuristic. Furthermore, we proposed and tested a post-processing regularisation technique for pruning the resulting policies, making them more simple (in terms of total amount of different feature combinations) and compact. 
+
+## 5.1 Comparison to the state-of-the-art 
+
+Our algorithm performed better than state-of-the-art methods in datasets where some of the features are very good predictors, but are expensive to acquire and need to be used scarcely. This was the case for the ”Heart” dataset (for which we used the real costs associated to each variable). Several variables correspond to the result of exercise testing, which requires a complex setup and is therefore expensive, but are very informative of the disease. Our algorithm was able to accurately determine individuals that require this costly test, from other individuals that can be accurately diagnosed using cheaper acquisitions. When only a hard constraint on the number of modalities was used, our al-gorithm showed similar performance, albeit slightly lower compared to Wang’s clustering (which is based on preselecting some possible combinations of vari-ables, common to all individuals). This is because our algorithm is able to choose a different number of modalities for each individual for minimising the average cost. However, when the limitation is just the maximal amount of modalities, the capacity of our method to use less modalities is not needed since the op-timal solution will be to acquire always the maximum number of modalities. In datasets with a higher number of variables such as ”Spam”, our algorithm outperforms Wang’s clustering, as their approach limits the amount of different features acquired. Our algorithm outperforms EDDI, especially in datasets with multidimen-sional features. This is because EDDI relies on data imputation, which is not accurate for high dimensional data, such as in the ”HTA” dataset. Another in-fluencing factor is that the open implementation available uses a regression loss instead of a classification loss, which can lower the performance of the method. 
+
+## 5.2 Relationship to the A* algorithm 
+
+Our heuristic shares similarities with the A* algorithm described in [11], which finds minimal distance paths in a graph. In A*, there is a set of explored nodes, for which the minimal distance to the origin is computed (for paths containing only explored nodes). There is also a set of ”open sets”, neighbours of the explored nodes, for which a heuristic is used to estimate the distance to the end-node. At each step, a new node from the open set is selected, based on both the distance to the initial node and the heuristic estimation to the end-node, and added to the explored nodes. This requires to potentially update the distances to the origin of all the explored nodes, so that paths including the new node are also considered; and the unexplored neighbours of the new node are added to the open set, thus their heuristic value needs to be computed at these new neighbours. 20 In our case, the procedure is similar. We have a set of explored superstates (nodes), whose optimal policy using only those superstates is computed, and an open set of their neighbouring nodes. For the latter, a heuristic based on sam-pling estimates for each instance the highest reward available from that node. Then, the algorithm selects the open node that offers the highest improvement, based on the heuristic, and updates the policy with the addition of the new superstate, as well as adding new neighbours to the open set. A problem of our heuristic is that it is a optimistic estimator, specially in the superstates closer to the root. It assumes that there is an oracle able to decide for each instance the best set of features that must be acquired to obtain the highest reward. In practice, there will be some error and instances that will end in sub-optimal combinations, decreasing the achieved reward. This makes that the estimated value will decrease for deeper nodes, which makes that the algorithm will prefer exploring the shallow parts of the graph, instead of exploiting found directions. A possible solution to this would be to include a correction term to account for this effect, similar to the Upper Confidence Bounds in Monte Carlo tree search [14]. However, this term needs to be derived for this specific problem. 
+
+## 5.3 Regularisation 
+
+A second challenge is the complexity of the policies, i.e. the number of differ-ent superstates. Sometimes, when there are features encoding approximately the same information, the optimal policy chooses one or the other almost arbi-trarily, increasing the complexity of the policy without producing a significant improvement of the reward. We proposed a regularisation term to promote sim-pler policies. A challenge in the formulation is that in the MDP formulation, reward has to be defined at an instance level, whereas we want to minimise the occupancy at specific superstates (i.e., the probability over the full population that a certain state is visited through an episode). This requires an iterative alternate optimisation, in which we first estimate the occupancy of each node following a fixed policy, and then add a virtual reward to update the policy based on the previous ”fixed” occupancy. This can be derived based on the REPS formalism [21]. A challenge is that this approach consists of the maximi-sation of a convex energy, for which only convergence towards a local maxima is guaranteed: in particular, once a superstate reaches 0 occupancy, it is dis-carded and will no longer be possible to be visited. Therefore, our algorithm has similarities to post-processing pruning algorithms in decision trees [6]. 
+
+# 6 Conclusion 
+
+We proposed a RL-based method to find instance-specific optimal combinations of features, accounting for both accuracy and feature acquisition cost, to work with a higher number of variables ( ∼ 10 to 50); and a post-training regularisation procedure to reduce the total number of different feature combinations used in 21 the population. We evaluated our algorithm in different datasets, demonstrating better performance compared to state-of-the-art methods. A sampling-based heuristic was used to obtain the next superstate to open, based on the one which will grant maximal value. However, this can lead to an excessive exploration of the super-states, as the maximal possible value is overestimated. This heuristic is simple, and can be improved by adding, for instance, a penalisation term to account that the nodes far away from the current explored subgraph have more uncertainty. Adding such a term will promote exploitation [7]. Finally, we developed a way of compacting policies by reducing the num-ber of different nodes visited the population, allowing an easier inspection and validation of the policy without losing accuracy/cost. 
+
+# A Derivation of the sparse-promoting regulari-sation term 
+
+We use the smoothed version of the regularisation term, for a fixed value of q,and we use the REPS formulation [21]. In this equivalent formulation of the MDP, instead of optimising over the decision functions, the optimisation is done in dual variables, which correspond to the occupancy functions μ. We will add our regularisation term Hq to the objective: maximize ⟨r, μ ⟩ + αH q (μ),
+
+subject to ET μ = γP T μ + (1 − μ)ν0, (10) where the constraint equation assures that the transitions are satisfied ( E
+
+and P are the transition functions) and ν0 is the initial distribution. This problem is typically solved with a primal-dual proximal operator al-gorithm. After linearising the regularisation term at μk, ( Hq (μ) ≈ Hq (μk) + 
+
+⟨∇ Hq (μk), μ − μk⟩) we obtain: maximize ⟨r, μ ⟩ + α(Hq (μk) + ⟨∇ Hq (μk), μ − μk⟩)+O(∥μ − μk∥2),
+
+subject to ET μ = γP T μ + (1 − μ)ν0.
+
+For small enough policy updates, the quadratic term can be neglected. More-over, after reorganising the terms, and removing those that only depend on μk,since they do not contribute to the maximisation result, the following problem is obtained: maximize ⟨r + α∇Hq (μk), μ ⟩,
+
+subject to ET μ = γP T μ + (1 − μ)ν0.
+
+This leads to a formulation in which, at each step, the gradient of the regu-larisation term at the current state-occupancy measure is added to the rewards as a ”virtual” reward, which equals our Equation 9. 22 Acknowledgment 
+
+The authors acknowledge the partial support from the LABEX PRIMES of Uni-versité de Lyon (ANR-11-LABX-0063), the French ANR (MIC-MAC project, ANR-19-CE45-0005), the Fédération Francaise de Cardiologie (MI-MIX project, Allocation René Foudon), the Institut Universitaire de France, La Marato TV3 (202415 30 31) the European Union-NextGenerationEU, Spanish Ministry of Universities and Recovery, Transformation and Resilience Plan, through a call from Pompeu Fabra University (Barcelona), TAILOR (EU H2020 #952215), AGAUR SGR and Spanish grants PID2019-108141GB-I00, PID2023-149959OA-I00, RYC2022-035960-I, and the Maria de Maeztu Units of Excellence Pro-gramme (CEX2021-001195-M). 
+
+# References 
+
+[1] Loai Albarqouni, Sujeewa Palagama, Julia Chai, Priatharsini Sivanantha-jothy, Thanya Pathirana, Mina Bakhit, Morteza Arab-Zozani, Respati Ranakusuma, Magnolia Cardona, Anna Scott, Justin Clark, Claire Friede-mann Smith, Emmanuel Effa, Eleanor Ochodo, and Ray Moynihan. Overuse of medications in low- and middle-income countries: a scoping review. Bulletin of the World Health Organization , 101(1):36–61, 1 2023. [2] Luigi Antelmi, Nicholas Ayache, Philippe Robert, and Marco Lorenzi. Sparse Multi-Channel Variational Autoencoder for the Joint Analysis of Heterogeneous Data. In International Conference on Machine Learning ,pages 302–311, 2019. [3] Gabriel Bernardino, Patrick Clarysse, Álvaro Sepúlveda-Martínez, Mérida Rodríguez-López, Susanna Prat-Gonzàlez, Marta Sitges, Eduard Gratacós, Fàtima Crispi, and Nicolas Duchateau. Hierarchical Multi-modality Pre-diction Model to Assess Obesity-Related Remodelling. In (STACOM -MICCAI workshop), LNCS , pages 103–112. 2022. [4] Gabriel Bernardino, Anders Jonsson, Filip Loncaric, Pablo-Miki Martí Castellote, Marta Sitges, Patrick Clarysse, and Nicolas Duchateau. Reinforcement Learning for Active Modality Selection During Diagno-sis. volume 13431 of Lecture Notes in Computer Science , pages 592–601. Springer Nature Switzerland, Cham, 2022. [5] Tolga Bolukbasi, Kai Wei Chang, Joseph Wang, and Venkatesh Saligrama. Resource Constrained Structured Prediction. 31st AAAI Conference on Artificial Intelligence, AAAI 2017 , pages 1756–1762, 2 2016. [6] Leonard A. Breslow and David W. Aha. Simplifying decision trees: Asurvey. The Knowledge Engineering Review , 12(01):1–40, 1997. 23 [7] Pierre Arnaud Coquelin and Rémi Munos. Bandit Algorithms for Tree Search. Proceedings of the 23rd Conference on Uncertainty in Artificial Intelligence, UAI 2007 , pages 67–74, 3 2007. [8] Ian Covert, Wei Qiu, Mingyu Lu, Nayoon Kim, Nathan White, and Su-In Lee. Learning to Maximize Mutual Information for Dynamic Feature Selection. In Proceedings of the 40th International Conference on Machine Learning , 1 2023. [9] Gabriel Dulac-Arnold, Ludovic Denoyer, Philippe Preux, and Patrick Galli-nari. Datum-wise classification: A sequential approach to sparsity. Lecture Notes in Computer Science (including subseries Lecture Notes in Artifi-cial Intelligence and Lecture Notes in Bioinformatics) , 6911 LNAI(PART 1):375–390, 2011. [10] Gabriel Erion, Joseph D. Janizek, Carly Hudelson, Richard B. Utarnachitt, Andrew M. McCoy, Michael R. Sayre, Nathan J. White, and Su In Lee. A cost-aware framework for the development of AI models for healthcare applications. Nature Biomedical Engineering 2022 6:12 , 6(12):1384–1398, 4 2022. [11] Peter Hart, Nils Nilsson, and Bertram Raphael. A Formal Basis for the Heuristic Determination of Minimum Cost Paths. IEEE Transactions on Systems Science and Cybernetics , 4(2):100–107, 1968. [12] Xiaoyan Huang and Meredith B. Rosenthal. Overuse of Cardiovascular Services. Circulation , 132(3):205–214, 7 2015. [13] Karen E. Joynt. Health Policy and Cardiovascular Medicine. Circulation ,131(12):1098–1105, 3 2015. [14] Emilie Kaufmann, Olivier Cappe, and Aurelien Garivier. On Bayesian Upper Confidence Bounds for Bandit Problems, 3 2012. [15] Yang Li and Junier B. Oliva. Active Feature Acquisition with Generative Surrogate Models. Proceedings of Machine Learning Research , 139:6450– 6459, 10 2020. [16] Yingming Li, Ming Yang, and Zhongfei Zhang. A Survey of Multi-View Representation Learning. IEEE Transactions on Knowledge and Data En-gineering , 31(10):1863–1883, 2019. [17] Chao Ma, Sebastian Tschiatschek, Konstantina Palla, José Miguel Hernández-Lobato, Sebastian Nowozin, and Cheng Zhang. EDDI: Effi-cient Dynamic Discovery of High-Value Information with Partial VAE. 9 2018. [18] Lukas Meier, Sara Van De Geer, and Peter Bühlmann. The group lasso for logistic regression. Journal of the Royal Statistical Society: Series B (Statistical Methodology) , 70(1):53–71, 1 2008. 24 [19] Fan Min, Qinghua Hu, and William Zhu. Feature selection with test cost constraint. International Journal of Approximate Reasoning , 55(1):167– 179, 1 2014. [20] J. Peters, O. Ecabert, C. Meyer, R. Kneser, and J. Weese. Optimizing boundary detection via Simulated Search with applications to multi-modal heart segmentation. Medical Image Analysis , 14(1):70–84, 2 2010. [21] Jan Peters, Katharina Mülling, and Yasemin Altün. Relative Entropy Pol-icy Search. In Proceedings of the Twenty-Fourth AAAI Conference on Artificial Intelligence , AAAI’10, pages 1607–1612. AAAI Press, 2010. [22] Nicholas Pudjihartono, Tayaza Fadason, Andreas W. Kempa-Liehr, and Justin M. O’Sullivan. A Review of Feature Selection Methods for Machine Learning-Based Disease Risk Prediction. Frontiers in Bioinformatics , 2, 6 2022. [23] Sergio Sanchez-Martinez, Nicolas Duchateau, Tamas Erdei, Alan G. Fraser, Bart H. Bijnens, and Gemma Piella. Characterization of myocardial motion patterns by unsupervised multiple kernel learning. Medical Image Analysis ,35:70–82, 1 2017. [24] Richard S. Sutton and Andrew G. Barto. Reinforcement Learning: An Introduction . MIT Press, Cambridge, MA, 2nd edition, 2018. [25] Joseph Wang, Kirill Trapeznikov, and Venkatesh Saligrama. Efficient Learning by Directed Acyclic Graph For Resource Constrained Prediction. In C Cortes, N Lawrence, D Lee, M Sugiyama, and R Garnett, editors, 
+
+Advances in Neural Information Processing Systems , volume 28. Curran Associates, Inc., 2015. [26] Haiyan Yin, Yingzhen Li, Sinno Jialin Pan, Cheng Zhang, and Sebastian Tschiatschek. Reinforcement Learning with Efficient Active Feature Acqui-sition. arXiv , 11 2020. 25
