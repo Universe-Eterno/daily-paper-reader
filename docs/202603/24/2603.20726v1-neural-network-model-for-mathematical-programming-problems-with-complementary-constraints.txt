@@ -1,0 +1,1209 @@
+Title: Neural network model for mathematical programming problems with complementary constraints
+
+URL Source: https://arxiv.org/pdf/2603.20726v1
+
+Published Time: Tue, 24 Mar 2026 00:39:59 GMT
+
+Number of Pages: 29
+
+Markdown Content:
+# Neural network model for mathematical programming problems with complementary constraints 
+
+Anurag Jayswal, Ajeet Kumar ∗
+
+Department of Mathematics and Computing, Indian Institute of Technology (Indian School of Mines), Dhanbad-826004, Jharkhand, India 
+
+Abstract : In this paper, we propose a a gradient-based neural network model to solve the mathematical programming problems with complementary constraints (MPCC). In order to facilitate tractable optimization, the problem MPCC is transformed via a reg-ularized approach into a relaxed nonlinear optimization problem NLP( β). After that employing the penalty function and neural network model an estimate of the optimal solution of the problem NLP( β) is obtained. On the basis of Lyapunov stability theory and LaSalle invariance principle, the equilibrium point of proposed neural network is the-oretically proven to be asymptotically stable and capable to generate optimal solution of the problem MPCC. Further, we demonstrate the performance and dynamic behavior of the proposed neural network through various illustrative examples and its effectiveness via theoretical and numerical experiments. 
+
+Keywords: Mathematical programming problems with complementary constraints, neu-ral network, Lyapunov stability, optimal solution.      
+
+> ∗Corresponding author
+> E-mail :anurag@iitism.ac.in, anurag_jais123@yahoo.com, (A. Jayswal), 22dr0039@iitism.ac.in, ajeetjionee@gmail.com, (A. Kumar)
+
+1
+
+> arXiv:2603.20726v1 [math.OC] 21 Mar 2026
+
+# 1 Introduction 
+
+In this paper, we consider the following constrained optimization problem 
+
+(MPCC) min f (w)
+
+subject to gj (w) ≤ 0, ∀j = 1 , m, hi(w) = 0 , ∀i = 1 , l, 
+
+0 ≤ Gk(w) ⊥ Hk(w) ≥ 0, ∀k = 1 , s. 
+
+where all the functions f, g j , h i, H k, G k : Rn → R are assumed to be continuously differ-entiable. MPCC is known as mathematical programming problems with complementary constraints and the notation 0 ≤ Gk(w) ⊥ Hk(w) ≥ 0, ∀k = 1 , s equivalently can be written as Gk(w) ≥ 0, Hk(w) ≥ 0, Gk(w)T Hk(w) = 0 , ∀k = 1 , s. Let F := {w ∈
+
+Rn | gj (w) ≤ 0, ∀j = 1 , m, h i(w) = 0 , ∀i = 1 , l, 0 ≤ Gk(w) ⊥ Hk(w) ≥ 0, ∀k = 1 , s }
+
+represents the set of all feasible points of the problem MPCC. The problem MPCC holds significant importance across various fields, including engineering design, economic equi-librium analysis, and multilevel game theory, see; Luo et al. [28], and it has stimulated extensive research attention in the recent years. The main difficulty in solving the problem MPCC, whether theoretically or numer-ically, stems from the presence of complementarity constraints. Such constraints cause the violation of standard constraint qualifications (such as, Mangasarian–Fromovitz con-straints qualification (MFCQ), Linear Independence Constraint Qualification (LICQ), etc.,) applicable to the traditional nonlinear optimization problems, for instance, see Leyffer [22]. As a result, the convergence conditions of standard optimization techniques are generally not met. To address this issue, several researchers over the past decade have proposed solution algorithms that exploit the specific structure of the problem MPCC and eliminate the complications caused by the complementarity constraints. The most com-monly adopted strategies to solve the problem MPCC includes penalty, lifting, smoothing, regularization, implicit programming, etc., are used to address inherent challenges asso-ciated with the problem MPCC (see [5, 9, 16, 17, 19, 24, 30, 31, 34–36] and references cited therein). In the past few decades, many real-world problems have increasingly required real-time solutions; however, the traditional methods as mentioned above often struggle to provide them because of the complexity and high dimensionality of the problems. Due to 2intrinsic parallel processing capabilities and compatibility with hardware-based execution, neural networks have emerged as powerful computational tools for providing real-time solutions and addressing the complex optimization problems. The use of neural networks in optimization began with Tank and Hopfield [37] for the linear programming problem. Zhang [40] considered a Lagrange multiplier based neural networks for general nonlinear programming problem and analyzed its stability. Later on, Kennedy and Chua [18] explores the stability properties for a class of nonlinear programming circuit model and examine a neural network implementation. Subsequently, neural networks have been employed to address a wide range of optimization problems, including linear and nonlinear programming, variational inequalities, and complementarity problems, see [1–4, 7, 10–12, 23, 25, 38] and the references cited therein. Inspired by the adaptability and efficiency of the neural networks, this study proposes a gradient-based neural network framework to address the MPCC problem. Due to strongly convergent performance, we use the regularized approach considered by Kanzow and Schwartz [16]. The main outcomes of the study are as follows: 
+
+(i) Gradient-based neural network framework: A new gradient-based neural net-work model is proposed to efficiently solve the problem MPCC. 
+
+(ii ) Reformulation of the problem: A regularization approach is employed to trans-form the problem MPCC into a continuously differentiable and constrained nonlin-ear programs NLP( β) that typically do not exhibit the critical kinks in their feasible sets, as found in the problem MPCC. 
+
+(iii ) Method and Complexity: By employing a penalty function technique, the pro-posed neural network model has simple one-layer architecture containing n-neurons with low computational complexity in compare to the existing one Ezazipour and Golbabai [6] model which has n + 2 m-neurons. 
+
+(iv ) Theoretical and experimental validation: Theoretical analysis proves that the equilibrium point of the proposed neural network model is asymptotically stable and able to find the optimal solution of the problem MPCC, which is further verified through computer simulations that demonstrate the accuracy and efficiency of the model. The rest structure of the paper is outlined as follows. In Section 2, we present some no-3tation and preliminary concepts associated with the problem MPCC and its transformed problem NLP( β) and some definitions that are essential for obtaining the subsequent re-sults presented in the paper. In Section 3, we construct the neural network model which able to find the optimal solution of the problem MPCC. In Section 4, we analyze the asymptotic stability of the equilibrium point of neural network and its relationship with the solution of the problem MPCC. Further, in section 5, we provide computer simula-tions to showcase the utility and potential impact of the proposed approach. Finally, in Section 6, we summarize the paper and provide the future development. 
+
+# 2 Notation and preliminaries 
+
+In this section, we provide some notation and fundamental concepts of mathematical programming with complementary constraints, together with the essential definitions that serve as a basis for the theoretical developments presented in the subsequent sections. Let 
+
+Rn be the n-dimensional Euclidean space and Rn 
+
+> +
+
+be the non-negative orthant comprising all vectors in Rn with non-negative components. 
+
+Definition 2.1. [15] The differentiable function f : U ⊆ Rn → R is said to convex at 
+
+w∗ ∈ U , if 
+
+f (w) − f (w∗) ≥ (w − w∗)T ∇f (w∗), ∀w ∈ U .
+
+Now, we define the index set of all active constraints at w∗ ∈ F , for the problem MPCC as 
+
+Ig(w∗) = {j ∈ { 1, m } | gj (w∗) = 0 } .
+
+Further, for any w∗ ∈ F , we define the following index sets 
+
+I00 (w∗) := {k ∈ { 1, s } | Gk(w∗) = 0 , H k(w∗) = 0 },
+
+I0+ (w∗) := {k ∈ { 1, s } | Gk(w∗) = 0 , H k(w∗) > 0},
+
+I+0 (w∗) := {k ∈ { 1, s } | Gk(w∗) > 0, H k(w∗) = 0 }.
+
+It is important to note that the first subscript indicates the sign of Gk at a given point 
+
+w∗, while the second subscript refers to the sign of Hk at the same point. 
+
+Definition 2.2. [14] A point w∗ ∈ F is said to be 4(i) Weakly stationary (W-stationary) : if there exists multipliers λ ∈ Rm, ξ ∈
+
+Rl, η, ζ ∈ Rs such that 
+
+∇f (w∗) + 
+
+> m
+
+∑
+
+> j=1
+
+λi∇gi(w∗) + 
+
+> l
+
+∑
+
+> i=1
+
+ξi∇hi(w∗) −
+
+> s
+
+∑
+
+> k=1
+
+ηk∇Gk(w∗) −
+
+> s
+
+∑
+
+> k=1
+
+ζk∇Hk(w∗) = 0 .
+
+and 
+
+λj ≥ 0, λj gj (w∗) = 0 ( j = 1 , m ),ηk = 0 ( k ∈ I +0 (w∗)) , ζk = 0 ( k ∈ I 0+ (w∗)) ,
+
+(ii) Clarke-stationary (C-stationary) : if w∗ is a W-stationary and γkνk ≥ 0 for all 
+
+k ∈ I 00 (w∗),(iii) Mordukhovich stationary( M-stationary) : if w∗ is a W-stationary and either 
+
+ηk > 0, ζ k > 0, or ηkζk = 0 for all k ∈ I 00 (w∗),
+
+(iv) Strongly stationary (S-stationary) : if w∗ is a W-stationary and ηk ≥ 0, ζ k ≥ 0
+
+for all k ∈ I 00 (w∗).Graphical view of these stationary conditions are depicted in the Figure 1. The differ-ence between these stationarity conditions comes from the multiplier index set I00 (w∗). If 
+
+I00 (w∗) is empty, then all stationarity conditions are coincide. The relationships between these stationarity conditions are organized as follows: S-stationarity ⇒ M-stationarity ⇒ C-stationarit ⇒ W-stationarity. 
+
+Definition 2.3. [16] A point w∗ ∈ F is said to satisfy the MPCC-linearly independent constraint qualification (MPCC-LICQ), if the gradients 
+
+{∇ gj (w∗) | j ∈ I g(w∗)} ∪ {∇ hi(w∗) | i = 1 , l }∪ {∇ Gk(w∗) | k ∈ I 0+ (w∗) ∪ I 00 (w∗)} ∪ {∇ Hk(x∗) | k ∈ I +0 (w∗) ∪ I 00 (w∗)}
+
+are linearly independent. To solve the problem MPCC, whether theoretically or numerically, the main difficul-ties stems from the presence of complementarity constraints, which violate the standard constraints qualification (see [22]), and generally lead to the feasible set is nonsmooth and nonconvex, (see [32]). To remove such critical kinks presented in the problem MPCC, we use the following regularization approach considered by Kanzow and Schwartz [16]. 5(a) W-stationary 
+
+(ηk, ζ k free )
+
+ηk
+
+ζk
+
+(b) C-stationary 
+
+(ηkζk ≥ 0) 
+
+ηk
+
+ζk
+
+(c) M-stationary 
+
+(ηk, ζ k > 0 or ηkζk = 0) 
+
+ηk
+
+ζk
+
+(d) S-stationary 
+
+(ηk, ζ k ≥ 0) 
+
+ηk
+
+ζk
+
+Figure 1: Graphical view of the stationary conditions for an index k ∈ I 00 (w∗).
+
+6Let ϕ(p, q ) be a regularized function defined by 
+
+ϕ(p, q ) := 
+
+
+
+pq if p + q ≥ 0,
+
+− 12 (p2 + q2) if p + q < 0.
+
+Lemma 2.1. [16] The function ϕ exhibits the following properties: (i) ϕ is an NCP-function , i.e., ϕ(p, q ) = 0 if and only if p ≥ 0, q ≥ 0, pq = 0 .(ii) ϕ is continuously differentiable with gradient 
+
+∇ϕ(p, q ) = 
+
+
+
+qp
+
+ if p + q ≥ 0,
+
+
+
+−p
+
+−q
+
+ if p + q < 0.
+
+(iii) ϕ has the property that 
+
+ϕ(p, q )
+
+
+
+> 0 if p > 0 and q > 0,< 0 if p < 0 or q < 0.
+
+Based on the ϕ-function, we define the following continuously differentiable mapping 
+
+B : Rn → Rs given by 
+
+Bk(w, β ) := ϕ(Gk(w) − β, H k(w) − β)
+
+=
+
+(Gk(w) − β)( Hk(w) − β), if G k(w) + Hk(w) ≥ 2β, 
+
+− 12
+
+((Gk(w) − β)2 + (Hk(w) − β)2)
+
+, if G k(w) + Hk(w) < 2β, 
+
+where β ≥ 0 is an arbitrary parameter. From a geometrical perspective, this leads to a set with the structure represented in the Figure 2. Now, using the function Bk(w, β ), we get the following regularized problem: 
+
+min f (w)
+
+subject to gj (w) ≤ 0, ∀j = 1 , m, hi(w) = 0 , ∀i = 1 , l, Gk(w) ≥ 0, ∀k = 1 , s, Hk(w) ≥ 0, ∀k = 1 , s, 
+
+Bk(w, β ) ≤ 0, ∀k = 1 , s, 
+
+7Gk(w)
+
+Hk(w)
+
+(β, β )
+
+Figure 2: Geometrical view of the Bk(w, β ).
+
+Further, for the simplification the above problem can be rewritten as 
+
+(NLP( β)) min f (w)
+
+subject to h(w) = 0 ,
+
+N (w, β ) ≤ 0.
+
+where N (w, β ) = ( gj (w), −Gk(w), −Hk(w), Bk(w, β )) T , h (w) = [ hi(w)] . Let M be the feasible set to the problem NLP( β). The optimization problem NLP( β) is continuously differentiable and constrained nonlinear programs that typically do not exhibit the critical kinks as discussed above. Therefore, we expect that standard optimization software can be used to solve the NLP( β) problems. The following theorem exhibits the relationship between the problems NLP( β) and MPCC. 
+
+Theorem 2.1. [16] Let wβ be a KKT-point of the problem NLP( β) with the multipliers 
+
+(ξβ , u β ), and (wβ , ξ β , u β ) → (w∗, ξ ∗, u ∗) as β → 0. If MPCC-LICQ holds at w∗, then w∗
+
+is an M-stationary point to the problem MPCC. 
+
+# 3 Construction of neural network model 
+
+In general, to solve the constrained optimization problems using neural networks a key ap-proach is to construct an appropriate energy function such that its minimum corresponds to the optimal solution of the considered problem. Therefore, to tackle the problem NLP( β), we use the penalty function method to transforms the constrained problem into an unconstrained one as described in Luenberger and Ye [27]. 
+
+min E(w, β ) = f (w) + bP (1) 8where b is a positive constant P : Rn → R is a penalty function. Here, we assume that the penalty function P is continuous and P(w) ≥ 0, ∀w ∈ Rn and P(w) = 0 ⇔ w ∈ M .Further, an effective penalty function for a set of inequality constraints {w : cα(w) ≤
+
+0, α = 1 , 2, . . . , ζ } is defined by 
+
+P(w) = 12 ∥c+(w)∥2 = 12
+
+> ζ
+
+∑
+
+> α=1
+
+(max {0, c α(w)})2 .
+
+And, thus we formulate E(w, β ) (an energy function) to approximate the problem NLP( β) as follows: 
+
+E(w, β ) = f (w) + λ
+
+2
+
+{∥N +(w, β )∥2 + ∥h(w)∥2} , (2) where λ is a large penalty parameter. It can be seen for large positive value of λ and for every fixed β, the energy function E(w, β ) possesses both non-negativity and continuous differentiability. In order to create neural network, we assume w(.) is some time-dependent variable and w(t, w 0) represents a trajectory starting from the initial point w0 = w(t0), where t0
+
+be an initial time. Now, using the steepest descent method, we formulate the following neural network to efficiently handle the problem MPCC. 
+
+dw dt = −∇E (w, β ) = −∇ f (w) − λ {N +(w, β )∇N (w, β ) + h(w)∇h(w)} . (3) Also, a simplified block diagram for the neural network (3) is presented in the Figure 3. Now, on the lines of Luenberger and Ye [27], we give the following theorem which establish the relationship between the unconstrained problem (1) and NLP( β). 9Figure 3: The architectural design of the proposed neural network model (3). 
+
+Theorem 3.1. Assume that {βk} is a sequence of nonzero terms approaching to zero as 
+
+k tends to infinity. Let {λk} be a sequence of positive real numbers that increases with 
+
+k and diverges to infinity. If the sequence {wk} is generated using the penalty method. Then, any limit point of the sequence {wk} solve the problem NLP( β). Proof. As the proof is analogous to the convergence theorem discussed in [Luenberger and Ye [27], pp. 404], hence, we omit the details. 
+
+# 4 Stability and convergence analysis 
+
+In this section, we present the stability and convergence properties of the neural network (3) and examine the relationship between the equilibrium of the neural network along with the approximate solution of the problem MPCC as the parameter β approaches to 10 zero. 
+
+Theorem 4.1. Let the point w(t0) = w0 be an intial point of the neural network (3) . If the level set L(w0) = {w ∈ Rn | E (w, β ) ≤ E (w0, β )} is bounded, then the neural network 
+
+(3) possesses an equilibrium point w∗, and there exists a strictly increasing sequence {tk}
+
+such that (a) lim  
+
+> k→+∞
+
+w(tk, w 0) = w∗ along with ∇E (w∗, β ) = 0 ,
+
+(b) lim  
+
+> t→+∞
+
+E[w(t), β ] = E(w∗, β ).
+
+Proof. (a) Let us define the trajectory set T (w0) = { w(t, w 0) : t ≥ t0 } initiated from the initial point w0. Then the time derivative of the energy function E(w, β ) along any trajectory w(t, w 0) ∈ T (w0) is given by 
+
+dE(w, β )
+
+dt 
+
+∣∣∣∣w(t,w 0)
+
+= ∇E (w, β )T dw dt ,
+
+which together with the neural network (3), yields 
+
+dE(w, β )
+
+dt 
+
+∣∣∣∣w(t,w 0)
+
+= −∥∇E (w, β )∥2 ≤ 0, (4) which shows that E(w, β ) decreases monotonically i.e. non-increasing along the trajectory 
+
+w(t, w 0). Also, since E(w, β ) is continuous, thus the trajectory remains within the level set L(w0) = {w ∈ Rn | E (w, β ) ≤ E (w0, β )}, and we have 
+
+T (w0) ⊆ L(w0).
+
+Further, since the function E(w, β ) is bounded below and non-increasing, thus the tra-jectory w(t, w 0) is also bounded. Thus, for any strictly increasing sequence {¯tk} with 
+
+¯tk → +∞, the sequence {w(¯ tk, w 0)} is bounded and admits a limit point w∗. Therefore, there exists a subsequence {tk} ⊆ { ¯tk} such that 
+
+lim  
+
+> k→+∞
+
+w(tk, w 0) = w∗.
+
+Now, the inequality (4) together with the non-negativity of the energy function E(w, β ),
+
+exhibits that E(w, β ) is a Lyapunov function, which satify 
+
+ddt E(w, β ) = 0 ⇔ ∇E (w, β ) = 0 . (5) And thus, according to LaSalle’s invariance principle [20], any trajectory of the neural network (3) starting in L(w0) approaches the largest invariant set Q such that 
+
+Q ⊆ 
+
+{
+
+w ∈ L(w0) | ddt E(w, β ) = 0 
+
+}
+
+= { w ∈ L(w0) | ∇E (w, β ) = 0 }. (by (5) )
+
+11 Therefore, w∗ ∈ Q and ∇E (w∗, β ) = 0 . Hence, w∗ is an equilibrium point of the neural network (3). (b) Since tk → +∞, for every k ≥ 0, there exists an integer K such that tk > t whenever 
+
+k ≥ K. From part (a), we know that E[w(t), β ] decreases monotonically, and therefore 
+
+E[w(tk), β ] ≤ E [w(t), β ].
+
+As k → +∞, we obtain 
+
+lim k→+∞ E[w(tk), β ] = E[w∗, β ] ≤ E [w(t), β ].
+
+Thus, for every ε > 0, there exists an integer K0, such that 
+
+E[w(tk), β ] < E[w∗, β ] + ε, ∀k ≥ K0.
+
+Also, we have 
+
+E[w∗, β ] = inf 
+
+> t≥0
+
+{E [w(t), β ]}.
+
+Hence, it follows from the above two relations 
+
+lim  
+
+> t→+∞
+
+E[w(t), β ] = lim  
+
+> k→+∞
+
+E[w(tk), β ] = E[w∗, β ].
+
+This completes the proof. 
+
+Theorem 4.2. Let the level set C(w0) is bounded and w(t, w 0) be the trajectory of neural network (3) starting from the initial point w0. Further, let wβ be a KKT-point to the problem NLP( β) such that wβ → w∗ as β → 0, where w∗ is an equilibrium point for the considered neural network (3) . Also, assume that there exists a neighborhood V ⊆ Rn
+
+around w∗ such that the energy function E(w, β ) is convex, for all w ∈ V and MPCC-LICQ holds at w∗.
+
+Under these assumptions, the following results are true: (a) The trajectory w(t, w 0) converges to an optimal solution of the penalized problem 
+
+(1) , and thus solve the considered constraints optimization problem MPCC. (b) The neural network (3) exhibits an asymptotic stability over the equilibrium point 
+
+w∗.
+
+Proof. (a) Let ¯w be an optimal solution of the function E(w, β ) and w∗ be an equilibrium point of the neural network (3). Now, consider the function L : Rn → R define by 
+
+L(w) = 12 ∥w − ¯w∥2.
+
+12 Then, the time derivative of L(w) along the trajectories of the neural network (3) is given by 
+
+dL(w)
+
+dt = ( w − ¯w)T dw dt = − (w − ¯w)T ∇E (w, β ). (6) Since, the energy function E(w, β ) is continuous differentiable and convex for all w ∈ V ,the equilibrium point w∗ of the neural network (3) and optimal solution ¯w of the function 
+
+E(w, β ) are coincide on V.
+
+Again, using the convexity assumption of the function E(., β ), we have 
+
+E( ¯ w, β ) − E (w, β ) ≥ ( ¯ w − w)T ∇E (w, β ), ∀ w ∈ V ,
+
+which together with the relation (6), gives 
+
+dL(w)
+
+dt = −(w − ¯w)T ∇E (w, β ) ≤ E ( ¯ w, β ) − E (w, β ) ≤ 0, (7) and thus we conclude that L(w) is a Lyapunov function of the neural network (3). Now, as per hypothesis, we define a bounded level set C(w0) given by 
+
+C(w0) = {w ∈ Rn | L (w) ≤ L (w0)}.
+
+And thus, according to LaSalle’s invariance principle [20], any trajectory of the neural network (3) starting in C(w0) approaches the largest invariant set S such that 
+
+S ⊆ { w ∈ C (w0) | dL(w)
+
+dt = 0 }.
+
+Next, we characterize the invariant set S. So for if, w ∈ S ⇒ dL(w) 
+
+> dt
+
+= 0 , then from the inequality (7), we obtain 
+
+E( ¯ w, β ) = E(w, β ),
+
+which yields w is an optimal solution of the function E(w, β ) and thus equilibrium point of the neural network (3) and we have ∇E (w, β ) = 0 .
+
+Conversely, if ∇E (w, β ) = 0 ⇒ dw dt = 0 , and consequently from the equality (6), we have  
+
+> dL(w)
+> dt
+
+= 0 , and hence dL(w) 
+
+> dt
+
+= 0 ⇔ ∇E (w, β ) = 0 , and it follows that 
+
+S ⊆ { w ∈ C (w0) | ∇E (w, β ) = 0 }.
+
+Since w∗ is an equilibrium point of the neural network (3), and thus will be the limiting point of any trajectory contained in the invariant set S. Therefore, w∗ ∈ S , and thus an optimal solution of the function E(w, β ).
+
+Next, in order to show that lim  
+
+> t→+∞
+
+w(t) = ¯ w, we consider the following Lyapunov function 
+
+ˆL(w) = 12 ∥w − w∗∥2.
+
+13 Proceeding on the similar way as of L(w), one can easily verify that ˆL(w) is a non-increasing function along the trajectory of the neural network (3). Therefore, for all 
+
+ϵ > 0, there exists ˆl > 0, such that 
+
+ˆL(w(t)) < ˆL(w(tˆl)) < ϵ, ∀t > t ˆl,
+
+⇒ 12 ∥w − w∗∥2 < ϵ, ∀t > t ˆl.
+
+It follows that 
+
+lim  
+
+> t→+∞
+
+w(t) = w∗ = ¯ w. 
+
+Hence, the trajectory w(t, w 0) converges to an optimal solution w∗(= ¯ w) of the penalized problem (1). Further, since wβ is a KKT-point to the problem NLP( β) such that wβ →
+
+w∗ as β → 0 and MPCC-LICQ holds at w∗, it follows from Theorem 2.1, that w∗ solves the problem MPCC. (b) Let Z(w0) = { w(t, w 0) : t ≥ t0 } be the set of trajectories starting from the initial point w0 of the neural network (3), and E(w, β ) be an energy function along any trajectory 
+
+w(t, w 0) ∈ Z (w0). Proceeding on the similar lines of Theorem 4.1 (a), one has E(w, β )
+
+decreases monotonically. Now, consider the function 
+
+Y(w) = E(w, β ) − E (w∗, β ), ∀w ∈ V .
+
+Since, the function E(w, β ) decreases monotonically and w∗ is an optimal point of the function E(w, β ), we have 
+
+Y(w) > 0, ∀w̸ = w∗.
+
+Also, Y(w∗) = 0 , and thus Y(w) is a positive definite function defined on V. Moreover, for any initial point w0, there exists a trajectory w(t, w 0) of the neural network (3) such that 
+
+ddt Y(w)
+
+∣∣∣∣w(t,w 0)
+
+= ∇Y (w)T dw dt = −∥∇E (w, β )∥2 < 0, ∀w̸ = w∗.
+
+Since, the function Y(w) is positive definite on V and its time derivative strictly negative for all w̸ = w∗. Thus, according to Lyapunov stability theorem [13], the neural network (3) is asymptotically stable over the equilibrium point w∗. This completes the proof. 
+
+# 5 Computer Simulations 
+
+In this section, we present computer simulations for the proposed neural network. All the numerical experiments are carried out on a personal computer utilizing MATLAB R2025b. 14 Further, the system of ordinary differential equations was integrated leveraging the ode45 solver, and random initial points are generated using MATLAB’s randi function. The results of the numerical experiments demonstrate the effectiveness and reliability of the proposed neural network model to address the MPCC problem. 
+
+Example 5.1. [33] Consider the problem: (MPCC1) min wT Qw 
+
+subject to 0 ≤ w1 ⊥ w2 ≥ 0,
+
+where Q =
+
+ 1 −1
+
+−1 1
+
+ and w = ( w1, w 2) ∈ R2.
+
+In order to solve the problem MPCC1, we employ the proposed neural network (3). Using the above mentioned mathematical tools, the numerical experiments with 10 ran-dom initial points, shows that the solution trajectories w1(t) and w2(t) of the neural network (3) converge to the global minimum point (0 , 0) with the parameters λ = 10 6
+
+and β = 0 .0001 , as depicted in the figures (4a) and (4b). 0.4           
+
+> -1
+> -
+> -
+> 0
+> 0.8
+> 1
+> 0.6
+> 0.2
+> 0.4
+> 0.6 -
+> 0.8
+> 20. -
+> 0246810 12 14 16 18 20
+
+Figure (4a) : Transient behaviors of w1(t).0 2 4 6 8 10 12 14 16 18 20  
+
+> 1
+> 0.8
+> 0.6
+> 0.4
+> 0.2
+> 0
+> 20. -
+> -0.4
+> 0.6 -
+> -0.8
+> -1
+
+Figure (4b): Transient behaviors of w2(t).
+
+Now, with fixed λ = 10 6, we examine the transient behavior of state variable w(t)
+
+having initial point w0 = (1 .0, 1.0) of the neural network (3) with decreasing value of the parameter β. It is observe that as β approaches to zero, the solution trajectories of the neural network get closer to the global minimum point (0,0) of the problem MPCC1 as exhibited in the Figures (5a) and (5b). Further, the corresponding numerical results are summarized in Table 1, which reports the approximate optimal solutions (w1, w 2), their objective values f (w1, w 2), and the associated absolute errors. Next, we investigate the affects of λ on the convergence behavior of the state variable 
+
+w(t) having initial point w0 = (1 .5, 1.5) with fixed β = 0 .001 . With increasing value of the 15 -1 -0.8 -0.6 -0.4 
+
+> -0.2
+> 0
+> 0.2
+> 0.4 0.8 10.6
+
+120 0 20 40 60 80 160 180 140 200 100 Figure (5a) : Transient behaviors of w1(t) with fixed λ.0 20 40 60 80 100 120 140 160 180 200  
+
+> -1
+> -0.8
+> -0.6
+> -0.4
+> -0.2
+> 0
+> 0.2
+> 0.4 0.6
+> 0.8
+> 1
+
+Figure (5b): Transient behaviors of w2(t) with fixed λ.
+
+β Optimal solution 
+
+(w∗
+
+> 1
+
+, w ∗
+
+> 2
+
+)
+
+Optimal value 
+
+f (w∗
+
+> 1
+
+, w ∗
+
+> 2
+
+) Absolute Error 0.1 (0.100050000140542, 0.100050000140542) 0 00.01 (0.0100500000194718, 0.0100500000194718 ) 0 00.001 (0.00105000001965199, 0.00105000001965199) 0 00.0001 (0.000150000019335945, 0.000150000019335945) 0 0Table 1 parameter λ, it is observe that the solution trajectories get closer to the global minimum point (0,0) as exhibited in the Figures (6a) and (6b). The corresponding numerical results are summarized in Table 2. 120 0 20 40 60 80 160 180 140 200 100 
+
+> -1
+> 0
+> 0.8
+> 1
+> 0.6
+> 0.2
+> -0.4
+> 0.6 -
+> -0.8
+> 0.4
+> 20. -
+
+Figure (6a) : Transient behaviors of w1(t)
+
+with fixed β. 0 20 40 60 80 100 120 140 160 180 200  
+
+> -1
+> -0.8
+> -0.6
+> -0.4
+> -0.2
+> 0
+> 0.2
+> 0.4 0.6
+> 0.8
+> 1
+
+Figure (6b): Transient behaviors of w2(t) with fixed β.
+
+16 λ Optimal solution 
+
+(w∗
+
+> 1
+
+, w ∗
+
+> 2
+
+)
+
+Optimal value 
+
+f (w∗
+
+> 1
+
+, w ∗
+
+> 2
+
+) Absolute Error 10 (0.0168105088432284, 0.0168105088432284) 0 0100 (0.00599997220798751 0.00599997220798751) 0 01000 (0.00258113797276159 0.00258113797276159) 0 010000 (0.00149999999698513 0.00149999999698513) 0 0100000 (0.00115811390460986, 0.00115811390460986) 0 0Table 2 
+
+Example 5.2. [8] Consider the problem: (MPCC3) min (w1 − 1) 2 + (w2 − 12
+
+)2
+
+subject to w1 ≤ 1, w 2 ≥ 0,
+
+0 ≤ 2w1 + w2 ⊥ 2 − (w1 − 1) 2 − (w2 − 1) 2 ≥ 0.
+
+In order to solve the problem MPCC3, we employ the proposed neural network (3). Using the above mentioned mathematical tools, the numerical experiments with 10 ran-dom initial points, shows that the solution trajectories w1(t) and w2(t) of the neural network (3) converge to the global minimum point (0 , 0) with the parameters λ = 10 6
+
+and β = 0 .00001 as depicted in the figures (7a) and (7b). 0 2 4 6 8 10 12 14 16 18 20  
+
+> -1
+> -0.8
+> 0.6 --0.4
+> 0. -2
+> 0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1
+
+Figure (7a) : Transient behaviors of w1(t).14 12 80        
+
+> 1-
+> -0.8
+> -0.6
+> -0.4
+> -0.2
+> 0
+> 0.2
+> 0.4
+> 0.6 0.8
+> 1
+> 24610 16 18 20
+
+Figure (7b): Transient behaviors of w2(t).
+
+Now, with fixed λ = 10 6, we examine the transient behavior of state variable w(t)
+
+having initial point w0 = (1 .0, 1.0) of the neural network (3) with decreasing value of the parameter β. It is observe that as β approaches to zero, the solution trajectories of the neural network get closer to the global minimum point (0,0) of the problem MPCC3 as exhibited in the Figures (8a) and (8b). Further, the corresponding numerical results are 17 summarized in Table 3, which reports the approximate optimal solutions (w1, w 2), their objective values f (w1, w 2), and the associated absolute errors. 10 640 2 8 12 14 16 18 20  
+
+> -1
+> -0.8
+> 0.6 --0.4
+> 0. -2
+> 0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1
+
+Figure (8a) : Transient behaviors of w1(t) with fixed λ. 0 2 4 6 8 10 12 14 16 18 20  
+
+> 1-
+> -0.8
+> -0.6
+> -0.4
+> -0.2
+> 0
+> 0.2
+> 0.4 0.6
+> 0.8
+> 1
+
+Figure (8b): Transient behaviors of w2(t) with fixed λ. 
+
+β Optimal solution 
+
+(w∗
+
+> 1
+
+, w ∗
+
+> 2
+
+)
+
+Optimal value 
+
+f (w∗
+
+> 1
+
+, w ∗
+
+> 2
+
+) Absolute Error 0.1 (0.0547347728730422, -5.57362581295502e-07) 1.14352690697827 0.106473093021729 0.01 0.00898313645704711, -4.95784188958737e-07) 1.23211491961095 0.0178850803890533 0.001 (0.00447091291113772, -4.97282434599503e-07) 1.24107866052267 0.00892133947733464 0.0001 (0.00402025441315761, -4.97464725953594e-07) 1.2419761510842 0.00802384891579511 Table 3 Next, we investigate the affects of λ on the convergence behavior of the state variable 
+
+w(t) having initial point w0 = (1 .0, 1.0) with fixed β = 0 .000001 . With increasing value of the parameter λ, it is observe that the solution trajectories get closer to the global mini-mum point (0,0) as exhibited in the Figures (9a) and (9b). The corresponding numerical results are summarized in Table 4. 18 0 2 4 6 8 10 12 14 16 18 20  
+
+> -1
+> -0.8
+> 0.6 --0.4
+> 0. -2
+> 0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1
+
+Figure (9a) : Transient behaviors of w1(t) with fixed β. 0 2 4 6 8 10 12 14 16 18 20  
+
+> 1-
+> -0.8
+> -0.6
+> -0.4
+> -0.2
+> 0
+> 0.2
+> 0.4
+> 0.6 0.8
+> 1
+
+Figure (9b): Transient behaviors of w2(t)
+
+with fixed β. 
+
+λ Optimal solution 
+
+(w∗
+
+> 1
+
+, w ∗
+
+> 2
+
+)
+
+Optimal value 
+
+f (w∗
+
+> 1
+
+, w ∗
+
+> 2
+
+) Absolute Error 100 (0.0895849855530089, -0.00445364859562869) 1.08332898211196 0.166671017888043 1000 (0.0401832807892819, -0.000475660458775592) 1.17172402118807 0.0782759788119258 10000 (0.0184902830395593, -4.88662867458115e-05) 1.21341019316242 0.0365898068375758 100000 (0.00856469689824011, -4.94705982203277e-06) 1.23294890732077 0.017051092679226 1000000 ( 0.00397519417035708, -4.97510345691846e-07) 1.24206591133857 0.00793408866142897 Table 4 Now, we present comparative study between the proposed neural network (3) and the penalty algorithms ( l1, lower-order, and quadratic) for MPCCs reported in Yang and Huang [39]. The comparison is conducted to evaluate the effectiveness of the proposed method in terms of solution numerical accuracy and solution reliability. 
+
+Example 5.3. [39] Consider the problem: (MPCC4) min (w1 + 1) 2 + ( w2 − 2.5) 2 + ( w3 + 1) 2
+
+subject to w1 ≥ 0, w 3 ≥ 0, −ew1 + w2 − ew3 ≥ 0,w1
+
+(−ew1 + w2 − ew3 ) = 0 .
+
+The transient behaviors of the state variables w1(t), w 2(t) and w3(t) at β = 0 .01 and 
+
+λ = 10 6, with 10 random initial points are exhibited in the Figures (10a), (10b) and (10c), respectively. Using the above mentioned mathematical tools, the computer simulation shows that the trajectories of the neural network (3) converges to approximate optimal solution w∗ = ( −0.000002 , 2.500000 , −0.000002) of the problem MPCC4. Further, the quantitative comparison between the proposed neural network (3) and penalty algorithms 19 (l1, lower-order, and quadratic) given by Yang and Huang [39] are presented in Table 5. It is observed that both the methods demonstrate convergence toward near-optimal solutions. However, the proposed neural network (3) exhibits the numerical accuracy and solution reliability. 0 2 4 6 8 10 12 14 16 18 20 
+
+> 32.5
+> 2
+> 1.5
+> 1
+> 0.5 0-0.5
+> -1
+> -1.5
+> -2
+
+Figure (10a) : Transient behaviors of w1(t).0 2 4 6 8 10 12 14 16 18 20 
+
+> -2
+
+-1 
+
+> 0
+
+1
+
+> 2
+> 3
+
+4 
+
+> 5
+> 2
+
+Figure (10b): Transient behaviors of w2(t).0 2 4 6 8 10 12 14 16 18 20 
+
+> -2
+> -1.5
+> -1
+> -0.5
+> 0
+> 0.5
+> 1
+> 1.5
+> 2
+> 2.5 3
+> 3
+
+Figure (10c): Transient behaviors of w3(t).
+
+Method Intial points Approximate optimal solution 
+
+(w∗
+
+> 1
+
+, w ∗
+
+> 2
+
+, w ∗
+
+> 3
+
+)
+
+Approximate optimal value 
+
+f (w∗
+
+> 1
+
+, w ∗
+
+> 2
+
+, w ∗
+
+> 3
+
+)
+
+l1
+
+penalty algorithm (1, 1, 1) (0 , 2.5, 0) 2Lower-order penalty algorithm (1, 1, 1) (0 , 2.5, 0) 2Quadratic penalty algorithm (1, 1, 1) (−0.0001 , 2.5, −0.0001) 1.9996 Proposed neural network 10 random (−0.000002 , 2.500000 , −0.000002) 1.99999 Table 5 20 Example 5.4. [39] Consider the problem: (MPCC5) min (w1 + 1) 2 + w22 + 10( w3 − 1) 2
+
+subject to w1 ≥ 0, w 3 ≥ 0, −ew1 + w2 − ew3 ≥ 0,w1
+
+(−ew1 + w2 − ew3 ) = 0 .
+
+The transient behaviors of the state variables w1(t), w 2(t) and w3(t) at β = 0 .01 and 
+
+λ = 10 5, with 10 random initial points are exhibited in the Figures (11a), (11b) and (11c), respectively. Using the above mentioned mathematical tools, the computer simulation shows that the trajectories of the neural network (3) converges to approximate optimal solution w∗ = ( −0.000074 , 2.709987 , 0.536561) of the problem MPCC4. Further, the quantitative comparison between the proposed neural network (3) and penalty algorithms (l1, lower-order, and quadratic) given by Yang and Huang [39] are presented in Table 6. It is observed that both the methods demonstrate convergence toward near-optimal solutions. However, the proposed neural network (3) exhibits the numerical accuracy and solution reliability. 0 2 4 6 8 10 12 14 16 18 20 
+
+> -5
+> -4
+> -2
+> -3
+> -1
+> 0
+> 1
+> 2
+> 3
+> 4
+> 5
+
+Figure (11a) : Transient behaviors of w1(t).3 
+
+> 1
+> 2
+> 0
+> -1
+> -2
+> 20 18 16 14 12 10 86420
+> -5
+> 2
+> -4
+> -3
+> 4
+> 5
+
+Figure (11b): Transient behaviors of w2(t).0 2 4 6 8 10 12 14 16 18 20 
+
+> -5
+> -4
+> -3
+> -2
+> -1
+> 0
+> 1
+> 2
+> 3
+> 4
+> 5
+> 3
+
+Figure (11c): Transient behaviors of w3(t).
+
+21 Method Intial points Approximate optimal solution 
+
+(w∗
+
+> 1
+
+, w ∗
+
+> 2
+
+, w ∗
+
+> 3
+
+)
+
+Approximate optimal value 
+
+f (w∗
+
+> 1
+
+, w ∗
+
+> 2
+
+, w ∗
+
+> 3
+
+)
+
+l1
+
+penalty algorithm (1, 1, 1) (0 , 2.7102 , 0.5366) 10.4923 Lower-order penalty algorithm (1, 1, 1) (0 , 2.7091 , 0.536) 10.4925 Quadratic penalty algorithm (1, 1, 1) (0 , 2.7111 , 0.5372) 10.4924 Proposed neural network 10 random (−0.000074 , 2.709987 , 0.536561) 10.491639 Table 6 
+
+Example 5.5. [39] Consider the problem: (MPCC6) min 12
+
+[
+
+(w1 − 3) 2 + ( w2 − 4) 2]
+
+Subject to w1, w 2, w 3, w 4 ≥ 0, 0 ≤ w5 ≤ 10 ,
+
+(1 + 0 .2w5)w1 − (1 + 1 .333 w5) − 0.333 w3 + 2 w1w4 ≥ 0,w1
+
+(
+
+(1 + 0 .2w5)w1 − (1 + 1 .333 w5) − 0.333 w3 + 2 w1w4
+
+)
+
+= 0 ,
+
+(1 + 0 .1w5)w2 − w5 + w3 + 2 w2w4 ≥ 0,w2
+
+(
+
+(1 + 0 .1w5)w2 − w5 + w3 + 2 w2w4
+
+)
+
+= 0 ,
+
+0.333 w1 − w2 + 1 − 0.1w5 ≥ 0,w3
+
+(0.333 w1 − w2 + 1 − 0.1w5
+
+) = 0 ,
+
+9 + 0 .1w5 − w21 − w22 ≥ 0,w4
+
+(9 + 0 .1w5 − w21 − w22
+
+) = 0 .
+
+The transient behaviors of the state variables w1(t), w 2(t), w 3(t), w 4(t) and w5(t) at 
+
+β = 0 .00001 and λ = 10 4, with 10 random initial points are exhibited in the Figures (12a), (12b), (12c), (12d) and (12e), respectively. Using the above mentioned mathematical tools, the computer simulation shows that the trajectories of the neural network (3) con-verges to approximate optimal solution w∗ = (2 .552739 , 1.640964 , −0.000039 , 0.032896 ,
+
+2.092187) of the problem MPCC6. Further, the quantitative comparison between the pro-posed neural network (3) and penalty algorithms ( l1, lower-order, and quadratic) given by Yang and Huang [39] are presented in Table 6. It is observed that both the methods 22 demonstrate convergence toward near-optimal solutions. However, the proposed neural network (3) exhibits the numerical accuracy and solution reliability. Also, for the problem MPCC6, Outrata [32] obtained the optimal value as 3.2077, while the proposed neural network (3) gives the optimal value 2.88254. 0 2 4 6 8 10 12 14 16 18 20 
+
+> -5
+> -4
+> -3
+> -2
+> -1
+> 0
+> 1
+> 2
+> 3
+> 4
+> 5
+
+Figure (12a): Transient behaviors of w1(t).0 2 4 6 8 10 12 14 16 18 20 
+
+> -5
+> -4
+> -3
+
+-2 
+
+-1 
+
+> 0
+
+2
+
+1
+
+4
+
+3 
+
+> 5
+
+Figure (12b): Transient behaviors of w2(t).0 2 4 6 8 10 12 14 16 18 20 
+
+-5 
+
+-4 
+
+> -3
+
+-2 
+
+-1 
+
+0
+
+1
+
+2
+
+3
+
+4
+
+> 5
+
+Figure (12c): Transient behaviors of w3(t).0 2 4 6 8 10 12 14 16 18 20  
+
+> -5
+> -4
+> -3
+> -2
+> -1
+> 0
+> 1
+> 2
+> 3
+> 4
+> 5
+
+Figure (12d): Transient behaviors of w4(t).0 2 4 6 8 10 12 14 16 18 20 
+
+> -5
+> -4
+> -3
+> -2
+> -1
+> 0
+> 1
+> 2
+> 3
+> 4
+> 5
+
+Figure (12e): Transient behaviors of w5(t).
+
+23 Method Intial points Approximate optimal solution 
+
+(w∗
+
+> 1
+
+, w ∗
+
+> 2
+
+, w ∗
+
+> 3
+
+, w ∗
+
+> 4
+
+, w ∗
+
+> 5
+
+)
+
+Approximate optimal value 
+
+f (w∗
+
+> 1
+
+, w ∗
+
+> 2
+
+, w ∗
+
+> 3
+
+, w ∗
+
+> 4
+
+, w ∗
+
+> 5
+
+)
+
+l1
+
+penalty algorithm (0,0,0,0,0) (2 .5528 , 1.6409 , 0, 0.0329 , 2.0921) 2.8827 
+
+l1
+
+penalty algorithm (0, 0, 0, 0, 10) (2.5528, 1.6409, 0, 0.0329, 2.092) 2.8827 Lower-order penalty algorithm (0, 0, 0, 0, 0) (2.5528, 1.6409, 0, 0.0329, 2.092) 2.8827 Lower-order penalty algorithm (0, 0, 0, 0, 10) (2.5528, 1.6409, 0, 0.0328, 2.092) 2.8827 Quadratic penalty algorithm (0, 0, 0, 0, 0) (2.5528, 1.6409, 0, 0.0329, 2.092) 2.8827 Quadratic penalty algorithm (0, 0, 0, 0, 0) (2.5528, 1.64, 0.0001, 0.0329, 2.092) 2.8825 Proposed neural network 10 random (2.552739, 1.640964, -0.000039, 0.032896, 2.092187) 2.88254 Table 7 
+
+# Observation: 
+
+The proposed neural network framework provides a competitive way for solving the prob-lem MPCC. Unlike the penalty-function algorithms ( l1, lower-order, and quadratic), which are implemented from a single prescribed starting point and require repeatedly solving a sequence of smooth penalty subproblems with updated parameters. The pro-posed method generates solution trajectories directly from the continuous-time descent dynamics of an energy function and use of 10 random initialization improves the solu-tion reliability. Across the tested problems (Examples 5.3, 5.4 and 5.5), the approximate optimal solutions produced by the proposed neural network (3) achieve optimal values that are consistently comparable to penalty algorithms and in many cases smaller than the values obtained by Yang and Huang [39] for the same problems, while simultaneously maintaining the complementary structure through regularization. Also, for the problem MPCC6, Outrata [32] obtained the optimal value as 3.2077, while the proposed neural network (3) gives the optimal value 2.88254, which is smaller than those obtained by Outrata [32]. 24 These observations indicate that the proposed neural network demonstrates improved numerical accuracy and enhanced solution reliability. Further, the proposed neural net-work is not only numerically stable and easy to implement (via standard ODE solvers), but also effective in producing high-accuracy optimal solutions for the problem MPCC. 
+
+# 6 Conclusion 
+
+In this study, a gradient-based neural network constructed to solve the mathematical programming problems with complementary constraints MPCC. By employing the reg-ularization techniques, the problem MPCC is transformed into an equivalent relaxed nonlinear programming problem NLP( β). Using the penalty function methods an energy function was constructed, whose minimum represents the optimal solution to the problem NLP( β). The neural network has a simple one-layer architecture and low computational complexity which makes it well-suited for hardware implementation and real-time appli-cations. Based on Lyapunov stability theory and the LaSalle invariance principle, the proposed neural network asymptotic stable over its equilibrium point. Further, com-puter simulations validate the proposed model is effective and reliable in obtaining the optimal solution of the problem MPCC. This approach can be further extended to the multi-objective and conic semi-infinite mathematical programming problems with com-plementary constraints incorporating the concepts of generalized convexity. 
+
+Funding: No funding was received to assist with the preparation of this manuscript. 
+
+Author Contributions: All authors contributed equally to this work. 
+
+Data availability: The data will be shared upon reasonable request.. 
+
+# Declarations 
+
+Conflict of interest: The authors assert that they have no conflicts of interest. 25 References 
+
+[1] Cheng, G.D., Guo, X., 1997. ϵ-relaxed approach in structural topology optimization. 
+
+Struct. Optim. 13, 258-266. [2] Chen, K.Z., Leung, Y., Leung, K.S., Gao, X.B., 2002. A neural network for solving nonlinear programming problems. Neural Comput. Appl. 11, 103-111. [3] Chen, J.S., Ko, C.H., Pan, S., 2010. A neural network based on the generalized Fischer–Burmeister function for nonlinear complementarity problems. Inf. Sci. 180, 697-711. [4] Dang, C., Leung, Y., Gao, X.B., Chen, K.Z., 2004. Neural networks for nonlinear and mixed complementarity problems and their applications. Neural Netw. 17, 271-283. [5] DeMiguel, V., Friedlander, M.P., Nogales, F.J., Scholtes, S., 2005. A two-sided re-laxation scheme for mathematical programs with equilibrium constraints. SIAM J. Optim. 16, 587-609. [6] Ezazipour, S., Golbabai, A., 2020. A globally convergent neurodynamics optimiza-tion model for mathematical programming with equilibrium constraints. Kybernetika 
+
+56, 383-409. [7] Effati, S., Nazemi, A.R., 2006. Neural network models and its application for solving linear and quadratic programming problems. Appl. Math. Comput. 172, 305-331. [8] Guo, L., Lin, G.H., Ye, J.J., 2015. Solving mathematical programs with equilibrium constraints. J. Optim. Theory Appl. 166, 234-256. [9] Facchinei, F., Jiang, H., Qi, L., 1999. A smoothing method for mathematical pro-grams with equilibrium constraints. Math. Program. 85, 107. [10] Golbabai, A.,Ezazipour, S., 2017. A high-performance nonlinear dynamic scheme for the solution of equilibrium constrained optimization problems. Expert Syst. Appl. 82, 291-300. [11] Han, Q., Liao, L.Z., Qi, H., Qi, L., 2001. Stability analysis of gradient-based neural networks for optimization problems. Glob. Optim., 19, 363-381. 26 [12] Hu, X., Wang, J., 2006. Solving pseudo monotone variational inequalities and pseu-doconvex optimization problems using the projection neural network. IEEE Trans. Neural Netw. 17, 1487-1499. [13] Khalil, H.K., Grizzle, J.W., 2002. Nonlinear Systems. 3rd edn. Prentice Hall, Upper Saddle River, NJ. [14] Hoheisel, T., Kanzow, C., Schwartz, A., 2013. Theoretical and numerical comparison of relaxation methods for mathematical programs with complementarity constraints. 
+
+Math. Program. 137, 257-288. [15] Jayswal, A., Banerjee, J., 2016. An exact l1 penalty approach for interval-valued programming problem. J. Oper. Res. Soc. China. 4, 461-481. [16] Kanzow, C., Schwartz, A., 2013. A new regularization method for mathematical pro-grams with complementarity constraints with strong convergence properties. SIAM J. Optim. 23, 770-798. [17] Kadrani, A., Dussault, J.P., Benchakroun, A., 2009. A new regularization scheme for mathematical programs with complementarity constraints. SIAM J. Optim. 20, 78-103. [18] Kennedy, M.P., Chua, L.O. 2002. Neural networks for nonlinear programming. IEEE Trans. Circuits Syst. 35, 554-562. [19] Kočvara, M., Outrata, J.V., 2004. Optimization problems with equilibrium con-straints and their numerical solution. Math. Program. 101, 119-149. [20] La Salle, J.P., 1976. The stability of dynamical systems. SIAM J. Appl. Math. 
+
+[21] Leung, Y., Chen, K.Z., Jiao, Y.C., Gao, X.B., Leung, K.S., 2001. A new gradient-based neural network for solving linear and quadratic programming problems. IEEE Trans. Neural Netw. 12, 1074-1083. [22] Leyffer, S., 2006. Complementarity constraints as nonlinear equations: Theory and numerical experience, In Optimization with Multivalued Mappings: Theory, Appli-cations, and Algorithms Boston, MA: Springer US. 169-208. 27 [23] Liao, L.Z., Qi, H., Qi, L., 2001. Solving nonlinear complementarity problems with neural networks: a reformulation method approach. J. Comput. Appl. Math. 131, 343-359. [24] Lin, G.H., Fukushima, M., 2005. A modified relaxation scheme for mathematical programs with complementarity constraints. Ann. Oper. Res. 133, 63-84. [25] Li, Y.M., Lei, T., 2024. Delayed neural network based on a new complementarity function for the NCP. Expert Syst. Appl. 251, 123980. [26] Lv, Y., Chen, Z., Wan, Z., 2011. A neural network approach for solving mathematical programs with equilibrium constraints. Expert Syst. Appl. 38, 231-234. [27] Luenberger D. G., Ye Y., 1984. Linear and nonlinear programming, Springer. [28] Luo, Z.Q., Pang, J.S., Ralph, D., 1996. Mathematical programs with equilibrium constraints. Cambridge University Press. [29] Lv, Y., Chen, Z., Wan, Z., 2011. A neural network approach for solving mathematical programs with equilibrium constraints. Expert Syst. Appl. 38, 231-234. [30] Nazemi, A., 2013. Solving general convex nonlinear optimization problems by an efficient neurodynamic model. Eng. Appl. Artif. Intell. 26, 685-696. [31] Nazemi, A., 2014. A neural network model for solving convex quadratic programming problems with some applications. Eng. Appl. Artif. Intell. 32, 54-62. [32] Outrata, J.V., 1994. On optimization problems with variational inequality con-straints. SIAM J. Optim. 4, 340-357. [33] Ralph, D., Wright, S.J., 2004. Some properties of regularization and penalization schemes for MPECs. Optim. Methods Softw., 19, 527-556. [34] Scholtes, S. and Stöhr, M., 1999. Exact penalization of mathematical programs with equilibrium constraints. SIAM J. Control Optim. 37, 617-652. [35] Scholtes, S., 2001. Convergence properties of a regularization scheme for mathemat-ical programs with complementarity constraints, SIAM J. Optim. 11, 918-936. [36] Steffensen, S., Ulbrich, M., 2010. A new relaxation scheme for mathematical pro-grams with equilibrium constraints. SIAM J. Optim. 20, 2504-2539. 28 [37] Tank, D.W., Hopfield, J.J., 1986. Simple “Neural” optimization networks: an A/D converter, signal decision circuit, and a linear programming circuit. In Artificial neural networks: theoretical concepts. IEEE Trans. Circuits Syst. 33, 533-541. [38] Xia, Y., Wang, J., 2004. A general projection neural network for solving mono-tone variational inequalities and related optimization problems. IEEE Trans. Neural Netw. 15, 318-328. [39] Yang, X.Q., Huang, X.X., 2004. Lower-order penalty methods for mathematical programs with complementarity constraints. Optim. Methods Softw. 19, 693-720. [40] Zhang, S., Constantinides, A.G., 1992. Lagrange programming neural networks. 
+
+IEEE Trans. Circuits Syst. II, Analog Digit. Signal. Process. 39, 441-452. 29

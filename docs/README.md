@@ -6,79 +6,76 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-23
-- 运行时间：2026-03-23 20:22:55 UTC
+- 最新运行日期：2026-03-24
+- 运行时间：2026-03-24 19:59:39 UTC
 - 运行状态：成功
-- 本次总论文数：19
-- 精读区：7
+- 本次总论文数：18
+- 精读区：6
 - 速读区：12
 
 ### 今日简报（AI）
-今日精选 19 篇前沿论文，深度聚焦大模型多维认知规划与系统自我演化机制。
-重点关注评分 9.0 的 ItinBench 基准，它系统性地挑战了 LLM 的复杂规划边界，同时“自我演化”研究为模型自主能力提升提供了新路径。
-建议优先研读 ItinBench 框架，以掌握评估 AI 逻辑规划与认知能力的最前沿标准。
-- 详情：[/202603/23/README](/202603/23/README)
+今日聚焦大规模组合优化与大模型效率提升，深度解析强化学习如何重塑传统启发式算法。
+重点推荐通过解耦参数提升 TSP 求解性能，以及利用神经约束启发式优化邻域搜索的突破性研究。
+建议关注 AI 与运筹优化的跨界融合趋势，以及端侧 LLM 量化部署与代码对抗进化的实用技术。
+- 详情：[/202603/24/README](/202603/24/README)
 
 ### 精读区论文标签
-1. [ItinBench: Benchmarking Planning Across Multiple Cognitive Dimensions with Large Language Models](/202603/23/2603.19515v1-itinbench-benchmarking-planning-across-multiple-cognitive-dimensions-with-large-language-models)  
+1. [Decoupling Numerical and Structural Parameters: An Empirical Study on Adaptive Genetic Algorithms via Deep Reinforcement Learning for the Large-Scale TSP](/202603/24/2603.20702v1-decoupling-numerical-and-structural-parameters-an-empirical-study-on-adaptive-genetic-algorithms-via-deep-reinforcement-learning-for-the-large-scale-tsp)  
+   标签：评分：10.0/10、query:nco
+   evidence：深度强化学习用于大规模旅行商问题和遗传算法
+2. [Large Neighborhood Search meets Iterative Neural Constraint Heuristics](/202603/24/2603.20801v1-large-neighborhood-search-meets-iterative-neural-constraint-heuristics)  
+   标签：评分：10.0/10、query:nco
+   evidence：将神经约束启发式算法应用于大邻域搜索
+3. [LLM-Driven Heuristic Synthesis for Industrial Process Control: Lessons from Hot Steel Rolling](/202603/24/2603.20537v1-llm-driven-heuristic-synthesis-for-industrial-process-control-lessons-from-hot-steel-rolling)  
    标签：评分：9.0/10、query:nco-llm
-   evidence：大模型在行程规划中路径优化的基准测试
-2. [Learning to Self-Evolve](/202603/23/2603.18620v1-learning-to-self-evolve)  
+   evidence：大模型驱动的控制优化启发式合成
+4. [Improving Coherence and Persistence in Agentic AI for System Optimization](/202603/24/2603.21321v1-improving-coherence-and-persistence-in-agentic-ai-for-system-optimization)  
+   标签：评分：9.0/10、query:nco-llm
+   evidence：大模型引导的复杂系统优化启发式搜索
+5. [Reasoning Topology Matters: Network-of-Thought for Complex Reasoning Tasks](/202603/24/2603.20730v1-reasoning-topology-matters-network-of-thought-for-complex-reasoning-tasks)  
    标签：评分：8.0/10、query:nco-llm
-   evidence：用于LLM测试时自演化和上下文优化的强化学习框架
-3. [Bridging Network Fragmentation: A Semantic-Augmented DRL Framework for UAV-aided VANETs](/202603/23/2603.18871v1-bridging-network-fragmentation-a-semantic-augmented-drl-framework-for-uav-aided-vanets)  
+   evidence：LLM生成的启发式方法用于基于图的推理搜索
+6. [Revisiting Tree Search for LLMs: Gumbel and Sequential Halving for Budget-Scalable Reasoning](/202603/24/2603.21162v1-revisiting-tree-search-for-llms-gumbel-and-sequential-halving-for-budget-scalable-reasoning)  
    标签：评分：8.0/10、query:nco-llm
-   evidence：结合大模型推理与深度强化学习进行拓扑优化
-4. [Towards Solving Polynomial-Objective Integer Programming with Hypergraph Neural Networks](/202603/23/2603.19318v1-towards-solving-polynomial-objective-integer-programming-with-hypergraph-neural-networks)  
-   标签：评分：8.0/10、query:nco
-   evidence：用于多项式目标整数规划的超图神经网络
-5. [POET: Power-Oriented Evolutionary Tuning for LLM-Based RTL PPA Optimization](/202603/23/2603.19333v1-poet-power-oriented-evolutionary-tuning-for-llm-based-rtl-ppa-optimization)  
-   标签：评分：8.0/10、query:nco-llm
-   evidence：LLM驱动的RTL PPA优化进化框架
-6. [Automating Reformulation for Parallel ADMM](/202603/23/2603.19417v1-automating-reformulation-for-parallel-admm)  
-   标签：评分：8.0/10、query:nco-llm
-   evidence：用于优化重构的GNN代理模型和启发式算法
-7. [CO-EVOLVE: Bidirectional Co-Evolution of Graph Structure and Semantics for Heterophilous Learning](/202603/23/2603.19596v1-co-evolve-bidirectional-co-evolution-of-graph-structure-and-semantics-for-heterophilous-learning)  
-   标签：评分：8.0/10、query:nco-llm
-   evidence：大模型与图神经网络结合用于结构推理
+   evidence：AlphaZero风格的树搜索增强大语言模型的推理能力
 
 ### 速读区论文标签
-1. [Hyper-Adaptive Momentum Dynamics for Native Cubic Portfolio Optimization: Avoiding Quadratization Distortion in Higher-Order Cardinality-Constrained Search](/202603/23/2603.15947v1-hyper-adaptive-momentum-dynamics-for-native-cubic-portfolio-optimization-avoiding-quadratization-distortion-in-higher-order-cardinality-constrained-search)  
+1. [Code-A1: Adversarial Evolving of Code LLM and Test LLM via Reinforcement Learning](/202603/24/2603.15611v1-code-a1-adversarial-evolving-of-code-llm-and-test-llm-via-reinforcement-learning)  
    标签：评分：7.0/10、query:nco-llm
-   evidence：基数约束组合优化的混合流水线
-2. [DyJR: Preserving Diversity in Reinforcement Learning with Verifiable Rewards via Dynamic Jensen-Shannon Replay](/202603/23/2603.16157v1-dyjr-preserving-diversity-in-reinforcement-learning-with-verifiable-rewards-via-dynamic-jensen-shannon-replay)  
+   evidence：通过强化学习实现大模型的对抗式协同演化
+2. [RAMP: Reinforcement Adaptive Mixed Precision Quantization for Efficient On Device LLM Inference](/202603/24/2603.17891v1-ramp-reinforcement-adaptive-mixed-precision-quantization-for-efficient-on-device-llm-inference)  
    标签：评分：7.0/10、query:nco
-   evidence：强化学习用于大语言模型推理和策略更新
-3. [Surrogate-Assisted Genetic Programming with Rank-Based Phenotypic Characterisation for Dynamic Multi-Mode Project Scheduling](/202603/23/2603.16286v1-surrogate-assisted-genetic-programming-with-rank-based-phenotypic-characterisation-for-dynamic-multi-mode-project-scheduling)  
+   evidence：用于LLM自适应混合精度量化的强化学习
+3. [Stone-in-Waiting: A Cloud-Based Accelerator for the Quantum Approximate Optimization Algorithm](/202603/24/2603.19980v1-stone-in-waiting-a-cloud-based-accelerator-for-the-quantum-approximate-optimization-algorithm)  
    标签：评分：7.0/10、query:nco
-   evidence：利用遗传编程为项目调度演化启发式规则
-4. [Per-Domain Generalizing Policies: On Learning Efficient and Robust Q-Value Functions (Extended Version with Technical Appendix)](/202603/23/2603.17544v1-per-domain-generalizing-policies-on-learning-efficient-and-robust-q-value-functions-extended-version-with-technical-appendix)  
+   evidence：使用QAOA的组合优化任务
+4. [SymCircuit: Bayesian Structure Inference for Tractable Probabilistic Circuits via Entropy-Regularized Reinforcement Learning](/202603/24/2603.20392v1-symcircuit-bayesian-structure-inference-for-tractable-probabilistic-circuits-via-entropy-regularized-reinforcement-learning)  
    标签：评分：7.0/10、query:nco
-   evidence：学习以图神经网络表示的Q值函数用于规划
-5. [Learning Decision-Sufficient Representations for Linear Optimization](/202603/23/2603.18551v1-learning-decision-sufficient-representations-for-linear-optimization)  
+   evidence：通过熵正则化强化学习训练生成策略以进行结构搜索
+5. [Generating from Discrete Distributions Using Diffusions: Insights from Random Constraint Satisfaction Problems](/202603/24/2603.20589v1-generating-from-discrete-distributions-using-diffusions-insights-from-random-constraint-satisfaction-problems)  
+   标签：评分：7.0/10、query:nco
+   evidence：随机约束满足问题的生成技术
+6. [Neural network model for mathematical programming problems with complementary constraints](/202603/24/2603.20726v1-neural-network-model-for-mathematical-programming-problems-with-complementary-constraints)  
    标签：评分：7.0/10、query:nco-llm
-   evidence：线性优化和混合整数规划的学习表示
-6. [A General Deep Learning Framework for Wireless Resource Allocation under Discrete Constraints](/202603/23/2603.19322v1-a-general-deep-learning-framework-for-wireless-resource-allocation-under-discrete-constraints)  
-   标签：评分：7.0/10、query:nco-llm
-   evidence：具有离散约束的无线资源分配深度学习框架
-7. [Sample-Efficient Hypergradient Estimation for Decentralized Bi-Level Reinforcement Learning](/202603/23/2603.14867v1-sample-efficient-hypergradient-estimation-for-decentralized-bi-level-reinforcement-learning)  
+   evidence：用于带约束数学规划问题的神经网络模型
+7. [Machine Learning-Driven Intelligent Memory System Design: From On-Chip Caches to Storage](/202603/24/2603.14583v1-machine-learning-driven-intelligent-memory-system-design-from-on-chip-caches-to-storage)  
    标签：评分：6.0/10、query:nco
-   evidence：用于战略决策的双层强化学习
-8. [Beyond Monolithic Models: Symbolic Seams for Composable Neuro-Symbolic Architectures](/202603/23/2603.15087v1-beyond-monolithic-models-symbolic-seams-for-composable-neuro-symbolic-architectures)  
+   evidence：基于强化学习的数据预取器取代人工设计的启发式算法
+8. [Lost in Aggregation: On a Fundamental Expressivity Limit of Message-Passing Graph Neural Networks](/202603/24/2603.14846v2-lost-in-aggregation-on-a-fundamental-expressivity-limit-of-message-passing-graph-neural-networks)  
+   标签：评分：6.0/10、query:nco
+   evidence：消息传递图神经网络的表达能力限制
+9. [Offline Exploration-Aware Fine-Tuning for Long-Chain Mathematical Reasoning](/202603/24/2603.16206v1-offline-exploration-aware-fine-tuning-for-long-chain-mathematical-reasoning)  
    标签：评分：6.0/10、query:nco-llm
-   evidence：将大模型与符号推理及约束捆绑集成
-9. [Sampling-guided exploration of active feature selection policies](/202603/23/2603.15110v1-sampling-guided-exploration-of-active-feature-selection-policies)  
-   标签：评分：6.0/10、query:nco
-   evidence：用于顺序特征选择启发式的强化学习
-10. [Probe-then-Plan: Environment-Aware Planning for Industrial E-commerce Search](/202603/23/2603.15262v1-probe-then-plan-environment-aware-planning-for-industrial-e-commerce-search)  
+   evidence：通过强化学习微调语言模型以进行推理
+10. [From Natural Language to Executable Option Strategies via Large Language Models](/202603/24/2603.16434v1-from-natural-language-to-executable-option-strategies-via-large-language-models)  
    标签：评分：6.0/10、query:nco-llm
-   evidence：基于大语言模型的搜索规划动态推理
-11. [Evolutionary Transfer Learning for Dragonchess](/202603/23/2603.15297v1-evolutionary-transfer-learning-for-dragonchess)  
+   evidence：大模型用于处理带严格约束的多维数据推理
+11. [GIST: Gauge-Invariant Spectral Transformers for Scalable Graph Neural Operators](/202603/24/2603.16849v1-gist-gauge-invariant-spectral-transformers-for-scalable-graph-neural-operators)  
    标签：评分：6.0/10、query:nco
-   evidence：用于优化启发式评估函数的进化迁移学习
-12. [MA-VLCM: A Vision Language Critic Model for Value Estimation of Policies in Multi-Agent Team Settings](/202603/23/2603.15418v1-ma-vlcm-a-vision-language-critic-model-for-value-estimation-of-policies-in-multi-agent-team-settings)  
+   evidence：用于图结构数据的谱变换器
+12. [Learning Permutation Distributions via Reflected Diffusion on Ranks](/202603/24/2603.17353v1-learning-permutation-distributions-via-reflected-diffusion-on-ranks)  
    标签：评分：6.0/10、query:nco
-   evidence：视觉语言模型用于多智能体强化学习中的价值估计
+   evidence：学习离散结构的排列分布
 
 
 <div class="dpr-home-promo-card">

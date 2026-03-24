@@ -1,0 +1,713 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-24T19:57:20.432881+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 6,
+    "deep_cap": 7,
+    "deep_selected": 6,
+    "quick_candidates": 38,
+    "quick_skim_target": 12,
+    "quick_selected": 12
+  },
+  "deep_dive": [
+    {
+      "id": "2603.20702v1",
+      "title": "Decoupling Numerical and Structural Parameters: An Empirical Study on Adaptive Genetic Algorithms via Deep Reinforcement Learning for the Large-Scale TSP",
+      "abstract": "Proper parameter configuration is a prerequisite for the success of Evolutionary Algorithms (EAs). While various adaptive strategies have been proposed, it remains an open question whether all control dimensions contribute equally to algorithmic scalability. To investigate this, we categorize control variables into numerical parameters (e.g., crossover and mutation rates) and structural parameters (e.g., population size and operator switching), hypothesizing that they play distinct roles. This paper presents an empirical study utilizing a dual-level Deep Reinforcement Learning (DRL) framework to decouple and analyze the impact of these two dimensions on the Traveling Salesman Problem (TSP). We employ a Recurrent PPO agent to dynamically regulate these parameters, treating the DRL model as a probe to reveal evolutionary dynamics. Experimental results confirm the effectiveness of this approach: the learned policies outperform static baselines, reducing the optimality gap by approximately 45% on the largest tested instance (rl5915). Building on this validated framework, our ablation analysis reveals a fundamental insight: while numerical tuning offers local refinement, structural plasticity is the decisive factor in preventing stagnation and facilitating escape from local optima. These findings suggest that future automated algorithm design should prioritize dynamic structural reconfiguration over fine-grained probability adjustment. To facilitate reproducibility, the source code is available at https://github.com/StarDream1314/DRLGA-TSP",
+      "authors": [
+        "Hongyu Wang",
+        "Yuhan Jing",
+        "Yibing Shi",
+        "Enjin Zhou",
+        "Haotian Zhang",
+        "Jialong Shi"
+      ],
+      "primary_category": "cs.NE",
+      "categories": [
+        "cs.NE",
+        "cs.AI"
+      ],
+      "published": "2026-03-21T07:56:39+00:00",
+      "link": "https://arxiv.org/pdf/2603.20702v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "Deep Reinforcement Learning for Large-Scale TSP and Genetic Algorithms",
+      "llm_evidence_cn": "深度强化学习用于大规模旅行商问题和遗传算法",
+      "llm_evidence": "深度强化学习用于大规模旅行商问题和遗传算法",
+      "canonical_evidence": "深度强化学习用于大规模旅行商问题和遗传算法",
+      "llm_tldr_en": "Uses DRL to adaptively configure parameters of genetic algorithms for solving large-scale TSP.",
+      "llm_tldr_cn": "利用深度强化学习自适应配置遗传算法参数，以解决大规模旅行商问题。",
+      "llm_tldr": "利用深度强化学习自适应配置遗传算法参数，以解决大规模旅行商问题。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Neural solvers for Traveling Salesman Problem TSP",
+      "matched_requirement_id": "req-16",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.20801v1",
+      "title": "Large Neighborhood Search meets Iterative Neural Constraint Heuristics",
+      "abstract": "Neural networks are being increasingly used as heuristics for constraint satisfaction. These neural methods are often recurrent, learning to iteratively refine candidate assignments. In this work, we make explicit the connection between such iterative neural heuristics and Large Neighborhood Search (LNS), and adapt an existing neural constraint satisfaction method-ConsFormer-into an LNS procedure. We decompose the resulting neural LNS into two standard components: the destroy and repair operators. On the destroy side, we instantiate several classical heuristics and introduce novel prediction-guided operators that exploit the model's internal scores to select neighborhoods. On the repair side, we utilize ConsFormer as a neural repair operator and compare the original sampling-based decoder to a greedy decoder that selects the most likely assignments. Through an empirical study on Sudoku, Graph Coloring, and MaxCut, we find that adapting the neural heuristic to an LNS procedure yields substantial gains over its vanilla settings and improves its competitiveness with classical and neural baselines. We further observe consistent design patterns across tasks: stochastic destroy operators outperform greedy ones, while greedy repair is more effective than sampling-based repair for finding a single high-quality feasible assignment. These findings highlight LNS as a useful lens and design framework for structuring and improving iterative neural approaches.",
+      "authors": [
+        "Yudong W. Xu",
+        "Wenhao Li",
+        "Scott Sanner",
+        "Elias B. Khalil"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-21T12:53:02+00:00",
+      "link": "https://arxiv.org/pdf/2603.20801v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "Adapting neural constraint heuristics into Large Neighborhood Search",
+      "llm_evidence_cn": "将神经约束启发式算法应用于大邻域搜索",
+      "llm_evidence": "将神经约束启发式算法应用于大邻域搜索",
+      "canonical_evidence": "将神经约束启发式算法应用于大邻域搜索",
+      "llm_tldr_en": "Integrates iterative neural heuristics with Large Neighborhood Search for constraint satisfaction problems.",
+      "llm_tldr_cn": "将迭代神经启发式算法与大邻域搜索结合，用于解决约束满足问题。",
+      "llm_tldr": "将迭代神经启发式算法与大邻域搜索结合，用于解决约束满足问题。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Learning search heuristics with neural networks",
+      "matched_requirement_id": "req-21",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.20537v1",
+      "title": "LLM-Driven Heuristic Synthesis for Industrial Process Control: Lessons from Hot Steel Rolling",
+      "abstract": "Industrial process control demands policies that are interpretable and auditable, requirements that black-box neural policies struggle to meet. We study an LLM-driven heuristic synthesis framework for hot steel rolling, in which a language model iteratively proposes and refines human-readable Python controllers using rich behavioral feedback from a physics-based simulator. The framework combines structured strategic ideation, executable code generation, and per-component feedback across diverse operating conditions to search over control logic for height reduction, interpass time, and rolling velocity. Our first contribution is an auditable controller-synthesis pipeline for industrial process control. The generated controllers are explicit programs accessible to expert review, and we pair them with an automated audit pipeline that formally verifies key safety and monotonicity properties for the best synthesized heuristic. Our second contribution is a principled budget allocation strategy for LLM-driven heuristic search: we show that Luby-style universal restarts -- originally developed for randomized algorithms -- transfer directly to this setting, eliminating the need for problem-specific budget tuning. A single 160-iteration Luby campaign approaches the hindsight-optimal budget allocation derived from 52 ad-hoc runs totalling 730 iterations.",
+      "authors": [
+        "Nima H. Siboni",
+        "Seyedreza Kiamousavi",
+        "Emad Scharifi"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-03-20T22:20:19+00:00",
+      "link": "https://arxiv.org/pdf/2603.20537v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "LLM-driven heuristic synthesis for control optimization",
+      "llm_evidence_cn": "大模型驱动的控制优化启发式合成",
+      "llm_evidence": "大模型驱动的控制优化启发式合成",
+      "canonical_evidence": "大模型驱动的控制优化启发式合成",
+      "llm_tldr_en": "Develops an LLM-based framework to iteratively synthesize and refine human-readable heuristics for industrial control.",
+      "llm_tldr_cn": "开发了一个基于大模型的框架，用于迭代合成和改进工业控制中的可读启发式策略。",
+      "llm_tldr": "开发了一个基于大模型的框架，用于迭代合成和改进工业控制中的可读启发式策略。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM driven heuristic generation for combinatorial optimization",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.21321v1",
+      "title": "Improving Coherence and Persistence in Agentic AI for System Optimization",
+      "abstract": "Designing high-performance system heuristics is a creative, iterative process requiring experts to form hypotheses and execute multi-step conceptual shifts. While Large Language Models (LLMs) show promise in automating this loop, they struggle with complex system problems due to two critical failure modes: evolutionary neighborhood bias and the coherence ceiling. Evolutionary methods often remain trapped in local optima by relying on scalar benchmark scores, failing when coordinated multi-step changes are required. Conversely, existing agentic frameworks suffer from context degradation over long horizons or fail to accumulate knowledge across independent runs.   We present Engram, an agentic researcher architecture that addresses these limitations by decoupling long-horizon exploration from the constraints of a single context window. Engram organizes exploration into a sequence of agents that iteratively design, test, and analyze mechanisms. At the conclusion of each run, an agent stores code snapshots, logs, and results in a persistent Archive and distills high-level modeling insights into a compact, persistent Research Digest. Subsequent agents then begin with a fresh context window, reading the Research Digest to build on prior discoveries.   We find that Engram exhibits superior performance across diverse domains including multi-cloud multicast, LLM inference request routing, and optimizing KV cache reuse in databases with natural language queries.",
+      "authors": [
+        "Pantea Karimi",
+        "Kimia Noorbakhsh",
+        "Mohammad Alizadeh",
+        "Hari Balakrishnan"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CL"
+      ],
+      "published": "2026-03-22T17:04:50+00:00",
+      "link": "https://arxiv.org/pdf/2603.21321v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "LLM-guided heuristic search for complex system optimization",
+      "llm_evidence_cn": "大模型引导的复杂系统优化启发式搜索",
+      "llm_evidence": "大模型引导的复杂系统优化启发式搜索",
+      "canonical_evidence": "大模型引导的复杂系统优化启发式搜索",
+      "llm_tldr_en": "Introduces Engram, an agentic architecture using LLMs to automate high-performance system heuristic design.",
+      "llm_tldr_cn": "引入 Engram，一种利用大模型自动化高性能系统启发式设计的智能体架构。",
+      "llm_tldr": "引入 Engram，一种利用大模型自动化高性能系统启发式设计的智能体架构。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM-guided heuristic search for optimization",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.20730v1",
+      "title": "Reasoning Topology Matters: Network-of-Thought for Complex Reasoning Tasks",
+      "abstract": "Existing prompting paradigms structure LLM reasoning in limited topologies: Chain-of-Thought (CoT) produces linear traces, while Tree-of-Thought (ToT) performs branching search. Yet complex reasoning often requires merging intermediate results, revisiting hypotheses, and integrating evidence from multiple sources. We propose Network-of-Thought (NoT), a framework that models reasoning as a directed graph with typed nodes and edges, guided by a heuristic-based controller policy. Across four benchmarks (GSM8K, Game of 24, HotpotQA, ProofWriter) and three models (GPT-4o-mini, Llama-3.3-70B-Instruct, Qwen2.5-72B-Instruct), we investigate when network topology outperforms chain or tree structures, whether LLM-generated heuristics can guide graph-based reasoning search, and the computation-accuracy tradeoff across topologies, evaluating each method on accuracy, topology simplicity, and token efficiency. Our results show that CoT remains effective for sequential tasks with GPT-4o-mini (89.5\\% on GSM8K), while NoT surpasses ToT on multi-hop reasoning (91.0\\% vs.\\ 88.0\\% on HotpotQA with LLM-as-Judge). With 72B open-source models, NoT achieves the highest accuracy on GSM8K (91.5\\%), and Qwen2.5-72B achieves the best multi-hop QA result overall (91.7\\% on HotpotQA). Self-generated controller heuristics outperform fixed and random strategies on logical reasoning, with uncertainty-only weighting achieving 57.0\\% on ProofWriter. We also find that evaluation methodology significantly impacts method rankings: string-match underestimates all methods on open-ended QA, with the largest gap for NoT, a pattern consistent across all three models (14--18 percentage point gap on HotpotQA).",
+      "authors": [
+        "Fan Huang"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI"
+      ],
+      "published": "2026-03-21T09:32:28+00:00",
+      "link": "https://arxiv.org/pdf/2603.20730v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "LLM-generated heuristics for graph-based reasoning search",
+      "llm_evidence_cn": "LLM生成的启发式方法用于基于图的推理搜索",
+      "llm_evidence": "LLM生成的启发式方法用于基于图的推理搜索",
+      "canonical_evidence": "LLM生成的启发式方法用于基于图的推理搜索",
+      "llm_tldr_en": "Proposes a Network-of-Thought framework using LLM-generated heuristics to guide graph-based reasoning search.",
+      "llm_tldr_cn": "提出了一种Network-of-Thought框架，利用LLM生成的启发式算法指导基于图的推理搜索。",
+      "llm_tldr": "提出了一种Network-of-Thought框架，利用LLM生成的启发式算法指导基于图的推理搜索。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM-guided heuristic search for optimization",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.21162v1",
+      "title": "Revisiting Tree Search for LLMs: Gumbel and Sequential Halving for Budget-Scalable Reasoning",
+      "abstract": "Neural tree search is a powerful decision-making algorithm widely used in complex domains such as game playing and model-based reinforcement learning. Recent work has applied AlphaZero-style tree search to enhance the reasoning capabilities of Large Language Models (LLMs) during inference, but we find that this approach suffers from a scaling failure: on GSM8K and Game24, accuracy drops as the search budget increases. In this paper, we present ReSCALE, an adaptation of Gumbel AlphaZero MCTS that replaces Dirichlet noise and PUCT selection with Gumbel sampling and Sequential Halving, restoring monotonic scaling without changes to the model or its training. ReSCALE reaches 58.4\\% on GSM8K and 85.3\\% on Game24 at budgets where the baseline degrades. Ablations confirm that Sequential Halving is the primary driver of the improvement.",
+      "authors": [
+        "Leonid Ugadiarov",
+        "Yuri Kuratov",
+        "Aleksandr Panov",
+        "Alexey Skrynnik"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-03-22T10:32:48+00:00",
+      "link": "https://arxiv.org/pdf/2603.21162v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "AlphaZero-style tree search to enhance reasoning capabilities of LLMs",
+      "llm_evidence_cn": "AlphaZero风格的树搜索增强大语言模型的推理能力",
+      "llm_evidence": "AlphaZero风格的树搜索增强大语言模型的推理能力",
+      "canonical_evidence": "AlphaZero风格的树搜索增强大语言模型的推理能力",
+      "llm_tldr_en": "Introduces ReSCALE to improve the budget-scalability of tree search for LLM reasoning tasks.",
+      "llm_tldr_cn": "引入ReSCALE方法，提升了大语言模型推理任务中树搜索的预算扩展性。",
+      "llm_tldr": "引入ReSCALE方法，提升了大语言模型推理任务中树搜索的预算扩展性。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM-guided heuristic search for optimization",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2603.15611v1",
+      "title": "Code-A1: Adversarial Evolving of Code LLM and Test LLM via Reinforcement Learning",
+      "abstract": "Reinforcement learning for code generation relies on verifiable rewards from unit test pass rates. Yet high-quality test suites are scarce, existing datasets offer limited coverage, and static rewards fail to adapt as models improve. Recent self-play methods unify code and test generation in a single model, but face a inherent dilemma: white-box access leads to self-collusion where the model produces trivial tests for easy rewards, yet black-box restriction yields generic tests that miss implementation-specific bugs. We introduce Code-A1, an adversarial co-evolution framework that jointly optimizes a Code LLM and a Test LLM with opposing objectives. The Code LLM is rewarded for passing more tests, while the Test LLM is rewarded for exposing more defects. This architectural separation eliminates self-collusion risks and safely enables white-box test generation, where the Test LLM can inspect candidate code to craft targeted adversarial tests. We further introduce a Mistake Book mechanism for experience replay and a composite reward balancing test validity with adversarial difficulty. Experiments on Qwen2.5-Coder models demonstrate that Code-A1 achieves code generation performance matching or exceeding models trained on human-annotated tests, while significantly improving test generation capability.",
+      "authors": [
+        "Aozhe Wang",
+        "Yuchen Yan",
+        "Nan Zhou",
+        "Zhengxi Lu",
+        "Weiming Lu",
+        "Jun Xiao",
+        "Yueting Zhuang",
+        "Yongliang Shen"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-03-16T17:58:13+00:00",
+      "link": "https://arxiv.org/pdf/2603.15611v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "adversarial co-evolution of LLMs via reinforcement learning",
+      "llm_evidence_cn": "通过强化学习实现大模型的对抗式协同演化",
+      "llm_evidence": "通过强化学习实现大模型的对抗式协同演化",
+      "canonical_evidence": "通过强化学习实现大模型的对抗式协同演化",
+      "llm_tldr_en": "Uses reinforcement learning to jointly optimize code and test generation LLMs in an adversarial framework.",
+      "llm_tldr_cn": "在对抗框架中利用强化学习共同优化代码生成和测试生成的大模型。",
+      "llm_tldr": "在对抗框架中利用强化学习共同优化代码生成和测试生成的大模型。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Fine tuning language models for neural combinatorial optimization tasks",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.14583v1",
+      "title": "Machine Learning-Driven Intelligent Memory System Design: From On-Chip Caches to Storage",
+      "abstract": "Despite the data-rich environment in which memory systems of modern computing platforms operate, many state-of-the-art architectural policies employed in the memory system rely on static, human-designed heuristics that fail to truly adapt to the workload and system behavior via principled learning methodologies. In this article, we propose a fundamentally different design approach: using lightweight and practical machine learning (ML) methods to enable adaptive, data-driven control throughout the memory hierarchy.   We present three ML-guided architectural policies: (1) Pythia, a reinforcement learning-based data prefetcher for on-chip caches, (2) Hermes, a perceptron learning-based off-chip predictor for multi-level cache hierarchies, and (3) Sibyl, a reinforcement learning-based data placement policy for hybrid storage systems. Our evaluation shows that Pythia, Hermes, and Sibyl significantly outperform the best-prior human-designed policies, while incurring modest hardware overheads. Collectively, this article demonstrates that integrating adaptive learning into memory subsystems can lead to intelligent, self-optimizing architectures that unlock performance and efficiency gains beyond what is possible with traditional human-designed approaches.",
+      "authors": [
+        "Rahul Bera",
+        "Rakesh Nadig",
+        "Onur Mutlu"
+      ],
+      "primary_category": "cs.AR",
+      "categories": [
+        "cs.AR",
+        "cs.AI",
+        "cs.DC",
+        "cs.LG"
+      ],
+      "published": "2026-03-15T20:02:05+00:00",
+      "link": "https://arxiv.org/pdf/2603.14583v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "reinforcement learning-based data prefetcher replacing human-designed heuristics",
+      "llm_evidence_cn": "基于强化学习的数据预取器取代人工设计的启发式算法",
+      "llm_evidence": "基于强化学习的数据预取器取代人工设计的启发式算法",
+      "canonical_evidence": "基于强化学习的数据预取器取代人工设计的启发式算法",
+      "llm_tldr_en": "Proposes using reinforcement learning to replace static heuristics in memory system architectural policies.",
+      "llm_tldr_cn": "提出使用强化学习取代内存系统架构策略中的静态启发式算法。",
+      "llm_tldr": "提出使用强化学习取代内存系统架构策略中的静态启发式算法。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Learning search heuristics with neural networks",
+      "matched_requirement_id": "req-21",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.17891v1",
+      "title": "RAMP: Reinforcement Adaptive Mixed Precision Quantization for Efficient On Device LLM Inference",
+      "abstract": "Post training quantization is essential for deploying large language models (LLMs) on resource constrained hardware, yet state of the art methods enforce uniform bit widths across layers, yielding suboptimal accuracy efficiency trade offs. We present RAMP (Reinforcement Adaptive Mixed Precision), an off policy Soft Actor Critic framework that learns per layer bit width assignments to minimize perplexity under a global bit budget. The policy conditions on an 11 dimensional embedding of activation statistics, weight properties, and structural descriptors, enabling zero shot transfer across model families and scales. To enable stable sub 4 bit quantization, we introduce Scale Folding, a preconditioning technique that migrates activation outliers into weights via per channel scaling and normalization layer compensation. A quality prioritized reward with asymmetric penalties and budget cliffs drives rapid convergence. On Llama 2 7B, RAMP achieves 5.54 perplexity at 3.68GB (3.65 effective bits), outperforming uniform 4 bit AWQ (5.60 at 3.90 GB) and GPTQ by 6% in size and 1% to3% in quality. Critically, a policy trained only on Llama 2 7B generalizes zero shot to Llama 2 13B and Mistral 7B, often surpassing target specific training, supporting the hypothesis that quantization sensitivity is primarily architectural. The HALO pipeline exports allocations to GGUF format for kernel free inference on CPUs, GPUs, and edge devices, retaining 99.5% of FP16 commonsense reasoning performance.",
+      "authors": [
+        "Arpit Singh Gautam",
+        "Saurabh Jha"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-18T16:16:28+00:00",
+      "link": "https://arxiv.org/pdf/2603.17891v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Reinforcement learning for adaptive mixed precision quantization in LLMs",
+      "llm_evidence_cn": "用于LLM自适应混合精度量化的强化学习",
+      "llm_evidence": "用于LLM自适应混合精度量化的强化学习",
+      "canonical_evidence": "用于LLM自适应混合精度量化的强化学习",
+      "llm_tldr_en": "Uses reinforcement learning to optimize bit-width assignments for efficient LLM inference.",
+      "llm_tldr_cn": "利用强化学习优化大语言模型的量化位宽分配，以实现高效推理。",
+      "llm_tldr": "利用强化学习优化大语言模型的量化位宽分配，以实现高效推理。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Reinforcement learning frameworks for combinatorial optimization",
+      "matched_requirement_id": "req-24",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.14846v2",
+      "title": "Lost in Aggregation: On a Fundamental Expressivity Limit of Message-Passing Graph Neural Networks",
+      "abstract": "We define a generic class of functions that captures most conceivable aggregations for Message-Passing Graph Neural Networks (MP-GNNs), and prove that any MP-GNN model with such aggregations induces only a polynomial number of equivalence classes on all graphs - while the number of non-isomorphic graphs is doubly-exponential (in number of vertices).   Adding a familiar perspective, we observe that merely 2-iterations of Color Refinement (CR) induce at least an exponential number of equivalence classes, making the aforementioned MP-GNNs relatively infinitely weaker. Previous results state that MP-GNNs match full CR, however they concern a weak, 'non-uniform', notion of distinguishing-power where each graph size may required a different MP-GNN to distinguish graphs up to that size.   Our results concern both distinguishing between non-equivariant vertices and distinguishing between non-isomorphic graphs.",
+      "authors": [
+        "Eran Rosenbluth"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.CC"
+      ],
+      "published": "2026-03-16T05:45:25+00:00",
+      "link": "https://arxiv.org/pdf/2603.14846v2",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Expressivity limits of Message-Passing Graph Neural Networks",
+      "llm_evidence_cn": "消息传递图神经网络的表达能力限制",
+      "llm_evidence": "消息传递图神经网络的表达能力限制",
+      "canonical_evidence": "消息传递图神经网络的表达能力限制",
+      "llm_tldr_en": "Analyzes fundamental expressivity limits of MP-GNNs compared to color refinement algorithms.",
+      "llm_tldr_cn": "分析了消息传递图神经网络（MP-GNN）相对于颜色细化算法的基础表达能力限制。",
+      "llm_tldr": "分析了消息传递图神经网络（MP-GNN）相对于颜色细化算法的基础表达能力限制。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Graph Neural Networks for solving combinatorial problems",
+      "matched_requirement_id": "req-15",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.19980v1",
+      "title": "Stone-in-Waiting: A Cloud-Based Accelerator for the Quantum Approximate Optimization Algorithm",
+      "abstract": "The Quantum Approximate Optimization Algorithm (QAOA) and its advanced variant, the Quantum Alternating Operator Ansatz (QAOA), are major research topics in the current era of Noisy Intermediate-Scale Quantum (NISQ) computing. However, the problem of initializing their parameters remains unresolved. Motivated by the combinatorial optimization task in the 6th MindSpore Quantum Computing Hackathon (2024), this paper proposes Stone-in-Waiting, a cloud-based accelerator for obtaining high-quality initial parameters for QAOA. Internally, the accelerator builds on state-of-the-art theories and methods for parameter determination and integrates four self-developed algorithms for QAOA parameter initialization, mainly based on Bayesian methods, nearest-neighbor methods, and metric learning. Compared with the Baseline Algorithm, the generated parameters improve the score by 40.19%. Externally, the accelerator offers both a web interface and an API, providing flexible and convenient access for users to test and develop related experiments and applications. This paper presents the design principles and methods of Stone-in-Waiting, demonstrates its functional characteristics, compares the strengths and weaknesses of the four proposed algorithms, and validates the overall system performance through experiments.",
+      "authors": [
+        "Shuai Zeng"
+      ],
+      "primary_category": "quant-ph",
+      "categories": [
+        "quant-ph",
+        "cs.DC"
+      ],
+      "published": "2026-03-20T14:23:57+00:00",
+      "link": "https://arxiv.org/pdf/2603.19980v1",
+      "tags": [
+        "keyword:NCO"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Combinatorial optimization task using QAOA",
+      "llm_evidence_cn": "使用QAOA的组合优化任务",
+      "llm_evidence": "使用QAOA的组合优化任务",
+      "canonical_evidence": "使用QAOA的组合优化任务",
+      "llm_tldr_en": "Accelerates parameter initialization for Quantum Approximate Optimization Algorithms in combinatorial tasks.",
+      "llm_tldr_cn": "加速了组合任务中量子近似优化算法的参数初始化。",
+      "llm_tldr": "加速了组合任务中量子近似优化算法的参数初始化。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Deep learning models for solving NP hard combinatorial problems",
+      "matched_requirement_id": "req-23",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.16206v1",
+      "title": "Offline Exploration-Aware Fine-Tuning for Long-Chain Mathematical Reasoning",
+      "abstract": "Through encouraging self-exploration, reinforcement learning from verifiable rewards (RLVR) has significantly advanced the mathematical reasoning capabilities of large language models. As the starting point for RLVR, the capacity of supervised fine-tuning (SFT) to memorize new chain-of-thought trajectories provides a crucial initialization that shapes the subsequent exploration landscape. However, existing research primarily focuses on facilitating exploration during RLVR training, leaving exploration-aware SFT under-explored. To bridge this gap, we propose Offline eXploration-Aware (OXA) fine-tuning. Specifically, OXA optimizes two objectives: promoting low-confidence verified teacher-distillation data to internalize previously uncaptured reasoning patterns, and suppressing high-confidence incorrect self-distillation data to redistribute probability mass of incorrect patterns toward potentially correct candidates. Experimental results across 6 benchmarks show that OXA consistently improves mathematical reasoning performance, especially achieving an average gain of $+6$ Pass@1 and $+5$ Pass@$k$ points compared to conventional SFT on the Qwen2.5-1.5B-Math. Crucially, OXA elevates initial policy entropy, and performance gains persist throughout extensive RLVR training, demonstrating the long-term value of OXA.",
+      "authors": [
+        "Yongyu Mu",
+        "Jiali Zeng",
+        "Fandong Meng",
+        "JingBo Zhu",
+        "Tong Xiao"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.CL"
+      ],
+      "published": "2026-03-17T07:36:29+00:00",
+      "link": "https://arxiv.org/pdf/2603.16206v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Fine-tuning language models for reasoning via RLVR",
+      "llm_evidence_cn": "通过强化学习微调语言模型以进行推理",
+      "llm_evidence": "通过强化学习微调语言模型以进行推理",
+      "canonical_evidence": "通过强化学习微调语言模型以进行推理",
+      "llm_tldr_en": "Proposes exploration-aware fine-tuning to improve the initialization for reinforcement learning in LLMs.",
+      "llm_tldr_cn": "提出探索感知微调，以改进大语言模型强化学习的初始化效果。",
+      "llm_tldr": "提出探索感知微调，以改进大语言模型强化学习的初始化效果。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Fine tuning language models for neural combinatorial optimization tasks",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.20392v1",
+      "title": "SymCircuit: Bayesian Structure Inference for Tractable Probabilistic Circuits via Entropy-Regularized Reinforcement Learning",
+      "abstract": "Probabilistic circuit (PC) structure learning is hampered by greedy algorithms that make irreversible, locally optimal decisions. We propose SymCircuit, which replaces greedy search with a learned generative policy trained via entropy-regularized reinforcement learning. Instantiating the RL-as-inference framework in the PC domain, we show the optimal policy is a tempered Bayesian posterior, recovering the exact posterior when the regularization temperature is set inversely proportional to the dataset size. The policy is implemented as SymFormer, a grammar-constrained autoregressive Transformer with tree-relative self-attention that guarantees valid circuits at every generation step. We introduce option-level REINFORCE, restricting gradient updates to structural decisions rather than all tokens, yielding an SNR (signal to noise ratio) improvement and >10 times sample efficiency gain on the NLTCS dataset. A three-layer uncertainty decomposition (structural via model averaging, parametric via the delta method, leaf via conjugate Dirichlet-Categorical propagation) is grounded in the multilinear polynomial structure of PC outputs. On NLTCS, SymCircuit closes 93% of the gap to LearnSPN; preliminary results on Plants (69 variables) suggest scalability.",
+      "authors": [
+        "Y. Sungtaek Ju"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "stat.ML"
+      ],
+      "published": "2026-03-20T18:11:15+00:00",
+      "link": "https://arxiv.org/pdf/2603.20392v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "learned generative policy trained via entropy-regularized reinforcement learning for structure search",
+      "llm_evidence_cn": "通过熵正则化强化学习训练生成策略以进行结构搜索",
+      "llm_evidence": "通过熵正则化强化学习训练生成策略以进行结构搜索",
+      "canonical_evidence": "通过熵正则化强化学习训练生成策略以进行结构搜索",
+      "llm_tldr_en": "Proposes a reinforcement learning framework with a Transformer policy to solve discrete structure search problems.",
+      "llm_tldr_cn": "提出一种利用强化学习和Transformer策略解决离散结构搜索问题的框架。",
+      "llm_tldr": "提出一种利用强化学习和Transformer策略解决离散结构搜索问题的框架。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Reinforcement learning frameworks for combinatorial optimization",
+      "matched_requirement_id": "req-24",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.16434v1",
+      "title": "From Natural Language to Executable Option Strategies via Large Language Models",
+      "abstract": "Large Language Models (LLMs) excel at general code generation, yet translating natural-language trading intents into correct option strategies remains challenging. Real-world option design requires reasoning over massive, multi-dimensional option chain data with strict constraints, which often overwhelms direct generation methods. We introduce the Option Query Language (OQL), a domain-specific intermediate representation that abstracts option markets into high-level primitives under grammatical rules, enabling LLMs to function as reliable semantic parsers rather than free-form programmers. OQL queries are then validated and executed deterministically by an engine to instantiate executable strategies. We also present a new dataset for this task and demonstrate that our neuro-symbolic pipeline significantly improves execution accuracy and logical consistency over direct baselines.",
+      "authors": [
+        "Haochen Luo",
+        "Zhengzhao Lai",
+        "Junjie Xu",
+        "Yifan Li",
+        "Tang Pok Hin",
+        "Yuan Zhang",
+        "Chen Liu"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "q-fin.TR"
+      ],
+      "published": "2026-03-17T12:14:47+00:00",
+      "link": "https://arxiv.org/pdf/2603.16434v1",
+      "tags": [
+        "keyword:NCO+LLM",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "LLMs for reasoning over multi-dimensional data with strict constraints",
+      "llm_evidence_cn": "大模型用于处理带严格约束的多维数据推理",
+      "llm_evidence": "大模型用于处理带严格约束的多维数据推理",
+      "canonical_evidence": "大模型用于处理带严格约束的多维数据推理",
+      "llm_tldr_en": "Uses LLMs as semantic parsers to translate natural language into executable constrained option strategies.",
+      "llm_tldr_cn": "利用大模型作为语义解析器，将自然语言转化为可执行的有约束期权策略。",
+      "llm_tldr": "利用大模型作为语义解析器，将自然语言转化为可执行的有约束期权策略。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Large Language Models (LLM) for optimization tasks",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.20589v1",
+      "title": "Generating from Discrete Distributions Using Diffusions: Insights from Random Constraint Satisfaction Problems",
+      "abstract": "Generating data from discrete distributions is important for a number of application domains including text, tabular data, and genomic data. Several groups have recently used random $k$-satisfiability ($k$-SAT) as a synthetic benchmark for new generative techniques. In this paper, we show that fundamental insights from the theory of random constraint satisfaction problems have observable implications (sometime contradicting intuition) on the behavior of generative techniques on such benchmarks. More precisely, we study the problem of generating a uniformly random solution of a given (random) $k$-SAT or $k$-XORSAT formula. Among other findings, we observe that: $(i)$~Continuous diffusions outperform masked discrete diffusions; $(ii)$~Learned diffusions can match the theoretical `ideal' accuracy; $(iii)$~Smart ordering of the variables can significantly improve accuracy, although not following popular heuristics.",
+      "authors": [
+        "Alankrita Bhatt",
+        "Mukur Gupta",
+        "Germain Kolossov",
+        "Andrea Montanari"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-21T01:16:57+00:00",
+      "link": "https://arxiv.org/pdf/2603.20589v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "generative techniques for random constraint satisfaction problems",
+      "llm_evidence_cn": "随机约束满足问题的生成技术",
+      "llm_evidence": "随机约束满足问题的生成技术",
+      "canonical_evidence": "随机约束满足问题的生成技术",
+      "llm_tldr_en": "Studies diffusion models for generating solutions to random k-SAT and k-XORSAT combinatorial problems.",
+      "llm_tldr_cn": "研究了用于生成随机k-SAT和k-XORSAT组合问题解的扩散模型。",
+      "llm_tldr": "研究了用于生成随机k-SAT和k-XORSAT组合问题解的扩散模型。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Deep learning models for solving NP hard combinatorial problems",
+      "matched_requirement_id": "req-23",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.16849v1",
+      "title": "GIST: Gauge-Invariant Spectral Transformers for Scalable Graph Neural Operators",
+      "abstract": "Adapting transformer positional encoding to meshes and graph-structured data presents significant computational challenges: exact spectral methods require cubic-complexity eigendecomposition and can inadvertently break gauge invariance through numerical solver artifacts, while efficient approximate methods sacrifice gauge symmetry by design. Both failure modes cause catastrophic generalization in inductive learning, where models trained with one set of numerical choices fail when encountering different spectral decompositions of similar graphs or discretizations of the same mesh. We propose GIST (Gauge-Invariant Spectral Transformers), a new graph transformer architecture that resolves this challenge by achieving end-to-end $\\mathcal{O}(N)$ complexity through random projections while algorithmically preserving gauge invariance via inner-product-based attention on the projected embeddings. We prove GIST achieves discretization-invariant learning with bounded mismatch error, enabling parameter transfer across arbitrary mesh resolutions for neural operator applications. Empirically, GIST matches state-of-the-art on standard graph benchmarks (e.g., achieving 99.50% micro-F1 on PPI) while uniquely scaling to mesh-based Neural Operator benchmarks with up to 750K nodes, achieving state-of-the-art aerodynamic prediction on the challenging DrivAerNet and DrivAerNet++ datasets.",
+      "authors": [
+        "Mattia Rigotti",
+        "Nicholas Thumiger",
+        "Thomas Frick"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-17T17:54:26+00:00",
+      "link": "https://arxiv.org/pdf/2603.16849v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Spectral Transformers for graph-structured data",
+      "llm_evidence_cn": "用于图结构数据的谱变换器",
+      "llm_evidence": "用于图结构数据的谱变换器",
+      "canonical_evidence": "用于图结构数据的谱变换器",
+      "llm_tldr_en": "Proposes GIST, a scalable graph transformer architecture that maintains gauge invariance for graph neural operators.",
+      "llm_tldr_cn": "提出GIST，一种可扩展的图变换器架构，为图神经算子保持规范不变性。",
+      "llm_tldr": "提出GIST，一种可扩展的图变换器架构，为图神经算子保持规范不变性。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Graph Neural Networks for solving combinatorial problems",
+      "matched_requirement_id": "req-15",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.20726v1",
+      "title": "Neural network model for mathematical programming problems with complementary constraints",
+      "abstract": "In this paper, we propose a a gradient-based neural network model to solve the mathematical programming problems with complementary constraints (MPCC). In order to facilitate tractable optimization, the problem MPCC is transformed via a regularized approach into a relaxed nonlinear optimization problem NLP($β$). After that employing the penalty function and neural network model an estimate of the optimal solution of the problem NLP($β$) is obtained. On the basis of Lyapunov stability theory and LaSalle invariance principle, the equilibrium point of proposed neural network is theoretically proven to be asymptotically stable and capable to generate optimal solution of the problem MPCC. Further, we demonstrate the performance and dynamic behavior of the proposed neural network through various illustrative examples and its effectiveness via theoretical and numerical experiments.",
+      "authors": [
+        "Anurag Jayswal",
+        "Ajeet Kumar"
+      ],
+      "primary_category": "math.OC",
+      "categories": [
+        "math.OC"
+      ],
+      "published": "2026-03-21T09:22:36+00:00",
+      "link": "https://arxiv.org/pdf/2603.20726v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Neural network model for mathematical programming with constraints",
+      "llm_evidence_cn": "用于带约束数学规划问题的神经网络模型",
+      "llm_evidence": "用于带约束数学规划问题的神经网络模型",
+      "canonical_evidence": "用于带约束数学规划问题的神经网络模型",
+      "llm_tldr_en": "Develops a gradient-based neural network to solve mathematical programming problems with complementary constraints.",
+      "llm_tldr_cn": "开发了一种基于梯度的神经网络模型，用于解决带互补约束的数学规划问题。",
+      "llm_tldr": "开发了一种基于梯度的神经网络模型，用于解决带互补约束的数学规划问题。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Hybrid approaches combining deep learning and traditional optimization",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.17353v1",
+      "title": "Learning Permutation Distributions via Reflected Diffusion on Ranks",
+      "abstract": "The finite symmetric group S_n provides a natural domain for permutations, yet learning probability distributions on S_n is challenging due to its factorially growing size and discrete, non-Euclidean structure. Recent permutation diffusion methods define forward noising via shuffle-based random walks (e.g., riffle shuffles) and learn reverse transitions with Plackett-Luce (PL) variants, but the resulting trajectories can be abrupt and increasingly hard to denoise as n grows. We propose Soft-Rank Diffusion, a discrete diffusion framework that replaces shuffle-based corruption with a structured soft-rank forward process: we lift permutations to a continuous latent representation of order by relaxing discrete ranks into soft ranks, yielding smoother and more tractable trajectories. For the reverse process, we introduce contextualized generalized Plackett-Luce (cGPL) denoisers that generalize prior PL-style parameterizations and improve expressivity for sequential decision structures. Experiments on sorting and combinatorial optimization benchmarks show that Soft-Rank Diffusion consistently outperforms prior diffusion baselines, with particularly strong gains in long-sequence and intrinsically sequential settings.",
+      "authors": [
+        "Sizhuang He",
+        "Yangtian Zhang",
+        "Shiyang Zhang",
+        "David van Dijk"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-18T04:28:24+00:00",
+      "link": "https://arxiv.org/pdf/2603.17353v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Learning permutation distributions for discrete structures",
+      "llm_evidence_cn": "学习离散结构的排列分布",
+      "llm_evidence": "学习离散结构的排列分布",
+      "canonical_evidence": "学习离散结构的排列分布",
+      "llm_tldr_en": "Proposes a diffusion framework for learning permutations, relevant to discrete optimization domains.",
+      "llm_tldr_cn": "提出了一种用于学习排列的扩散框架，与离散优化领域相关。",
+      "llm_tldr": "提出了一种用于学习排列的扩散框架，与离散优化领域相关。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Deep learning models for solving NP hard combinatorial problems",
+      "matched_requirement_id": "req-23",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
