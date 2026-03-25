@@ -1,0 +1,1038 @@
+Title: Transformers Can Learn Rules They've Never Seen: Proof of Computation Beyond Interpolation
+
+URL Source: https://arxiv.org/pdf/2603.17019v1
+
+Published Time: Thu, 19 Mar 2026 00:06:14 GMT
+
+Number of Pages: 26
+
+Markdown Content:
+# Transformers Can Learn Rules They’ve Never Seen: Proof of Computation Beyond Interpolation 
+
+Andy Gray 
+
+Kortical 
+
+# Abstract 
+
+A central question in the LLM debate is whether transformers can infer rules absent from training, or whether apparent generalisation reduces to similarity-based inter-polation over observed examples. We test a strong interpolation-only hypothesis in two controlled settings: one where interpolation is ruled out by construction and proof, and one where success requires emitting intermediate symbolic derivations rather than only final answers. In Experiment 1, we use a cellular automaton (CA) with a pure XOR transition rule and remove specific local input patterns from training; since XOR is linearly inseparable, each held-out pattern’s nearest neigh-bours have the opposite label, so similarity-based predictors fail on the held-out region. Yet a two-layer transformer recovers the rule (best 100%; 47/60 converged runs), and circuit extraction identifies XOR computation. Performance depends on multi-step constraint propagation: without unrolling, accuracy matches output bias (63.1%), while soft unrolling reaches 96.7%. In Experiment 2, we study symbolic operator chains over integers with one operator pair held out; the model must emit intermediate steps and a final answer in a proof-like format. Across all 49 holdout pairs, the transformer exceeds every interpolation baseline (up to 78.6%, mean 41.8% vs best baseline kernel ridge regression (KRR), mean 4.3%; 
+
+k-nearest neighbours (KNN) and multilayer perceptron (MLP) score 0% on every pair), while removing intermediate-step supervision substantially degrades perfor-mance. Together with an explicit appendix construction showing that a standard transformer block can implement exact local Boolean rules, these results provide an existence proof that transformers can learn rule structure not directly observed in training and express it explicitly, ruling out the strongest architectural form of interpolation-only accounts—namely, that transformers cannot in principle discover and communicate unseen rules—while leaving open when such behaviour arises in large-scale language training. 
+
+# 1 Introduction 
+
+The debate over whether transformers can genuinely compute or merely interpolate [Bender et al., 2021, Chollet, 2019, Nanda et al., 2023] persists because natural language is too smooth and training corpora too vast to rule out interpolation definitively. We resolve this by constructing a controlled setting where interpolation provably achieves 0% holdout accuracy and showing that a standard two-layer transformer succeeds anyway, recovering the held-out rule at up to 100%. A second experiment on symbolic operator chains, where simple baselines remain far below the transformer, reproduces the phenomenon in a structurally unrelated task. This establishes an existence result: the architecture can compute beyond similarity-based interpolation. Throughout this paper, interpolation means prediction from similarity structure in observed input-output examples: the sense in which neural network generalisation is argued to reduce to interpolation [Belkin, 2021, Chollet, 2019]. 
+
+Preprint. 
+
+> arXiv:2603.17019v1 [cs.LG] 17 Mar 2026
+
+Key findings. (1) Interpolation is ruled out in input space and neighbourhood embeddings (0%), remains below chance in single-position embeddings (0–42%), and becomes highly decodable only after transformer computation (Figure 2). (2) Circuit extraction confirms genuine XOR computation with zero fit error. (3) The mechanism is constraint propagation through differentiable multi-step prediction: soft unrolling achieves 96.7%, hard unrolling 65.5%, no unrolling 63.1% (matching the output bias of 62.5%). Attention provides smooth local routing, while the ReLU FFN supplies the non-affine rule computation that breaks interpolation (Appendix A.2). (4) A phase transition reveals when indirect learning activates. (5) Wider neighbourhoods help despite hiding more patterns, a signature of constraint density. (6) Performance cliffs depend on intrinsic rule complexity (Appendix D). (7) A structurally unrelated symbolic benchmark on compositional operator chains over integers shows a similar phase transition consistent with the same mechanism, and the model externalises discovered operators as learned symbols (Section 4.6). 
+
+Why minimal models. We deliberately use small transformers and synthetic data because this setting eliminates the confounds that make definitive claims impossible for large language models: data contamination, memorisation, and scale effects. The question is not whether LLMs compute XOR; it is whether the transformer architecture can compute functions absent from its training data. Minimal models answer this cleanly. The mechanism we identify requires only attention and feedforward layers, the same components present in every deployed LLM. Appendix A.2 makes this concrete by giving an explicit exact local-rule circuit for a standard transformer block, while Appendix A.3 shows that such primitives can in principle be composed across depth. Showing that the capacity exists in a controlled setting is strictly stronger than showing suggestive evidence at scale, where the interpolation alternative can never be fully excluded. A second experiment on compositional operator chains (Section 4.6) shows the mechanism is not specific to cellular automata. 
+
+# 2 Related Work 
+
+Cellular automata learning. Prior work shows that neural networks can learn CA dynamics, typically in-distribution or across rules [Gilpin, 2019]. Elser [2020] reconstructed CA rules from nonconsecutive observations via constraint satisfaction, and Elser and Lal [2026] generalized this into a projection-based Boolean threshold learning framework. Our setting instead asks whether a standard transformer trained by gradient descent can recover missing truth-table entries. 
+
+Algorithmic generalisation. Anil et al. [2022] and Delétang et al. [2022] showed that transformers fail to generalise across sequence lengths, a finding widely cited as evidence of fundamental algorith-mic limitations. We do not contest the specific finding—transformers do fail at length generalisation. However, the broad conclusion is falsified by our experiment: a standard transformer computes a linearly inseparable function entirely absent from its training data. Length generalisation failure reflects a length-specific limitation (position encodings, sequence structure), not a computational one. 
+
+The interpolation debate. Bender et al. [2021] argue that LLMs are “stochastic parrots” that recombine observed patterns. Our experiment provides a controlled counterexample to the strongest architectural form of that view: the target pattern is never observed during training, yet the transformer still recovers it at up to 100%. We do not dispute that transformers often default to pattern matching; our result shows that the architecture is not limited to it. Chollet [2019] distinguishes “local generalisation” from genuine computation; we provide the first clean empirical demonstration of this boundary. XOR’s linear inseparability means no amount of local interpolation recovers the hidden pattern (0% across all methods), yet the transformer crosses to genuine computation with a mathematical guarantee. Belkin [2021] shows generalisation reduces to interpolation for smooth functions; XOR is discon-tinuous and linearly inseparable, so no smooth manifold connects training patterns to the hidden one. Kernel methods, the mathematical backbone of Belkin’s framework, provably achieve 0% (Theorems 2–4). Mirzadeh et al. [2024] argue LLM reasoning is fragile pattern matching; our transformer computes a function it was never trained on, verified by circuit extraction. Dziri et al. [2023] conclude transformers reduce compositional reasoning to “linearised subgraph matching”; the hidden pattern has no subgraph to match against, and the extracted XOR polynomial with nonlinear interaction terms proves genuine computation. 2Attention as smoothing. Tsai et al. [2019] interpret self-attention as a kernel smoother over value vectors. Our appendix result is complementary: while attention supplies smooth local routing, a standard attention+ReLU transformer block already implements exact local Boolean rules, so the full block is not merely a smoothing operator. 
+
+Mechanistic interpretability. We build on Nanda et al. [2023], who reverse-engineered Fourier circuits for modular addition, and Power et al. [2022], Zhang et al. [2024], Zhou et al. [2023]. Our work extends Nanda et al. in four ways: (i) a linearly inseparable target function, eliminating the criticism that learned trig is indistinguishable from smooth interpolation; (ii) indirect supervision—the model never sees hidden pattern outputs, inferring them through constraint propagation; (iii) three-level representation tracing (input 0% → embeddings 51% → final layer 98%), providing a more complete mechanistic story; and (iv) a directly interpretable XOR polynomial (zero fit error, explicit interaction terms LC , LR , CR , LCR ) rather than Fourier features. The result is a definitive proof of computation rather than a suggestive one. 
+
+# 3 Experimental Setup 
+
+3.1 Cellular automata as testbed 
+
+A one-dimensional CA is a binary grid of width W evolving by a local transition rule over a neighbourhood of radius r. For radius r = 1 , neighbourhoods are 3 bits, giving 23 = 8 input patterns. We test five rules: Rule 150 (radius 1, pure 3-way XOR: L⊕C ⊕R), Rule 30 (L⊕(C ∨R)), Rule 106 ,
+
+Rule D (radius 2, L1 ⊕ (( C ∨ R1) ∧ (L2 ∨ R2)) ), and Rule G (radius 2, (L1 ⊕ (C ∨ R1)) ∨ (L2 ∧ R2)). 
+
+3.2 Hard-gap setup t = 0       
+
+> t= 1
+> t= 2
+> t= 3
+> t= 4
+> Initial state Visible (supervised) Hidden (no supervision)
+> Constraint
+> propagation
+> Cellular automaton with hidden patterns masked during training
+
+Figure 1: Experimental setup. A CA evolves from a random initial state ( t = 0 ). At each subsequent timestep, positions where hidden patterns occur (red) receive no supervision. Visible positions (green) provide training signal. Wrong hidden-pattern predictions at t + 1 cascade into errors at visible positions at t + 2 , providing indirect gradient signal. We select k input patterns as “hidden” (Figure 1). During training, outputs at positions where hidden patterns occur are masked at every timestep; the model receives zero direct supervision on hidden pattern outputs. The model must infer hidden outputs through constraint propagation: wrong predictions at hidden positions cascade into errors at visible downstream positions ( t + 2 onward), generating indirect gradient signal. 
+
+3.3 Why XOR provides a mathematical guarantee 
+
+Pure XOR has the property that every input bit flip changes the output. For a held-out pattern, every nearest neighbour has the opposite label. We prove this defeats all standard interpolation methods. Let f : {0, 1}n → { 0, 1} be pure XOR, with labels y(x) := ( −1) f (x). Fix held-out p; training set 
+
+T := {0, 1}n \ { p}.3Parity-distance identity. For any q ∈ { 0, 1}n: y(q) = y(p) · (−1) d(q,p ): odd-distance points have label −y(p), even-distance points have label y(p). On {0, 1}n, all Lp distances reduce to Hamming distance. 
+
+Theorem 1 (Rule 150 / n = 3 : all monotonic similarity interpolation fails) . Let n = 3 . Any classifier 
+
+ˆy(p) = sign( P 
+
+> q∈T
+
+w(dH (p, q )) y(q)) with nonneg. weights w(1) ≥ w(2) ≥ w(3) ≥ 0 predicts 
+
+−y(p) or ties. In particular, k-NN majority vote fails for every odd k ∈ { 1, 3, 5, 7}.
+
+Theorem 2 (General n: completely monotone kernels give 0%) . For any n ≥ 1, if w(d) = R 
+
+> [0 ,1]
+
+rd dμ (r) with μ((0 , 1]) > 0, then ˆy(p) = −y(p).
+
+Corollary 3. The RBF kernel on {0, 1}n satisfies exp( −γ∥x − q∥2) = ( e−γ )dH , which is completely monotone. Theorem 2 applies directly. 
+
+Theorem 4 (GP / kernel ridge regression with RBF kernel) . GP regression with K(x, q ) = rdH (x,q )
+
+trained on T : the LOO prediction at p always has sign −y(p).
+
+Lemma 5 (Decision trees and Random Forests) . Any axis-aligned decision tree predicting majority label on T predicts −y(p). Any Random Forest aggregating such trees also predicts −y(p).
+
+Proofs are in Appendix A. These results cover every interpolation method we test. For rules that are not pure XOR (Rule D, Rule G), the guarantee does not hold; our interpolation proof uses Rule 150 accordingly. 
+
+3.4 Architecture and training 
+
+Standard post-LN transformer encoder: scalar embedding ( 1 → 64 ) + learned absolute position embeddings, 2 layers, 4 heads, ReLU FFN dim 128. Output: linear projection ( 64 → 1). Soft unrolling : the model predicts t + 1 from t; output at t + 1 (sigmoid probabilities) is fed back as input for t + 2 , through t + num_steps . Gradients flow through all timesteps. Loss: BCE on visible positions only. Width 101, 4 timesteps, 20K train / 2K test samples, Adam (lr 10 −3), 10 seeds. 
+
+# 4 Results 
+
+4.1 Interpolation fails at every representation level Input 
+
+> space
+> Neighbourhood
+> embedding
+> Single-pos.
+> embedding
+> Single-pos.
+> hidden state
+> Neighbourhood
+> hidden state
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> Holdout Accuracy (%)
+> Proved 0%
+> (Theorems 1 4)
+> Constructed
+> de novo
+> Transformer
+> KNN ( k=1)
+> Random Forest
+> RBF SVM
+
+Figure 2: Interpolation accuracy across five representation levels for Rule 150. Input space: provably 0% (Results 1–5). Neighbourhood embeddings: empirically 0%, with a fixed-position proof extension in Appendix A.1. After transformer layers: 94–100%. The function is constructed de novo by computation. Table 1 shows interpolation accuracy at five levels, from raw input to post-transformer hidden states. In input space, all methods achieve 0%—guaranteed by Results 1–5. In pooled neighbourhood embeddings, all methods also achieve 0% empirically. The Rule 150 interpolation-impossibility result extends to raw neighbourhood embeddings after conditioning on centre location (Appendix A.1). After the transformer layers, Random Forests decode holdout patterns at 94–100% from single-position hidden states. The function does not exist in the input or embedding; it is constructed by 4the transformer. High decodability from hidden states is a consequence of this computation, not an alternative explanation: the representation is absent pre-transformer and constructed de novo by the network. Table 1: Interpolation accuracy (%) across five representation levels for Rule 150. Results summarize the six transformer runs achieving ≥95% holdout accuracy.                               
+
+> Representation Level KNN GP RBF SVM RF Transformer Input space (3-bit) 000096.8 Nbhd. embedding (192-d) 000096.8 Single-pos. embedding (64-d) 34–42 5–27 0096.8 Single-pos. hidden (64-d) 0–100 0–100 0–100 94–100 96.8 Nbhd. hidden (192-d) 72–100 0–100 0–100 95–100 96.8
+
+A temporal baseline giving Random Forests the same inputs and supervision as the transformer achieves 100% on supervised patterns but 0.2–0.4% on hidden ones. XOR defeats interpolation regardless of temporal data. 
+
+4.2 Main results 
+
+Table 2: Mean holdout accuracy across seeds (95% CI). Outcomes are bimodal; the mean reflects the fraction of seeds that succeed.                            
+
+> Experiment Mean 95% CI Successes Rule D k=8 (soft) 96.7% [94.1, 99.2] 10/10 Rule G k=8 (soft) 99.5% [99.2, 99.7] 10/10 Rule D k=8 (hard) 65.5% [59.2, 71.9] 1/10 Rule 150 (soft, 220 ep.) 71.5% [61.6, 81.4] 47/60 Rule 150 (soft, 50 ep.) 10.6% [4.1, 17.1] 8/80 No unrolling (1 step) 63.1% [62.7, 63.5] 0/10 Leaky mask ( t+1 only) 99.3% [99.1, 99.6] 10/10
+
+Table 2 shows the core results. Soft unrolling dramatically outperforms hard unrolling: 96.7% vs 65.5% ( p = 0 .002 , Wilcoxon). Multi-step structure alone is insufficient; the model needs differentiable signal propagation. Without unrolling, accuracy is 63.1%, matching the expected output bias (62.5%). 
+
+4.3 Constraint propagation is provably sufficient 
+
+A GF(2) constraint solver confirms the multi-step rollout uniquely determines hidden outputs. With one timestep: 0% identifiability. With two: 100% ( ∼31 equations for ∼12.5 unknowns, full rank). The information exists; the question is whether the transformer can find it. 
+
+4.4 Circuit analysis confirms XOR computation 
+
+For Rule 150 models achieving 100% holdout accuracy (2 models, independently trained), we fit the complete degree-3 polynomial over the 3-bit input. The interaction terms ( LC , LR , CR , LCR ) have large coefficients ( −25 .3 to +46 .1), confirming the model computes a function with the nonlinear structure of XOR, not a linear or additive approximation. We note that multiple circuits can implement the same function [Méloux et al., 2025]; our claim is functional (the model computes XOR) rather than structural (this is the unique circuit). Layer ablation: zeroing layer 0 drops accuracy by 79–87%; zeroing layer 1 drops it by 100%. The logit lens shows XOR is undecodable at the embedding and after layer 0 (0–3%), then appears at 100% after layer 1. Linear probes confirm the routing-plus-computation decomposition: neighbour bits become partially decodable after layer 0, while XOR jumps from chance to 98.4% only after layer 1. Appendix A.2 shows that a standard transformer block already contains an exact local-rule circuit with the same division of labour. Full circuit analysis in Appendix B. 54.5 Phase transition and constraint density 0 10 20 30 40 50     
+
+> Epoch
+> 0
+> 25
+> 50
+> 75
+> 100
+> Accuracy (%)
+> Rule D ( k=8, soft)
+> Holdout
+> Supervised
+> 050 100 150 200
+> Epoch
+> Rule 150 (pattern 3)
+
+Figure 3: Training dynamics for Rule D (left) and Rule 150 pattern 3 (right). Each line is one seed (10 per panel). Holdout accuracy (blue) emerges rapidly once supervised accuracy (orange) exceeds 
+
+∼85%. For pure XOR (Rule 150), holdout stays near 0% until this threshold; Rule D, which has internal structure permitting partial interpolation, can rise earlier. Rule 150 ( k=1, radius 1) requires more epochs and fewer seeds converge, consistent with sparser constraints producing weaker indirect signal. In pure XOR (Rule 150), where interpolation is provably impossible, holdout accuracy stays near 0% until supervised accuracy exceeds ∼85%, then rises sharply (Figure 3). In rules with internal structure that permits partial interpolation, holdout can rise earlier, but the same grokking-like transition to high holdout accuracy still appears around a similar threshold. Below this threshold, predictions are too noisy for wrong hidden outputs to produce detectable downstream errors. Wider neighbourhoods help: Rule D (radius 2, 32 total patterns, k=8 hidden) reaches 96.7% (10/10 seeds), while Rule 150 (radius 1, 8 total patterns, k=1 hidden) reaches only 10.6% in 50 epochs (8/80). The key factor is not the number of hidden patterns but the number of visible ones: 24 visible constraints in radius-2 vs. 7 in radius-1. The k-sweep within a single rule confirms this: hiding more 
+
+patterns within Rule D makes learning strictly harder, with a sharp cliff between 44% and 50% hidden (Appendix D, Figure 5). Rule G, whose OR-decomposable structure creates richer inter-pattern constraints, tolerates 75% hidden at 97.1% accuracy. A Conv1D with local receptive fields achieves 100%, serving as a ceiling; the transformer reaches 96.7% without built-in locality. 
+
+4.6 Symbolic operator benchmark 
+
+As an external-validity check on whether the capacity demonstrated above is specific to cellular automata, we train an encoder-decoder transformer (same depth: 2 layers, 4 heads, 64-dim, ∼180 Kparameters) on compositional chains of two binary operators over 6-bit integers. The input is five tokens (a, b, c, d, u ); the model predicts the full derivation including intermediate results and operator identities. Seven operators are used (XOR, OR, AND, NOR, NAND, LSHIFT, RSHIFT); one operator pair is held out entirely from training (48 of 49 pairs seen). We test all 49 holdout pairs (Appendix F, Figure 6); four are analysed in detail below. We select the best checkpoint by peak eval-set performance and report its accuracy on a separate held-out test set of 500 examples per operator pair. Table 3: Symbolic benchmark: test-set holdout accuracy (%) averaged over 3 seeds. Baselines: KNN = 0%, MLP = 0%, KRR = 0–18.2%, Oracle = 100%. Full details in Appendix F.                                        
+
+> Holdout Full (familiar) Full (opaque) Label-only
+> ˆ| 73.2 ±2.0 73.0 ±5.1 29.1 ±0.8
+> &L 55.3 ±3.9 65.9 ±1.9 14.5 ±2.5
+> Rˆ 28.2 ±6.6 24.6 ±7.0 6.1 ±3.2
+> d| 54.4 ±17.7 56.3 ±14.2 33.3 ±9.8
+
+6Table 3 shows holdout accuracy across four held-out pairs under three conditions. Three findings parallel the CA results. (i) All holdout pairs exceed baseline accuracy (KNN and MLP score 0%; KRR reaches 0–18.2%); KRR uses the numeric inputs directly while the transformer discovers the operator identity and outputs it symbolically—a qualitatively different kind of generalisation. 
+
+(ii) Replacing operator symbols with arbitrary letters (“opaque”) has negligible effect ( ≤11pp), showing generalisation does not depend on pre-existing symbol meaning; the model builds its own representations. (iii) Removing intermediate computation steps (“label-only”) roughly halves accuracy, paralleling the CA finding that soft unrolling (96.7%) far exceeds no unrolling (63.1%): multi-step structure provides the constraint propagation channel. Further mechanistic details (logit lens, cross-attention maps, head ablation) are in Appendix F. 
+
+Causal substitution test. To verify the model has learned the causal structure of the computation, we perform targeted input substitutions (Figure 4). Starting from 200 unambiguous ˆ| examples, we replace inputs (c, d ) with values consistent with a different second operator while holding (a, b ) fixed, or vice versa. The model correctly identifies the substituted operator 77–100% of the time across all 7 target operators, while preserving the untouched operator (94–100% when swapping a, b ). This double dissociation confirms the model has learned which inputs determine which operator: not a surface correlation but the correct causal graph. 
+
+Figure 4: Causal substitution test for the symbolic benchmark. (a) Surgical input replacement: changing (c, d ) to values consistent with a different operator flips op 2 while preserving op 1; changing 
+
+(a, b ) flips op 1 while preserving op 2. (b) Systematic results over 200 base examples per target operator confirm a clean double dissociation. 
+
+# 5 Discussion 
+
+5.1 The plateau question 
+
+A central question in artificial intelligence, with scientific, economic, and societal consequences, is whether transformer-based models are approaching a fundamental ceiling. Interpolation-only accounts provide a clear route to such a ceiling: if all a model does is recombine observed patterns, then its capabilities are bounded by those patterns, and neither scaling nor deeper chain-of-thought reasoning changes what the architecture can do. These are serious arguments, and they are partially right. Transformers often do default to interpolation when interpolation works [Tayyar Madabushi et al., 2025, Mirzadeh et al., 2024]. That is what makes stronger architectural-ceiling claims, including those advanced by Marcus [2022], worth testing rather 7than dismissing. The question is whether this reflects a fundamental architectural limitation or a preference for the easier strategy. Our experiment directly tests this by constructing a task where interpolation achieves provably 0%, not just low performance but mathematical impossibility, and showing that a standard two-layer transformer nevertheless succeeds, reaching up to 100%. This falsifies the strongest architectural form of interpolation-only accounts: a standard transformer can succeed where interpolation is provably impossible. To the extent that plateau arguments rest on that premise, it removes that basis for a ceiling. The architectural capacity for genuine computation beyond the patterns in training data therefore exists. We are precise about scope: this proves the architecture can compute absent functions, not that any particular LLM does so, nor that scaling will produce unbounded improvement. 
+
+5.2 The mechanism: constraint propagation, not memorisation 
+
+Three results jointly establish how the transformer computes beyond its training distribution. First, the ablation studies isolate what matters: no unrolling 63.1%, hard unrolling 65.5%, soft unrolling 96.7%. The progression shows that neither seeing more data nor having multi-step structure is sufficient. The model requires differentiable signal propagation through intermediate predictions. Second, the GF(2) constraint solver proves the information exists: with two timesteps, 100% of samples are uniquely identifiable; the constraint system is heavily overdetermined. Third, constraint density governs learning speed: radius-2 rules with 8 hidden patterns (but 24 visible) are learned in 50 epochs while radius-1 rules with 1 hidden pattern (and only 7 visible) require 220 epochs. Within a single rule, hiding more patterns makes learning harder ( k-sweep, Appendix D), confirming that it is the visible constraints, not the hidden ones, that drive learning. The implication is constructive: richer domains— more operators, wider interactions, deeper causal chains—provide denser constraint graphs, so this mechanism may strengthen rather than weaken as task complexity grows. Appendix A.2 shows that it is also built into the transformer block itself, with attention gathering local bits and the ReLU FFN computing the Boolean rule. 
+
+5.3 Implications for LLMs 
+
+The mechanism we identify, constraint propagation through sequential prediction with gradient flow, requires only attention and feedforward layers. It is supported empirically by the symbolic benchmark, which shows the same capacity to compute beyond the training distribution in a setting unrelated to CA, and constructively by Appendix A.2, which gives an exact local-rule circuit for a standard transformer block. The model goes further than merely computing the right answer: it externalises discovered operators as tokens in a structured derivation, representing the rule in a communicable form. We emphasise that this is shown in principle. Natural language offers far denser constraints than our benchmarks, but each constraint is noisier, the rules are softer, and the training signal is less structured. Whether the density advantage outweighs the noise is an empirical question. Our result establishes that the barrier is not architectural; the open question is whether real training conditions produce the right dynamics. Our phase transition result suggests when this capacity activates: holdout accuracy remains low relative to supervised accuracy until supervised performance reaches roughly ∼85%, then rises sharply. This delayed transition appears in both experiments despite their different structure. If the pattern transfers to natural language, it predicts a threshold effect: models below a competence level in some domain may rely mostly on interpolation, while those above it may begin computing rules never directly present in their training data. This has a direct bearing on the plateau debate; it suggests that new capabilities could emerge as models cross domain-specific competence thresholds, rather than improvements tapering off smoothly. In Experiment 2, the model receives only five integers and must recover an operator composition it has never seen, expressing the result as a symbolic derivation. This is a minimal analogue of a larger possibility: an LLM’s training data contains billions of observations that are consequences of underlying rules—experimental measurements shaped by physical laws, clinical outcomes governed by biological mechanisms, mathematical results following from axioms. The constraint-density result suggests that such domains may, in some respects, be easier , not harder, for this mechanism: compared with our 7-operator benchmark, real-world systems often contain far more interacting 8rules and observable consequences, and may therefore provide richer indirect signal for rule recovery. Our results therefore show that transformer architectures can, in principle, recover rules absent from their training data and express them explicitly—not merely compute the right answer internally but represent the discovered rule in a communicable symbolic form. This is a prerequisite for AI systems that contribute to scientific discovery rather than merely recapitulating known patterns. 
+
+5.4 Limitations 
+
+We are precise about the boundaries of our claim. 1. Synthetic setting. We use two-layer transformers on synthetic tasks (1D cellular automata, integer operator chains). The value is the proof of principle, not the specific numbers; we cannot directly extrapolate to LLMs at scale. 2. Interpolation lower bound specificity. The provable 0% interpolation result is specific to pure XOR / Rule 150. The broader architectural construction in Appendix A.2 is more general: a standard transformer block can implement any radius-1 Boolean rule exactly. 3. Bimodal outcomes. Not every seed succeeds, though failure rates respond systematically to training conditions (more epochs, denser constraints). For Rule 150, two of eight patterns show bimodal convergence where the model finds a consistent alternative rule. Experiment 2 does not exhibit bimodality: seed variance is continuous rather than all-or-nothing, consistent with the explicit derivation structure providing more reliable gradient signal. 4. Proof of possibility, not performance. Our result shows that transformers are not funda-mentally limited to interpolation, and Appendix A.2 makes this concrete with an explicit local-rule circuit in a standard transformer block. It does not prove that any particular scaling trajectory will continue, that training on natural language produces the same dynamics, or that all domains contain sufficient indirect signal for constraint propagation. The absence of a fundamental ceiling does not imply the absence of practical ones. 5. Symbolic benchmark scope. The operator benchmark shows the mechanism beyond CA, but in a small deterministic setting and without a mathematical guarantee. Whether it extends to stochastic or continuous-valued domains remains untested. 
+
+# 6 Conclusion 
+
+We constructed a setting where interpolation is ruled out by mathematical proof and showed that a standard two-layer transformer succeeds anyway. KNN, Gaussian processes, RBF SVMs, and Random Forests all achieve provably 0% on the held-out XOR pattern. The transformer, receiving zero direct supervision, recovers the hidden rule in 47 of 60 runs; the best models reach 100%, verified by polynomial extraction confirming XOR structure, causal layer ablations, and identified parity neurons. This result has direct implications for the debate over whether AI progress faces a fundamental plateau. The strongest version of the plateau argument—that the transformer architecture is inherently limited to interpolation and therefore bounded by its training data—is falsified. The architectural capacity for genuine computation exists and requires only attention and feedforward layers, the same components in every large language model. A second experiment on compositional operator chains, structurally unrelated to cellular automata, reproduces a similar phase transition and is consistent with the same mechanistic signature, showing the capacity is not specific to cellular automata. The model externalises discovered operators as learned symbols, suggesting that constraint-driven learning may enable models not only to discover absent rules but to communicate them. Our result does not guarantee unlimited progress, nor does it prove that LLMs exercise this capacity in practice. What it does is remove the theoretical foundation for claims of an inevitable ceiling rooted in the assumption that transformers can only interpolate over their training distribution. The question shifts from “can transformers compute beyond interpolation?” to “when and under what conditions do they?” Our phase transition result suggests an answer: above a domain-specific competence threshold, constraint propagation activates and models may begin computing rules never directly present in their training data. The question of whether this capacity is realised at scale remains open, but the question of whether it is architecturally possible is now answered, both empirically and constructively. 9References 
+
+Cem Anil, Yuhuai Wu, Anders Andreassen, Aitor Lewkowycz, Vedant Misra, Vinay Ramasesh, Ambrose Slone, Guy Gur-Ari, Ethan Dyer, and Behnam Neyshabur. Exploring length generalization in large language models. Advances in Neural Information Processing Systems , 2022. Mikhail Belkin. Fit without fear: remarkable mathematical phenomena of deep learning through the prism of interpolation. Acta Numerica , 30:203–248, 2021. Emily M Bender, Timnit Gebru, Angelina McMillan-Major, and Shmargaret Shmitchell. On the dangers of stochastic parrots: Can language models be too big? In Proceedings of the 2021 ACM Conference on Fairness, Accountability, and Transparency , pages 610–623, 2021. François Chollet. On the measure of intelligence. arXiv preprint arXiv:1911.01547 , 2019. Grégoire Delétang, Anian Ruoss, Paul-Ambroise Duquenne, Elliot Catt, Tim Genewein, Christopher Mattern, Jordi Grau-Moya, Li Kevin Wenliang, Matthew Aitchison, Laurent Orseau, et al. Neural networks and the chomsky hierarchy. arXiv preprint arXiv:2207.02098 , 2022. Nouha Dziri, Ximing Lu, Melanie Sclar, Xiang Lorraine Li, Liwei Jiang, Bill Yuchen Lin, Sean Welleck, Peter West, Chandra Bhatt, Jiazhao Lu, et al. Faith and fate: Limits of transformers on compositionality. In Advances in Neural Information Processing Systems , 2023. Veit Elser. Reconstructing cellular automata rules from observations at nonconsecutive times. arXiv preprint arXiv:2012.02179 , 2020. Veit Elser and Manish Krishan Lal. Learning with boolean threshold functions. arXiv preprint arXiv:2602.17493 , 2026. Jonathan Frankle and Michael Carlin. The lottery ticket hypothesis: Finding sparse, trainable neural networks. In International Conference on Learning Representations , 2019. William Gilpin. Cellular automata as convolutional neural networks. Physical Review E , 100(3): 032402, 2019. Gary Marcus. Deep learning is hitting a wall. Nautilus , 2022. March 10, 2022. Maxime Méloux, Silviu Maniu, François Portet, and Maxime Peyrard. Everything, everywhere, all at once: Is mechanistic interpretability identifiable? arXiv preprint arXiv:2502.20914 , 2025. Iman Mirzadeh, Keivan Alizadeh, Hooman Shahrokhi, Oncel Tuzel, Samy Bengio, and Mehrdad Farajtabar. GSM-Symbolic: Understanding the limitations of mathematical reasoning in large language models. arXiv preprint arXiv:2410.05229 , 2024. Neel Nanda, Lawrence Chan, Tom Liberum, Jess Smith, and Jacob Steinhardt. Progress measures for grokking via mechanistic interpretability. arXiv preprint arXiv:2301.05217 , 2023. Alethea Power, Yuri Burda, Harri Edwards, Igor Babuschkin, and Vedant Misra. Grokking: General-ization beyond overfitting on small algorithmic datasets. In ICLR 2022 Workshop on MATH-AI ,2022. Carl Edward Rasmussen and Christopher K I Williams. Gaussian Processes for Machine Learning .MIT Press, 2006. Harish Tayyar Madabushi, Tom Sherborne, Tony Sherborne, and David Sherborne. Language models can be deductive solvers. arXiv preprint arXiv:2502.09614 , 2025. Yao-Hung Hubert Tsai, Shaojie Bai, Barnabas Poczos, J Zico Kolter, and Ruslan Salakhutdinov. Transformer dissection: An unified understanding for transformer’s attention via the lens of kernel. In Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing ,pages 4344–4353, 2019. Ruiqi Zhang, Spencer Frei, and Peter L Bartlett. Trained transformers learn linear models in-context. 
+
+Journal of Machine Learning Research , 25:1–55, 2024. Hattie Zhou, Arwen Bradley, Etai Littwin, Noam Razin, Omid Saremi, Josh Susskind, Samy Bengio, and Preetum Nakkiran. What algorithms can transformers learn? a study in length generalization. 
+
+arXiv preprint arXiv:2310.16028 , 2023. 10 A Proof of Theorems 
+
+Proof of Theorem 1. In {0, 1}3, the distance shells around p contain 3 points at distance 1, 3 at distance 2, and 1 at distance 3. By the parity-distance identity, the 3 distance-1 and 1 distance-3 points have label −y(p) (4 total), while the 3 distance-2 points have label y(p) (3 total). (a) k = 1 or 3: all selected neighbours at distance 1, all −y(p). k = 5 : three distance-1 ( −y(p)) plus two distance-2 ( y(p)), majority −y(p). k = 7 : all of T , majority −y(p) (4 vs 3). (b) The weighted vote is P 
+
+> q∈T
+
+w(d) y(q) = y(p)[ −3w(1) + 3 w(2) − w(3)] . Since w(1) ≥ w(2) :
+
+−3w(1) + 3 w(2) ≤ 0, and −w(3) ≤ 0, so the total is ≤ 0.
+
+Proof of Theorem 2. Group by Hamming distance: P 
+
+> q∈T
+
+w(d) y(q) = y(p) Pnd=1 
+
+ nd
+
+(−1) dw(d).Substituting the mixture representation and applying the binomial theorem: 
+
+> n
+
+X
+
+> d=1
+
+nd
+
+
+
+(−1) dw(d) = 
+
+Z
+
+> [0 ,1]
+
+(1 − r)n − 1 dμ (r) < 0
+
+since (1 − r)n < 1 for all r ∈ (0 , 1] .
+
+Proof of Corollary 3. On {0, 1}n, (xi − qi)2 ∈ { 0, 1}, so ∥x − q∥2 = dH (x, q ) and exp( −γ∥x −
+
+q∥2) = ( e−γ )dH , which is completely monotone. 
+
+Proof of Theorem 4. The kernel rdH (x,q ) = Qnt=1 κ(xt, q t) where κ(a, b ) = r|a−b|. The kernel matrix K is the n-fold Kronecker product of   1 rr 1
+
+, with eigenvectors formed by choosing (1 , 1) 
+
+(eigenvalue 1 + r) or (1 , −1) (eigenvalue 1 − r) per coordinate. The parity vector y picks (1 , −1) in every coordinate, giving eigenvalue λy = (1 − r)n—the smallest. Let C = K +σ2I. Then C−1y = cy where c = ((1 −r)n +σ2)−1. By the LOO identity [Rasmussen and Williams, 2006]: μ−p(p) = y(p)(1 − c/β ) where β = [ C−1]pp = (1 /2n) P 
+
+> S
+
+1/(λS + σ2).Since λy is the smallest eigenvalue, c is the maximum of 1/(λS + σ2), and β (the average over all 
+
+2n eigenvalues) is strictly less. Thus c/β > 1 and (1 − c/β ) < 0.
+
+Proof of Lemma 5. Any axis-aligned leaf is a subcube with m free coordinates. For m ≥ 1, parity is balanced on the subcube: pairing each point with its neighbour from flipping one free coordinate establishes a bijection that flips parity, giving 2m−1 of each label. Removing p leaves 2m−1 − 1
+
+correct vs 2m−1 wrong; majority is −y(p). For m = 0 , the leaf {p} is empty; the fallback also yields −y(p) (global training set: 2n−1 − 1 correct vs 2n−1 wrong). Every tree predicts −y(p); any ensemble does too. 
+
+A.1 Position-conditioned extension to raw neighbourhood embeddings 
+
+The hard-gap arguments above extend from raw binary inputs to raw pre-transformer neighbourhood embeddings after conditioning on centre location, or equivalently after subtracting the slotwise positional offsets before comparing neighbourhoods. This isolates the role of the value embedding itself. Because the empirical neighbourhood-embedding baseline in Table 1 pools examples across absolute positions, where those offsets no longer cancel, the results below do not by themselves prove the pooled table row; they prove the corresponding fixed-location statement. 
+
+Proposition 6 (Fixed-position neighbourhood embeddings preserve Hamming geometry) . Let 
+
+ϕ(0) , ϕ (1) ∈ Rm denote the two value-embedding vectors induced by the learned input projec-tion, and let π1, . . . , π W ∈ Rm denote the learned absolute position embeddings. Fix a centre location i ∈ { 2, . . . , W − 1} and define the raw pre-transformer neighbourhood embedding 
+
+Φi(xL, x C , x R) = ϕ(xL) + πi−1, ϕ (xC ) + πi, ϕ (xR) + πi+1 
+
+ ∈ R3m.
+
+Let ∆ := ϕ(1) − ϕ(0) . Then for all x, q ∈ { 0, 1}3,
+
+∥Φi(x) − Φi(q)∥22 = ∥∆∥22 dH (x, q ).
+
+Hence, if ∆̸ = 0 , the eight embedded neighbourhoods form a scaled isometric copy of the 3-bit Hamming cube. 
+
+11 Proof. For each slot s ∈ { L, C, R }, the positional offset cancels in pairwise differences: 
+
+Φi(x) − Φi(q) = ϕ(xL) − ϕ(qL), ϕ (xC ) − ϕ(qC ), ϕ (xR) − ϕ(qR).
+
+Since each input bit is binary, for each slot the difference is either 0 (if the bits agree) or ±∆ (if they differ). Therefore 
+
+∥Φi(x) − Φi(q)∥22 = X
+
+> s∈{ L,C,R }
+
+∥ϕ(xs) − ϕ(qs)∥22 = ∥∆∥22
+
+X
+
+> s∈{ L,C,R }
+
+1[xs̸ = qs] = ∥∆∥22dH (x, q ).
+
+Corollary 7 (Rule 150 hard gap in fixed-position neighbourhood embeddings) . Let y(x) := (−1) xL+xC +xR be the Rule 150 label, fix a held-out pattern p ∈ { 0, 1}3, and let T := {0, 1}3 \ { p}.If ∆ = 0 , then all embedded neighbourhoods coincide and the statement is trivial, so assume ∆̸ = 0 .For any fixed centre location i:1. Any monotone similarity vote of the form 
+
+ˆy(p) = sign 
+
+ X 
+
+> q∈T
+
+W (∥Φi(p) − Φi(q)∥2) y(q)
+
+
+
+,
+
+with W nonnegative and nonincreasing, predicts −y(p) or ties. 2. Any radial similarity method with 
+
+Ki(x, q ) = ψ(∥Φi(x) − Φi(q)∥22),
+
+where ψ is completely monotone, reduces to a completely monotone function of Hamming distance, so Theorem 2 applies. In particular, 
+
+Ki(x, q ) = exp( −γ∥Φi(x) − Φi(q)∥22) =  e−γ∥∆∥22
+
+dH (x,q ),
+
+so Corollary 3 applies directly, and the GP / kernel-ridge result of Theorem 4 applies unchanged with r = e−γ∥∆∥22 .3. Any axis-aligned decision tree on Φi predicts −y(p); therefore Lemma 5 extends unchanged to Random Forests built from such trees. Proof. Let δ := ∥∆∥2. By Proposition 6, the seven training points around a held-out pattern p lie on shells of radii δ, √2 δ, √3 δ with counts 3, 3, 1. By the parity-distance identity, the distance-δ and distance-√3 δ points have label −y(p), while the distance-√2 δ points have label y(p). Hence 
+
+X
+
+> q∈T
+
+W (∥Φi(p) − Φi(q)∥2) y(q) = y(p) − 3W (δ) + 3 W (√2 δ) − W (√3 δ) ≤ 0,
+
+proving (1). For (2), Proposition 6 shows that any radial kernel in ∥Φi(x) − Φi(q)∥22 is a function of dH (x, q )
+
+alone. If ψ is completely monotone, Bernstein’s theorem gives 
+
+ψ(z) = 
+
+Z
+
+> [0 ,∞)
+
+e−tz dν (t)
+
+for some finite nonnegative measure ν. Therefore 
+
+Ki(x, q ) = 
+
+Z
+
+> [0 ,∞)
+
+ e−t∥∆∥22
+
+dH (x,q )dν (t),
+
+a nonnegative mixture of powers rdH (x,q ), exactly the setting of Theorem 2. For the RBF kernel, 
+
+r = e−γ∥∆∥22 , so Corollary 3 and Theorem 4 apply unchanged. For (3), each coordinate of Φi takes at most two values, one for bit 0 and one for bit 1 in a fixed slot. Any nonconstant axis-aligned threshold split is therefore equivalent to fixing one original bit value in one slot. Leaves are subcubes of {0, 1}3, so Lemma 5 applies unchanged. 12 Remark 8 (Training does not break this geometry) . This statement depends only on the additive form of the input parameterisation, not on the initialisation. SGD may move ϕ(0) , ϕ(1) , and the position embeddings, but for fixed centre location the position terms cancel exactly, and every bit flip still contributes the same squared distance ∥∆∥22. Training may translate, rotate, or rescale the embedded cube, but it cannot warp its Hamming-shell structure. The barrier disappears only after the transformer layers mix positions nonlinearly. 
+
+Remark 9 (Why the statement is position-conditioned) . If one compares neighbourhoods centred at different absolute locations i̸ = k, then 
+
+Φi(x)−Φk(q) = ϕ(xL)−ϕ(qL)+( πi−1−πk−1), ϕ (xC )−ϕ(qC )+( πi−πk), ϕ (xR)−ϕ(qR)+( πi+1 −πk+1 ),
+
+so pairwise distances acquire additional position-dependent terms. The clean Hamming isometry therefore holds only after conditioning on centre location, or equivalently after subtracting the slotwise positional offsets before comparison. This is why the appendix result sharpens, but does not replace, the empirical pooled-position neighbourhood-embedding baseline in Table 1. 
+
+A.2 A single transformer block implements any radius-1 Boolean rule 
+
+We now strengthen the Rule 150 construction. Rather than proving a circuit only for parity, we show that a single standard transformer encoder block already implements any radius-1 Boolean rule 
+
+f : {0, 1}3 → { 0, 1}, yi = f (xi−1, x i, x i+1 ),
+
+exactly at the final logit / threshold level. Rule 150 is the special case f (L, C, R ) = L ⊕ C ⊕ R.The proof separates the two roles: 1. self-attention performs smooth local routing of the left and right neighbour bits, while the centre bit is already present in the residual stream; 2. the ReLU FFN performs the non-affine Boolean rule computation. 
+
+Canonical input code. Let 
+
+s(b) := 2 b − 1 ∈ {− 1, +1 }, θj := 2πj W .
+
+For each position j, define the antisymmetric absolute-position code 
+
+pj := (cos θj , sin θj ) ∈ R2, πj := (cos θj , − cos θj , sin θj , − sin θj ) ∈ R4.
+
+We use the 12 -dimensional token code 
+
+h(0)  
+
+> j
+
+=  0, 0, s (xj ), −s(xj ), 0, 0, π j , 0, 0 ∈ R12 ,
+
+grouped as 
+
+(left pair , centre pair , right pair , position code , readout pair ).
+
+This canonical input code is realizable by the actual input layer: choose the input affine map 
+
+e : {0, 1} → R12 as 
+
+e(xj ) = (0 , 0, s (xj ), −s(xj ), 0, 0, 0, 0, 0, 0, 0, 0) ,
+
+and the absolute position embedding as 
+
+π(j) = (0 , 0, 0, 0, 0, 0, cos θj , − cos θj , sin θj , − sin θj , 0, 0) ,
+
+so that h(0)  
+
+> j
+
+= e(xj ) + π(j).
+
+Lemma 10 (Softmax heads can route a fixed relative neighbour with arbitrarily high mass) . Fix width W ≥ 3 and periodic positions j ∈ { 0, . . . , W − 1}. For each offset τ ∈ {− 1, +1 } and every 
+
+ρ ∈ (0 , 1) , there exist absolute position embeddings together with query and key projections for one attention head such that, at every position i, the attention weight on i + τ is at least ρ.Proof. Use the circle code pj = (cos θj , sin θj ). For offset τ , take the query at position i proportional to pi+τ and the key at position j proportional to pj . Both maps ignore the content coordinates and read only the position-code coordinates. Then the scaled dot-product score has the form 
+
+s(τ ) 
+
+> ij
+
+= α cos( θj − θi+τ )
+
+13 for some free scale α > 0; the standard factor 1/√dh is absorbed into α. The score is uniquely maximized at j = i + τ (mod W ). Since the position set is finite, there is a uniform positive gap between the target score and the largest non-target score. Therefore, as α → ∞ , the softmax mass on 
+
+i + τ tends to 1 uniformly in i, so any ρ < 1 can be achieved. 
+
+Lemma 11 (Weighted averages preserve sign margins under a target-mass condition) . Let 0 < m ≤
+
+M , let v1, . . . , v n ∈ [−M, −m] ∪ [m, M ], and let a1, . . . , a n ≥ 0 with P 
+
+> j
+
+aj = 1 . Fix an index t
+
+and suppose at ≥ ρ. If 
+
+ρm − (1 − ρ)M > 0,
+
+then the weighted average 
+
+¯v := 
+
+> n
+
+X
+
+> j=1
+
+aj vj
+
+has the same sign as vt, and moreover 
+
+|¯v| ≥ ρm − (1 − ρ)M. 
+
+In particular, if m = M = 1 , then any ρ > 1/2 yields the margin |¯v| ≥ 2ρ − 1.Proof. If vt ≥ m, then the smallest possible value of ¯v occurs when every non-target term equals 
+
+−M , giving 
+
+¯v ≥ atm − (1 − at)M ≥ ρm − (1 − ρ)M > 0.
+
+If vt ≤ − m, then the largest possible value of ¯v occurs when every non-target term equals +M ,giving 
+
+¯v ≤ − atm + (1 − at)M ≤ −  ρm − (1 − ρ)M  < 0.
+
+The claimed lower bound on |¯v| follows. 
+
+Lemma 12 (LayerNorm on antisymmetric pairs) . Let LN be LayerNorm with gain γ = 1, bias 
+
+β = 0, and stabilizer εLN ≥ 0. For any 
+
+z = ( a, −a, b, −b, c, −c, d, −d, e, −e, u, −u) ∈ R12 ,
+
+one has 
+
+LN( z) = η(z) z
+
+for some scalar η(z) > 0.Proof. The mean is zero and the variance is 
+
+a2 + b2 + c2 + d2 + e2 + u2
+
+6 .
+
+Substituting into the LayerNorm formula gives 
+
+η(z) = 
+
+ a2 + b2 + c2 + d2 + e2 + u2
+
+6 + εLN 
+
+−1/2
+
+> 0.
+
+Lemma 13 (A width-8 ReLU FFN computes any Boolean rule from sign margins) . Let 0 < m ≤
+
+M < 2m. Suppose real numbers zL, z C , z R satisfy 
+
+zS ∈ [m, M ] when S = 1 , zS ∈ [−M, −m] when S = 0 ,
+
+for some (L, C, R ) ∈ { 0, 1}3. Choose any threshold θ with 
+
+2M − m < θ < 3m. 
+
+For each sign pattern σ = ( σL, σ C , σ R) ∈ {− 1, +1 }3, define 
+
+uσ = ReLU( σLzL + σC zC + σRzR − θ).
+
+Then exactly one hidden unit is positive, namely the one with 
+
+σ = ( s(L), s (C), s (R)) .
+
+14 Moreover, for that active unit one has 
+
+uσ ≥ 3m − θ > 0.
+
+Consequently, for any Boolean rule f : {0, 1}3 → { 0, 1}, if we write 
+
+b(σ) := 
+
+ σL + 1 2 , σC + 1 2 , σR + 1 2
+
+
+
+and define 
+
+gf (zL, z C , z R) := X
+
+> σ∈{− 1,+1 }3
+
+ 2f (b(σ)) − 1 uσ ,
+
+then 
+
+gf (zL, z C , z R) > 0 ⇐⇒ f (L, C, R ) = 1 , gf (zL, z C , z R) < 0 ⇐⇒ f (L, C, R ) = 0 .
+
+Proof. Let σ⋆ = ( s(L), s (C), s (R)) . Then 
+
+σ⋆LzL + σ⋆C zC + σ⋆RzR ≥ 3m, 
+
+so uσ⋆ ≥ 3m − θ > 0. If σ̸ = σ⋆, then at least one sign is wrong, so the corresponding signed sum contains at most two terms from [m, M ] and at least one term from [−M, −m]. Hence 
+
+σLzL + σC zC + σRzR ≤ 2M − m < θ, 
+
+so uσ = 0 . Therefore exactly one detector is active, and gf takes the sign of the desired output label. 
+
+Theorem 14 (A single standard transformer block implements any radius-1 Boolean rule) . Consider a post-LN transformer encoder block in evaluation mode with learned absolute position embeddings, multi-head softmax self-attention, residual connections, LayerNorm, a ReLU FFN, and a final affine scalar readout. Assume model dimension at least 12 , at least 2 attention heads, and FFN width at least 8. Then for every Boolean rule f : {0, 1}3 → { 0, 1}, there exists a parameter setting such that for every binary input row x ∈ { 0, 1}W and every position i,
+
+ℓi(x) > 0 ⇐⇒ f (xi−1, x i, x i+1 ) = 1 ,
+
+with indices interpreted modulo W . Thus thresholding the final logit at 0 computes the radius-1 rule 
+
+f exactly. Proof. Use the canonical input code h(0)  
+
+> j
+
+above and fix any ρ ∈ (1 /2, 1) , to be chosen sufficiently close to 1.Use two attention heads in the first sublayer. The left head uses Lemma 10 with offset −1, and the right head uses it with offset +1 . In both heads, the query and key maps ignore content and read only the position-code coordinates, while the value projection reads only the centre sign pair 
+
+(s(xj ), −s(xj )) . The multi-head output projection writes the left-head output into the left pair and the right-head output into the right pair. The residual stream already contains the centre pair and the position code. Thus, after the attention-residual sublayer, the token at position i has the form 
+
+ri = ( αi, −αi, s (xi), −s(xi), β i, −βi, π i, 0, 0) ,
+
+where 
+
+αi = X
+
+> j
+
+a(−1)  
+
+> ij
+
+s(xj ), βi = X
+
+> j
+
+a(+1)  
+
+> ij
+
+s(xj ),
+
+and the target weights satisfy 
+
+a(−1)  
+
+> i,i −1
+
+≥ ρ, a(+1)  
+
+> i,i +1
+
+≥ ρ. 
+
+Applying Lemma 11 with m = M = 1 , we obtain 
+
+sgn( αi) = s(xi−1), sgn( βi) = s(xi+1 ), |αi|, |βi| ≥ 2ρ − 1.
+
+Choose the first LayerNorm gains to be 1 and biases to be 0. By Lemma 12, the post-attention LayerNorm output is 
+
+zi = λiri
+
+15 for some scalar λi > 0. Therefore the three readable coordinates 
+
+zL := zi, 1, zC := zi, 3, zR := zi, 5
+
+have the correct signs for (xi−1, x i, x i+1 ).Because 
+
+(αi, s (xi), β i) ∈ ([ −(1) , −(2 ρ − 1)] ∪ [2 ρ − 1, 1]) × {− 1, +1 } × ([ −(1) , −(2 ρ − 1)] ∪ [2 ρ − 1, 1]) ,
+
+and because λi is a continuous positive function of these values, compactness yields constants 
+
+0 < m ≤ M < ∞ such that 
+
+zS ∈ [m, M ] when S = 1 , zS ∈ [−M, −m] when S = 0 .
+
+Moreover, as ρ → 1, the admissible triples (αi, s (xi), β i) converge uniformly to the exact codebook 
+
+(±1, ±1, ±1) . The corresponding pre-LayerNorm vectors therefore converge uniformly to a finite codebook with constant squared norm, so the LayerNorm scaling factors converge uniformly to a common positive constant. Hence M/m → 1 as ρ → 1, and for ρ sufficiently close to 1 we have 
+
+M < 2m.Now apply Lemma 13 to (zL, z C , z R). This gives a width-8 hidden layer whose scalar output gi
+
+satisfies 
+
+gi > 0 ⇐⇒ f (xi−1, x i, x i+1 ) = 1 , gi < 0 ⇐⇒ f (xi−1, x i, x i+1 ) = 0 .
+
+Choose the FFN output projection to write only into the readout pair: 
+
+(0 , 0, 0, 0, 0, 0, 0, 0, 0, 0, Bg i, −Bg i)
+
+for some fixed B > 0. After the FFN residual, the pre-final-LayerNorm token is 
+
+vi = ( zL, −zL, z C , −zC , z R, −zR, λ iπi, Bg i, −Bg i),
+
+which is again an antisymmetric-pair vector. Choosing the final LayerNorm gain and bias as 1 and 0,Lemma 12 implies that this final LayerNorm multiplies vi by a positive scalar. Therefore the sign of the readout pair is still the sign of gi. A final linear readout taking the difference of the two readout coordinates gives the scalar logit ℓi, and hence 
+
+ℓi(x) > 0 ⇐⇒ f (xi−1, x i, x i+1 ) = 1 .
+
+This proves the claim. 
+
+Corollary 15 (Rule 150 as a special case) . Taking f (L, C, R ) = L ⊕ C ⊕ R in Theorem 14 yields an explicit exact Rule 150 circuit. Moreover, for Rule 150 the FFN width can be reduced from 8 to 4,since only the four odd-parity patterns 100 , 010 , 001 , 111 require positive detectors. 
+
+Remark 16 (Interpretation) . Theorem 14 is a block-level architectural existence result. A standard transformer block already contains a complete beyond-interpolation local-rule primitive: softmax attention performs smooth local routing, and the ReLU FFN performs the non-affine Boolean computation. Experiment 1 uses embedding dimension 64 and 4 heads, so the result applies a fortiori to the architecture class studied in the main experiments. This is a capacity statement about the architecture, not a claim that SGD must recover the same parameters in every trained model. 
+
+A.3 Composable local-rule circuits across depth 
+
+Theorem 14 is a one-block statement. To justify the broader architectural interpretation, it is useful to record a compositional extension: the same routing-plus-FFN primitive can be re-used across blocks. For this extension it is convenient to use a larger, induction-friendly absolute-position code. Fix depth 
+
+T ≥ 1 and width W ≥ 3. Let 
+
+u(0)  
+
+> i
+
+:= xi, u(t) 
+
+> i
+
+:= ft
+
+ u(t−1)  
+
+> i−1
+
+, u (t−1)  
+
+> i
+
+, u (t−1) 
+
+> i+1
+
+ (t = 1 , . . . , T ),
+
+for arbitrary Boolean rules ft : {0, 1}3 → { 0, 1}.We use the signed one-hot position code 
+
+qj := ( ej , −ej ) ∈ R2W ,
+
+16 where ej is the j-th standard basis vector of RW . Group the model coordinates as 
+
+(position code , left scratch pair , state pair , right scratch pair ) ∈ R2W ⊕ R2 ⊕ R2 ⊕ R2.
+
+Thus model dimension 2W + 6 suffices. Again this code is realizable by the actual input layer: choose the input affine map 
+
+ecomp (xi) = (0 2W , 0, 0, s (xi), −s(xi), 0, 0) 
+
+and the absolute position embedding 
+
+πcomp (i) = ( qi, 0, 0, 0, 0, 0, 0) ,
+
+so that the compositional input token equals ecomp (xi) + πcomp (i).
+
+Lemma 17 (A width-14 ReLU FFN can update the state and clear the scratch pairs) . As-sume (zL, z C , z R) satisfy the sign-margin hypothesis of Lemma 13. Then for any Boolean rule 
+
+f : {0, 1}3 → { 0, 1} and any scalar B > 0, there exists a one-hidden-layer ReLU FFN of width 14 
+
+whose output simultaneously: 1. writes (−zL, +zL) into the left scratch pair, 2. writes (−zC + Bg f (zL, z C , z R), z C − Bg f (zL, z C , z R)) into the state pair, 3. writes (−zR, +zR) into the right scratch pair, where gf is the rule logit from Lemma 13. Consequently, when this FFN output is added via the residual connection to a token whose three relevant pairs are (zL, −zL), (zC , −zC ), and (zR, −zR),it clears the two scratch pairs, replaces the old state pair by (Bg f (zL, z C , z R), −Bg f (zL, z C , z R)) ,and leaves the sign of the new state equal to the rule output. Proof. Use the eight hidden units uσ from Lemma 13 to compute gf . In addition, use the six sign-split units 
+
+ReLU( zL), ReLU( −zL), ReLU( zC ), ReLU( −zC ), ReLU( zR), ReLU( −zR).
+
+From these one recovers 
+
+zL = ReLU( zL)−ReLU( −zL), zC = ReLU( zC )−ReLU( −zC ), zR = ReLU( zR)−ReLU( −zR).
+
+A linear output projection can therefore emit the three pairwise cancellation terms together with the fresh rule-dependent state pair. 
+
+Proposition 18 (Composable depth-T local-rule circuit) . For every fixed width W , depth T , and Boolean rules f1, . . . , f T : {0, 1}3 → { 0, 1}, there exists a post-LN T -block transformer encoder in evaluation mode with learned absolute position embeddings, multi-head softmax self-attention, residual connections, LayerNorm, ReLU FFNs, and a final affine scalar readout such that, for every binary input row x ∈ { 0, 1}W and every position i, the final logit satisfies 
+
+ℓi(x) > 0 ⇐⇒ u(T ) 
+
+> i
+
+= 1 .
+
+It is enough to use model dimension 2W + 6 , two attention heads per block, and FFN width 14 per block. Proof sketch. Initialize token i as 
+
+h(0)  
+
+> i
+
+= ( qi, 0, 0, s (xi), −s(xi), 0, 0) .
+
+We maintain the invariant that after block t and its final LayerNorm, token i has the form 
+
+h(t) 
+
+> i
+
+= ( λi,t qi, 0, 0, γ i,t s(u(t) 
+
+> i
+
+), −γi,t s(u(t) 
+
+> i
+
+), 0, 0) ,
+
+where λi,t > 0 and γi,t ∈ [mt, M t] for some constants 0 < m t ≤ Mt < ∞. Moreover, at each stage we choose the block parameters so that Mt/m t < 2.The base case t = 0 is immediate with m0 = M0 = 1 . Assume the invariant at stage t − 1. In block 
+
+t, both queries and keys depend only on the position subspace. Let P−1 and P+1 be the cyclic shift operators on RW . Since 
+
+Pτ (ei, −ei) = ( ei+τ , −ei+τ ) (τ ∈ {− 1, +1 }),
+
+17 a left-routing head can query qi−1 and a right-routing head can query qi+1 . The position code survives every LayerNorm up to positive tokenwise rescaling, so each head still has a unique target position in every row. Because the possible LayerNorm scales form a compact positive set, choosing the head scale large enough makes the target weight at least ρt uniformly in i; again, the standard factor 
+
+1/√dh is absorbed into this free head scale. Let both value projections read only the current state pair. The multi-head output projection writes the left head into the left scratch pair and the right head into the right scratch pair. By Lemma 11, if 
+
+ρtmt−1 − (1 − ρt)Mt−1 > 0,
+
+then the two routed scratch pairs have the correct neighbour signs and positive margin. The residual stream already carries the centre state pair. After the post-attention LayerNorm, the three readable scalars (zL, z C , z R) therefore satisfy the sign-margin hypothesis of Lemma 13 for suitable constants 
+
+0 < m in  
+
+> t
+
+≤ M in  
+
+> t
+
+< ∞. By choosing ρt sufficiently close to 1, one can ensure M in  
+
+> t
+
+< 2min  
+
+> t
+
+.Now apply Lemma 17 with rule ft. The FFN clears the left and right scratch pairs, cancels the old state pair, and writes a fresh state pair (Btgi,t , −Btgi,t ), where the sign of gi,t is exactly the sign of 
+
+u(t) 
+
+> i
+
+. Thus, before the final LayerNorm in block t, the token has the form 
+
+(eλi,t qi, 0, 0, B tgi,t , −Btgi,t , 0, 0) .
+
+The final LayerNorm again rescales this vector by a positive scalar, so the sign of the new state pair is preserved. Finally, because gi,t is a continuous nonzero function on a compact domain, there exist bounds 
+
+0 < δ t ≤ | gi,t | ≤ ∆t < ∞. The normalized state-pair magnitude after the final LayerNorm is a continuous function of |gi,t | on [δt, ∆t]. As Bt → ∞ , this normalized magnitude converges uniformly to a positive constant, so by choosing Bt sufficiently large we can make the interval 
+
+[mt, M t] satisfy Mt/m t < 2. This closes the induction. After block T , the state pair has the sign of u(T ) 
+
+> i
+
+. A final linear readout that takes the difference of the two state coordinates yields 
+
+ℓi(x) > 0 ⇐⇒ u(T ) 
+
+> i
+
+= 1 .
+
+Remark 19 (Discussion) . Theorem 14 shows that a standard transformer block already contains a complete local beyond-interpolation primitive: attention performs smooth neighbour routing, while the FFN performs the non-affine rule computation. Proposition 18 is a broader capacity result, showing that such primitives can be stacked across layers. This is not a claim that every trained model realizes this exact circuit; it is an architectural existence statement about what standard transformer components can do. 
+
+# B Circuit Analysis Details 
+
+Fitted polynomial coefficients. For two independently trained Rule 150 models achieving 100% holdout accuracy:                         
+
+> Model c0cLcCcRcLC cLR cCR cLCR
+> Seed 4444 −5.89 11 .82 7.13 11 .63 −19 .28 −23 .60 −18 .91 42 .88
+> Seed 456 −6.50 12 .59 8.26 12 .91 −20 .39 −25 .27 −21 .11 46 .14
+
+Layer ablation.       
+
+> Layer Ablated Seed 4444 Seed 456 Layer 0 20.5% (79.5% drop) 13.1% (86.9% drop) Layer 1 0.0% (100% drop) 0.0% (100% drop)
+
+18 Logit lens. 
+
+Layer Seed 4444 Seed 456 Embedding 1.2% 2.7% After layer 0 0.0% 0.0% After layer 1 100.0% 100.0% 
+
+Linear probing. Linear classifiers decoding individual bit values and XOR from each layer’s activations: 
+
+Layer Left Centre Right XOR Embedding 51.6% 100.0% 51.5% 51.6% After layer 0 75.4% 100.0% 75.3% 56.8% After layer 1 76.8% 99.2% 75.8% 98.4% 
+
+Activation patching. Corrupt inputs by flipping neighbour bits (accuracy →∼ 6%), then patch clean activations: 
+
+Patch Point Seed 4444 Recovery Seed 456 Recovery Embedding 98.6% 98.6% After layer 0 98.6% 100.0% After layer 1 100.0% 100.0% 
+
+Parity neurons. In layer 1’s FFN, top parity neurons show activation differences up to 1.0 (neuron 20 in seed 456: mean activation 1.00 for XOR=1, 0.00 for XOR=0). 
+
+# C Temporal Interpolation Baseline 
+
+Random Forests and KNN given the same input as the transformer (full t = 0 state, 101 values, plus target position and timestep). Trained on all visible cells at t = 1 –t = 4 . Tested on hidden pattern positions at t = 1 .
+
+Method Hidden Pattern [2] Hidden Pattern [5] Random Forest (500 trees) 0.2% 0.4% Random Forest (100 trees) 8.4% 11.8% KNN ( k=1) 42.5% 42.1% KNN ( k=5) 36.2% 36.1% 
+
+19 D k-Sweep Detailed Results 10 20 30 40 50 60 70 80 90 
+
+Hidden Patterns (%) 
+
+> 40
+> 60
+> 80
+> 100
+> Mean Holdout Accuracy (%)
+> Rule D cliff
+> Rule D (XOR top-level)
+> Rule G (OR top-level)
+
+Figure 5: Mean holdout accuracy vs. fraction of hidden patterns for Rule D and Rule G. Rule D shows a sharp cliff at ∼50% hidden; Rule G degrades gradually, tolerating 88% hidden. The frontier depends on intrinsic rule complexity. Table 4: Rule D k-sweep (soft unrolling, 50 epochs, 10 seeds each). 
+
+k Hidden % Mean Accuracy Successes 4 12% 99.4% 10/10 10 31% 99.6% 10/10 12 38% 99.6% 10/10 14 44% 99.8% 10/10 16 50% 55.3% 0/10 20 62% 55.3% 0/10 24 75% 42.2% 0/10 28 88% 43.0% 0/10 
+
+Table 5: Rule G k-sweep (soft unrolling, 50 epochs, 10 seeds each). 
+
+k Hidden % Mean Accuracy Successes 14 44% 99.3% 10/10 16 50% 99.2% 10/10 20 62% 99.2% 10/10 24 75% 97.1% 10/10 26 81% 81.3% 7/10 27 84% 95.7% 9/10 28 88% 82.3% 8/10 
+
+D.1 Cross-rule comparison 
+
+Table 6 reports holdout accuracy for the radius-2 rules; Table 7 gives a per-pattern breakdown for the three radius-1 rules. All experiments use soft unrolling with masking at all timesteps and hide k=1 of 8 patterns. Table 6: Radius-2 rules ( k=8 of 32 hidden). All use soft unrolling, 50 epochs. 
+
+Rule Formula Seeds Mean Acc. Successes Rule D L1 ⊕ (( C ∨ R1) ∧ (L2 ∨ R2)) 10 96.7% 10/10 Rule G (L1 ⊕ (C ∨ R1)) ∨ (L2 ∧ R2) 10 99.5% 10/10 
+
+20 Table 7: Per-pattern holdout accuracy for radius-1 rules ( k=1 of 8 hidden, 10 seeds each). Cells show seeds achieving ≥70% holdout accuracy out of 10. Rule 150 (220 ep) excludes patterns 2 and 5, which partially succeeded at 50 epochs and were not re-run.                                          
+
+> 50 epochs 220 epochs Pattern Rule 150 Rule 30 Rule 106 Rule 150 00/10 1/10 10/10 3/10 10/10 5/10 10/10 10/10
+> 24/10 6/10 0/10 —30/10 10/10 8/10 10/10
+> 40/10 0/10 9/10 10/10
+> 54/10 2/10 10/10 —60/10 10/10 4/10 10/10
+> 70/10 7/10 4/10 4/10 Overall 8/80 41/80 55/80 47/60
+
+The per-pattern view reveals that success is pattern-specific, not rule-specific. At 50 epochs, Rule 30 and Rule 106 each have patterns that succeed on every seed (e.g. Rule 30 patterns 3 and 6 at 10/10; Rule 106 patterns 0, 1, and 5 at 10/10), while Rule 150 has none. Extended training (220 epochs) allows Rule 150 to reach 47/60; patterns that showed no signal at 50 epochs emerge with longer optimisation. The bimodal, pattern-dependent success rates suggest that learnability depends on how well each hidden pattern is constrained by its seven visible neighbours in the specific rule’s truth table, not on a single global property of the rule. Some patterns are fully determined by indirect constraints and learned reliably; others are underdetermined and rarely or never recovered. The k-sweep (Appendix D) shows the complementary effect: hiding more patterns simultaneously removes constraints, eventually crossing a threshold where no pattern can be recovered. 
+
+# E GF(2) Constraint Solver Results                     
+
+> Timesteps Identifiability Mean Unknowns Mean Constraints Mean Rank 10% 12.5 0.0 0.0 2100% 12.5 31.4 12.5 3100% 12.5 58.8 12.5 4100% 12.5 101.2 12.5
+
+# F Symbolic Operator Benchmark Details 
+
+F.1 Task and architecture 
+
+The task uses compositional chains of two binary operators over 6-bit integers [0 , 63] . Seven operators are defined: XOR ( ⊕), OR ( ∨), AND ( ∧), NOR ( ∨), NAND ( ∧), LSHIFT ( ≪1, left-shift by 1, masked to 6 bits), and RSHIFT ( ≫1, right-shift by 1). Given five input integers (a, b, c, d, u )
+
+satisfying (a op 1 b) op 2 c = d, the model predicts the full derivation: intermediate result e = a op 1 b,operator identities op 1 and op 2, and final result f = e op 2 c.There are 7 × 7 = 49 possible operator pairs. One pair is held out entirely from training; the remaining 48 are seen. Training uses balanced marginal sampling (equal per-slot operator frequency) to eliminate unigram shortcuts. Each seen pair contributes ∼3,000 training examples ( ∼144 ,000 
+
+total) and 500 test examples. The architecture is an encoder-decoder transformer: 2 encoder layers, 2 decoder layers, 4 attention heads, embedding dimension 64, FFN dimension 128 ( ∼180 K parameters). The encoder receives 5 integer tokens; the decoder autoregressively produces the derivation sequence. Three training conditions are tested: 21 • Full derivation (familiar symbols): The decoder outputs intermediate values and operator labels using standard symbols ( ⊕, ∨, etc.). • Full derivation (opaque symbols): Same structure but operator tokens are replaced with arbitrary letters (e.g., A, B, C. . . ), testing whether generalisation depends on pre-existing symbol meaning. • Label-only: The decoder outputs only operator labels, no intermediate computation values, testing whether multi-step structure matters. All 49 holdout pairs are tested (Figure 6); four are selected for detailed analysis spanning structural diversity: ˆ| (logic →logic), &L (logic →shift), Rˆ (shift →logic), and d| (negated →logic). 
+
+F.2 Complete results 
+
+Table 8: Test-set holdout accuracy (%) per seed across all conditions. Each cell reports accuracy on a held-out test set, evaluated at the best checkpoint (selected by peak eval-set performance).                                                                                 
+
+> Holdout Seed Full (familiar) Full (opaque) Label-only
+> ˆ| 42 70.4 66.0 28.0 123 74.0 78.2 29.6 456 75.2 74.8 29.6
+> Mean 73.2 ±2.0 73.0 ±5.1 29.1 ±0.8
+> &L 42 50.8 67.6 13.0 123 60.2 66.8 18.0 456 54.8 63.2 12.6
+> Mean 55.3 ±3.9 65.9 ±1.9 14.5 ±2.5
+> Rˆ 42 30.4 23.2 8.0 123 35.0 33.8 8.8 456 19.2 16.8 1.6
+> Mean 28.2 ±6.6 24.6 ±7.0 6.1 ±3.2
+> d| 42 37.0 36.4 19.4 123 47.6 63.8 39.8 456 78.6 68.8 40.6
+> Mean 54.4 ±17.7 56.3 ±14.2 33.3 ±9.8
+
+F.3 Baselines 
+
+Table 9: Baseline holdout accuracy (%) for seven representative holdouts. All 49 pairs were evaluated: KNN and MLP achieve exactly 0% on every holdout; KRR ranges from 0% to 18.2% (mean 4.3%), highest when XOR is the first operator.                                                 
+
+> Holdout Transformer KNN MLP KRR Oracle Learned Tables
+> ˆ| 73.2 0013.8 100 100
+> ˆr 53.4 0011.8 100 99.6
+> &L 55.3 000.2 100 99.2
+> d| 54.4 003.2 100 99.8
+> Rˆ 28.2 007.2 100 99.8
+> |& 12.3 000.4 100 100
+> |r 11.6 000.2 100 99.2
+
+F.4 Mechanistic interpretability 
+
+Mechanistic analysis was performed on the seed-42 full-familiar model for each holdout. All results below are from those four models. 
+
+Position-specific probes. Linear probes trained on encoder layer 1 representations decode operator identity from specific positions. Op 1 is best decoded from positions 0–1 (inputs a, b), reaching 22 49–71% accuracy across holdouts. Op 2 is best decoded from position 3 (input d), reaching 83–85%. The model encodes each operator where it is causally relevant, not uniformly across positions. Table 10: Encoder layer 1 probe accuracy (%) for operator identity by position.                        
+
+> Op 1accuracy Op 2accuracy Holdout Pos 0 ( a)Pos 1 ( b)Pos 3 ( d)Pos 4 ( u)
+> ˆ| 63.9 61.7 83.8 56.5
+> &L 49.2 52.3 85.0 46.9
+> Rˆ 70.8 67.6 84.7 37.3
+> d| 58.4 53.3 84.8 44.9
+
+Cross-attention maps. Decoder cross-attention at layer 0 targets causally correct encoder positions: Table 11: Cross-attention weights (layer 0 average across heads) on the causally relevant encoder position.                      
+
+> Predicting ˆ| &L Rˆ d|
+> e: attention to c84.9% 57.2% 84.0% 91.2%
+> f: attention to c74.0% 62.3% 68.4% 77.6%
+> f: attention to u24.8% 34.9% 27.6% 19.6%
+
+Input corruption (causal test). Replacing encoder inputs at positions a, b changes op 1 predictions 62–74% of the time; replacing c, d changes op 2 69–79%. Replacing u (which appears only in the second sub-computation’s output) changes op 1 ≤3% and op 2 <2%, a clean negative control confirming the model has learned causal structure. Table 12: Input corruption: fraction of predictions changed when each encoder position is replaced with a random value.                                               
+
+> Corrupted position ˆ| &L Rˆ d|
+> a→op 1changed 73.0% 68.0% 62.0% 73.7%
+> b→op 1changed 73.7% 73.3% 67.0% 73.7%
+> c→op 2changed 70.7% 69.7% 69.3% 70.0%
+> d→op 2changed 77.0% 78.7% 75.3% 78.3%
+> u→op 1changed 3.0% 1.0% 1.3% 1.0%
+> u→op 2changed 1.7% 0.7% 0.7% 1.0%
+
+Logit lens. The decoder shows a sharp two-stage computation matching the CA pattern: Table 13: Logit lens: accuracy (%) when projecting intermediate decoder representations to output vocabulary.                                    
+
+> Layer Target ˆ| &L Rˆ d|
+> Embedding op 26.6 4.6 2.4 10.4 After dec-0 op 297.5 87.2 82.0 89.6 After dec-1 op 2100 100 99.9 100 Embedding op 10.0 3.9 1.7 0.6 After dec-0 op 161.8 47.9 54.3 60.1 After dec-1 op 193.1 91.6 94.9 93.6
+
+Head-level ablation. For the ˆ| holdout, ablating individual attention heads reveals generalisation-specific effects. Ablating dec_cross_0_head_0 drops holdout accuracy from 69% to 47% (22pp) while seen accuracy drops only 1.7pp. This head is disproportionately important for generalisation, consistent with the CA finding that specific circuit components are essential for computing the held-out function. 23 F.5 Shortcut gradient 
+
+Seen-chain accuracy is 88–94% for every holdout pair; the model learns the visible task equally well in all cases. The variation is entirely in holdout accuracy, reflecting how easily each held-out composition can be shortcutted. Four case-study holdout pairs illustrate: ˆ| (73.2%) > &L (55.3%) 
+
+> d| (54.4%) > Rˆ (28.2%). ˆ| (XOR-then-OR) involves two logic operators that share dense algebraic constraints with many seen chains, providing strong indirect signal. Rˆ (RSHIFT-then-XOR) is hardest of the four because RSHIFT is a lossy, many-to-one mapping: right-shifting discards the least significant bit, so multiple inputs map to the same output. The model finds approximate representations that satisfy seen-chain constraints without encoding the precise holdout operator—a shortcut that is sufficient for the visible loss but insufficient for the held-out pair. This is a prediction of the constraint-density account: lossy operators reduce indirect signal and permit shortcut solutions that satisfy visible constraints without uniquely determining the holdout operator. The transformer still exceeds all interpolation baselines at 28.2% (vs KRR 7.2%), but the lower accuracy reflects insufficient constraints in the visible data to force true generalisation rather than architectural failure. This mirrors the CA finding that intrinsic rule complexity determines the generalisation frontier. The full coverage study (Figure 6) tests all 49 holdout pairs with baselines evaluated on every pair. The transformer exceeds interpolation baselines on all 49 (mean 41.8% vs KRR mean 4.3%; KNN and MLP score 0% everywhere). Per-holdout means range from 9.2% to 73.2%, with the hardest pairs involving closely related operators (e.g. NAND–NOR, OR–AND) whose similar truth tables reduce the distinguishing signal available from seen chains. 24 ^| *
+
+&^ 
+
+RR 
+
+^L 
+
+^R 
+
+LL 
+
+r^ 
+
+dd 
+
+r| 
+
+&L *
+
+rr 
+
+d| *
+
+^r 
+
+rL 
+
+&d 
+
+^d 
+
+&R 
+
+^& 
+
+rR 
+
+|d 
+
+r& 
+
+&| 
+
+|| 
+
+dL 
+
+R& 
+
+|^ 
+
+rd 
+
+LR 
+
+|L 
+
+RL 
+
+dR 
+
+R| 
+
+L& 
+
+&r 
+
+&& 
+
+|R 
+
+L| 
+
+d^ 
+
+Rd 
+
+R^ *
+
+Holdout accuracy by operator pair (49 pairs) 25 G Relationship to Grokking 
+
+Our phase transition resembles grokking [Power et al., 2022], but differs in a key respect: the model never memorises the hidden outputs because they are never provided. The delay reflects a constraint propagation threshold: until the model’s visible-pattern predictions are accurate enough, wrong hidden-pattern predictions do not produce detectable errors at downstream visible positions. The bimodal outcome (each seed either fully succeeds or fully fails) is consistent with the lottery ticket hypothesis [Frankle and Carlin, 2019] and initialization-dependent phase transitions [Zhang et al., 2024]. 26

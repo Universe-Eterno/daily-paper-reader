@@ -1,0 +1,478 @@
+Title: Leveraging Classical and Quantum Computing for Process Systems Engineering Applications: Decomposition Algorithm with Ising Solvers for Efficient Discrete Landscape Exploration
+
+URL Source: https://arxiv.org/pdf/2603.19520v1
+
+Published Time: Mon, 23 Mar 2026 00:18:05 GMT
+
+Number of Pages: 24
+
+Markdown Content:
+# Leveraging Classical and Quantum Computing for Process Systems Engineering Applications: Decomposition Algorithm with Ising Solvers for Efficient Discrete Landscape Exploration 
+
+Yirang Park and David E. Bernal Neira Davidson School of Chemical Engineering, Purdue University, 480 Stadium Mall Drive, West Lafayette, IN 47907, USA 
+
+Abstract 
+
+Conceptual process design is a crucial aspect of chemical engineering that involves process synthesis in consideration of the various process phenomena. Mixed-integer nonlinear program-ming (MINLP) offers a powerful framework for modeling such design problems by combining discrete and continuous variables; however, the combinatorial complexity of discrete choices, coupled with nonlinearities, makes MINLPs challenging to solve as monolithic problems. Var-ious simulation and mathematical optimization tools have been developed for solving these difficult problems, often utilizing decomposition strategies that break the original problem into more manageable subproblems. Additionally, recent advances in computational hardware create opportunities for addressing different parts of the problem more efficiently. Discrete subprob-lems can potentially benefit from quantum Ising solvers, while simulators and nonlinear solvers offer powerful tools for handling nonlinearities. To fully exploit these emerging computational capabilities, we propose an integrated approach that decomposes MINLP problems into discrete and continuous components and solves each subproblem using the most suitable computational method. In this work, two case studies are presented: an illustrative example involving the se-lection of an ionic liquid and its process design, and a more complex problem of drug substance manufacturing process optimization. The discrete subproblem in each case is formulated as an integer programming problem and solved using a commercial classical optimization solver. For comparative analysis, the same subproblem is reformulated as a quadratic unconstrained binary optimization and solved with various Ising solvers including simulated annealing (SA), quantum annealing (QA), and entropy computing (EC). The continuous subproblem is solved using a classical optimizer and a simulator-based optimization approach, respectively. In both discrete subproblems, the commercial classical solver achieved the shortest runtime in terms of compu-tational efficiency, whereas EC took the longest, followed by QA and SA, in reaching feasible and optimal solutions. The heuristic methods identified all or most of the feasible solutions in a single run, demonstrating advantages in solution diversity and more efficient and broad exploration of the solution space over the classical solver. In contrast, the global solver provides a global optimality guarantee and rapid convergence speed. In the context of process design, where insights of alternative feasible designs and comparisons of costs are more valuable than a single optimal solution, heuristics methods offer a better suited approach for decision-making. This comparative analysis highlights the distinct strengths of each method and underscores the potential of this heterogeneous computing approach that leverages different methods to address practical optimization problems. 
+
+1
+
+> arXiv:2603.19520v1 [math.OC] 19 Mar 2026
+
+# 1 Introduction 
+
+Mixed-Integer Nonlinear Programming (MINLP) is an optimization framework that combines both discrete (integer or binary) and continuous decision variables, incorporating nonlinear relationships in the objective function and/or constraints, thereby enabling the modeling and solution of complex, real-world problems. Many applications, such as process design, operations research, and finance, involve decision-making problems that can be effectively modeled as MINLP problems [1, 2]. Math-ematical programming and MINLP formulations have been widely applied to multiple domains in chemical engineering, including flowsheet synthesis [3, 4], heat- and utility-integration [5, 6], and supply chain optimizations [7, 8], as a means to represent the process systems for integrated decision-making. The systematic and rigorous approach of these optimization-based methods is particularly advantageous in identifying the optimal process configuration in the process design space, and sub-stantial research efforts have been made spanning superstructure generation, model formulation, and algorithmic development in the field [9, 10]. Solving MINLP problems remains a challenge, as these problems are complex and many practical instances are non-deterministic polynomial-time (NP) hard. Finding a good or even a feasible solution can be computationally demanding [11]. Various practical methods have been developed, and solvers have advanced to address this complexity; however, the problems and their scales that can be solved are still limited and smaller than what can be modeled [2]. One of the most common approaches to solving MINLP problems is to decompose the problem into smaller subproblems, typically composed of discrete (i.e., process configuration) and continuous (i.e., process operation) parts. The discrete subproblem can be solved to find candidate values for the integer variables, which can then be fixed, and the remaining problem can be solved as a nonlinear program (NLP) or passed to a simulator for evaluation. This divide-and-conquer strategy enables more efficient and flexible use of specialized solvers and methods tailored to the subproblems’ complexities, thereby making the overall problem more tractable. While the nonlinear continuous subproblems are well-handled by the advanced nonlinear algo-rithms and solvers or simulation tools, the combinatorial complexity of the discrete subproblems remains a computational challenge [12]. A discrete optimization problem can be written as 
+
+min  
+
+> x∈{ 0,1}
+
+f (x) s.t. x ∈ X (1) where X is a set of constraints that define the feasible space of the problem. A branch-and-bound (BB) method is a classical, deterministic approach to solving discrete optimization problems, which systematically explores the solution space by following a search tree and eliminating infeasible branches [13]. Namely, Gurobi is a commercial solver that implements this BB method [14]. This enumeration method provides rigorous global optimality and convergence guarantees, but the com-putational burden can grow exponentially with the problem size, limiting its applicability and scal-ability. Consequently, there is a substantial research interest focused on making the discrete search smaller and better guided through various algorithmic developments, such as logic-based search, cutting planes, and heuristics [2]. Among these efforts, Ising solvers are a promising approach for their potential of practical applicability to large-scale combinatorial optimization problems. It has been shown that many discrete optimization problems can be mapped to Ising models with only a polynomial overhead [15, 16], and any advantage in solving these Ising problems over traditional methods would have significant practical implications [17, 18]. Ising models, first developed to describe magnetism [19, 20], offer a physics-based representation of discrete optimization problems by encoding binary decision variables as spin states and defining 2the objective function as the energy of the system through a Hamiltonian function: 
+
+H = X 
+
+> i∈V(G)
+
+hiσi + X
+
+> (ij )∈E(G)
+
+Jij σiσj (2) where σi ∈ {− 1, +1 } are binary spin variables, indexed by the vertices V (G) of graph G, and the pairwise interactions are defined by the edges E(G) of the graph, where hi and Jij are the corresponding coefficients [21, 22]. This formulation is mathematically equivalent to the quadratic unconstrained binary optimization (QUBO) model (Eq. (3)), and a simple variable transformation can be used to convert between the two representations (i.e. σi = 2 xi − 1). 
+
+min  
+
+> x
+
+x⊤Qx s.t. x ∈ { 0, 1}n (3) where Q is without loss of generality an n-by-n square, symmetric matrix of coefficients, and x
+
+is a set of binary variables. This equivalence establishes a connection between the Ising solvers and many constrained integer programming (IP) problems, as the IPs can be reformulated into QUBOs by incorporating the constraints into the objective function as quadratic penalty terms [23, 24]. Ising solvers are specialized hardware that operate to find or approximate the ground states of the system, effectively providing solutions to the corresponding integer optimization problems [18, 17, 25]. Many Ising hardware have been developed based on various technologies, including classical thermal annealers, quantum annealers, and dynamical system-based solvers such as the coherent Ising machines. A comprehensive review of these technologies and their implementations can be found in Reference [18]. In contrast to the deterministic classical solvers that strive to find and guarantee the global optimum, Ising solvers operate as stochastic heuristics, providing solution distributions rather than single optima. Simulated annealing (SA) is a classical method that has been used to solve Ising or QUBO problems, exemplifying this approach by employing a probabilistic technique inspired by the physical annealing process. SA uses random sampling to search the solution space and makes probabilistic decisions to accept or reject new solutions based on a temperature parameter that gradually decreases over time, allowing the algorithm to escape local minima [26]. The annealing techniques emulate the annealing process of metal thermal processing to attain the lowest lattice energy state; the analogy is that the optimal solution in a minimization optimization is found through a specific algorithmic treatment [27]. While SA does not provide a global optimality guarantee, the randomized nature of search can lead to better exploration of the rugged energy landscape of the discrete optimization problems. Building on this concept, various physics-based and physics-inspired solvers have emerged, providing other methods for solving Ising or QUBO problems. These systems encode the Hamiltonian directly into a physical system and exploit the system’s natural dynamics to drive it towards low-energy configurations. Quantum annealers, such as D-Wave’s Advantage systems, are specialized quantum computing devices designed to perform quantum annealing [28]. Quantum annealing (QA) directly implements Ising Hamiltonians as the native energy functions of the hardware to find the ground state of the encoded optimization problems through adiabatic quantum evolution [29, 30]. In this process, the system whose energy is described by an initial Hamiltonian is evolved into a final Hamiltonian slowly enough and without interactions with its environment, also known as adiabatically . Considering a time schedule 0 ≤ s(t) ≤ 1, where 0 ≤ t ≤ tf is the time, and the initial and final Hamiltonians, H0
+
+and Hf , respectively, a time-dependent Hamiltonian can be defined as: 
+
+H(s) = A(s)H0 + B(s)Hf , (4) 3where the functions A and B are smooth, differentiable, and satisfy the boundary conditions A(1) = 0, B (0) = 0 . In the simplest case, the time-dependent Hamiltonian can be a convex combination of the initial and final Hamiltonians in terms of the schedule, i.e., A(s) = 1 −s, B (s) = s. The quantum adiabatic approximation states that with a slow enough transition, the instantaneous energy ranking is tracked during the Hamiltonian evolution [31]. If the initial energy state is the minimum according to the ranking, also known as the ground state, at the end of the evolution, the system will be sitting in the final Hamiltonian’s ground state. The final Hamiltonian encodes the optimization problem of interest, and thus the ground state corresponds to the optimal solution of the minimization problem. Other quantum algorithms, such as the quantum approximate optimization algorithm (QAOA), can also be implemented in the gate-based quantum computing framework to solve Ising or QUBO problems [32, 33]. Interested readers can refer to Reference [34] for additional quantum algorithms for combinatorial optimization problems. Another emerging paradigm is entropy computing (EC); it is an optic-based computing system introduced by Quantum Computing Incorporated (QCi). Dirac-1, originally presented as an optics-based platform for addressing Ising optimization problems [35], uses optical phases to represent the binary spin states and emulate the interactions between them through light interference and nonlinearity. A feedback loop is employed to iteratively adjust the probability distribution towards the lower-energy states, with inherent noise playing a constructive role by promoting exploration and biasing the system toward favorable solutions rather than directly minimizing an energy function [36]. The emergence of these Ising solvers and other alternative computing hardware offers new opportunities to tackle combinatorial problems, and recent advances in this hardware have made sufficient progress to warrant exploring their potential in practical applications. In process design and optimization, Ising solvers can be particularly useful for addressing the combinatorial aspects of design problems, such as equipment selection, process configuration, and operational scheduling. The primary focus of this work is on process superstructure optimization; however, the proposed framework and approach are not limited to this domain and are generalizable to other MINLP problems with decomposable structures. A process synthesis optimization problem can be written as a MINLP with an objective function subject to equality and inequality constraints, as shown below [9, 3]. 
+
+min  
+
+> x,y
+
+f (x, y ) s.t. h(x, y ) = 0 , g(x, y ) ≤ 0, x ∈ Rn ⊆ X, y ∈ Zm ⊆ Y (5) where x represents continuous variables (e.g., flow rate), y represents integer variables (e.g., unit selection). f represents the objective function, which is the performance metric of the optimization problem (e.g., cost). The model equations h describe the interaction of state variables with system physics (e.g., mass balances), and the inequalities g describe specifications and operational or safety constraints (e.g., critical quality attribute requirements). In the case of maximization, the negative value of the corresponding subject of interest can be minimized (e.g., the negative value of the pro-duction mass). The set of constraints defines the feasible space of the problem, which is represented algebraically by h and g. In cases where the derivation of such algebraic expressions is complex, simulation tools can be used to represent the process in a black-box optimization approach [37]. Using a MINLP for end-to-end optimization (E2EO) has been actively explored in relatively well-behaved system applications, such as steady-state processes observed in the chemical industry [38, 39, 40]. However, in systems that require high modeling fidelity and exhibit complex behav-iors, such as pharmaceutical processes, the mathematical programming approach to optimization has been limited in its applicability. The derivation of equation-oriented optimization models for these systems is complex, and simulation-based optimization requires an iterative process that can result in a non-trivial computational burden [41]. However, efforts have been made to integrate 4process synthesis optimization with overall process dynamics optimization. In Reference [41], the authors propose a rule-based and optimization-driven decision framework for optimizing flowsheets in a Drug Substance (DS) manufacturing process. The methodology leverages heuristic rules, such as regulatory considerations and knowledge-based rules, as well as scenario analysis, to generate a smaller search space. This framework efficiently narrows down the search space, thus evaluating alternative configurations more effectively overall. However, the derivation of these rules is suscep-tible to user bias and lacks a quantitative evaluation of the alternative configurations. In other words, this framework does not directly optimize the configuration selection itself. To address the complexity of discreteness and the desire for high fidelity in process design prob-lems, we explore a heterogeneous computing approach that leverages the advantages of the Ising form and utilizes involved optimization algorithms, such as black-box optimization. Through decom-position, we isolate the discrete part of the problem, specifically the Ising part of the formulation, thereby offloading a source of hardness and better capturing the combinatorial aspect of the prob-lem. Furthermore, we still maintain high fidelity and solve the nonlinear part of the problem using a black-box optimization approach. In this work, we investigate this approach and the application of the Ising solvers through both classical and quantum algorithms to solve combinatorial problems, with a focus on process synthesis and practical decision-making. 
+
+1.1 Contributions of this work 
+
+The contributions of this work are as follows: 
+
+• propose a framework for integrating Ising solvers into the solution algorithm of complex MINLP problems, 
+
+• application case studies of using Ising solvers, such as simulated annealing (SA), quantum annealing (QA), and entropy computing (EC), to solve discrete subproblems in process design problems, 
+
+• exploration of the use of novel computing methods, such as quantum annealing (QA) and entropy computing (EC), in process design problems, 
+
+• provide open-source code for the case studies to facilitate reproducibility and further research in this area 1.
+
+# 2 Methods 
+
+This section describes the methods used, including the formulation of discrete subproblems and the solution approaches employed. The continuous subproblems are not discussed in detail, as they are not the primary focus of this work; however, they are solved using a black-box optimization approach, either with a simulator or an optimization solver. Two case studies are explored in this work: an illustrative example of ionic liquid selection and process configuration, and a more complex optimization problem for drug substance manufacturing. BB, SA, QA, and EC are used to solve the discrete subproblem in both case studies. A workflow overview of the process is illustrated in Fig. 1. 
+
+> 1https://github.com/SECQUOIA/pd_ising
+
+5Figure 1: An illustrative workflow of the proposed approach. In step (1), we construct a single flowsheet of a superstructure that encapsulates the set of all feasible alternative process structures. Denoting critical flow paths and nodes, the process design and optimization is cast as a mathematical program, consisting of discrete (configuration) and continuous (operational) variables. Step (2), we decompose the problem into discrete and continuous parts, where the discrete subproblem is formulated as an integer program using approximation and logical statements. The integer program can further be reformulated into a quadratic unconstrained binary optimization to take advantage of Ising solvers. The solutions from the discrete subproblem fix the discrete variables in the continuous subproblem, where powerful nonlinear solvers and simulators can be leveraged. The bottom image illustrates the procedure used in the case studies presented in this work. The red box on the left represents discrete optimization at the configurational level, and the blue box on the right represents the continuous subproblem, which is handled by a classical solver or a simulator to optimize the process at the operational level. 
+
+62.1 Discrete Subproblem Formulation and Solution Methods 
+
+As many discrete variables in decision-making MINLP problems are binary (e.g., unit selection), the discrete subproblem is formulated as an integer programming (IP) problem with binary variables in this work. The formulation is implemented using JuMP [42] in Julia or using Pyomo [43] in Python 
+
+programming language and solved with Gurobi [14] for branch-and-bound method. Two modes of testing are implemented to find all feasible solutions. First, the problem is solved with the default solver settings (BB) that provide a single optimal solution. To find all feasible solutions with this mode, an iterative procedure of adding a "no-good cut" is used to eliminate the solution of the current iteration. In each iteration n, a "no-good cut" constraint is added to eliminate previous solution as infeasible as P
+
+> y|yn−1=1
+
+(1 − y) + P 
+
+> y|yn−1=0
+
+y ≥ 1 for n = {1, 2, . . . , n max − 1} with 
+
+nmax = N or the number of possible alternatives. Each iteration in this approach represents the solution of the combinatorial part of the MINLP, the fixing of the discrete variables, and the solution of the resulting NLP subproblem for evaluation. Secondly, the problem is solved using the solution pool feature of Gurobi (BB-Pool). This option prompts the solver to retain and return multiple solutions found along the search tree. The user can also specify the number of best solutions for the solver to return using this feature [14]. For these case studies, the total number of combinations of the binary variables is known, so this value is used as the setpoint for these parameters when operating in this mode. For other Ising solvers, the IP subproblem is reformulated into a QUBO problem using the open-source Julia package QUBO.jl [25], and then solved via simulated annealing, quantum an-nealing, and entropy computing. The simulated annealing (SA) method was implemented using the 
+
+dwave-neal package [44] with default parameters, consisting of 1000 reads and 1000 sweeps. For quantum annealing (QA), the D-Wave Advantage 4.1 (QA-Adv1) and Advantage2 1.8 (QA-Adv2) quantum processing units (QPU)[28] were used with the default annealing schedule and a sample anneal time of 20 μs, with 1000 reads [22]. The Advantage 4.1 QPU uses the Pegasus topology, while Advantage2 1.8 adopts the Zephyr topology, which provides higher native qubit connectivity and shorter minor-embedding chains for dense QUBO mappings. We refer interested readers to References [45, 46, 47] for the details of the topologies and connectivity of the QPUs. The embed-ding overhead in both case studies was examined to be less than 0.25 second and not considered separately in computational time results. For entropy computing (EC), the Quantum Computing Inc. (QCi) Dirac-1 device was used with 100 samples per run, which was the maximum number allowed [35, 48]. For comparison in computation time, a performance metric called time-to-target (TTT) is in-troduced. TTT s = τ · log(1 − s)log(1 − ptarget ) (6) where TTT s is the time required to achieve success with probability s (typically 0.99) in reaching the target . τ is the execution time of the algorithm. ptarget is the probability of reaching the target solution. If ptarget = 1 , which applies for deterministic solvers, then TTT s = τ [49]. Time to optimality and finding all feasible solutions are considered as targets in this work. Targeting optimality serves as a benchmark for the performance of the methods, while targeting all feasible solutions provides a measure of the solution diversity and completeness of the search space. From a decision-making perspective, finding all feasible solutions is relevant, if not crucial, as it allows for a comprehensive understanding of the alternatives and enables better-informed decisions. The computational setup used in this work runs on a Linux Ubuntu 22.04 operating system and features an Intel ® i7-1365U processor with a base frequency of 1.80 GHz and 32.0 GB of RAM. The environment supports both Python 3.10.12 and Julia 1.11. Quantum computing re-7sources include the D-Wave Advantage 4.1 quantum annealer and the QCi Dirac-1 entropy-based quantum computer. Optimization and modeling tasks were performed using the following packages: 
+
+JuMP v1.26.0, Pyomo v6.7.3, ToQUBO.jl v0.1.10, PharmaPy v0.4.0, and pyNOMAD v4.4.0. Solver and hardware interfaces include Gurobi (v11.0, v12.0.2), dwave-neal v0.6.0, and qci_client v4.5.0. 
+
+2.2 Quadratic Unconstrained Binary Optimization (QUBO) Reformulation 
+
+A constrained IP problem with binary variables y can be represented as Eq. (7); inequality con-straints (e.g., g in Eq. (5)) can be written into Ay = b form by adding slack variables to the expressions [23]. 
+
+min  
+
+> y
+
+c⊤y s.t. Ay = b y ∈ { 0, 1}n (7) where c is the cost vector, A is the constraint matrix, and b is the right-hand side vector. These problems can be reformulated into a QUBO model by including quadratic infeasibility penalties in the objective function. The constraints Ay = b are moved into the objective function with a penalty cost ( ρ) as: 
+
+min  
+
+> y
+
+cT y + ρ(Ay − b)⊤(Ay − b) (8) The penalty terms are: ρ(Ay − b)⊤(Ay − b) = ρ(y⊤(A⊤A)y − 2( A⊤b)y + b⊤b). Taking advantage of y2 = y for y ∈ { 0, 1}, the linear terms ( c, A⊤b) appear on the diagonal of the matrix Q in the general form of a QUBO as described in Eq. (3) [23]. 
+
+2.3 Illustrative example: discrete subproblem formulation 
+
+The original problem is (P8) in Reference [50]; its formulation is included in the Supplementary section for completeness. This case study presents an optimization problem involving the synthesis of a reactor-separator network with two reactors and three separator options while simultaneously selecting an ionic pair from a list of two cations and two anions for the process. There are a total of 84 possible combinations of the discrete choices. When formulated as a single monolithic problem, it is a MINLP with a nonlinear objective function and binary and continuous variables. This problem was decomposed into two subproblems: 1. the discrete network synthesis and ion pair selection problem, and 2. the continuous flow optimization at fixed discrete variables. The discrete subproblem was formulated as an integer program (IP) with the objective function to minimize the total cost and binary variables for cation ( zc) and anion ( za) selection, flow ( fi,j ), and unit selection (yr/s ) as follows: 8min 
+
+> y,w
+
+X
+
+> k∈K
+
+cfixed  
+
+> k
+
+yk + 2 X
+
+> r∈R
+
+coper  
+
+> r
+
+yrαr + 2 X
+
+> s∈S
+
+X
+
+> c∈C
+
+X
+
+> a∈A
+
+coper  
+
+> s
+
+ysβs,c,a wc,a (9) s.t. fsrc ,r = yr ∀r ∈ R (10) 
+
+fs, sink = ys ∀s ∈ S (11) 
+
+X
+
+> r∈R
+
+fsrc ,r − fsrc ,r 1 · fsrc ,r 2 = 1 (12) 
+
+X
+
+> s∈S
+
+fs, sink ≥ 1 (13) 
+
+fr,s · fsrc ,r = fr,s , fr,s · fs, sink = fr,s ∀r ∈ R , s ∈ S (14) 
+
+(1 − fsrc ,r ) + X
+
+> s∈S
+
+fr,s ≥ 1 ∀r ∈ R (15) 
+
+(1 − fs, sink ) + X
+
+> r∈R
+
+fr,s ≥ 1 ∀s ∈ S (16) 
+
+X
+
+> c∈C
+
+zc = 1 , X
+
+> a∈A
+
+za = 1 (17) 
+
+wc,a = zc · za ∀c ∈ C, a ∈ A (18) where R is the set of reactors, S is the set of separators, and R, S ⊂ K are the sets of units in the overall process. C is the set of cations, and A is the set of anions. Additionally, cfixed  
+
+> k
+
+is the fixed cost of unit k, coper  
+
+> r/s
+
+is the operating cost of reactor or separator r/s , αr is the conversion factor of reactor r, and βs,c,a is the separation factor of separator s for cation c and anion a. Constraints for the subproblem are formulated with domain knowledge and logic-based statements; for example, flow conservation such as if there is flow into a reactor, there must be flow into at least one of the separators is enforced through a constraint, (1 − fsrc,r ) + P fr,s ≥ 1, as shown in Eq. (15). Eqs. (10) and (11) ensure that the flow from the source to the reactor and from the separator to the sink is equal to the binary variable of unit selection, yr and ys, respectively. Constraints (12) and (13) ensure that there is at least one flow from the source to the reactor and from the separator to the sink, and constraints (14)-(16) ensure that the flow conservation is satisfied at each unit. Lastly, a cation and an anion are selected using Eq. (17), and the product of the two selections is represented by a binary variable wc,a in Eq. (18). 
+
+2.4 Simulation-based optimization problem example: discrete subproblem for-mulation 
+
+This case study presents a simulation-based optimization problem of a drug substance (DS) manu-facturing process and serves as a case study of a more complex problem than the illustrative example. The original problem is adopted from [51] and describes a process for synthesizing a general drug substance, consisting of reaction, crystallization, and separation steps with multiple operating op-tions for each step. The process configuration features two reactors, an evaporator for the solvent switch step in preparation for the crystallization step, and a filtration step to separate the solid active pharmaceutical ingredient (API). Three reactor types are considered for each reaction unit: a plug-flow reactor (PFR), and two continuously stirred tank reactors (CSTR) with different oper-ating modes (continuous and batch). For evaporation, only the batch process is considered. Four options are considered for the crystallization step: one option is a batch crystallizer, and the other 9Figure 2: A superstructure of a drug substance manufacturing process (top) and a representative flow diagram for the main problem (bottom); dotted and solid lines indicate batch and continuous feed, respectively. 
+
+three options are continuous mixed suspension mixed product removal units (MSMPR) in series, ranging from one to three units. For each step, only one option is selected. The problem is decomposed into two subproblems: a discrete configuration selection problem and a simulation-based operational optimization problem. A superstructure of the process is shown in Fig. 2. In total, there are 36 alternative configurations. The objective function of the configuration design subproblem is to minimize the total capi-tal expense, and the objective function for the simulation-based subproblem is to maximize the production rate and crystal size. The simulation-based optimization framework, adopted from the literature [52, 41, 53], is not discussed in detail; the primary focus of this work is on the discrete problem and the application of the heterogeneous computing framework. Similarly to the illustrative example, the discrete problem is formulated as an integer program and as a QUBO problem, and solved using Gurobi v.11.00 and the aforementioned heuristic meth-ods (SA, QA, EC) and the corresponding parameters, respectively. For the continuous subproblem, the configuration is fixed based on the solution of the discrete subproblem, and an open-package simulator, PharmaPy [54], is used to simulate the process and optimize the flow rates of the process, using pyNOMAD [55] as a black-box optimizer. The objective of the simulation-based framework is to maximize the production rate and crystal size. Two sets of variables are defined for optimization of the process configuration: F = {f00 , f 01 , ..., f 18 },representing the binary flow variables, and L = {yf01 , y f02 , ..., y f17 }, representing the binary vari-ables associated with the unit operation through which the corresponding flows pass, as illustrated in Fig. 2. For a system with parallel units or flows at disjunctions, these two variables ( f and 
+
+y) may need to be treated separately. In this case study, each disjunction represents a discrete choice of operating mode rather than a flow split; therefore, a single binary variable, f , is used to 10 represent both flow and unit selection. The objective function of the subproblem is to minimize the total capital expense, C. The unit capital cost ( ci) can be estimated in various ways, such as using previously calculated data. In cases where data are unavailable, theory-based calculations or approximations suffice; methods such as the bare module method can be used to estimate the associated expense [56]. For flows that do not activate any unit, the associated cost is set to zero. The formulation of the discrete subproblem is as follows: 
+
+min 
+
+> f
+
+X
+
+> i∈F
+
+ci fi (objective) (19) s.t. X
+
+> i∈In (n)
+
+fi = X
+
+> i∈Out (n)
+
+fi ∀ n ∈ N (flow conservation) (20) 
+
+fsource = 1 , fsink = 1 (source/sink activation) (21) 
+
+g(f ) ≤ 0 (continuous-to-batch constraints) (22) 
+
+fi ∈ { 0, 1} ∀ i ∈ F. (23) where F is the set of all flows, and N is the set of nodes. Two types of constraints are declared: flow conservation at each node (20) and logic-based constraints (22). At each disjunction, only one selection of unit or flow rule is enforced through the mass conservation equality constraint. Logic-based constraints, such as when a continuous unit is followed by a batch process, a holding tank must be placed in between these two units , are incorporated into the optimization framework as inequality constraints ( g(f ) ≤ 0). For example, (1 −f01 )+(1 −f10 )+ f06 ≥ 1, this equation indicates that if the first reactor is PFR ( f01 = 1 ) and the second reactor is a batch reactor ( f10 = 1 ), then the holding tank must be installed ( f06 = 1 ). The full formulation of the discrete subproblem is included in the Supplementary section (Section 6) for completeness. 
+
+# 3 Results 
+
+3.1 Illustrative example: Ionic Liquid Selection and Configuration of Reactor-Separator Network (IL) 
+
+The results of the discrete subproblems are presented in this section, and the detailed formulation and approach are described in Section 2.3. The bar graph results presented in Fig. 3 show the energy or probability of solutions found in a single run of the heuristic methods on the y-axis, ranked by the discrete problem’s objective function value on the x-axis. The plot illustrates that out of 84 possible configurations identified by Gurobi, SA was able to find all 84 feasible solutions in a single run. In contrast, QA-Adv1, QA-Adv2 and EC found 66, 78, and 30 feasible solutions, respectively. All methods were able to find the optimal solution. The algorithm execution time values along with the calculated time-to-target (TTT) metrics are summarized in Table 1. Total time for QA-Adv2 was not included in the analysis due to a post-processing error that led to incorrect values. Overall, BB achieved the fastest computation time for both finding the optimal solution and identifying all feasible solutions, followed by SA, QA, and EC. The solution pool mode of BB method (BB-Pool) resulted in the longest time to find all feasible solutions. These results highlight the differences among these methods. The heuristic methods can explore all feasible solutions in a single run, but require longer times to do so. In contrast, BB quickly solves for optimality, albeit with multiple iterations corresponding to the problem size, to discover 11 Figure 3: A plot of energy or probability of solutions found through various methods in the IL case study. The vertical line indicates the optimal solution of the discrete subproblem found by Gurobi . Infeasible solutions are not shown in this plot. 
+
+all feasible solutions. When BB method is applied to search for all or multiple feasible solutions in BB-Pool mode, it becomes orders of magnitude slower than the heuristic methods. Compared to the default mode with iterations, BB-Pool does not have access to information such as no-good cuts to navigate the search direction, slowing down the discovery of feasible solutions. Furthermore, the introduction of a new binary variable, f , in formulation of the discrete problem further enlarges the state-space. Since pruning branches is only possible through infeasibility in this mode, enumeration over the resulting large search space becomes inefficient. The optimal discrete choices from the original problem were found in the 72nd iteration solution of Gurobi for the discrete subproblem. This mismatch occurred from the misalignment of the objective functions in the two problems. Although the objective function of the discrete subproblem was formulated to approximate that of the original problem, it could not account for the complexities involved with the continuous variables in the original problem. As a result, the subproblem solutions did not replicate the exact ranking of solutions in the iterations. Nevertheless, the integer program formulation of the discrete subproblem allowed the use of the discrete solvers and other optimization techniques. 
+
+3.2 Simulation-based optimization problem example: Drug Substance Manu-facturing Process Optimization (DSMFG) 
+
+All results of the discrete subproblem are plotted in Fig. 4; the simulation objective values at each iteration of IP are plotted along with the best objective value found with the iterations in Fig. 5. The TTT metrics are presented in Table 2. Similar trends were observed in this case study as the illustrative example. All methods were able to find the optimal solution. With a single run, SA and QA-Adv2 identified all 36 feasible solutions, while QA-Adv1 and EC found 28 and 6 feasible solutions, respectively. BB in both default (BB) and solution pool (BB-Pool) modes achieved the fastest computation time for both finding the optimal solution and identifying all feasible solutions, while entropy computing exhibited the slowest computation time. Unlike in the illustrative example, the BB-pool method outperformed the heuristic methods in computational speed in this case study. This result is understandable given that the discrete subproblem in this case study is smaller, leading to a smaller search space. The best simulation objective value was achieved at the 34th iteration in the BB method. 12 Figure 4: A plot of energy or probability of feasible solutions found through annealing methods. The vertical line indicates the optimal solution of the discrete subproblem, indicated by the first result of Gurobi .Infeasible solutions are not shown in this plot. 
+
+The corresponding configuration for the process was to choose the plug-flow reactor, continuously stirred tank reactor, and batch process for the first reaction, second reaction, and the crystallization unit selections respectively. The optimal configuration from the discrete subproblem was batch reactors for both reactions followed by a single continuous crystallization unit. Because the discrete subproblem minimizes capital cost while the simulation objective maximizes production and product quality, the opposing rankings between the two subproblems are consistent with the expected trade-off between cost and performance. Multi-objective optimization can simultaneously optimize the overall system for several purposes (e.g., minimizing capital cost while maximizing product purity and production rate), and pareto plots like Figure 6 can be used to visualize the overall trade-off between the two objectives to better guide decision-making when selecting an optimal solution. 
+
+# 4 Discussion 
+
+In general performance, the heuristic methods (SA, QA, EC) are slower than BB in finding the optimal solution. Among the novel computing approaches, EC showed slower computation time and identified fewer solutions compared to QA. While QA identified solutions that were more broadly distributed across the solution space, EC solutions were more clustered near the optimal solution, indicating that EC tends to find the high-quality solutions early, but explores the solution space less extensively. These observations highlight a fundamental trade-off between solution optimality and diversity among these methods. Heuristic approaches can explore the solution space more broadly and provide diverse solutions within a single run. In contrast, BB requires iterations and additional mechanisms like cuts to recover multiple feasible solutions, and as the problem scale grows, the computational effort required for such enumeration increases exponentially. The results from the BB-Pool method further demonstrate how the growth of the search space increases the computational burden of the BB method. 13 Figure 5: Simulation objective function values ranked according to discrete subproblem solution by IP iterations (x-axis). Red dots indicate the objective function value of the corresponding simulation, and the blue line shows the best objective function value found with each iteration. 
+
+Figure 6: Pareto plot of simulation objective function values (y-axis) versus IP discrete subproblem objective values (x-axis) for the DSMFG case study; in-plot labels indicate the corresponding iteration numbers. The simulation objective maximizes the production rate and crystal size of the final product, with more negative values indicating better performance, while the discrete subproblem objective minimizes the capital cost of the process configuration. The Pareto front (red) highlights the trade-off between productivity and product quality and cost. 
+
+14 A clear understanding of these methodological differences can enable their more effective use in practical applications. For practical decision-making processes, the size of the optimization problem is often large, and exploring all combinatorial solutions is intractable and inefficient. In cases like this, heuristic methods can be employed to quickly explore the solution space and identify feasible discrete solutions. Several decisions can be made based on the heuristics and practical constraints, such as cost, time, and resources. Then the remaining continuous problem can be solved to complete the optimization process. For instance, in a process design problem, with a single run of heuristics, all the configuration decisions can be identified, and impractical process choices can be eliminated with user’s domain knowledge in the first step. Then, the selected few configurations may proceed with simulations in parallel to gain a comprehensive understanding of the process implications without loss of fidelity. Selecting the appropriate computing method for specific optimization problems can significantly impact the computational effort required to solve them. In the IL case study, several degenerate solutions were observed in the subproblem, where multiple distinct feasible solutions resulted in the same objective function value. This illustrates one of the key differences between heuristic methods and deterministic solvers, such as Gurobi . In cases of degeneracy, deterministic solvers cannot prune any branches with the same objective value, and in the worst-case scenario, would have to evaluate all combinations of the discrete choices, which can increase exponentially with the problem size. Even worse, if cuts based on the objective value were imposed instead of an integer cut, there is a risk of eliminating alternative feasible, even optimal, solutions to the original problem. Additionally, for a simple problem such as the IL selection, current classical solvers, such as Gurobi v.12.0 ,can solve the original MINLP without modifications to the nonlinear objective function. Further processing of the problem into a QUBO problem actually introduces additional slack variables and constraints, unnecessarily increasing the problem size and complexity. In contrast, complex problems such as drug substance manufacturing process optimization, characterized by differential-algebraic equations, nonlinearities, and discrete decisions, are intractable when approached as a single monolithic MINLP. By applying a decomposition strategy, we can systematically integrate discrete configuration decisions into large-scale problems and find practical solutions. Lastly, it is essential to note that since these are different methods, different parameters were used, and their performance results may not be directly comparable. For heuristic methods, the parameters were set to their default values, and a limit of 100 samples was imposed for EC. There is a potential for performance improvement through parameter tuning and by implementing an iterative process of adding cuts similar to that used in the BB method [57]. 
+
+# 5 Conclusion 
+
+This work proposes a heterogeneous computing approach for solving MINLPs through a decompo-sition strategy with Ising solvers and other NLP solution methods. The IP formulation was first used to represent the discrete subproblem for BB, and the QUBO reformulation was applied to express the discrete problem in a form suitable for Ising solvers. Classical and Ising-based solvers were explored and compared for their computational performance and solution quality in two case studies: one simple and one complex, of process design optimization. Lastly, the open-source code for the case studies are provided for general use and application of the framework and promote further research in the area. The differences in algorithm execution among these methods, along with the optimality guaran-tee and solution diversity of their results, were discussed in the context of practical decision-making purpose. The classical commercial solver enabled us to find the global optimal solution to the sub-15 problem, yet it required iterations to identify additional feasible solutions. Other heuristic methods provided a probability distribution of solutions with a single execution of the algorithms, but not all methods were able to find the entire set of feasible solutions. Simulated annealing (SA) was able to find all feasible solutions, while the novel computing methods (QA and EC) did not find all feasible solutions in a single run. These results highlight that a better understanding of the differences in solution methods can help in more effectively leveraging these methods and hardware in practice. As a last remark, even though these emerging technologies do not match the classical solvers in con-vergence speed, their complementary strengths in scalability and solution exploration, along with the continuing developments in the hardware and algorithms, warrant continued investigation in future research. 
+
+# Acknowledgments 
+
+This material is based upon work supported by the Center for Quantum Technologies under the Industry-University Cooperative Research Center Program at the US National Science Foundation under Grant No. 2224960. We also acknowledge the financial support of Quantum Computing Inc. in sponsoring this research. We would also like to acknowledge Daniel Laky and Daniel Casas-Orozco for their support and help in using PharmaPy and associated code. 16 Tables 
+
+Table 1: Summary table of time to target (Opt: optimality, Feas: all feasible solutions) results of BB, SA, QA (D-Wave Advantage, Advantage2), and EC (QCi Dirac 1) for the discrete subproblem of the illustrative problem. All times are in seconds. The subscript "quantum" indicates the time required for the quantum processing unit only, while "total" includes both communication overhead and the time for the quantum processing unit. The subscript "device" indicates the overall computing time[58]. 
+
+Execution Time Time to Target ( T T T 99 )Solution Method τ T T Opt 99 T T F eas 99 
+
+BB (Gurobi) 0.003 0.003 ( = τ ) 0.477 
+
+BB-Pool (Gurobi Pool) 62.95 0.003 62.95 
+
+SA 0.34 222.9 0.54 
+
+QA-Adv1 quantum 0.13 620.5 -
+
+QA-Adv1 total 1.59 7313.9 -
+
+QA-Adv2 quantum 0.16 188.5 -
+
+EC device 37.0 1223.5 -
+
+Table 2: Summary table of time to target (Opt: optimality, Feas: all feasible solutions) results of BB, SA, QA (D-Wave Advantage, Advantage2), and EC (QCi Dirac 1) for the discrete subproblem of the drug substance manufacturing problem. All times are in seconds. The subscript "quantum" indicates the time required for the quantum processing unit only, while "total" includes both communication overhead and the time for the quantum processing unit. The subscript "device" indicates the overall computing time[58]. 
+
+Execution Time Time to Target ( T T T 99 )Solution Method τ T T Opt 99 T T F eas 99 
+
+BB (Gurobi) 0.0009 0.0009 ( = τ ) 0.0790 
+
+BB-Pool (Gurobi Pool) 0.073 0.0009 0.073 
+
+SA 0.606 197.8 1.1 
+
+QA-Adv1 quantum 0.136 311.9 -
+
+QA-Adv1 total 0.410 942.7 -
+
+QA-Adv2 quantum 0.174 199.6 0.44 
+
+EC device 35.0 295.9 -17 References 
+
+[1] Pietro Belotti, Christian Kirches, Sven Leyffer, Jeff Linderoth, James Luedtke, and Ashutosh Mahajan. Mixed-integer nonlinear optimization. Acta Numerica , 22, 05 2013. [2] Jan Kronqvist, David Bernal Neira, Andreas Lundell, and Ignacio Grossmann. A review and comparison of solvers for convex MINLP. Optimization and Engineering , 20, 06 2019. [3] Metin Türkay and Ignacio E. Grossmann. Logic-based MINLP algorithms for the optimal synthesis of process networks. Computers & Chemical Engineering , 20:959–978, 8 1996. [4] Qi Chen and I. E. Grossmann. Recent developments and challenges in optimization-based process synthesis. Annual Review of Chemical and Biomolecular Engineering , 8:249–283, 6 2017. [5] T.F. Yee, I.E. Grossmann, and Z. Kravanja. Simultaneous optimization models for heat inte-gration—i. area and energy targeting and modeling of multi-stream exchangers. Computers & Chemical Engineering , 14(10):1151–1164, 1990. [6] A.R. Ciric and C.A. Floudas. Heat exchanger network synthesis without decomposition. Com-puters & Chemical Engineering , 15(6):385–396, 1991. [7] Ignacio Grossmann. Enterprise-wide optimization: A new frontier in process systems engineer-ing. AIChE Journal , 51(7):1846–1857, 2005. [8] Fengqi You and Ignacio E. Grossmann. Integrated multi-echelon supply chain design with inven-tories under uncertainty: Minlp models, computational strategies. AIChE Journal , 56(2):419– 440, 2010. [9] Luca Mencarelli, Qi Chen, Alexandre Pagot, and Ignacio E. Grossmann. A review on super-structure optimization approaches in process system engineering. Computers and Chemical Engineering , 2020. [10] David A. Liñán and Luis A. Ricardez-Sandoval. Trends and perspectives in deterministic MINLP optimization for integrated planning, scheduling, control, and design of chemical pro-cesses. Reviews in Chemical Engineering , 41(5):451–472, July 2025. [11] Leo Liberti, Nenad Mladenovic, and Giacomo Nannicini. A recipe for finding good solutions to MINLPs. Mathematical Programming Computation , 3:349–390, 12 2011. [12] G.E. Constante-Flores and A.J. Conejo. Optimization via Relaxation and Decomposition: Ap-plications to Large-Scale Engineering Problems . International Series in Operations Research & Management Science. Springer Nature Switzerland, 2025. [13] A. H. Land and A. G. Doig. An automatic method of solving discrete programming problems. 
+
+Econometrica , 28(3):497–520, 1960. [14] Gurobi Optimization, LLC. Gurobi Optimizer Reference Manual, 2026. [15] Stephen A. Cook. The complexity of theorem-proving procedures. In Proceedings of the third annual ACM symposium on Theory of computing , STOC ’71, pages 151–158, New York, NY, USA, May 1971. Association for Computing Machinery. 18 [16] Richard M. Karp. Reducibility among Combinatorial Problems. In Raymond E. Miller, James W. Thatcher, and Jean D. Bohlinger, editors, Complexity of Computer Computations: Proceedings of a symposium on the Complexity of Computer Computations, held March 20–22, 1972, at the IBM Thomas J. Watson Research Center, Yorktown Heights, New York, and spon-sored by the Office of Naval Research, Mathematics Program, IBM World Trade Corporation, and the IBM Research Mathematical Sciences Department , pages 85–103. Springer US, Boston, MA, 1972. [17] Andrew Lucas. Ising formulations of many NP problems. Frontiers in Physics , 2:5, 02 2014. [18] Naeimeh Mohseni, Peter L. McMahon, and Tim Byrnes. Ising machines as hardware solvers of combinatorial optimization problems. Nature Reviews Physics , 2022. [19] W Lenz. Beitrag zum Verständnis der magnetischen Erscheinungen in festen Körpern. Z. Phys. ,21:613–615, 1920. [20] Ernst Ising. Beitrag zur Theorie des Ferromagnetismus. Zeitschrift für Physik , 31(1):253–258, February 1925. [21] A J Berkley, M W Johnson, P Bunyk, R Harris, J Johansson, T Lanting, E Ladizinsky, E Tolka-cheva, M H S Amin, and G Rose. A scalable readout system for a superconducting adiabatic quantum optimization system. Superconductor Science and Technology , 23(10):105014, sep 2010. [22] Zhengbing Bian, Fabian Chudak, Robert Israel, Brad Lackey, William G. Macready, and Aidan Roy. Discrete optimization using quantum annealing on sparse Ising models. Frontiers in Physics , 2:1–10, 9 2014. [23] Fred Glover, Gary Kochenberger, and Yu Du. A Tutorial on Formulating and Using QUBO Models, 2019. [24] Gary Kochenberger, Jin Kao Hao, Fred Glover, Mark Lewis, Zhipeng Lü, Haibo Wang, and Yang Wang. The unconstrained binary quadratic programming problem: A survey. Journal of Combinatorial Optimization , 28:58–81, 4 2014. [25] Pedro Maciel Xavier, Pedro Ripper, Tiago Andrade, Joaquim Dias Garcia, Nelson Maculan, and David E Bernal Neira. Qubo.jl: A julia ecosystem for quadratic unconstrained binary optimization, 2023. [26] Darrall Henderson, Sheldon Jacobson, and Alan Johnson. The Theory and Practice of Simulated Annealing , pages 287–319. 04 2003. [27] S. Kirkpatrick, C. D. Gelatt, and M. P. Vecchi. Optimization by simulated annealing. Science ,220:671–680, 1983. [28] D-Wave Systems Inc. D-Wave Advantage 4.1 Quantum Processor, 2024. [29] Edward Farhi, Jeffrey Goldstone, Sam Gutmann, and Michael Sipser. Quantum Computation by Adiabatic Evolution. 2000. [30] Atanu Rajak, Sei Suzuki, Amit Dutta, and Bikas K. Chakrabarti. Quantum annealing: an overview. Philosophical Transactions of the Royal Society A , 2023. 19 [31] Max Born and Vladimir Fock. Beweis des adiabatensatzes. Zeitschrift für Physik , 51(3):165– 180, 1928. [32] Edward Farhi, Jeffrey Goldstone, and Sam Gutmann. A quantum approximate optimization algorithm, 2014. [33] Stuart Hadfield, Zhihui Wang, Bryan O’Gorman, Eleanor Gilbert Rieffel, Davide Venturelli, and Rupak Biswas. From the quantum approximate optimization algorithm to a quantum alternating operator ansatz. Algorithms , 12:34, 2017. [34] Yuval R. Sanders, Dominic W. Berry, Pedro C.S. Costa, Louis W. Tessler, Nathan Wiebe, Craig Gidney, Hartmut Neven, and Ryan Babbush. Compilation of fault-tolerant quantum heuristics for combinatorial optimization. PRX Quantum , 1:020312, Nov 2020. [35] S. Chaitanya Kumar, Santosh Kumar, He Zhang, and Yu-Ping Huang. Large-scale Ising em-ulation with four body interaction and all-to-all connections. Communications in Physics ,2020. [36] Lac Nguyen, Mohammad-Ali Miri, R. Joseph Rupert, Wesley Dyk, Sam Wu, Nick Vrahoretis, Irwin Huang, Milan Begliarbekov, Nicholas Chancellor, Uchenna Chukwu, Pranav Mahamuni, Cesar Martinez-Delgado, David Haycraft, Carrie Spear, Joel Russell Huffman, Yong Meng Sua, and Yu-Ping Huang. Entropy computing, a paradigm for optimization in open photonic systems. Communications Physics , 8(1):411, October 2025. Publisher: Nature Publishing Group. [37] Daniel Casas-Orozco, Daniel Laky, Vivian Wang, Mesfin Abdi, X. Feng, E. Wood, Carl Laird, Gintaras V. Reklaitis, and Zoltan K. Nagy. PharmaPy: An object-oriented tool for the devel-opment of hybrid pharmaceutical flowsheets. Computers & Chemical Engineering , 153:107408, 10 2021. [38] José A. Caballero, Daniel Milán-Yañez, and Ignacio E. Grossmann. Rigorous design of distil-lation columns: Integration of disjunctive programming and process simulators. Industrial and Engineering Chemistry Research , 44:6760–6775, 8 2005. [39] Miguel A Navarro-Amorós, Rubén Ruiz-Femenia, and José A Caballero. Integration of mod-ular process simulators under the Generalized Disjunctive Programming framework for the structural flowsheet optimization. Computers and Chemical Engineering , 67:13–25, 2014. [40] Michele Corbetta, Ignacio E. Grossmann, and Flavio Manenti. Process simulator-based opti-mization of biorefinery downstream processes under the Generalized Disjunctive Programming framework. Computers & Chemical Engineering , 88:73–85, 5 2016. [41] Yash Barhate, Daniel J Laky, Daniel Casas-Orozco, Gintaras Reklaitis, and Zoltan Nagy. Rule-based Decision Framework for the Digital Synthesis of Optimal Pharmaceutical Processes. 2024. [42] Miles Lubin, Oscar Dowson, Joaquim Dias Garcia, Joey Huchette, Benoît Legat, and Juan Pablo Vielma. JuMP 1.0: Recent improvements to a modeling language for mathematical optimization. Mathematical Programming Computation , 2023. [43] Michael L. Bynum, Gabriel A. Hackebeil, William E. Hart, Carl D. Laird, Bethany L. Nicholson, John D. Siirola, Jean-Paul Watson, and David L. Woodruff. Pyomo–optimization modeling in python , volume 67. Springer Science & Business Media, third edition, 2021. 20 [44] D-Wave Systems Inc. Neal: Simulated Annealing Sampler, 2024. [45] Tomas Boothby, Andrew D. King, and Aidan Roy. Fast clique minor generation in Chimera qubit connectivity graphs. Quantum Information Processing , 15(1):495–508, January 2016. [46] Kelly Boothby, Paul Bunyk, Jack Raymond, and Aidan Roy. Next-generation topology of d-wave quantum processors technical report next-generation topology i notice and disclaimer. Technical report, D-Wave, 2 2019. [47] Kelly Boothby, Andrew D King, and Jack Raymond. Zephyr topology of d-wave quantum processors technical report-a d-wave technical report series. Technical report, D-Wave, 9 2021. [48] Santosh Kumar, He Zhang, Yuping Huang, and Ting BU. US020230185160A120230615, 2023. [49] Catherine C. McGeoch and Cong Wang. Experimental evaluation of an adiabiatic quantum system for combinatorial optimization. In Proceedings of the ACM International Conference on Computing Frontiers , CF ’13, New York, NY, USA, 2013. Association for Computing Ma-chinery. [50] Ashfaq Iftakher and M. M. F. Hasan. Exploring Quantum Optimization for Computer-aided Molecular and Process Design. Systems and Control Transactions , 2024. [51] Daniel Casas-Orozco, Daniel J. Laky, Vivian Wang, Mesfin Abdi, Xin Feng, Erin Wood, Gin-taras V. Reklaitis, and Zoltan K. Nagy. Techno-economic analysis of dynamic, end-to-end optimal pharmaceutical campaign manufacturing using PharmaPy. AIChE Journal , 69, 9 2023. [52] Yash Barhate, Daniel Casas-Orozco, Daniel J Laky, Gintaras V Reklaitis, and Zoltan K Nagy. Peer Reviewed Conference Proceeding Hybrid Rule-based and Optimization-driven Decision Framework for the Rapid Synthesis of End-to-End Optimal (E2EO) and Sustainable Pharma-ceutical Manufacturing Flowsheets. Syst Control Trans , 3:261, 2024. [53] Daniel J. Laky, Daniel Casas-Orozco, Carl D. Laird, Gintaras V. Reklaitis, and Zoltan K. Nagy. Simulation-Optimization Framework for the Digital Design of Pharmaceutical Processes Using Pyomo and PharmaPy. Industrial and Engineering Chemistry Research , 61:16128–16140, 11 2022. [54] Daniel Casas-Orozco, Daniel Laky, Vivian Wang, Mesfin Abdi, X. Feng, E. Wood, Carl Laird, Gintaras V. Reklaitis, and Zoltan K. Nagy. PharmaPy: An object-oriented tool for the devel-opment of hybrid pharmaceutical flowsheets. Computers & Chemical Engineering , 153:107408, 2021. [55] Charles Audet, Sébastien Le Digabel, Viviane Rochon Montplaisir, and Christophe Tribes. Algorithm 1027: NOMAD Version 4: Nonlinear Optimization with the MADS Algorithm. 
+
+ACM Trans. Math. Softw. , 48(3), 9 2022. [56] R. Turton, J.A. Shaeiwitz, D. Bhattacharyya, and W.B. Whiting. Analysis, Synthesis, and Design of Chemical Processes . International Series in the Physical and Chemical Engineering Sciences. Pearson Education, 2018. [57] David E Bernal Neira, Robin Brown, Pratik Sathe, Filip Wudarski, Marco Pavone, Eleanor Rieffel, and Davide Venturelli. Benchmarking the operation of quantum heuristics and ising 21 machines: scoring parameter setting strategies on optimization applications. Quantum Machine Intelligence , 7(2):86, 2025. [58] Quantum Computing Inc. Dirac-3 user guide - Quantum Computing Inc, 2025. 22 6 Supplementary 
+
+6.1 Ionic Liquid Selection and Configuration of Reactor Separator Network Optimization Problem (original MINLP formulation) 
+
+min X
+
+> k∈K
+
+cfk yk + X
+
+> i∈Iin
+> Kr
+
+cIi x0.6 
+
+> i
+
++ X
+
+> k∈Ks
+
+cIk( X
+
+> i∈Iin
+> Ks
+
+xi)2 + X
+
+> k∈Ks
+
+cek( X
+
+> i∈Iin
+> Ks
+
+xi − X
+
+> i∈Iout
+> Ks
+
+xi) (24) s.t. f Lk yk ≤ X
+
+> i∈Iin
+> k
+
+xi ≤ f Uk yk, ∀k ∈ K (25) 
+
+X
+
+> i∈Iout
+> Kr
+
+xi = αk
+
+X
+
+> i∈Iin
+> Kr
+
+xi, ∀k ∈ Kr (26) 
+
+X
+
+> c∈Cat
+
+zc = 1 , X
+
+> a∈An
+
+za = 1 (27) 
+
+xi ≥ βk,c,a 
+
+X
+
+> i∈Iin
+> Ks
+
+xi − M (2 − zc − za), ∀i ∈ Iout  
+
+> Ks
+
+, k ∈ Ks, c ∈ Cat , a ∈ An (28) 
+
+xi ≤ βk,c,a 
+
+X
+
+> i∈Iin
+> Ks
+
+xi + M (2 − zc − za), ∀i ∈ Iout  
+
+> Ks
+
+, k ∈ Ks, c ∈ Cat , a ∈ An (29) 
+
+X
+
+> i∈Iout
+> Ks
+
+xi ≥ d (30) Cat = {c1, c 2, . . . , c C } set of cations An = {a1, a 2, . . . , a A} set of anions IL = {c × a | c ∈ Cat , a ∈ An } set of all feasible ionic liquids (ILs) 
+
+K = set of all process units 
+
+Kr ⊂ K set of all reactors 
+
+Ks ⊂ K set of all separators 
+
+Iin  
+
+> k
+
+= set of all inlet streams to unit kIout  
+
+> k
+
+= set of all outlet streams from unit kd = demand requirement 
+
+cfk fixed cost for unit kcIi operating cost for reactor stream i ∈ Iin 
+
+> Kr
+
+cIk operating cost for separator kcek emissions or waste cost for separator kαk stoichiometric reactor conversion factor for reactor k ∈ Kr
+
+βk,c,a separation factor for separator k ∈ Ks with IL (c, a )
+
+xi flowrate of stream izc ∈ { 0, 1} binary: cation c selected 
+
+za ∈ { 0, 1} binary: anion a selected 
+
+yk ∈ { 0, 1} binary: unit k selected 23 6.2 Drug Substance Manufacturing Process Optimization Problem (discrete subproblem IP formulation) 
+
+min 
+
+> f
+
+X
+
+> i∈F
+
+ci fi (objective) (31) s.t. X
+
+> i∈In (n)
+
+fi = X
+
+> j∈Out (n)
+
+fj ∀ n ∈ N (flow conservation) (32) 
+
+(1 − f01 ) + (1 − f10 ) + f06 ≥ 1 (33) 
+
+(1 − f02 ) + (1 − f10 ) + f06 ≥ 1 (34) 
+
+(1 − f03 ) + (1 − f10 ) + (1 − f06 ) ≥ 1 (35) 
+
+f01 + f02 + f05 ≥ 1 (36) 
+
+f05 + f10 ≥ 1 (37) 
+
+f00 = 1 , f18 = 1 (source/sink activation) (38) 
+
+fi ∈ { 0, 1} ∀ i ∈ F. (39) 
+
+F : set of flows ,N : set of nodes ,
+
+In( n) ⊆ F : incoming flows to node n ∈ N, 
+
+Out( n) ⊆ F : outgoing flows from node n ∈ N. ci ≥ 0 cost of flow i, i ∈ F, fi ∈ { 0, 1} binary decision variable (1 if flow i is selected) , i ∈ F. 
+
+24

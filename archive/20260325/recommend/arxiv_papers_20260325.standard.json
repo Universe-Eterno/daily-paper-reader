@@ -1,0 +1,754 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-25T19:40:41.365218+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 10,
+    "deep_cap": 7,
+    "deep_selected": 7,
+    "quick_candidates": 45,
+    "quick_skim_target": 12,
+    "quick_selected": 12
+  },
+  "deep_dive": [
+    {
+      "id": "2603.23004v1",
+      "title": "Can Large Language Models Reason and Optimize Under Constraints?",
+      "abstract": "Large Language Models (LLMs) have demonstrated great capabilities across diverse natural language tasks; yet their ability to solve abstraction and optimization problems with constraints remains scarcely explored. In this paper, we investigate whether LLMs can reason and optimize under the physical and operational constraints of Optimal Power Flow (OPF) problem. We introduce a challenging evaluation setup that requires a set of fundamental skills such as reasoning, structured input handling, arithmetic, and constrained optimization. Our evaluation reveals that SoTA LLMs fail in most of the tasks, and that reasoning LLMs still fail in the most complex settings. Our findings highlight critical gaps in LLMs' ability to handle structured reasoning under constraints, and this work provides a rigorous testing environment for developing more capable LLM assistants that can tackle real-world power grid optimization problems.",
+      "authors": [
+        "Fabien Bernier",
+        "Salah Ghamizi",
+        "Pantelis Dogoulis",
+        "Maxime Cordy"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-03-24T09:50:17+00:00",
+      "link": "https://arxiv.org/pdf/2603.23004v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "LLMs for constrained optimization problems",
+      "llm_evidence_cn": "大语言模型处理受限优化问题",
+      "llm_evidence": "大语言模型处理受限优化问题",
+      "canonical_evidence": "大语言模型处理受限优化问题",
+      "llm_tldr_en": "Evaluates the ability of LLMs to solve constrained optimization problems like Optimal Power Flow.",
+      "llm_tldr_cn": "评估了大语言模型解决最优潮流等受限优化问题的能力。",
+      "llm_tldr": "评估了大语言模型解决最优潮流等受限优化问题的能力。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Large Language Models (LLM) for optimization tasks",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.23249v1",
+      "title": "A Learning Method with Gap-Aware Generation for Heterogeneous DAG Scheduling",
+      "abstract": "Efficient scheduling of directed acyclic graphs (DAGs) in heterogeneous environments is challenging due to resource capacities and dependencies. In practice, the need for adaptability across environments with varying resource pools and task types, alongside rapid schedule generation, complicates these challenges. We propose WeCAN, an end-to-end reinforcement learning framework for heterogeneous DAG scheduling that addresses task--pool compatibility coefficients and generation-induced optimality gaps. It adopts a two-stage single-pass design: a single forward pass produces task--pool scores and global parameters, followed by a generation map that constructs schedules without repeated network calls. Its weighted cross-attention encoder models task--pool interactions gated by compatibility coefficients, and is size-agnostic to environment fluctuations. Moreover, widely used list-scheduling maps can incur generation-induced optimality gaps from restricted reachability. We introduce an order-space analysis that characterizes the reachable set of generation maps via feasible schedule orders, explains the mechanism behind generation-induced gaps, and yields sufficient conditions for gap elimination. Guided by these conditions, we design a skip-extended realization with an analytically parameterized decreasing skip rule, which enlarges the reachable order set while preserving single-pass efficiency. Experiments on computation graphs and real-world TPC-H DAGs demonstrate improved makespan over strong baselines, with inference time comparable to classical heuristics and faster than multi-round neural schedulers.",
+      "authors": [
+        "Ruisong Zhou",
+        "Haijun Zou",
+        "Li Zhou",
+        "Chumin Sun",
+        "Zaiwen Wen"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "math.OC"
+      ],
+      "published": "2026-03-24T14:16:08+00:00",
+      "link": "https://arxiv.org/pdf/2603.23249v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "end-to-end reinforcement learning for DAG scheduling",
+      "llm_evidence_cn": "用于DAG调度的端到端强化学习框架",
+      "llm_evidence": "用于DAG调度的端到端强化学习框架",
+      "canonical_evidence": "用于DAG调度的端到端强化学习框架",
+      "llm_tldr_en": "Proposes an end-to-end RL framework for heterogeneous DAG scheduling using weighted cross-attention.",
+      "llm_tldr_cn": "提出一种基于加权交叉注意力的端到端强化学习框架，用于解决异构DAG调度问题。",
+      "llm_tldr": "提出一种基于加权交叉注意力的端到端强化学习框架，用于解决异构DAG调度问题。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "End to end learning for combinatorial optimization tasks",
+      "matched_requirement_id": "req-25",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.23401v1",
+      "title": "Self-Supervised Graph Neural Networks for Optimal Substation Reconfiguration",
+      "abstract": "Changing the transmission system topology is an efficient and costless lever to reduce congestion or increase exchange capacities. The problem of finding the optimal switch states within substations is called Optimal Substation Reconfiguration (OSR), and may be framed as a Mixed Integer Linear Program (MILP). Current state-of-the-art optimization techniques come with prohibitive computing times, making them impractical for real-time decision-making. Meanwhile, deep learning offers a promising perspective with drastically smaller computing times, at the price of an expensive training phase and the absence of optimality guarantees. In this work, we frame OSR as an Amortized Optimization problem, where a Graph Neural Network (GNN) model -- our data being graphs -- is trained in a self-supervised way to improve the objective function. We apply our approach to the maximization of the exchange capacity between two areas of a small-scale 12-substations system. Once trained, our GNN model improves the exchange capacity by 10.2% on average compared to the all connected configuration, while a classical MILP solver reaches an average improvement of 15.2% with orders-of-magnitude larger computing times.",
+      "authors": [
+        "Antoine Martinez",
+        "Balthazar Donon",
+        "Louis Wehenkel",
+        "a Efthymios Karangelos"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY"
+      ],
+      "published": "2026-03-24T16:36:27+00:00",
+      "link": "https://arxiv.org/pdf/2603.23401v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Graph Neural Networks for Optimal Substation Reconfiguration as a MILP problem",
+      "llm_evidence_cn": "用于变电站重构优化（混合整数线性规划）的图神经网络",
+      "llm_evidence": "用于变电站重构优化（混合整数线性规划）的图神经网络",
+      "canonical_evidence": "用于变电站重构优化（混合整数线性规划）的图神经网络",
+      "llm_tldr_en": "Uses GNNs to solve the Optimal Substation Reconfiguration problem, framing it as amortized optimization.",
+      "llm_tldr_cn": "利用图神经网络解决变电站重构优化问题，将其建模为摊销优化任务。",
+      "llm_tldr": "利用图神经网络解决变电站重构优化问题，将其建模为摊销优化任务。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Graph Neural Networks for solving combinatorial problems",
+      "matched_requirement_id": "req-15",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.19621v1",
+      "title": "DeepStock: Reinforcement Learning with Policy Regularizations for Inventory Management",
+      "abstract": "Deep Reinforcement Learning (DRL) provides a general-purpose methodology for training inventory policies that can leverage big data and compute. However, off-the-shelf implementations of DRL have seen mixed success, often plagued by high sensitivity to the hyperparameters used during training. In this paper, we show that by imposing policy regularizations, grounded in classical inventory concepts such as \"Base Stock\", we can significantly accelerate hyperparameter tuning and improve the final performance of several DRL methods. We report details from a 100% deployment of DRL with policy regularizations on Alibaba's e-commerce platform, Tmall. We also include extensive synthetic experiments, which show that policy regularizations reshape the narrative on what is the best DRL method for inventory management.",
+      "authors": [
+        "Yaqi Xie",
+        "Xinru Hao",
+        "Jiaxi Liu",
+        "Will Ma",
+        "Linwei Xin",
+        "Lei Cao",
+        "Yidong Zhang"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-20T03:58:18+00:00",
+      "link": "https://arxiv.org/pdf/2603.19621v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Deep Reinforcement Learning with policy regularizations for inventory management",
+      "llm_evidence_cn": "带有策略正则化的深度强化学习用于库存管理",
+      "llm_evidence": "带有策略正则化的深度强化学习用于库存管理",
+      "canonical_evidence": "带有策略正则化的深度强化学习用于库存管理",
+      "llm_tldr_en": "Improves DRL for inventory management by incorporating classical policy regularizations like Base Stock.",
+      "llm_tldr_cn": "通过引入基础库存等经典策略正则化，改进了用于库存管理的深度强化学习方法。",
+      "llm_tldr": "通过引入基础库存等经典策略正则化，改进了用于库存管理的深度强化学习方法。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Deep Reinforcement Learning for combinatorial optimization",
+      "matched_requirement_id": "req-14",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.22548v1",
+      "title": "L2O-CCG: Adversarial Learning with Set Generalization for Adaptive Robust Optimization",
+      "abstract": "The adversarial subproblem in two-stage adaptive robust optimization (ARO), which identifies the worst-case uncertainty realization, is a major computational bottleneck. This difficulty is exacerbated when the recourse value function is non-concave and the uncertainty set shifts across applications. Existing approaches typically exploit specific structural assumptions on the value function or the uncertainty set geometry to reformulate this subproblem, but degrade when these assumptions are violated or the geometry changes at deployment. To address this challenge, we propose L2O-CCG, a bi-level framework that enables the integration of structure-aware adversarial solvers within the constraint-and-column generation (CCG) algorithm. As one instantiation, we develop a generalizable adversarial learning method, which replaces solver-based adversarial search with a learned proximal gradient optimizer that can generalize across uncertainty set geometries without retraining. Here, an inner-level neural network approximates the recourse value function from offline data, while an outer-level pre-trained mapping generates iteration-dependent step sizes for a proximal gradient scheme. We also establish out-of-distribution convergence bounds under uncertainty set parameter shifts, showing how the trajectory deviation of the learned optimizer is bounded by the uncertainty set shift. We illustrate performance of the L2O-CCG method on a building HVAC management task.",
+      "authors": [
+        "Zhiyi Zhou",
+        "Ján Drgoňa",
+        "Yury Dvorkin"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY"
+      ],
+      "published": "2026-03-23T20:14:20+00:00",
+      "link": "https://arxiv.org/pdf/2603.22548v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Learning to optimize for adaptive robust optimization subproblems",
+      "llm_evidence_cn": "针对自适应鲁棒优化子问题的学习优化方法",
+      "llm_evidence": "针对自适应鲁棒优化子问题的学习优化方法",
+      "canonical_evidence": "针对自适应鲁棒优化子问题的学习优化方法",
+      "llm_tldr_en": "Proposes L2O-CCG, integrating neural solvers into traditional constraint-and-column generation algorithms.",
+      "llm_tldr_cn": "提出L2O-CCG框架，将神经求解器集成到传统的约束与列生成算法中以解决鲁棒优化问题。",
+      "llm_tldr": "提出L2O-CCG框架，将神经求解器集成到传统的约束与列生成算法中以解决鲁棒优化问题。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Hybrid approaches combining deep learning and traditional optimization",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.21283v1",
+      "title": "A Quantum Encoding of Traveling Salesperson Tours via Route Generation, Cost Phases, and a Valid-Permutation",
+      "abstract": "We present a compact quantum encoding of the Traveling Salesperson Problem (TSP) based on a time-register representation of tours. A candidate route is represented as a sequence of $n$ city labels over discrete time steps, with one fixed start city and the remaining cities encoded in binary registers. We describe three ingredients of the construction: uniform route generation over the route register, a reversible oracle for marking valid tours, and a phase oracle that encodes the total tour cost. The validity oracle distinguishes permutations of the non-start cities from invalid assignments, while the cost oracle accumulates the contribution of the start edge, intermediate transitions, and return edge into a tour-dependent phase. This yields a coherent superposition of candidate routes with feasibility and tour-length information embedded directly in the quantum state. The number of qubits required is $\\Order{n\\log_2(n)}$ and the circuit depth scales quadratically in $n$. The encoding is compatible with amplitude amplification or spectral filtering techniques such as the quantum singular value transform (QSVT) or Grover's algorithm. However, due to the exponentially small fraction of valid tours, the overall complexity remains exponential even when combined with amplitude amplification.",
+      "authors": [
+        "Alexander Johannes Stasik",
+        "Franz Georg Fuchs"
+      ],
+      "primary_category": "quant-ph",
+      "categories": [
+        "quant-ph",
+        "math.CO"
+      ],
+      "published": "2026-03-22T15:15:28+00:00",
+      "link": "https://arxiv.org/pdf/2603.21283v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Quantum encoding of Traveling Salesperson Problem (TSP) tours",
+      "llm_evidence_cn": "旅行商问题（TSP）路径的量子编码",
+      "llm_evidence": "旅行商问题（TSP）路径的量子编码",
+      "canonical_evidence": "旅行商问题（TSP）路径的量子编码",
+      "llm_tldr_en": "Presents a compact quantum encoding and oracle construction for solving the Traveling Salesperson Problem.",
+      "llm_tldr_cn": "提出了一种用于解决旅行商问题（TSP）的紧凑量子编码和算子构建方法。",
+      "llm_tldr": "提出了一种用于解决旅行商问题（TSP）的紧凑量子编码和算子构建方法。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Neural solvers for Traveling Salesman Problem TSP",
+      "matched_requirement_id": "req-16",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.23217v1",
+      "title": "Joint Task Orchestration and Resource Optimization for SC3 Closed Loop in 6G Networks",
+      "abstract": "In hazardous environments, sensors and actuators can be deployed to see and operate on behalf of humans, enabling safe and efficient task execution. Functioning as a neural center, the edge information hub (EIH), which integrates communication and computing capabilities, coordinates these sensors and actuators into sensing-communication-computing-control (SC3) closed loops to enable autonomous operations. From a system-level optimization perspective, this paper addresses the problem of joint sensor-actuator pairing and resource allocation across multiple SC3 closed loops. To tackle the resulting mixed-integer nonlinear programming problem, we develop a learning-optimization-integrated actor-critic (LOAC) framework. In this framework, a deep neural network-based actor generates pairing candidates, while an optimization-based critic subsequently allocates communication and computing resources. The actor is then iteratively refined through feedback from the critic. Simulation results demonstrate that the LOAC framework achieves near-optimal solutions with low computational complexity, offering significant performance gains in reducing control cost.",
+      "authors": [
+        "Xinran Fang",
+        "Wei Feng",
+        "Yanmin Wang",
+        "Yunfei Chen",
+        "Baoquan Ren",
+        "Ning Ge",
+        "Shi Jin"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT"
+      ],
+      "published": "2026-03-24T13:56:59+00:00",
+      "link": "https://arxiv.org/pdf/2603.23217v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Learning-optimization-integrated framework for mixed-integer nonlinear programming",
+      "llm_evidence_cn": "用于混合整数非线性规划的学习-优化集成框架",
+      "llm_evidence": "用于混合整数非线性规划的学习-优化集成框架",
+      "canonical_evidence": "用于混合整数非线性规划的学习-优化集成框架",
+      "llm_tldr_en": "Develops a learning-optimization-integrated actor-critic framework for resource allocation in 6G networks.",
+      "llm_tldr_cn": "开发了一种学习-优化集成的Actor-Critic框架，用于6G网络中的资源分配。",
+      "llm_tldr": "开发了一种学习-优化集成的Actor-Critic框架，用于6G网络中的资源分配。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Hybrid approaches combining deep learning and traditional optimization",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2603.21533v1",
+      "title": "Non-Exclusive Notifications for Ride-Hailing at Lyft I: Single-Cycle Approximation Algorithms",
+      "abstract": "Ride-hailing platforms increasingly rely on non-exclusive notifications-broadcasting a single request to multiple drivers simultaneously-to mitigate inefficiencies caused by uncertain driver acceptance. In this paper, the first in a two-part collaboration with Lyft, we formally model the 'Notification Set Selection Problem' for a single decision cycle, where the platform determines the optimal subset of drivers to notify for each incoming ride request. We analyze this combinatorial optimization problem under two contention-resolution protocols: 'First Acceptance (FA)', which prioritizes speed by assigning the ride to the first responder, and 'Best Acceptance (BA)', which prioritizes match quality by selecting the highest-valued accepting driver.   We show that welfare maximization under both mechanisms is strongly NP-hard, ruling out a Fully Polynomial Time Approximation Scheme (FPTAS). Despite this, we derive several positive algorithmic results. For FA, we present a Polynomial Time Approximation Scheme (PTAS) for the single-rider case and a constant-factor approximation (factor 4) for the general matching setting. We highlight that the FA valuation function can be viewed as a novel discrete choice model with theoretical properties of independent interest. For BA, we prove that the objective is monotone and submodular, admitting a standard $(1 - 1/e)$-approximation. Moreover, using a polynomial-time demand oracle that we design for this problem, we show it is possible to surpass the $(1 - 1/e)$ barrier. Finally, in the special case of homogeneous acceptance probabilities, we show that the BA problem can be solved exactly in polynomial time via a linear programming formulation. We validate the empirical performance our algorithms through numerical experiments on synthetic data and on instances calibrated using real ride-sharing data from Lyft.",
+      "authors": [
+        "Farbod Ekbatani",
+        "Rad Niazadeh",
+        "Mehdi Golari",
+        "Romain Camilleri",
+        "Titouan Jehl",
+        "Chris Sholley",
+        "Matthew Leventi",
+        "Theresa Calderon",
+        "Angela Lam",
+        "Paul Havard Duclos",
+        "Tim Holland",
+        "James Koch",
+        "Shreya Reddy"
+      ],
+      "primary_category": "cs.DS",
+      "categories": [
+        "cs.DS",
+        "cs.DM",
+        "cs.GT"
+      ],
+      "published": "2026-03-23T03:43:49+00:00",
+      "link": "https://arxiv.org/pdf/2603.21533v1",
+      "tags": [
+        "keyword:NCO"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Combinatorial optimization for ride-hailing notification sets",
+      "llm_evidence_cn": "网约车通知集合的组合优化",
+      "llm_evidence": "网约车通知集合的组合优化",
+      "canonical_evidence": "网约车通知集合的组合优化",
+      "llm_tldr_en": "Models and solves a combinatorial optimization problem for ride-hailing driver notification sets.",
+      "llm_tldr_cn": "建模并解决了网约车司机通知集合的组合优化问题。",
+      "llm_tldr": "建模并解决了网约车司机通知集合的组合优化问题。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Neural combinatorial optimization for Vehicle Routing Problem VRP",
+      "matched_requirement_id": "req-17",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2603.16969v1",
+      "title": "DeepStage: Learning Autonomous Defense Policies Against Multi-Stage APT Campaigns",
+      "abstract": "This paper presents DeepStage, a deep reinforcement learning (DRL) framework for adaptive, stage-aware defense against Advanced Persistent Threats (APTs). The enterprise environment is modeled as a partially observable Markov decision process (POMDP), where host provenance and network telemetry are fused into unified provenance graphs. Building on our prior work, StageFinder, a graph neural encoder and an LSTM-based stage estimator infer probabilistic attacker stages aligned with the MITRE ATT&CK framework. These stage beliefs, combined with graph embeddings, guide a hierarchical Proximal Policy Optimization (PPO) agent that selects defense actions across monitoring, access control, containment, and remediation. Evaluated in a realistic enterprise testbed using CALDERA-driven APT playbooks, DeepStage achieves a stage-weighted F1-score of 0.89, outperforming a risk-aware DRL baseline by 21.9%. The results demonstrate effective stage-aware and cost-efficient autonomous cyber defense.",
+      "authors": [
+        "Trung V. Phan",
+        "Tri Gia Nguyen",
+        "Thomas Bauschert"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-03-17T09:46:11+00:00",
+      "link": "https://arxiv.org/pdf/2603.16969v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Deep reinforcement learning and graph neural encoders for defense policy optimization",
+      "llm_evidence_cn": "深度强化学习和图神经编码器用于防御策略优化",
+      "llm_evidence": "深度强化学习和图神经编码器用于防御策略优化",
+      "canonical_evidence": "深度强化学习和图神经编码器用于防御策略优化",
+      "llm_tldr_en": "Combines GNNs and DRL to learn autonomous defense policies against multi-stage cyber threats.",
+      "llm_tldr_cn": "结合图神经网络和深度强化学习，学习针对多阶段网络威胁的自主防御策略。",
+      "llm_tldr": "结合图神经网络和深度强化学习，学习针对多阶段网络威胁的自主防御策略。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Deep Reinforcement Learning for combinatorial optimization",
+      "matched_requirement_id": "req-14",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.16823v1",
+      "title": "Deep Reinforcement Learning-driven Edge Offloading for Latency-constrained XR pipelines",
+      "abstract": "Immersive extended reality (XR) applications introduce latency-critical workloads that must satisfy stringent real-time responsiveness while operating on energy- and battery-constrained devices, making execution placement between end devices and nearby edge servers a fundamental systems challenge. Existing approaches to adaptive execution and computation offloading typically optimize average performance metrics and do not fully capture the sustained interaction between real-time latency requirements and device battery lifetime in closed-loop XR workloads. In this paper, we present a battery-aware execution management framework for edge-assisted XR systems that jointly considers execution placement, workload quality, latency requirements, and battery dynamics. We design an online decision mechanism based on a lightweight deep reinforcement learning policy that continuously adapts execution decisions under dynamic network conditions while maintaining high motion-to-photon latency compliance. Experimental results show that the proposed approach extends the projected device battery lifetime by up to 163% compared to latency-optimal local execution while maintaining over 90% motion-to-photon latency compliance under stable network conditions. Such compliance does not fall below 80% even under significantly limited network bandwidth availability, thereby demonstrating the effectiveness of explicitly managing latency-energy trade-offs in immersive XR systems.",
+      "authors": [
+        "Sourya Saha",
+        "Saptarshi Debroy"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-17T17:30:11+00:00",
+      "link": "https://arxiv.org/pdf/2603.16823v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Deep Reinforcement Learning for edge offloading optimization",
+      "llm_evidence_cn": "深度强化学习用于边缘卸载优化",
+      "llm_evidence": "深度强化学习用于边缘卸载优化",
+      "canonical_evidence": "深度强化学习用于边缘卸载优化",
+      "llm_tldr_en": "Applies deep reinforcement learning to optimize execution placement and resource management in XR systems.",
+      "llm_tldr_cn": "应用深度强化学习来优化XR系统中的执行位置和资源管理。",
+      "llm_tldr": "应用深度强化学习来优化XR系统中的执行位置和资源管理。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Deep Reinforcement Learning for combinatorial optimization",
+      "matched_requirement_id": "req-14",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.21659v1",
+      "title": "IMMSched: Interruptible Multi-DNN Scheduling via Parallel Multi-Particle Optimizing Subgraph Isomorphism",
+      "abstract": "The growing demand for multi-DNN workloads with unpredictable task arrival times has highlighted the need for interruptible scheduling on edge accelerators. However, existing preemptive frameworks typically assume known task arrival times and rely on CPU-based offline scheduling, which incurs heavy runtime overhead and struggles to handle unpredictable task arrivals. Even worse, prior studies have shown that multi-DNN scheduling requires solving an NP-hard subgraph isomorphism problem on large directed acyclic graphs within limited time, which is extremely challenging. To tackle this, we propose IMMSched, a parallel subgraph isomorphism method that combines Multi-Particle Optimization with the Ullmann algorithm based on a probabilistic continuous-relaxation scheme, eliminating the serial data dependencies of previous works. Finally, a quantized scheduling scheme and a global controller in the hardware architecture further combine multi-particle results for consensus-guided exploration. Evaluations demonstrate that IMMSched achieves orders-of-magnitude reductions in scheduling latency and energy consumption, enabling real-time execution of unpredictable DNN tasks on edge accelerators.",
+      "authors": [
+        "Boran Zhao",
+        "Hetian Liu",
+        "Zihang Yuan",
+        "Yanbin Hu",
+        "Wenzhe Zhao",
+        "Tian Xia",
+        "Pengju Ren"
+      ],
+      "primary_category": "cs.AR",
+      "categories": [
+        "cs.AR"
+      ],
+      "published": "2026-03-23T07:38:02+00:00",
+      "link": "https://arxiv.org/pdf/2603.21659v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "solving NP-hard subgraph isomorphism for multi-DNN scheduling",
+      "llm_evidence_cn": "解决多DNN调度的NP-hard子图同构问题",
+      "llm_evidence": "解决多DNN调度的NP-hard子图同构问题",
+      "canonical_evidence": "解决多DNN调度的NP-hard子图同构问题",
+      "llm_tldr_en": "Proposes a parallel optimization method to solve the NP-hard subgraph isomorphism problem in task scheduling.",
+      "llm_tldr_cn": "提出一种并行优化方法，解决任务调度中具有挑战性的NP-hard子图同构问题。",
+      "llm_tldr": "提出一种并行优化方法，解决任务调度中具有挑战性的NP-hard子图同构问题。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Deep learning models for solving NP hard combinatorial problems",
+      "matched_requirement_id": "req-23",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2603.18436v1",
+      "title": "AS2 -- Attention-Based Soft Answer Sets: An End-to-End Differentiable Neuro-Soft-Symbolic Reasoning Architecture",
+      "abstract": "Neuro-symbolic artificial intelligence (AI) systems typically couple a neural perception module to a discrete symbolic solver through a non-differentiable boundary, preventing constraint-satisfaction feedback from reaching the perception encoder during training. We introduce AS2 (Attention-Based Soft Answer Sets), a fully differentiable neuro-symbolic architecture that replaces the discrete solver with a soft, continuous approximation of the Answer Set Programming (ASP) immediate consequence operator $T_P$. AS2 maintains per-position probability distributions over a finite symbol domain throughout the forward pass and trains end-to-end by minimizing the fixed-point residual of a probabilistic lift of $T_P$, thereby differentiating through the constraint check without invoking an external solver at either training or inference time. The architecture is entirely free of conventional positional embeddings. Instead, it encodes problem structure through constraint-group membership embeddings that directly reflect the declarative ASP specification, making the model agnostic to arbitrary position indexing. On Visual Sudoku, AS2 achieves 99.89% cell accuracy and 100% constraint satisfaction (verified by Clingo) across 1,000 test boards, using a greedy constrained decoding procedure that requires no external solver. On MNIST Addition with $N \\in \\{2, 4, 8\\}$ addends, AS2 achieves digit accuracy above 99.7% across all scales. These results demonstrate that a soft differentiable fixpoint operator, combined with constraint-aware attention and declarative constraint specification, can match or exceed pipeline and solver-based neuro-symbolic systems while maintaining full end-to-end differentiability.",
+      "authors": [
+        "Wael AbdAlmageed"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-03-19T02:51:18+00:00",
+      "link": "https://arxiv.org/pdf/2603.18436v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Differentiable neuro-symbolic reasoning for constraint satisfaction",
+      "llm_evidence_cn": "用于约束满足的可微神经符号推理",
+      "llm_evidence": "用于约束满足的可微神经符号推理",
+      "canonical_evidence": "用于约束满足的可微神经符号推理",
+      "llm_tldr_en": "Presents AS2, a differentiable architecture that bridges neural perception with symbolic solvers for end-to-end training.",
+      "llm_tldr_cn": "提出AS2，一种将神经感知与符号求解器桥接的可微架构，支持端到端训练。",
+      "llm_tldr": "提出AS2，一种将神经感知与符号求解器桥接的可微架构，支持端到端训练。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Hybrid approaches combining deep learning and traditional optimization",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.17019v1",
+      "title": "Transformers Can Learn Rules They've Never Seen: Proof of Computation Beyond Interpolation",
+      "abstract": "A central question in the LLM debate is whether transformers can infer rules absent from training, or whether apparent generalisation reduces to similarity-based interpolation over observed examples. We test a strong interpolation-only hypothesis in two controlled settings: one where interpolation is ruled out by construction and proof, and one where success requires emitting intermediate symbolic derivations rather than only final answers. In Experiment 1, we use a cellular automaton with a pure XOR transition rule and remove specific local input patterns from training; since XOR is linearly inseparable, each held-out pattern's nearest neighbours have the opposite label, so similarity-based predictors fail on the held-out region. Yet a two-layer transformer recovers the rule (best 100%; 47/60 converged runs), and circuit extraction identifies XOR computation. Performance depends on multi-step constraint propagation: without unrolling, accuracy matches output bias (63.1%), while soft unrolling reaches 96.7%. In Experiment 2, we study symbolic operator chains over integers with one operator pair held out; the model must emit intermediate steps and a final answer in a proof-like format. Across all 49 holdout pairs, the transformer exceeds every interpolation baseline (mean 41.8%, up to 78.6%; mean KRR 4.3%; KNN and MLP score 0% on every pair), while removing intermediate-step supervision degrades performance. Together with a construction showing that a standard transformer block can implement exact local Boolean rules, these results provide an existence proof that transformers can learn rule structure not directly observed in training and express it explicitly, ruling out the strongest architectural form of interpolation-only accounts: that transformers cannot in principle discover and communicate unseen rules, while leaving open when such behaviour arises in large-scale language training.",
+      "authors": [
+        "Andy Gray"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-17T18:02:28+00:00",
+      "link": "https://arxiv.org/pdf/2603.17019v1",
+      "tags": [
+        "keyword:NCO"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Transformers learning rules and symbolic derivations",
+      "llm_evidence_cn": "Transformer学习规则与符号推导",
+      "llm_evidence": "Transformer学习规则与符号推导",
+      "canonical_evidence": "Transformer学习规则与符号推导",
+      "llm_tldr_en": "Investigates whether transformers can generalize to unseen rules through symbolic derivations.",
+      "llm_tldr_cn": "研究了Transformer是否可以通过符号推导泛化到未见过的规则。",
+      "llm_tldr": "研究了Transformer是否可以通过符号推导泛化到未见过的规则。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Transformer architectures for combinatorial optimization",
+      "matched_requirement_id": "req-20",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.23290v1",
+      "title": "Traveling Salesman Problem with a preprocessing method for classical and quantum optimization",
+      "abstract": "The Traveling Salesman Problem is a fundamental combinatorial optimization problem widely studied in operations research. Despite its simple formulation, it remains computationally challenging due to the exponential growth of the search space and the large number of constraints required to eliminate subtours. This paper introduces a preprocessing strategy that significantly reduces the size of the optimization model by restricting the set of candidate arcs and retaining only the lowest-cost neighbors for each vertex. Computational experiments on TSPLIB benchmark instances demonstrate that the proposed approach substantially reduces the number of decision variables. The method is evaluated using both classical and quantum optimization techniques, showing improvements in computational time and reductions in optimality gaps. Overall, the results indicate that the proposed preprocessing enhances the scalability of the formulations and makes them more suitable for both classical solvers and emerging quantum optimization frameworks.",
+      "authors": [
+        "Alessia Ciacco",
+        "Luigi Di Puglia Pugliese",
+        "Francesca Guerriero"
+      ],
+      "primary_category": "quant-ph",
+      "categories": [
+        "quant-ph",
+        "cs.CE",
+        "math.CO"
+      ],
+      "published": "2026-03-24T14:54:14+00:00",
+      "link": "https://arxiv.org/pdf/2603.23290v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "preprocessing method for Traveling Salesman Problem",
+      "llm_evidence_cn": "旅行商问题的预处理方法",
+      "llm_evidence": "旅行商问题的预处理方法",
+      "canonical_evidence": "旅行商问题的预处理方法",
+      "llm_tldr_en": "Introduces a preprocessing strategy to reduce the search space of the Traveling Salesman Problem.",
+      "llm_tldr_cn": "提出一种预处理策略，旨在缩小旅行商问题的搜索空间。",
+      "llm_tldr": "提出一种预处理策略，旨在缩小旅行商问题的搜索空间。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Neural solvers for Traveling Salesman Problem TSP",
+      "matched_requirement_id": "req-16",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2603.19520v1",
+      "title": "Leveraging Classical and Quantum Computing for Process Systems Engineering Applications: Decomposition Algorithm with Ising Solvers for Efficient Discrete Landscape Exploration",
+      "abstract": "Conceptual process design is a crucial aspect of chemical engineering that involves process synthesis. Mixed-integer nonlinear programming is a powerful framework for modeling such design problems by combining discrete and continuous variables; however, the combinatorial complexity of discrete choices, coupled with nonlinearities, presents challenging monolithic problems. Using decomposition, discrete subproblems can potentially benefit from Ising solvers, while simulators and nonlinear solvers offer powerful tools for handling nonlinearities. This work aims to: evaluate use of Ising-based solvers for discrete optimization and holistic process optimization through two case studies: an ionic liquid selection and its process design, and a more complex problem of drug manufacturing process optimization. The discrete subproblem is formulated as an integer program or quadratic unconstrained binary optimization and solved using a commercial classical or Ising solvers such as simulated annealing (SA), quantum annealing (QA), and entropy computing (EC) respectively. The commercial classical solver had the shortest runtime, whereas EC took the longest, followed by QA and SA, in reaching feasible and optimal solutions. The heuristics identified all or most feasible solutions in a single run, demonstrating advantages in solution diversity and efficient and broad exploration of the solution space over the classical solver, while the classical solver provides an optimality guarantee and rapid convergence speed. In process design, where insights of alternative designs and cost comparisons are more valuable than an optimal solution, heuristics offer a better-suited decision-making strategy. The comparative analysis highlights the strengths of each method and underscores the potential of this heterogeneous computing approach that leverages different methods to address practical optimization problems.",
+      "authors": [
+        "Yirang Park",
+        "David E. Bernal Neira"
+      ],
+      "primary_category": "math.OC",
+      "categories": [
+        "math.OC"
+      ],
+      "published": "2026-03-19T23:13:21+00:00",
+      "link": "https://arxiv.org/pdf/2603.19520v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "decomposition algorithm with Ising solvers for discrete optimization",
+      "llm_evidence_cn": "结合Ising求解器的离散优化分解算法",
+      "llm_evidence": "结合Ising求解器的离散优化分解算法",
+      "canonical_evidence": "结合Ising求解器的离散优化分解算法",
+      "llm_tldr_en": "Evaluates hybrid classical-quantum decomposition algorithms for discrete landscape exploration in process design.",
+      "llm_tldr_cn": "评估了用于过程设计中离散景观探索的经典-量子混合分解算法。",
+      "llm_tldr": "评估了用于过程设计中离散景观探索的经典-量子混合分解算法。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Hybrid approaches combining deep learning and traditional optimization",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.17310v1",
+      "title": "InfoDensity: Rewarding Information-Dense Traces for Efficient Reasoning",
+      "abstract": "Large Language Models (LLMs) with extended reasoning capabilities often generate verbose and redundant reasoning traces, incurring unnecessary computational cost. While existing reinforcement learning approaches address this by optimizing final response length, they neglect the quality of intermediate reasoning steps, leaving models vulnerable to reward hacking. We argue that verbosity is not merely a length problem, but a symptom of poor intermediate reasoning quality. To investigate this, we conduct an empirical study tracking the conditional entropy of the answer distribution across reasoning steps. We find that high-quality reasoning traces exhibit two consistent properties: low uncertainty convergence and monotonic progress. These findings suggest that high-quality reasoning traces are informationally dense, that is, each step contributes meaningful entropy reduction relative to the total reasoning length. Motivated by this, we propose InfoDensity, a reward framework for RL training that combines an AUC-based reward and a monotonicity reward as a unified measure of reasoning quality, weighted by a length scaling term that favors achieving equivalent quality more concisely. Experiments on mathematical reasoning benchmarks demonstrate that InfoDensity matches or surpasses state-of-the-art baselines in accuracy while significantly reducing token usage, achieving a strong accuracy-efficiency trade-off.",
+      "authors": [
+        "Chengwei Wei",
+        "Jung-jae Kim",
+        "Longyin Zhang",
+        "Shengkai Chen",
+        "Nancy F. Chen"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CL"
+      ],
+      "published": "2026-03-18T03:11:36+00:00",
+      "link": "https://arxiv.org/pdf/2603.17310v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "LLM reasoning and reinforcement learning",
+      "llm_evidence_cn": "LLM推理与强化学习",
+      "llm_evidence": "LLM推理与强化学习",
+      "canonical_evidence": "LLM推理与强化学习",
+      "llm_tldr_en": "Optimizes LLM reasoning traces using RL to reduce redundancy, relevant to efficient optimization search.",
+      "llm_tldr_cn": "利用强化学习优化LLM推理路径以减少冗余，与高效优化搜索相关。",
+      "llm_tldr": "利用强化学习优化LLM推理路径以减少冗余，与高效优化搜索相关。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Large Language Models (LLM) for optimization tasks",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.19732v1",
+      "title": "Helix: A Dual-Helix Co-Evolutionary Multi-Agent System for Prompt Optimization and Question Reformulation",
+      "abstract": "Automated prompt optimization (APO) aims to improve large language model performance by refining prompt instructions. However, existing methods are largely constrained by fixed prompt templates, limited search spaces, or single-sided optimization that treats user questions as immutable inputs. In practice, question formulation and prompt design are inherently interdependent: clearer question structures facilitate focused reasoning and task understanding, while effective prompts reveal better ways to organize and restate queries. Ignoring this coupling fundamentally limits the effectiveness and adaptability of current APO approaches. We propose a unified multi-agent system (Helix) that jointly optimizes question reformulation and prompt instructions through a structured three-stage co-evolutionary framework. Helix integrates (1) planner-guided decomposition that breaks optimization into coupled question-prompt objectives, (2) dual-track co-evolution where specialized agents iteratively refine and critique each other to produce complementary improvements, and (3) strategy-driven question generation that instantiates high-quality reformulations for robust inference. Extensive experiments on 12 benchmarks against 6 strong baselines demonstrate the effectiveness of Helix, achieving up to 3.95% performance improvements across tasks with favorable optimization efficiency.",
+      "authors": [
+        "Kewen Zhu",
+        "Liping Yi",
+        "Zhiming Zhao",
+        "Xiang Li",
+        "Qinghua Hu"
+      ],
+      "primary_category": "cs.MA",
+      "categories": [
+        "cs.MA"
+      ],
+      "published": "2026-03-20T08:16:09+00:00",
+      "link": "https://arxiv.org/pdf/2603.19732v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Multi-agent system for prompt optimization and question reformulation",
+      "llm_evidence_cn": "用于提示词优化和问题重构的多智能体系统",
+      "llm_evidence": "用于提示词优化和问题重构的多智能体系统",
+      "canonical_evidence": "用于提示词优化和问题重构的多智能体系统",
+      "llm_tldr_en": "Proposes Helix, a system that jointly optimizes LLM prompts and user questions for better performance.",
+      "llm_tldr_cn": "提出了Helix系统，通过联合优化提示词和用户问题来提升大语言模型的性能。",
+      "llm_tldr": "提出了Helix系统，通过联合优化提示词和用户问题来提升大语言模型的性能。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Large Language Models (LLM) for optimization tasks",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.17478v1",
+      "title": "Auto-Unrolled Proximal Gradient Descent: An AutoML Approach to Interpretable Waveform Optimization",
+      "abstract": "This study explores the combination of automated machine learning (AutoML) with model-based deep unfolding (DU) for optimizing wireless beamforming and waveforms. We convert the iterative proximal gradient descent (PGD) algorithm into a deep neural network, wherein the parameters of each layer are learned instead of being predetermined. Additionally, we enhance the architecture by incorporating a hybrid layer that performs a learnable linear gradient transformation prior to the proximal projection. By utilizing AutoGluon with a tree-structured parzen estimator (TPE) for hyperparameter optimization (HPO) across an expanded search space, which includes network depth, step-size initialization, optimizer, learning rate scheduler, layer type, and post-gradient activation, the proposed auto-unrolled PGD (Auto-PGD) achieves 98.8% of the spectral efficiency of a traditional 200-iteration PGD solver using only five unrolled layers, while requiring only 100 training samples. We also address a gradient normalization issue to ensure consistent performance during training and evaluation, and we illustrate per-layer sum-rate logging as a tool for transparency. These contributions highlight a notable reduction in the amount of training data and inference cost required, while maintaining high interpretability compared to conventional black-box architectures.",
+      "authors": [
+        "Ahmet Kaplan"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-18T08:33:25+00:00",
+      "link": "https://arxiv.org/pdf/2603.17478v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Deep unfolding for iterative optimization algorithms",
+      "llm_evidence_cn": "迭代优化算法的深度展开",
+      "llm_evidence": "迭代优化算法的深度展开",
+      "canonical_evidence": "迭代优化算法的深度展开",
+      "llm_tldr_en": "Combines AutoML with deep unfolding to optimize iterative proximal gradient descent for wireless beamforming.",
+      "llm_tldr_cn": "结合AutoML与深度展开技术，优化无线波束成形中的迭代近端梯度下降算法。",
+      "llm_tldr": "结合AutoML与深度展开技术，优化无线波束成形中的迭代近端梯度下降算法。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Hybrid approaches combining deep learning and traditional optimization",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.20981v1",
+      "title": "Cyber Deception for Mission Surveillance via Hypergame-Theoretic Deep Reinforcement Learning",
+      "abstract": "Unmanned Aerial Vehicles (UAVs) are valuable for mission-critical systems like surveillance, rescue, or delivery. Not surprisingly, such systems attract cyberattacks, including Denial-of-Service (DoS) attacks to overwhelm the resources of mission drones (MDs). How can we defend UAV mission systems against DoS attacks? We adopt cyber deception as a defense strategy, in which honey drones (HDs) are proposed to bait and divert attacks. The attack and deceptive defense hinge upon radio signal strength: The attacker selects victim MDs based on their signals, and HDs attract the attacker from afar by emitting stronger signals, despite this reducing battery life. We formulate an optimization problem for the attacker and defender to identify their respective strategies for maximizing mission performance while minimizing energy consumption. To address this problem, we propose a novel approach, called HT-DRL. HT-DRL identifies optimal solutions without a long learning convergence time by taking the solutions of hypergame theory into the neural network of deep reinforcement learning. This achieves a systematic way to intelligently deceive attackers. We analyze the performance of diverse defense mechanisms under different attack strategies. Further, the HT-DRL-based HD approach outperforms existing non-HD counterparts up to two times better in mission performance while incurring low energy consumption.",
+      "authors": [
+        "Zelin Wan",
+        "Jin-Hee Cho",
+        "Mu Zhu",
+        "Ahmed H. Anwar",
+        "Charles Kamhoua",
+        "Munindar P. Singh"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI",
+        "cs.GT",
+        "cs.MA"
+      ],
+      "published": "2026-03-21T23:57:33+00:00",
+      "link": "https://arxiv.org/pdf/2603.20981v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Deep Reinforcement Learning for UAV mission surveillance optimization",
+      "llm_evidence_cn": "用于无人机任务监控优化的深度强化学习",
+      "llm_evidence": "用于无人机任务监控优化的深度强化学习",
+      "canonical_evidence": "用于无人机任务监控优化的深度强化学习",
+      "llm_tldr_en": "Applies hypergame-theoretic DRL to optimize cyber deception strategies for UAV mission surveillance.",
+      "llm_tldr_cn": "应用超博弈论深度强化学习来优化无人机任务监控中的网络欺骗策略。",
+      "llm_tldr": "应用超博弈论深度强化学习来优化无人机任务监控中的网络欺骗策略。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Deep Reinforcement Learning for combinatorial optimization",
+      "matched_requirement_id": "req-14",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}
