@@ -6,77 +6,79 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-26
-- 运行时间：2026-03-26 20:10:12 UTC
+- 最新运行日期：2026-03-27
+- 运行时间：2026-03-27 20:08:50 UTC
 - 运行状态：成功
 - 本次总论文数：19
 - 精读区：7
 - 速读区：12
 
 ### 今日简报（AI）
-今日精选 19 篇前沿论文，深度解析策略与提示词联合优化及复杂路径规划的两项 9.0 分
-- 详情：[/202603/26/README](/202603/26/README)
+今日深度研读 19 篇论文，见证大模型与离线强化学习在物流排班及 TSP 组合优化领域刷新性能上限。
+重点关注 Decision Transformer 如何超越传统启发式算法，以及 LLM 在工业约束特征选择中的逻辑推理能力。
+建议开发者探索将 LLM 决策框架引入路径规划与资源调度场景，实现从“内容生成”向“复杂决策”的跨越。
+- 详情：[/202603/27/README](/202603/27/README)
 
 ### 精读区论文标签
-1. [P^2O: Joint Policy and Prompt Optimization](/202603/26/2603.21877v1-p2o-joint-policy-and-prompt-optimization)  
+1. [Learning to Staff: Offline Reinforcement Learning and Fine-Tuned LLMs for Warehouse Staffing Optimization](/202603/27/2603.24883v1-learning-to-staff-offline-reinforcement-learning-and-fine-tuned-llms-for-warehouse-staffing-optimization)  
+   标签：评分：10.0/10、query:nco-llm
+   evidence：离线强化学习和微调LLM用于仓库人员配置优化
+2. [Offline Decision Transformers for Neural Combinatorial Optimization: Surpassing Heuristics on the Traveling Salesman Problem](/202603/27/2603.25241v1-offline-decision-transformers-for-neural-combinatorial-optimization-surpassing-heuristics-on-the-traveling-salesman-problem)  
+   标签：评分：10.0/10、query:nco
+   evidence：用于TSP和神经组合优化的决策Transformer
+3. [Experiential Reflective Learning for Self-Improving LLM Agents](/202603/27/2603.24639v1-experiential-reflective-learning-for-self-improving-llm-agents)  
    标签：评分：9.0/10、query:nco-llm
-   evidence：大模型推理的策略与提示词联合优化
-2. [The DeepXube Software Package for Solving Pathfinding Problems with Learned Heuristic Functions and Search](/202603/26/2603.23873v1-the-deepxube-software-package-for-solving-pathfinding-problems-with-learned-heuristic-functions-and-search)  
+   evidence：大模型从任务轨迹中生成启发式方法
+4. [Decentralized Task Scheduling in Distributed Systems: A Deep Reinforcement Learning Approach](/202603/27/2603.24738v1-decentralized-task-scheduling-in-distributed-systems-a-deep-reinforcement-learning-approach)  
    标签：评分：9.0/10、query:nco
-   evidence：使用深度强化学习学习用于路径规划的启发式函数
-3. [Understanding the Challenges in Iterative Generative Optimization with LLMs](/202603/26/2603.23994v1-understanding-the-challenges-in-iterative-generative-optimization-with-llms)  
+   evidence：深度强化学习用于任务调度
+5. [Large Language Models as Optimization Controllers: Adaptive Continuation for SIMP Topology Optimization](/202603/27/2603.25099v1-large-language-models-as-optimization-controllers-adaptive-continuation-for-simp-topology-optimization)  
    标签：评分：9.0/10、query:nco-llm
-   evidence：使用LLM进行生成式优化以迭代改进工件
-4. [Lagrangian Relaxation Score-based Generation for Mixed Integer linear Programming](/202603/26/2603.24033v1-lagrangian-relaxation-score-based-generation-for-mixed-integer-linear-programming)  
+   evidence：LLM作为拓扑优化的在线自适应控制器
+6. [Agent Factories for High Level Synthesis: How Far Can General-Purpose Coding Agents Go in Hardware Optimization?](/202603/27/2603.25719v1-agent-factories-for-high-level-synthesis-how-far-can-general-purpose-coding-agents-go-in-hardware-optimization)  
    标签：评分：9.0/10、query:nco-llm
-   evidence：混合整数线性规划的混合方法
-5. [AVO: Agentic Variation Operators for Autonomous Evolutionary Search](/202603/26/2603.24517v1-avo-agentic-variation-operators-for-autonomous-evolutionary-search)  
-   标签：评分：9.0/10、query:nco-llm
-   evidence：基于大模型的自主编码代理用于进化搜索和启发式生成
-6. [Accelerating Maximum Common Subgraph Computation by Exploiting Symmetries](/202603/26/2603.23031v1-accelerating-maximum-common-subgraph-computation-by-exploiting-symmetries)  
+   evidence：将LLM智能体与整数线性规划(ILP)求解器结合进行硬件优化
+7. [AutoPDR: Circuit-Aware Solver Configuration Prediction for Hardware Model Checking](/202603/27/2603.25048v1-autopdr-circuit-aware-solver-configuration-prediction-for-hardware-model-checking)  
    标签：评分：8.0/10、query:nco
-   evidence：组合优化中的对称性破缺
-7. [Learning-guided Prioritized Planning for Lifelong Multi-Agent Path Finding in Warehouse Automation](/202603/26/2603.23838v1-learning-guided-prioritized-planning-for-lifelong-multi-agent-path-finding-in-warehouse-automation)  
-   标签：评分：8.0/10、query:nco
-   evidence：强化学习引导的多智能体路径规划搜索启发式
+   evidence：用于智能启发式选择的图学习
 
 ### 速读区论文标签
-1. [Demystifying Reinforcement Learning for Long-Horizon Tool-Using Agents: A Comprehensive Recipe](/202603/26/2603.21972v1-demystifying-reinforcement-learning-for-long-horizon-tool-using-agents-a-comprehensive-recipe)  
+1. [Transformers in the Dark: Navigating Unknown Search Spaces via Bandit Feedback](/202603/27/2603.24780v1-transformers-in-the-dark-navigating-unknown-search-spaces-via-bandit-feedback)  
    标签：评分：8.0/10、query:nco-llm
-   evidence：针对具有约束的长程规划LLM智能体的强化学习
-2. [Caterpillar of Thoughts: The Optimal Test-Time Algorithm for Large Language Models](/202603/26/2603.22784v1-caterpillar-of-thoughts-the-optimal-test-time-algorithm-for-large-language-models)  
+   evidence：大语言模型模拟搜索算法解决问题
+2. [LLM-Driven Reasoning for Constraint-Aware Feature Selection in Industrial Systems](/202603/27/2603.24979v1-llm-driven-reasoning-for-constraint-aware-feature-selection-in-industrial-systems)  
    标签：评分：8.0/10、query:nco-llm
-   evidence：大模型解题的最优推理时计算与回溯
-3. [Bilevel Autoresearch: Meta-Autoresearching Itself](/202603/26/2603.23420v1-bilevel-autoresearch-meta-autoresearching-itself)  
-   标签：评分：8.0/10、query:nco-llm
-   evidence：大模型引导的元优化和搜索机制生成
-4. [Language Model Planners do not Scale, but do Formalizers?](/202603/26/2603.23844v1-language-model-planners-do-not-scale-but-do-formalizers)  
-   标签：评分：8.0/10、query:nco-llm
-   evidence：LLM形式化器生成面向求解器的程序以解决复杂规划问题
-5. [PowerFlow: Unlocking the Dual Nature of LLMs via Principled Distribution Matching](/202603/26/2603.18363v1-powerflow-unlocking-the-dual-nature-of-llms-via-principled-distribution-matching)  
+   evidence：大模型驱动的特征选择优化推理
+3. [CTS-PLL: A Robust and Anytime Framework for Collaborative Task Sequencing and Multi-Agent Path Finding](/202603/27/2603.25121v1-cts-pll-a-robust-and-anytime-framework-for-collaborative-task-sequencing-and-multi-agent-path-finding)  
+   标签：评分：8.0/10、query:nco
+   evidence：用于组合任务排序的大邻域搜索
+4. [RE-SAC: Disentangling aleatoric and epistemic risks in bus fleet control: A stable and robust ensemble DRL approach](/202603/27/2603.18396v2-re-sac-disentangling-aleatoric-and-epistemic-risks-in-bus-fleet-control-a-stable-and-robust-ensemble-drl-approach)  
+   标签：评分：7.0/10、query:nco
+   evidence：用于公交车队控制和随机优化的深度强化学习
+5. [A Fast Quasi-Linear Heuristic for the Close-Enough Traveling Salesman Problem](/202603/27/2603.21401v1-a-fast-quasi-linear-heuristic-for-the-close-enough-traveling-salesman-problem)  
+   标签：评分：7.0/10、query:nco
+   evidence：针对近邻旅行商问题的快速启发式算法
+6. [P^2O: Joint Policy and Prompt Optimization](/202603/27/2603.21877v2-p2o-joint-policy-and-prompt-optimization)  
+   标签：评分：7.0/10、query:nco
+   evidence：增强大模型推理能力的强化学习
+7. [Optimal Solutions for the Moving Target Vehicle Routing Problem with Obstacles via Lazy Branch and Price](/202603/27/2603.21880v1-optimal-solutions-for-the-moving-target-vehicle-routing-problem-with-obstacles-via-lazy-branch-and-price)  
+   标签：评分：7.0/10、query:nco
+   evidence：移动目标车辆路径问题的最优解
+8. [From AI Assistant to AI Scientist: Autonomous Discovery of LLM-RL Algorithms with LLM Agents](/202603/27/2603.23951v1-from-ai-assistant-to-ai-scientist-autonomous-discovery-of-llm-rl-algorithms-with-llm-agents)  
    标签：评分：7.0/10、query:nco-llm
-   evidence：将 GFlowNet 作为 LLM 微调和优化的变分采样器
-6. [Adaptive Decoding via Test-Time Policy Learning for Self-Improving Generation](/202603/26/2603.18428v1-adaptive-decoding-via-test-time-policy-learning-for-self-improving-generation)  
-   标签：评分：7.0/10、query:nco-llm
-   evidence：基于强化学习的LLM优化任务解码采样器
-7. [FIPO: Eliciting Deep Reasoning with Future-KL Influenced Policy Optimization](/202603/26/2603.19835v2-fipo-eliciting-deep-reasoning-with-future-kl-influenced-policy-optimization)  
-   标签：评分：7.0/10、query:nco-llm
-   evidence：克服LLM推理瓶颈的强化学习算法
-8. [DRL-driven Online Optimization for Joint Traffic Reshaping and Channel Reconfiguration in RIS-assisted Semantic NOMA Communications](/202603/26/2603.21093v1-drl-driven-online-optimization-for-joint-traffic-reshaping-and-channel-reconfiguration-in-ris-assisted-semantic-noma-communications)  
-   标签：评分：7.0/10、query:nco-llm
-   evidence：深度强化学习驱动的资源分配在线优化
-9. [TRiMS: Real-Time Tracking of Minimal Sufficient Length for Efficient Reasoning via RL](/202603/26/2603.17449v1-trims-real-time-tracking-of-minimal-sufficient-length-for-efficient-reasoning-via-rl)  
+   evidence：使用智能体自动发现大语言模型的策略优化算法
+9. [Reflection in the Dark: Exposing and Escaping the Black Box in Reflective Prompt Optimization](/202603/27/2603.18388v1-reflection-in-the-dark-exposing-and-escaping-the-black-box-in-reflective-prompt-optimization)  
    标签：评分：6.0/10、query:nco-llm
-   evidence：利用强化学习实现大语言模型推理链的压缩
-10. [Gaussian Process Limit Reveals Structural Benefits of Graph Transformers](/202603/26/2603.17569v1-gaussian-process-limit-reveals-structural-benefits-of-graph-transformers)  
-   标签：评分：6.0/10、query:nco
-   evidence：图Transformer与注意力机制的结构优势
-11. [CoVerRL: Breaking the Consensus Trap in Label-Free Reasoning via Generator-Verifier Co-Evolution](/202603/26/2603.17775v2-coverrl-breaking-the-consensus-trap-in-label-free-reasoning-via-generator-verifier-co-evolution)  
+   evidence：自动提示词优化的多智能体框架
+10. [TARo: Token-level Adaptive Routing for LLM Test-time Alignment](/202603/27/2603.18411v1-taro-token-level-adaptive-routing-for-llm-test-time-alignment)  
    标签：评分：6.0/10、query:nco-llm
-   evidence：无标签强化学习提升大模型推理
-12. [Operator-Theoretic Foundations and Policy Gradient Methods for General MDPs with Unbounded Costs](/202603/26/2603.17875v2-operator-theoretic-foundations-and-policy-gradient-methods-for-general-mdps-with-unbounded-costs)  
-   标签：评分：6.0/10、query:nco
-   evidence：MDP优化的策略梯度方法
+   evidence：基于LLM的推理阶段结构化推理
+11. [Self-Tuning Sparse Attention: Multi-Fidelity Hyperparameter Optimization for Transformer Acceleration](/202603/27/2603.18417v1-self-tuning-sparse-attention-multi-fidelity-hyperparameter-optimization-for-transformer-acceleration)  
+   标签：评分：6.0/10、query:nco-llm
+   evidence：用于Transformer超参数调优的贝叶斯优化
+12. [Automatic Configuration of LLM Post-Training Pipelines](/202603/27/2603.18773v1-automatic-configuration-of-llm-post-training-pipelines)  
+   标签：评分：6.0/10、query:nco-llm
+   evidence：利用强化学习自动配置LLM后训练流水线
 
 
 <div class="dpr-home-promo-card">
