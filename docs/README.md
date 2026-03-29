@@ -6,64 +6,67 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-28
-- 运行时间：2026-03-28 19:32:04 UTC
+- 最新运行日期：2026-03-29
+- 运行时间：2026-03-29 19:32:03 UTC
 - 运行状态：成功
-- 本次总论文数：14
-- 精读区：2
+- 本次总论文数：15
+- 精读区：3
 - 速读区：12
 
 ### 今日简报（AI）
-今日深度探索 LLM 如何重塑多智能体协作激励与数据库查询优化，共收录 14 篇前沿进展。
-核心结论指出，LLM 引导的奖励设计能显著提升多智能体协作效率，而多模型协同则为复杂查询优化提供了新范式。
-推荐关注大模型与强化学习、系统架构的交叉融合，把握 AI 迈向复杂决策与底层基础设施优化的新趋势。
-- 详情：[/202603/28/README](/202603/28/README)
+今日追踪 15 篇前沿进展，重点攻克多智能体强化学习的鲁棒性难题与大模型信息易感性理论。
+核心突破在于提出了自适应稳健估计器，并为 LLM 接收外部信息的敏感度建立了首个理论框架。
+建议深入研读多智能体
+- 详情：[/202603/29/README](/202603/29/README)
 
 ### 精读区论文标签
-1. [Large Language Model Guided Incentive Aware Reward Design for Cooperative Multi-Agent Reinforcement Learning](/202603/28/2603.24324v1-large-language-model-guided-incentive-aware-reward-design-for-cooperative-multi-agent-reinforcement-learning)  
+1. [Adaptive Robust Estimator for Multi-Agent Reinforcement Learning](/202603/29/2603.21574v1-adaptive-robust-estimator-for-multi-agent-reinforcement-learning)  
    标签：评分：8.0/10、query:nco-llm
-   evidence：大语言模型为强化学习合成可执行的奖励程序
-2. [Multi-LLM Query Optimization](/202603/28/2603.24617v1-multi-llm-query-optimization)  
+   evidence：用于大语言模型推理优化的多智能体强化学习
+2. [A Theory of LLM Information Susceptibility](/202603/29/2603.23626v1-a-theory-of-llm-information-susceptibility)  
    标签：评分：8.0/10、query:nco-llm
-   evidence：多大模型部署的查询优化被建模为NP难问题
+   evidence：大语言模型作为智能体系统中的优化模块
+3. [Adaptive decision-making for stochastic service network design](/202603/29/2603.24369v2-adaptive-decision-making-for-stochastic-service-network-design)  
+   标签：评分：8.0/10、query:nco-llm
+   evidence：结合元启发式与机器学习的服务网络设计
 
 ### 速读区论文标签
-1. [Evolving Embodied Intelligence: Graph Neural Network--Driven Co-Design of Morphology and Control in Soft Robotics](/202603/28/2603.19582v1-evolving-embodied-intelligence-graph-neural-network--driven-co-design-of-morphology-and-control-in-soft-robotics)  
+1. [Grounded Chess Reasoning in Language Models via Master Distillation](/202603/29/2603.20510v1-grounded-chess-reasoning-in-language-models-via-master-distillation)  
+   标签：评分：7.0/10、query:nco-llm
+   evidence：将专家推理蒸馏至LLM以解决复杂领域问题
+2. [A Quantum Encoding of Traveling Salesperson Tours via Route Generation, Cost Phases, and a Valid-Permutation Oracle](/202603/29/2603.21283v2-a-quantum-encoding-of-traveling-salesperson-tours-via-route-generation-cost-phases-and-a-valid-permutation-oracle)  
    标签：评分：7.0/10、query:nco
-   evidence：基于图神经网络的形态与控制器协同设计方法
-2. [LoopRPT: Reinforcement Pre-Training for Looped Language Models](/202603/28/2603.19714v1-looprpt-reinforcement-pre-training-for-looped-language-models)  
+   evidence：旅行商问题的量子编码与路径生成
+3. [Partial Attention in Deep Reinforcement Learning for Safe Multi-Agent Control](/202603/29/2603.21810v1-partial-attention-in-deep-reinforcement-learning-for-safe-multi-agent-control)  
+   标签：评分：7.0/10、query:nco
+   evidence：深度强化学习中的注意力机制用于车辆控制
+4. [Set Transformer-Based Beamforming Design for Cell-Free Integrated Sensing and Communication](/202603/29/2603.23618v1-set-transformer-based-beamforming-design-for-cell-free-integrated-sensing-and-communication)  
+   标签：评分：7.0/10、query:nco
+   evidence：用于波束成形优化的Set Transformer
+5. [Adaptive decision-making for stochastic service network design](/202603/29/2603.24369v1-adaptive-decision-making-for-stochastic-service-network-design)  
    标签：评分：7.0/10、query:nco-llm
-   evidence：用于语言模型推理优化的强化学习
-3. [Breaking the Capability Ceiling of LLM Post-Training by Reintroducing Markov States](/202603/28/2603.19987v1-breaking-the-capability-ceiling-of-llm-post-training-by-reintroducing-markov-states)  
-   标签：评分：7.0/10、query:nco-llm
-   evidence：用于大模型后训练的强化学习与马尔可夫状态
-4. [A reliability-aware randomized simheuristic for the team orienteering problem with stochastic travel times](/202603/28/2603.20766v1-a-reliability-aware-randomized-simheuristic-for-the-team-orienteering-problem-with-stochastic-travel-times)  
-   标签：评分：7.0/10、query:nco-llm
-   evidence：结合构造性启发式和局部搜索的仿真启发式算法解决团队定向问题
-5. [Compass: Optimizing Compound AI Workflows for Dynamic Adaptation](/202603/28/2603.20821v1-compass-optimizing-compound-ai-workflows-for-dynamic-adaptation)  
-   标签：评分：7.0/10、query:nco-llm
-   evidence：AI工作流组合搜索空间中的帕累托最优配置
-6. [Shadoks Approach to Parallel Reconfiguration of Triangulations](/202603/28/2603.21293v1-shadoks-approach-to-parallel-reconfiguration-of-triangulations)  
-   标签：评分：7.0/10、query:nco-llm
-   evidence：结合SAT求解器与贪婪启发式算法进行重构
-7. [FIPO: Eliciting Deep Reasoning with Future-KL Influenced Policy Optimization](/202603/28/2603.19835v1-fipo-eliciting-deep-reasoning-with-future-kl-influenced-policy-optimization)  
+   evidence：结合元启发式和机器学习的网络设计混合方法
+6. [Dual-Graph Multi-Agent Reinforcement Learning for Handover Optimization](/202603/29/2603.24634v1-dual-graph-multi-agent-reinforcement-learning-for-handover-optimization)  
+   标签：评分：7.0/10、query:nco
+   evidence：用于网络切换优化的多智能体强化学习
+7. [Joint Surrogate Learning of Objectives, Constraints, and Sensitivities for Efficient Multi-objective Optimization of Neural Dynamical Systems](/202603/29/2603.20984v1-joint-surrogate-learning-of-objectives-constraints-and-sensitivities-for-efficient-multi-objective-optimization-of-neural-dynamical-systems)  
    标签：评分：6.0/10、query:nco-llm
-   evidence：针对LLM推理瓶颈的强化学习算法
-8. [On the Ability of Transformers to Verify Plans](/202603/28/2603.19954v1-on-the-ability-of-transformers-to-verify-plans)  
+   evidence：多目标优化的代理学习
+8. [PLR: Plackett-Luce for Reordering In-Context Learning Examples](/202603/29/2603.21373v1-plr-plackett-luce-for-reordering-in-context-learning-examples)  
+   标签：评分：6.0/10、query:nco-llm
+   evidence：重新排列上下文学习示例的概率方法
+9. [DRTriton: Large-Scale Synthetic Data Reinforcement Learning for Triton Kernel Generation](/202603/29/2603.21465v1-drtriton-large-scale-synthetic-data-reinforcement-learning-for-triton-kernel-generation)  
+   标签：评分：6.0/10、query:nco-llm
+   evidence：大语言模型用于代码优化与内核生成
+10. [Thinking Deeper, Not Longer: Depth-Recurrent Transformers for Compositional Generalization](/202603/29/2603.21676v1-thinking-deeper-not-longer-depth-recurrent-transformers-for-compositional-generalization)  
    标签：评分：6.0/10、query:nco
-   evidence：Transformer在经典规划领域中验证计划的能力
-9. [RouterKGQA: Specialized--General Model Routing for Constraint-Aware Knowledge Graph Question Answering](/202603/28/2603.20017v1-routerkgqa-specialized--general-model-routing-for-constraint-aware-knowledge-graph-question-answering)  
+   evidence：用于多跳图遍历和推理的深度循环Transformer
+11. [From Static Templates to Dynamic Runtime Graphs: A Survey of Workflow Optimization for LLM Agents](/202603/29/2603.22386v1-from-static-templates-to-dynamic-runtime-graphs-a-survey-of-workflow-optimization-for-llm-agents)  
    标签：评分：6.0/10、query:nco-llm
-   evidence：集成专用模型与通用大模型进行知识图谱推理
-10. [The $\mathbf{Y}$-Combinator for LLMs: Solving Long-Context Rot with $λ$-Calculus](/202603/28/2603.20105v1-the-mathbfy-combinator-for-llms-solving-long-context-rot-with--calculus)  
-   标签：评分：6.0/10、query:nco-llm
-   evidence：使用组合子的LLM长上下文推理框架
-11. [AE-LLM: Adaptive Efficiency Optimization for Large Language Models](/202603/28/2603.20492v1-ae-llm-adaptive-efficiency-optimization-for-large-language-models)  
-   标签：评分：6.0/10、query:nco-llm
-   evidence：大语言模型的自适应效率优化框架
-12. [Learning to Optimize Joint Source and RIS-assisted Channel Encoding for Multi-User Semantic Communication Systems](/202603/28/2603.21097v1-learning-to-optimize-joint-source-and-ris-assisted-channel-encoding-for-multi-user-semantic-communication-systems)  
-   标签：评分：6.0/10、query:nco-llm
-   evidence：使用深度强化学习进行通信系统的联合优化
+   evidence：大模型智能体工作流优化与计算图综述
+12. [Neural Structure Embedding for Symbolic Regression via Continuous Structure Search and Coefficient Optimization](/202603/29/2603.22429v1-neural-structure-embedding-for-symbolic-regression-via-continuous-structure-search-and-coefficient-optimization)  
+   标签：评分：6.0/10、query:nco
+   evidence：用于符号结构搜索和优化的Transformer模型
 
 
 <div class="dpr-home-promo-card">
