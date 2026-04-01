@@ -6,79 +6,72 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-31
-- 运行时间：2026-03-31 20:22:19 UTC
+- 最新运行日期：2026-04-01
+- 运行时间：2026-04-01 21:36:17 UTC
 - 运行状态：成功
-- 本次总论文数：19
-- 精读区：7
+- 本次总论文数：17
+- 精读区：5
 - 速读区：12
 
 ### 今日简报（AI）
-今日深度解析 19 篇前沿进展，重点攻克大语言模型在组合优化与工业调度中的落地难题。
-核心结论指出 LLM 与图神经求解器的对齐及启发式组合演化，能显著提升动态环境下的实时决策效率。
-建议关注 LLM 从通用对话向复杂工业场景转型的趋势，探索其在硬件验证或物流调度优化中的跨界潜力。
-- 详情：[/202603/31/README](/202603/31/README)
+今日精选 17 篇前沿论文，重点突破了 CPU-GPU 混合调度效率与多智能体 LLM 在贝叶斯优化中的自适应能力。
+核心结论指出可微分初始化能显著加速组合调度，而多智能体协作可大幅提升 LLM 处理复杂优化任务的精度。
+- 详情：[/202604/01/README](/202604/01/README)
 
 ### 精读区论文标签
-1. [Aligning LLMs with Graph Neural Solvers for Combinatorial Optimization](/202603/31/2603.27169v1-aligning-llms-with-graph-neural-solvers-for-combinatorial-optimization)  
-   标签：评分：10.0/10、query:nco-llm
-   evidence：将大语言模型与图神经求解器对齐以解决组合优化问题
-2. [DSevolve: Enabling Real-Time Adaptive Scheduling on Dynamic Shop Floor with LLM-Evolved Heuristic Portfolios](/202603/31/2603.27628v1-dsevolve-enabling-real-time-adaptive-scheduling-on-dynamic-shop-floor-with-llm-evolved-heuristic-portfolios)  
-   标签：评分：10.0/10、query:nco-llm
-   evidence：大模型演化的启发式组合用于自适应调度
-3. [Critic-Free Deep Reinforcement Learning for Maritime Coverage Path Planning on Irregular Hexagonal Grids](/202603/31/2603.28385v1-critic-free-deep-reinforcement-learning-for-maritime-coverage-path-planning-on-irregular-hexagonal-grids)  
-   标签：评分：10.0/10、query:nco-llm
-   evidence：基于Transformer指针策略的神经组合优化任务
-4. [Dynamic resource matching in manufacturing using deep reinforcement learning](/202603/31/2603.27066v1-dynamic-resource-matching-in-manufacturing-using-deep-reinforcement-learning)  
-   标签：评分：8.0/10、query:nco
-   evidence：深度强化学习用于动态资源匹配
-5. [Q-BIOLAT: Binary Latent Protein Fitness Landscapes for QUBO-Based Optimization](/202603/31/2603.27526v1-q-biolat-binary-latent-protein-fitness-landscapes-for-qubo-based-optimization)  
-   标签：评分：8.0/10、query:nco
-   evidence：基于QUBO的离散蛋白质适应度景观优化
-6. [GEAKG: Generative Executable Algorithm Knowledge Graphs](/202603/31/2603.27922v1-geakg-generative-executable-algorithm-knowledge-graphs)  
+1. [Differentiable Initialization-Accelerated CPU-GPU Hybrid Combinatorial Scheduling](/202604/01/2603.28943v1-differentiable-initialization-accelerated-cpu-gpu-hybrid-combinatorial-scheduling)  
+   标签：评分：9.0/10、query:nco-llm
+   evidence：用于组合调度和整数线性规划的CPU-GPU混合框架
+2. [Multi-Agent LLMs for Adaptive Acquisition in Bayesian Optimization](/202604/01/2603.28959v1-multi-agent-llms-for-adaptive-acquisition-in-bayesian-optimization)  
+   标签：评分：9.0/10、query:nco-llm
+   evidence：贝叶斯优化中由大模型介导的搜索策略学习
+3. [See it to Place it: Evolving Macro Placements with Vision-Language Models](/202604/01/2603.28733v1-see-it-to-place-it-evolving-macro-placements-with-vision-language-models)  
    标签：评分：8.0/10、query:nco-llm
-   evidence：大模型合成的可执行算法知识图谱
-7. [Evolutionary Discovery of Reinforcement Learning Algorithms via Large Language Models](/202603/31/2603.28416v1-evolutionary-discovery-of-reinforcement-learning-algorithms-via-large-language-models)  
-   标签：评分：8.0/10、query:nco-llm
-   evidence：利用大模型作为生成式变异算子发现强化学习算法
+   evidence：视觉语言模型引导的芯片布局演化搜索优化
+4. [Reinforced Reasoning for End-to-End Retrosynthetic Planning](/202604/01/2603.29723v1-reinforced-reasoning-for-end-to-end-retrosynthetic-planning)  
+   标签：评分：8.0/10、query:nco
+   evidence：组合逆合成任务的端到端学习
+5. [Associative Constructive Evolution: Enhancing Metaheuristics through Hebbian-Learned Generative Guidance](/202604/01/2603.29774v1-associative-constructive-evolution-enhancing-metaheuristics-through-hebbian-learned-generative-guidance)  
+   标签：评分：8.0/10、query:nco
+   evidence：通过元启发式算法中的生成式引导学习搜索启发式
 
 ### 速读区论文标签
-1. [Quantum-inspired Tensor Network for QUBO, QUDO and Tensor QUDO Problems with k-neighbors](/202603/31/2603.28065v1-quantum-inspired-tensor-network-for-qubo-qudo-and-tensor-qudo-problems-with-k-neighbors)  
-   标签：评分：8.0/10、query:nco
-   evidence：解决QUBO和组合问题的张量网络算法
-2. [Non-Exclusive Notifications for Ride-Hailing at Lyft I: Single-Cycle Approximation Algorithms](/202603/31/2603.21533v2-non-exclusive-notifications-for-ride-hailing-at-lyft-i-single-cycle-approximation-algorithms)  
+1. [MemCollab: Cross-Agent Memory Collaboration via Contrastive Trajectory Distillation](/202604/01/2603.23234v1-memcollab-cross-agent-memory-collaboration-via-contrastive-trajectory-distillation)  
+   标签：评分：7.0/10、query:nco-llm
+   evidence：基于大模型的智能体用于问题解决与记忆协作
+2. [Pruning for efficient deterministic global optimization over trained ReLU neural networks](/202604/01/2603.23299v1-pruning-for-efficient-deterministic-global-optimization-over-trained-relu-neural-networks)  
+   标签：评分：7.0/10、query:nco-llm
+   evidence：结合神经网络剪枝与数学优化的混合方法
+3. [Off-Policy Value-Based Reinforcement Learning for Large Language Models](/202604/01/2603.23355v1-off-policy-value-based-reinforcement-learning-for-large-language-models)  
    标签：评分：7.0/10、query:nco
-   evidence：为网约车通知集建立组合优化模型
-3. [AutoPDR: Circuit-Aware Solver Configuration Prediction for Hardware Model Checking](/202603/31/2603.25048v2-autopdr-circuit-aware-solver-configuration-prediction-for-hardware-model-checking)  
+   evidence：大模型的离策强化学习框架
+4. [AutoPDR: Circuit-Aware Solver Configuration Prediction for Hardware Model Checking](/202604/01/2603.25048v3-autopdr-circuit-aware-solver-configuration-prediction-for-hardware-model-checking)  
    标签：评分：7.0/10、query:nco
-   evidence：用于PDR验证中智能启发式选择的图学习
-4. [Cooperative Deep Reinforcement Learning for Fair RIS Allocation](/202603/31/2603.25572v1-cooperative-deep-reinforcement-learning-for-fair-ris-allocation)  
-   标签：评分：7.0/10、query:nco
-   evidence：深度强化学习用于资源分配
-5. [Learning to Select Visual In-Context Demonstrations](/202603/31/2603.26775v1-learning-to-select-visual-in-context-demonstrations)  
+   evidence：利用图学习进行求解器中的智能启发式选择
+5. [Can AI Scientist Agents Learn from Lab-in-the-Loop Feedback? Evidence from Iterative Perturbation Discovery](/202604/01/2603.26177v1-can-ai-scientist-agents-learn-from-lab-in-the-loop-feedback-evidence-from-iterative-perturbation-discovery)  
    标签：评分：7.0/10、query:nco-llm
-   evidence：多模态大模型上下文学习中的强化学习示例选择
-6. [RTLSeek: Boosting the LLM-Based RTL Generation with Multi-Stage Diversity-Oriented Reinforcement Learning](/202603/31/2603.27630v1-rtlseek-boosting-the-llm-based-rtl-generation-with-multi-stage-diversity-oriented-reinforcement-learning)  
+   evidence：大模型在迭代实验设计和扰动发现中的上下文学习
+6. [Robust Batch-Level Query Routing for Large Language Models under Cost and Capacity Constraints](/202604/01/2603.26796v1-robust-batch-level-query-routing-for-large-language-models-under-cost-and-capacity-constraints)  
    标签：评分：7.0/10、query:nco-llm
-   evidence：基于大模型的硬件设计优化，结合强化学习进行后训练
-7. [Beyond the Answer: Decoding the Behavior of LLMs as Scientific Reasoners](/202603/31/2603.28038v1-beyond-the-answer-decoding-the-behavior-of-llms-as-scientific-reasoners)  
-   标签：评分：7.0/10、query:nco-llm
-   evidence：用于LLM提示词启发式搜索的遗传帕累托优化
-8. [Heddle: A Distributed Orchestration System for Agentic RL Rollout](/202603/31/2603.28101v1-heddle-a-distributed-orchestration-system-for-agentic-rl-rollout)  
-   标签：评分：7.0/10、query:nco-llm
-   evidence：大语言模型智能体强化学习展开的编排系统
-9. [KG-Hopper: Empowering Compact Open LLMs with Knowledge Graph Reasoning via Reinforcement Learning](/202603/31/2603.21440v2-kg-hopper-empowering-compact-open-llms-with-knowledge-graph-reasoning-via-reinforcement-learning)  
+   evidence：联合优化大模型查询路由的模型分配
+7. [Double Coupling Architecture and Training Method for Optimization Problems of Differential Algebraic Equations with Parameters](/202604/01/2603.22724v1-double-coupling-architecture-and-training-method-for-optimization-problems-of-differential-algebraic-equations-with-parameters)  
    标签：评分：6.0/10、query:nco-llm
-   evidence：通过强化学习整合LLM与知识图谱推理
-10. [Multinoulli Extension: A Lossless Continuous Relaxation for Partition-Constrained Subset Selection](/202603/31/2603.21492v1-multinoulli-extension-a-lossless-continuous-relaxation-for-partition-constrained-subset-selection)  
-   标签：评分：6.0/10、query:nco
-   evidence：分区约束子集选择的连续松弛方法
-11. [Holistic Scaling Laws for Optimal Mixture-of-Experts Architecture Optimization](/202603/31/2603.21862v1-holistic-scaling-laws-for-optimal-mixture-of-experts-architecture-optimization)  
+   evidence：神经网络与微分代数方程优化的混合方法
+8. [ABSTRAL: Automatic Design of Multi-Agent Systems Through Iterative Refinement and Topology Optimization](/202604/01/2603.22791v1-abstral-automatic-design-of-multi-agent-systems-through-iterative-refinement-and-topology-optimization)  
    标签：评分：6.0/10、query:nco-llm
-   evidence：MoE架构配置作为一个组合庞大的设计空间
-12. [Optimal Solutions for the Moving Target Vehicle Routing Problem with Obstacles via Lazy Branch and Price](/202603/31/2603.21880v2-optimal-solutions-for-the-moving-target-vehicle-routing-problem-with-obstacles-via-lazy-branch-and-price)  
+   evidence：多智能体系统中的拓扑优化与任务分解
+9. [Object Search in Partially-Known Environments via LLM-informed Model-based Planning and Prompt Selection](/202604/01/2603.23800v1-object-search-in-partially-known-environments-via-llm-informed-model-based-planning-and-prompt-selection)  
+   标签：评分：6.0/10、query:nco-llm
+   evidence：大模型告知的模型化规划与提示词选择用于搜索任务
+10. [HDPO: Hybrid Distillation Policy Optimization via Privileged Self-Distillation](/202604/01/2603.23871v1-hdpo-hybrid-distillation-policy-optimization-via-privileged-self-distillation)  
+   标签：评分：6.0/10、query:nco-llm
+   evidence：用于数学推理和策略优化的强化学习
+11. [Approximation Schemes and Structural Barriers for the Two-Dimensional Knapsack Problem with Rotations](/202604/01/2603.23970v1-approximation-schemes-and-structural-barriers-for-the-two-dimensional-knapsack-problem-with-rotations)  
    标签：评分：6.0/10、query:nco
-   evidence：带障碍物的移动目标车辆路径问题
+   evidence：二维背包问题的近似方案
+12. [Integrating Deep RL and Bayesian Inference for ObjectNav in Mobile Robotics](/202604/01/2603.25366v1-integrating-deep-rl-and-bayesian-inference-for-objectnav-in-mobile-robotics)  
+   标签：评分：6.0/10、query:nco
+   evidence：结合深度强化学习和贝叶斯推理进行导航搜索
 
 
 <div class="dpr-home-promo-card">
