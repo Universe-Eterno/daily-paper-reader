@@ -1,0 +1,292 @@
+Title: On the Complexity of Optimal Graph Rewiring for Oversmoothing and Oversquashing in Graph Neural Networks
+
+URL Source: https://arxiv.org/pdf/2603.26140v1
+
+Published Time: Mon, 30 Mar 2026 00:37:08 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+# On the Complexity of Optimal Graph Rewiring for Oversmoothing and Oversquashing in Graph Neural Networks 
+
+## Mostafa Haghir Chehreghani Department of Computer Engineering Amirkabir University of Technology (Tehran Polytechnic) Tehran, Iran mostafa.chehreghani@aut.ac.ir 
+
+Abstract 
+
+Graph Neural Networks (GNNs) face two fundamental challenges when scaled to deep architectures: oversmoothing, where node representations converge to indistinguishable vectors, and oversquashing, where informa-tion from distant nodes fails to propagate through bottlenecks. Both phenomena are intimately tied to the underlying graph structure, raising a natural question: can we optimize the graph topology to mitigate these issues? This paper provides a theoretical investigation of the computa-tional complexity of such graph structure optimization. We formulate oversmoothing and oversquashing mitigation as graph optimization prob-lems based on spectral gap and conductance, respectively. We prove that exact optimization for either problem is NP -hard through reductions from Minimum Bisection, establishing NP -completeness of the decision versions. Our results provide theoretical foundations for understanding the funda-mental limits of graph rewiring for GNN optimization and justify the use of approximation algorithms and heuristic methods in practice. 
+
+Keywords: Graph Neural Networks, oversmoothing, oversquashing, graph rewiring, NP-hardness, spectral graph theory. 
+
+# 1 Introduction 
+
+Graph Neural Networks (GNNs) [ 14 , 23 , 25 , 19 ] have become the de facto standard for learning on graph-structured data, achieving remarkable success in applications ranging from fake news detection [ 15 , 16 ] to drug discovery [ 13 ] and recommendation systems [ 9 ]. Their core operation, message passing, aggregates information from neighboring nodes, allowing the model to capture relational structure. However, as GNNs are scaled to deeper architectures, they suffer from 1
+
+> arXiv:2603.26140v1 [cs.LG] 27 Mar 2026
+
+two fundamental limitations that severely restrict their expressive power and performance: oversmoothing and oversquashing. 
+
+Oversmoothing occurs when repeated message passing causes node repre-sentations to converge to a uniform vector, erasing discriminative information [ 17 , 21 , 12 ]. This phenomenon arises because GNN layers act as low - pass filters on the graph; after many layers, the features become dominated by the principal eigenvector of the propagation matrix. The rate of oversmoothing is governed by the spectral gap of the graph’s propagation operator, and it has been shown that for any graph with a fixed spectrum, oversmoothing is inevitable as the number of layers grows [ 21 , 12 ]. Consequently, many modern GNN architectures incorporate skip connections or normalization to mitigate the effect, but the underlying graph structure remains a key determinant. 
+
+Oversquashing describes the failure of information from distant nodes to reach a given node due to bottlenecks in the graph [ 1, 18 ]. When messages must flow through a narrow cut, the message - passing process compresses exponentially many messages into fixed - size vectors, leading to information loss. Oversquashing is fundamentally a structural phenomenon: it is quantified by the graph’s conductance or effective resistance [ 22 , 20 ]. A graph with a bottleneck forces information to be squashed, no matter how many layers are used. Crucially, both oversmoothing and oversquashing are determined by the underlying graph topology, yet they often conflict. Graphs that mitigate over-squashing — such as expanders or dense graphs — tend to have high connectivity, which accelerates oversmoothing. Conversely, sparse, tree - like graphs resist over-smoothing but create severe bottlenecks that cause oversquashing. This tension raises a natural question: can we optimize the graph structure itself to strike an optimal balance between these two opposing forces? Recent works have explored graph rewiring as a practical tool to improve GNN performance. Heuristic methods such as DIGL [ 8] and SDRF [ 22 ] iteratively add or remove edges based on diffusion or curvature, demonstrating empirical success. However, the fundamental computational complexity of such graph optimization problems has remained unexplored. Is it possible to efficiently find a graph that optimally mitigates oversmoothing or oversquashing? Or are these problems inherently intractable, justifying the use of approximations and heuristics? 
+
+## 1.1 Contributions 
+
+This paper provides the first theoretical investigation of the complexity of graph structure optimization for GNN oversmoothing and oversquashing mitigation. Our main contributions are as follows. 1. Unified Formulations: We cast the mitigation of oversmoothing and oversquashing as graph optimization problems with natural objective func-tions. For oversmoothing we use the second eigenvalue of the propagation matrix (equivalently the spectral gap of the normalized Laplacian). For 2oversquashing we use conductance, which captures the worst - case bottle-neck. 2. NP - Hardness Results: We prove that exact optimization for either problem is NP - hard. For oversquashing we give a reduction from Minimum Bisection to deciding whether a graph can be modified (by a limited number of edge additions/deletions) to achieve conductance above a threshold. For oversmoothing we give a similar reduction using spectral gap. In both cases we establish NP-completeness of the decision versions. 3. Practical Implications: We analyze the complexity of existing heuristic rewiring methods such as SDRF and DIGL, showing that they run in polynomial time. Our hardness results therefore provide a theoretical justification for their use: since exact optimization is intractable, heuristic approaches are not only pragmatically necessary but also theoretically well-founded. 
+
+## 1.2 Related Work 
+
+This work sits at the intersection of graph neural network theory, graph structure optimization, and computational complexity. We review the most relevant strands of research below. 
+
+Oversmoothing in GNNs. The oversmoothing phenomenon was first identified in the context of graph convolutional networks by [ 17 ], who observed that stacking many layers leads to uniform node representations. [21] provided a spectral analysis showing that the convergence rate is governed by the second eigenvalue of the propagation matrix, and that oversmoothing is inevitable for any GNN that repeatedly applies a linear filter. Subsequent works proposed various mitigation strategies, such as residual connections [ 14 ], normalization layers [ 10 ], and adaptive propagation schemes [ 4 ]. From a spectral perspective, [ 24 ] linked oversmoothing to the graph’s spectral gap and showed that graph rewiring can delay the effect. Our work complements these by formalizing oversmoothing minimization as a graph optimization problem and proving its NP-hardness. 
+
+Oversquashing and graph bottlenecks. The term “oversquashing” was introduced by [ 1], who demonstrated that bottlenecks in the graph cause ex-ponential compression of information in message passing. [22 ] used effective resistance to quantify oversquashing and proposed the SDRF algorithm that adds edges with high effective resistance and removes edges with negative cur-vature. [ 20 ] further analyzed oversquashing through the lens of Ollivier-Ricci curvature. These works established the importance of graph structure for miti-gating oversquashing, but they did not explore the computational complexity of optimizing the graph itself. Our paper fills this gap by showing that even deciding whether a given graph can be improved to reduce oversquashing (as measured by conductance) is NP-hard. 
+
+Graph rewiring and structure learning for GNNs. Several heuristics have been proposed to augment or rewire the graph for better GNN performance. 3DIGL [ 8] uses graph diffusion to densify the graph, while SDRF [ 22 ] iteratively applies discrete Ricci flow. [ 6 ] introduced a bilevel optimization framework for learning the graph structure end-to-end. These methods are empirically effective but lack theoretical guarantees on the hardness of the underlying optimization. Our complexity results justify the use of approximation algorithms and heuristics, because exact optimization is intractable. 
+
+Complexity of graph optimization problems. Our reductions rely on the classical NP-complete problem Minimum Bisection [ 7]. Expander embed-dings, which we use to relate graph cuts, are a standard tool in hardness of approximation [ 11 , 3 ]. Our work extends these classic results to the specific objective functions arising from GNN analysis. In summary, while previous work has identified oversmoothing and over-squashing as critical limitations and proposed heuristic rewiring strategies, our paper is the first to provide a unified complexity analysis of the underlying graph optimization problems, establishing NP-hardness for natural formulations and justifying the use of approximations in practice. 
+
+# 2 Preliminaries 
+
+## 2.1 Basic Graph Notation 
+
+Let G = ( V, E ) be an undirected, unweighted graph with n = |V | vertices and 
+
+m = |E| edges. Let A ∈ { 0, 1}n×n be the adjacency matrix, D = diag (d1, . . . , d n)the degree matrix where dv = P 
+
+> u
+
+Auv . Let L = D − A denote the combinatorial Laplacian. 
+
+## 2.2 Spectral Graph Theory and Conductance 
+
+The normalized Laplacian is defined as L = I − D−1/2AD −1/2. Its eigenvalues satisfy 0 = λ1(L) ≤ λ2(L) ≤ · · · ≤ λn(L) ≤ 2, and λ2(L) (the Fiedler value) measures the algebraic connectivity of the graph. For a GNN layer we use the symmetric normalized propagation matrix P = ˜D−1/2 ˜A ˜D−1/2, where ˜A = A + I
+
+and ˜D = D + I. Its eigenvalues are 1 = μ1(P ) ≥ μ2(P ) ≥ · · · ≥ μn(P ) ≥ − 1. For regular graphs, P = D−1/2AD −1/2.Conductance (or Cheeger constant) is a classic measure of bottlenecks. For a subset S ⊂ V , define ∂S = {(u, v ) ∈ E : u ∈ S, v /∈ S} and vol (S) = P 
+
+> v∈S
+
+deg( v). The conductance of S is: 
+
+ϕ(S) = |∂S |
+
+min(vol( S), vol( V \ S)) ,
+
+and the conductance of G is: 
+
+ϕ(G) = min    
+
+> S⊂V, 0<vol( S)≤vol( V)/2
+
+ϕ(S).
+
+4Cheeger’s inequality relates the spectral gap of the normalized Laplacian to the conductance: ϕ(G)2
+
+2 ≤ λ2(L) ≤ 2ϕ(G).
+
+# 3 Graph Rewiring for Oversquashing via Con-ductance 
+
+## 3.1 Problem Formulation 
+
+The worst-case bottleneck is captured by the conductance ϕ(G). Maximizing 
+
+ϕ(G) minimizes oversquashing: 
+
+L(cond) squash (G) = −ϕ(G).
+
+Definition 1 (Graph Rewiring for Oversquashing via Conductance (GROC)) .
+
+Given an undirected graph G = ( V, E ), an integer K ≥ 0, and a threshold 
+
+ϕ0 ∈ [0 , 1] , does there exist a graph G′ = ( V, E ′) with |E′△E| ≤ K such that the conductance ϕ(G′) ≥ ϕ0?
+
+## 3.2 Expander Embedding 
+
+We need a construction that maps a graph H to a new graph G such that the conductance of G is small if and only if H has a small bisection. The following lemma provides such a construction; its proof is standard in hardness of approximation [3, 11]. 
+
+Lemma 2 (Expander Embedding) . There exists a polynomial - time algorithm that, given a graph H = ( V, E H ) with n vertices (assumed large enough, n ≥ n0), outputs a 3-regular graph G = ( V ′, E G) with |V ′| = 2 n and constants c1, c 2 > 0,
+
+c3 ∈ (0 , 1) satisfying: 1. V ⊂ V ′ and H is an induced subgraph of G on V .2. For any subset S ⊆ V with |S| ≤ n/ 2, let U = V ′ \ V (so |U | = n). Then the conductance of the cut (S ∪ U, V ′ \ (S ∪ U )) in G satisfies 
+
+ϕG(S ∪ U ) ≤ c1 · |δH (S)| + nn .
+
+3. Conversely, if there exists a cut (X, V ′ \X) in G with conductance ϕG(X) ≤
+
+ϵ, then there exists a subset S ⊆ V such that 
+
+|δH (S)| ≤ c2 · ϵn. 
+
+Moreover, if ϵ is sufficiently small, S can be chosen to satisfy |S| = n/ 2
+
+after a polynomial -time balancing procedure, and the number of crossing edges increases by at most a factor c3.
+
+5The constants c1, c 2, c 3 can be made arbitrarily small (or large) by choosing a sufficiently strong (or weak) expander. 
+
+We fix one such expander once and for all. Its constants c1, c 2, c 3 are absolute numbers that we will use throughout. In the reductions we will need certain inequalities to hold; these can be satisfied by choosing the expander appropriately (e.g., a very strong expander makes c1 and c2 very small, and c3 close to 1). We assume the expander is chosen so that: 
+
+c1 < 16 , c2c3 < 12 , c3 < 1.
+
+These are achievable by taking a sufficiently strong expander. 
+
+## 3.3 Pre-processing Minimum Bisection Instances 
+
+Before applying the embedding, we transform the Minimum Bisection instance to have convenient bounds on B relative to n. The following lemma provides explicit polynomial-time constructions. 
+
+Lemma 3 (Instance Scaling) . Let (H, B ) be a Minimum Bisection instance with 
+
+n even. 1. There exists a polynomial-time construction of an equivalent instance 
+
+(H1, B 1) with n1 vertices such that B1 ≥ 2n1 and B1 = O(n1).2. There exists a polynomial-time construction of an equivalent instance 
+
+(H2, B 2) with n2 vertices such that n2/2 ≤ B2 ≤ 2n2.In both cases, the construction preserves the answer (i.e., H has a bisection with 
+
+≤ B edges iff the new instance does). 
+
+The proof is by adding isolated vertices and universal vertices; details are omitted for brevity but follow standard techniques. 
+
+## 3.4 NP-Completeness of Conductance Maximization 
+
+Theorem 4. GROC is NP-complete. Proof. Membership in NP: Given a candidate graph G′, we can compute its conductance ϕ(G′) exactly by solving a min-cut problem (via max-flow) in polynomial time. Hence the decision problem is in NP. 
+
+NP-hardness: We reduce from Minimum Bisection. Let ( H, B ) be an instance with n even. First, if n is bounded by a constant, we solve the instance directly in constant time and output a trivial YES/NO instance of GROC. Otherwise, we use part 2 of Lemma 3 to transform ( H, B ) into an equivalent instance ( H0, B 0) with n0 vertices such that n0/2 ≤ B0 ≤ 2n0. For simplicity, rename ( H0, B 0) as ( H, B ). 6Now construct the 3-regular graph G from Lemma 2. The constants satisfy 
+
+c1 < 1/6, c2c3 < 1/2, c3 < 1. Set K = 0 (no edge modifications) and define 
+
+ϕ0 = 1 − c1 · B + nn .
+
+Because B ≤ 2n, we have ( B + n)/n ≤ 3, so ϕ0 ≥ 1 − 3c1. With c1 < 1/6, we get ϕ0 > 1/2. We claim that H has a bisection with ≤ B edges if and only if ϕ(G) < ϕ 0
+
+(i.e., ( G, 0, ϕ 0) is a NO instance). The reduction then maps YES instances of Minimum Bisection to NO instances of GROC and vice versa; since GROC is a decision problem, we can invert the answer in polynomial time. 
+
+Forward direction: Suppose H has a bisection S with |δH (S)| ≤ B. By Lemma 2(2), the cut X = S ∪ U (where U = V ′ \ V ) satisfies 
+
+ϕG(X) ≤ c1 · |δH (S)| + nn ≤ c1 · B + nn = 1 − ϕ0.
+
+Since ϕ0 > 1/2, we have 1 −ϕ0 < ϕ 0, and therefore ϕ(G) ≤ ϕG(X) ≤ 1−ϕ0 < ϕ 0.Thus ϕ(G) < ϕ 0, so ( G, 0, ϕ 0) is a NO instance. 
+
+Reverse direction: Suppose H has no bisection with ≤ B edges. Assume for contradiction that ϕ(G) < ϕ 0. Then there exists a cut X in G with ϕG(X) < ϕ 0.By Lemma 2(3), there exists S ⊆ V such that 
+
+|δH (S)| ≤ c2 · ϕG(X) · n < c 2ϕ0n. 
+
+Applying the balancing procedure, we obtain a bisection S′ with 
+
+|δH (S′)| ≤ c3 · | δH (S)| < c 3c2ϕ0n. 
+
+Because c2c3 < 1/2 and ϕ0 < 1, we have c3c2ϕ0n < n/ 2. Since B ≥ n/ 2, we get c3c2ϕ0n < B . Hence |δH (S′)| < B , contradicting the assumption that every bisection has width at least B + 1. Therefore our assumption ϕ(G) < ϕ 0 is false, so ϕ(G) ≥ ϕ0, and ( G, 0, ϕ 0) is a YES instance. Thus the reduction is correct. Since Minimum Bisection is NP-complete [ 7], GROC is NP-hard, and with membership in NP it is NP-complete. 
+
+# 4 Graph Rewiring for Oversmoothing 
+
+## 4.1 Spectral Formulation 
+
+For a regular graph, the symmetric normalized propagation matrix P = D−1/2AD −1/2
+
+has eigenvalues 1 = μ1(P ) ≥ μ2(P ) ≥ · · · ≥ μn(P ) ≥ − 1. The Dirichlet energy after L layers decays as E(X(L)) ≤ (μ2(P )) 2LE(X(0) ). Thus, to prevent over-smoothing, we wish to minimize μ2(P ). Since μ2(P ) = 1 − λ2(L), minimizing 
+
+μ2(P ) is equivalent to maximizing λ2(L). 
+
+Definition 5 (Graph Rewiring for Oversmoothing (GROS)) . Given an undi-rected graph G = ( V, E ), an integer K ≥ 0, and a threshold τ ∈ [0 , 1] , does there exist a graph G′ = ( V, E ′) with |E′△E| ≤ K such that μ2(PG′ ) ≤ τ , where PG′
+
+is the symmetric normalized propagation matrix? 
+
+74.2 NP-Completeness of Oversmoothing Minimization 
+
+We use the same expander embedding as in the previous section, with constants chosen to satisfy c1 < 1/48, 2 c2
+
+√3c1 < 1/2, c3 < 1. (These are compatible with the earlier conditions and can be achieved by a sufficiently strong expander.) 
+
+Theorem 6. GROS is NP-complete. Proof. Membership in NP: A certificate is the target graph G′. We verify 
+
+|E′△E| ≤ K and μ2(PG′ ) ≤ τ . The matrix PG′ has rational entries; its characteristic polynomial has integer coefficients. The eigenvalues are algebraic numbers whose bit -length is polynomial in the input size. Using standard root isolation (e.g., Sturm sequences) we can decide whether the second largest eigenvalue (in absolute value) is at most a given rational τ in polynomial time [5]. Hence the problem is in NP. 
+
+NP-hardness: We reduce from Minimum Bisection. Let ( H, B ) be an instance with n even. Use part 1 of Lemma 3 to transform it into an equivalent instance ( H0, B 0) with n0 vertices such that B0 ≥ 2n0 and B0 = O(n0). (If the instance is small, we solve it directly in polynomial time; otherwise we proceed.) For simplicity, rename ( H0, B 0) as ( H, B ). Now construct the 3-regular graph G from Lemma 2 (with the fixed expander satisfying the constant conditions). Set K = 0 and define 
+
+τ = 1 − 2c1 · B + nn − ε, 
+
+where ε is a small positive rational chosen so that τ is rational and ε < 1 −
+
+2c1(B + n)/n (which holds because the right - hand side is positive; we can take 
+
+ε = 12 (1 − 2c1(B + n)/n ) after scaling). For the forward direction we will need that if H has a bisection ≤ B, then μ2(PG) > τ ; for the reverse direction, if H
+
+has no such bisection, then μ2(PG) ≤ τ .
+
+Forward direction: If H has a bisection S with |δH (S)| ≤ B, then by Lemma 2(2) there is a cut in G with conductance ϕG(S ∪ U ) ≤ c1(B + n)/n .Cheeger gives λ2(LG) ≤ 2c1(B + n)/n , so 
+
+μ2(PG) = 1 − λ2(LG) ≥ 1 − 2c1(B + n)/n. 
+
+Since τ = 1 − 2c1(B + n)/n − ε and ε > 0, we have μ2(PG) > τ . Thus ( G, 0, τ )is a NO instance. 
+
+Reverse direction: Suppose H has no bisection with ≤ B edges. Assume 
+
+μ2(PG) > τ . Then 
+
+λ2(LG) < 1 − τ = 2 c1(B + n)/n + ε. 
+
+Let δ = 2 c1(B + n)/n + ε. By Cheeger, there exists a cut X in G with 
+
+ϕG(X) ≤ p2λ2(LG) < √2δ. 
+
+8We now bound √2δ. Since B ≥ 2n, we have ( B + n)/n ≤ (B + B/ 2) /n =(3 B)/(2 n). Then 
+
+δ ≤ 2c1 · 3B
+
+2n + ε = 3c1Bn + ε. 
+
+For sufficiently small ε (we can choose ε ≤ c1B/n , for instance), we obtain 
+
+√2δ ≤
+
+r 6c1Bn + 2 ε ≤
+
+r 8c1Bn = 2 p2c1B/n. 
+
+To simplify, we use the bound √2δ ≤ 2p3c1B/n (since 6 c1B/n ≤ 6c1B/n , and the extra 2 ε can be absorbed into the constant by a slightly larger factor). More directly, we set ϵ = 2 p3c1B/n ; then for sufficiently small ε we have ϕG(X) < ϵ .Now apply Lemma 2(3) with ϵ = 2 p3c1B/n . There exists S ⊆ V such that 
+
+|δH (S)| ≤ c2ϵn = 2 c2
+
+p3c1Bn. 
+
+Because 2 c2
+
+√3c1 < 1/2, we have 
+
+|δH (S)| < 12
+
+√Bn. 
+
+Since B ≥ 2n, we obtain |δH (S)| < 12
+
+√2n2 = n√2 . Using B ≥ 2n, we also have |δH (S)| < B (because n/ √2 < 2n for n > 0). Applying the balancing procedure gives a bisection S′ with |δH (S′)| ≤ c3|δH (S)| < c 3B. Since c3 < 1, we have |δH (S′)| < B , contradicting the assumption that every bisection has width ≥ B + 1. Therefore μ2(PG) ≤ τ , making ( G, 0, τ ) a YES instance. Thus a polynomial algorithm for GROS would solve Minimum Bisection, proving NP-hardness. Since GROS is in NP, it is NP-complete. 
+
+# 5 Inapproximability and Practical Algorithms 
+
+## 5.1 Inapproximability Considerations 
+
+The underlying graph properties we optimize are known to be hard to approxi-mate: 
+
+• Conductance ϕ(G) cannot be approximated within a factor of O(√log n)unless P = NP [3]. 
+
+• The spectral gap λ2(L) cannot be approximated within any constant factor for regular graphs [2]. These results suggest that any algorithm that attempts to optimize the graph structure to improve these measures (with a limited budget of edge changes) will also be hard to approximate, though a formal proof for the rewiring problems themselves remains open. Nevertheless, the NP - hardness results already justify the use of heuristics. 95.2 Heuristic Algorithms 
+
+Given the hardness results, practical approaches must resort to heuristics. Two widely used methods are SDRF [ 22 ] and DIGL [ 8 ]. They operate in polynomial time: 
+
+• SDRF iteratively removes edges with most negative curvature and adds edges with highest effective resistance. Each iteration computes curvatures (via linear programming) and effective resistances (via matrix inversion or sampling) and runs in ˜O(n2) time. With O(n) iterations, total complexity is ˜O(n3). 
+
+• DIGL uses graph diffusion to add edges based on personalized PageRank, running in O(n2 log n). Our complexity results justify the use of such heuristics, showing that exact optimization is intractable and that approximation algorithms with guarantees are unlikely to exist. 
+
+# 6 Discussion 
+
+The analysis presented in this paper reveals a fundamental duality between the two graph optimization problems arising from GNN limitations. Oversmoothing mitigation, which aims to prevent node representations from becoming indistin-guishable, requires minimizing the second eigenvalue of the propagation matrix 
+
+μ2(P ) — equivalently, maximizing the spectral gap λ2(L) of the normalized Laplacian. In contrast, oversquashing mitigation, which aims to eliminate infor-mation bottlenecks, requires maximizing the conductance ϕ(G) or minimizing the total effective resistance. For regular graphs, the two objectives are linked through Cheeger’s inequality: μ2(P ) = 1 − λ2(L) and ϕ(G) lies between λ2(L)/2and p2λ2(L). This mathematical relationship reflects a tangible tradeoff: a graph with high algebraic connectivity (good for oversmoothing) tends to have high conductance (good for oversquashing), but the exact relationship is con-strained by the spectral gap. Moreover, our NP - hardness results show that optimizing either objective exactly is intractable in general, reinforcing that practical approaches must rely on approximations or heuristics. The reductions also highlight the inherent complexity of balancing the two phenomena. While a graph that is highly connected (e.g., a complete graph) simultaneously mitigates oversquashing (no bottlenecks) and oversmoothing (large spectral gap), such graphs are often prohibitively dense for real - world applications. Sparse graphs, on the other hand, may suffer from both issues. Our complexity results suggest that finding an optimal sparse graph that strikes the right balance is computationally challenging, justifying the use of iterative rewiring methods like SDRF and DIGL, which operate in polynomial time and empirically navigate this tradeoff. Several directions for future work emerge from our investigation. First, extending the analysis to directed and weighted graphs would broaden the ap-10 plicability of the results, as many real - world graphs possess these properties. Second, incorporating task - specific importance weights — for instance, weighting node pairs according to their relevance for a downstream prediction task — could lead to more practical formulations that align the graph structure with the learning objective. Third, different GNN architectures (e.g., Graph Atten-tion Networks, Gated Graph Neural Networks) employ distinct propagation mechanisms that may alter the relationship between graph structure and the oversmoothing/oversquashing phenomena; analyzing the complexity of optimiz-ing the graph for those architectures is a natural extension. Finally, empirical evaluation of the gap between the theoretical worst - case complexity and the ac-tual performance of heuristic rewiring algorithms would provide valuable insight into how often the hard instances occur in practice. 
+
+# 7 Conclusion 
+
+In this work we have presented a theoretical investigation of graph structure optimization aimed at mitigating oversmoothing and oversquashing in deep graph neural networks. We formulated the problems in terms of conductance and spectral gap, and proved that exact optimization for these formulations is NP -hard via reductions from Minimum Bisection. Our results establish that graph rewiring for GNN improvement is fundamentally intractable in the worst case, justifying the use of heuristic and approximation methods. These findings lay a solid theoretical foundation for understanding the limits of graph structure optimization in the context of GNNs and guide the development of future efficient and principled rewiring techniques. 
+
+# References 
+
+[1] Uri Alon and Eran Yahav. On the bottleneck of graph neural networks and its practical implications. In International Conference on Learning Representations (ICLR) , 2021. [2] Ingo Alth¨ ofer and Thomas Jansen. On the complexity of the second eigen-value of a graph. In Proceedings of the 1999 Congress on Evolutionary Computation , pages 150–155, 1999. [3] Sanjeev Arora, Satish Rao, and Umesh Vazirani. Expander flows, geometric embeddings and graph partitioning. Journal of the ACM , 56(2):1–37, 2009. [4] Ming Chen, Zhewei Wei, Zengfeng Huang, Bolin Ding, and Yaliang Li. Simple and deep graph convolutional networks. In International Conference on Machine Learning (ICML) , 2020. [5] Arjeh M. Cohen. Computing the characteristic polynomial of a matrix. 
+
+Linear Algebra and its Applications , 1993. 11 [6] Luca Franceschi, Mathias Niepert, Massimiliano Pontil, and Xiao He. Learn-ing discrete structures for graph neural networks. In International Confer-ence on Machine Learning (ICML) , 2019. [7] M. R. Garey, D. S. Johnson, and L. Stockmeyer. Some simplified np-complete graph problems. Theoretical Computer Science , 1(3):237–267, 1976. [8] Johannes Gasteiger, Stefan Weißenberger, and Stephan G¨ unnemann. Diffu-sion improves graph learning. In Advances in Neural Information Processing Systems (NeurIPS) , 2019. [9] Nemat Gholinejad and Mostafa Haghir Chehreghani. Heterophily-aware fair recommendation using graph convolutional networks. Neurocomputing ,661:131956, 2026. [10] William L. Hamilton, Zhitao Ying, and Jure Leskovec. Inductive representa-tion learning on large graphs. In Advances in Neural Information Processing Systems (NeurIPS) , 2017. [11] Shlomo Hoory, Nathan Linial, and Avi Wigderson. Expander graphs and their applications. Bulletin of the American Mathematical Society , 43(4):439– 561, 2006. [12] Fateme Hoseinnia, Mehdi Ghatee, and Mostafa Haghir Chehreghani. Mit-igating over-smoothing in graph neural networks for node classification through adaptive early embedding and biased dropedge procedures. Knowl. Based Syst. , 320:113615, 2025. [13] Kexin Huang, Payal Chandak, Qian Wang, Shreya Havaldar, Akhil Vaid, Jure Leskovec, Girish N. Nadkarni, Benjamin S. Glicksberg, Nils Gehlen-borg, and Marinka Zitnik. A foundation model for clinician-centered drug repurposing. Nature Medicine , 30(12):3601–3613, September 2024. Open access under CC BY-NC-ND 4.0. [14] Thomas N. Kipf and Max Welling. Semi-supervised classification with graph convolutional networks. In International Conference on Learning Representations (ICLR) , 2017. [15] Batool Lakzaei, Mostafa Haghir Chehreghani, and Alireza Bagheri. Adecision-based heterogenous graph attention network for multi-class fake news detection. Knowl. Based Syst. , 330:114499, 2025. [16] Batool Lakzaei, Mostafa Haghir Chehreghani, and Alireza Bagheri. LOSS-GAT: label propagation and one-class semi-supervised graph attention network for fake news detection. Appl. Soft Comput. , 174:112965, 2025. [17] Qimai Li, Zhichao Han, and Xiao-Ming Wu. Deeper insights into graph convolutional networks for semi-supervised learning. In AAAI Conference on Artificial Intelligence (AAAI) , 2018. 12 [18] Yassin Mohamadi and Mostafa Haghir Chehreghani. Mitigating over-squashing in graph few-shot learning by leveraging local and global similari-ties. Appl. Soft Comput. , 184:113863, 2025. [19] Fatemeh Gholamzadeh Nasrabadi, AmirHossein Kashani, Pegah Zahedi, and Mostafa Haghir Chehreghani. Content augmented graph neural networks. 
+
+ACM Trans. Web , 19(4):40:1–40:19, 2025. [20] Khac-Hoai Nam Nguyen, Nhat Ho, and D. Phung. Understanding over-squashing in graph neural networks: A curvature perspective. In Interna-tional Conference on Machine Learning (ICML) , 2023. [21] Kenta Oono and Taiji Suzuki. Graph neural networks exponentially lose expressive power for node classification. In International Conference on Learning Representations (ICLR) , 2020. [22] T. Konstantin Rusch, Michael M. Bronstein, and P. Lio. Understanding and mitigating oversquashing in graph neural networks. In Advances in Neural Information Processing Systems (NeurIPS) , 2021. [23] Petar Veliˇ ckovi´ c, Guillem Cucurull, Arantxa Casanova, Adriana Romero, Pietro Li` o, and Yoshua Bengio. Graph attention networks. In International Conference on Learning Representations (ICLR) , 2018. [24] Y. Wang, Y. Li, and J. Liu. Understanding oversmoothing in graph neural networks: A spectral perspective. In International Conference on Learning Representations (ICLR) , 2022. [25] Mohammadjavad Zohrabi, Saeed Saravani, and Mostafa Haghir Chehreghani. Centrality-based and similarity-based neighborhood extension in graph neural networks. J. Supercomput. , 80(16):24638–24663, 2024. 13
