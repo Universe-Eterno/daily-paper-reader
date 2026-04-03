@@ -1,0 +1,203 @@
+Title: Neural Approximation of Generalized Voronoi Diagrams
+
+URL Source: https://arxiv.org/pdf/2603.26964v1
+
+Published Time: Tue, 31 Mar 2026 00:24:21 GMT
+
+Number of Pages: 2
+
+Markdown Content:
+EUROGRAPHICS 2026/ T. Gerrits and M. Teschner Poster 
+
+# Neural Approximation of Generalized Voronoi Diagrams 
+
+Panagiotis Rigas 1,2 , George Ioannakis 3 , and Ioannis Emiris 1,2
+
+> 1
+
+Department of Informatics & Telecommunications, National and Kapodistrian University of Athens, Greece 
+
+> 2
+
+Archimedes, Athena Research Center, Greece 
+
+> 3
+
+Institute for Language and Speech Processing, Athena Research Center, Greece 
+
+Figure 1: Neural implicit Voronoi partition of line segments induced by learned score functions. 
+
+Abstract 
+
+We introduce VoroFields , a hierarchical neural-field framework for approximating generalized Voronoi diagrams of finite ge-ometric site sets in low-dimensional domains under arbitrary evaluable point-to-site distances. Instead of constructing the diagram combinatorially, VoroFields learns a continuous, differentiable surrogate whose maximizer structure induces the par-tition implicitly. The Voronoi cells correspond to maximizer regions of the field, with boundaries defined by equal responses between competing sites. A hierarchical decomposition reduces the combinatorial complexity by refining only near envelope transition strata. Experiments across site families and metrics demonstrate accurate recovery of cells and boundary geometry without shape-specific constructions. 
+
+CCS Concepts 
+
+• Computing methodologies → Neural networks; Computational geometry; 
+
+1. Introduction Geometric Setting. Let D ⊆ Rd be a domain and let E = {1, . . . , n}
+
+index a finite family of sites {se}e∈E . Each site induces a real-valued function fe : D → R, x 7 → fe(x), typically a point-to-site dis-tance. The associated arrangement of graphs Γe := {(x, r) ∈ D×R :
+
+r = fe(x)} partitions D×R into cells determined by the sign pattern of {r − fe(x)}e∈E [AKL13]. The generalized Voronoi stratification of D is the projection of the 1-level cells of this arrangement, equiv-alently the decomposition induced by the lower envelope 
+
+L(x) := min  
+
+> e∈E
+
+fe(x), VT := {x ∈ D : arg min  
+
+> e∈E
+
+fe(x) = T }, (1) for nonempty T ⊆ E. Figure 3 illustrates the classical construction: distance functions fe(x) := d(x, se) ∈ R≥0, their graphs, the lower envelope, and the projected Voronoi stratification. 
+
+Motivation. Exact constructions of minimization diagrams rely on geometric predicates tailored to specific site families and met-rics, often requiring algebraic computation and certified robust-ness [AKL13, EMM13]. Approximate approaches typically sub-divide space (e.g., via quad/octrees), assign nearest-site labels to vertices or cells, and reconstruct the diagram from local topology tests [BCMAS08]. Such approaches approximate the distance field over a spatial data structure, and their memory and complexity scale with spatial resolution. We instead approximate the lower-envelope operator itself by a continuous, differentiable surrogate, avoiding spatial discretization or explicit combinatorial construction, and en-abling amortized evaluation when distance queries are repeated or expensive. 
+
+Contributions. We approximate the envelope by a neural field [XTS ∗22] ΦΘ : D → Rn and define the neural envelope 
+
+LΘ(x) = max  
+
+> e∈E
+
+ΦΘ,e(x), VT = {x ∈ D : arg max  
+
+> e∈E
+
+ΦΘ,e(x) = T }. (2) 
+
+> © 2026 The Author(s). Proceedings published by Eurographics - The European Association for Computer Graphics. This is an open access article under the terms of the Creative Commons Attribution License, which permits use, distribution and reproduction in any medium, provided the original work is properly cited.
+> arXiv:2603.26964v1 [cs.CG] 27 Mar 2026
+
+2 of 2 P. Rigas, G. Ioannakis & I. Emiris / VoroFields 
+
+Figure 2: Hierarchical VoroFields construction. Local partition-ing, fat-bisector sampling, and recursive refinement of Voronoi strata. Final regions are obtained via tree parsing. 
+
+1D Line Segments 
+
+s1 s2 s3
+
+Segments in R1
+
+fe(x) = d(x, se)
+
+Distance Functions 
+
+f1
+
+f2
+
+f3
+
+> x
+
+Arrangement in R1 × R
+
+min 
+
+Lower Envelope 
+
+> x
+
+L(x) = min e∈E fe(x)
+
+project 
+
+1D Voronoi 
+
+VT = {x ∈ D : arg min e∈E fe(x) = T }
+
+Figure 3: Arrangement of distance functions for 1D segments, its lower envelope, and the projected Voronoi stratification. 
+
+This replaces spatial discretization by a continuous, differentiable, compressed, and implicit surrogate of the minimization operator. To scale with large n, we factor the global maximization into a hier-archy of local decisions over subsets Ev ⊂ E, |Ev| = k ≪ n, yielding depth h ≈ ⌈ log k n⌉, site-based (rather than space-based) refinement, and uniform handling of heterogeneous distance functions. 
+
+2. VoroFields 
+
+We approximate the lower envelope L in Eqt (1) by learning a neu-ral surrogate ΦΘ : D → R|E|. The induced neural stratification is de-fined in Equation (2), and training enforces arg max e∈E ΦΘ,e(x) ≈
+
+arg min e∈E fe(x).
+
+Hierarchical Decomposition. To scale to large n, we construct a tree T = {(v, ΦΘ(v) , R(v), E(v))}v∈V , where each node v contains a subset E(v) ⊂ E, a spatial region R(v) ⊂ D, and a local neu-ral field ΦΘ(v) : R(v) → R|E(v)|. Subsets are obtained via k-means clustering of sites, yielding partitions E(v) → { E(v) 
+
+> 1
+
+, . . . , E(v) 
+
+> k
+
+} with 
+
+|E(v) 
+
+> i
+
+| ≪ | E(v)|. Inference replaces the global maximization over E
+
+by successive local ones along the tree until a leaf vL is reached. 
+
+Fat-Bisector Sampling. Within each node v, Voronoi interfaces correspond to ∃i̸ = j ∈ E(v) s.t. fi(x) = f j(x) = min e∈E(v) fe(x).
+
+We concentrate samples inside the ε-thickened boundary 
+
+B(v) 
+
+> ε
+
+:=
+
+n
+
+x ∈ R (v) : ∃i̸ = j s.t. fi(x), f j(x) ≤ min  
+
+> e
+
+fe(x) + ε
+
+o
+
+. (3) In practice, for low dimensions, this is approximated using cluster centroids c(v) 
+
+> i
+
+and surrogate distances ˜ f (v) 
+
+> i
+
+(x) = ∥x − c(v) 
+
+> i
+
+∥.Dataset Layers Dim Metric Top-1 (%) Top-2 (%) Squares 5 R2 L∞ 93 .46 ± 1.75 97 .53 ± 0.29 Cuboids 7 R3 L∞ 89 .40 ± 1.84 97 .46 ± 0.83 Ellipses 5 R2 L2 94 .73 ± 1.01 98 .46 ± 0.56 Segments 5 R2 L2 94 .47 ± 1.21 97 .93 ± 0.49 Segments 7 R3 L2 93 .72 ± 1.83 97 .59 ± 1.09 NC-Polygons 7 R2 L2 92 .66 ± 1.73 97 .20 ± 0.37 
+
+Table 1: Leaf-level Top-m accuracy (%) across shape families (n =
+
+10 k sites). Layers denote hierarchy depth until leaf size τ.                
+
+> ℓmax /bbox 10% 20% 30% 40% 50% Baseline 91.93 84.20 68.46 71.13 72.80 Increased ε94.33 89.34 78.53 75.53 76.80
+
+Table 2: Top-1 accuracy (%) for 2D segments under increasing relative length. Enlarging ε improves boundary coverage. 
+
+Supervision. For sampled x ∈ D, labels are computed as y(x) = 
+
+arg min e∈E fe(x), and parameters are optimized via L(Θ) = 
+
+Ex∼D 
+
+ℓ(ΦΘ(x), y(x)) , with ℓ the cross-entropy loss. 
+
+3. Experimental Results 
+
+We evaluate VoroFields on synthetic geometric site families with 
+
+n = 10k parametric sites per dataset (e.g. cuboids, ellipses, seg-ments) in 2D and 3D, using analytic distances fe(x). Such non-point sites already require specialized nearest-site constructions even in low dimension [AM21]. High Top-1/Top-2 accuracy across dimensions, metrics, and primitives (Table 1) indicates reliable routing. Increasing segment length stresses boundary complexity; increasing ε in Eqt (3) improves resolution (Table 2). Errors con-centrate near dense bisector intersections and depend on ε and sampling density. Notably, training on the lower envelope (Top-1 
+
+≈ 0.9588) yields representations partially consistent with higher-order structure ( Kendall– τ ≈ 0.7215, order-2 ≈ 0.7746; evalu-ated on a 200-segment subset), suggesting that training through the probability simplex induces implicit ordering in the learned scores. 
+
+Acknowledgments 
+
+This work has been partially supported by project MIS 5154714 of the National Recovery and Resilience Plan Greece 2.0 funded by the European Union under the NextGenerationEU Program. 
+
+References 
+
+[AKL13] AURENHAMMER F., K LEIN R., L EE D.-T.: Voronoi diagrams and Delaunay triangulations . World Scientific, 2013. 1 [AM21] ABDELKADER A., M OUNT D. M.: Approximate nearest-neighbor search for line segments. In 37th Intern. Symp. Computational Geometry (SoCG) (2021), Leibniz-Zentrum für Informatik, pp. 4–1. 2 [BCMAS08] BOADA I., C OLL N., M ADERN N., A NTONI SELLARES 
+
+J.: Approximations of 2d and 3d generalized voronoi diagrams. Intern. J. Computer Mathematics 85 , 7 (2008), 1003–1022. 1 [EMM13] EMIRIS I. Z., M ANTZAFLARIS A., M OURRAIN B.: Voronoi diagrams of algebraic distance fields. Computer-Aided Design 45 , 2 (2013), 511–516. 1 [XTS ∗22] XIE Y., T AKIKAWA T., S AITO S., L ITANY O., Y AN S., KHAN N., T OMBARI F., T OMPKIN J., S ITZMANN V., S RIDHAR S.: Neural fields in visual computing and beyond. In Computer Graphics forum (2022), vol. 41, Wiley Online Library, pp. 641–676. 1

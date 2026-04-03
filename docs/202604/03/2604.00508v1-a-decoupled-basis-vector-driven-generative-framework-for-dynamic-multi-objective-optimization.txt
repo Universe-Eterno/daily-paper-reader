@@ -1,0 +1,2981 @@
+Title: A Decoupled Basis-Vector-Driven Generative Framework for Dynamic Multi-Objective Optimization
+
+URL Source: https://arxiv.org/pdf/2604.00508v1
+
+Published Time: Thu, 02 Apr 2026 00:35:00 GMT
+
+Number of Pages: 23
+
+Markdown Content:
+> JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 1
+
+# A Decoupled Basis-Vector-Driven Generative Framework for Dynamic Multi-Objective Optimization 
+
+Yaoming Yang†, Shuai Wang†, Bingdong Li*, Peng Yang, Senior Member, IEEE, and Ke Tang, Fellow, IEEE 
+
+Abstract —Dynamic multi-objective optimization requires contin-uous tracking of moving Pareto fronts. Existing methods struggle with irregular mutations and data sparsity, primarily facing three challenges: the non-linear coupling of dynamic modes, negative transfer from outdated historical data, and the cold-start problem during environmental switches. To address these issues, this paper proposes a decoupled basis-vector-driven generative framework (DB-GEN). First, to resolve non-linear coupling, the framework employs the discrete wavelet transform to separate evolutionary trajectories into low-frequency trends and high-frequency details. Second, to mitigate negative transfer, it learns transferable basis vectors via sparse dictionary learning rather than directly memorizing historical instances. Recomposing these bases under a topology-aware contrastive constraint constructs a structured latent manifold. Finally, to overcome the cold-start problem, a surrogate-assisted search paradigm samples initial populations from this manifold. Pre-trained on 120 million solutions, DB-GEN performs direct online inference without retraining or fine-tuning. This zero-shot generation process executes in milliseconds, requiring approximately 0.2 seconds per environmental change. Experimental results demonstrate that DB-GEN improves tracking accuracy across various dynamic benchmarks compared to existing algorithms. 
+
+Index Terms —Dynamic multi-objective optimization, evolution-ary algorithms, structure learning, latent manifold 
+
+I. I NTRODUCTION 
+
+# IN real-world scientific research and engineering applications, many optimization problems involve multiple conflicting objectives. Furthermore, their environmental parameters and objective functions often change dynamically over time [1]. These problems are collectively referred to as Dynamic Multi-Objective Optimization Problems (DMOPs) [2]. Unlike static multi-objective optimization, which seeks a fixed Pareto Set (PS), the core task in solving DMOPs lies in continuously and accurately tracking the time-varying PS and its corresponding image in the objective space, the Pareto Front (PF). To address this challenge, population-based Evolutionary Algorithms (EAs) have been widely adopted [1], [3], [4]. Due to their inherent parallel search mechanisms, EAs have recently demonstrated exceptional capabilities in solving complex real-world multi-objective tasks, ranging from large language model merging [5] and adversarial textual attacks [6] to online load balancing in cloud services [7]. Building upon these successes, researchers are continuously adapting evolutionary frameworks to tackle the temporal complexities of DMOPs. However, the intrinsic contradiction between environmental dynamics and population evolution poses a rigorous test for algorithm design [8]. Specifically, environmental changes rarely follow simple linear or periodic patterns; instead, they often manifest as random jumps or complex non-linear correlations [9]. Concurrently, algorithms must strike a delicate balance between rapid convergence to the current PF and maintaining diversity to accommodate future mutations [8], [10]. If this balance is disrupted, a highly converged population may be-come trapped in the optimal region of the previous environment during a sudden change, leading to tracking latency or even the loss of the global optimum. To overcome these difficulties, researchers have proposed various Dynamic Multi-Objective Evolutionary Algorithms (DMOEAs). Early approaches primarily relied on reactive evolutionary mechanisms to address environmental changes passively, including diversity-based methods, multi-population-based methods, and memory-based methods. Diversity-based methods inject new individuals through ran-dom initialization and mutation to compensate for diversity loss. Liu et al. [11] adaptively introduced diversity by employing either objective inverse modeling or random initialization based on the severity of changes. Ma et al. [12] mitigated diversity loss by partitioning the search space into subregions and randomly generating new individuals within their respective boundaries. Jiang and Yang [13] maintained population diversity by constructing an elite archive, selecting parents from both the current population and the archive during the cross-mutation process. Multi-population strategies maintain parallel sub-swarms to collaboratively balance exploration and exploitation. Aboud 
+
+et al. [14] proposed a bi-level parallel framework that uti-lizes an upper-level single population for global search and environmental monitoring, while triggering multiple lower-level sub-populations to collaboratively track the Pareto front upon detecting changes. Similarly, Jo ´cko et al. [15] partitioned the swarm into multiple dedicated sub-swarms, assigning each to optimize a specific objective function to balance exploration and exploitation. Furthermore, Yang et al. [16] divided the population into non-dominated and dominated sub-populations during the steady state, applying distinct genetic engineering operators to each group to simultaneously accelerate convergence and preserve diversity. Memory-based approaches archive historical elite solutions and retrieve them upon detecting similar changes. For instance, Hu et al. [17] established an environment pool and utilized the Mahalanobis distance to retrieve similar past environments, guiding the initialization of the new population. Sahmoud and Topcuoglu [18] developed a memory-based NSGA-II that reuses archived non-dominated solutions for population reinitialization to maintain diversity. Similarly, Jiang and Yang [13] maintained a reservoir of discovered non-dominated solutions to supply high-quality parents for genetic operations during environmental changes. However, these reactive mechanisms search without actively  
+
+> arXiv:2604.00508v1 [cs.LG] 1 Apr 2026 JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 2
+
+learning the underlying dynamics. Overemphasizing diversity degrades convergence efficiency [11], [12], multi-population schemes incur heavy computational overhead [14]–[16], and memory strategies are susceptible to negative transfer when confronting non-periodic or stochastic environments [13], [17]. To break the limitations of passive responses, proactive data-driven strategies have emerged, hypothesizing that environmen-tal variations follow learnable patterns. Temporal and trajectory prediction methods attempt to estimate the coordinates of the new PS using historical sequences. To predict the evolutionary trajectory, mathematical and statistical models have been widely adopted. For instance, Wang et al. [19] adaptively selected prediction strategies based on the extent of environmental changes, while Lei et al. [20] utilized first- and second-order derivatives within clustered sub-regions to estimate future locations. Similarly, Jiang et al. 
+
+[21] modeled the evolutionary trajectory using a vector autore-gressive framework, and Wang et al. [22] captured complex dynamics through spatial-temporal topological tensor prediction. To handle highly non-linear patterns, neural networks have also been introduced. Ye et al. [23] trained a feedforward neural network to learn directional improvements between consecutive environments, and Hu et al. [24] employed an incremental Long Short-Term Memory network comed with an inverse model to predict new Pareto sets. Despite their applicability in tracking continuous dynamics, these prediction-based methods share a common limitation regarding online data dependency. Recently, motivated by the recent development of generative models, manifold and distribution learning models have been introduced into DMOPs. These approaches assume that the PS resides on a low-dimensional manifold and attempt to learn the global probability distribution of historical elite solutions to sample high-quality, diverse populations. Specifically, Li et al. 
+
+[25] employed an adversarial autoencoder (AAE) to learn the prior distribution of historical data and generate diverse initial populations, utilizing a Markov chain to constrain the prediction scope. To explicitly capture the movement of the Pareto set, Wang et al. [26] trained a Generative Adversarial Network (GAN) on up-sampled historical elite solutions to generate new candidates. Furthermore, Wang et al. [27] combined a variational autoencoder (VAE) with a diffusion model, mapping the Pareto set into a low-dimensional latent space for robust data generation. Despite their capability to generate well-distributed solutions, these generative models commonly rely on a preliminary anchor prediction. Another paradigm circumventing exact coordinate prediction is domain knowledge transfer, which seeks shared latent spaces or mapping functions to reuse historical data. For instance, Zou 
+
+et al. [28] represented environmental knowledge using Gaussian Mixture Models for adaptive weight allocation. Song et al. [29] clustered historical Pareto sets to identify source domains and guide the search via classification. Furthermore, Jiang et al. [30] and Hu et al. [31] mitigated negative transfer by projecting historical and current data into shared spaces to minimize their distribution discrepancies. While these methods primarily transfer knowledge within a single isolated problem, very recent studies have extended this paradigm across problems. For in-stance, Xie et al. [32] proposed a centralized model to leverage knowledge across different DMOPs through dynamic feature extraction and task-specific classification. Despite broadening the learning scope, the effectiveness of these transfer-based methods relies heavily on the apparent similarity between domains. Directly transferring raw experiences or distributions without fundamentally disentangling these dynamic modes makes algorithms highly susceptible to severe negative transfer. While effective under smooth environmental changes, cur-rent methods exhibit limitations when addressing irregular variations, data sparsity, and complex topological transforma-tions. Specifically, the coupling of multiple dynamic modes challenges traditional linear prediction models, particularly during non-linear topological shifts. Furthermore, the cold-start problem restricts online adaptation: immediately after an environmental change, the scarcity of evaluated solutions provides insufficient data for timely model training and calibration. Moreover, transfer learning strategies that rely on basic distance metrics or direct memory inheritance are prone to negative transfer. To overcome these challenges, we propose a Decoupled basis-vector-driven Generative framework that shifts the dynamic optimization paradigm from online autoregressive prediction to zero-shot latent manifold generation. By leveraging a pre-trained offline model, DB-GEN bypasses the need for online data collection, while employing frequency decoupling and interpretable basis learning to extract transferable physical primitives from historical trajectories. In summary, the major contributions of this paper are highlighted as follows:  
+
+> •
+
+A Generative Framework with Frequency Decoupling: 
+
+To address the non-linear coupling of dynamic modes, we introduce a Discrete Wavelet Transform (DWT) [33] module into the generative framework. This mechanism explicitly disentangles complex evolutionary trajectories into low-frequency global trends and high-frequency local details, reducing learning complexity and isolating predictable patterns from stochastic environmental noise.  
+
+> •
+
+Cross-Problem Structure Learning via Transferable Bases: To mitigate negative transfer caused by rigidly memorizing problem-specific historical data, we design a structure learning module based on sparse dictionary learn-ing. By recomposing learnable basis vectors guided by an Inverted Generational Distance (IGD)-driven contrastive loss, the model extracts universal topological priors from diverse source problems. This constructs an interpretable latent manifold that enables robust cross-problem gener-alization rather than traditional intra-problem tracking.  
+
+> •
+
+Cross-Problem Zero-Shot Generative Search: To over-come the absolute cold-start problem during environmental switches, DB-GEN operates as an offline-trained zero-shot generator for completely unseen tasks. Pre-trained on the largest DMOP dataset to our knowledge (120 million solutions), it employs joint centroid perturbation in the continuous latent space and Tchebycheff decomposition for precise candidate screening. This paradigm directly generates high-quality initial populations without requiring any target-specific historical accumulation or online model updates. JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 3Basis-vector-driven Generative Model Structure         
+
+> Decision Variable Decision Variable
+> History Objective
+> Source
+> Source
+> Source
+> ...
+> VAE Encoder Frequency Decoupling
+> Basis Vectors
+> Dual-stream Encoder
+> Concat
+> Combination
+> Basis Coeffs
+> Reconstruction Decoder Predictor Classifier Reconstructed Predicted Objective Environment Label
+> Latent Space Construction (M1) Surrogate-Assisted Decoding (M2)
+> New
+> Initialize Population
+> Change?
+> Evolutionary Search
+> Terminate? Final Population
+> Latent Space Mapping (via M1)
+> Mean Pooling
+> Gaussian Sampling
+> Surrogate-Assisted Decoding (via M2)
+> Predictive Filtering
+> Population Fusion
+> Change Response
+> DMOEA with DB-GEN
+> Yes Yes No No Source
+> Pre-trained Model
+
+Fig. 1: The overall framework of the proposed DB-GEN. The remainder of this paper is organized as follows. Sec-tion II details the components and the overall workflow of the proposed DB-GEN. Section III presents the experimental configurations, performance comparisons, and corresponding analyses. Finally, Section IV concludes this paper and outlines potential directions for future work. II. P ROPOSED METHOD 
+
+A. Overall Algorithm 
+
+To address the limitations of existing dynamic multi-objective evolutionary algorithms, we propose a novel generative struc-ture learning framework for DMOPs. The core motivation of DB-GEN is to decouple the complex environmental dynamics into universal physical primitives and construct a topology-aware latent manifold for robust generative search. As illustrated in Fig. 1, the proposed framework funda-mentally operates in two primary phases: the Joint Latent Structure Learning phase for end-to-end model training and the Multi-Task Generative Inference phase for surrogate-assisted population initialization. 1) Offline Latent Space Pre-training Phase: Prior to online tracking, the model is jointly trained on historical evolutionary trajectories to construct a regularized latent space via three interconnected steps. First, Multi-scale Frequency Decoupling Encoding (Sec. II-B ) decomposes historical objective sequences into global trends and local details to extract a holistic perceptual embedding zperc . Subsequently, Structure Learning via Basis Vectors (Sec. II-C ) maps zperc to a sparse coefficient vector a, dynamically recomposing a learnable dictionary W
+
+into a structural latent variable zstruct . A topology-aware contrastive loss is applied here to cluster geometrically similar Pareto Fronts. Finally, Joint Generative and Predictive Mod-eling (Sec. II-D ) extracts a solution latent zsol from decision variables x using a VAE. Fusing zsol and zstruct yields a unified embedding zjoint , which is decoded via a multi-task strategy for simultaneous reconstruction, objective prediction, and semantic supervision. 2) Multi-Task Generative Inference Phase: When an en-vironmental change is detected, the frozen trained model acts as an intelligent surrogate to generate a high-quality initial population for the new environment (Sec. II-E ). Rather than relying on individual noisy predictions, the model cal-culates a joint centroid ¯zjoint from the current population to capture the macroscopic topological trend. By applying Gaussian perturbation around this centroid, a pool of candidate latent codes is generated. These candidates are subsequently decoded into decision variables and objective values. Finally, a decomposition-based selection mechanism employing the augmented Tchebycheff scalarizing function generates an initial population with balanced convergence and diversity to accelerate the subsequent evolutionary search. The complete online tracking execution process of the proposed DB-GEN is summarized in Algorithm 1. The detailed mathematical formulations and specific mechanisms of each module are comprehensively elaborated in the following subsections. 
+
+B. Multi-scale Frequency Decoupling Encoding 
+
+The dynamics of DMOPs typically exhibit complex multi-scale spatiotemporal characteristics, where rigid global move-ments are entangled with non-rigid local deformations [2], [30], [34], [35]. Decomposing these mixed dynamics into distinct frequency components is a strategy for reducing learning com-plexity and isolating predictable trends from stochastic noise [36], [37]. To effectively disentangle these coupled variations JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 4
+
+Algorithm 1 Online Tracking Phase of DB-GEN for DMOPs 
+
+Require: Sequence of DMOPs Ft, Population size N , Weight vectors W = {w1, . . . , wN }, Candidate pool size Ncand ,Perturbation radius σ, Pre-trained DB-GEN model M.
+
+Ensure: The tracked Pareto Optimal Sets PS . 
+
+> 1:
+
+Initialize environment index t ← 0, generation index 
+
+gen ← 0, PS ← ∅  
+
+> 2:
+
+Initialize population Pgen uniformly at random and evalu-ate on F0 
+
+> 3:
+
+while stopping criterion is not satisfied do  
+
+> 4:
+
+Perform standard MOEA/D reproduction and selection on Pgen to obtain Pgen +1  
+
+> 5:
+
+if environmental change is detected then  
+
+> 6:
+
+PS ← PS ∪ Pgen +1  
+
+> 7:
+
+t ← t + 1  
+
+> 8:
+
+Construct fitness trajectory matrix T by evaluating 
+
+Pgen +1 on recent past environments  
+
+> 9:
+
+[Low , High ] ← DWT (T ) 
+
+> 10:
+
+Extract ¯z ← Encoder M(Pgen +1 , Low , High ) 
+
+> 11:
+
+Generate Ncand latent vectors Zcand ← { ¯z+ϵi | ϵi ∼N (0 , σ r )}Ncand  
+
+> i=1
+> 12:
+
+[Xcand , Ycand ] ← Decoder M(Zcand ) 
+
+> 13:
+
+Calculate Tchebycheff scalarizing values for Ypred 
+
+using the predefined weight vectors  
+
+> 14:
+
+Select N solutions from Xcand with the minimum Tchebycheff values to form Pgen +1  
+
+> 15:
+
+Re-evaluate Pgen +1 on the new environment Ft 
+
+> 16:
+
+Update the ideal point z∗ based on the exact evalua-tions  
+
+> 17:
+
+end if  
+
+> 18:
+
+gen ← gen + 1  
+
+> 19:
+
+end while  
+
+> 20:
+
+return PS 
+
+while preserving the temporal resolution of the input sequence, we introduce a Multi-scale Frequency Decoupling Perception module based on Multiresolution Analysis [38]. Our method employs an explicit Decomposition-Reconstruction mechanism to separate the signal into trend and detail components of the original sequence length. Formally, let Yhis ∈ RL×M denote the historical objective sequence with length L and M objectives. The decoupling process consists of two stages: 1) Wavelet Decomposition: To decouple the temporal dy-namics, we apply the DWT [33] along the time dimension of the historical sequence. Given the relatively short length of our sequences, the Haar wavelet is adopted as the basis [39] due to its localization properties. The Haar basis consists of a scaling function ϕ(t) (low-pass filter) and a mother wavelet 
+
+ψ(t) (high-pass filter), explicitly defined for t ∈ [0 , 1) as: 
+
+ϕ(t) = 1 , ψ(t) = 
+
+(
+
+1 0 ≤ t < 1/2
+
+−1 1/2 ≤ t < 1 . (1) In the discrete domain, this normalized continuous unit interval [0 , 1) conceptually maps to a pair of adjacent sequence elements. Thus, projecting a signal onto these basis functions is mathematically equivalent to passing the signal through a digital quadrature mirror filter bank. For a discrete historical sequence 
+
+Yhis = {y1, y 2, . . . , y L} of length L, the inner products with 
+
+ϕ(t) and ψ(t) simplify to pairwise averaging and differencing. Specifically, the approximation coefficients Clow,k and detail coefficients Chigh,k at index k ∈ { 1, 2, . . . , L/ 2} are computed as: 
+
+Clow,k = y2k−1 + y2k
+
+√2 , C high,k = y2k−1 − y2k
+
+√2 . (2) where the 1/√2 factor acts as the normalization constant to ensure the orthonormality of the transformation. 2) Selective Reconstruction: To obtain independent feature streams in the original time domain, we utilize the Inverse Discrete Wavelet Transform (IDWT). By selectively zeroing out specific coefficient sets during reconstruction, we can isolate the macroscopic trends from the microscopic variations. Specifically, the low-frequency sequence Ylow is recon-structed using only Clow (with Chigh zeroed out), while the high-frequency sequence Yhigh is reconstructed using only 
+
+Chigh (with Clow zeroed out). Following the inverse filter properties of the Haar transform, the reconstructed time-domain elements at adjacent indices 2k − 1 and 2k are mathematically decoupled as: 
+
+ylow  
+
+> 2k−1
+
+= Clow,k + Chigh,k 
+
+√2 = Clow,k 
+
+√2 ,ylow  
+
+> 2k
+
+= Clow,k − Chigh,k 
+
+√2 = Clow,k 
+
+√2 ,yhigh  
+
+> 2k−1
+
+= Clow,k + Chigh,k 
+
+√2 = Chigh,k 
+
+√2 ,yhigh  
+
+> 2k
+
+= Clow,k − Chigh,k 
+
+√2 = − Chigh,k 
+
+√2 .
+
+(3) This discrete formulation guarantees that Ylow captures the step-wise local mean of the historical trajectory, while Yhigh extracts the local step-wise fluctuations. It satisfies the reconstruction property, ensuring no information loss during the process. Subsequently, a dual-stream encoder utilizing Multilayer Perceptron (MLP) extracts features from these decoupled views: 
+
+hlow = MLP L(Flatten (Ylow ); θL),
+
+hhigh = MLP H (Flatten (Yhigh ); θH ), (4) where MLP L and MLP H are the low-frequency and high-frequency encoders parameterized by θL and θH , respectively. 
+
+hlow captures the global evolutionary trend of the Pareto Front, while hhigh encodes the local geometric variations. Finally, to construct a comprehensive representation of the current state, the features from both streams are fused. We employ a concatenation-based fusion strategy followed by a projection layer to integrate the multi-scale information: 
+
+zperc = MLP F ([ hlow ⊕ hhigh ]; θF ), (5) where ⊕ denotes the concatenation operation, and MLP F serves as the fusion network parameterized by θF . The resulting vector zperc serves as a holistic perceptual embedding of the environment, containing both trend information and detail features required for subsequent structure learning. JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 5
+
+C. Structure Learning via Basis Vectors 
+
+A fundamental challenge in transfer-learning-based DMOP solvers is the risk of negative transfer when reusing knowledge from different historical problems, where models may retrieve misleading historical solutions due to superficial similarities in environmental parameters, failing to adapt to novel topological changes [30], [40]. To overcome this, we propose a Structure Learning mechanism based on Sparse Dictionary Learning [41], [42]. Instead of memorizing specific historical solutions, our model learns to capture universal basis vectors of environmental evolution. By dynamically recomposing these learned basis vectors, the model can generalize to unseen dynamics through compositional generation. 
+
+1) Sparse Basis Representation: To construct the basis vector set, we introduce a learnable latent dictionary matrix 
+
+W ∈ RK×D , where K denotes the dictionary size and D
+
+represents the latent feature dimension. After training, each row of W represents a basis vector encoding a distinct mode of environmental change. To reconstruct the latent structure of the current environment, the model generates a sparse coefficient vector a ∈ RK based on the perceptual embedding zperc obtained from the previous stage. Furthermore, we employ a Batch Normalization (BN) layer followed by a ReLU activation to adaptively induce sparsity in a:
+
+a = ReLU (BN (MLP struct (zperc ))) , (6) where MLP struct maps the perceptual features to the coefficient space. The BN layer normalizes the pre-activation values to a standard distribution, and the ReLU function naturally truncates negative values to zero. It ensures that only a small subset of relevant basis vectors is activated for any given environment. The final structural latent variable zstruct is then obtained by the linear combination of basis vectors: 
+
+zstruct = a · W =
+
+> K
+
+X
+
+> k=1
+
+akwk. (7) Through this decomposable representation, the model can flexibly describe complex, unseen environmental dynamics by recombining known primitives, thereby achieving robust zero-shot generalization. 
+
+2) Topology-Aware Contrastive Regularization: To ensure that the learned basis vectors capture topological semantics rather than arbitrary statistical correlations, we introduce a Topology-Aware Contrastive Loss based on the IGD metric . Specifically, we quantify the topological difference between two environments, Ei and Ej , by calculating the IGD value between their ground-truth Pareto Fronts PF i and PF j . Prior to training, we compute a global distance matrix D ∈ RN ×N cov-ering all historical environments. For each anchor environment 
+
+Ei, we pre-select two candidate sets:  
+
+> •
+
+Positive Set S+ 
+
+> i
+
+: Comprising the top-k environments with the smallest IGD distances to Ei excluding Ei itself.  
+
+> •
+
+Negative Set S− 
+
+> i
+
+: Comprising the top-k environments with the largest IGD distances to Ei.During the training phase, for a given anchor environment 
+
+Ei, we randomly sample a positive instance Ep ∈ S + 
+
+> i
+
+and a negative instance En ∈ S − 
+
+> i
+
+. Drawing inspiration from deep metric learning [43], we use a triplet margin loss to explicitly shape the geometry of the latent manifold. Rather than relying solely on unsupervised reconstruction gradients, this contrastive objective directly enforces that the sparse coefficient vector 
+
+ai is closer to its topological neighbor ap than to the distant instance an:
+
+Lcontrast = max(0 , ∥ai − ap∥2 − ∥ ai − an∥2 + m), (8) where m = 1 .0 defines the minimum separation boundary between non-similar environments. By injecting this physical topological prior into the optimization process, the contrastive loss prevents the dictionary matrix W from degenerating into a purely mathematical compression tool. Instead, it forces the latent space to cluster environments with similar Pareto Front geometries. This structural alignment is crucial for the subsequent evolutionary search, as it ensures that random perturbations or interpolations of the latent coefficients a will reliably map to continuous, physically valid environmental changes in the decision space. 
+
+D. Joint Generative and Predictive Modeling 
+
+To bridge the gap between the learned environmental structure and the decision space, we design a framework based on latent variable fusion. This module integrates the decision variables x and the environmental context zstruct to perform simultaneous solution reconstruction and objective prediction. 
+
+1) Latent Variable Fusion: The objective of this module is to construct a joint representation zjoint that encapsulates both the intrinsic manifold of the solution space and the physical laws of the current environment. To achieve this, we synthesize two complementary latent codes. First, following the VAE framework [44], the Solution Latent ( zsol ) is extracted from the decision variable x via a probabilistic encoder Eϕ, which maps the input to the mean vector μ and variance vector σ2. Modeled as a diagonal Gaus-sian distribution qϕ(zsol |x) = N (μ, diag (σ2)) , this variable captures the diversity and distribution patterns of the population. To maintain the generative capability of the framework and ensure a continuous latent space, a Kullback-Leibler (KL) divergence loss LKL is introduced here. This term regularizes the approximate posterior distribution qϕ(zsol |x) to closely match a prior distribution, defined as a standard multivariate normal distribution N (0, I). This regularization prevents the latent codes from becoming disjointed or overfitting to discrete points, which would otherwise degrade the model’s ability to sample diverse solutions. The KL divergence is computed analytically as: 
+
+LKL = DKL (qϕ(zsol |x)∥N (0, I)) = − 12
+
+> dz
+
+X
+
+> j=1
+
+ 1 + log( σ2 
+
+> j
+
+) − μ2 
+
+> j
+
+− σ2
+
+> j
+
+ , (9) where dz is the dimensionality of the solution latent space zsol ,and μj and σj are the j-th components of the mean vector μ
+
+and standard deviation vector σ produced by the encoder. JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 6
+
+Second, the Structural Context ( zstruct ), obtained from the Basis Module (Eq. 7), represents the sparse combination of physical primitives specific to the current environment. These two distinct codes are concatenated to form the joint embedding: 
+
+zjoint = [ zsol ⊕ zstruct ], (10) where ⊕ denotes concatenation. This design ensures that the subsequent generation is conditioned on the learned environ-mental dynamics while retaining the stochasticity required for robust exploration [45]. 
+
+2) Multi-Task Decoding: The joint embedding zjoint serves as the unified representation that encapsulates both the solution characteristics and the environmental context. To utilize this representation, we employ a multi-head decoding strategy consisting of four parallel streams [46]. The first branch focuses on reconstructing the decision variables. We employ an MLP as the backbone decoder to map the latent embedding back to the decision space. To satisfy the boundary constraints of the decision variables, a Sigmoid activation function is applied to the final output layer: 
+
+ˆx = Sigmoid (Wrec MLP rec (zjoint ) + brec ), (11) where Wrec and brec denote the weight matrix and bias vector of the output layer, respectively. The reconstruction loss Lrec =
+
+∥x − ˆx∥2 forces the latent space to capture the geometric features of the Pareto Set. Simultaneously, the second branch acts as a surrogate predictor to estimate the objective values. The predictor aims to regress the unbounded objective values directly: 
+
+ˆy = Wpred MLP pred (zjoint ) + bpred . (12) The prediction loss Lpred = ∥y − ˆy∥2 renders the latent space objective-aware, enabling efficient candidate screening. To ensure the latent space retains distinct semantic structures of the problem environment, we introduce two auxiliary heads that also operate on zjoint . A problem classifier predicts the problem identity logits pid via a linear transformation to differentiate between optimization landscapes: 
+
+pid = Wcls zjoint + bcls . (13) Concurrently, an environmental regressor estimates the evolu-tionary status tnorm ∈ [0 , 1] using a Sigmoid-activated linear layer to capture continuous temporal dynamics: 
+
+ˆtnorm = Sigmoid (Wreg zjoint + breg ). (14) These auxiliary tasks implicitly regularize the structure learning module by minimizing the auxiliary loss Laux , composed of the Cross-Entropy loss for classification and the Mean Squared Error for time regression. 
+
+3) Overall Objective: The entire framework is trained end-to-end by minimizing the weighted sum of the reconstruction, prediction, topological, auxiliary, and KL-divergence losses: 
+
+Ltotal = Lrec + Lpred + λ1Lcontrast 
+
++ λ2Laux + λ3LKL , (15) where λ1, λ 2, and λ3 act as penalty coefficients to balance the contributions of the respective task components. 
+
+E. Surrogate-Assisted Generative Search 
+
+While the learned joint model provides the capability to reconstruct solutions, identifying the distribution for the 
+
+next moment requires an effective search strategy within the latent manifold. We propose a Centroid-based Neighborhood Sampling strategy with a surrogated screening mechanism to generate high-quality, diverse initial populations. 
+
+1) Centroid-based Latent Mapping: Given the current pop-ulation Pt, we map individuals through the encoding modules to obtain a set of joint embeddings {z(i)
+
+> joint
+
+}. Geometrically, each embedding represents a localized semantic coordinate of a solution under the current environmental state. However, due to the stochasticity of evolutionary search, individual representations often suffer from approximation noise and may not perfectly align with the true Pareto manifold. To mitigate this individual-level noise, we calculate the joint centroid of the population: 
+
+¯zjoint = 1
+
+|P t|
+
+X
+
+> x∈P t
+
+zjoint (x). (16) By aggregating the individual embeddings, this centroid ef-fectively acts as a stable anchor representing the dominant topological trend of the current environment. This mechanism filters out stochastic micro-fluctuations, providing a robust macroscopic descriptor of the population distribution. Benefiting from the topological smoothness and continuity induced by our latent space construction mechanism, we assume that the optimal solutions for the next moment reside in the local geometric neighborhood of this centroid. Furthermore, introducing stochasticity into population updates rather than re-lying solely on deterministic greedy strategies can significantly enhance search efficiency and prevent premature convergence in MOEAs [47]. Therefore, we inject controlled randomness into the generation phase to thoroughly explore the latent neighborhood. Specifically, we generate a candidate pool Zcand 
+
+consisting of Ncand samples via Gaussian perturbation: 
+
+z(j) 
+
+> cand
+
+= ¯ zjoint + σr · ϵ(j), (17) where ϵ(j) ∼ N (0, I) is the standard multivariate Gaussian noise for j = 1 , 2, . . . , N cand , and σr controls the exploration intensity. These perturbed joint codes are then fed into the frozen Decoder Dψ and the Surrogate Predictor Pξ to obtain the reconstructed candidate solutions Xcand and their predicted objective values Ycand , respectively. 
+
+2) Decomposition-based Screening: To ensure the generated population is not only convergent but also diverse and aligned with the sub-problems of the downstream optimizer, we employ a greedy matching strategy based on the Augmented Tchebycheff decomposition. Let {w1, . . . , wN } be the set of weight vectors defining the sub-problems. We identify the ideal point z∗ from the predicted values Ycand . For each sub-problem k, we aim to select a unique candidate x(k) from the pool that minimizes the Augmented Tchebycheff cost: cost (x, wk) = max  
+
+> j
+
+{wk,j | ˆfj (x) − z∗ 
+
+> j
+
+|} + ρ X
+
+> j
+
+| ˆfj (x) − z∗ 
+
+> j
+
+|,
+
+(18) JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 7
+
+where ˆf (x) is the predicted objective vector. The selection process proceeds iteratively: for each weight vector, we assign the candidate with the minimum cost that has not yet been selected. This bijective mapping is designed to maintain the distribution of the generated initial population along the Pareto Front, providing an evenly distributed starting point for the subsequent evolutionary search. III. EXPERIMENTS 
+
+A. Benchmark Test Problems and Performance Indicators 1) Test Problems: To comprehensively evaluate the effec-tiveness of the proposed framework, we conduct experiments on two widely recognized DMOP benchmark suites: the FDA test suite [2] and the CEC 2018 benchmark suite (DF1 through DF14) [9]. In addition to these synthetic benchmarks, we also incorporate the real-world inspired Dynamic Resource Allocation (DRA) and Dynamic Path Planning (DPP) problems [48] to verify the practical applicability of the model. 
+
+2) Performance Indicators: The performance of the algo-rithms is quantified using two metrics: Mean Inverted Genera-tional Distance (MIGD) [49] and Mean Hypervolume (MHV) [50]. The MIGD metric calculates the average IGD across all environments over the entire evolutionary process. It serves as a comprehensive indicator of both the convergence of the solution set and its diversity along the true Pareto Front. A smaller MIGD value indicates superior performance. Conversely, the MHV metric measures the average Hypervolume (HV) covered by the solution set across all time steps. It assesses the ability of algorithm to maintain a wide and well-distributed coverage in the objective space. Unlike MIGD, a larger MHV value signifies better performance. 
+
+B. Competitors and Parameter Settings 1) Competitors: To demonstrate the performance of our proposed method, we compare it against four state-of-the-art algorithms that represent different mainstream categories in dynamic multi-objective optimization. Specifically, the selected competitors include STT-MOEA/D [22], which employs spatial-temporal topological tensor prediction to forecast the location of the PS in the subsequent environment; DIP-DMOEA [23], a method based on directional improvement prediction; the recently proposed VARE [21], which utilizes vector autoregres-sive evolution; and SIKT-DMOEA [31], an algorithm driven by similarity identification and knowledge transfer. 
+
+2) Parameter Settings: To comprehensively evaluate the performance of the algorithm under different dynamic charac-teristics, we adopt three standard configurations for the change frequency ( τt) and change severity ( nt): (10 , 10) for standard changes, (5 , 10) for high-frequency changes, and (10 , 5) for severe changes. These settings are widely adopted in recent DMOP literature [21], [22]. During the online tracking phase, the framework employs MOEA/D equipped with Differential Evolution (DE) opera-tors for static optimization. For the offline preparation, the pre-training dataset is constructed by instantiating multiple historical problems under various nt configurations, yielding a collection of approximately 1.2 × 10 8 samples to ensure a robust approximation of the latent manifolds. All algorithms are executed for 20 independent runs on each test instance to mitigate statistical randomness. Due to space constraints, the detailed parameter configuration tables for the DMOP bench-marks, the DB-GEN architecture, and the static optimizer, along with the specific methodology for training data generation, are provided in Appendix A-A. 
+
+C. Overall Performance Comparison 
+
+As shown in Tables I and II, our method exhibits highly competitive performance across the majority of test instances. The evaluation employs the MIGD (smaller is better) and MHV (larger is better) metrics. To facilitate observation, the best and second-best mean values are highlighted with dark and light gray backgrounds, respectively. Furthermore, the symbols ” +”, ”−”, and ” ≈” appended to the baseline results indicate that the compared algorithm performs significantly better than, worse than, or similarly to our proposed method, according to the Wilcoxon rank-sum test at a 5% significance level. Statistically, out of the 57 tested dynamic environment configurations, DB-GEN achieves the optimal MIGD (dark gray) on 49 instances and the sub-optimal (light gray) on 5 instances, yielding a remarkable Top-2 hit rate of 94.7%. For the MHV metric, Table II presents the comparison results on the FDA1 to FDA5 instances due to space limitations. On this subset, our method secures the optimal MHV results in 13 out of the 15 configurations. Furthermore, the non-parametric Friedman test at a 5% significance level reveals that DB-GEN achieves an outstanding average rank of 1.29 for the MIGD metric (across all 57 instances) and 1.20 for the MHV metric (on the presented FDA subset). These statistically significant scores, closely approaching the theoretical optimum of 1.0, quantitatively demonstrate that DB-GEN consistently secures the top position across the test environments. It is worth noting that DF6 and DF9 are generally considered challenging problems due to their complex and irregular Pareto Front changes. Consequently, baseline methods often exhibit poor IGD performance and struggle to track the shifting PF, particularly under severe environmental mutations (nt = 10 , τ t = 5). Under such severe settings, explicit numerical predictions frequently fail. In contrast, DB-GEN demonstrates remarkable robustness, yielding a substantial quantitative improvement. For instance, on the DF6 problem (nt = 10 , τ t = 5 ), DB-GEN achieves an IGD of 4.26E-01, reducing the tracking error by approximately 66.4% compared to the best-performing baseline (DIP-DMOEA with 1.27E+00). Similarly, on the DF9 problem under the same severe config-uration, DB-GEN lowers the IGD from the baseline best of 2.78E-01 to 8.00E-02, marking a 71.2% performance gain. This indicates that the continuous latent space modeling enables reliable zero-shot solution generation, effectively handling environments where historical data is severely deceptive. 
+
+D. Dynamic Adaptability Analysis 
+
+To gain a deeper understanding of the adaptability of the proposed framework across dynamic environments, this section provides a detailed analysis of its evolutionary behavior. JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 8
+
+TABLE I: The MIGD values and standard deviation in parentheses obtained by SOTAs and Ours. 
+
+Problem nt τt STT-MOEA/D DIP-DMOEA VARE SIKT-DMOEA Ours DF1 5 10 7.36e-02(8.78e-03) − 3.71e-02(3.15e-04) − 4.22e-02(3.33e-03) − 5.64e-02(8.69e-03) − 1.31e-02(4.08e-03) 10 5 6.75e-01(3.59e-03) − 6.48e-02(5.87e-03) − 1.24e-01(1.69e-02) − 1.50e-01(2.38e-02) − 2.10e-02(9.62e-04) 10 10 6.33e-01(7.77e-02) − 2.33e-02(4.03e-03) − 2.85e-02(1.85e-03) − 5.35e-02(7.42e-03) − 1.05e-02(2.22e-04) DF2 5 10 2.19e-02(1.38e-02) ≈ 4.97e-02(6.99e-03) − 6.51e-02(5.91e-03) − 4.21e-02(4.36e-03) − 2.15e-02(5.04e-03) 10 5 4.02e-01(6.23e-03) − 9.55e-02(8.71e-03) − 1.36e-01(9.32e-02) − 1.08e-01(7.67e-03) − 4.69e-02(1.64e-03) 10 10 3.85e-01(3.81e-03) − 3.82e-02(8.73e-04) − 4.22e-02(3.67e-03) − 3.63e-02(3.91e-03) − 1.57e-02(1.06e-03) DF3 5 10 2.05e-01(1.91e-02) − 1.05e-01(7.91e-03) + 1.32e-01(2.43e-02) ≈ 4.43e-02(3.74e-03) + 1.41e-01(3.67e-03) 10 5 6.48e-01(2.77e-02) − 1.51e-01(5.11e-04) − 3.37e-01(1.44e-01) − 1.07e-01(6.85e-03) + 1.37e-01(8.45e-03) 10 10 6.70e-01(1.24e-02) − 8.65e-02(6.30e-04) + 1.41e-01(2.23e-02) − 3.67e-02(1.93e-03) + 9.68e-02(1.16e-02) DF4 5 10 4.31e-01(6.49e-02) − 1.18e-01(5.28e-02) − 4.07e-02(2.44e-03) + 6.23e-02(4.12e-03) ≈ 6.23e-02(2.17e-03) 10 5 8.68e-01(5.39e-02) − 1.94e-01(6.51e-02) − 7.63e-02(1.29e-03) ≈ 1.23e-01(8.37e-03) − 7.56e-02(2.14e-03) 10 10 8.34e-01(1.43e-02) − 1.23e-01(9.53e-02) − 3.49e-02(9.83e-03) + 5.67e-02(2.63e-03) ≈ 5.59e-02(9.25e-04) DF5 5 10 2.77e-02(1.06e-02) − 2.10e-02(9.42e-04) − 4.65e-02(4.04e-03) − 9.73e-02(2.13e-02) − 1.38e-02(3.58e-04) 10 5 6.42e-01(5.29e-03) − 4.29e-02(7.37e-04) − 1.30e-01(4.03e-03) − 2.33e-01(6.05e-02) − 2.32e-02(9.10e-04) 10 10 6.16e-01(4.29e-03) − 1.84e-02(9.86e-04) − 3.71e-02(2.44e-03) − 5.21e-02(6.94e-03) − 1.26e-02(1.62e-04) DF6 5 10 7.15e-01(1.38e+00) − 6.91e-01(8.83e-02) − 1.80e+00(4.30e-01) − 2.18e+00(3.20e-01) − 1.62e-01(2.01e-01) 10 5 4.35e+00(7.91e-01) − 1.27e+00(2.33e-01) − 6.08e+00(7.90e-01) − 6.24e+00(7.43e-01) − 4.26e-01(2.27e-01) 10 10 3.43e+00(5.64e-01) − 9.50e-01(4.05e-02) − 5.44e+00(1.34e+00) − 3.00e+00(2.72e-01) − 3.62e-01(6.43e-02) DF7 5 10 1.52e+00(5.14e-02) − 3.25e-01(7.91e-02) − 1.15e-01(3.38e-02) − 6.76e-02(1.70e-02) + 9.01e-02(1.83e-02) 10 5 6.05e-01(4.53e-03) − 2.12e-01(8.24e-04) − 2.56e-01(9.75e-03) − 1.19e-01(3.46e-02) − 7.20e-02(2.22e-02) 10 10 5.95e-01(2.50e-03) − 2.13e-01(6.36e-03) − 8.83e-02(7.41e-03) − 4.43e-02(2.45e-02) + 5.98e-02(8.51e-03) DF8 5 10 5.29e-02(1.83e-02) − 6.22e-02(4.60e-03) − 4.33e-02(3.32e-03) − 3.49e-02(2.34e-03) − 1.60e-02(5.88e-04) 10 5 5.44e-01(6.32e-03) − 6.40e-02(9.37e-04) − 7.57e-02(4.61e-04) − 7.12e-02(4.65e-03) − 1.79e-02(1.49e-04) 10 10 5.34e-01(6.21e-03) − 5.86e-02(9.69e-04) − 4.52e-02(2.81e-03) − 4.20e-02(3.63e-03) − 1.56e-02(7.03e-04) DF9 5 10 1.01e-01(6.42e-02) − 3.01e-01(5.22e-04) − 3.72e-01(1.04e-01) − 3.38e-01(5.27e-02) − 6.81e-02(2.35e-03) 10 5 8.81e-01(5.87e-02) − 3.25e-01(6.65e-03) − 6.65e-01(5.78e-02) − 5.64e-01(1.02e-01) − 8.00e-02(9.30e-03) 10 10 6.70e-01(3.10e-02) − 2.02e-01(9.69e-04) − 2.77e-01(8.25e-02) − 2.39e-01(4.92e-02) − 4.28e-02(5.25e-03) DF10 5 10 3.28e-01(5.29e-02) − 1.90e-01(4.46e-04) − 1.92e-01(1.04e-02) − 2.01e-01(1.25e-02) − 1.53e-02(6.86e-04) 10 5 3.77e-01(4.44e-03) − 1.95e-01(7.00e-04) − 2.45e-01(9.24e-03) − 2.21e-01(1.32e-02) − 2.55e-02(2.31e-03) 10 10 3.93e-01(3.42e-03) − 2.06e-01(3.44e-04) − 2.10e-01(4.80e-02) − 2.05e-01(1.34e-02) − 1.22e-02(7.26e-04) DF11 5 10 3.40e-01(7.89e-02) − 1.26e-01(3.79e-04) − 1.18e+00(3.14e-03) − 1.19e-01(6.71e-03) − 9.00e-03(2.11e-04) 10 5 8.34e-01(1.50e-03) − 1.33e-01(7.56e-04) − 1.25e+00(1.89e-03) − 1.36e-01(4.83e-03) − 1.21e-02(2.82e-04) 10 10 8.26e-01(1.63e-03) − 1.25e-01(6.56e-04) − 1.06e+00(3.90e-03) − 1.07e-01(3.92e-03) − 7.45e-03(2.93e-04) DF12 5 10 4.46e-01(5.60e-02) − 2.80e-01(6.35e-04) − 4.44e-01(3.67e-02) − 5.68e-02(7.78e-03) ≈ 5.68e-02(7.22e-03) 10 5 5.64e-01(4.69e-02) − 1.94e-01(8.24e-04) − 2.61e-01(1.03e-02) − 5.94e-02(8.90e-03) − 5.11e-02(5.68e-03) 10 10 4.68e-01(5.47e-02) − 1.77e-01(1.54e-03) − 4.73e-01(3.11e-02) − 3.05e-02(6.35e-03) ≈ 2.89e-02(2.68e-03) DF13 5 10 2.47e-01(1.12e-02) − 1.95e-01(2.76e-03) − 1.85e-01(6.46e-03) − 2.72e-01(8.13e-03) − 1.14e-01(4.74e-03) 10 5 6.48e-01(7.15e-03) − 2.19e-01(6.97e-04) − 2.49e-01(2.43e-02) − 3.46e-01(1.81e-02) − 1.25e-01(5.71e-03) 10 10 6.21e-01(1.04e-02) − 2.02e-01(8.87e-03) − 1.71e-01(4.48e-03) − 2.56e-01(4.92e-03) − 1.14e-01(6.58e-03) DF14 5 10 8.89e-02(2.02e-03) − 7.17e-02(4.03e-04) − 1.10e-01(4.18e-03) − 8.34e-02(2.59e-03) − 6.34e-02(1.60e-04) 10 5 1.68e-01(6.05e-03) − 8.21e-02(7.21e-03) − 2.09e-01(4.19e-02) − 1.49e-01(1.66e-02) − 6.83e-02(1.38e-03) 10 10 1.53e-01(3.38e-03) − 6.90e-02(9.81e-04) − 1.60e-01(4.50e-03) − 7.36e-02(2.09e-03) − 6.13e-02(1.68e-04) FDA1 5 10 4.90e-01(7.10e-03) − 3.98e-01(3.88e-04) − 3.86e-01(1.48e-02) − 6.99e-02(1.08e-02) − 1.64e-02(8.05e-03) 10 5 5.34e-01(4.71e-03) − 3.30e-01(6.65e-03) − 2.58e-01(3.59e-02) − 1.49e-01(3.17e-02) − 2.58e-02(3.02e-03) 10 10 5.08e-01(5.54e-03) − 1.48e-01(7.47e-04) − 2.19e-01(3.24e-02) − 3.95e-02(2.77e-03) − 1.22e-02(2.25e-03) FDA2 5 10 1.24e+00(7.21e-03) − 1.96e-01(7.96e-02) − 2.05e-01(2.20e-03) − 2.78e-02(1.80e-03) − 2.45e-02(3.24e-03) 10 5 1.91e-01(1.43e-03) − 2.16e-01(6.92e-04) − 1.21e+00(3.55e-03) − 7.86e-02(1.12e-02) − 1.15e-02(5.87e-03) 10 10 1.15e+00(2.10e-03) − 9.98e-01(9.42e-04) − 1.04e+00(2.78e-03) − 2.38e-02(1.18e-03) ≈ 2.34e-02(5.26e-03) FDA3 5 10 1.47e-01(2.12e-03) − 1.54e-01(1.24e-02) − 2.29e-01(2.99e-02) − 1.23e-01(1.18e-02) − 5.43e-02(4.79e-04) 10 5 1.71e-01(3.12e-03) − 1.23e-01(3.80e-04) − 2.09e-01(2.33e-02) − 2.61e-01(3.35e-02) − 5.94e-02(1.30e-03) 10 10 7.53e-02(4.41e-03) − 2.46e-01(3.42e-04) − 4.39e-01(4.14e-02) − 8.50e-02(9.16e-03) − 5.35e-02(6.42e-04) FDA4 5 10 5.34e-01(1.04e-01) − 7.86e-01(5.68e-03) − 1.85e+00(6.89e-03) − 1.03e-01(4.95e-03) − 7.32e-02(1.25e-03) 10 5 5.84e-01(2.74e-01) − 6.48e-01(7.49e-04) − 2.49e-01(3.75e-02) − 1.76e-01(1.36e-02) − 8.58e-02(1.03e-03) 10 10 4.38e-01(5.39e-02) − 5.59e-01(3.09e-04) − 1.75e-01(5.02e-03) − 9.45e-02(2.41e-03) − 7.26e-02(7.87e-04) FDA5 5 10 5.89e-02(2.40e-03) + 8.24e-02(5.42e-04) + 7.67e-02(4.68e-03) + 3.33e-01(2.87e-02) − 1.14e-01(8.36e-03) 10 5 3.51e-01(2.08e-03) − 2.81e-01(7.33e-04) − 2.06e-01(1.87e-02) − 4.64e-01(3.83e-02) − 9.33e-02(9.55e-03) 10 10 4.48e-01(1.92e-03) − 4.46e-01(2.31e-04) − 1.16e-01(5.60e-03) ≈ 3.34e-01(2.86e-02) − 1.16e-01(8.10e-03) 
+
+Average Rank 4.30 2.95 3.63 2.82 1.29 JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 9
+
+TABLE II: The MHV values and standard deviation in parentheses obtained by SOTAs and Ours. 
+
+Problem nt τt STT-MOEA/D DIP-DMOEA VARE SIKT-DMOEA Ours FDA1 5 10 1.07e-01(4.61e-03) − 5.31e-01(1.68e-03) − 6.01e-01(1.57e-03) − 6.17e-01(1.49e-02) − 6.27e-01(6.56e-03) 10 5 7.13e-02(3.59e-03) − 6.51e-01(4.69e-02) − 6.56e-01(6.34e-03) − 5.08e-01(4.21e-02) − 6.74e-01(3.47e-03) 10 10 1.02e-01(3.55e-03) − 7.19e-01(4.46e-03) + 8.07e-01(5.19e-04) + 6.60e-01(3.99e-03) ≈ 6.75e-01(4.19e-03) FDA2 5 10 1.74e-03(3.06e-03) − 5.54e-01(3.50e-03) − 6.84e-01(1.08e-02) − 5.64e-01(1.69e-03) − 2.00e+00(1.14e-02) 10 5 1.33e-02(1.79e-03) − 7.11e-01(1.46e-02) − 6.07e-01(2.29e-04) − 5.57e-01(1.35e-02) − 1.82e+00(2.01e-02) 10 10 2.63e-01(1.68e-03) − 7.90e-01(4.57e-03) − 5.85e-01(5.56e-04) − 5.65e-01(1.71e-03) − 1.96e+00(2.85e-02) FDA3 5 10 2.96e-01(1.16e-03) − 5.33e-01(4.75e-04) − 6.30e-01(8.86e-03) − 4.59e-01(1.00e-02) − 6.72e-01(1.01e-03) 10 5 4.39e-01(2.24e-03) − 3.39e-01(7.72e-04) − 5.71e-01(8.31e-03) − 3.38e-01(2.23e-02) − 6.59e-01(2.78e-03) 10 10 6.50e-01(7.14e-03) ≈ 6.37e-01(5.32e-04) − 5.82e-01(2.93e-04) − 5.06e-01(8.91e-03) − 6.72e-01(1.04e-03) FDA4 5 10 1.70e-01(8.38e-03) − 3.36e-01(4.65e-04) − 3.33e-01(8.18e-03) − 4.58e-01(7.47e-03) ≈ 4.68e-01(2.19e-03) 10 5 1.11e-01(3.86e-02) − 3.05e-01(1.36e-03) − 2.26e-01(1.40e-03) − 3.34e-01(1.56e-02) − 3.42e-01(3.32e-03) 10 10 1.70e-01(3.00e-02) − 4.12e-01(2.38e-04) − 4.51e-01(1.57e-04) − 4.77e-01(4.99e-03) − 4.93e-01(8.06e-04) FDA5 5 10 4.90e-01(3.94e-02) ≈ 4.40e-01(2.27e-04) − 4.18e-01(1.37e-04) − 4.51e-01(1.37e-02) ≈ 4.59e-01(3.86e-04) 10 5 7.12e-02(1.50e-02) − 2.42e-01(5.28e-04) − 3.95e-01(1.16e-03) − 3.33e-01(1.47e-02) − 4.00e-01(8.76e-04) 10 10 1.20e-01(1.71e-02) − 3.54e-01(4.65e-03) − 4.62e-01(5.53e-04) − 4.58e-01(8.49e-03) − 4.98e-01(2.09e-04) 
+
+Average Rank 4.40 3.27 2.80 3.33 1.20 
+
+Specifically, we examine the algorithm’s tracking stability over sequential environmental changes, visualize the mechanisms underlying its zero-shot population generation, and investi-gate its generalization boundaries when encountering out-of-distribution topological dynamics. 
+
+1) Evolutionary Stability Tracking: Fig. 2 illustrates the trajectory of the final IGD values obtained at the end of each environment on representative problems. This metric serves as an indicator of the ability of the algorithm to converge to the new Pareto Front within a limited evolutionary window. For a comprehensive comparison, the complete IGD tracking curves across the entire DF test suite are provided in Appendix A-C. As observed in Fig. 2, baseline methods, such as the prediction-based VARE, exhibit noticeable fluctuations across different environments. The variations in their IGD curves suggest that these methods experience varying degrees of convergence difficulty. This behavior indicates that while traditional predictive models are effective for moderate changes, they may encounter challenges when facing more abrupt topological shifts, occasionally resulting in decreased solution quality during specific periods. In comparison, the proposed method maintains a relatively stable IGD trajectory throughout the sequential changes. The model demonstrates consistent convergence behavior across the tested environments. It suggests that the decoupled frequency encoding and structure learning mechanisms assist the model in adapting to diverse dynamic patterns, facilitating steady convergence across various environmental mutation severities. 
+
+2) Visualization of Zero-Shot Generation: To demonstrate the model’s capability to handle data sparsity and adapt to novel environments, Fig. 3 visualizes the distribution of solutions in the objective space upon specific environmental change on the DF1 problem. For a comprehensive view, the complete tracking results across consecutive environments are detailed in Appendix A-B. In these plots, the grey dots delineate the true PF of the new environment. The blue dots represent the lagging population inherited from the previous environment (the old solutions evaluated under the new environmental parameters). 0 5 10 15 20 25 30       
+
+> Environment Index ( t)
+> 0
+> 10
+> 20
+> 30
+> 40
+> IGD Value
+> Performance on DF6
+> STT
+> VARE
+> SIKT
+> DIP
+> Ours 0510 15 20 25 30
+> Environment Index ( t)
+> 0.0
+> 0.5
+> 1.0
+> 1.5
+> 2.0
+> IGD Value
+> Performance on DF11
+> STT
+> VARE
+> SIKT
+> DIP
+> Ours
+
+Fig. 2: The IGD variation curves over environments. The red star marks the evaluation result of the unperturbed latent centroid ( ¯zjoint ), while the orange dots denote the final initial population generated after the surrogate-assisted screening. As shown in Fig. 3(a), upon an environmental switch, the in-herited population (blue dots) exhibits noticeable displacement, often remaining in previous local optima or positioned away from the new PF due to distribution shifts, which quantitatively corresponds to a high initial IGD of 0.1550. Conversely, the proposed model captures the macroscopic evolutionary trend. As observed in the figure, the reconstructed latent centroid (red star) lands in proximity to the center of the true PF, indicating that the model has captured the physical primitives of the new environment. Guided by this structural anchor, the generated candidate population (orange dots) avoids the localized regions covered by the blue dots and is distributed along the true PF (grey dots), substantially reducing the IGD to 0.0488. This suggests that continuous latent space modeling facilitates zero-shot generation: by sampling around the centroid within the learned manifold, DB-GEN provides topologically consistent initial seeds. To further validate this centroid-based design choice, Fig. 3(b) illustrates an alternative strategy where perturbations are instead applied to the latent variables of all individual solutions from the previous generation. As shown, this all-point perturbation strategy yields a significantly less accurate initial population, only managing to decrease the IGD from 0.1550 to 0.1106. Because the old population is already JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 10 0.0 0.2 0.4 0.6 0.8 1.0 
+
+> Objective 1
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> 1.2
+> Objective 2
+> Environment: 1
+> True PF
+> Old Pop (Before)
+> New Pop (After)
+> Latent Centroid
+
+(a) 0.0 0.2 0.4 0.6 0.8 1.0  
+
+> Objective 1
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> 1.2
+> Objective 2
+> Environment: 1
+> True PF
+> Old Pop (Before)
+> New Pop (After)
+> Latent Centroid
+
+(b) 
+
+Fig. 3: Zero-shot solution generation upon specific environmen-tal change on the DF1 problem. (a) Proposed latent centroid perturbation. (b) Perturbation on all previous solutions. displaced relative to the new environment, applying noise to their individual latent representations directly propagates this positional error. The resulting candidates tend to scatter around sub-optimal regions and heavily inherit the historical inertia of the old distribution. 
+
+E. Data Scalability and Generalization Analysis 
+
+To evaluate the scalability of the proposed framework, we first investigate the impact of the historical dataset size on optimization performance. The expansion of the data scale is achieved by increasing the number of historical problems and performing multiple instantiations under various environmental severity parameters ( nt), as detailed in Appendix A-A. Fig. 4 visualizes the mean IGD values and the average rankings obtained when the number of historical solutions provided for training varies from 4 × 10 7 to 1.2 × 10 8.The statistical significance of the data scale expansion is first evaluated via a non-parametric Friedman test across the matched test instances. The results ( p = 2 .48 × 10 −18 )provide strong evidence that the volume of historical data fundamentally impacts the optimization performance, exhibiting a clear monotonic improvement trend in both metrics as the data volume increases. To further investigate the local gains, Wilcoxon signed-rank tests were performed for pairwise com-parisons. Crucially, the maximal scale ( 1.2 × 10 8) significantly outperforms all other configurations ( p < 0.05 in all cases), including its nearest neighbor ( 1.1 × 10 8, p = 0 .020 ). While the marginal performance gain temporarily plateaus between the scales of 8 × 10 7 and 1 × 10 8 (p = 0 .966 ), suggesting a localized saturation point in manifold coverage for the current benchmark complexity, the overall trend strongly reinforces the scalability of our framework. This indicates that increasing the diversity and density of historical priors allows the model to capture a broader range of dynamic patterns, constructing a more robust and accurate latent manifold for solution generation. Detailed pairwise comparison results and precise p-values are provided in Appendix A-F. To further investigate the generalization limits and understand the underlying mechanism of this scalability, we analyze the relationship between distributional shift and performance gain, utilizing the model trained on 8 × 10 7 historical solutions. The shift is measured by the normalized latent space distance from 4 6 8 10 11 12 
+
+> Data Scale
+> 0.00
+> 0.02
+> 0.04
+> 0.06
+> 0.08
+> 0.10
+> 0.12
+> 0.14
+> Mean IGD
+> Mean IGD
+> Average Rank
+> 0
+> 1
+> 2
+> 3
+> 4
+> 5
+> Average Rank
+
+Fig. 4: Effect of historical data scale on the mean IGD and the average rank. the new environment to the nearest historical prior, while the gain is quantified by the IGD improvement rate of the generated population over the unperturbed inherited population. As shown in Fig. 5, a strong negative Pearson correlation ( r = −0.64 , p < 
+
+0.001 ) is observed. This correlation suggests that the latent distance serves as a confidence indicator: the performance improvement generally decays as the target domain deviates further from the historical data distribution. 0 1 2 3 4 5 6
+
+> Latent Space Distance (Normalized)
+> 125
+> 100
+> 75
+> 50
+> 25
+> 0
+> 25
+> 50
+> 75
+> IGD Improvement Rate (%)
+> Standard Problems
+> Extrapolation (DF6)
+> OOD Failure (DF7)
+> Trend Line
+> DF6
+> (Manifold Extrapolation)
+> DF7
+> (OOD Failure)
+
+Fig. 5: Correlation between the normalized latent space distance of new environments and the average IGD improvement rate. However, specific test instances reveal capabilities beyond proximity-based generation. DF6 presents an exception, achiev-ing a high IGD improvement ( ≈ 66 .19% ) despite a large latent distance. This indicates that DB-GEN is capable of manifold extrapolation . Rather than merely memorizing historical in-stances, the model adapts to distant novel environments by combinatorially generalizing its learned basis vectors, provided the new dynamics remain within the subspace spanned by the dictionary (detailed in Section III-G and Appendix A-D). Conversely, the performance on DF7 illustrates the boundary of the proposed framework. Characterized by out-of-distribution (OOD) topological dynamics, DF7 exhibits both a large latent distance and a negative improvement rate. This limitation occurs because the dynamics of DF7 introduce variations orthogonal to the manifold spanned by the historical basis vectors. It confirms that while DB-GEN performs interpolation and combinatorial extrapolation, generating solutions for environments that require entirely unobserved physical primitives remains a limitation. JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 11 
+
+F. Ablation Study 
+
+To verify the independent contributions and necessity of the core components proposed in our framework, we conducted a comprehensive ablation study across 57 environmental change instances. All variants are trained on 8×10 7 historical solutions. As previously demonstrated in Section III-E , this intermediate scale reaches a localized performance saturation, serving as a highly representative and computationally viable baseline to independently evaluate each component. We constructed five variants by removing or replacing specific modules from the full model, as detailed in Table III. TABLE III: Ablation study results on the core mechanisms.                         
+
+> Variant MIGD Degradation ( ∆)+/−/≈
+> Full Model 0.0832 --w/o High-Low Freq 0.0983 +18.1% 4 / 53 / 0 w/o Basis Learning 0.1205 +44.8% 14 / 43 / 0 w/o Solution VAE 0.1028 +23.6% 23 / 34 / 0 w/o Triplet Loss 0.1048 +26.0% 15 / 42 / 0 w/o Classify Loss 0.0934 +12.3% 17 / 40 / 0
+
+Table III confirms each module’s positive contribution. The 
+
++/ − / ≈ indicates instances where the variant performs significantly better, worse, or similarly to the Full Model. We first observe that removing the High-Low Frequency Decou-pling module (w/o High-Low Freq.) results in an average IGD increase from 0.0832 to 0.0983. The full model outperforms this variant in 53 out of 57 test instances ( 4/53 /0). This statistical difference confirms that treating all environmental changes uniformly hinders predictive ability. By explicitly decoupling high-frequency local jitter from low-frequency global trends, this mechanism reduces the complexity of representing environmental changes, thereby facilitating the learning of underlying evolutionary dynamics. The most significant performance degradation occurs when the Basis Vector Learning module is removed (w/o Basis Learning). Without it, the mean IGD increases sharply to 0.1205 (+44.8%), and the variant is defeated by the full model in 43 instances. In this baseline, the interpretable sparse combination of physical primitives is replaced by a black-box MLP mapping. The resulting poor tracking performance validates our hypothesis: simply mapping observations to a latent space frequently induces negative transfer. The proposed basis vector mechanism acts as a robust physical prior, enabling the model to achieve reliable zero-shot generalization in unseen environments. Furthermore, we investigated the impact of the generative manifold and auxiliary loss functions. Removing the Solution VAE (w/o Solution VAE) increases the IGD to 0.1028 and incurs 34 losses against the full model, confirming the necessity of performing generative search within a well-structured latent manifold rather than directly in the complex decision space. Omitting the Triplet Loss (w/o Triplet Loss) leads to a similar performance decline (IGD: 0.1048, 15 /42 /0), indicating that contrastive learning is vital for aligning the latent topology with the true problem geometry. Discarding the Classify Loss (w/o Classify Loss) also negatively impacts performance ( 17 /40 /0). These results robustly suggest that both topological constraints and auxiliary tasks are essential for guiding the model to learn meaningful and discriminative representations. In summary, while the Basis Vector Learning module serves as the most critical backbone for robust generalization, the Frequency Decoupling, Solution VAE, and Auxiliary Tasks further refine the prediction accuracy and topological stability. The full model achieves optimal performance across the vast majority of environments, demonstrating that these architectural components are mutually complementary and indispensable. 
+
+G. Analysis of Basis Vectors 1) Visualization of Latent Representation: To investigate the environmental representations learned by our framework, we project the high-dimensional structural latent representations (denoted as zstruct ) into a 2D space using t-SNE. Specifically, the macroscopic latent coordinate of each environment is obtained by feeding a large volume of sampled data from that environment into the model, generating their corresponding 
+
+zstruct codes, and subsequently averaging them. For this visual-ization, the environmental severity parameter is specifically set to nt = 20 . This high-resolution configuration is deliberately chosen to meticulously capture the fine-grained transition dynamics and to reveal the exact correspondence between environmental changes and latent coordinates, particularly for problems with inherent periodic variations. The data points in Fig. 6 represent these aggregated latent locations for unseen 
+
+benchmark test problems during the online inference phase. Each point corresponds to a specific environmental state, with different colors denoting distinct test problems. Observing the intra-problem dynamics, the latent represen-tations of consecutive environments form continuous, smooth trajectories rather than randomly scattered clusters. This indicates that the model successfully tracks the temporal continuity of environmental changes. Furthermore, several trajectories exhibit U-shaped folding and cyclic patterns. Such structures objectively reflect the periodic dynamics, such as sinusoidal parameter variations, inherent in the definitions of the benchmark suite. A striking spatial bifurcation can be explicitly observed in the trajectory of the DF6 problem, whose environmental states are mapped into two distant, isolated sub-regions. This separation physically corresponds to the distinct evolutionary phases of the problem. During the expansion phase, where the underlying parameters drive the problem structure to deform continuously in a specific direction, the latent coordinates cluster tightly in one region. Conversely, during the contraction phase, which encapsulates reverse structural transformations and opposite spatial offsets, the representations are mapped to the other distant region. This proves the model’s capability to effectively discern distinct and opposing geometric deformations occurring within the same problem. Extending the observation to inter-problem relationships, the trajectories of most test problems occupy distinct sub-regions in the latent space. This global separability suggests that the learned basis vectors and their combinations possess sufficient expressiveness to differentiate various modes of macroscopic topological mutations across unobserved environments. How-ever, this spatial distribution is driven by geometric similarity JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 12 
+
+rather than strict mathematical formulations. A notable example is the distinct intertwining phenomenon observed in the lower-right region of Fig. 6, specifically between the trajectories of the DF5 and DF6 problems. Although DF5 relies on a static linear base and DF6 features dynamic curvature scaling, the dynamic curvature of DF6 periodically flattens during its evolutionary cycle, causing its macroscopic geometry to intersect directly with the linear base of DF5. Because the topology-aware triplet loss prioritizes global geometric homology over minor differences in their localized sinusoidal ripples, it groups these macroscopically similar states into adjacent sub-manifolds. A detailed mathematical derivation of this topological intersection is provided in Appendix A-D. Overall, the t-SNE visualization confirms that the organiza-tion of the latent space is primarily governed by topological semantics. This geometric structuring provides a verifiable context for understanding how the underlying basis vectors combine to construct diverse environmental manifolds. 10 0 10 20 30 
+
+> t-SNE Dimension 1
+> 10
+> 0
+> 10
+> 20
+> t-SNE Dimension 2  DF1
+> DF2
+> DF3
+> DF4
+> DF5
+> DF6
+> DF7
+> DF8
+
+Fig. 6: The t-SNE visualization of the environment-level structural latent representations ( zstruct ) generated by the pre-trained model on unseen test problems. 
+
+2) Semantic Correlation Analysis: To further demonstrate the interpretability of the proposed method and verify whether the learned dictionary vectors capture meaningful physical primitives, we conduct an in-depth case study on the DF6 problem. As previously observed in the generalization analysis (Fig. 5), DF6 exhibits a relatively large distance from historical priors in the latent space, yet our model still achieves highly competitive optimization performance on it. 
+
+Fig. 7: The t-SNE visualization of DF6 and Problem 64/67. To understand the mechanism behind this successful out-of-distribution generalization, we visualize both the test and training environments in a unified latent space, as shown in Fig. 7. Interestingly, although DF6 is isolated from the majority of historical problems, its trajectory is positioned exactly between two specific training instances: Problem 64 and Problem 67. Further investigation into their mathematical definitions reveals a distinct physical disentanglement. DF6 is a complex dynamic environment characterized by simultaneous non-linear curvature changes in the Pareto Front (PF) and positional shifts in the Pareto Set (PS). Conversely, Problem 64 exclusively shares a similar PF curvature variation pattern with DF6 but maintains a static PS; meanwhile, Problem 67 exclusively shares a similar PS positional shift pattern with DF6 but maintains a static PF geometry. The detailed mathematical formulations and dynamic similarities of these three problems are provided in Appendix A-D. This geometric interpolation in the latent space suggests that the model effectively reconstructs the unseen DF6 by recombining the decoupled physical properties (curvature and shift) learned from Problem 64 and Problem 67. By recording the activation coefficients of the learned basis vectors across continuous environments, we computed the Pearson correlation r between the activation sequences of DF6 and those of the auxiliary problems. This quantitative analysis demonstrates a clear functional disentanglement among the learned latent vectors. Specifically, curvature vectors, such as dimensions 9 and 20, act as shape neurons that encode topological deformations like convexity or concavity while ignoring spatial translations. For instance, dimension 9 exhibits a high activation correlation with the curvature-varying Problem 64 ( r = 0 .955 ) and remains uncorrelated with the shift-varying Problem 67 ( r = −0.080 ). Conversely, shift vectors function as displacement neurons controlling the macroscopic movement of solutions across the decision space. Dimension 11, for example, shows a strong correlation with the positional shift dynamics of Problem 67 ( r = 0 .832 ) but is independent of curvature changes ( r = −0.034 ). Finally, global intensity vectors, such as dimension 26, maintain high correlations of r ≈ 0.902 with both auxiliary problems, likely encoding the global temporal factor or the overall intensity of the environmental transition. 
+
+3) Functional Verification via Masking: Building upon the statistical correlations discovered above, we conduct a masking experiment to explicitly verify the functional roles of these disentangled basis vectors. By manually zeroing specific dimensions of the activation coefficients during inference, we observe the resulting geometric impacts on the generated solutions. Fig. 8 visualizes the objective space distribution of the generated solutions under different masking strategies on the DF6 problem. The full model accurately tracks the true PF, maintaining both correct global positioning and non-linear curvature. When the curvature vectors (9, 20) are masked, the generated solutions remain in the general vicinity of the true PF but exhibit distinct geometric distortion, failing to reconstruct the correct topological shape. This observation confirms their specific function in handling shape deformations. Conversely, masking the shift vectors (11, 16) displaces the generated solutions JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 13 0 10 0 10 1
+
+> Objective 1
+> 0
+> 10 0
+> 10 1
+> 10 2
+> Objective 2
+> True PF
+> Mask Curvature
+> Mask shift
+> Original
+
+Fig. 8: Visualization of the generated solutions under different masking strategies across environments on the DF6 problem. far from the true PF and causes a complete collapse of their geometric shapes. In highly non-linear problems, local manifold curvature is tightly coupled with global spatial coordinates. Losing the positional anchor leads to severe non-linear distortion during the decoding mapping. This validates that the shift vectors not only govern precise spatial localization but also provide the necessary structural foundation for stable manifold reconstruction. 
+
+H. Parameter Sensitivity Analysis 
+
+To investigate the robustness of the proposed DB-GEN framework and understand its key hyperparameters, we con-ducted sensitivity analyses on the number of basis vectors K,the Gaussian perturbation radius σ, and the candidate pool size Ncand . The results, evaluated using the mean IGD across dynamic environments, are summarized in Table IV. TABLE IV: Parameter sensitivity analysis result.                                   
+
+> Parameter Tested Values and Mean IGD
+> Basis Vectors ( K)32 64 128 256 384 512 0.1048 0.0975 0.1046 0.0832 0.0854 0.0872 Perturbation Radius ( σ)0.05 0.10 0.15 0.20 0.25 0.30 0.1040 0.0923 0.0970 0.0832 0.0886 0.0871 Candidate Pool ( Ncand )50,000 100,000 150,000 200,000 250,000 300,000 0.1140 0.0910 0.0920 0.0832 0.0870 0.0840
+
+The parameter K determines the capacity of the learned dictionary. As observed in Table IV, performance exhibits a U-shaped trend, achieving the optimal mean IGD at K = 256 .A smaller dictionary causes underfitting, as the limited basis vectors are insufficient to express complex environmental dy-namics. Conversely, an excessively large dictionary introduces semantic redundancy and risks overfitting to environmental noise, hindering the sparse reconstruction process. The perturbation radius σ directly controls the exploration-exploitation balance within the latent manifold. The best perfor-mance is recorded at σ = 0 .20 . A smaller radius leads to over-exploitation around the latent centroid, degrading the diversity of the generated population. On the other hand, an excessively large radius pushes the sampling process into low-probability-density regions of the latent space, where the decoder mapping becomes highly non-linear and unreliable, ultimately yielding sub-optimal solutions with poor convergence. Finally, the candidate pool size Ncand dictates the sampling density for the surrogate-assisted screening. Performance improves significantly as the pool size increases up to 200,000, as a denser pool ensures that the Tchebycheff decomposition can precisely match high-quality candidates for diverse weight vectors. Beyond this threshold, the performance plateaus. This indicates that the latent space has been adequately covered, and further expanding the pool size yields diminishing returns while unnecessarily increasing the computational burden. 
+
+I. Performance on Real-World Scenarios 
+
+To evaluate the practical applicability of the proposed frame-work, we extend the experiments to two real-world dynamic formulations: DRA and DPP, whose detailed mathematical definitions and environmental settings are provided in Appendix B. Table V summarizes the mean IGD results of all algorithms on these two problems. The DRA problem models the trade-off between resource cost and system return under spatio-temporal environmen-tal shifts. As shown in Table V, DB-GEN achieves the remarkably lowest IGD of 1.35E-02. Compared to the second-best baseline, DIP-DMOEA (3.63E-02), DB-GEN yields a substantial quantitative improvement of approximately 62.8%. In practical resource allocation, this significant reduction in IGD translates to a much more accurate approximation of the optimal dispatching frontier. This indicates that upon an environmental change, DB-GEN can rapidly restore the balance between cost and quality, mitigating the excessive transient resource waste typically caused by lagging population convergence. The DPP problem models the physical trade-off between operation time ( f1 ∝ 1/v ) and energy consumption ( f2 ∝ v2). In this scenario, the vector auto-regression model VARE achieves the best performance, though DB-GEN follows closely with a marginal IGD difference. Because DPP dynamics are driven by smooth, auto-correlated periodic functions, explicit numerical extrapolation holds an inherent predictive advantage over continuous manifold sampling. Nevertheless, DB-GEN remains highly competitive and significantly outperforms other baselines. Practically, this tracking accuracy ensures the reliable generation of valid velocity profiles to minimize dynamic energy while satisfying strict temporal constraints. TABLE V: MIGD results on real-world dynamic problems.                
+
+> Problem Ours STT-MOEA/D DIP-DMOEA SIKT-DMOEA VARE
+> DRA 1.35E-02 9.18E-02 3.63E-02 1.22E-01 5.74E-02 DPP 7.19E-02 ≈1.58E-01 2.90E-01 1.77E-01 7.07E-02
+
+J. Run Time Analysis 
+
+To evaluate the computational efficiency of the proposed framework, we compare the execution time of DB-GEN with the baseline algorithms across the DF test suite. The quantitative execution times are visualized in Fig. 9. Overall, DB-GEN exhibits a moderate computational cost, consistently completing the entire environmental tracking JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 14 DF1 DF2 DF3 DF4 DF5 DF6 DF7 DF8 DF9 DF10 DF11 DF12 DF13 DF14     
+
+> Test Instances
+> 10 0
+> 10 1
+> 10 2
+> Execution Time (s) [Log Scale]
+> Ours VARE SIKT STT-MOEA/D DIP-DMOEA
+
+Fig. 9: Comparison of execution time (in seconds) across the DF test suite when τt = 10 and nt = 10 .process within 15 to 35 seconds. Compared to lightweight prediction methods such as SIKT and VARE, DB-GEN requires slightly more execution time. This is primarily because SIKT relies on a simplified clustering-based mapping, and VARE employs a computationally inexpensive linear vector autoregression. However, this marginal increase in execution time is a worthwhile trade-off. The generative sampling in the continuous latent space and the surrogate-assisted screening in DB-GEN yield tracking accuracy and topological robustness, mitigating the performance limitations observed in SIKT and VARE under highly non-linear dynamics. Furthermore, compared to advanced structural and learning-based prediction methods, DB-GEN demonstrates a clear efficiency advantage. Both STT-MOEA/D and DIP-DMOEA require higher computational costs, frequently exceeding 100 seconds per environment change. This is particularly evident on the 3-objective instances (i.e., DF10-DF14), where their execution times scale up noticeably. Specifically, STT-MOEA/D involves the intensive computational complexity of spatial-temporal topological tensor decomposition, while DIP-DMOEA requires online backpropagation training for its neural network upon every environmental change. In contrast, DB-GEN avoids online training by performing zero-shot generative inference directly within the pre-trained latent manifold. Consequently, DB-GEN achieves a favorable balance between execution efficiency and optimization performance. IV. C ONCLUSION 
+
+In this paper, we proposed a decoupled basis-vector-driven generative framework (DB-GEN) for dynamic multi-objective optimization. Rather than relying on task-specific memory inheritance or simple autoregression, DB-GEN achieves robust cross-problem knowledge transfer through manifold generation and structural recombination, thereby mitigating negative transfer and overcoming the cold-start problem. Specifically, the framework employs the discrete wavelet transform to decouple global trends from local noise. Subse-quently, a sparse dictionary learning mechanism extracts univer-sal topological basis vectors from a large-scale offline dataset, constructing a latent manifold instead of rigidly tracking current historical trajectories. Guided by these extracted primitives, DB-GEN performs cross-problem zero-shot generation in the continuous latent space for completely unseen environments. A surrogate-assisted Tchebycheff screening strategy is then utilized to sample a high-quality initial population from the generated candidates. Experimental results and ablation studies across various benchmarks indicate that DB-GEN improves tracking accuracy and convergence stability compared to existing baselines. Despite its advantages, the current framework has certain limitations. The dictionary capacity and sampling radius are configured as static hyperparameters, which limits adaptabil-ity to varying dynamic severities. Additionally, the current evaluation primarily focuses on unconstrained environments with low-dimensional spaces. Therefore, future work will focus on adaptive mechanisms to dynamically adjust the manifold structure and sampling strategies. Furthermore, extending DB-GEN to handle high-dimensional and constrained dynamic multi-objective optimization problems represents an important direction for further investigation [51]. For instance, integrating space discretization or dimensionality reduction techniques [52] into our continuous latent generation process could be a promising avenue to overcome the curse of dimensionality. REFERENCES [1] A. Mukhopadhyay, U. Maulik, S. Bandyopadhyay, and C. A. C. Coello, “A survey of multiobjective evolutionary algorithms for data mining: Part i,” IEEE Transactions on Evolutionary Computation , vol. 18, no. 1, pp. 4–19, 2013. [2] M. Farina, K. Deb, and P. Amato, “Dynamic multiobjective optimization problems: test cases, approximations, and applications,” IEEE Transac-tions on evolutionary computation , vol. 8, no. 5, pp. 425–442, 2004. [3] S. Jiang, J. Zou, S. Yang, and X. Yao, “Evolutionary dynamic multi-objective optimisation: A survey,” ACM Computing Surveys , vol. 55, no. 4, pp. 1–47, 2022. [4] C. Qian, D.-X. Liu, and Z.-H. Zhou, “Result diversification by multi-objective evolutionary algorithms with theoretical guarantees,” Artificial Intelligence , vol. 309, p. 103737, 2022. [5] B. Li, Z. Di, Y. Yang, H. Qian, P. Yang, H. Hao, K. Tang, and A. Zhou, “It’s morphing time: Unleashing the potential of multiple llms via multi-objective optimization,” IEEE Transactions on Evolutionary Computation ,2025. [6] S. Liu, N. Lu, W. Hong, C. Qian, and K. Tang, “Effective and imperceptible adversarial textual attack via multi-objectivization,” ACM Transactions on Evolutionary Learning and Optimization , vol. 4, no. 3, pp. 1–23, 2024. [7] P. Yang, L. Zhang, H. Liu, and G. Li, “Reducing idleness in financial cloud services via multi-objective evolutionary reinforcement learning based load balancer,” Science China Information Sciences , vol. 67, no. 2, p. 120102, 2024. [8] M. Helbig and A. P. Engelbrecht, “Benchmarks for dynamic multi-objective optimisation algorithms,” ACM Computing Surveys (CSUR) ,vol. 46, no. 3, pp. 1–39, 2014. [9] S. Jiang, S. Yang, X. Yao, K. C. Tan, M. Kaiser, and N. Krasnogor, “Benchmark functions for the cec’2018 competition on dynamic multiob-jective optimization,” Newcastle University, Tech. Rep., 2018. [10] A. Zhou, Y. Jin, and Q. Zhang, “A population prediction strategy for evolutionary dynamic multiobjective optimization,” IEEE transactions on cybernetics , vol. 44, no. 1, pp. 40–53, 2013. [11] R. Liu, P. Yang, and J. Liu, “A dynamic multi-objective optimization evolutionary algorithm for complex environmental changes,” Knowledge-Based Systems , vol. 216, p. 106612, 2021. [12] X. Ma, J. Yang, H. Sun, Z. Hu, and L. Wei, “Multiregional co-evolutionary algorithm for dynamic multiobjective optimization,” Information Sciences ,vol. 545, pp. 1–24, 2021. [13] S. Jiang and S. Yang, “A steady-state and generational evolutionary algorithm for dynamic multiobjective optimization,” IEEE Transactions on evolutionary Computation , vol. 21, no. 1, pp. 65–82, 2016. [14] A. Aboud, N. Rokbani, R. Fdhila, A. M. Qahtani, O. Almutiry, H. Dhahri, A. Hussain, and A. M. Alimi, “Dpb-mopso: a dynamic pareto bi-level multi-objective particle swarm optimization algorithm,” Applied soft computing , vol. 129, p. 109622, 2022. JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 15 
+
+[15] P. Jo ´cko, B. M. Ombuki-Berman, and A. P. Engelbrecht, “Dynamic multi-objective optimisation using multi-guide particle swarm optimisation,” in 2022 IEEE Congress on Evolutionary Computation (CEC) . IEEE, 2022, pp. 1–10. [16] Y. Yang, Y. Ma, Y. Zhao, W. Zhang, and Y. Wang, “A dynamic multi-objective evolutionary algorithm based on genetic engineering and improved particle swarm prediction strategy,” Information Sciences , vol. 660, p. 120125, 2024. [17] Y. Hu, J. Zheng, S. Jiang, S. Yang, J. Zou, and R. Wang, “A mahalanobis distance-based approach for dynamic multiobjective optimization with stochastic changes,” IEEE Transactions on Evolutionary Computation ,vol. 28, no. 1, pp. 238–251, 2023. [18] S. Sahmoud and H. R. Topcuoglu, “A memory-based nsga-ii algorithm for dynamic multi-objective optimization problems,” in European Conference on the Applications of Evolutionary Computation . Springer, 2016, pp. 296–310. [19] Y. Wang, K. Li, and G.-G. Wang, “An adaptive multi-strategy algorithm based on extent of environmental change for dynamic multiobjective optimization,” IEEE Transactions on Evolutionary Computation , 2024. [20] R. Lei, L. Li, R. Stolkin, and B. Feng, “An adaptive dual-domain prediction strategy based on second-order derivatives for dynamic multi-objective optimization,” IEEE Transactions on Evolutionary Computation ,2025. [21] S. Jiang, Y. Wang, Y. Hu, Q. Zhang, and S. Yang, “Dynamic multi-objective optimisation based on vector autoregressive evolution,” IEEE Transactions on Evolutionary Computation , 2025. [22] X. Wang, Y. Zhao, L. Tang, and X. Yao, “Moea/d with spatial-temporal topological tensor prediction for evolutionary dynamic multiobjective optimization,” IEEE Transactions on Evolutionary Computation , 2024. [23] Y. Ye, S. Liu, J. Zhou, Q. Lin, M. Jiang, and K. C. Tan, “Learning-based directional improvement prediction for dynamic multiobjective optimization,” IEEE Transactions on Evolutionary Computation , 2024. [24] C. Hu, R. Wang, T. Lei, X. Zhang, M. Li, and J. Jiang, “Dynamic multi-objective optimization based on integrated incremental long short-term memory and inverse model prediction strategy,” IEEE Transactions on Evolutionary Computation , 2025. [25] C. Li, G. G. Yen, and Z. He, “Adversarial autoencoder-based large-scale dynamic multi-objective evolutionary algorithm,” IEEE Transactions on Evolutionary Computation , 2024. [26] F. Wang, J. Xie, F. Liao, Y. Li, Y. Guo, S. Yang, and A. Zhou, “A generative adversarial network based prediction strategy for evolutionary dynamic multiobjective optimization,” IEEE Transactions on Evolution-ary Computation , 2025. [27] F. Wang, J. Xie, A. Zhou, and K. Tang, “A new prediction strategy for dynamic multi-objective optimization using diffusion model,” IEEE Transactions on Evolutionary Computation , 2025. [28] J. Zou, Z. Hou, S. Jiang, S. Yang, G. Ruan, Y. Xia, and Y. Liu, “Knowledge transfer with mixture model in dynamic multi-objective optimization,” IEEE Transactions on Evolutionary Computation , 2025. [29] W. Song, Z. Liu, J. Yu, X. Sun, Y. Jin, and K. W. Lai, “Multisource and hidden source-based knowledge transfer for solving dynamic multi-objective optimization problems,” IEEE Transactions on Evolutionary Computation , 2025. [30] M. Jiang, Z. Huang, L. Qiu, W. Huang, and G. G. Yen, “Transfer learning-based dynamic multiobjective optimization algorithms,” IEEE Transactions on Evolutionary Computation , vol. 22, no. 4, pp. 501–514, 2017. [31] Y. Hu, Z. Zheng, J. Ou, Y. Song, J. Zheng, J. Zou, P. N. Suganthan, and S. Yang, “A learning algorithm based on similarity identification and knowledge transfer for dynamic multi-objective optimization,” IEEE Transactions on Evolutionary Computation , 2025. [32] Y. Xie, Q. Zhao, W. Zhou, and Z. Zhu, “Evolutionary dynamic multi-objective optimization with learning across problems,” IEEE Transactions on Evolutionary Computation , 2025. [33] I. Daubechies, Ten lectures on wavelets . SIAM, 1992. [34] C.-K. Goh and K. C. Tan, “A competitive-cooperative coevolutionary paradigm for dynamic multiobjective optimization,” IEEE Transactions on Evolutionary Computation , vol. 13, no. 1, pp. 103–127, 2008. [35] S. Biswas, S. Das, P. N. Suganthan, and C. A. C. Coello, “Evolutionary multiobjective optimization in dynamic environments: A set of novel benchmark functions,” in 2014 IEEE congress on evolutionary computa-tion (CEC) . IEEE, 2014, pp. 3192–3199. [36] Y. Fang, Y. Qin, H. Luo, F. Zhao, and K. Zheng, “Stwave+: A multi-scale efficient spectral graph attention network with long-term trends for disentangled traffic flow forecasting,” IEEE Transactions on Knowledge and Data Engineering , vol. 36, no. 6, pp. 2671–2685, 2023. [37] H. Wu, J. Xu, J. Wang, and M. Long, “Autoformer: Decomposition transformers with auto-correlation for long-term series forecasting,” 
+
+Advances in neural information processing systems , vol. 34, pp. 22 419– 22 430, 2021. [38] S. G. Mallat, “A theory for multiresolution signal decomposition: the wavelet representation,” IEEE transactions on pattern analysis and machine intelligence , vol. 11, no. 7, pp. 674–693, 2002. [39] C. Torrence and G. P. Compo, “A practical guide to wavelet analysis,” 
+
+Bulletin of the American Meteorological society , vol. 79, no. 1, pp. 61–78, 1998. [40] S. J. Pan and Q. Yang, “A survey on transfer learning,” IEEE Transactions on knowledge and data engineering , vol. 22, no. 10, pp. 1345–1359, 2009. [41] B. A. Olshausen and D. J. Field, “Emergence of simple-cell receptive field properties by learning a sparse code for natural images,” Nature ,vol. 381, no. 6583, pp. 607–609, 1996. [42] J. Mairal, F. Bach, J. Ponce, and G. Sapiro, “Online dictionary learning for sparse coding,” in Proceedings of the 26th annual international conference on machine learning , 2009, pp. 689–696. [43] F. Schroff, D. Kalenichenko, and J. Philbin, “Facenet: A unified embedding for face recognition and clustering,” in Proceedings of the IEEE conference on computer vision and pattern recognition , 2015, pp. 815–823. [44] D. P. Kingma and M. Welling, “Auto-encoding variational bayes,” arXiv preprint arXiv:1312.6114 , 2013. [45] K. Sohn, H. Lee, and X. Yan, “Learning structured output represen-tation using deep conditional generative models,” Advances in neural information processing systems , vol. 28, 2015. [46] R. Caruana, “Multitask learning,” Machine learning , vol. 28, no. 1, pp. 41–75, 1997. [47] C. Bian, Y. Zhou, M. Li, and C. Qian, “Stochastic population update can provably be helpful in multi-objective evolutionary algorithms,” Artificial Intelligence , vol. 341, p. 104308, 2025. [48] S. M. LaValle, Planning algorithms . Cambridge university press, 2006. [49] E. Zitzler, L. Thiele, M. Laumanns, C. M. Fonseca, and V. G. Da Fonseca, “Performance assessment of multiobjective optimizers: An analysis and review,” IEEE Transactions on evolutionary computation , vol. 7, no. 2, pp. 117–132, 2003. [50] L. While, P. Hingston, L. Barone, and S. Huband, “A faster algorithm for calculating hypervolume,” IEEE transactions on evolutionary compu-tation , vol. 10, no. 1, pp. 29–38, 2006. [51] B. Li, Y. Yang, P. Yang, G. Li, K. Tang, and A. Zhou, “Causal inference-based large-scale multiobjective optimization,” IEEE Transactions on Evolutionary Computation , vol. 29, no. 2, pp. 444–458, 2025. [52] H. Qian, Y.-P. Wu, R.-J. Qin, X. An, Y. Chen, and A. Zhou, “Provable space discretization based evolutionary search for scalable multi-objective security games,” Swarm and Evolutionary Computation , vol. 92, p. 101770, 2025. 1
+
+# APPENDIX 
+
+APPENDIX ADETAIL OF THE EXPERIMENT 
+
+A. Parameter Configurations and Implementation Details 
+
+To ensure the reproducibility of the proposed framework, Table I summarizes the complete parameter configurations utilized in our experiments. This includes the environment settings for the benchmark problems, the scale of the pre-training data, the architectural hyperparameters of the proposed DB-GEN framework, and the specific control parameters for the MOEA/D static optimizer. Furthermore, all algorithmic implementations, including the offline latent space pre-training and the online evolutionary tracking, were developed in Python using the PyTorch deep learning framework. The experiments were deployed and executed on a workstation running the Ubuntu 22.04.4 LTS operating system. The hardware environment is equipped with an AMD EPYC 7742 64-Core CPU, 314 GiB of RAM, and NVIDIA GeForce RTX 4090 (24GB) GPU to accelerate the tensor computations and neural network inferences. TABLE I: Parameter Configurations and Implementation Envi-ronments                                    
+
+> Category Parameter Value
+> DMOP Benchmarks Number of Objectives ( M)2, 3 Decision Variables Dimension ( D)10 Change Frequency & Severity ( τt, n t)(10,10), (5,10), (10,5) Number of Environments 30 Total Generations per Run 30 ×τt
+> DB-GEN Architecture Latent Space Dimension ( dz)64 Dictionary Size ( K)256 Historical Window Size ( W)3Perturbation Radius ( σr)0.20 Candidate Pool Size ( Ncand )200,000 Loss Penalty ( λ1−λ3)0.5, 0.1, 0.01 Static Optimizer (MOEA/D) Population Size ( N)100 ( M= 2 ), 150 ( M= 3 )Neighborhood Size ( T)20 Neighborhood Selection Prob. ( p)0.8 DE Scaling Factor ( F)0.5 DE Crossover Rate ( CR )0.5 Implementation Details Programming Language Python 3.10 Deep Learning Framework PyTorch (CUDA 12.2) CPU & RAM AMD EPYC 7742 (64-Core), 314 GiB GPU Acceleration NVIDIA RTX 4090 (24GB)
+
+During the training phase, to encompass various environmen-tal change characteristics and evaluate the proposed method, we utilize a collection of standard test problem suites commonly applied in dynamic multi-objective optimization (DMOP). Specifically, the base training problems are selected from the following classic series: F and ZF [13], HE [3], [4], JY [7], UDF [1], DIMP [9], GTA [2], SDP [5], SJY [6], DCP [12], and DSW [11]. Additionally, problems such as the T, DMZDT, and CF series, as well as the ZJZ test problems reviewed in the comprehensive survey [10], are also included. To construct the offline pre-training dataset, we execute a decomposition-based static optimizer (i.e., MOEA/D) across these historical base problems under diverse environmental change frequencies and severities ( τt, n t). During the evolu-tionary process, periodic random initialization and mutation mechanisms are employed to inject diversity and prevent premature convergence. For each generation, the system records comprehensive evolutionary state features, including the deci-sion variables, objective values, Tchebycheff scalarizing values, and the temporal context of historical objective fluctuations. This highly parallelized collection process yields a high-fidelity trajectory dataset encapsulating diverse dynamic patterns. To ensure a rigorous evaluation of the zero-shot cross-problem generalization capabilities and to strictly prevent data leakage, we performed a decontamination of the pre-training dataset. Any historical problems sharing identical or highly isomorphic mathematical definitions with our target test suites (i.e., the FDA and DF series) were explicitly excluded. For instance, several instances in the dMOP and DMZDT series share highly similar baseline formulations and Pareto Front dynamic mappings with the DF test suite. To avoid the model merely memorizing these superficial similarities rather than learning transferable structural primitives, all such overlapping benchmarks were removed from the training pool. 
+
+B. Detailed Visualization of Zero-Shot Generation on DF1 
+
+To comprehensively illustrate the generative capability of the proposed DB-GEN framework and validate the design choice of the latent sampling strategy, this section provides the complete visualizations of the zero-shot generation process across all 30 consecutive environments on the DF1 problem. Fig. 1 visualizes the performance of the proposed centroid perturbation strategy . By aggregating the population into a unified joint centroid in the latent space before applying Gaussian perturbation, the model effectively filters out the individual historical biases of the inherited population. As observed across the 30 environments, this strategy consistently generates a topologically correct and well-distributed initial candidate pool (orange dots) that closely approximates the true Pareto Front (grey dots), regardless of the displacement of the old population (blue dots). Conversely, Fig. 2 illustrates the results of the alternative all-point perturbation strategy , where noise is applied directly to the latent representations of all individual historical solutions. Because the inherited population is already misaligned with the new environment, adding individual noise propagates these positional errors. The visualizations demonstrate that the result-ing candidates frequently scatter around sub-optimal regions, inheriting the historical inertia of the previous distribution and failing to accurately cover the new Pareto Front. 
+
+C. Complete IGD Trajectories for All Test Instances 
+
+To provide a comprehensive and transparent view of the evolutionary stability, Fig. 3 presents the complete IGD trajectories for all 14 test instances (DF1 to DF14) across sequential environmental changes. As shown in the complete results, DB-GEN generally maintains a stable and low IGD profile across the majority of the benchmark problems, demonstrating its overall robustness 20.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0 
+
+1.2 
+
+> Objective 2
+
+Environment: 1 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0 
+
+1.2 
+
+1.4 
+
+> Objective 2
+
+Environment: 2 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0.0 
+
+0.5 
+
+1.0 
+
+1.5 
+
+2.0 
+
+> Objective 2
+
+Environment: 3 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0.0 
+
+0.5 
+
+1.0 
+
+1.5 
+
+2.0 
+
+2.5 
+
+3.0 
+
+> Objective 2
+
+Environment: 4 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0.0 
+
+0.5 
+
+1.0 
+
+1.5 
+
+2.0 
+
+2.5 
+
+3.0 
+
+3.5 
+
+4.0 
+
+> Objective 2
+
+Environment: 5 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0
+
+1
+
+2
+
+3
+
+4
+
+5
+
+> Objective 2
+
+Environment: 6 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+> Objective 2
+
+Environment: 7 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+> Objective 2
+
+Environment: 8 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+> Objective 2
+
+Environment: 9 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+> Objective 2
+
+Environment: 10 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+> Objective 2
+
+Environment: 11 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+> Objective 2
+
+Environment: 12 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+> Objective 2
+
+Environment: 13 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0
+
+1
+
+2
+
+3
+
+4
+
+5
+
+> Objective 2
+
+Environment: 14 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0.0 
+
+0.5 
+
+1.0 
+
+1.5 
+
+2.0 
+
+2.5 
+
+3.0 
+
+3.5 
+
+4.0 
+
+> Objective 2
+
+Environment: 15 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0.0 
+
+0.5 
+
+1.0 
+
+1.5 
+
+2.0 
+
+2.5 
+
+3.0 
+
+> Objective 2
+
+Environment: 16 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0.0 
+
+0.5 
+
+1.0 
+
+1.5 
+
+2.0 
+
+> Objective 2
+
+Environment: 17 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0 
+
+1.2 
+
+1.4 
+
+> Objective 2
+
+Environment: 18 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0 
+
+1.2 
+
+1.4 
+
+> Objective 2
+
+Environment: 19 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0 
+
+1.2 
+
+1.4 
+
+> Objective 2
+
+Environment: 20 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0 
+
+1.2 
+
+> Objective 2
+
+Environment: 21 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0 
+
+1.2 
+
+1.4 
+
+> Objective 2
+
+Environment: 22 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0.0 
+
+0.5 
+
+1.0 
+
+1.5 
+
+2.0 
+
+> Objective 2
+
+Environment: 23 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0.0 
+
+0.5 
+
+1.0 
+
+1.5 
+
+2.0 
+
+2.5 
+
+3.0 
+
+> Objective 2
+
+Environment: 24 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0.0 
+
+0.5 
+
+1.0 
+
+1.5 
+
+2.0 
+
+2.5 
+
+3.0 
+
+3.5 
+
+4.0 
+
+> Objective 2
+
+Environment: 25 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0
+
+1
+
+2
+
+3
+
+4
+
+5
+
+> Objective 2
+
+Environment: 26 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+> Objective 2
+
+Environment: 27 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+> Objective 2
+
+Environment: 28 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+> Objective 2
+
+Environment: 29 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+> Objective 2
+
+Environment: 30 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 
+
+Fig. 1: Complete tracking performance of the proposed DB-GEN utilizing the centroid perturbation strategy across all 30 environments on the DF1 problem. The grey dots delineate the true PF, the blue dots represent the un-evaluated inherited population, the red star marks the latent centroid, and the orange dots denote the generated initial candidates. to diverse dynamic patterns. However, it is also objectively observable that on certain specific instances (e.g., DF4), the proposed method yields sub-optimal tracking performance or experiences slight fluctuations compared to the best-performing baseline methods. This comprehensive visualization highlights both the general adaptability of the proposed framework and its occasional limitations when encountering specific topological structures. 
+
+D. Details of Basis Vector Correlation and Manifold Topology 
+
+To quantitatively evaluate the semantic meaning of the learned basis vectors and explain the geometric phenomena observed in the latent space, we introduce DF6 as the primary target for our case studies. As visually illustrated in Fig. 4, DF6 exhibits highly complex dynamics characterized by simultaneous positional shifts in the decision space and non-linear curvature changes in the objective space. Let the decision variables be denoted as x = ( x1, . . . , x n),where the search space is x1 ∈ [0 , 1] and xi ∈ [−1, 1] for 30.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0 
+
+1.2 
+
+> Objective 2
+
+Environment: 1 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0 
+
+1.2 
+
+1.4 
+
+> Objective 2
+
+Environment: 2 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0.0 
+
+0.5 
+
+1.0 
+
+1.5 
+
+2.0 
+
+> Objective 2
+
+Environment: 3 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0.0 
+
+0.5 
+
+1.0 
+
+1.5 
+
+2.0 
+
+2.5 
+
+3.0 
+
+> Objective 2
+
+Environment: 4 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0.0 
+
+0.5 
+
+1.0 
+
+1.5 
+
+2.0 
+
+2.5 
+
+3.0 
+
+3.5 
+
+4.0 
+
+> Objective 2
+
+Environment: 5 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0
+
+1
+
+2
+
+3
+
+4
+
+5
+
+> Objective 2
+
+Environment: 6 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+> Objective 2
+
+Environment: 7 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+> Objective 2
+
+Environment: 8 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+> Objective 2
+
+Environment: 9 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+> Objective 2
+
+Environment: 10 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+> Objective 2
+
+Environment: 11 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+> Objective 2
+
+Environment: 12 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+> Objective 2
+
+Environment: 13 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0
+
+1
+
+2
+
+3
+
+4
+
+5
+
+> Objective 2
+
+Environment: 14 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0.0 
+
+0.5 
+
+1.0 
+
+1.5 
+
+2.0 
+
+2.5 
+
+3.0 
+
+3.5 
+
+4.0 
+
+> Objective 2
+
+Environment: 15 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0.0 
+
+0.5 
+
+1.0 
+
+1.5 
+
+2.0 
+
+2.5 
+
+3.0 
+
+> Objective 2
+
+Environment: 16 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0.0 
+
+0.5 
+
+1.0 
+
+1.5 
+
+2.0 
+
+> Objective 2
+
+Environment: 17 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0 
+
+1.2 
+
+1.4 
+
+> Objective 2
+
+Environment: 18 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0 
+
+1.2 
+
+> Objective 2
+
+Environment: 19 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0 
+
+1.2 
+
+1.4 
+
+> Objective 2
+
+Environment: 20 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0 
+
+1.2 
+
+> Objective 2
+
+Environment: 21 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0 
+
+1.2 
+
+1.4 
+
+> Objective 2
+
+Environment: 22 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0.0 
+
+0.5 
+
+1.0 
+
+1.5 
+
+2.0 
+
+> Objective 2
+
+Environment: 23 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0.0 
+
+0.5 
+
+1.0 
+
+1.5 
+
+2.0 
+
+2.5 
+
+3.0 
+
+> Objective 2
+
+Environment: 24 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0.0 
+
+0.5 
+
+1.0 
+
+1.5 
+
+2.0 
+
+2.5 
+
+3.0 
+
+3.5 
+
+4.0 
+
+> Objective 2
+
+Environment: 25 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0
+
+1
+
+2
+
+3
+
+4
+
+5
+
+> Objective 2
+
+Environment: 26 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+> Objective 2
+
+Environment: 27 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+> Objective 2
+
+Environment: 28 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+> Objective 2
+
+Environment: 29 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+> Objective 2
+
+Environment: 30 
+
+True PF 
+
+Old Pop (Before) 
+
+New Pop (After) 
+
+Latent Centroid 
+
+Fig. 2: Complete tracking performance utilizing the alternative all-point perturbation strategy across all 30 environments on the DF1 problem. 
+
+i = 2 , . . . , n . The DF6 problem is mathematically defined as: 
+
+(
+
+f1(x, t ) = g(x, t )( x1 + 0 .1 sin(3 πx 1)) αt
+
+f2(x, t ) = g(x, t )(1 − x1 + 0 .1 sin(3 πx 1)) αt (1) where the distance function is g(x, t ) = 1 + Pni=2 (|G(t)|y2
+
+i −
+
+10 cos(2 πy i) + 10) , with the spatial translation term yi = xi −
+
+G(t). The temporal dynamics are driven by G(t) = sin(0 .5πt ),which controls both the decision space shift and the objective space curvature exponent αt = 0 .2 + 2 .8|G(t)|.
+
+1) Semantic Correlation with Auxiliary Problems (Problem 64 and 67): To disentangle the coupled dynamics of DF6, we introduce two auxiliary problems that isolate specific dynamic properties. 
+
+Problem 64 (Curvature Isolation): Problem 64 isolates the PF curvature variations without any positional shifts in the PS. The search space is x ∈ [0 , 1] n. It is defined as: 
+
+(f1(x, t ) = x1
+
+f2(x, t ) = g(x, t )
+
+
+
+1.0 −
+
+ x1
+
+g(x,t )
+
+αt  (2) where g(x, t ) = 1 .0+9 .0 Pni=2 x2
+
+i , and the curvature exponent 
+
+αt = 0 .2+3 .0|G(t)|. The dynamic exponent αt shares a highly similar mathematical structure with DF6, causing analogous 40 5 10 15 20 25 30 
+
+Environment Index ( t)
+
+> 0.00
+> 0.02
+> 0.04
+> 0.06
+> 0.08
+> 0.10
+> 0.12
+> IGD Value
+
+Performance on DF1 
+
+STT 
+
+VARE 
+
+SIKT 
+
+DIP 
+
+Ours 0 5 10 15 20 25 30 
+
+Environment Index ( t)
+
+> 0.00
+> 0.05
+> 0.10
+> 0.15
+> 0.20
+> 0.25
+> IGD Value
+
+Performance on DF2 
+
+STT 
+
+VARE 
+
+SIKT 
+
+DIP 
+
+Ours 0 5 10 15 20 25 30 
+
+Environment Index ( t)
+
+> 0.0
+> 0.1
+> 0.2
+> 0.3
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+> IGD Value
+
+Performance on DF3 
+
+STT 
+
+VARE 
+
+SIKT 
+
+DIP 
+
+Ours 0 5 10 15 20 25 30 
+
+Environment Index ( t)
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> 1.2
+> 1.4
+> IGD Value
+
+Performance on DF4 
+
+STT 
+
+VARE 
+
+SIKT 
+
+DIP 
+
+Ours 0 5 10 15 20 25 30 
+
+Environment Index ( t)
+
+> 0.00
+> 0.05
+> 0.10
+> 0.15
+> 0.20
+> 0.25
+> 0.30
+> IGD Value
+
+Performance on DF5 
+
+STT 
+
+VARE 
+
+SIKT 
+
+DIP 
+
+Ours 0 5 10 15 20 25 30 
+
+Environment Index ( t)
+
+> 0
+> 10
+> 20
+> 30
+> 40
+> IGD Value
+
+Performance on DF6 
+
+STT 
+
+VARE 
+
+SIKT 
+
+DIP 
+
+Ours 0 5 10 15 20 25 30 
+
+Environment Index ( t)
+
+> 0.0
+> 0.1
+> 0.2
+> 0.3
+> 0.4
+> 0.5
+> IGD Value
+
+Performance on DF7 
+
+STT 
+
+VARE 
+
+SIKT 
+
+DIP 
+
+Ours 0 5 10 15 20 25 30 
+
+Environment Index ( t)
+
+> 0.00
+> 0.02
+> 0.04
+> 0.06
+> 0.08
+> 0.10
+> 0.12
+> 0.14
+> 0.16
+> IGD Value
+
+Performance on DF8 
+
+STT 
+
+VARE 
+
+SIKT 
+
+DIP 
+
+Ours 0 5 10 15 20 25 30 
+
+Environment Index ( t)
+
+> 0.0
+> 0.5
+> 1.0
+> 1.5
+> 2.0
+> 2.5
+> 3.0
+> 3.5
+> IGD Value
+
+Performance on DF9 
+
+STT 
+
+VARE 
+
+SIKT 
+
+DIP 
+
+Ours 0 5 10 15 20 25 30 
+
+Environment Index ( t)
+
+> 0.10
+> 0.15
+> 0.20
+> 0.25
+> 0.30
+> 0.35
+> 0.40
+> 0.45
+> IGD Value
+
+Performance on DF10 
+
+STT 
+
+VARE 
+
+SIKT 
+
+DIP 
+
+Ours 0 5 10 15 20 25 30 
+
+Environment Index ( t)
+
+> 0.0
+> 0.5
+> 1.0
+> 1.5
+> 2.0
+> IGD Value
+
+Performance on DF11 
+
+STT 
+
+VARE 
+
+SIKT 
+
+DIP 
+
+Ours 0 5 10 15 20 25 30 
+
+Environment Index ( t)
+
+> 0.0
+> 0.1
+> 0.2
+> 0.3
+> 0.4
+> 0.5
+> IGD Value
+
+Performance on DF12 
+
+STT 
+
+VARE 
+
+SIKT 
+
+DIP 
+
+Ours 0 5 10 15 20 25 30 
+
+Environment Index ( t)
+
+> 0.1
+> 0.2
+> 0.3
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+> IGD Value
+
+Performance on DF13 
+
+STT 
+
+VARE 
+
+SIKT 
+
+DIP 
+
+Ours 0 5 10 15 20 25 30 
+
+Environment Index ( t)
+
+> 0.00
+> 0.05
+> 0.10
+> 0.15
+> 0.20
+> IGD Value
+
+Performance on DF14 
+
+STT 
+
+VARE 
+
+SIKT 
+
+DIP 
+
+Ours 
+
+Fig. 3: Complete IGD variation curves of different algorithms over consecutive environments on all DF test instances. 0.0 0.2 0.4 0.6 0.8 1.0 
+
+Objective 1 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0 
+
+> Objective 2
+
+Fig. 4: The dynamic Pareto Front (PF) of the DF6 benchmark, illustrating the non-linear curvature changes and localized disconnected regions across different environmental states. convex-to-concave geometric deformations, but its PS remains statically anchored at xi = 0 (i ≥ 2). 
+
+Problem 67 (Shift Isolation): Problem 67 isolates the PS positional shifts while maintaining a completely static PF geometry. It is defined as: 
+
+
+
+f1(x, t ) = x1
+
+f2(x, t ) = g(x, t )
+
+
+
+1.0 −
+
+q x1
+
+g(x,t )
+
+ (3) where g(x, t ) = 1 .0 + 9 .0 Pni=2 (xi − si(t)) 2. The shift vector 
+
+si(t) alternates between |G(t)| and −| G(t)| across indices, closely mirroring the yi = xi − G(t) translation mechanism in DF6. However, its objective space exponent is fixed at 0.5.To visually illustrate the structural relationships among these problems, Fig. 5 presents their distributions in the latent space. While DF6, Problem 64, and Problem 67 occupy distinct sub-regions, the trajectory of DF6 is situated spatially between Problem 64 and Problem 67. This intermediate positioning in the latent manifold visually corroborates the compositional nature of DF6, proving that the learned latent space captures the underlying mathematical topology and intrinsic structural connections across different dynamic environments. 
+
+Fig. 5: Latent space visualization of DF6, Problem 64, and Problem 67. Although distributed in distant sub-regions, the trajectory of DF6 is spatially positioned between Problem 64 and Problem 67, reflecting its compositional dynamic properties. 5
+
+2) Topological Intersection Between DF5 and DF6: As ob-served in the latent space t-SNE visualization, the evolutionary trajectories of the DF5 and DF6 problems exhibit a distinct intertwining phenomenon. To mathematically explain this behavior, we compare their respective Pareto Front definitions. According to the CEC 2018 benchmark definitions [8], the dynamic PF of DF5 is defined with a static linear base and dynamically oscillating high-frequency ripples: DF5: 
+
+(
+
+f1(x, t ) = g(x, t )( x1 + 0 .02 sin( wtπx 1)) 
+
+f2(x, t ) = g(x, t )(1 − x1 + 0 .02 sin( wtπx 1)) (4) where the distance function is g(x, t ) = 1 + Pni=2 (xi − G(t)) 2,and the frequency parameter wt = ⌊10 G(t)⌋. Macroscopically, ignoring the minor 0.02 amplitude ripple, the PF of DF5 is consistently anchored to a linear geometry ( f1 + f2 ≈ 1). By contrasting Eq. 4 with the DF6 definition in Eq. 1, it is evident that their local ripples differ mathematically (DF6 uses a static 0.1 sin(3 πx 1) ripple). However, a macroscopic topological homology occurs when the dynamic curvature of DF6 degenerates into a linear manifold. This condition is satisfied when the exponent of DF6 becomes exactly 1:
+
+αt = 0 .2 + 2 .8|G(t)| = 1 (5) 
+
+|G(t)| = | sin(0 .5πt )| = 0.82.8 = 27 ≈ 0.2857 (6) This derivation reveals that at specific evolutionary moments within every cycle (when | sin(0 .5πt )| = 2 /7), the non-linear curvature of DF6 dynamically flattens. At these exact steps, the macroscopic PF of DF6 becomes f1 + f2 ≈ 1. Because the Topology-Aware Contrastive Regularization in DB-GEN utilizes the Inverted Generational Distance (IGD) metric, the minor differences in their localized ripple amplitudes ( 0.1 vs 
+
+0.02 ) contribute negligibly to the overall IGD. Consequently, the IGD between the PFs of DF5 and DF6 approaches zero at these temporal nodes. The triplet margin loss directly forces the model to encode these geometrically homol-ogous, yet mathematically distinct, environmental states into adjacent latent regions. This provides a rigorous explanation for their trajectory intersection in the t-SNE projection, confirming that the latent space representation is strictly governed by global manifold geometry. 
+
+E. HV 
+
+Table II presents the complete Mean Hypervolume (MHV) results and their corresponding standard deviations across all 57 dynamic test configurations, comprising the DF1–DF14 and FDA1–FDA5 problem suites. The performance of the proposed method is compared against four state-of-the-art dynamic multi-objective evolutionary algorithms: STT-MOEA/D, DIP-DMOEA, VARE, and SIKT-DMOEA. In the table, the best and second-best results for each configuration are highlighted with a dark gray and light gray background, respectively. To ensure statistical rigor, the Wilcoxon rank-sum test at a 5% significance level is conducted. The symbols “ +”, “ −”, and “ ≈” indicate that the corresponding comparison algorithm performs significantly better than, significantly worse than, or statistically similar to our proposed method. The bottom row summarizes the overall performance, where the proposed method achieves the best average rank of 1.37 across all test environments. 
+
+F. Detailed Statistical Analysis of Data Scale Expansion 
+
+To comprehensively validate the scalability of the proposed framework, we performed pairwise Wilcoxon signed-rank tests across all evaluated historical data scales. Since the Friedman test in the main text confirmed a globally significant difference, these post-hoc pairwise comparisons are utilized to identify exact local improvements. Fig. 6 visualizes the p-value matrix derived from the Wilcoxon tests. In this lower-triangular heatmap, each cell represents the statistical significance of the performance difference between two corresponding data scales. The exact 
+
+p-values are annotated within the cells, where the asterisk ( ∗)explicitly denotes statistical significance at the conventional 
+
+5% level ( p < 0.05 ). 4 6 8 10 11 12           
+
+> Data Scale ( ×10 7)
+> 46810 11 12
+> Data Scale ( ×10 7)
+> 5.2e-02
+> 5.3e-04* 2.4e-03*
+> 8.0e-07* 1.3e-05* 9.7e-01
+> 1.6e-06* 4.2e-06* 6.2e-02 1.1e-04*
+> 2.9e-08* 3.6e-07* 7.3e-04* 4.8e-06* 2.0e-02*
+> 0.00
+> 0.01
+> 0.02
+> 0.03
+> 0.04
+> 0.05
+> p-value
+
+Fig. 6: The p-value heatmap of the pairwise Wilcoxon signed-rank tests across different historical data scales. Cells annotated with ∗ indicate a statistically significant difference ( p < 0.05 ). The scale units are ×10 7.As depicted in Fig. 6, the maximum data scale ( 12 × 10 7)exhibits highly significant superiority over all other baseline scales (all p-values < 0.05 ). Notably, the performance leap from 11 × 10 7 to 12 × 10 7 remains statistically significant ( p =2.04 × 10 −2), indicating that expanding the diverse topological priors continues to benefit the model’s generative accuracy at this stage. Additionally, the non-significant cell between the scales of 8 × 10 7 and 10 × 10 7 (p = 0 .966 ) clearly identifies the localized performance plateau mentioned in the main text. Overall, this comprehensive statistical matrix substantiates the robustness and strict monotonicity of the model’s scalability. APPENDIX BREAL -WORLD PROBLEM DEFINITIONS 
+
+To further validate the proposed algorithm in practical sce-narios, we introduce two formulated real-world dynamic multi-objective optimization problems. These models are designed with decoupled position and distance variables to explicitly simulate complex topological transformations. Consequently, both the Pareto Set (PS) in the decision space and the Pareto 6
+
+TABLE II: The MHV values and standard deviation in parentheses obtained by SOTAs and Ours. 
+
+Problem nt τt STT-MOEA/D DIP-DMOEA VARE SIKT-DMOEA Ours DF1 5 10 9.30e-02(3.84e-03) − 4.72e-01(3.09e-03) − 5.81e-01(1.56e-03) − 4.55e-01(1.21e-02) − 6.09e-01(2.74e-03) 10 5 7.91e-02(8.64e-03) − 4.34e-01(4.66e-04) − 5.39e-01(4.63e-03) − 3.73e-01(1.82e-02) − 5.58e-01(1.74e-03) 10 10 9.15e-02(8.24e-04) − 4.95e-01(4.53e-02) − 4.43e-01(2.90e-03) − 4.46e-01(7.95e-03) − 5.15e-01(4.57e-04) DF2 5 10 2.63e-01(2.99e-03) − 6.32e-01(7.12e-03) + 6.55e-01(3.61e-03) + 6.56e-01(7.68e-03) + 6.24e-01(4.49e-03) 10 5 2.45e-01(7.95e-04) − 5.81e-01(5.35e-04) − 5.51e-01(1.20e-03) − 5.84e-01(7.65e-03) − 6.28e-01(2.90e-03) 10 10 2.47e-01(6.28e-04) − 6.71e-01(4.58e-04) − 6.76e-01(6.94e-03) − 6.67e-01(5.75e-03) − 6.81e-01(1.44e-03) DF3 5 10 8.54e-02(1.80e-03) − 3.72e-01(1.55e-03) − 4.41e-01(3.54e-03) − 4.33e-01(4.66e-03) − 4.57e-01(3.39e-03) 10 5 2.28e-01(7.64e-04) − 3.26e-01(5.42e-04) − 2.90e-01(2.32e-03) − 3.84e-01(6.63e-03) − 4.19e-01(3.44e-03) 10 10 7.99e-01(8.38e-04) + 3.82e-01(7.47e-04) + 9.49e-01(2.23e-03) + 4.39e-01(2.47e-03) + 2.28e-01(7.20e-03) DF4 5 10 4.97e+00(2.49e-03) − 6.99e-01(5.41e-04) − 8.03e-01(5.13e-03) − 6.78e-01(2.11e-03) − 7.24e+00(7.24e-03) 10 5 5.19e+00(4.23e-03) − 6.73e-01(6.63e-03) − 7.41e-01(5.74e-03) − 5.79e-01(4.09e-03) − 7.16e+00(3.75e-03) 10 10 4.85e+00(4.70e-03) − 7.10e-01(2.68e-04) − 6.23e-01(6.93e-03) − 6.66e-01(5.30e-03) − 7.24e+00(7.32e-03) DF5 5 10 1.04e-01(3.20e-03) − 5.51e-01(4.75e-02) − 6.15e-01(2.68e-03) + 4.58e-01(1.73e-02) − 5.77e-01(6.77e-04) 10 5 1.03e-01(3.90e-03) − 5.18e-01(4.32e-02) − 4.78e-01(2.98e-03) − 3.26e-01(3.30e-02) − 5.57e-01(1.29e-03) 10 10 9.04e-02(3.21e-03) − 5.54e-01(1.73e-02) − 5.37e-01(3.86e-03) − 4.95e-01(9.06e-03) − 5.78e-01(2.65e-04) DF6 5 10 7.61e-01(2.26e-03) − 2.80e-01(4.54e-03) − 3.64e-01(2.77e-03) − 2.15e-01(3.78e-02) − 1.43e+00(1.42e-01) 10 5 7.84e-01(3.65e-03) − 2.36e-01(8.31e-03) − 2.54e-01(2.88e-03) − 9.91e-02(2.33e-02) − 1.69e+00(3.92e-02) 10 10 9.91e-01(2.80e-03) − 3.21e-01(3.71e-03) − 5.70e-01(2.90e-03) − 2.78e-01(3.99e-02) − 1.82e+00(2.00e-02) DF7 5 10 5.40e+00(3.27e-03) − 3.73e-01(2.61e-03) − 7.30e-01(2.80e-03) − 4.31e-01(3.79e-03) − 8.62e+00(1.21e-01) 10 5 7.75e+00(3.15e-03) − 3.91e-01(7.67e-03) − 5.09e-01(2.84e-03) − 4.01e-01(8.74e-03) − 1.00e+01(1.47e-01) 10 10 7.37e+00(3.72e-03) − 4.00e-01(3.25e-04) − 8.12e-01(3.40e-03) − 4.42e-01(4.01e-03) − 1.03e+01(2.21e-02) DF8 5 10 3.30e-01(3.19e-03) − 5.99e-01(5.79e-04) − 5.02e-01(3.20e-03) − 5.93e-01(1.76e-03) − 6.11e-01(5.56e-03) 10 5 2.83e-01(2.81e-03) − 5.64e-01(2.44e-04) − 4.65e-01(2.66e-03) − 5.56e-01(2.40e-03) − 5.88e-01(8.83e-03) 10 10 2.56e-01(3.55e-03) − 6.01e-01(3.25e-03) − 5.23e-01(3.42e-03) − 6.00e-01(2.21e-03) − 6.39e-01(4.67e-03) DF9 5 10 4.99e-02(2.68e-03) − 3.31e-01(3.37e-04) − 3.42e-01(2.46e-03) − 3.09e-01(2.84e-02) − 3.54e-01(4.51e-03) 10 5 5.61e-02(3.42e-03) − 2.78e-01(9.64e-04) − 2.41e-01(2.78e-03) − 1.98e-01(3.72e-02) − 3.11e-01(8.20e-03) 10 10 4.63e-02(2.72e-03) − 3.79e-01(2.43e-03) − 4.32e-01(3.20e-03) − 4.18e-01(2.71e-02) ≈ 4.39e-01(5.47e-03) DF10 5 10 4.62e-01(4.28e-03) − 6.42e-01(4.57e-04) + 5.45e-01(3.31e-03) − 5.88e-01(8.54e-03) − 6.36e-01(1.27e-03) 10 5 3.91e-01(3.14e-03) − 5.32e-01(5.25e-04) − 5.65e-01(3.11e-03) − 5.22e-01(7.47e-03) − 6.19e-01(3.16e-03) 10 10 3.72e-01(3.24e-03) − 5.34e-01(7.45e-04) − 6.20e-01(2.98e-03) − 5.85e-01(4.65e-03) − 6.45e-01(1.26e-03) DF11 5 10 3.83e-01(2.46e-03) − 2.56e-01(7.49e-04) − 9.38e-02(3.28e-03) − 2.67e-01(4.66e-03) − 5.18e-01(3.65e-04) 10 5 5.62e-02(3.18e-03) − 2.35e-01(5.43e-03) − 6.00e-01(2.73e-03) + 2.36e-01(2.54e-03) − 5.08e-01(6.52e-04) 10 10 5.56e-02(3.14e-03) − 2.62e-01(3.69e-04) − 9.95e-02(2.77e-03) − 2.52e-01(3.72e-03) − 5.15e-01(3.88e-04) DF12 5 10 1.79e-01(3.28e-03) − 5.46e-01(9.50e-04) + 1.16e+00(2.56e-03) + 6.61e-02(3.65e-03) − 2.52e-01(1.86e-02) 10 5 1.94e-01(3.11e-03) − 5.77e-01(4.02e-03) − 1.18e+00(3.24e-02) + 3.09e-02(1.41e-03) − 6.61e-01(2.27e-03) 10 10 1.82e-01(2.88e-03) − 6.35e-01(3.37e-03) − 1.21e-01(3.63e-03) − 4.43e-02(2.59e-03) − 6.79e-01(2.12e-04) DF13 5 10 6.06e-01(2.96e-03) − 6.30e-01(2.75e-04) − 6.40e-01(2.77e-03) − 4.99e-01(9.88e-03) − 6.52e-01(3.45e-03) 10 5 6.65e-01(3.07e-03) + 5.73e-01(3.63e-03) − 4.96e-01(2.96e-03) − 4.19e-01(1.47e-02) − 6.09e-01(1.52e-03) 10 10 6.41e-01(3.36e-03) − 6.10e-01(8.79e-04) − 6.24e-01(3.33e-03) − 4.88e-01(9.70e-03) − 6.63e-01(4.26e-03) DF14 5 10 2.73e-01(3.42e-03) − 5.82e-01(3.31e-03) − 6.96e-01(2.60e-03) + 4.87e-01(5.75e-03) − 6.90e-01(2.06e-04) 10 5 2.83e+00(3.30e-03) + 5.44e-01(4.12e-03) − 6.67e-01(3.22e-03) − 4.09e-01(2.02e-02) − 6.84e-01(2.79e-04) 10 10 2.82e+00(2.89e-03) + 5.82e-01(3.21e-04) − 8.12e-01(3.02e-03) + 5.47e-01(4.13e-03) − 6.91e-01(1.62e-04) FDA1 5 10 1.07e-01(4.61e-03) − 5.31e-01(1.68e-03) − 6.01e-01(1.57e-03) − 6.17e-01(1.49e-02) − 6.27e-01(6.56e-03) 10 5 7.13e-02(3.59e-03) − 6.51e-01(4.69e-02) − 6.56e-01(6.34e-03) − 5.08e-01(4.21e-02) − 6.74e-01(3.47e-03) 10 10 1.02e-01(3.55e-03) − 7.19e-01(4.46e-03) + 8.07e-01(5.19e-04) + 6.60e-01(3.99e-03) ≈ 6.75e-01(4.19e-03) FDA2 5 10 1.74e-03(3.06e-03) − 5.54e-01(3.50e-03) − 6.84e-01(1.08e-02) − 5.64e-01(1.69e-03) − 2.00e+00(1.14e-02) 10 5 1.33e-02(1.79e-03) − 7.11e-01(1.46e-02) − 6.07e-01(2.29e-04) − 5.57e-01(1.35e-02) − 1.82e+00(2.01e-02) 10 10 2.63e-01(1.68e-03) − 7.90e-01(4.57e-03) − 5.85e-01(5.56e-04) − 5.65e-01(1.71e-03) − 1.96e+00(2.85e-02) FDA3 5 10 2.96e-01(1.16e-03) − 5.33e-01(4.75e-04) − 6.30e-01(8.86e-03) − 4.59e-01(1.00e-02) − 6.72e-01(1.01e-03) 10 5 4.39e-01(2.24e-03) − 3.39e-01(7.72e-04) − 5.71e-01(8.31e-03) − 3.38e-01(2.23e-02) − 6.59e-01(2.78e-03) 10 10 6.50e-01(7.14e-03) ≈ 6.37e-01(5.32e-04) − 5.82e-01(2.93e-04) − 5.06e-01(8.91e-03) − 6.72e-01(1.04e-03) FDA4 5 10 1.70e-01(8.38e-03) − 3.36e-01(4.65e-04) − 3.33e-01(8.18e-03) − 4.58e-01(7.47e-03) ≈ 4.68e-01(2.19e-03) 10 5 1.11e-01(3.86e-02) − 3.05e-01(1.36e-03) − 2.26e-01(1.40e-03) − 3.34e-01(1.56e-02) − 3.42e-01(3.32e-03) 10 10 1.70e-01(3.00e-02) − 4.12e-01(2.38e-04) − 4.51e-01(1.57e-04) − 4.77e-01(4.99e-03) − 4.93e-01(8.06e-04) FDA5 5 10 4.90e-01(3.94e-02) ≈ 4.40e-01(2.27e-04) − 4.18e-01(1.37e-04) − 4.51e-01(1.37e-02) ≈ 4.59e-01(3.86e-04) 10 5 7.12e-02(1.50e-02) − 2.42e-01(5.28e-04) − 3.95e-01(1.16e-03) − 3.33e-01(1.47e-02) − 4.00e-01(8.76e-04) 10 10 1.20e-01(1.71e-02) − 3.54e-01(4.65e-03) − 4.62e-01(5.53e-04) − 4.58e-01(8.49e-03) − 4.98e-01(2.09e-04) 
+
+Average Rank 3.91 3.21 2.79 3.72 1.37 7
+
+Front (PF) in the objective space undergo continuous and non-linear shifts over time, providing a rigorous testbed for evaluating the manifold generation capability of the algorithm. 
+
+A. Dynamic Resource Allocation (DRA) 
+
+The DRA problem models the continuous trade-off between the overall operational cost and the service quality within a dynamically changing computing network. The decision variables x = ( x1, . . . , x D ) ∈ [0 , 1] D represent the resource allocation strategy across D heterogeneous nodes. To simulate real-world physical constraints, the first variable 
+
+x1 acts as the primary trade-off controller (e.g., total budget size), while the remaining variables x2, . . . , x D represent the convergence accuracy (e.g., load balancing efficiency). The conflicting objectives are formulated as follows:  
+
+> •
+
+Objective 1 (Minimize Cost): 
+
+f1(x, t ) = ¯ c(t) · x1 · g(x, t ) (7) This objective evaluates the normalized operational cost, where ¯c(t) denotes the mean cost index across the network at time t. 
+
+> •
+
+Objective 2 (Maximize Quality): 
+
+f2(x, t ) = ¯ q(t) − ¯q(t)√x1
+
+g(x, t ) (8) This objective minimizes the service quality loss. A larger budget x1 reduces the loss marginally, reflecting the physical law of diminishing returns (modeled by the square root). ¯q(t) is the mean quality index. The convergence penalty function g(x, t ) models the system efficiency loss and defines the dynamic behavior of the Pareto Set (PS): 
+
+g(x, t ) = 1 + 9 
+
+> D
+
+X
+
+> j=2
+
+(xj − G(t)) 2, G(t) = | sin(0 .5πt )| (9) The optimal state requires g(x, t ) = 1, which forces the variables xj to continuously track the shifting optimal load center G(t).The environmental dynamics are characterized by spatial-temporal heterogeneity. The parameters ci(t) and qi(t) for the 
+
+i-th node incorporate node-specific base attributes and spatial phase shifts: 
+
+ci(t) = cbase  
+
+> i
+
+(1 + 0 .1 sin(0 .5πt + θi)) 
+
+qi(t) = qbase  
+
+> i
+
+(1 + 0 .1 cos(0 .5πt + θi)) (10) where cbase  
+
+> i
+
+∈ [0 .5, 1.5] , qbase  
+
+> i
+
+∈ [0 .5, 2.0] , and the spatial phase θi ∈ [0 , π ]. The mean indices are computed as ¯c(t) = 
+
+> 1
+> D
+
+P ci(t) and ¯q(t) = 1
+
+> D
+
+P qi(t).
+
+B. Dynamic Path Planning (DPP) 
+
+The DPP problem simulates the velocity planning of an autonomous vehicle navigating through multiple physical segments. It aims to balance the total travel time and energy consumption under varying weather and traffic conditions. The decision variable x1 determines the target velocity mapped to a normalized physical interval vnorm ∈ [0 .2, 1.0] 
+
+via vnorm = 0 .2 + 0 .8x1. The remaining variables model the deviation from the optimal trajectory.  
+
+> •
+
+Objective 1 (Minimize Travel Time): 
+
+f1(x, t ) = ¯d(t)
+
+vnorm 
+
+· g(x, t ) (11) where ¯d(t) is the mean dynamic effective distance across all segments, factoring in periodic traffic congestion.  
+
+> •
+
+Objective 2 (Minimize Energy Consumption): 
+
+f2(x, t ) = cd (t) · v2 
+
+> norm
+
+· g(x, t ) (12) This objective reflects aerodynamic principles where energy consumption is proportional to the square of the velocity. cd (t) denotes the spatially averaged coupled drag-distance coefficient. Similar to DRA, the distance function g(x, t ) incorporates the moving optimum G(t) = | sin(0 .5πt )| to simulate the time-varying optimal steering or lane-changing target: 
+
+g(x, t ) = 1 + 9 
+
+> D
+
+X
+
+> j=2
+
+(xj − G(t)) 2 (13) The dynamic environmental factors are formulated as: 
+
+di(t) = 1 + 0 .2 sin(0 .5πt + θi)
+
+ci(t) = 1 + 0 .2 cos(0 .5πt + θi) (14) where di(t) indicates the congestion length of segment i,and ci(t) represents the varying aerodynamic drag coefficient caused by weather conditions. The aggregate coefficients are derived as ¯d(t) = 1
+
+> D
+
+P di(t) and cd (t) = 1
+
+> D
+
+P ci(t)di(t).REFERENCES [1] Subhodip Biswas, Swagatam Das, Ponnuthurai N Suganthan, and Carlos A Coello Coello. Evolutionary multiobjective optimization in dynamic environments: A set of novel benchmark functions. In 2014 IEEE congress on evolutionary computation (CEC) , pages 3192–3199. IEEE, 2014. [2] Sen Bong Gee, Kay Chen Tan, and Hussein A Abbass. A benchmark test suite for dynamic evolutionary multiobjective optimization. IEEE transactions on cybernetics , 47(2):461–472, 2016. [3] Marde Helbig and Andries P Engelbrecht. Archive management for dynamic multi-objective optimisation problems using vector evaluated particle swarm optimisation. In 2011 IEEE Congress of Evolutionary Computation (CEC) , pages 2047–2054. IEEE, 2011. [4] Marde Helbig and Andries P Engelbrecht. Benchmarks for dynamic multi-objective optimisation algorithms. ACM Computing Surveys (CSUR) ,46(3):1–39, 2014. [5] Shouyong Jiang, Marcus Kaiser, Shengxiang Yang, Stefanos Kollias, and Natalio Krasnogor. A scalable test suite for continuous dynamic multiob-jective optimization. IEEE transactions on cybernetics , 50(6):2814–2826, 2019. [6] Shouyong Jiang and Shengxiang Yang. A framework of scalable dynamic test problems for dynamic multi-objective optimization. In 2014 IEEE Symposium on Computational Intelligence in Dynamic and Uncertain Environments (CIDUE) , pages 32–39. IEEE, 2014. [7] Shouyong Jiang and Shengxiang Yang. Evolutionary dynamic multi-objective optimization: Benchmarks and algorithm comparisons. IEEE transactions on cybernetics , 47(1):198–211, 2016. [8] Shouyong Jiang, Shengxiang Yang, Xin Yao, Kay Chen Tan, Marcus Kaiser, and Natalio Krasnogor. Benchmark functions for the cec’2018 competition on dynamic multiobjective optimization. Technical report, Newcastle University, 2018. [9] Wee Tat Koo, Chi Keong Goh, and Kay Chen Tan. A predictive gradient strategy for multiobjective evolutionary algorithms in a fast changing environment. Memetic Computing , 2(2):87–110, 2010. 8
+
+[10] Ruochen Liu, Jianxia Li, Jing Liu, and Licheng Jiao. A survey on dynamic multi-objective optimization. Chinese Journal of Computers ,43(7):1246–1278, 2020. [11] J ¨orn Mehnen and G ¨unter Rudolph. Evolutionary optimization of dynamic multi-objective test functions. 2000. [12] Zhuhong Zhang and Shuqu Qian. Artificial immune system in dynamic environments solving time-varying non-linear constrained multi-objective problems. Soft Computing , 15(7):1333–1349, 2011. [13] Aimin Zhou, Yaochu Jin, and Qingfu Zhang. A population prediction strategy for evolutionary dynamic multiobjective optimization. IEEE transactions on cybernetics , 44(1):40–53, 2013.

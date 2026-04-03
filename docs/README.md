@@ -6,79 +6,76 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-02
-- 运行时间：2026-04-02 20:04:05 UTC
+- 最新运行日期：2026-04-03
+- 运行时间：2026-04-03 19:43:46 UTC
 - 运行状态：成功
-- 本次总论文数：19
-- 精读区：7
+- 本次总论文数：18
+- 精读区：6
 - 速读区：12
 
 ### 今日简报（AI）
-今日聚焦 19 篇前沿进展，深度解析强化学习如何通过执行验证与随机优化重塑建模效率。
-满分论文展示了执行验证强化学习在优化建模中的巨大潜力，同时多智能体 LLM 协作与代码效率优化亦有显著突破。
-建议重点关注 RL 与大模型结合的决策机制，这是提升复杂任务分配与系统性能的关键路径。
-- 详情：[/202604/02/README](/202604/02/README)
+今日聚焦 LLM 攻克复杂优化难题的潜力，深度解析从组合优化感知到非线性建模的 18 篇前沿成果。
+满分论文揭示了 LLM 识别不可行解的关键能力，而 NED-Tree 架构则通过非线性元素分解有效弥合了语义与数学建模的鸿沟。
+建议关注大模型与传统运筹学的跨界融合，尝试将其应用于工业调度或能源管理等实际优化场景。
+- 详情：[/202604/03/README](/202604/03/README)
 
 ### 精读区论文标签
-1. [Execution-Verified Reinforcement Learning for Optimization Modeling](/202604/02/2604.00442v1-execution-verified-reinforcement-learning-for-optimization-modeling)  
+1. [Infeasibility Aware Large Language Models for Combinatorial Optimization](/202604/03/2604.01455v1-infeasibility-aware-large-language-models-for-combinatorial-optimization)  
    标签：评分：10.0/10、query:nco-llm
-   evidence：大模型与数学规划求解器集成
-2. [Learning to Shuffle: Block Reshuffling and Reversal Schemes for Stochastic Optimization](/202604/02/2604.00260v1-learning-to-shuffle-block-reshuffling-and-reversal-schemes-for-stochastic-optimization)  
+   evidence：大语言模型用于组合优化及不可解性检测
+2. [NED-Tree: Bridging the Semantic Gap with Nonlinear Element Decomposition Tree for LLM Nonlinear Optimization Modeling](/202604/03/2604.01588v1-ned-tree-bridging-the-semantic-gap-with-nonlinear-element-decomposition-tree-for-llm-nonlinear-optimization-modeling)  
    标签：评分：9.0/10、query:nco-llm
-   evidence：大模型引导的优化规则程序演化
-3. [TR-ICRL: Test-Time Rethinking for In-Context Reinforcement Learning](/202604/02/2604.00438v1-tr-icrl-test-time-rethinking-for-in-context-reinforcement-learning)  
-   标签：评分：9.0/10、query:nco-llm
-   evidence：大模型的上下文强化学习
-4. [Large Language Model Guided Incentive Aware Reward Design for Cooperative Multi-Agent Reinforcement Learning](/202604/02/2603.24324v2-large-language-model-guided-incentive-aware-reward-design-for-cooperative-multi-agent-reinforcement-learning)  
+   evidence：将自然语言转化为非线性优化模型的大模型框架
+3. [A Graph Neural Network Approach for Solving the Ranked Assignment Problem in Multi-Object Tracking](/202604/03/2604.01696v1-a-graph-neural-network-approach-for-solving-the-ranked-assignment-problem-in-multi-object-tracking)  
+   标签：评分：9.0/10、query:nco
+   evidence：使用图神经网络解决追踪中的排名分配问题
+4. [CORAL: Towards Autonomous Multi-Agent Evolution for Open-Ended Discovery](/202604/03/2604.01658v1-coral-towards-autonomous-multi-agent-evolution-for-open-ended-discovery)  
    标签：评分：8.0/10、query:nco-llm
-   evidence：LLM 驱动的强化学习奖励程序生成
-5. [Experiential Reflective Learning for Self-Improving LLM Agents](/202604/02/2603.24639v2-experiential-reflective-learning-for-self-improving-llm-agents)  
+   evidence：基于大模型的演化算法用于开放式搜索
+5. [When does learning pay off? A study on DRL-based dynamic algorithm configuration for carbon-aware scheduling](/202604/03/2604.01886v1-when-does-learning-pay-off-a-study-on-drl-based-dynamic-algorithm-configuration-for-carbon-aware-scheduling)  
    标签：评分：8.0/10、query:nco-llm
-   evidence：LLM从任务轨迹中生成启发式方法以实现自我改进
-6. [Efficient CMOS Invertible Logic Using Stochastic Computing](/202604/02/2603.27030v1-efficient-cmos-invertible-logic-using-stochastic-computing)  
-   标签：评分：8.0/10、query:nco
-   evidence：用于组合优化的脉冲神经网络
-7. [Speeding Up Mixed-Integer Programming Solvers with Sparse Learning for Branching](/202604/02/2604.00094v1-speeding-up-mixed-integer-programming-solvers-with-sparse-learning-for-branching)  
-   标签：评分：8.0/10、query:nco
-   evidence：用于MIP求解器分支决策的稀疏学习
+   evidence：基于深度强化学习的调度动态算法配置
+6. [Intelligent Cloud Orchestration: A Hybrid Predictive and Heuristic Framework for Cost Optimization](/202604/03/2604.02131v1-intelligent-cloud-orchestration-a-hybrid-predictive-and-heuristic-framework-for-cost-optimization)  
+   标签：评分：8.0/10、query:nco-llm
+   evidence：结合预测性机器学习与数学启发式的混合框架
 
 ### 速读区论文标签
-1. [EffiSkill: Agent Skill Based Automated Code Efficiency Optimization](/202604/02/2603.27850v1-effiskill-agent-skill-based-automated-code-efficiency-optimization)  
-   标签：评分：8.0/10、query:nco-llm
-   evidence：基于大模型代理的代码效率优化与启发式搜索
-2. [Large Neighborhood Search for Multi-Agent Task Assignment and Path Finding with Precedence Constraints](/202604/02/2603.28968v1-large-neighborhood-search-for-multi-agent-task-assignment-and-path-finding-with-precedence-constraints)  
-   标签：评分：8.0/10、query:nco-llm
-   evidence：用于多智能体任务分配和路径规划的大邻域搜索
-3. [Agent Q-Mix: Selecting the Right Action for LLM Multi-Agent Systems through Reinforcement Learning](/202604/02/2604.00344v1-agent-q-mix-selecting-the-right-action-for-llm-multi-agent-systems-through-reinforcement-learning)  
-   标签：评分：8.0/10、query:nco-llm
-   evidence：GNN、LLM 与强化学习的集成
-4. [Query-Conditioned Evidential Keyframe Sampling for MLLM-Based Long-Form Video Understanding](/202604/02/2604.01002v1-query-conditioned-evidential-keyframe-sampling-for-mllm-based-long-form-video-understanding)  
-   标签：评分：8.0/10、query:nco-llm
-   evidence：基于多模态大模型的视频理解，涉及关键帧采样的组合优化
-5. [An Efficient High-Degree, High-Order Equivariant Graph Neural Network for Direct Crystal Structure Optimization](/202604/02/2603.23941v1-an-efficient-high-degree-high-order-equivariant-graph-neural-network-for-direct-crystal-structure-optimization)  
+1. [Knowledge Distillation for Efficient Transformer-Based Reinforcement Learning in Hardware-Constrained Energy Management Systems](/202604/03/2603.26249v1-knowledge-distillation-for-efficient-transformer-based-reinforcement-learning-in-hardware-constrained-energy-management-systems)  
    标签：评分：7.0/10、query:nco
-   evidence：用于晶体结构优化的等变图神经网络
-6. [Optimizing Coverage and Difficulty in Reinforcement Learning for Quiz Composition](/202604/02/2603.27695v1-optimizing-coverage-and-difficulty-in-reinforcement-learning-for-quiz-composition)  
+   evidence：基于Transformer的强化学习用于能源管理优化
+2. [Data Center Chiller Plant Optimization via Mixed-Integer Nonlinear Differentiable Predictive Control](/202604/03/2603.28323v1-data-center-chiller-plant-optimization-via-mixed-integer-nonlinear-differentiable-predictive-control)  
+   标签：评分：7.0/10、query:nco-llm
+   evidence：用于混合整数最优控制问题的可微预测控制
+3. [The Model Says Walk: How Surface Heuristics Override Implicit Constraints in LLM Reasoning](/202604/03/2603.29025v1-the-model-says-walk-how-surface-heuristics-override-implicit-constraints-in-llm-reasoning)  
+   标签：评分：7.0/10、query:nco-llm
+   evidence：大语言模型在约束问题中的推理与启发式表现
+4. [Approximation algorithms for satisfiable and nearly satisfiable ordering CSPs](/202604/03/2603.30020v1-approximation-algorithms-for-satisfiable-and-nearly-satisfiable-ordering-csps)  
    标签：评分：7.0/10、query:nco
-   evidence：强化学习用于测验组合的序列决策问题
-7. [Is One Token All It Takes? Graph Pooling Tokens for LLM-based GraphQA](/202604/02/2604.00342v1-is-one-token-all-it-takes-graph-pooling-tokens-for-llm-based-graphqa)  
+   evidence：排序约束满足问题的近似算法
+5. [Certificate-Driven Closed-Loop Multi-Agent Path Finding with Inheritable Factorization](/202604/03/2604.00428v1-certificate-driven-closed-loop-multi-agent-path-finding-with-inheritable-factorization)  
+   标签：评分：7.0/10、query:nco
+   evidence：将闭环多智能体路径规划作为组合优化问题
+6. [A Decoupled Basis-Vector-Driven Generative Framework for Dynamic Multi-Objective Optimization](/202604/03/2604.00508v1-a-decoupled-basis-vector-driven-generative-framework-for-dynamic-multi-objective-optimization)  
    标签：评分：7.0/10、query:nco-llm
-   evidence：GNN与LLM结合用于图推理
-8. [Adaptive Parallel Monte Carlo Tree Search for Efficient Test-time Compute Scaling](/202604/02/2604.00510v1-adaptive-parallel-monte-carlo-tree-search-for-efficient-test-time-compute-scaling)  
-   标签：评分：7.0/10、query:nco-llm
-   evidence：用于提高大语言模型推理性能和计算缩放的蒙特卡洛树搜索
-9. [COIN: Collaborative Interaction-Aware Multi-Agent Reinforcement Learning for Self-Driving Systems](/202604/02/2603.24931v1-coin-collaborative-interaction-aware-multi-agent-reinforcement-learning-for-self-driving-systems)  
-   标签：评分：6.0/10、query:nco
-   evidence：自动驾驶的多智能体强化学习
-10. [On the Complexity of Optimal Graph Rewiring for Oversmoothing and Oversquashing in Graph Neural Networks](/202604/02/2603.26140v1-on-the-complexity-of-optimal-graph-rewiring-for-oversmoothing-and-oversquashing-in-graph-neural-networks)  
-   标签：评分：6.0/10、query:nco
-   evidence：用于缓解GNN性能问题的图结构优化
-11. [On the Reliability Limits of LLM-Based Multi-Agent Planning](/202604/02/2603.26993v1-on-the-reliability-limits-of-llm-based-multi-agent-planning)  
+   evidence：用于动态多目标优化的生成式框架
+7. [SEVerA: Verified Synthesis of Self-Evolving Agents](/202604/03/2603.25111v1-severa-verified-synthesis-of-self-evolving-agents)  
    标签：评分：6.0/10、query:nco-llm
-   evidence：基于 LLM 的多智能体规划与优化
-12. [Distributed Online Submodular Maximization under Communication Delays: A Simultaneous Decision-Making Approach](/202604/02/2603.27803v1-distributed-online-submodular-maximization-under-communication-delays-a-simultaneous-decision-making-approach)  
+   evidence：用于任务合成和约束学习的LLM智能体
+8. [Train at Moving Edge: Online-Verified Prompt Selection for Efficient RL Training of Large Reasoning Model](/202604/03/2603.25184v1-train-at-moving-edge-online-verified-prompt-selection-for-efficient-rl-training-of-large-reasoning-model)  
+   标签：评分：6.0/10、query:nco-llm
+   evidence：通过提示词选择实现大型推理模型的高效强化学习训练
+9. [Geometric Evolution Graph Convolutional Networks: Enhancing Graph Representation Learning via Ricci Flow](/202604/03/2603.26178v1-geometric-evolution-graph-convolutional-networks-enhancing-graph-representation-learning-via-ricci-flow)  
    标签：评分：6.0/10、query:nco
-   evidence：子模最大化的分布式在线算法
+   evidence：用于图表示的图卷积网络
+10. [Neural Approximation of Generalized Voronoi Diagrams](/202604/03/2603.26964v1-neural-approximation-of-generalized-voronoi-diagrams)  
+   标签：评分：6.0/10、query:nco
+   evidence：用于近似广义Voronoi图的神经框架
+11. [Cross-attentive Cohesive Subgraph Embedding to Mitigate Oversquashing in GNNs](/202604/03/2603.27529v1-cross-attentive-cohesive-subgraph-embedding-to-mitigate-oversquashing-in-gnns)  
+   标签：评分：6.0/10、query:nco
+   evidence：用于捕获图中全局上下文的GNN框架
+12. [SARL: Label-Free Reinforcement Learning by Rewarding Reasoning Topology](/202604/03/2603.27977v1-sarl-label-free-reinforcement-learning-by-rewarding-reasoning-topology)  
+   标签：评分：6.0/10、query:nco-llm
+   evidence：强化学习用于改进大型推理模型
 
 
 <div class="dpr-home-promo-card">
