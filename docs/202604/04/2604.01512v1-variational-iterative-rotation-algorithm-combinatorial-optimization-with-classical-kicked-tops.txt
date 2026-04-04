@@ -1,0 +1,1837 @@
+Title: Variational Iterative Rotation Algorithm: Combinatorial Optimization with Classical Kicked Tops
+
+URL Source: https://arxiv.org/pdf/2604.01512v1
+
+Published Time: Fri, 03 Apr 2026 00:22:54 GMT
+
+Number of Pages: 23
+
+Markdown Content:
+# Variational Iterative Rotation Algorithm: Combinatorial Optimization with Classical Kicked Tops 
+
+Flaviano Morone, 1 Andrew D. Kent, 1 and Dries Sels 2, 3 
+
+> 1
+
+Center for Quantum Phenomena, Department of Physics, New York University, New York, NY 10003 USA 
+
+> 2
+
+Department of Physics, Boston University, 590 Commonwealth Ave., Boston, Massachusetts 02215, USA 
+
+> 3
+
+Center for Computational Quantum Physics, Flatiron Institute, New York, NY, USA 
+
+We investigate a classical formulation of the Quantum Approximate Optimization Algorithm (QAOA), realized as a Hamiltonian dynamical system of classical kicked tops, which we call the Variational Iterative Rotation Algorithm (VIRAL). The variational parameters are the transverse and longitudinal rotation angles at each of the p layers of the circuit. We find that VIRAL outper-forms QAOA on the canonical Sherrington-Kirkpatrick spin-glass benchmark at all circuit depths, with the energy density converging to the ground state value linearly in 1/p . For large circuit depths, the optimized dynamics follows a Floquet protocol in which a pitchfork bifurcation destabi-lizes the equatorial fixed point and drives the spins toward polar Ising configurations. Our results demonstrate that the effectiveness of QAOA-like protocols derives primarily from their underly-ing iterative rotation structure, and that a classical implementation of it outperforms its quantum counterpart. We further elucidate its efficiency by reducing the many-body classical evolution to an effective Landau-Lifshitz dynamics for a single spin in a stochastic magnetic field. In this picture, the covariance matrix of the effective field reveals a nearly rank-one structure in which a single mode dominates the stochastic dynamics. In contrast, quantum fluctuations make the noise covariance of the effective quantum model of higher rank, hampering the control of the system. We propose nanometer-scale magnetic tunnel junctions as a natural physical platform for implementing VIRAL, where spin rotations can be realized using magnetic fields and spin torques. 
+
+I. INTRODUCTION 
+
+Hard combinatorial optimization problems can often be reformulated as finding the ground state of an Ising spin-glass system, a perspective that has brought together statistical physics, computer science, and electrical engineering, and motivated both classical approaches, such as Ising machines, and quantum algorithms. Among the latter, vari-ational quantum algorithms have attracted particular attention, as they can be realized on noisy intermediate-scale quantum devices while having the potential for quantum advantage. A prominent example is the Quantum Approx-imate Optimization Algorithm (QAOA) [1–5], which seeks low-energy states of interacting quantum spins through a sequence of alternating unitary rotations. The performance of QAOA is often attributed to quantum mechanical effects, yet the precise physical mechanism underlying its effectiveness remains unclear. This has sparked a growing debate on whether quantum resources are truly essential for optimization, or whether comparable performance can be achieved with classical dynamical systems. Recent works have begun to address this question by exploring classical variational architectures that rival or outperform QAOA on benchmark problems [6, 7]. A related question concerns the role of stochasticity, in that, while noise can be beneficial in classical settings, as seen in simulated annealing [8] and stochastic resonance [9], it is still an open question whether the quantum fluctuations at the core of QAOA actually aid the optimization process or introduce detrimental noise. In this work, we introduce the Variational Iterative Rotation Algorithm (VIRAL), a purely classical algorithm built on a dynamical system of three-component unit vectors (kicked tops) that systematically outperforms QAOA on the paradigmatic Sherrington-Kirkpatrick spin-glass problem. Since the entire algorithm is classical, it can be implemented on a large number of spins and optimized at much larger depths p then typically reported for QAOA. We find that the effectiveness of our algorithm in steering the system toward the ground state is rooted in a pitchfork bifurcation of the Floquet map, which destabilizes the equatorial fixed point and drives the spins toward the polar fixed point. Moreover, we develop a dynamical mean field theory in which the problem reduces to an effective Landau-Lifshitz dynamics for a single spin in a stochastic magnetic field. For optimized parameters, the noise covariance matrix exhibits a low effective rank, in stark contrast to the higher-rank noise structure of the quantum case. 
+
+> arXiv:2604.01512v1 [cond-mat.dis-nn] 2 Apr 2026
+
+2 
+
+> II. THE VARIATIONAL ITERATIVE ROTATION ALGORITHM
+
+FIG. 1: The Variational Iterative Rotation Algorithm. Schematic illustration of the classical optimization protocol based on a dynamical system of classical kicked tops. The dynamics is initialized in a uniform configuration in which all unit spins are aligned at an angle α in the xz -plane. Each layer n applies to each spin si a site-dependent rotation about the z-axis of angle γnhzi generated by the local field hzi = ∑  
+
+> j̸=i
+
+Jij szj , followed by a global rotation about the x-axis of angle βn acting uniformly on all the spins. This sequence is repeated p times. The variational parameters α, γn, and βn are optimized to minimize the average energy function of the final state ⟨H[sp]⟩J . The resulting deterministic evolution steers the spins toward Ising configurations with szi = ±1, corresponding to the minimum of the cost function of the original optimization problem. We begin by introducing the algorithm and its implementation. The Variational Iterative Rotation Algorithm is fundamentally a dynamical system composed of N classical 3-components unit vectors si = ( sxi , s yi , s zi ) governed by a deterministic Hamiltonian. To explain its implementation, we focus on the canonical problem of finding the ground state of the Sherrington-Kirkpatrick (SK) model. Within our framework, the discrete Ising variables σi = ±1 are promoted to the z-component of classical spins σi → szi . This maps the SK cost function H[σ] = ∑ 
+
+> i<j
+
+Jij σzi σzj
+
+(with Jij i.i.d. Gaussian random variables with zero mean and variance 1/N ) onto the Hamiltonian of interacting tops H[s] = ∑ 
+
+> i<j
+
+Jij szi szj , whose ground state coincides exactly with the SK ground state when the tops are fully polarized along the z-axis ( szi = ±1). As illustrated in Fig. 1, our protocol initializes all N spins identically in the xz -plane at an angle α, such that 
+
+si(0) = (cos α, 0, sin α), with the angle α serving as the first variational parameter. The system then evolves through 
+
+p discrete layers. Each layer n comprises two successive rotations: first, a site-dependent rotation Rz (γn) around the 
+
+z-axis, where each spin i precesses by an angle γnhzi determined by its local field hzi = ∑  
+
+> j̸=i
+
+Jij szj ; second, a uniform rotation Rx(βn) around the x-axis, kicking all spins by a common angle βn. After p layers, the final state is given by 
+
+s(p) = Rx(βp) Rz (γp) · · · Rx(β1) Rz (γ1) s(0) . (1) A classical optimizer evaluates the disorder-averaged cost function on this final configuration, ⟨H[sp]⟩J /N , and itera-tively adjusts the 2p + 1 variational parameters {α, γ 1, β 1, . . . , γ p, β p} to guide the system toward the ground state. As the circuit depth p increases, this optimized protocol steers the tops toward the poles, effectively freezing them into the Ising ground state. Numerical simulations shown in Fig. 2A confirm that our algorithm reaches an energy density of approximately E/N ≈ − 0.761 (very close to the exact Parisi ground state value of −0.76321 ... ), scaling linearly in 1/p and notably outperforming QAOA which extrapolates to a higher energy value of roughly E/N ≈ − 0.757 .Furthermore, we introduce a thresholding procedure consisting of anti-aligning all the spins with their local z-field, 
+
+szi = −sign( hzi ) (green triangles in Fig. 2A), which enhances the efficiency of our algorithm also at any finite depth. For p = 1 , the optimal parameters are found to be α = π/ 4, β = π/ 4, γ = −√2 (see Supplementary Sec. S6 for derivation). The corresponding optimized variational energy is E/N = −0.1516 ... , which is exactly half that of the QAOA at the same depth (this value lies outside the scale of Fig. 2A, which focuses on the large-p limit). After thresholding this becomes E/N ≈ − 0.456 .3
+
+FIG. 2: Optimization of the SK energy and universality of the optimized control parameters. . (A) 
+
+Energy density reached after p layers of either classical (blue circles) or quantum (red diamonds) evolution. The classical results were obtained by optimizing the variational parameters on systems of size N = 2 9, while the final energy density was evaluated on a larger instance with N = 2 14 spins. The classical protocol can be augmented with a final thresholding layer that projects the spins onto their z axis, sign( szi ), yielding improved performance (green triangles). The blue and green points on the y axis correspond to an idealized protocol with p = 3200 layers, obtained by fitting the optimized β angles with a smooth function, resampling 3200 values, and fixing γ = −1.2; its performance is consistent with the extrapolated 1/p scaling. Quantum results are taken from Refs. [3, 4, 10]. Dashed lines denote linear fits to the large-p data. Both classical protocols converge to E/N ≈ − 0.761 , outperforming the quantum QAOA extrapolation E/N ≈ − 0.757 . The solid black horizontal line represents the exact Parisi ground state energy density of −0.76321 ... . (B) Optimized variational angles γn (the local field scaling factor) and βn/π (the global rotation angle) as a function of the layer index for circuit depths of p = 20 and p = 40 . Optimization results for system sizes ranging from N = 64 to N = 512 exhibit negligible dependence on N .A crucial practical advantage of this protocol is the universality of the optimized control parameters. As shown in Fig. 2B, the optimal schedule for the rotation angles γn and βn exhibits negligible dependence on the system size N .This enables a highly efficient computational strategy whereby the optimal parameters are learned on small instances (e.g., N = 2 9) and subsequently deployed to solve much larger instances (e.g., N = 2 14 ).  
+
+> III. EQUIVALENCE TO THE DYNAMICS OF CLASSICAL KICKED TOPS
+
+The layered protocol described above is equivalent to the dynamics of N coupled classical tops governed by the time-dependent Hamiltonian 
+
+H(t) = γ(t)
+
+> N
+
+∑
+
+> i<j =1
+
+Jij szi szj + β(t)
+
+> N
+
+∑
+
+> i=1
+
+sxi , (2) where the interaction strength γ(t) is a piecewise-constant function of time, γ(t) = ∑pn=1 γn 1[n − 1 ≤ t < n ],modulating the zz -coupling at each layer, and the transverse field β(t) acts as a train of delta-function kicks, 
+
+β(t) = ∑pn=1 βn δ(t − n), where βn is the kick strength at layer n. These two terms play complementary roles: the zz -interaction drives a site-dependent precession around the z-axis, while the transverse kick rotates the resulting 
+
+y-component toward the z-axis, thus updating the spin polarizations. This continuous Hamiltonian generates precisely the discrete map in Eq. (1) at each layer, si(n + 1) = Rx(βn) Rz (γnh(n) 
+
+> i,z
+
+) si(n), where h(n) 
+
+> i,z
+
+= ∑  
+
+> j̸=i
+
+Jij szj (n) is the local field acting on the z-component of spin i. To understand how the algorithm steers the spins from their initial state to the SK ground state, we analyze the fixed-point structure of the map in Eq. (1). Two families of fixed points are crucial here: the 2N equatorial fixed points where s∗ 
+
+> i
+
+= ( ±1, 0, 0) , which exist for any value of γ and β, and the 4
+
+2N polar (Ising) fixed points where s∗ 
+
+> i
+
+= (0 , 0, ±1) , which exist only for β = 0 . Since the system is initialized near the uniform equatorial fixed point (1 , 0, 0) , the success of the algorithm relies on destabilizing this state and steering the system toward the correct polar fixed point, i.e. the SK ground state configuration. Linearizing the map around the equatorial fixed point, we find that in the eigenbasis of the coupling matrix J the evolution factorizes into N independent modes, one for each eigenvalue λi of J (see Supplementary Sec. S7), with frequencies given by ωi = arccos [ cos β + ( γλ i/2) sin β]. Thus, the equatorial fixed point remains stable provided all normal mode frequencies are real, yielding the stability condition 
+
+|2 cos β + γλ i sin β| < 2 ∀i, Stability of the equatorial FP (1 , 0, 0) . (3) Since the eigenvalues follow the Wigner semicircle law with support λ ∈ [−2, 2] , the two edges of the spectrum dictate the onset of the instability by saturating the inequality in Eq. (3). Depending on the parameters, two types of instability can occur: (i) a pitchfork bifurcation, in which a soft mode frequency vanishes ( ω → 0) and new stable fixed points with szi̸ = 0 emerge above and below the equator; (ii) a period-doubling instability, in which a normal mode frequency reaches ω → π, creating a period-2 orbit where the perturbation flips sign at every kick. The stability boundaries are defined by γ = ± tan( β/ 2) for the pitchfork bifurcations, and by γ = ± cot( β/ 2) for the period doubling instabilities, as shown in the phase diagram in Fig. 3A. 
+
+FIG. 3: Phase diagram of the kicked tops and evolution of spin polarizations. (A) , Phase diagram in the 
+
+(γ, β ) plane showing the stability regions of the equatorial fixed point. In the blue region all normal-mode frequencies 
+
+ωi are real. The red boundaries γ = ± tan( β/ 2) mark the onset of a pitchfork bifurcation into polar fixed points with 
+
+szi̸ = 0 (red region), where the frequency of the softest mode vanishes ( ω → 0). The orange boundaries γ = ± cot( β/ 2) 
+
+mark the onset of period-2 orbits (orange region), where the frequency of the hardest mode reaches ω → π. In the white regions both instabilities can occur. The four boundaries intersect at two multicritical points (β, γ ) = ( π/ 2, ±1) 
+
+(red dots). The black curve shows the optimal schedule {(γn, β n)}pn=1 for p = 40 , which begins near the critical line γ = − tan( β/ 2) and progressively steers the spins toward the Ising fixed point as β → 0. (B) , Evolution of the z-components szi (n) of some representative spins across layers for p = 40 and N = 2048 . Spins are colored blue (decided) after their last crossing of szi = 0 and red (undecided) while they are still actively crossing it. The intermediate layers show intense mixing, where the large transverse kicks drive the undecided spins repeatedly across zero, while the decided spins progressively consolidate near ±1 as β is reduced. In Fig. 3A we also plot the optimal trajectory followed by our algorithm from the equatorial plane to the Ising fixed point. The optimal schedule operates with γ < 0 and crosses the critical line γ = − tan( β/ 2) to enter the polar fixed point region. In the early layers, the transverse kick is large, βn ∼ π/ 2, and acts as a violent mixer. For spins near the equator, the z-rotations generate y-components that the x-kicks convert into z-components. However, the kicks are so large that they prevent most of the spins from staying localized near the poles, since any z-polarization is immediately rotated back toward the equator by the subsequent kick. This aggressive phase is needed to efficiently explore the 5phase space and to prevent a premature freezing of the spins’ z-component into sub-optimal configurations. Then, as 
+
+β decreases across layers, the mixing effect weakens and the z-polarization is increasingly preserved from one layer to the next, allowing the spins to progressively settle in an Ising-like configuration. The gradual commitment of the spins to their final Ising positions is directly visible in Fig. 3B, which tracks the z-component of each spin across layers. Due to the infinite-range nature of the Hamiltonian in Eq. (2), the many body problem can be exactly reduced to a single-spin effective dynamics in a magnetic field with a fluctuating z-component (see Supplementary Sec. S8 B). This evolution is described by the continuous Landau-Lifshitz equations: 
+
+˙sα = ϵαβγ gβ (t)sγ , (4) where the transverse component of the local field consists of the original train of delta-function kicks gx(t) = β(t),the y-component is identically zero gy = 0 , and the z-component is a self-consistent Gaussian stochastic process gz (t)
+
+with zero mean and temporal covariance determined by the spin’s own trajectory: 
+
+⟨⟨ gz (t)gz (t′)⟩⟩ = γ(t)γ(t′)Σ( t, t ′) = γ(t)γ(t′)⟨⟨ sz (t)sz (t′)⟩⟩ . (5) Although Eq. (4) describes a continuous-time process, the discrete nature of the transverse kicks allows for a massive simplification of the effective dynamics. Because gx(t) = 0 during the continuous precession of the spin in the intervals 
+
+t ∈ (n − 1, n ), the z-component of the spin remains perfectly constant between kicks. Consequently, the integrated effect of the continuous stochastic field gz (t) during the n-th layer can be captured by a single random rotation angle 
+
+θn given by 
+
+θn =
+
+∫ nn−1
+
+gz (t) dt . (6) The integrated angles θn are themselves Gaussian random variables drawn from a multivariate Gaussian distribution with zero mean and covariance ⟨⟨ θmθn⟩⟩ = γmγn⟨⟨ sz (m − 1) sz (n − 1) ⟩⟩ , where sz (n − 1) denotes the z-component of the spin right after the n − 1-th kick. This mathematical property is a key advantage of the classical deterministic framework, since the dynamics can be exactly simulated as a discrete sequence of conditional rotations, bypassing the need to solve the computationally expensive self-consistency condition in continuous time. Once the dynamics is reduced to a discrete sequence of rotations driven by the stochastic angles θn, the goal of the algorithm is to tune the control parameters γn and βn to minimize the expected energy. In the thermodynamic limit, the disorder-averaged energy can be evaluated exactly at the final layer p. The resulting energy density, derived in Supplementary Sec. S8 B, is given by 
+
+EN =
+
+> p
+
+∑
+
+> n=1
+
+γn ⟨⟨ sz (p)sz (n − 1) ⟩⟩ 
+
+〈〈
+
+∂s z (p)
+
+∂θ n
+
+〉〉
+
+≡
+
+> p
+
+∑
+
+> n=1
+
+γn C(n) R(n) . (7) where C(n) ≡ ⟨⟨ sz (p)sz (n − 1) ⟩⟩ is the temporal correlation function between the final state and the state in layer n,and R(n) ≡ ⟨⟨ ∂s z (p)/∂θ n⟩⟩ is the response function of the final state to a perturbation of the angle θn in layer n.Equation (7) reveals the core of the optimization scheme. The total energy is the sum of contributions from each layer n, where each contribution is the product of three factors: the interaction strength γn, the correlation function 
+
+C(n), and the response function R(n). The correlation and response operate in opposition throughout the optimization protocol. In the early layers, the system exhibits a large response, when the spins are near the equator and experience large transverse kicks βn. A small perturbation of the angle θn applied at this stage drastically alters the spin’s subsequent trajectory, yielding a high response (or susceptibility). On the contrary the correlation is negligible in the early layers, because these same large kicks effectively erase the memory of the spin. In fact, the early transient state 
+
+sz (n − 1) provides little information about its final destination sz (p), causing the correlation to be small. In the late layers, the roles are reversed and correlation dominates while the response vanishes. As the kick size βn
+
+decreases across the layers, the polarization along the z-axis is increasingly preserved. The spins are steered toward the poles, committing to their final Ising positions with sz = ±1. Once a spin is locked onto a pole, a small rotation 
+
+θn around the z-axis has no effect on its z-projection, thus causing the response function to vanish. On the other side, since the state sz is effectively frozen, the spin’s current orientation perfectly correlates with its final state, thus pushing the correlation toward 1. Therefore the algorithm succeeds if it finds the correct rotation angles that 6
+
+FIG. 4: Correlation, response, and small rank structure of the classical dynamics. (A), Correlation 
+
+C(n) = ⟨⟨ sz (p) sz (n − 1) ⟩⟩ (blue dots) and response R(n) = ⟨⟨ ∂s z (p)/∂θ n⟩⟩ (orange dots) as a function of the layer index n for a circuit of depth p = 40 . The response is large in the early layers, while the correlation is large in the later layers. (B), Single layer contribution ε(n) = γnC(n)R(n) to the total energy Eq. (7), showing how much each layer contributes to the ground state energy. (C), Cumulative energy e(n) = ∑nk=1 ε(k) computed layer by layer via Eq. (7). (D), Eigenvalues of the covariance Σ( t, t ′) of the effective field for the classical (blue circles) and quantum (red diamonds) protocols. The classical spectrum is strongly dominated by a single eigenvalue, reflecting the near rank-one structure of the noise covariance, while the quantum case exhibits a higher rank structure induced by quantum fluctuations. maximize the product of these two competing factors, by balancing the loss of susceptibility with the gain in memory, as illustrated in Fig. 4A. The contribution of each layer n to the total energy, defined as ε(n) = γnC(n)R(n), and the resulting cumulative energy e(n) = ∑nk=1 ε(k) are plotted in Fig. 4B and Fig. 4C, showing that the energy is built up across all layers, with the largest contributions coming from the intermediate layers where the product of correlation and response is the largest. Within the dynamical mean field theory, the efficiency of our classical protocol is embodied in the spectral properties of the self-consistent noise covariance matrix Σ( t, t ′), shown in Fig. 4D. In the classical case, the spectrum is dominated by a single eigenvalue, reflecting a nearly rank-one structure of Σ( t, t ′). Given the self-consistency condition Eq. (5), this implies that Σ( t, t ′) ≈ sz (t)sz (t′), and thus the stochastic fields gz (t) can be written as gz (t) ≈ sz (t)ξ where the random variable ξ is the same for all layers. As such, the dynamics becomes equivalent to purely Hamiltonian 7dynamics, with an effective Hamiltonian given by 
+
+Heff = ξγ (t)2 (sz )2 + β(t)sx, (8) Controlling this system is relatively straightforward as there exist a family of fixed points of the Floquet map, controlled by β, that continuously connects the equatorial fixed point to the poles. Just like in the full treatment, the equatorial fixed point undergoes a pitchfork bifurcation, upon which new fixed points emerge that can be adiabatically connected to the poles. This links the dynamical mean field theory to our previous fixed point analysis, but shows more clearly that the efficiency of the control is linked to the existence of a smooth trajectory of stable fixed points. At large p, this allows one to simply slowly vary β(t) from π/ 2 to 0 as shown in Fig. 2B while keeping γ fixed. In contrast, the spectrum of Σ( t, t ′) in the quantum case decays significantly more slowly, as shown in Fig. 4D. The latter is a direct consequence of quantum fluctuations, which imply that the equal time correlator Σ( t, t ) = 1 . To be close to rank-1 all the off-diagonals entries Σ( t, t ′) for t̸ = t′, would also have to be close to 1, but that would imply having long-range (temporal) order in the z−direction, i.e. the system should have a conserved sz during the entire evolution. While the system may approach that point at late time, the off-diagonal correlations must decay rapidly at early times. In other words, the noise decorrelates over some characteristic timescale and it has a strength of order one. For short depths p, quantum noise makes the QAOA better than the unthresholded classical result for purely entropic reasons. Conversely, at large depths the noise renders the system significantly harder to control, explaining the markedly slower convergence observed in QAOA compared to its classical counterpart.  
+
+> IV. PHYSICAL REALIZATION OF THE ITERATIVE ROTATION ALGORITHM
+
+We propose nanometer-scale magnetic tunnel junction (MTJ) free layers as a natural physical platform for the Variational Iterative Rotation Algorithm. At these length scales, the magnetization of the MTJ free layer is well approximated as a single macrospin whose dynamics is accurately described by the classical Landau-Lifshitz–Gilbert equation. Unlike conventional Ising machines, which restrict the degrees of freedom to binary states, the MTJ free-layer magnetization constitutes a continuous three-dimensional classical vector spin. By engineering the perpendicular magnetic anisotropy to compensate the demagnetization (shape) anisotropy [11–13], the effective magnetic anisotropy can be made nearly isotropic, allowing the macrospin to explore the full Bloch sphere dynamically rather than being confined to discrete logical poles [14]. Nanoscale MTJ free layers are therefore well suited for implementing deterministic classical spin dynamics, with magnetic anisotropy engineering, macrospin behavior, and spin-torque-driven control well established experimentally. Deterministic spin rotations required by the algorithm can be implemented using spin-transfer torque, spin-orbit torque, and applied magnetic fields, which generate rotations about spin axes set by the direction of the injected electron spin polarization. Pulse trains and readout can be generated and synchronized using high-speed FPGA-based control electronics, enabling precise temporal control of the magnetization dynamics, as has been recently demonstrated experimentally [15, 16]. The instantaneous projection of the free-layer magnetization can be read out electrically via the tunnel magnetoresistance effect, providing a direct measurement of the spin state during or after the dynamical evolution. The resulting coherent dynamics occurs on time scales set by the intrinsic magnetic damping, typically in the tens-of-nanoseconds range, providing a clear separation between fast deterministic evolution and slower stochastic effects. These characteristics make MTJ macrospin arrays a realistic and experimentally grounded platform for implementing the layered rotation protocols central to the VIRAL optimization scheme.  
+
+> V. CONCLUSION
+
+In this work, we have introduced a dequantized version of the QAOA, called Variational Iterative Rotation Algo-rithm, and demonstrated that a purely deterministic system of classical kicked tops outperforms its quantum coun-terpart on the canonical Sherrington-Kirkpatrick benchmark. Our results indicate that the performance of QAOA is actually due to the iterative rotation structure of the protocol and quantum fluctuations hamper the optimization process rather than aiding it. In contrast, the classical nature of our protocol ensures that the system evolves under a highly controlled dynamics with minimal fluctuations. 8By reducing the many-body problem to an effective Landau-Lifshitz dynamics, we show that optimization is driven by a bifurcation in the phase space of the kicked top, with a soft mode frequency that vanishes like √γ − γc. By carefully choosing the rotation angles, the spins are transported from the equator to the polarized Ising states, with the energy density converging toward the optimal Parisi value linearly in 1/p .As a final remark, we want to stress that the current delta function train for β(t) represents a rather rudimentary open loop control strategy. Due to the classical nature of the problem, it would be straightforward to consider general feedback control strategies with little overhead, e.g. the magnetization of the MTJs can be read out electrically via the tunnel magnetoresistance at a couple GHz rate with minimal perturbation to the system, while FPGAs can be used to implement the feedback control. For more complex optimization problems than the SK model, such as p-spin models, one can further consider adding controlled noise to the dynamics to improve the phase space exploration. With all of this in mind, one really wonders, where is quantum optimization going to present a clear advantage? 
+
+Acknowledgements. The Flatiron Institute is a division of the Simons Foundation. D.S. was supported by AFOSR under Award No. FA9550-21-1-0236 and D.S. and A.D.K. were supported by ONR under Award No. N00014-23-1-2771. We thank Jonathan Z. Sun for helpful discussions of this work. 
+
+[1] Edward Farhi, Jeffrey Goldstone, and Sam Gutmann, “A quantum approximate optimization algorithm,” arXiv preprint arXiv:1411.4028 (2014). [2] Edward Farhi, David Gamarnik, and Sam Gutmann, “The quantum approximate optimization algorithm needs to see the whole graph: A typical case,” (2020), arXiv:2004.09002 [quant-ph]. [3] Edward Farhi, Jeffrey Goldstone, Sam Gutmann, and Leo Zhou, “The Quantum Approximate Optimization Algorithm and the Sherrington-Kirkpatrick Model at Infinite Size,” Quantum 6, 759 (2022). [4] Joao Basso, Edward Farhi, Kunal Marwaha, Benjamin Villalonga, and Leo Zhou, “The Quantum Approximate Op-timization Algorithm at High Depth for MaxCut on Large-Girth Regular Graphs and the Sherrington-Kirkpatrick Model,” in 17th Conference on the Theory of Quantum Computation, Communication and Cryptography (TQC 2022) ,Leibniz International Proceedings in Informatics (LIPIcs), Vol. 232, edited by François Le Gall and Tomoyuki Morimae (Schloss Dagstuhl – Leibniz-Zentrum für Informatik, Dagstuhl, Germany, 2022) pp. 7:1–7:21. [5] Marco Cerezo, Andrew Arrasmith, Ryan Babbush, Simon C Benjamin, Suguru Endo, Keisuke Fujii, Jarrod R McClean, Kosuke Mitarai, Xiao Yuan, Lukasz Cincio, et al. , “Variational quantum algorithms,” Nature Reviews Physics 3, 625– 644 (2021). [6] Gal Weitz, Lirandë Pira, Chris Ferrie, and Joshua Combes, “Subuniversal variational circuits for combinatorial opti-mization problems,” Physical Review A 112 , 032418 (2025). [7] Abdelrahman S Abdelrahman, Shuvro Chowdhury, Flaviano Morone, and Kerem Y Camsari, “Generalized probabilistic approximate optimization algorithm,” Nature Communications 17 , 498 (2026). [8] Scott Kirkpatrick, C Daniel Gelatt Jr, and Mario P Vecchi, “Optimization by simulated annealing,” Science 220 ,671–680 (1983). [9] Roberto Benzi, Alfonso Sutera, and Angelo Vulpiani, “The mechanism of stochastic resonance,” Journal of Physics A: Mathematical and General 14 , L453 (1981). [10] Sami Boulebnane, Abid Khan, Minzhao Liu, Jeffrey Larson, Dylan Herman, Ruslan Shaydulin, and Marco Pistoia, “Evidence that the quantum approximate optimization algorithm optimizes the sherrington-kirkpatrick model efficiently in the average case,” (2025), arXiv:2505.07929 [quant-ph]. [11] S. Ikeda, K. Miura, H. Yamamoto, K. Mizunuma, H. D. Gan, M. Endo, S. Kanai, J. Hayakawa, F. Matsukura, and H. Ohno, “A perpendicular-anisotropy CoFeB–MgO magnetic tunnel junction,” Nature Materials 9, 721–724 (2010). [12] D. C. Worledge, Kuo-Juei Hu, D. W. Abraham, Jifeng Sun, P. L. Trouilloud, J. Nowak, S. Brown, M. C. Gaidis, Ewan O’Sullivan, and R. P. Robertazzi, “Spin torque switching of perpendicular Ta|CoFeB|MgO-based magnetic tunnel junctions,” Applied Physics Letters 98 , 022501 (2011). [13] Justin M. Shaw, Hans T. Nembach, Mathias Weiler, T. J. Silva, Martin Schoen, Jonathan Z. Sun, and Daniel C. Worledge, “Perpendicular Magnetic Anisotropy and Easy Cone State in Ta/Co 60 Fe 20 B20 /MgO,” IEEE Magnetics Letters 6, 3500404 (2015). [14] Hidekazu Kurebayashi, Joseph Barker, Takumi Yamazaki, Varun K. Kushwaha, Kilian D. Stenning, Harry Youel, Xueyao Hou, Troy Dion, Daniel Prestwood, Gerrit E. W. Bauer, Kei Yamamoto, and Takeshi Seki, “Dynamical stability by spin transfer in nearly isotropic magnets,” Nature Materials , 1 (2026). [15] Ahmed Sidi El Valli, Michael Tsao, J. Darby Smith, Shashank Misra, and Andrew D. Kent, “High-speed tunable generation of random number distributions using actuated perpendicular magnetic tunnel junctions,” Applied Physics Letters 126 , 212403 (2025). 9
+
+[16] Troy Criss, Ahmed Sidi El Valli, Naomi Li, Andrew Haas, and Andrew D. Kent, “Magnetic tunnel junction as a real-time entropy source: Field-programmable gate array based random bit generation without post-processing,” Journal of Applied Physics 139 , 013903 (2026). 10 
+
+Supplementary Material: Variational Iterative Rotation Algorithm: Combinatorial Optimization with Classical Kicked Tops 
+
+Flaviano Morone 1, Andrew D. Kent 1, and Dries Sels 2,31Center for Quantum Phenomena, Department of Physics, New York University, New York, New York 10003, USA 
+
+> 2
+
+Department of Physics, Boston University, 590 Commonwealth Ave., Boston, Massachusetts 02215, USA 
+
+> 3
+
+Center for Computational Quantum Physics, Flatiron Institute, 162 Fifth Avenue, New York, New York 10010 USA 
+
+S6. SINGLE LAYER OPTIMIZATION p = 1 
+
+In this section we derive analytically the optimal parameters for the single layer case corresponding to p = 1 . The initial state corresponds to all spins aligned in the same direction in the xz plane at an angle α relative to the x axis such that 
+
+si(0) = 
+
+
+
+cos α
+
+0sin α
+
+ . (1) To generate si(1) we apply two rotations to each spin si(0) : one of angle γh zi around the z-axis, Rz (γh zi ), and a second one of angle β around the x-axis, Rx(β), thus obtaining the total rotation Rtot 
+
+Rtot =
+
+
+
+cos( γh zi ) − sin( γh zi ) 0cos( β) sin( γh zi ) cos( β) cos( γh zi ) − sin( β)sin( β) sin( γh zi ) sin( β) cos( γh zi ) cos( β)
+
+ , (2) where hzi is the z component of the local field 
+
+hzi = ∑ 
+
+> k̸=i
+
+Jik szk(0) = ∑ 
+
+> k̸=i
+
+Jik sin α. (3) Applying Rtot to si(0) we find si(1) , whose z component is given by 
+
+szi (1) = sin( α) cos( β) + cos( α) sin( β) sin( γh zi ) . (4) Having found the new state we need to evaluate the Energy H[s(1)] = ∑ 
+
+> i<j
+
+Jij szi (1) szj (1) and average over the Jij .We take the average because we want to find the optimal variational parameters that are generic, i.e. independent of the particular realization of the couplings. Due to the symmetry of the distribution P (Jij ) the only piece that survives in the average is 
+
+⟨H[s(1)] ⟩J = 2 sin( α) cos( β) cos( α) sin( β) ∑
+
+> i<j
+
+⟨Jij sin( γh zi )⟩J . (5) Computing the expectation we find 
+
+⟨Jij sin( γh zi )⟩J = EJ
+
+[
+
+Jij Im 
+
+(
+
+eiγh zi
+
+)] 
+
+= EJ
+
+[
+
+Jij Im 
+
+(
+
+eiγ ∑   
+
+> k̸=iJik sin( α)
+
+)] 
+
+== EJ
+
+[
+
+Jij Im 
+
+(
+
+eiγJ ij sin( α)eiγ ∑   
+
+> k̸=i,j Jik sin( α)
+
+)] 
+
+== EJ
+
+[
+
+Jij Im 
+
+(
+
+ei˜γJ ij ei˜γ ∑  
+
+> k̸=i,j Jik
+
+)] 
+
+= EJ
+
+[
+
+Im 
+
+(
+
+Jij ei˜γJ ij ei˜γ ∑  
+
+> k̸=i,j Jik
+
+)] 
+
+== EJ
+
+[
+
+Im 
+
+(
+
+− i dd˜γ ei˜γJ ij 
+
+)( 
+
+ei˜γ ∑  
+
+> k̸=i,j Jik
+
+)] 
+
+= −
+
+[ dd˜γ EJ
+
+(
+
+ei˜γJ ij 
+
+)] 
+
+EJ
+
+(
+
+ei˜γ ∑  
+
+> k̸=i,j Jik
+
+)
+
+== −
+
+( dd˜γ e−˜γ2/2N )
+
+e−˜γ2(N −2) /2N = ˜γN e−˜γ2(N −1) /2N
+
+, (6) 11 where we defined ˜γ = γ sin( α). Summing over i < j yields 
+
+∑
+
+> i<j
+
+⟨Jij sin( γh zi )⟩J = ∑
+
+> i<j
+
+˜γN e−˜γ2(N −1) /2N = ˜γ(N − 1) 2 e−˜γ2(N −1) /2N ∼ ˜γN 
+
+2 e−˜γ2/2 . (7) Thus we obtain in the thermodynamic limit 
+
+lim  
+
+> N→∞
+
+⟨H[s(1)] ⟩J
+
+N = sin( α) cos( β) cos( α) sin( β)˜ γe −˜γ2/2 , (8) from which we find the optimal variational parameters 
+
+α∗ = π/ 4 , α∗ = π/ 4 , γ∗ = −√2 , (9) and the optimal energy 
+
+lim  
+
+> N→∞
+
+⟨H[s(1)] ⟩J
+
+N
+
+∣∣∣∣∣α∗,β ∗,γ ∗
+
+= − 14√e = −0.15163 ... (10) 
+
+S7. FIXED POINTS OF THE DISCRETE MAP 
+
+In this section we explore in detail the dynamics of the kicked tops evolving over time under the Hamiltonian in Eq. (2), which we rewrite for clarity 
+
+H(t) = γ(t) ∑
+
+> i<j
+
+Jij szi szj + β(t)
+
+> N
+
+∑
+
+> i=1
+
+sxi , (11) There are two competing terms in this Hamiltonian: 1) the precession non-linear term and 2) the the linear kick. The first one rotates each spin around the z axis by an angle 
+
+θi = γh zi = γ ∑ 
+
+> j̸=i
+
+Jij szj , (12) and this angle depends on the z position of all spins j̸ = i. The second linear term rotates all spins around the x axis by a global angle β. The dynamics evolves according to the following discrete map 
+
+si(n + 1) = Rx(β)Rz (θi)si(n) . (13) The fixed points of the discrete map defined by Eq. (13) are the solutions of 
+
+sxi = sxi cos( θi) − syi sin( θi) ,syi = cos( β)[ sxi sin( θi) + syi cos( θi)] − szi sin( β) ,szi = sin( β)[ sxi sin( θi) + syi cos( θi)] + szi cos( β) .
+
+(14) The first equation can be rewritten as 
+
+2 sin( θi/2)[ sxi sin( θi/2) + syi cos( θi/2)] = 0 . (15) We have two cases depending on sin( θi/2) = 0 or sin( θi/2) ̸ = 0 .
+
+A. Case 1: sin( θi/2) = 0 . Equatorial fixed point 
+
+In this case szi = 0 , so the fixed point must be of the form si = ( sxi , s yi , 0) . Since Rz (θi) = R(0) = I, the map reduces to si(n + 1) = Rx(β)si(n), whose fixed points are s∗ 
+
+> i
+
+= ( ±1, 0, 0) . These two equatorial fixed points exist for all values of γ and β. Next we consider the fixed point (1 , 0, 0) (the analysis for (−1, 0, 0) can be conducted in the same 12 way). To study the stability of this fixed point we linearize around s∗ 
+
+> i
+
+by setting si = s∗ 
+
+> i
+
++ ϵi, where ϵi = (0 , ϵ i,y , ϵ i,z ).Applying Rz and Rx we obtain the evolution map for the perturbation 
+
+ϵ(n+1)  
+
+> i,y
+
+=
+
+[
+
+ϵ(n) 
+
+> i,y
+
++ γ ∑ 
+
+> j̸=i
+
+Jij ϵ(n)
+
+> j,z
+
+]
+
+cos β − ϵ(n) 
+
+> i,z
+
+sin β , ϵ(n+1)  
+
+> i,z
+
+=
+
+[
+
+ϵ(n) 
+
+> i,y
+
++ γ ∑ 
+
+> j̸=i
+
+Jij ϵ(n)
+
+> j,z
+
+]
+
+sin β + ϵ(n) 
+
+> i,z
+
+cos β . 
+
+(16) We can write the evolution equations (16) in matrix form by staking all perturbation in a vector of size 2N , denoted 
+
+(ϵy , ϵz ),
+
+(ϵy , ϵz )T ≡ (ϵy 
+
+> 1
+
+, ..., ϵ yN , ϵ z
+
+> 1
+
+, ..., ϵ zN )T (17) as 
+
+(ϵy
+
+ϵz
+
+)(n+1) 
+
+=
+
+(A BC D
+
+) ( ϵy
+
+ϵz
+
+)(n)
+
+, (18) where the N × N matrices A, B, C and D are defined as 
+
+A = cos β I ,
+
+B = γ cos β J − sin β I ,
+
+C = sin β I ,
+
+D = γ sin β J + cos β I .
+
+(19) The nice thing of the matrix form is that all blocks are diagonalized by the same orthogonal transformation O that diagonalizes the coupling matrix J = OΛJ OT . Thus, rotating the perturbation in the eigenbasis of J (δy , δz ) = (OT ϵy , O T ϵz ) we find 
+
+(δy
+
+δz
+
+)(n+1) 
+
+=
+
+(A ΛB
+
+C ΛD
+
+) ( δy
+
+δz
+
+)(n)
+
+, (20) where each block is now diagonal with 
+
+ΛB = γ cos β ΛJ − sin β I ,
+
+ΛD = γ sin β ΛJ + cos β I . (21) Thus, the problem factorizes into N separate 2 × 2 subproblems of the form 
+
+(δyi
+
+δzi
+
+)(n+1) 
+
+=
+
+(cos β γλ i cos β − sin β
+
+sin β γλ i sin β + cos β
+
+) ( δyi
+
+δzi
+
+)(n)
+
+. (22) Since the eigenvalues are complex conjugates with modulus 1, they can be written as μ± 
+
+> i
+
+= e±iω i where ωi can be easily calculated from the trace of the matrix in Eq. (22) and we obtain 
+
+ωi = cos −1 (
+
+cos β + γλ i
+
+2 sin β
+
+)
+
+. (23) The equatorial fixed point is stable as long as all frequencies remain real (i.e. when the argument of the cos −1 is less the 1 in absolute value) yielding the stability condition 
+
+|2 cos β + γλ i sin β| < 2 , ∀ i . (24) Since the eigenvalues of the coupling matrix follow the Wigner semicircle law with support λ ∈ [−2, 2] , the two edges of the spectrum control the onset of the instability. For λ = +2 , the stability condition gives 
+
+− cot( β/ 2) < γ < tan( β/ 2) , for λ = +2 . (25) 13 The lower and upper boundaries of this inequality give different type of instabilities. More precisely, at the upper boundary, when γ → tan( β/ 2) , the frequency ω → 0, while at the lower boundary, when γ → − cot( β/ 2) , the frequency ω → π. In the first case the instability is driven by the vanishing of a soft mode and the equatorial fixed point undergoes a pitchfork bifurcation into two polar fixed points with szi̸ = 0 ; in the second case the instability is driven by a normal mode reaching the frequency ω = π, signaling the emergence of a period-2 orbit in which the perturbation flips sign at every kick, δ → − δ → δ.For λ = −2, the stability condition gives the reversed condition 
+
+− tan( β/ 2) < γ < cot( β/ 2) , for λ = −2 , (26) where the role of the boundaries is inverted: the upper boundary ( γ → cot( β/ 2) corresponds to ω → π and drives a period-2 instability, while the lower boundary ( γ → − tan( β/ 2) corresponds to ω → 0 and drives a pitchfork bifurcation. The full stable region is the intersection of these two conditions, bounded by all four curves γ = ± tan( β/ 2) 
+
+and γ = ± cot( β/ 2) . These curves meet at two multicritical points (β, γ ) = ( π/ 2, ±1) where both instabilities occur simultaneously, as shown in Fig. 3A in the main text. The distribution of the oscillation frequencies P (ω) (i.e. the density of states) can be obtained simply as P (ω) = 
+
+ρ(λ)
+
+∣∣∣ dλ dω 
+
+∣∣∣, where ρ(λ) = 12π
+
+√4 − λ2 is the Wigner semicircle function. For β = π/ 2 the density of states has the simple form shown in Fig S1. 
+
+P (ω) = 2
+
+πγ 2 | sin( ω)|√γ2 − cos 2(ω) for ω ∈ [ωmin , ω max ] , (27) with the lowest and highest frequencies given by 
+
+ωmin = cos −1(γ) , ωmax = cos −1(−γ) . (28) In particular, for γ → γc, we find ωmin → 0 as 
+
+ωmin ∼ √γc − γ for γ → γ− 
+
+> c
+
+. (29)    
+
+> B. Case 2: sin( θi)̸= 0 . Polar fixed points
+
+In this case, the fixed point equations are the solution of 
+
+sxi = tan( β/ 2) tan( θi/2) szi ,syi = − tan( β/ 2) szi ,szi = sin( θi/2) 
+
+√tan 2(β/ 2) + sin 2(θi/2) . (30) 
+
+β = 0 . Ising-like fixed points 
+
+It is easy to see that when β = 0 , the polar fixed points are located exactly at the poles, i.e. 
+
+s∗ 
+
+> i
+
+= (0 , 0, sign( θ∗ 
+
+> i
+
+)) , (31) where θ∗ 
+
+> i
+
+is given by 
+
+θ∗ 
+
+> i
+
+= γ ∑ 
+
+> j̸=i
+
+Jij (szj )∗ ≡ γh ∗ 
+
+> i
+
+. (32) There are exactly 2N of such fixed points, corresponding to all possible Ising-like configurations. One of this fixed points is precisely the ground state of the SK Hamiltonian that the optimal protocol seeks to find. 14 
+
+FIG. S1: Distribution of oscillation frequencies in the interacting system. Probability density P (ω) of the frequencies of normal modes around the fixed point s∗ 
+
+> i
+
+= (1 , 0, 0) for different values of γ (with β = π/ 2). For small 
+
+γ (e.g., γ = 0 .5, blue curve), the frequencies are concentrated in a narrow band around ω = π/ 2. As γ increases towards the critical value γc = 1 , the width of the distribution expands and, at the critical point γ = 1 (red curve), the support of P (ω) spans the entire range ω ∈ [0 , π ]. The non-zero density at ω → 0 indicates the emergence of soft modes and at ω → π the emergence of period-2 orbits. A perturbation around one of these fixed points is, at linear order, completely confined to the xy -plane, i.e. 
+
+ϵi = ( ϵi,x , ϵ i,y , 0) . Substituting in Eq. (30) and keeping only term up to first order, the problem decouples into N
+
+independent 2 × 2 subproblems, one for each site i as 
+
+(ϵxi
+
+ϵyi
+
+)(n+1) 
+
+=
+
+(cos θ∗ 
+
+> i
+
+− sin θ∗
+
+> i
+
+sin θ∗ 
+
+> i
+
+cos θ∗
+
+> i
+
+) ( ϵxi
+
+ϵyi
+
+)(n)
+
+, (33) and the eigenvalues of the Jacobian are simply μ± 
+
+> i
+
+= e±θ∗ 
+
+> i
+
+. Therefore the frequencies of the normal modes are simply 
+
+ωi = θ∗ 
+
+> i
+
+= γh ∗ 
+
+> i
+
+. (34) Since the eigenvalues lie on the unit circle for any value of γh ∗ 
+
+> i
+
+, the polar fixed points, at β = 0 , are always stable. 
+
+β ≪ 1. Stability of the Ising-like fixed points 
+
+When β̸ = 0 but small, the kick on the x-axis can be treated as a perturbation. This perturbation will change the eigenvalues μi, but since the dynamics is Hamiltonian, the determinant of the Jacobian must be 1, and thus the perturbed eigenvalues must still satisfy μ+ 
+
+> i
+
+μ− 
+
+> i
+
+= 1 . If the unperturbed eigenvalues are not on the real axis, the perturbation will cause just a frequency shift θ∗ 
+
+> i
+
+→ θ∗ 
+
+> i
+
++ β. However if the unperturbed eigenvalues are degenerate so that μ+ 
+
+> i
+
+= μ− 
+
+> i
+
+= 1 (i.e. ωi = 0 ) or μ+ 
+
+> i
+
+= μ− 
+
+> i
+
+= −1 (i.e. ωi = π), then the perturbation will push one eigenvalue outside the unit circle causing the spin to leave the z-axis. Thus, for the Ising fixed point to be stable against small 
+
+β kicks, the following condition must hold 
+
+0 < |γh ∗ 
+
+> i
+
+| < π, ∀i Stability of the Ising FP . (35) The right side of this condition sets the maximum value of the local field to 
+
+|h∗
+
+> max
+
+| < π
+
+|γ| , (36) 15 which, using the value of |γ| ∼ 1.4 from the optimized protocol, gives |h∗
+
+> max
+
+| ≲ 2.2. A spin with a local field near 
+
+|h∗
+
+> max
+
+| will be pushed away from the z-axis by a small β kick causing the SK energy to increase by |h∗
+
+> max
+
+|/2 above the Parisi value. Similarly, a spin with a local field very close to zero will also drift away from the z-axis in presence of a small kick. Indeed, if h∗ 
+
+> i
+
+∼ 0 and β is small, we can write the z-component of the spin as 
+
+szi ∼ γh ∗
+
+> i
+
+√β2 + ( γh ∗ 
+
+> i
+
+)2 ∼ 0 for |γh ∗ 
+
+> i
+
+| ≪ β, (37) i.e. all spins with a local field |h∗ 
+
+> i
+
+| ≲ β/γ will be dragged to the equator by the transverse kick. Although the direct contribution to the energy is negligible (since its h∗ 
+
+> i
+
+∼ 0), once the spin leaves the z-axis it lowers the local fields on its neighbors. This shift might push one of those local fields closer to 0, causing the neighboring spin to leave the z-axis, which in turn lowers the local fields on the neighbors even more, potentially triggering an avalanche that destabilizes the entire Ising fixed point. The number of spins that collapse to the equator when β̸ = 0 depends on the behavior of the distribution P (h) near h ∼ 0. In the exact Parisi solution of the SK model at T = 0 , the probability distribution P (h) vanishes linearly near h = 0 as P (h) ∼ c|h|. Therefore the fraction of spins dragged to the equator by a transverse kick of O(β) is 
+
+fz→xy =
+
+∫ β/γ 
+
+> −β/γ
+
+P (h)dh ∼ c
+
+( βγ
+
+)2
+
+, (38) so it’s order O(β2). From the point of view of the algorithm, this means that as β approaches zero in the final layers, the fraction of spins still near the equator is only f ∼ O(β2). Since a given equatorial spin has a local field hi ∼ O(β),the maximum energy contribution this spin could provide if it fully polarizes on the z-axis is emax = O(β). If it fails to polarize, instead, it would provide an energy contribution of only emin = O(β2), since its local field is O(β) and its z-components is also O(β). Thus, the energy lost if it doesn’t polarize is at most O(β). So, by terminating the algorithm at a small nonzero β, the total energy lost is only O(β3), i.e. 
+
+E(β) = E(0) + O(β3) for β → 0 . (39) The results in Eqs. (38) and (39) also guarantees that thresholding the small fraction of equatorial leftover spins (i.e. aligning them with their local field) does not compromise the ground state energy produced by the backbone of fully polarized spins. In the practical case, however, the P (h) is never truly zero at h = 0 . In this case the fraction of spins near the equator is f ∼ O(β) and the energy error is E(β) − E(0) = O(β2). This quadratic scaling implies that to reach a fixed accuracy more layers are needed than in the ideal cubic scaling case.   
+
+> S8. REDUCTION TO A SINGLE-SPIN EFFECTIVE PROBLEM A. Effective single-spin dynamics
+
+Consider a set of spins sμi where μ denotes the component of the spin, μ = x, y, z , and i labels the site. They all evolve under the Landau-Lifshitz dynamics 
+
+∂tsαi = ϵαβγ hβi (t)sγi , (40) where ϵαβγ is the Levi-Civita symbol and hμi (t) is the local effective field expressed as 
+
+hμi (t) = 
+
+∑  
+
+> j̸=i
+
+γ(t)Jij szj (t) if μ = z, 
+
+∑pn=1 βnδ(t − n) if μ = x, 
+
+0 if μ = y , 
+
+(41) where γ(t) is a piecewise-constant function of time, γ(t) = ∑pn=1 γn 1[n − 1 ≤ t < n ]. Next consider the density function ρ(s, t ) representing the probability of finding the spin configuration s at time t. The time evolution of ρ(s, t )
+
+is described by the Liouville equation 
+
+∂tρ = ∑
+
+> i
+
+(hi × si) · ∇ si ρ = −iLρ , (42) 16 where L is the Liouvillian operator. The path integral of the propagator P (sf , t f |s0, 0) can be derived straightforwardly by: (i) breaking down the total time interval into M small δt = tf /M , (ii) expressing the evolution operator as 
+
+e−iLtf = e−iLδt · · · e−iLδt , (43) and (iii) inserting the identity at each time slice, thus obtaining 
+
+PJ (sf , t f |s0, 0) = 
+
+∫
+
+Dr(t)
+
+∫ s(tf )= sf
+
+> s(0)= s0
+
+Ds(t) exp 
+
+[
+
+i ∑
+
+> i
+
+∫ tf
+
+> 0
+
+dt r αi
+
+(
+
+˙sαi − ϵαβγ hβi (t)sγi
+
+)]
+
+. (44) The part of the exponent which depends on Jij is 
+
+−i ∑
+
+> i̸=j
+
+Jij 
+
+∫ tf
+
+> 0
+
+dt γ (t) rαi (t)ϵαzγ sγi (t)szj (t) ≡ − i ∑
+
+> i̸=j
+
+Jij 
+
+∫ tf
+
+> 0
+
+dt γ (t) vi(t)szj (t) ≡ − i ∑
+
+> i̸=j
+
+Jij Aij (45) where we defined 
+
+vi(t) ≡ rαi (t)ϵαzγ sγi (t) ,Aij ≡
+
+∫ tf
+
+> 0
+
+dt γ (t) vi(t)szj (t) . (46) Averaging ei ∑   
+
+> i̸=jJij Aij
+
+over Jij we obtain 
+
+〈
+
+e−i ∑  
+
+> i̸=jJij Aij
+
+〉
+
+> J
+
+=
+
+∫ ( ∏
+
+> i<j
+
+P (Jij )dJ ij 
+
+)
+
+e−i ∑   
+
+> i̸=jJij Aij
+
+= exp 
+
+− 12N
+
+∑
+
+> i<j
+
+(Aij + Aji )2
+
+ . (47) Then expanding the square in the sum we get 
+
+− 12N
+
+∑
+
+> i<j
+
+(Aij + Aji )2 = − 12N
+
+∑
+
+> i̸=j
+
+(A2 
+
+> ij
+
++ Aji Aij ) = − 12
+
+∑
+
+> i
+
+∫
+
+dtdt ′ γ(t)γ(t′) vi(t)Σ( t, t ′)vi(t′) −
+
+= − N
+
+2
+
+∫
+
+dtdt ′ γ(t)γ(t′) R(t, t ′)R(t′, t )
+
+(48) where 
+
+Σ( t, t ′) = 1
+
+N
+
+∑
+
+> j
+
+szj (t)szj (t′) ,R(t, t ′) = 1
+
+N
+
+∑
+
+> j
+
+vj (t)szj (t′) ,
+
+(49) are the spin-spin correlation function and the response function, respectively. Physically, R(t, t ′) measures how much the z-component of the spin at time t′ changes if we apply a perturbation at time t. Therefore, the response function 
+
+R(t, t ′) must obey causality, meaning that R(t, t ′) ∝ Θ( t′ −t), so it must be identically zero for t > t ′. As a consequence, the product R(t, t ′)R(t′, t ) ∝ Θ( t′ − t)Θ( t − t′) = 0 , and thus we can drop the last integral in Eq. (48). Next we perform a Hubbard-Stratonovich transformation. Setting K(t, t ′) = γ(t)γ(t′)Σ( t, t ′) we write 
+
+exp 
+
+[
+
+− 12
+
+∑
+
+> i
+
+∫
+
+dtdt ′ vi(t)K(t, t ′)vi(t′)
+
+]
+
+=
+
+∫
+
+Dgz e−S[gz ] ei ∑
+
+> i
+
+∫ dt g z (t)vi(t) , (50) where S[gz ] is a Gaussian action defined as 
+
+S[gz ] = 12
+
+∫
+
+dtdt ′ gz (t)K−1(t, t ′)gz (t′) , K−1(t, t ′) = Σ−1(t, t ′)
+
+γ(t)γ(t′) (51) 17 Defining the stochastic magnetic field gμ(t) as 
+
+gμ(t) = 
+
+
+
+gz (t) if μ = z, 
+
+∑pn=1 βnδ(t − n) if μ = x, 
+
+0 if μ = y , 
+
+(52) we can write the disorder averaged propagator as ⟨PJ (sf , t f |s0, 0) ⟩J ≡ P (sf , t f |s0, 0) as 
+
+P (sf , t f |s0, 0) = 
+
+∫
+
+Dgz DrDs exp 
+
+[
+
+− 12
+
+∫
+
+dtdt ′ gz (t)Σ −1(t, t ′)gz (t′)
+
+γ(t)γ(t′) + i ∑
+
+> i
+
+∫ tf
+
+> 0
+
+dt r αi
+
+( ˙sαi − ϵαβγ gβ (t)sγi
+
+)]
+
+. (53) Integrating out the response fields rαi generates delta functions that constrain each spin to obey an effective LLG equation and we get 
+
+P (sf , t f |s0, 0) = 
+
+∫
+
+Dgz Ds e −S[gz ] ∏
+
+> i,t
+
+δ[ ˙sαi − ϵαβγ gβ (t)sγi
+
+] . (54) Now, all spins have the same initial condition and obey the same equation of motion for each realization of gz , so the problem reduces to a single-spin problem with propagator 
+
+P (sf , t f |s0, 0) = 
+
+∫
+
+Dgz Ds e −S[gz ] ∏
+
+> t
+
+δ[ ˙sα − ϵαβγ gβ (t)sγ ] . (55) The effective single-spin LLG dynamics is given by 
+
+∂tsαi = ϵαβγ gβ (t)sγi , (56) with 
+
+⟨⟨ gz (t)gz (t′)⟩⟩ = γ(t)γ(t′)Σ( t, t ′) = γ(t)γ(t′)⟨⟨ sz (t)sz (t′)⟩⟩ , (57) where the average ⟨⟨·⟩⟩ is taken using the distribution (55). Since Σ depends on the trajectories, and the trajectories depend on gz , and gz is drawn from a Gaussian with covariance γ(t)γ(t′)Σ( t, t ′), the whole thing must be solved self-consistently. This is a subtle point that we like to clarify. Looking back at the definition of Σ in Eq. (49), we can see that Σ is not a fixed external object: it is a functional of all N spin trajectories. The disorder average converted the quenched random interactions Jij into a self-interaction non-local in time mediated by Σ( t, t ′), and the Hubbard-Stratonovich transformation introduced the auxiliary field gz (t). The point is that the Gaussian weight of 
+
+gz in Eq. (55) involves Σ−1, which depends itself on the same trajectories that gz drives. The measure P (s, g )
+
+P (s, g z ) ∝ exp 
+
+[
+
+− 12
+
+∫
+
+dtdt ′ gz (t)Σ −1(t, t ′)gz (t′)
+
+γ(t)γ(t′)
+
+] ∏
+
+> t
+
+δ [ ˙sα − ϵαβγ gβ (t)sγ ] . (58) is therefore defined only at a self-consistent fixed point solution Σ∗.This self-consistency condition is obtained as follows. Since all spins share the same initial condition si(0) = (cos α, 0, sin α) for all i, and since after the Hubbard-Stratonovich transformation every spin i obeys the same equation of motion, ˙sαi = ϵαβγ gβ (t) sγi , all spins follow exactly the same trajectory for each realization of gz , i.e. 
+
+si(t) = s(t; gz ) ∀ i . (59) Substituting into Eq. (49), for each realization of gz , the correlator Σ is exactly rank-1: 
+
+Σ( t, t ′) = sz (t; gz )sz (t′; gz ) . (60) Averaging over gz , the self-consistency condition therefore reads 
+
+Σ∗(t, t ′) = 〈sz (t; gz ) sz (t′; gz )〉 
+
+> gz
+
+, with gz ∼ N (0 , γ tγt′ Σ∗ 
+
+> tt ′
+
+) , (61) 18 which is a fixed-point equation for the function Σ∗(t, t ′). In words, the meaning of this self-consistent equation is: the stochastic magnetic field gz (t) that drives the spin is a Gaussian process with covariance γ(t)γ(t′)Σ ∗(t, t ′), and Σ∗
+
+must equal the two-time correlator produced by the spin evolving under that same stochastic field. In principle, Eq. (61) can be solved iteratively from a starting point Σ(0) (t, t ′). The natural choice is to initialize the iteration scheme by setting gz (t) = 0 at the beginning. When gz = 0 , the effective LLG dynamics is fully deterministic and has a unique solution s(0)  
+
+> z
+
+(t) given the initial condition s(0)  
+
+> z
+
+(0) = sin α. This gives the zero order correlator as 
+
+Σ(0) (t, t ′) = s(0)  
+
+> z
+
+(t)s(0)  
+
+> z
+
+(t′) , (62) which is exactly rank-1. Given Σ(n) at iteration step n, at the subsequent iteration n + 1 we proceed as follows: 
+
+• (i) draw gz ∼ N (0 , γ tγt′ Σ(n) 
+
+> tt ′
+
+);
+
+• (ii) integrate Eq. (56) to obtain sz (t; gz );
+
+• (iii) set Σ(n+1) (t, t ′) = ⟨sz (t)sz (t′)⟩gz , and repeat until convergence. The fixed point Σ∗ then defines the effective measure P (s, g ) in Eq. (58). Note that the rank-1 property holds exactly within each sample of gz . After averaging, Σ∗(t, t ′) = ⟨⟨ sz (t)sz (t′)⟩⟩ 
+
+need not be rank-1 as a matrix in (t, t ′). The claim that Σ∗ remains approximately rank-1 throughout the dynamics, as seen numerically in Fig. 4d, is the key difference with the quantum case. In QAOA, the qubits have (σz )2 = 1 ,which implies the initial variance is 1.  
+
+> B. How to compute the average energy
+
+The quantity of interest is the disorder-averaged energy of the final state: 
+
+E =
+
+〈 ∑ 
+
+> i<j
+
+Jij szi (tf )szj (tf )
+
+〉
+
+> ρf
+
+, (63) where ρf ≡ ρ(sf , t ) is given by 
+
+ρ(sf , t ) = 
+
+∫
+
+⟨P (sf , t f |s0, 0) ⟩J ρ(s0, 0) ds0 . (64) Here we assume that at time t = 0 all spins lie in the xz -plane and point in the same direction specified by the angle 
+
+α, which is itself a variational parameter. In other words ρ(s0, 0) is a product of delta-functions 
+
+ρ(s0, 0) = 
+
+> N
+
+∏
+
+> i=1
+
+δ(sx 
+
+> 0i
+
+− cos α)δ(sy
+
+> 0i
+
+)δ(sz 
+
+> 0i
+
+− sin α) . (65) We extract the energy by differentiating the generating functional with respect to a source ηE = ∂∂η 
+
+∣∣∣∣∣η=0 
+
+EJ
+
+∫
+
+ρ(s0, 0) ds0
+
+∫
+
+Dr
+
+∫ sf
+
+> s0
+
+Ds exp 
+
+i
+
+∫ tf
+
+> 0
+
+dt ∑
+
+> i
+
+rαi
+
+(
+
+˙sαi − ϵαβγ hβi (t)sγi
+
+)
+
+− i η
+
+2
+
+∑
+
+> ij
+
+Jij szi szj δ(t − tf )
+
+ .
+
+(66) This description is convenient because it allows us to take easily the average over the quenched disorder. Note that this is exactly what is needed, because we want to come up with controls γ(t) and β(t) that do not depend on the exact realization of the Jij ’s and as such minimize the average energy of the ensemble. There are only two terms in the exponent that depend on Jij , namely the term from the local field hzi (t) and the boundary term which comes with a factor of η
+
+−i ∑
+
+> i̸=j
+
+Jij Aij + η
+
+2
+
+∑
+
+> i̸=j
+
+Jij szi (t) szj (t) , (67) 19 where again we introduced the shorthand Aij ≡ ∫ tf 
+
+> 0
+
+dt γ (t) vi(t)szj (t) with vi(t) ≡ rαi (t)ϵαzγ sγi (t). Performing the average over Jij results in an exponent 
+
+12N
+
+∑
+
+> i<j
+
+[
+
+− i(Aij + Aji ) + ηs zi (t) szj (t)
+
+]2
+
+(68) Expanding the square and summing over j as in Eq. (48) generates Σ( t, t ′) = 1
+
+> N
+
+∑ 
+
+> j
+
+szj (t)szj (t′). Let’s first analyze the 
+
+η0 term: this gives the effective action already derived in Eq. (48) 
+
+− 12
+
+∑
+
+> i
+
+∫
+
+dtdt ′ γ(t)γ(t′) vi(t) Σ( t, t ′) vi(t′) . (69) The term linear in η is the only one contributing to E = ∂η |η=0 and reads 
+
+− iη N
+
+∑
+
+> i̸=j
+
+Aij szi (tf ) szj (tf ) = −iη ∑
+
+> i
+
+∫ tf
+
+> 0
+
+dt γ (t) vi(t) Σ( t, t f ) szi (tf ) . (70) Then, differentiating at η = 0 we obtain the following expression for the disorder-averaged energy 
+
+E = −i
+
+∫
+
+DrDsDgz e−S[gz ]
+
+[ ∑
+
+> i
+
+∫ tf
+
+> 0
+
+dt γ (t) vi(t) Σ( t, t f ) szi (tf )
+
+]
+
+exp 
+
+[
+
+i ∑
+
+> i
+
+∫ tf
+
+> 0
+
+dt ′ rαi
+
+(
+
+˙sαi − ϵαβγ gβ (t′)sγi
+
+)]
+
+. (71) As showed before, after the Hubbard-Stratonovich transformation the path integral factorizes over sites so the ∑
+
+> i
+
+inside the path integral yields a factor N and we are left with 
+
+EN = −i
+
+∫
+
+DrDsDgz e−S[gz ]
+
+∫ tf
+
+> 0
+
+dt γ (t) v(t) Σ( t, t f ) sz (tf ) eiΦ( s,r,g ) , (72) where 
+
+Φ( s, r, g ) ≡
+
+∫ tf
+
+> 0
+
+dt ′ rα(
+
+˙sα − ϵαβγ gβ (t′)sγ )
+
+. (73) Now we observe that the factor v(t) ≡ rα(t)ϵαzγ sγ (t) inside the path integral can be written as the functional derivative of the exponent with respect to gz (t). Indeed since gz (t) appears in the Φ only through −rαϵαzγ gz sγ = −vg z we can write 
+
+v(t) eiΦ( s,r,g ) = i δδg z (t) eiΦ( s,r,g ) (74) and we get 
+
+EN =
+
+∫
+
+DrDsDgz e−S[gz ]
+
+∫ tf
+
+> 0
+
+dt γ (t) Σ( t, t f ) sz (tf ) δδg z (t) eiΦ( s,r,g ) . (75) Next we integrate by parts in Dgz . The relevant piece in the integration by parts is 
+
+∫
+
+Dgz e−Sg δδg z (t) eiΦ = (bound . term) + 
+
+∫
+
+Dgz e−Sg +iΦ δS g
+
+δg z (t) =
+
+∫
+
+Dgz e−Sg +iΦ
+
+∫
+
+dt ′ Σ−1(t, t ′)
+
+γ(t)γ(t′) gz (t′) , (76) where the boundary terms vanishes at gz (t) = ±∞ . So the integration by parts gives 
+
+EN =
+
+∫
+
+DrDsDgz e−S[gz ]+ iΦ( s,r,g )
+
+∫
+
+dtdt ′ γ(t) Σ( t, t f ) sz (tf ) Σ−1(t, t ′)
+
+γ(t)γ(t′) gz (t′) ==
+
+∫
+
+DrDsDgz e−S[gz ]+ iΦ( s,r,g ) gz (tf )sz (tf )
+
+γ(tf ) .
+
+(77) Finally, integrating out r we find 
+
+EN = ⟨⟨ gz (tf )sz (tf )⟩⟩ 
+
+γ(tf ) , (78) where the average is over the self-consistent measure in Eq. (58). Note that since the noise covariance Σ needs to be computed self-consistently, the effective field gz is not necessarily Gaussian, i.e. it is only Gaussian conditioned on the trajectory of the spins. If one succeeds to find the ground state, the energy should go to the Parisi value 
+
+lim  
+
+> tf→∞
+
+⟨⟨ gz (tf )sz (tf )⟩⟩ 
+
+γ(tf ) = −0.76321 ... . (79) 20  
+
+> C. Discrete map of the effective single-spin LLG dynamics
+
+In this section we derive the discrete map corresponding to the effective dynamics 
+
+∂s α
+
+∂t = ϵαβγ gβ (t)sγ , (80) with gβ (t) = ( gx(t), 0, g z (t)) where gx(t) = ∑ 
+
+> n
+
+βnδ(t − n) and gz (t) is a stochastic field with 
+
+⟨⟨ gz (t)gz (t′)⟩⟩ = γ(t)γ(t′) ⟨⟨ sz (t)sz (t′)⟩⟩ = γ(t)γ(t′) Σ( t, t ′) (81) with γ(t) = γn constant in (n−1, n ). The dynamics evolves through p layers, where a layer n consists of two successive operations: first the local z-rotation driven by the continuous precession in the interval t ∈ (n − 1, n ), and second the global x-rotation driven by the kick at the end of the interval t = n. The output of layer n is the state of the spin after both rotations have occurred. Now consider the continuous precession in the interval t ∈ (n − 1, n ). The spin entering layer n at time t = ( n − 1) +
+
+has just experienced the kick from layer n − 1 so its state is s(n − 1) . In the interval t ∈ (n − 1, n ) the transverse field 
+
+gx = 0 and the stochastic field gz is active yielding the LLG equations 
+
+˙sx = −gz (t) sy ,
+
+˙sy = + gz (t) sx ,
+
+˙sz = 0 .
+
+(82) The first thing to notice is that sz (t) is constant in the interval t ∈ (n − 1, n ) and thus sz (t) = sz (n − 1) . If we look at the covariance operator Σ( t, t ′) = ⟨⟨ sz (t)sz (t′)⟩⟩ for t ∈ (m − 1, m ) and t′ ∈ (n − 1, n ) we find that 
+
+Σ( t, t ′) = ⟨⟨ sz (m − 1) sz (n − 1) ⟩⟩ ≡ Σmn for t ∈ (m − 1, m ), t ′ ∈ (n − 1, n ) . (83) Let’s now look at the equations for the x and y components. Combining sx and sy into a single vector w = ( sx, s y )
+
+we obtain the differential equation ˙w = gz (t)
+
+(0 −11 0
+
+)
+
+w, whose solution is 
+
+w(t) = 
+
+(cos( θn) − sin( θn)sin( θn) cos( θn)
+
+)
+
+w(n − 1) = Rz (θn)w(n − 1) , (84) where θn is the total z-rotation angle of the spin in layer n given by 
+
+θn =
+
+∫ nn−1
+
+dt g z (t) . (85) The angle θn is itself a Gaussian random variable (it is the integral of the Gaussian process gz (t)) with zero mean and covariance 
+
+⟨⟨ θmθn⟩⟩ =
+
+∫ mm−1
+
+dt 
+
+∫ nn−1
+
+dt ′ ⟨⟨ gz (t)gz (t′)⟩⟩ = γmγn⟨⟨ sz (m − 1) sz (n − 1) ⟩⟩ = γmγnΣmn , (86) where γn is the coupling strength in layer n. Equation (86) is telling us that the matrix Σ that dictates the angles 
+
+θm and θn during layers m and n is defined by the spin states from the previous layers m − 1 and n − 1. This means that the discrete version of the dynamics does not require to solve the self-consistent fixed point condition in Eq. (61). Let’s clarify better this important point layer by layer.  
+
+> 1. Layer 1
+
+In layer 1 we start by drawing an angle θ1 from a Gaussian distribution N (0 , γ 21 Σ11 ) so that 
+
+⟨⟨ θ21 ⟩⟩ = γ21 Σ11 = γ21 ⟨⟨ sz (0) 2⟩⟩ = γ21 sin 2(α) . (87) 21 As a consistency check with the single layer calculation performed in Sec. S6 we now derive the optimal parameters 
+
+α, β 1, γ 1 that minimize the energy at time t = 1 
+
+EN = ⟨⟨ gz (1) sz (1) ⟩⟩ 
+
+γ1
+
+, (88) where gz (1) is the stochastic field evaluated at time t = 1 . Now, we know that the field gz (t) is a continuous Gaussian process defined by its correlator ⟨⟨ gz (t)gz (t′)⟩⟩ = γ(t)γ(t′)⟨⟨ sz (t)sz (t′)⟩⟩ and that gz (1) must be correlated with the angle θ1 via Eq. (85). More precisely 
+
+⟨⟨ gz (1) θ1⟩⟩ =
+
+∫ 10
+
+dt ⟨⟨ gz (1) gz (t)⟩⟩ = γ21
+
+∫ 10
+
+dt ⟨⟨ sz (1) sz (t)⟩⟩ = γ21 ⟨⟨ sz (1) sz (0) ⟩⟩ , (89) where the last step follows from the fact that sz (t) = sz (0) for t ∈ (0 , 1) . Using the expression for sz (0) and sz (1) 
+
+sz (0) = sin( α) ,sz (1) = sin( β1) cos( α) sin( θ1) + cos( β1) sin( α) , (90) and taking the expectation we obtain 
+
+⟨⟨ gz (1) θ1⟩⟩ = γ21 cos( β1) sin 2(α) . (91) Therefore, gz (1) and θ1 are correlated Gaussian variables with zero mean and covariance given by Eq. (91). As a consequence we can express gz (1) as a linear combination of θ1 as 
+
+gz (1) = aθ 1 + b , (92) where b is an independent Gaussian variable and a is given by 
+
+a = ⟨⟨ gz (1) θ1⟩⟩ ⟨⟨ θ21 ⟩⟩ = cos( β1) . (93) The calculation of ⟨⟨ gz (1) sz (1) ⟩⟩ thus reduces to 
+
+⟨⟨ gz (1) sz (1) ⟩⟩ = cos( β1)⟨⟨ sz (1) θ1⟩⟩ = cos( β1) sin( β1) cos( α)γ21 sin 2(α) e−γ21 sin 2(α)/2 . (94) Defining ˜γ1 = γ1 sin( α), the energy function becomes 
+
+EN = sin( α) cos( β1) cos( α) sin( β1)˜ γe −˜γ2/2 (95) which matches exactly the cost function in Eq. (8).   
+
+> 2. From Layer 2 to Layer p
+
+A similar calculation can be performed for two layers to find the average energy as a function of the variational paramters α, γ 1, β 1, γ 2, β 2. However, taking the gradient of the cost function results in a set of complicated equations with increasingly more terms as we go to higher layers. Instead of going in that direction, we look here for an efficient numerical procedure to compute the optimal parameters for an arbitrary number of layers by taking advantage of the purely forward structure of the covariance matrix Σmn .The initial state of the spin at t = 0 is sz (0) = sin( α). Therefore the entry Σ11 of the covariance matrix is simply 
+
+Σ11 = ⟨⟨ sz (0) 2⟩⟩ = sin 2(α) . (96) For t ∈ (0 , 1) we need to generate the angle θ1. Since the covariance matrix of the angles contains the γ factors, it is convenient to define 
+
+Cmn = γmγnΣmn . (97) 22 We know that θ1 is a Gaussian random variable with zero mean and variance C11 = γ21 Σ11 , so it can be written as 
+
+θ1 = √C11 x1 = γ1
+
+√Σ11 x1 , x1 ∼ N (0 , 1) . (98) We sample θ1 and we apply the z-rotation Rz (θ1) and the kick Rx(β1) to get the new state of the spin s(1) 
+
+s(1) = Rx(β1)Rz (θ1)s(0) , (99) whose z-component is explicitly given by 
+
+sz (1) = sin( β1) cos( α) sin( θ1) + cos( β1) sin( α) . (100) Note that sz (1) is also a random variable since it is a function of the random variable θ1 we just sampled. For t ∈ (1 , 2) we calculate the next entries of the covariance matrix 
+
+C12 = γ1γ2Σ12 = γ1γ2⟨⟨ sz (0) sz (1) ⟩⟩ ,C22 = γ22 = Σ 22 = γ22 ⟨⟨ sz (1) 2⟩⟩ . (101) Next we have to sample θ2, but we cannot do it freely because we have already drawn a specific value for θ1, so we must sample θ2 conditioned on θ1. We look for an angle θ2 of the form 
+
+θ2 = aθ 1 + bx 2 x2 ∼ N (0 , 1) , (102) with coefficients a and b determined by imposing that the covariance of θ1 and θ2 is given by Eqs. (96) and (101), thus yielding 
+
+a = C12 
+
+C11 
+
+,b =
+
+√
+
+C22 − C212 /C 11 .
+
+(103) To proceed to higher layers we first notice the following fact. Given the i.i.d Gaussian random variables x1, x 2 ∼ N (0 , 1) 
+
+we can write the correlated random variables θ1 and θ2 as linear combinations 
+
+θ1 = A11 x1 ,θ2 = A21 x1 + A22 x2 . (104) So if we define the lower triangular matrix A =
+
+(A11 0
+
+A21 A22 
+
+)
+
+we can write 
+
+C = ⟨⟨ θθ T ⟩⟩ = ⟨⟨ Axx T AT ⟩⟩ = A⟨⟨ xx T ⟩⟩ AT = AA T , (105) which is just the Cholesky decomposition of C. The interesting point is that, if we add one more layer, the previous entries of the Cholesky matrix A do not change as the matrix grows. Therefore we can iteratively compute the Cholesky factor A one row at the time at each layer n. More precisely, at layer n, we calculate the covariance between the new angle θn and all previous angles θm, for m = 1 , ..., n Cmn = γmγn⟨⟨ sz (m − 1) sz (n − 1) ⟩⟩ . (106) Then, find the new row in the Cholesky factor A and compute the new angle θn as 
+
+θn =
+
+> n
+
+∑
+
+> i=1
+
+Ani xi . (107) Then apply the rotation Rz (θn) and the kick Rx(βn) and update the state of the spin as 
+
+s(n) = Rx(βn) Rz (θn) s(n − 1) . (108) 23 Then, repeat until the last layer p to obtain the final state s(p). At this point we need to compute the energy 
+
+EN = ⟨⟨ gz (p)sz (p)⟩⟩ 
+
+γp
+
+. (109) The calculation of the average energy deserves some care, since the field gz (p) itself is correlated with all previous angles θ1, ..., θ p. First of all we write gz (p) as a linear combination of the θn’s as 
+
+gz (p) = 
+
+> p
+
+∑
+
+> n=1
+
+anθn + b , (110) where b is an independent Gaussian variable and the coefficient an can be computed by taking averages of gz (p) with 
+
+θm as 
+
+⟨⟨ gz (p)θm⟩⟩ =
+
+> p
+
+∑
+
+> n=1
+
+an⟨⟨ θnθm⟩⟩ =
+
+> p
+
+∑
+
+> n=1
+
+anCnm . (111) Using the fact that 
+
+⟨⟨ gz (p)θm⟩⟩ =
+
+∫ mm−1
+
+dt ⟨⟨ gz (p) gz (t)⟩⟩ = γpγm⟨⟨ sz (p) sz (m − 1) ⟩⟩ ≡ um , (112) we can find the coefficients an as 
+
+an =
+
+> p
+
+∑
+
+> m=1
+
+C−1 
+
+> nm
+
+um . (113) So the average ⟨⟨ gz (p)sz (p)⟩⟩ becomes 
+
+⟨⟨ gz (p)sz (p)⟩⟩ =
+
+> p
+
+∑
+
+> n=1
+> p
+
+∑
+
+> m=1
+
+C−1 
+
+> nm
+
+um⟨⟨ θnsz (p)⟩⟩ . (114) Now the spin in the final state sz (p) is a function of all angles 
+
+sz (p) = f (θ1, ..., θ p) , (115) and we want to compute 
+
+⟨⟨ θnsz (p)⟩⟩ =
+
+∫
+
+dθ P (θ) θn f (θ) . (116) Using the identity 
+
+∂P (θ)
+
+∂θ k
+
+= −P (θ)
+
+> p
+
+∑
+
+> l=1
+
+C−1 
+
+> kl
+
+θl →
+
+> p
+
+∑
+
+> k=1
+
+Cnk ∂kP (θ) = −P (θ) θn (117) we find that 
+
+∫
+
+dθ P (θ) θn f (θ) = 
+
+> p
+
+∑
+
+> k=1
+
+Cnk 
+
+∫
+
+dθ P (θ) ∂f (θ)
+
+∂θ k
+
+, (118) and thus 
+
+⟨⟨ θnsz (p)⟩⟩ =
+
+> p
+
+∑
+
+> k=1
+
+Cnk 
+
+〈〈 ∂s z (p)
+
+∂θ k
+
+〉〉 
+
+(119) Substituting in the equation for ⟨⟨ gz (p)sz (p)⟩⟩ and using the definition of um we finally find the expression for the average energy 
+
+EN =
+
+> p
+
+∑
+
+> k=1
+
+γk ⟨⟨ sz (p) sz (k − 1) ⟩⟩ 
+
+〈〈 ∂s z (p)
+
+∂θ k
+
+〉〉 
+
+, (120) which is precisely Eq. (7) in the main text.
