@@ -1,0 +1,828 @@
+Title: Autonomous Adaptive Solver Selection for Chemistry Integration via Reinforcement Learning
+
+URL Source: https://arxiv.org/pdf/2604.00264v1
+
+Published Time: Thu, 02 Apr 2026 00:15:56 GMT
+
+Number of Pages: 16
+
+Markdown Content:
+# AUTONOMOUS ADAPTIVE SOLVER SELECTION FOR CHEMISTRY 
+
+# INTEGRATION VIA REINFORCEMENT LEARNING 
+
+A P REPRINT 
+
+Eloghosa Ikponmwoba 
+
+Department of Mechanical and Industrial Engineering Louisiana State University Baton Rouge, LA 70803 
+
+eikpon1@lsu.edu 
+
+Opeoluwa Owoyele 
+
+Department of Mechanical and Industrial Engineering Louisiana State University Baton Rouge, LA 70803 
+
+oowoyele.edu 
+
+April 2, 2026 
+
+## ABSTRACT 
+
+The computational cost of stiff chemical kinetics remains a dominant bottleneck in reacting-flow simulation, yet hybrid integration strategies are typically driven by hand-tuned heuristics or supervised predictors that make myopic decisions from instantaneous local state. We introduce a constrained reinforcement learning (RL) framework that autonomously selects between an implicit BDF integrator (CVODE) and a quasi-steady-state (QSS) solver during chemistry integration. Solver selection is cast as a Markov decision process. The agent learns trajectory-aware policies that account for how present solver choices influence downstream error accumulation, while minimizing computational cost under a user-prescribed accuracy tolerance enforced through a Lagrangian reward with online multiplier adaptation. Across sampled 0D homogeneous reactor conditions, the RL-adaptive policy achieves a mean speedup of approximately 3×, with speedups ranging from 1.11 × to 10 .58 ×, while maintaining accurate ignition delays and species profiles for a 106-species n-dodecane mechanism and adding approximately 1% inference overhead. Without retraining, the 0D-trained policy transfers to 1D counterflow diffusion flames over strain rates 10 –2000 s −1, delivering consistent ≈ 2.2× speedup relative to CVODE while preserving near-reference temperature accuracy and selecting CVODE at only 12 –15% of space-time points. Overall, the results demonstrate the potential of the proposed reinforcement learning framework to learn problem-specific integration strategies while respecting accuracy constraints, thereby opening a pathway toward adaptive, self-optimizing workflows for multiphysics systems with spatially heterogeneous stiffness. 
+
+Keywords reinforcement learning · combustion modeling · chemical kinetics · adaptive solvers · scientific machine learning 
+
+## 1 Introduction 
+
+High-fidelity combustion simulation has become indispensable for developing modern energy systems, including internal combustion engines, gas turbine combustors, and emerging alternative fuel technologies. Accurate prediction of ignition delay, flame structure, pollutant formation, and fuel oxidation pathways requires coupling fluid dynamics, transport processes, and multi-step chemical kinetic mechanisms. However, the chemical kinetics-related modules within reacting flow solvers typically consume 70–90% of the total computational cost Bracconi et al. [2017], Lu and Law [2009], Liang et al. [2009], creating a critical computational bottleneck. This computational burden arises from the extreme stiffness of the governing ordinary differential equation (ODE) systems, where fast radical chain-branching and recombination reactions evolve on sub-nanosecond timescales while slower fuel oxidation and thermal relaxation processes occur on millisecond scales. Formally, finite-difference analysis of the constant-pressure 0D chemical source-term Jacobian reveals eigenvalues whose real parts span many orders of magnitude, reflecting extreme spectral separation across fast and slow chemical timescales. This pronounced stiffness presents severe stability and performance challenges for numerical integrators and motivates the use of adaptive implicit methods Hindmarsh et al. [2005]. 
+
+> arXiv:2604.00264v1 [cs.LG] 31 Mar 2026 A P REPRINT
+
+To address stiffness, robust implicit integrators such as the backward differentiation formula (BDF) methods imple-mented in CVODE (part of the SUNDIALS suite Hindmarsh et al. [2005]) have become the workhorse for combustion kernel solvers. The implicit time-stepping strategy enables large stable time steps even in highly stiff regimes but incurs substantial computational overhead from Jacobian evaluations, Newton-Krylov iterations, and expensive linear solver phases, particularly problematic when detailed mechanisms with hundreds to thousands of species are employed. Conversely, explicit methods or quasi-steady-state (QSS) approximations exploit timescale separation by assuming fast intermediates reach local equilibrium, thereby reducing integration cost Mott et al. [2000]. However, these methods become unreliable or divergent in strongly stiff or gradient-rich flame zones where the quasi-steady-state assumption breaks down Flach and Schnell [2006]. This fundamental trade-off (robustness versus efficiency) motivates the search for adaptive strategies that can dynamically select the appropriate solver based on local conditions. Recognizing this challenge, researchers have developed various hybrid approaches to mitigate chemistry integration costs. Numerous works have used stiffness metrics derived from the source term Shi et al. [2012] or the eigenvalues of the system Jacobian Curtis [1983], Lu et al. [2010] to switch between explicit and implicit solvers. Early work by Young and Boris introduced CHEMEQ Young Jr [1980], which switches between stiff and non-stiff methods based on time-scale analysis. Liang et al. Liang et al. [2007, 2009] proposed dynamic adaptive chemistry (DAC) that partitions the computational domain into regions requiring detailed versus reduced kinetics, achieving significant speedups in engine simulations. Despite these advances, most existing approaches rely on problem-specific heuristics, such as temperature thresholds, species concentration limits, or geometric domain partitioning. This usually requires manual calibration for each application. Such fixed rules lack adaptability to spatiotemporal stiffness variations that emerge naturally in reacting flows, particularly in complex configurations with moving flame fronts, extinction-reignition events, or adaptive mesh refinement. Furthermore, as combustion research increasingly focuses on alternative fuels (biodiesel, hydrogen blends, ammonia) with different kinetic characteristics, the need for solver strategies that can automatically adapt without expert re-tuning becomes paramount. A recent review by Niemeyer and Sung Niemeyer and Sung [2014] highlighted this gap, noting that while substantial progress has been made in mechanism reduction and tabulation, the fundamental question of when and where to apply which numerical method remains largely heuristic-driven. In parallel, machine learning and artificial intelligence methods have begun transforming computational physics and engineering. Neural network surrogates for thermochemical property prediction Blasco et al. [1998, 2000], convolutional neural networks for turbulence modeling Fukami et al. [2019], Kim and Lee [2020], and physics-informed neural networks (PINNs) for PDE solutions Nguyen et al. [2022] demonstrate the potential of data-driven approaches. In combustion specifically, learned intelligent tabulation schemes Haghshenas et al. [2021] replace traditional in-situ adaptive tabulation (ISAT) Pope [1997] with neural networks, achieving faster retrieval with comparable accuracy. Owoyele and Pal Owoyele and Pal [2022] introduced ChemNode, a machine learning framework to predict chemical source terms during integration. These efforts demonstrate that data-driven methods can successfully accelerate chemistry computations while maintaining acceptable accuracy. More directly relevant to solver selection, Lapointe et al. Lapointe et al. [2020] presented a data-driven approach using neural networks to predict ODE solver CPU times and errors for given thermochemical states, enabling optimal solver selection on a cell-by-cell, timestep-by-timestep basis in operator-splitting CFD simulations. However, their method requires separate neural networks for each solver to predict cost and error, relies on supervised labels from exhaustive solver sweeps during training, and uses a greedy selection strategy that does not account for long-term consequences of solver choices. Furthermore, the approach does not provide mechanisms for the policy to learn trade-offs between cost and accuracy beyond what is encoded in the pre-labeled training data. This approach relied on a supervised learning algorithm trained on partially-stirred reactor and flame data. Reinforcement learning (RL), a branch of machine learning concerned with learning optimal policies through sequential interaction within an environment offers a natural extension of this paradigm by formulating solver selection as a sequential decision problem where an agent learns optimal policies through interaction with the environment rather than supervised labels. By casting the problem as a Markov decision process (MDP), an RL agent can discover strategies that account for temporal dependencies, for instance, recognizing that using an expensive solver now may enable cheaper integration later, or that accumulated errors over multiple steps must be managed. Recent applications of RL in scientific computing include adaptive mesh refinement Yang et al. [2023], Freymuth et al. [2023], Foucart et al. [2023], multigrid method selection Luz et al. [2020], Huergo et al. [2024], and turbulence model switching Novati et al. [2021], demonstrating feasibility for physics-based simulation tasks. Proximal Policy Optimization (PPO) Schulman et al. [2017], a state-of-the-art policy gradient method, has proven particularly effective due to its stable gradient updates via clipped objectives and sample efficiency through generalized advantage estimation. Our contributions in this paper are as follows: first, we present a RL approach for automatic solver selection in reacting flow applications. We demonstrate that reinforcement learning can discover adaptive solver selection strategies that 2A P REPRINT 
+
+achieve significant speedups in reacting flow applications compared to CVODE-only baselines, while maintaining good accuracy. Secondly, we demonstrate some degree of generalization: policies trained exclusively on 0D trajectories generalize to 1D counterflow flames across strain rates spanning two orders of magnitude (10–2000 s −1) and adapt naturally to dynamic mesh refinement. Thirdly, we include a discussion suggesting that the learned strategy is physically consistent. The remainder of this paper is organized as follows. Section 2 describes the problem formulation, including the chemistry integration solvers (CVODE and QSS), MDP design, Lagrangian constraint reward function, and PPO training procedure. Section 3 presents results for 0D homogeneous reactors and 1D counterflow flames, including performance metrics, generalization tests, policy interpretability analysis, and comparisons to fixed-threshold heuristics. Section 4 concludes with key findings and broader impacts for scientific computing applications involving spatially heterogeneous degrees of stiffness, current limitations and future work. 
+
+## 2 Methodology 
+
+Figure 1: Reinforcement learning (RL) framework for adaptive solver selection. The RL agent observes the evolving thermo-chemical state variables (e.g., T , OH, H 2, O, etc.) from the combustion simulation and selects the optimal numerical solver (e.g., CVODE or QSS) at each step. This section presents our reinforcement learning framework for adaptive solver selection in chemical kinetics integration illustrated in Fig. 1). We begin by formulating the chemistry integration problem and describing the two solver classes, implicit backward differentiation formula (BDF) methods and quasi-steady-state (QSS) approximations. We then cast solver selection as a Markov Decision Process (MDP), detail our Lagrangian constraint-based reward formulation for balancing cost and accuracy, and describe the Proximal Policy Optimization (PPO) training procedure. Finally, we specify the training data generation and curriculum learning strategy. 
+
+2.1 Chemistry Integration Problem 
+
+Consider a reacting system at fixed or slowly varying pressure p. The evolution of Ns chemical species and temperature is governed by a stiff system of ordinary differential equations (ODEs): 
+
+dy
+
+dt = f (y, T, p ), dT dt = g(y, T, p ), (1) where y(t) ∈ RNs denotes species mass fractions, T (t) is temperature, f represents chemical production and destruction rates, and g, providing the temporal rate of change of system temperature, accounts for heat release from reactions. 3A P REPRINT 
+
+For typical hydrocarbon combustion, Ns ranges from O(10) for reduced mechanisms of smaller hydrocarbon fuels to O(1 , 000) when dealing with detailed mechanisms for complex fuel molecules. Furthermore, the system exhibits extreme stiffness due to vastly different reaction timescales, identified mathematically by a Jacobian matrix J = ∂f /∂ y
+
+with eigenvalues that span many orders of magnitude, thereby creating numerical stability challenges for explicit integration methods. 
+
+2.2 Solver Classes 
+
+We consider two representative chemistry integrators that occupy opposite ends of the robustness-efficiency spectrum: 
+
+2.2.1 CVODE: Implicit BDF Method 
+
+CVODE from the SUNDIALS suite Hindmarsh et al. [2005] employs backward differentiation formulas (BDF), a family of implicit multistep methods. At each integration step from tn to tn+1 = tn + ∆ t, BDF methods approximate the time derivative using a linear combination of solution values at previous time levels: 
+
+dy
+
+dt tn+1 
+
+≈ 1∆t
+
+> q
+
+X
+
+> j=0
+
+αj yn+1 −j , (2) where q is the method order (typically 1–5, chosen adaptively) and {αj } are BDF coefficients. Substituting (2) into (1) yields a nonlinear system for yn+1 :
+
+G(yn+1 ) := yn+1 −
+
+> q
+
+X
+
+> j=1
+
+αj yn+1 −j − ∆t f (yn+1 , T n+1 , p ) = 0. (3) CVODE solves (3) via Newton iteration: 
+
+yn+1 ,(m+1) = yn+1 ,(m) −
+
+"
+
+I − ∆t ∂f
+
+∂y yn+1 ,(m)
+
+#−1
+
+G(yn+1 ,(m)), (4) where m indexes the Newton iteration and the term in brackets is the iteration matrix. Each Newton step first requires a Jacobian evaluation that involves computing ∂f /∂ y (either analytically or by finite differences), which amounts to an 
+
+O(N 2 
+
+> s
+
+) operation. Secondly, it involves the solution to a linear system solution by factorizing and solving the iteration matrix, typically O(N 3 
+
+> s
+
+) for dense systems or O(Ns) for banded/sparse structures with iterative solvers. The implicit formulation allows CVODE to take relatively (compared to explicit methods) large stable time steps even when the system is stiff, since the method’s stability region encompasses large portions of the negative real axis in the eigenvalue plane. However, the computational cost per step is substantial due to Jacobian evaluations and linear solves, particularly for detailed mechanisms where Ns ≫ 1.
+
+2.2.2 QSS: Quasi-Steady-State Approximation 
+
+Quasi-steady-state (QSS) methods exploit the observation that in many reacting systems, a subset of species, typically short-lived radicals such as OH, O, H, HO 2 reach local chemical equilibrium much faster than the bulk species evolve Mott et al. [2000], Segel and Slemrod [1989], Bond et al. [1998], Bothe and Pierre [2010]. For these "fast" species indexed by F ⊂ { 1, . . . , N s}, we impose the algebraic constraint: 
+
+fF (y, T, p ) = 0, (5) where fF denotes the production rate vector restricted to fast species. The remaining "slow" species S = {1, . . . , N s} − F are integrated conventionally: 
+
+dyS
+
+dt = fS (yS , yF , T, p ), (6) with yF determined algebraically from (5) at each step. The coupled system (5) – (6) can be advanced using explicit methods (e.g., Runge-Kutta) for the slow variables since the stiff fast modes have been eliminated algebraically. In practice, the nonlinear system (5) is solved iteratively (often via Newton’s method or fixed-point iteration) within each time step. In this work, we employ the α-QSS predictor-corrector scheme Mott et al. [2000], which splits each species equation into production ( qi) and destruction ( di) terms: 
+
+dy i
+
+dt = qi(y, T ) − di(y, T ), (7) 4A P REPRINT 
+
+and employs a Padé approximation Butcher [2016] to construct a second-order accurate update that transitions smoothly between explicit (non-stiff) and quasi-steady (stiff) regimes. The method uses an adaptive parameter αi ∈ [0 .5, 1] that interpolates between trapezoidal and backward Euler formulas based on the local stiffness ratio τi = di∆t/y i.However, QSS can become inaccurate or unstable under certain conditions, such as when nearly all species evolve rapidly, or when the time step is too large relative to the fastest unconverged modes Turanyi et al. [1993]. 
+
+2.3 Adaptive Solver Selection as an MDP 
+
+In this study, we present an approach to dynamically select CVODE or the α−QSS solver at various regions of a thermochemical manifold, leveraging the strengths of both methods. We formulate solver selection as a sequential decision problem. At discrete decision points tk (typically aligned with the operator-splitting time step ∆tglobal in CFD codes), an agent observes the local thermochemical state and chooses which solver to employ for advancing chemistry from tk to tk+1 = tk + ∆ tk (see Figure 1. The chosen solver integrates the chemistry equations, potentially taking multiple internal sub-steps, and returns updated states along with measured computational cost and error. This naturally defines a Markov Decision Process (MDP) consisting of a state space S , an action space, A, transition probability P ,reward function r, and a discount factor γ: (S , A, P, r, γ ). These elements are discussed next. 
+
+2.3.1 State Space S
+
+The state sk ∈ S encodes local thermochemical information and lightweight contextual features sufficient for the agent to assess the local behavior of the system and select an appropriate time-integration scheme. Specifically, sk
+
+is constructed as a feature vector comprising temperature, pressure, selected species mass fractions, and their local temporal rates of change. The temperature T is normalized to have zero mean and unit variance, while pressure effects are incorporated through the logarithmic scaling log 10 (p/p atm ). To capture dominant reaction pathways and the evolution of the radical pool, we include mass fractions of key species, 
+
+Ykey = [ YOH , Y O, Y H, Y HO 2 , Y H2O, Y H2 , Y O2 , Y N2 ],
+
+which involve both radical and stable species. Because species mass fractions vary over several orders of magnitude, each Yi is log-transformed as log 10 (max( Yi, 10 −20 )) to accommodate a range of magnitudes between 10 −20 and unity. In addition to instantaneous thermochemical quantities, the state includes temporal derivatives computed from the previous time step, namely the temperature rate of change ∆T / ∆t and species gradient proxies ∆Ykey /∆t. These temporal gradients provide a direct and inexpensive proxy for stiffness: large magnitudes of |∆T / ∆t| or rapid species evolution signal fast transients associated with ignition, extinction, or flame-front dynamics. Overall, the state representation, as described, balances expressiveness with computational efficiency. Temperature and key species characterize the local thermochemical regime (e.g., lean versus rich, pre- versus post-ignition), while radicals such as OH and others are markers for rapid and high temperature heat release. By incorporating temporal gradients, the policy gains stiffness awareness without resorting to costly eigenvalue or Jacobian analyses. Importantly, we avoid including the full species vector ( Ns ≳ 100 ) to keep inference overhead negligible. This enables solver selection decisions to be made cheaply and locally within large-scale reacting-flow simulations. 
+
+2.3.2 Action Space A
+
+The action set is discrete and binary: 
+
+A = {0 : CVODE , 1 : QSS }. (8) At decision point tk, the agent selects ak ∈ A , and the environment invokes the corresponding solver to integrate chemistry from tk to tk+1 . We deliberately restrict to two actions to maximize the contrast between solver types and simplify policy interpretation. 
+
+2.3.3 Transition Dynamics P
+
+Given the current state sk and selected action ak, the environment advances the chemical system by executing the chosen chemistry integrator. This step produces the next state sk+1 , which is constructed from the updated thermochemical fields 
+
+(yn+1 , T n+1 ). In addition to the state transition, the environment returns two auxiliary quantities: the computational cost Ck, measured as the wall-clock time required for the chemistry kernel call (including Jacobian formation and linear solve overheads for implicit solvers such as CVODE), and an error estimate Ek, which quantifies the deviation from a high-accuracy reference solution as described later in Section 2.4. The resulting transition function P (sk+1 | sk, a k) is deterministic in our setup, as chemical integration is fully determined by the current state and solver choice. Stochasticity arises only during training through randomized sampling of initial conditions. 5A P REPRINT 
+
+2.3.4 Reward Function r
+
+The reward function encodes the central trade-off in solver selection: reducing computational cost while enforcing a user-prescribed accuracy tolerance. We defer the full mathematical specification to Section 2.5 after introducing the cost and error measures, but here provide a brief description of its role in the learning process. In RL framework of this study, an agent is trained to maximize expected cumulative reward through interaction with its environment (i.e., the chemical kinetics ODE solver). Consequently, the reward is the primary mechanism by which we shape the learned behavior: it incentivizes choosing the cheaper QSS update when it is accurate enough, and penalizes decisions that either incur unnecessary implicit-solver expense or allow errors to grow beyond acceptable levels through overuse of QSS. In this sense, the reward functions as an explicit control signal that shapes the learned switching policy toward efficient yet constraint-compliant time integration. 
+
+2.4 Cost and Error Quantification 2.4.1 Computational Cost Ck
+
+We measure the wall-clock time required by the chemistry integrator to advance from tk to tk+1 :
+
+Ck = tend wall − tstart wall , (9) This includes all overhead: function evaluations, Jacobian assembly, linear solves, convergence checks, and error control. To stabilize training, we normalize costs relative to a baseline: 
+
+eCk = Ck
+
+¯CCVODE 
+
+, (10) where ¯CCVODE is the mean CVODE cost per decision window for the same thermochemical trajectory (precomputed). This normalization ensures eCk ≈ 1 for CVODE and eCk ≪ 1 for QSS in favorable regimes, making the reward magnitudes comparable across different test cases. 
+
+2.4.2 Solution Error Ek
+
+We quantify the accuracy of the selected solver by comparing its output to a high-fidelity reference solution. Let 
+
+(ysel  
+
+> k
+
+, T sel  
+
+> k
+
+) denote the state produced by the selected solver at tk, and (yref  
+
+> k
+
+, T ref  
+
+> k
+
+) denote the reference solution. We define a composite error metric: 
+
+Ek = αT
+
+∥T sel  
+
+> k
+
+− T ref  
+
+> k
+
+∥∥T ref  
+
+> k
+
+∥ + εT
+
++ αY
+
+∥Ysel  
+
+> k
+
+− Yref  
+
+> k
+
+∥∥Yref  
+
+> k
+
+∥ + εY
+
+, (11) where ∥ · ∥ 2 denotes the Euclidean norm, αT + αY = 1 are user-defined weights ( αT = 0 .7, αY = 0 .3), and 
+
+εT = εY = 10 −12 prevent division by zero. We precompute CVODE trajectories with tight tolerances (rtol = 10 −10 ,atol = 10 −20 ) for all training cases. These serve as ground truth throughout training. 
+
+2.5 Lagrangian Constraint Reward Formulation 
+
+We seek solver-selection policies that reduce computational cost while satisfying a user-prescribed accuracy tolerance ϵ.To encode this requirement in a form amenable to constrained reinforcement learning, we define a per-step constraint violation signal 
+
+νk ≡ max(0 , E k − ϵ), (12) which measures the amount by which the local integration error Ek exceeds the tolerance. Our objective is then to minimize the expected computational cost while constraining the expected average violation: 
+
+min  
+
+> π
+
+Eπ
+
+"K−1X
+
+> k=0
+
+eCk
+
+#
+
+subject to Eπ
+
+"
+
+1
+
+K
+
+> K−1
+
+X
+
+> k=0
+
+νk
+
+#
+
+≤ δ, (13) where π denotes the policy, K is the episode length, and the expectation is taken over trajectories induced by π from the initial condition distribution. Here, δ ≥ 0 specifies the allowable average constraint violation (with δ = 0 corresponding to a strict no-violation target). This defines a constrained Markov decision process (CMDP) Altman [2021], which we handle using a primal-dual Lagrangian formulation. 6A P REPRINT 
+
+2.5.1 Primal-Dual Lagrangian Approach 
+
+We introduce a Lagrange multiplier λ ≥ 0 associated with the expected violation constraint in eqn (13) . Using the violation signal νk defined in eqn (12), the Lagrangian is, 
+
+L(π, λ ) = Eπ
+
+"K−1X
+
+> k=0
+
+eCk
+
+#
+
++ λ Eπ
+
+"
+
+1
+
+K
+
+> K−1
+
+X
+
+> k=0
+
+νk
+
+#
+
+− δ
+
+!
+
+, λ ≥ 0, (14) which yields the dual problem max λ≥0 min π L(π, λ ). We solve this using alternating (primal-dual) updates: 1. Policy update (primal): for a fixed λ, optimize π (via PPO) to minimize the penalized objective implied by (14). 2. Multiplier update (dual): update λ based on the observed average violation 1
+
+> K
+
+PK−1 
+
+> k=0
+
+νk to drive the constraint toward satisfaction (see Section 2.5.3). 
+
+2.5.2 Step-wise Reward 
+
+From eqn (14) , we obtain a step-wise reward by combining the instantaneous computational cost with a penalty on accuracy violations. In practice, we implement solver selection via a step-wise reward that penalizes accuracy violations in proportion to the multiplier: 
+
+rk = − eCk − λ ν k. (15) Here, νk penalizes exceedance of the prescribed tolerance ϵ, while λ ≥ 0 controls the strength of constraint enforcement. The reward (15) implements a soft constraint on accuracy. When Ek ≤ ϵ, the violation is zero ( νk = 0 ), so rk = − eCk
+
+and the agent is incentivized to minimize computational cost. When Ek > ϵ , the violation becomes νk = Ek − ϵ > 0,leading to an additional penalty −λ(Ek − ϵ) that discourages solver choices producing excessive error. Note that eqn (15) corresponds to the per-step penalized objective induced by eqn (14) up to a constant rescaling of the multiplier (i.e., absorbing the factor 1/K into λ), which does not change the form of the learned policy update but simplifies implementation. As λ adapts (see Section 2.5.3), the policy is driven toward solutions that keep the average violation near the allowable level δ while minimizing cost, thereby learning an accuracy-efficiency trade-off consistent with the CMDP formulation. In this work, we set δ = 0 .
+
+2.5.3 Dual Variable Update 
+
+At the end of each training episode (or every M episodes), we update λ via projected gradient ascent on the dual objective: 
+
+λ ← clip (λ + ηλ (ν − δ) , 0, λ max ) , (16) where ν = 1
+
+> K
+
+PK−1 
+
+> k=0
+
+νk is the mean constraint violation over the episode, ηλ is the dual learning rate ( 10 −3), and δ ≥ 0
+
+is an allowance ( 10 −4) that permits the policy to slightly exceed ϵ without penalty. On the other hand, λmax prevents unbounded growth ( 10 2). Therefore, if ν > δ (i.e., policy violates the constraint), λ increases, tightening the penalty and encouraging the policy to prioritize accuracy. Conversely, if ν < δ (policy satisfies the constraint), λ decreases, relaxing the penalty and allowing more aggressive computational cost reduction. 
+
+2.6 Policy Architecture and Training 2.6.1 Actor-Critic Neural Network 
+
+We employ a standard actor-critic architecture with a shared feature set. Let ϕθ : S → Rdh denote a multilayer perceptron (MLP) encoder with parameters θ, mapping the state s to a hidden representation of dimension dh. The encoder consists of two fully connected layers with hyperbolic tangent activations, each with 128 neurons. Orthogonal weight initialization Saxe et al. [2013] is used to mitigate gradient vanishing. The actor (policy) head outputs a categorical distribution over actions: 
+
+πθ (a|s) = Softmax (Wπ ϕθ (s)) , (17) where Wπ ∈ R|A|× dh is the actor weight matrix. For our binary action space, πθ produces two logits that are normalized via softmax. The critic (value function) head predicts the expected cumulative reward: 
+
+Vθ (s) = w⊤ 
+
+> v
+
+ϕθ (s), (18) where wv ∈ Rdh is the critic weight vector. 7A P REPRINT 
+
+2.6.2 Proximal Policy Optimization (PPO) 
+
+We train the policy using Proximal Policy Optimization Schulman et al. [2017], a policy gradient method that balances sample efficiency and stability via clipped surrogate objectives. PPO collects trajectories using the current policy 
+
+πθold , computes advantages via Generalized Advantage Estimation (GAE) Schulman et al. [2015], and updates θ by maximizing a clipped objective that prevents excessively large policy updates. 
+
+Advantage estimation. For each timestep k in a trajectory, we compute the GAE advantage: 
+
+ˆAk =
+
+> K−k−1
+
+X
+
+> l=0
+
+(γλ GAE )lδk+l,
+
+where δk = rk + γV θold (sk+1 ) − Vθold (sk),
+
+(19) with γ = 0 .99 (discount factor) and λGAE = 0 .95 (GAE parameter). The advantages are normalized to zero mean and unit variance across the minibatch to stabilize training. 
+
+Loss function. The PPO loss combines three terms: 
+
+LPPO (θ) = Lpolicy (θ) + βV Lvalue (θ) − βH Lentropy (θ), (20) where Lpolicy (θ) is the policy loss involving a clipped surrogate, Lvalue (θ) is the value loss, and Lentropy (θ) is the entropy loss. Coefficients are set to βV = 0 .5 (value loss weight) and βH = 0 .01 (entropy bonus) as used in Schulman et al. [2017]. The entropy term encourages exploration early in training; as the policy converges, H(πθ ) naturally decreases. 
+
+Training procedure. For each policy update, the following steps are performed: 1. Collect Nrollout = 2048 timesteps of experience using πθold .2. Compute advantages { ˆAk} and returns { ˆVk} via GAE. 3. Perform Nepoch = 4 epochs of minibatch gradient descent on LPPO with batch size 64. 4. Update θ via Adam optimizer Kingma [2014] with learning rate 3 × 10 −4.
+
+2.7 Training Data 2.7.1 0D Homogeneous Reactors 
+
+Training episodes consist of constant-pressure homogeneous ignition simulations with selected values of initial temperatures, pressure, and mixture fractions chosen as T0 ∈ [300 K, 1200 K] (uniform sampling), p ∈ [1 atm , 60 atm ]
+
+(log-uniform sampling) and Z ∈ [10 −6, 10 −1] (log-uniform), respectively. For training, we use a detailed n-dodecane mechanism with 106 species and 678 reactions Luo et al. [2014]. At each sampled condition, we precompute a CVODE reference trajectory with tolerances rtol = 10 −10 , atol = 10 −20 ,and integrate to tfinal = 10 ms (or until temperature exceeds 2500 K ). Decision points {tk} are spaced at ∆t = 1 μs (for 0D) or aligned with the CFD global timestep (in 1D). This yields K ∼ 100 –10 ,000 decisions per episode depending on ignition delay. All training experiments were executed on a laptop-class workstation (Apple MacBook Pro with an M2 processor and 16 GB unified memory). Under this setup, training for 10 5 environment steps completes in under three hours, including on-the-fly evaluation of per-step cost and error metrics. Key hyperparameters used for training are summarized in Table 1. 
+
+## 3 Results and Discussion 
+
+While the policy was trained exclusively on 0D trajectories based on initial conditions described in the preceding section, to demonstrate some degree of generalizability, we evaluate the learned RL-adaptive solver selection policy on both zero-dimensional (0D) homogeneous reactors and one-dimensional (1D) counterflow diffusion flames. We assess performance through three key metrics: (i) computational speedup relative to CVODE-only baseline, (ii) solution accuracy measured by temperature and ignition delay errors, and (iii) solver utilization patterns that reveal the policy’s learned strategy. 8A P REPRINT 
+
+Table 1: Summary of key hyperparameters 
+
+Parameter Value 
+
+Rollout length Nrollout 2048 Minibatch size 64 PPO epochs Nepoch 4Learning rate 3 × 10 −4
+
+Discount γ 0.99 GAE λGAE 0.95 Clip threshold ϵclip 0.2 Entropy coefficient βH 0.01 Value coefficient βV 0.5 Dual learning rate ηλ 10 −3
+
+Constraint tolerance ϵ 10 −3
+
+Initial λ 1.0 
+
+λmax 100 
+
+3.1 Zero-Dimensional Homogeneous Reactors 3.1.1 Computational Performance and Speedup 2 4 6 8 10   
+
+> RL Speedup
+> 0.0
+> 0.1
+> 0.2
+> 0.3
+> 0.4
+> 0.5
+> Probability Density
+> Mean: 3.13x
+> Normal fit ( =3.13, =1.89)
+
+(a) Speedup distribution over 0D test cases. The RL-adaptive policy achieves 3.13 × mean speedup over CVODE ( σ = 1 .89 ). Black: normal fit; red dashed: mean. 600 700 800 900 1000 1100 
+
+> Initial Temperature (K)
+> 0
+> 10
+> 20
+> 30
+> 40
+> 50
+> 60
+> Initial Pressure (atm)
+> Speedup range: 1.11x - 10.56x
+> 2
+> 4
+> 6
+> 8
+> 10
+> Speedup vs CVODE
+
+(b) Speedup versus initial conditions. Markers denote cases (color: speedup; size: % CVODE usage). Speedup ranges from 
+
+1.1× to 10 .5× over T0 ∈ [600 , 1100] K and p ∈ [1 , 60] atm .
+
+Figure 2: RL-adaptive performance across initial conditions: (a) speedup distribution and (b) dependence on (T0, p ).Accuracy is maintained within 2.6% ignition-delay error and < 110 K temperature RMSE. Figure 2 summarizes the speedups achieved by the RL-adaptive policy across the sampled 0D conditions. Figure 2a shows a histogram of the resulting speedup distribution, with a mean speedup of approximately 3×, a minimum of 1.11 ×, and a maximum exceeding 10 ×. Figure 2b maps these speedups in the (T0, p ) space, where marker size scales with speedup. Several trends are apparent. The largest efficiency gains are generally realized at lower initial temperatures across the full pressure range, with a modest reduction in speedup as pressure increases. As T0 increases, the gains diminish, particularly at lower pressures, consistent with faster ignition kinetics and more sustained stiffness which forces the RL agent to employ the more expensive CVODE solver more frequently. While a few isolated high-speedup points appear at higher T0, these are likely attributable to stochastic variability rather than a robust trend. Table 2 reports representative accuracy and efficiency metrics at selected thermodynamic conditions. The maximum speedup among these representative cases occurs at the lowest-temperature, lowest-pressure case ( T0 = 650 K ,
+
+p = 1 atm ), where the long induction period ( 97 .2 ms ignition delay) creates an extended window of slow chemical 9A P REPRINT 
+
+evolution during which QSS integration is sufficient. In this regime, the policy selects CVODE for only 5.4% of time steps, concentrating expensive implicit integration near the ignition event (Figure 3a, left panel; red markers at t ≈ 15 –22 ms ). In contrast, the (T0, p ) = (1000 K , 30 atm) case exhibits the smallest speedup ( 1.42 ×) and the highest CVODE usage ( 68 .0% ). Here, rapid ignition kinetics ( 1.40 ms ) and steep transients over a larger fraction of the trajectory compel frequent implicit integration to maintain accuracy. Even in this more stringent regime, the policy reduces total computational cost by 29 .6% relative to pure implicit integration, demonstrating adaptive allocation of computational effort under strongly stiff conditions. Finally, policy inference overhead remains negligible across all conditions, averaging 67 .9 ms (approximately 1% of total CPU time). This confirms that neural network evaluation (implemented via batched forward passes) introduces minimal additional cost, supporting the feasibility of the approach in production CFD workflows where chemistry integration dominates runtime. Table 2: Performance metrics for RL-adaptive solver selection in 0D homogeneous reactors compared to CVODE and QSS baselines. All cases use n-dodecane mechanism with 106 species. 
+
+Ignition Delay CPU Time Performance Condition CVODE QSS RL Error CVODE QSS RL Speedup Inference 
+
+(T0, P ) (ms) (ms) (ms) (%) (s) (s) (s) vs CVODE (s) 
+
+650K, 1.0atm 97.21 109.94 96.81 0.41 39.25 10.12 12.06 3.25 × 0.11 800K, 10.0atm 2.30 2.42 2.27 1.13 12.92 0.74 6.43 2.01 × 0.07 1000K, 30.0atm 1.40 1.64 1.41 0.64 4.92 1.58 3.95 1.24 × 0.02 750K, 60.0atm 1.45 2.10 1.49 2.62 6.92 0.48 4.30 1.61 × 0.07 
+
+3.1.2 Solution Accuracy and Learned Solver-Selection Strategy 
+
+Across all test cases, the learned policy satisfies the prescribed accuracy requirement ( ϵ = 10 −3), maintaining ignition-delay errors below 2.62% (Table 2). Post-ignition equilibrium temperatures agree with the reference solution to within 
+
+0.1% , and key species profiles (OH, CO, and H 2O) exhibit root-mean-square (RMS) errors below 10 −2 in mass fraction. Figure 3a illustrates the trajectory for the low-temperature, low-pressure case (Condition 1: T0 = 650 K , p = 1 atm ). The RL-adaptive solution closely follows the CVODE reference throughout both the low- and high-temperature stages of ignition, whereas QSS overpredicts the second-stage ignition delay by 13 .1% . While QSS adequately captures the initial low-temperature chemistry, errors introduced during this stage accumulate and degrade accuracy during the high-temperature ignition phase. In contrast, the RL policy selectively invokes CVODE at critical portions of the trajectory where QSS accuracy degrades, preserving accuracy across both stages while retaining some of the improved computational savings of QSS. At intermediate initial temperature and pressure (Fig. 3b, T0 = 800 K , p = 10 atm ), a similar two-stage ignition behavior is observed, with QSS again overpredicting the second-stage ignition delay. In this case, however, error accumulation is already evident during the low-temperature first-stage ignition, as reflected in deviations in the temporal profiles of intermediate species such as CO 2, OH, and H2O . Interestingly, the RL-adaptive solver switches to CVODE precisely in this region, where QSS-induced errors begin to accumulate and the solution starts to diverge from the reference. After stabilizing the solution through implicit integration, the policy reverts to QSS for the remainder of the trajectory, while still maintaining close agreement with the CVODE solution. This behavior suggests that for QSS, the dominant errors observed during the second-stage ignition originate from inaccuracies introduced earlier in the first-stage chemistry. It also demonstrates a key advantage of the RL-based approach over static solver-selection strategies based on neural classifiers trained in supervised mode using labels: by leveraging experience acquired during training, the RL agent is able to effectively account for potential error accumulation in future time steps. To mitigate these future unseen errors, it adapts solver choices to prevent error accumulation before it degrades solution fidelity. Condition 3 (Fig. 3c, T0 = 1000 K , p = 30 atm ) involves single-stage ignition and exhibits more pervasive CVODE usage. In this regime, highly reactive conditions that are challenging to the QSS solver emerge early in the trajectory, causing QSS accuracy to degrade shortly after the induction period begins. The RL agent correctly identifies this behavior (as well as the downstream effects) and correspondingly invokes CVODE over a larger fraction of the simulation to preserve solution fidelity. At a selected high-pressure condition (Fig. 3d, T0 = 750 K , p = 60 atm ), the agent uses CVODE for most of the trajectory. In this case, a cursory evaluation of the profiles suggest that QSS may be sufficient for much of the early induction period, and it is unclear whether the conservative behavior of the RL agent reflects strong sensitivity of later ignition dynamics to early-stage accuracy, or residual suboptimality arising from training stochasticity or data balance issues. Nevertheless, as a general observation, the RL agent learns to select 10 A P REPRINT 0 20 40 60 80 100 120 
+
+Time (ms) 
+
+> 750
+> 1000
+> 1250
+> 1500
+> 1750
+> 2000
+> 2250
+> 2500
+> Temperature (K)
+
+Temperature       
+
+> CVODE
+> QSS
+> RL (CVODE)
+> RL (QSS)
+> 020 40 60 80 100 120
+
+Time (ms) 
+
+> 16
+> 14
+> 12
+> 10
+> 8
+> 6
+> 4
+> 2
+> OH Mass Fraction
+
+OH       
+
+> CVODE
+> QSS
+> RL-Adaptive
+> 020 40 60 80 100 120
+
+Time (ms) 
+
+> 16
+> 14
+> 12
+> 10
+> 8
+> 6
+> 4
+> 2
+> CO 2 Mass Fraction
+
+CO 2      
+
+> CVODE
+> QSS
+> RL-Adaptive
+> 020 40 60 80 100 120
+
+Time (ms) 
+
+> 16
+> 14
+> 12
+> 10
+> 8
+> 6
+> 4
+> 2
+> H2O Mass Fraction
+
+H2O
+
+> CVODE
+> QSS
+> RL-Adaptive
+
+(a) Condition 1: 650K, 1.0atm 0.0 0.5 1.0 1.5 2.0 2.5 3.0 
+
+Time (ms) 
+
+> 750
+> 1000
+> 1250
+> 1500
+> 1750
+> 2000
+> 2250
+> 2500
+> Temperature (K)
+
+Temperature       
+
+> CVODE
+> QSS
+> RL (CVODE)
+> RL (QSS)
+> 0.0 0.5 1.0 1.5 2.0 2.5 3.0
+
+Time (ms) 
+
+> 16
+> 14
+> 12
+> 10
+> 8
+> 6
+> 4
+> 2
+> OH Mass Fraction
+
+OH       
+
+> CVODE
+> QSS
+> RL-Adaptive
+> 0.0 0.5 1.0 1.5 2.0 2.5 3.0
+
+Time (ms) 
+
+> 16
+> 14
+> 12
+> 10
+> 8
+> 6
+> 4
+> 2
+> CO 2 Mass Fraction
+
+CO 2      
+
+> CVODE
+> QSS
+> RL-Adaptive
+> 0.0 0.5 1.0 1.5 2.0 2.5 3.0
+
+Time (ms) 
+
+> 16
+> 14
+> 12
+> 10
+> 8
+> 6
+> 4
+> 2
+> H2O Mass Fraction
+
+H2O 
+
+> CVODE
+> QSS
+> RL-Adaptive
+
+(b) Condition 2: 800K, 10.0atm 0.0 0.5 1.0 1.5 2.0 
+
+Time (ms) 
+
+> 1000
+> 1200
+> 1400
+> 1600
+> 1800
+> 2000
+> 2200
+> 2400
+> Temperature (K)
+
+Temperature     
+
+> CVODE
+> QSS
+> RL (CVODE)
+> RL (QSS)
+> 0.0 0.5 1.0 1.5 2.0
+
+Time (ms) 
+
+> 16
+> 14
+> 12
+> 10
+> 8
+> 6
+> 4
+> 2
+> OH Mass Fraction
+
+OH     
+
+> CVODE
+> QSS
+> RL-Adaptive
+> 0.0 0.5 1.0 1.5 2.0
+
+Time (ms) 
+
+> 16
+> 14
+> 12
+> 10
+> 8
+> 6
+> 4
+> 2
+> CO 2 Mass Fraction
+
+CO 2    
+
+> CVODE
+> QSS
+> RL-Adaptive
+> 0.0 0.5 1.0 1.5 2.0
+
+Time (ms) 
+
+> 16
+> 14
+> 12
+> 10
+> 8
+> 6
+> 4
+> 2
+> H2O Mass Fraction
+
+H2O
+
+> CVODE
+> QSS
+> RL-Adaptive
+
+(c) Condition 3: 1000K, 30.0atm 0.0 0.5 1.0 1.5 2.0 
+
+Time (ms) 
+
+> 800
+> 1000
+> 1200
+> 1400
+> 1600
+> 1800
+> 2000
+> 2200
+> Temperature (K)
+
+Temperature     
+
+> CVODE
+> QSS
+> RL (CVODE)
+> RL (QSS)
+> 0.0 0.5 1.0 1.5 2.0
+
+Time (ms) 
+
+> 16
+> 14
+> 12
+> 10
+> 8
+> 6
+> 4
+> OH Mass Fraction
+
+OH     
+
+> CVODE
+> QSS
+> RL-Adaptive
+> 0.0 0.5 1.0 1.5 2.0
+
+Time (ms) 
+
+> 16
+> 14
+> 12
+> 10
+> 8
+> 6
+> 4
+> 2
+> CO 2 Mass Fraction
+
+CO 2    
+
+> CVODE
+> QSS
+> RL-Adaptive
+> 0.0 0.5 1.0 1.5 2.0
+
+Time (ms) 
+
+> 16
+> 14
+> 12
+> 10
+> 8
+> 6
+> 4
+> 2
+> H2O Mass Fraction
+
+H2O 
+
+> CVODE
+> QSS
+> RL-Adaptive
+
+(d) Condition 4: 750K, 60.0atm 
+
+Figure 3: 0D trajectory comparisons across thermochemical conditions using the RL-adaptive solver policy. (a) 
+
+Condition 1 (650K, 1.0atm) achieves a 3.25 × speedup with 0.41% ignition delay error and 5.4% CVODE usage. The temperature subplot shows solver selection via colored scatter (red=CVODE, green=QSS), with CVODE concentrated in a narrow ignition window ( t ≈ 15 –22 ms). (b–d) As temperature and pressure increase (hence stiffness), CVODE usage rises from 14% (b) to 68.0% (c,d), demonstrating adaptive resource allocation. In all cases, the RL-adaptive approach maintains ignition delay errors below 2.62% and temperature RMSE below 108K. CVODE when required to maintain accuracy, while switching to QSS for improved computational efficiency when feasible. Overall, the learned solver-selection strategy generalizes beyond fixed heuristic rules that either overuse implicit integration (sacrificing efficiency) or underuse it (sacrificing accuracy). By dynamically balancing accuracy preservation against computational cost, these results demonstrate that the policy achieves near-reference fidelity at a fraction of the cost of fully implicit integration. 
+
+3.1.3 Comparison to Pure QSS Baseline 
+
+While the QSS-only baseline offers 3–8 × speedup over CVODE (Table 2, CPU Time columns), it systematically fails to capture ignition accurately: QSS overpredicts ignition delay by 13–45% relative to the CVODE reference. This unacceptable error stems from QSS’s reliance on the quasi-steady-state approximation for radicals, which breaks down precisely during the rapid chain-branching phase that defines ignition. 11 A P REPRINT 
+
+Figure 4: Space-time evolution of temperature, H2O , and OH illustrating agreement between the RL-adaptive solution and the CVODE reference, and deviations introduced by pure QSS. The RL-adaptive policy bridges this accuracy-efficiency gap by selectively invoking CVODE only where QSS fails. By learning to identify chemical regimes (via temperature, radical concentrations, and temporal gradients) rather than memorizing problem-specific patterns, the policy achieves CVODE-level accuracy at a cost closer to QSS than to CVODE. This represents a practical middle ground unattainable by either pure solver. 
+
+3.2 One-Dimensional Counterflow Diffusion Flames 3.2.1 Generalization of the 0D-Trained Policy 
+
+To assess cross-domain generalization, we deployed the RL-based adaptive solver-selection policy trained exclusively 
+
+on 0D constant-pressure homogeneous reactors in a one-dimensional (1D) n-dodecane/air counterflow diffusion flame, without any retraining or domain-specific tuning. These 1D simulations were carried out using the open-source code Ember Long et al. [2018], which solves the coupled species, energy, and momentum equations utilizing the rebalanced Strang operator splitting method. The counterflow diffusion flame simulations employed a symmetric opposed-jet configuration, with n-dodecane introduced on the fuel side at 300 K and air supplied on the oxidizer side at 800 K. Strain rates were varied between 10 and 2000 s −1. The computational domain spanned x ∈ [−8 × 10 −4, 8 × 10 −4] m and was initialized using a uniform axial grid of 500 points. Initial temperature and species profiles were constructed from a piecewise stoichiometric equilibrium profile smoothly matched to the prescribed inlet conditions. This evaluation setting differs fundamentally from the training environment by introducing transport-chemistry coupling (advection and diffusion), steep spatial gradients, and strain-rate-dependent flame structure, all of which can induce data patterns not present in homogeneous ignition trajectories. Despite these distribution shifts, the policy exhibits strong zero-shot transfer. Across all simulated strain rates ( 10 –
+
+2000 s −1), it maintained numerical stability and preserved physical fidelity, achieving ignition-delay errors below 
+
+2.5% and temperature root-mean-square (RMS) errors below 2.5 K relative to a CVODE reference. These results suggest that the learned decision rule does not merely memorize homogeneous ignition behavior but instead exploits stiffness-relevant signatures encoded in the local thermochemical state and its gradient (as represented by the selected features) to invoke expensive implicit integration only when warranted. 
+
+3.2.2 Spatiotemporal Analysis 
+
+Although the underlying configuration is one-dimensional in space, Figures 4 and 5 present space-time visualizations obtained by treating time as the second axis. This representation provides an interpretable view of both the flame-structure evolution and the associated solver allocation decisions. The results shown correspond to the representative high-strain case of 2000 s −1.12 A P REPRINT 
+
+Figure 4 depicts the space-time evolution (time increasing from right to left) of temperature (left), H2O mass fraction (middle), and OH mass fraction (right). The RL-adaptive solution closely reproduces the CVODE reference, capturing both the flame-front evolution and the spatial shift that occurs during ignition. In contrast, pure QSS exhibits delayed ignition, as seen by the delayed rise in OH and a corresponding lag in temperature rise close to stoichiometric conditions, consistent with reduced accuracy during radical buildup in regions of high chemical reactivity. The spatiotemporal solver map in Figure 5 illustrates how the RL policy allocates integration methods across the space-time domain. CVODE is selectively activated in a narrow band surrounding the flame front for the majority of the simulation, while QSS dominates elsewhere, indicating that the policy concentrates expensive implicit integration in regions of highly reactive chemistry and pronounced stiffness. Minor speckling is observed, which we attribute to stochasticity in training; however, the dominant structure is clear and physically consistent. Specifically, the policy localizes CVODE to regions of large thermal and species gradients and high chemical activity, precisely where numerical stiffness is expected to be strongest. Overall, CVODE is selected at only ∼ 14% of space-time points, thus implying the efficiency of the RL-derived solver allocation policy. 
+
+Figure 5: Spatiotemporal solver deployment in the 1D counterflow diffusion flame at strain rate 2000 s −1, as selected by the RL policy. Red denotes CVODE and turquoise denotes QSS. 
+
+3.2.3 Computational Performance and Efficiency 
+
+Table 3: Performance metrics for RL-adaptive solver selection in 1D counterflow diffusion flames compared to CVODE and QSS baselines. All cases use n-dodecane mechanism with 106 species.                                                                         
+
+> Ignition Delay CPU Time Performance & Accuracy Strain Rate CVODE QSS RL CVODE QSS RL Speedup QSS RL CVODE (s −1)(ms) (ms) (ms) (s) (s) (s) vs CVODE RMSE (K) RMSE (K) Usage (%)
+> 10 1.47 1.63 1.49 78.32 8.32 33.98 2.30 ×58.93 10.49 15.4 100 1.41 1.58 1.43 79.45 8.57 35.54 2.24 ×90.22 4.48 15.6 500 1.27 1.43 1.30 79.33 8.64 35.66 2.22 ×101.73 1.09 15.4 1000 1.20 1.36 1.23 86.32 8.95 37.96 2.27 ×14.33 2.21 14.3 2000 1.21 1.41 1.24 80.78 9.29 35.01 2.31 ×12.93 1.34 12.1
+
+Table 3 reports runtime and accuracy metrics across strain rates ranging from 10 to 2000 s −1. Overall, the RL-adaptive strategy delivers a consistent speedup of approximately 2.2× relative to CVODE while maintaining numerical stability and near-reference accuracy. For example, at 1000 s −1 the total CPU time is reduced from 86 .3 s (CVODE) to 38 .0 s 
+
+(RL-adaptive). The inference overhead associated with evaluating the policy network and issuing solver-selection decisions remains negligible, contributing only 2.7% of the total wall-clock time. Across strain rates, solver utilization patterns remain stable: the implicit CVODE integrator is selected at only 12 –15% 
+
+of space-time points, with the remaining points advanced using the cheaper QSS update. While the standalone QSS solver achieves the lowest runtime, it does so at the expense of substantially degraded accuracy compared to the RL-adaptive method. It should also be noted that the accuracy-cost trade-off of the RL policy is directly controlled through the training constraint (or tolerance) used to define acceptable error, as described in section 2.5.2. Looser tolerances encourage more frequent selection of QSS, whereas tighter tolerances increase reliance on CVODE (perhaps even beyond very stiff regions). In this sense, the proposed approach provides a principled continuum between the two 13 A P REPRINT 
+
+extremes (always-CVODE versus always-QSS). Depending on user preference, the obtained policy can be tuned to provide higher CVODE-like accuracy (at higher computational cost), or to approach QSS speeds (with higher ignition delay errors). Therefore, the proposed framework offers a pathway to construct policies that can be tuned to lie on different points along the accuracy-efficiency spectrum. 
+
+## 4 Conclusion 
+
+This study introduced a reinforcement learning (RL) framework for adaptive solver selection in detailed combustion chemistry, featuring automatic switching between an implicit integrator (CVODE) and a quasi-steady-state (QSS) method. By casting solver selection as a Markov decision process and training under a Lagrangian, constraint-aware objective, the policy learns to reduce computational cost while enforcing stringent accuracy requirements. When evaluated on zero-dimensional (0D) homogeneous reactor trajectories, the learned policy achieves speedups ranging from 1.11 × to 10 .58 × relative to CVODE, while maintaining ignition-delay errors below 2.6% . Although trained solely on zero-dimensional (0D) homogeneous reactor data, the learned policy transfers effectively to one-dimensional (1D) n-dodecane/air counterflow diffusion flames, achieving ≈ 2.2× speedup across strain rates while preserving near-reference accuracy (ignition-delay errors below 2.5% ). The observed transferability indicates that the policy captures stiffness-relevant signatures embedded in local thermochemical states and gradients (in particular temperature, radical species levels, and temporal-gradient proxies) rather than memorizing trajectory-specific patterns. Spatiotemporal solver-allocation maps further reveal physically interpretable behavior: the policy concentrates implicit integration in narrow high-stiffness regions near the flame front and relies on QSS elsewhere. This adaptive partitioning emerges without hand-crafted switching rules, thereby demonstrating the potential of data-driven control in regimes where stiffness, multiscale kinetics, and evolving thermochemical conditions limit the effectiveness of fixed heuristics. Moreover, policy evaluation incurs minimal overhead (less than 3% of total runtime), making the approach compatible with existing operator-splitting workflows in production CFD solvers. Several limitations remain, providing a pathway for future extensions. The present policy was trained using a single fuel mechanism ( n-dodecane) and would be extended to multi-fuel formulations in a future study. Scaling to large 2D and 3D turbulent configurations will also require efficient batched inference and load balancing, and the lightweight network architecture used in this study makes these practical. Finally, the current formulation focuses on binary solver selection; future work will expand the action space to include solvers with variable tolerances and reduced-order chemistry options to enable finer control of the accuracy-efficiency trade-off. By allowing learned policies to govern solver adaptivity, this work points toward simulation frameworks that satisfy desired accuracy constraints while learning to optimize their computational strategies for efficiency. 
+
+## References 
+
+Mauro Bracconi, Matteo Maestri, and Alberto Cuoci. In situ adaptive tabulation for the cfd simulation of heterogeneous reactors based on operator-splitting algorithm. AIChE J. , 63(1):95–104, 2017. Tianfeng Lu and Chung K Law. Toward accommodating realistic fuel chemistry in large-scale computations. Prog. Energ. Combust. Sci. , 35(2):192–215, 2009. Long Liang, John G Stevens, Sumathy Raman, and John T Farrell. The use of dynamic adaptive chemistry in combustion simulation of gasoline surrogate fuels. Combust. Flame , 156(7):1493–1502, 2009. Alan C Hindmarsh, Peter N Brown, Keith E Grant, Steven L Lee, Radu Serban, Dan E Shumaker, and Carol S Woodward. Sundials: Suite of nonlinear and differential/algebraic equation solvers. ACM Trans. Math. Softw. , 31(3): 363–396, 2005. David R Mott, Elaine S Oran, and Bram Van Leer. A quasi-steady-state solver for the stiff ordinary differential equations of reaction kinetics. J. Comput. Phys. , 164(2):407–428, 2000. Edward H Flach and Santiago Schnell. Use and abuse of the quasi-steady-state approximation. IEE Proc. Syst. Biol. ,153(4):187–191, 2006. Yu Shi, William H Green, Hsi-Wu Wong, and Oluwayemisi O Oluwole. Accelerating multi-dimensional combustion simulations using gpu and hybrid explicit/implicit ode integration. Combust. Flame , 159(7):2388–2397, 2012. AR Curtis. Jacobian matrix properties and their impact on choice of software for stiff ode systems. IMA J. Numer. Anal. , 3(4):397–415, 1983. TF Lu, Chun Sang Yoo, JH Chen, and Chung K Law. Three-dimensional direct numerical simulation of a turbulent lifted hydrogen jet flame in heated coflow: a chemical explosive mode analysis. J. Fluid Mech. , 652:45–64, 2010. 14 A P REPRINT 
+
+TR Young Jr. Chemeq-a subroutine for solving stiff ordinary differential equations. Technical report, 1980. Long Liang, Song-Charng Kong, Chulhwa Jung, and Rolf D Reitz. Development of a semi-implicit solver for detailed chemistry in internal combustion engine simulations. J. Eng. Gas Turbines Power , 129(1):271–278, 2007. Kyle E Niemeyer and Chih-Jen Sung. Accelerating moderately stiff chemical kinetics in reactive-flow simulations using gpus. J. Comput. Phys. , 256:854–871, 2014. JA Blasco, N Fueyo, C Dopazo, and J Ballester. Modelling the temporal evolution of a reduced combustion chemical system with an artificial neural network. Combust. Flame , 113(1-2):38–52, 1998. Javier A Blasco, Norberto Fueyo, C Dopazo, and JY Chen. A self-organizing-map approach to chemistry representation in combustion applications. Combust. Theor. Model. , 4(1):61, 2000. Kai Fukami, Koji Fukagata, and Kunihiko Taira. Super-resolution reconstruction of turbulent flows with machine learning. J. Fluid Mech. , 870:106–120, 2019. Junhyuk Kim and Changhoon Lee. Prediction of turbulent heat transfer using convolutional neural networks. J. Fluid Mech. , 882:A18, 2020. Long Nguyen, Maziar Raissi, and Padmanabhan Seshaiyer. Efficient physics informed neural networks coupled with domain decomposition methods for solving coupled multi-physics problems. In Advances in Computational Modeling and Simulation , pages 41–53. Springer, 2022. Majid Haghshenas, Peetak Mitra, Niccolò Dal Santo, and David P Schmidt. Acceleration of chemical kinetics computation with the learned intelligent tabulation (lit) method. Energies , 14(23):7851, 2021. Stephen B Pope. Computationally efficient implementation of combustion chemistry using in situ adaptive tabulation. 1997. Opeoluwa Owoyele and Pinaki Pal. Chemnode: A neural ordinary differential equations framework for efficient chemical kinetic solvers. Energ. AI , 7:100118, 2022. Simon Lapointe, Sudeepta Mondal, and Russell A Whitesides. Data-driven selection of stiff chemistry ode solver in operator-splitting schemes. Combust. Flame , 220:133–143, 2020. Jiachen Yang, Tarik Dzanic, Brenden Petersen, Jun Kudo, Ketan Mittal, Vladimir Tomov, Jean-Sylvain Camier, Tuo Zhao, Hongyuan Zha, Tzanio Kolev, et al. Reinforcement learning for adaptive mesh refinement. International Conference on Artificial Intelligence and Statistics (2023), pp. 5997–6014, 2023. Niklas Freymuth, Philipp Dahlinger, Tobias Würth, Simon Reisch, Luise Kärger, and Gerhard Neumann. Swarm reinforcement learning for adaptive mesh refinement. Adv. Neural Inf. Process. Syst. , 36:73312–73347, 2023. Corbin Foucart, Aaron Charous, and Pierre FJ Lermusiaux. Deep reinforcement learning for adaptive mesh refinement. 
+
+J. Comput. Phys. , 491:112381, 2023. Ilay Luz, Meirav Galun, Haggai Maron, Ronen Basri, and Irad Yavneh. Learning algebraic multigrid using graph neural networks. International Conference on Machine Learning (2020), pp. 6489–6499, 2020. David Huergo, Laura Alonso, Saumitra Joshi, Adrian Juanicotena, Gonzalo Rubio, and Esteban Ferrer. A reinforcement learning strategy to automate and accelerate h/p-multigrid solvers. Results Eng. , 24:102949, 2024. Guido Novati, Hugues Lascombes de Laroussilhe, and Petros Koumoutsakos. Automating turbulence modelling by multi-agent reinforcement learning. Nat. Mach. Intell. , 3(1):87–96, 2021. John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Radford, and Oleg Klimov. Proximal policy optimization algorithms. arXiv preprint arXiv:1707.06347 , 2017. Lee A. Segel and Marshall Slemrod. The quasi-steady-state assumption: A case study in perturbation. SIAM Rev. , 31 (3):446–477, 1989. Richard A. B. Bond, Bice S. Martincigh, Janusz R. Mika, and Reuben H. Simoyi. The quasi-steady-state approximation: Numerical validation. J. Chem. Educ. , 75(9):1158, 1998. Dieter Bothe and Michel Pierre. Quasi-steady-state approximation for a reaction–diffusion system with fast intermediate. 
+
+J. Math. Anal. Appl. , 368(1):120–132, 2010. John Charles Butcher. Runge–kutta methods. Numerical Methods for Ordinary Differential Equations , pages 143–331, 2016. T. Turanyi, A. S. Tomlin, and M. J. Pilling. On the error of the quasi-steady-state approximation. J. Phys. Chem. , 97: 163–172, 1993. Eitan Altman. Constrained Markov decision processes . Routledge, Boca Raton, 2021. 15 A P REPRINT 
+
+Andrew M Saxe, James L McClelland, and Surya Ganguli. Exact solutions to the nonlinear dynamics of learning in deep linear neural networks. arXiv preprint arXiv:1312.6120 , 2013. John Schulman, Philipp Moritz, Sergey Levine, Michael Jordan, and Pieter Abbeel. High-dimensional continuous control using generalized advantage estimation. arXiv preprint arXiv:1506.02438 , 2015. Diederik P Kingma. Adam: A method for stochastic optimization. arXiv preprint arXiv:1412.6980 , 2014. Zhaoyu Luo, Sibendu Som, S Mani Sarathy, Max Plomer, William J Pitz, Douglas E Longman, and Tianfeng Lu. Development and validation of an n-dodecane skeletal mechanism for spray combustion applications. Combust. Theor. Model. , 18(2):187–203, 2014. Alan E. Long, Raymond L. Speth, and William H. Green. Ember: An open-source, transient solver for 1d reacting flow using large kinetic models, applied to strained extinction. Combust. Flame , 195:105–116, 2018. 16

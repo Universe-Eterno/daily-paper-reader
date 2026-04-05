@@ -1,0 +1,711 @@
+Title: Soft vector spins with dimensional annealing for combinatorial optimization
+
+URL Source: https://arxiv.org/pdf/2604.01003v1
+
+Published Time: Thu, 02 Apr 2026 01:26:38 GMT
+
+Number of Pages: 14
+
+Markdown Content:
+# Soft vector spins with dimensional annealing for combinatorial optimization 
+
+Marvin Syed ∗
+
+Department of Applied Mathematics and Theoretical Physics, University of Cambridge Wilberforce Road, Cambridge CB3 0WA, United Kingdom and Department of Physics and SUPA, University of Strathclyde, Glasgow G4 0NG, United Kingdom 
+
+Richard Zhipeng Wang and Natalia G. Berloff 
+
+Department of Applied Mathematics and Theoretical Physics, University of Cambridge Wilberforce Road, Cambridge CB3 0WA, United Kingdom 
+
+(Dated: April 2, 2026) Recently, purpose-built analog hardware that can efficiently minimize the Ising energy and thereby solve a variety of combinatorial optimization problems has been receiving widespread attention. In this work, we show how multidimensional, vectorial degrees of freedom, that are either naturally present or can be artificially created in such hardware, could strengthen the capability to find optimal solutions to optimization problems. In order to achieve this, we introduce a simple model of soft vector spins that should be implementable on a variety of analog hardware platforms as well as three different dimensional annealing methods which harness the enlarged phase space of the vectorial degrees of freedom to minimize the Ising energy. We perform simulations on different benchmark problems and show that for all dimensional annealing methods we tested, vectorial degrees of freedom improve upon one-dimensional degrees of freedom when it comes to finding the ground state of the Ising model. In particular, we find that this advantage becomes most pronounced for d ≳ 3 dimensional degrees of freedom, with diminishing returns as the dimension is increased further. Our results could inspire new analog optimization hardware and algorithms that explicitly incorporate the advantage of vectorial degrees of freedom. 
+
+I. INTRODUCTION 
+
+Solving combinatorial optimization problems is of in-terest in a variety of fields. Many of these problems can be efficiently represented in terms of a classical Ising model [1], such that the variables become Ising spins, and the objective becomes finding the minimum of the Ising energy, that is, finding 
+
+arg min 
+
+> s∈{− 1,+1 }N
+
+− 12
+
+> N
+
+X
+
+> i,j =1
+
+Jij sisj , (1) where J is a symmetric matrix. In recent years, this fact has sparked considerable interest in developing purpose-built hardware aimed at minimizing the Ising energy. While some works in this area make use of conventional digital computing hardware ( for example, field pro-grammable gate arrays (FPGAs) [2, 3], or other custom CMOS hardware [4] ), many proposed hardware plat-forms are based on analog physical systems. These in-clude ultracold atoms [5], injection-locked lasers [6], de-generate optical parametric oscillators [7, 8], polariton condensates [9–12], spatially modulated light [13, 14], po-larization oscillators [15], or electronic oscillators [16, 17]. Often, the analog systems can be described as a dynam-ical system of interacting analog units of the form 
+
+ddt xi = fi(x1, . . . , x N , t ) . (2)  
+
+> ∗marvin.syed@strath.ac.uk
+
+where fi describes some (possibly time-dependent) forces [18]. We will refer to the analog units xi ∈ R as soft (Ising) spins . During operation, the soft spins evolve ac-cording to Eq. (2) for a specified amount of time or until some convergence criterion is reached. Afterwards, the soft spins are read out and transformed into “hard” Ising spins via si = sign( xi).In this work, we introduce a multi-dimensional gener-alization of soft Ising spins, soft vector spins , that evolve according to an equation of the form 
+
+ddt xi = fi(x1, . . . , xN , t ) , (3) where the soft vector spins, xi ∈ Rd, are now vecto-rial degrees of freedom. This is motivated by a couple of different reasons. While the ultimate aim is to min-imize the Ising energy, many hardware platforms nat-urally operate in a higher-dimensional state space with variables possessing a continuous phase degree of free-dom, thus making them naturally more suited to mini-mize the energy of vector spin models like the XY model. Although minimizing vector spin models has applications in itself [19, 20], the solution of the Ising problem is often still desired. Because of this, many approaches include a mechanism that biases dynamics in favor of aligning all spins along a single axis, for example through second-harmonic injection locking in polariton networks [12] and oscillator Ising machines [17]. Beyond being a hardware necessity, recent works have employed different such di-mensionality reducing mechanisms to obtain better per-forming optimization methods [21–23]. This is done by varying the strength of the dimensionality reducing mechanism during time-evolution. In accordance with 
+
+> arXiv:2604.01003v1 [cond-mat.dis-nn] 1 Apr 2026
+
+2                   
+
+> FIG. 1. Example of d= 3 soft vector spins traversing the Ising energy landscape. For each point in time we evaluate the vec-tor spin energy, Evec , via si=xi/∥xi∥, and the Ising energy,
+> EIsing , via the method in Sec. III C. Solid colored lines show the resulting trajectories for Evec using different dimensional annealing methods (described in detail later in the text); the dashed lines show the ones for EIsing .For comparison, the evolution of a d= 1 soft Ising spin system is shown in black (in one dimension Evec and EIsing coincide). Vertical dashed lines show the time period where dimensional annealing is ac-tive, while the dotted horizontal line shows the Ising ground state energy. Within this region, the dimensional annealing process enables jumps over Ising energy barriers that are not possible in one dimension.
+
+Refs. [21, 22], we will refer to this process as dimensional annealing . Intuitively, the extra degrees of freedom of soft vector spins turn local minima into saddle points opening up new “escape routes” during the dimensional annealing process, thereby increasing the likelihood of finding the global minimum (see Fig. 1). On the other hand, there is a trade-off in the fact that dimensional reduction mechanisms can distort the energy landscape and make it harder to identify the true global minimum. Our aim in this work is to compare dimensional anneal-ing with a selection of dimensional reduction methods on a set of Ising benchmark problems, and study their de-pendence on the dimensionality of the soft vector spin variables. In order to do so, we start with a base model of coupled soft vector spins which can be used to de-scribe a variety of concrete hardware platforms. There are a variety of ways to implement dimensionality reduc-ing mechanisms in such a model. We focus on three: 1. An anisotropic gain, where there is a stronger gain for one specific component of the vector spins. We show that this is essentially the same as second-harmonic injection-locking which was considered in Refs. [12, 17], for example. 2. An anisotropic metric, where the couplings among spins are stronger for a specific vector component. This mechanism has previously been discussed in the context of the Hyperspin Machine [21, 22]. 3. A generalized cross-product penalty. Such apenalty term was introduced for the Vector Ising Spin Annealer (VISA) [23], but only for three di-mensional vector spins. We show that this type of penalty can be implemented for any dimension. Our findings show that soft vector spins with dimensional annealing have an increased or equal probability of find-ing the ground state compared to soft Ising spins in all test cases we considered. Furthermore, higher dimen-sions d ≥ 2 generally fare better for all three dimensional reduction methods, with diminishing returns for d ≥ 3.These results imply that existing and future analog op-timization hardware could benefit from making use of analog units with vectorial degrees of freedom. The outline of the paper is as follows: In Sec. II, we introduce and describe the elementary properties of the base model of coupled soft vector spins and describe how to add dimensional reduction mechanisms to it. Sec. III contains the methodology and results of our numerical simulations. We conclude with a discussion of our results in Sec. IV.   
+
+> II. MODEL A. Base model
+
+We begin with a base model of a dynamical system consisting of N coupled soft vector spins evolving via 
+
+ddt xi = ai(t)xi − ∥ xi∥2xi +
+
+> N
+
+X
+
+> j=1
+
+Jij xj , (4) where xi ∈ Rd, J is a symmetric coupling matrix with 
+
+Jii = 0 , and ai(t) is the time-dependent linear gain which is usually increased (annealed) with time from an initial small value. For d = 1 and ai(t) = a(t), this reduces to the dynamics of the Coherent Ising Machine (CIM) [7, 8]: 
+
+ddt xi = a(t)xi − x3 
+
+> i
+
++
+
+> N
+
+X
+
+> j=1
+
+Jij xj , (5) while for d = 2 we can use complex variables ψi to express the equation of motion as 
+
+ddt ψi = a(t)ψi − | ψi|2ψi +
+
+> N
+
+X
+
+> j=1
+
+Jij ψj . (6) Such equations frequently arise in systems used for gain-based computing [23] such as polariton condensates [12], and are an example of a wider class of Andronov-Hopf os-cillators systems that are common in analog optimization hardware [18]. 3The soft vector spin system (4) has an associated en-ergy landscape at each point in time, s.t., 
+
+ddt x = −∇ E(x, a(t)) . (7) For a(t) = a = ( a1, . . . , a N ), the energy function is 
+
+E(x, a) = X
+
+> i
+
+V (xi, a i) − 12
+
+X
+
+> ij
+
+Jij xi · xj , (8) where x =  x1, . . . , xN
+
+ and 
+
+V (x, a ) = − a
+
+2 ∥x∥2 + 14 ∥x∥4 . (9) This energy function can be seen as a generalization of the energy landscape of the CIM studied in Refs. [24, 25] which represents the d = 1 case of the soft vector spin model. In the past, similar models (also with d = 1 ) were used in the context of structural glasses [26, 27]. If the spins in Eq. (8) were “hard” vector spins with 
+
+xi ∈ Sd−1 living on the unit sphere, the second term in Eq. (8) would simply be the energy of a classical system of vector spins. The first term takes the form of the clas-sic “sombrero” potential acting on each spin individually. This kind of potential often arises in systems exhibiting spontaneous symmetry breaking. In our setting we may look at it simply as a penalty that punishes soft spin con-figurations with vector spins that stray too far from the origin (when a < 0) or the surface of the sphere Sd−1(√a)
+
+of radius √a (when a ≥ 0). In particular, the potential well becomes deeper as the gain a is increased, ultimately leading to the soft vector spins converging towards hard vector spins constrained to the sphere Sd−1(√a). This intuition can be put into more quantitative terms by ex-amining the low-gain and high-gain limit.  
+
+> 1. Low-gain limit
+
+In this section, we assume homogeneous gains, ai(t) = 
+
+a(t) for all i. A similar picture, however, holds also for heterogeneous gains. At low enough gain, the amplitudes of the soft spins will be driven close to zero, i.e, ∥xi∥ ≪ 1. This allows us to linearize Eq. (4), yielding 
+
+ddt xi = X
+
+> j
+
+(aδ ij + Jij )xj . (10) The linearized system’s behavior depends only on the eigenvalues of the matrix aI + J with the modes corre-sponding to positive (negative) eigenvalues exponentially growing (decaying). A transition occurs at the point 
+
+ac = − λmax (J), where the gain equals the negative max-imum eigenvalue of J. Below ac, all modes decay and the origin is the only fixed point of Eq. (4). Above ac, the fixed point at the origin becomes unstable and the am-plitudes start to grow causing the system to move away from the linear regime. Close to the transition point, the soft spins align themselves in the direction of the eigen-vector associated to λmax (J). More precisely, treating a
+
+as quasi-static near the transition point, the linearized equation admits the formal solution 
+
+x(t) = exp( at ) exp(( J ⊗ Id)t)x(0) , (11) where Id is the d × d identity matrix, and ⊗ denotes the tensor product. The exponentially fastest growing mode in Eq. (11) is given by the maximal eigenvector of 
+
+J ⊗ Id. Written in components, this is xμi ∝ vieμ, where 
+
+vi are the components of the eigenvector associated to 
+
+λmax (J) and e is an arbitrary vector giving the direction of the spin vectors. This means that in the vicinity of the transition point, the system finds a minimizer of the energy 
+
+Espec = − 12
+
+X
+
+> ij
+
+Jij uiuj , (12) over all ui such that P 
+
+> i
+
+u2 
+
+> i
+
+= 1 , which is a spectral ap-proximation of the problem of minimizing the Ising en-ergy [24, 28], 
+
+EIsing = − 12
+
+X
+
+> ij
+
+Jij sisj . (13) As the gain is increased further beyond the transition point, other eigenvectors start to contribute more and the system goes beyond simply finding the spectral ap-proximation.  
+
+> 2. High-gain limit
+
+Let us now examine the high-gain limit where a ≫
+
+1. In that case, V (x, a ) has deep minima on the sphere where ∥x∥ = √a. This inspires us to make the change of variables y = a−1/2x. As a result, the energy expressed in the new variables has the form 
+
+a−2E = X
+
+> i
+
+
+
+− 12 ∥yi∥2 + 14 ∥yi∥4
+
+
+
+− 12a
+
+X
+
+> ij
+
+Jij yi · yj .
+
+(14) Thus, the interaction term is only a small perturbation at large a. We now proceed perturbatively: to first order in 1/a , the fixed points of Eq. (4) are located at 
+
+yμi =
+
+
+
+bi + 1
+
+a ηi
+
+
+
+eμi + O a−2 , (15) where bi can take the values 0 or 1, and ηi = (3 bi −
+
+1) −1ei · P 
+
+> j
+
+Jij bj ej , with ei ∈ Sd−1 being arbitrary unit vectors. The energy at this order in perturbation theory becomes 
+
+a−2E = − 14
+
+X
+
+> i
+
+bi − 12a
+
+X
+
+> ij
+
+Jij bibj ei ·ej +O a−2 . (16) 4By computing the Hessian of the energy E, it can be ver-ified that all fixed points with some bi = 0 are unstable. Hence, the local minima of E have all bi = 1 . In that case, the second term in Eq. (16) is exactly a rescaled version of the energy 
+
+Evec = − 12
+
+X
+
+> ij
+
+Jij si · sj , si ∈ Sd−1 , (17) which shows that the dynamical system in Eq. (4) tends to minimize the vector spin energy at large gain.   
+
+> B. Dimensional reduction mechanisms
+> 1. Anisotropic gain
+
+One option to drive the system towards Ising config-urations, is to add a quadratic anisotropy of the form P
+
+> i
+
+(Di · xi)2 that either punishes or rewards configu-rations aligned with D. This corresponds to second harmonic injection-locking as implemented in complex gain-dissipative oscillators [12] or oscillator Ising ma-chines [17]. If we add a quadratic anisotropy, the total energy be-comes 
+
+Eag (x, a, D) = E(x, a) − 12
+
+X
+
+> i
+
+(Di · xi)2
+
+= X
+
+> i
+
+V (xi, a i) − 12
+
+X
+
+> ij
+
+Jij xi · xj − 12
+
+X
+
+> i
+
+(Di · xi)2 ,
+
+(18) while the equations of motion are modified to 
+
+ddt xi = ai(t)xi −∥ xi∥2xi +
+
+> N
+
+X
+
+> j=1
+
+Jij xj +( Di ·xi)Di . (19) For simplicity, we make the anisotropy the same on every site, i.e., Di = D. Since the energy E(x, a) without the anisotropy is symmetric under global rotations, the specific direction of D should not matter. Hence, we can choose D ∼ (1 , 0, . . . , 0) ⊺ without loss of generality. Then, Eq. (19) can be written 
+
+ddt xμi =
+
+(ai(t)x1 
+
+> i
+
+− ∥ xi∥2x1 
+
+> i
+
++ PNj=1 Jij x1 
+
+> j
+
++ h(t)x1 
+
+> i
+
+, μ = 1 ,ai(t)xμi − ∥ xi∥2xμi + PNj=1 Jij xμj μ̸ = 1 ,
+
+(20) where h = ∥D∥2, and we have made explicit that the quadratic anisotropy will generally depend on time. Equivalently, one might absorb the quadratic anisotropy into the linear gain term, and think about it as an anisotropic gain: 
+
+ddt xi = ai(t) ⊙ xi − ∥ xi∥2xi +
+
+> N
+
+X
+
+> j=1
+
+Jij xj . (21) Here, a1 
+
+> i
+
+= ai +h, aμi = ai for μ = 2 , . . . , d , and ⊙ denotes the element-wise product between vectors. Written in this way, we can see that through the anisotropic gain, the first spin component receives a larger gain relative to the others whenever h > 0. The local minima of the corresponding energy 
+
+Eag (x, a) = X
+
+> i
+
+− 12
+
+X
+
+> μ
+
+aμi (xμi )2 + 14 ∥xi∥4
+
+!
+
+− 12
+
+X
+
+> ij
+
+Jij xi · xj (22) become more and more aligned with the first component 
+
+a1 as the strength of the anisotropy h becomes larger. Since the vector spin energy Evec reduces to the Ising energy EIsing for collinear spins, the system thus mini-mizes the Ising energy under the influence of a strongly anisotropic gain.  
+
+> 2. Anisotropic metric
+
+Refs. [21, 22] proposed coupling vector spins with a time-dependent metric, referring to this under the name of dimensional annealing . In our notation, this is equiv-alent to replacing the coupling terms as 
+
+Jij xi · xj → Jij 
+
+X
+
+> μν
+
+gμν (t)xμi xνj , (23) where g(t) is a time-dependent matrix, interpreted as a metric for Rd, the space of soft vector spins. While the metric g(t) is generally determined by O d2 time-dependent coefficients, for simplicity, we restrict our-selves in the following to diagonal metrics of the form 
+
+gμν (t) = 
+
+
+
+1 , μ = ν = 1 ,
+
+1 − b(t) , μ = ν̸ = 1 ,
+
+0 , otherwise. (24) Here, b(t) is a monotonically increasing function map-ping to the interval [0 , 1] determining the dimensional annealing schedule. The total energy associated with the anisotropic metric is 
+
+Eam (x, a, g ) = X
+
+> i
+
+V (xi, a i) − 12
+
+X
+
+> ij
+
+Jij 
+
+X
+
+> μν
+
+gμν (t) xμi xνj .
+
+(25) As b(t) → 1, the coupling term selectively strengthens interactions along the first component x1 
+
+> i
+
+, which biases fixed points toward first-axis alignment. Note, however, 5that the on-site potential V (xi, a i) retains O(d) symme-try and does not by itself penalize transverse components. In the limit b(t) → 1 with J = 0 , for instance, non-axis-aligned states with ∥xi∥ = √a remain fixed points. Intro-ducing any finite coupling J̸ = 0 in this limit breaks the 
+
+O(d) symmetry and yields fixed points that are aligned with the first axis, thus producing Ising-like configura-tions.  
+
+> 3. Generalized cross product penalty
+
+In Ref. [23], the Vector Ising Spin Annealer (VISA) was introduced. VISA uses three dimensional spin vari-ables xi ∈ R3 that evolve according to the gradient of the energy (adjusted to our notation) 
+
+EVISA (x, a, P ) = E(x, a) + P
+
+4
+
+X
+
+> ij
+
+∥xi × xj ∥2 , (26) where a and P can depend on time, and the last term is a penalty proportional to the norm of the cross product of all spin pairs. Since the cross product vanishes only when two vectors are parallel, the penalty forces spins to be collinear if P is large enough, minimizing the Ising energy. While the cross product cannot be straightforwardly generalized beyond d = 3 , it would suffice for our pur-poses to define a product that vanishes whenever two vectors are collinear. This can be done by noting that the components of the three dimensional cross product may be written as 
+
+(xi × xj )μ = X
+
+> αβ
+
+ϵμαβ xαi xβj , (27) where ϵ is the totally antisymmetric Levi-Civita tensor. In d dimensions, the right-hand side of Eq. (27) can be generalized to 
+
+X
+
+> αβ
+
+ϵμ1μ2...μ d−2αβ xαi xβj . (28) This is a rank d − 2 tensor which vanishes whenever xi =
+
+cxj thanks to the antisymmetry of the Levi-Civita tensor. Contracting this tensor with itself yields 
+
+X
+
+> μ1...μ d−2
+
+X
+
+> αβ
+
+ϵμ1μ2...μ d−2αβ xαi xβj
+
+
+
+> 2
+
+= (d − 2)! 2
+
+X
+
+> αβ
+
+
+
+xαi xβj − xβi xαj
+
+2
+
+= ( d − 2)! 
+
+h
+
+∥xi∥2∥xj ∥2 − (xi · xj )2i
+
+,
+
+(29) which is the energetic penalty we are looking for. In total, we therefore obtain 
+
+Egcpp (x, a, P ) = E(x, a)+ P
+
+4
+
+X
+
+> ij
+
+h
+
+∥xi∥2∥xj ∥2 − (xi · xj )2i
+
+, (30) which has the gradient with respect to xi
+
+∇xi Egcpp = ∇xi E(x, a) + P X
+
+> j
+
+
+
+∥xj ∥2I − xj x⊺
+
+> j
+
+
+
+xi ,
+
+(31) where I denotes the identity matrix. Factors of (d − 2)! 
+
+have been absorbed into the constant P in the expressions above.  
+
+> III. SIMULATIONS AND OPTIMIZATION PERFORMANCE
+
+We now apply the dimensional reduction mechanisms discussed in Sec. II to perform dimensional annealing .That is, using one of the dimensional reduction mech-anisms, we deform the soft vector spin energy E(x, a )
+
+during the optimization process, biasing the spins more and more towards collinear, “Ising-like”, configurations. In total, we test three dimensional annealing methods: 1. Anisotropic gain annealing (AGA) uses a time-dependent anisotropic gain a(t). The gain is initial-ized isotropically, i.e., aμ(0) = a0, and then changes according to a predetermined annealing schedule that affects each component differently. 2. Metric annealing (MA) uses a time-dependent met-ric g(t). The metric is initialized as the identity matrix and then changes according to an annealing schedule described by the function b(t) in Eq. (24). 3. Generalized cross product penalty annealing 
+
+(GCPP) uses a penalty of the form in Eq. (30). The annealing schedule is given by the time-dependent coefficient of the penalty, P (t).In conjunction with the dimensional annealing, we also perform gain annealing by varying a(t) (or a(t) for AGA) in all methods according to a predetermined annealing schedule.   
+
+> A. Annealing schedules and simulation details
+> 1. Gain annealing schedules
+
+For the gain annealing, we use either a linear or a feedback-driven annealing schedule. Our linear anneal-ing schedules are of the form 
+
+ai(t) = a(t) = min 
+
+
+
+a0 + tτa
+
+, a max 
+
+
+
+, (32) 6where a0 = − λmax (J), amax = a0 + 2 , and τa = 0 .4tf .Here, tf is the total run time of the simulation and is set to tf = 10 3 unless otherwise specified. The initial gain is set equal to − λmax (J) because any smaller values would just lead to amplitudes unnecessarily decreasing before the bifurcation (see Sec. II A 1; a similar argument is also made in Ref. [24]). For the value of amax , we are not aware of any simple heuristic to determine a value of amax a priori such that the optimization performance is superior for any general coupling matrices. Instead we pick the value of a0 +2 because it leads to final soft vector spin amplitudes that are roughly close to 1. Lastly, the value of τa = 0 .4tf is chosen such that the gain annealing happens over a significant fraction of the total simulation time while still leaving plenty of time for the system to settle into a steady state once the annealing has stopped. The feedback-driven schedule changes the gain hetero-geneously via 
+
+˙ai(t) = ϵ(1 − ∥ xi∥2) . (33) In order to achieve roughly similar time scales as in the linear annealing case, we set ϵ = 1 /τ a (for small ampli-tudes, where the quadratic term ∥xi∥2 can be neglected, the gain will thus grow at almost the same rate as in the linear case). Initial gains are set to ai(0) = a0 =
+
+− λmax (J) again. At a steady state, all amplitudes are equal, ∥xi∥ = 1 . Feedback-driven schedules thus elimi-nate heterogeneous amplitudes which are usually seen as a barrier to optimization in Ising and vector spin ma-chines [29–32]. Through preliminary test runs and trial-and-error, we have confirmed that the parameters for linear and feedback-driven gain annealing parameters work reason-ably well for most instances and dimensional annealing methods though we do not expect them to be optimal. Later, we will investigate the effect of varying the total simulation time tf . 
+
+> 2. Dimensional annealing schedules
+
+For AGA, we use the annealing schedule 
+
+aμi (t) = 
+
+(
+
+ai(t) , if μ = 1 ,ai(t) − ∆a b (t) , if μ̸ = 1 , (34) where 
+
+b(t) = 
+
+(0 , if t < t b ,
+
+min 
+
+ t−tb 
+
+> τb
+
+, 1
+
+
+
+, if t ≥ tb , (35) with tb = 0 .2tf , τb = 0 .6tf , and ∆a = ∥J∥2= |λmax (J)|,where ∥J∥2 is the spectral norm. Choosing the strength of the anisotropy, ∆a, in this way ensures that the maxi-mal additional energy contribution due to the anisotropy is of similar size to the interaction energy. In particular, we have 
+
+12
+
+X
+
+> μ̸=1
+
+X
+
+> ij
+
+Jij xμi xμj ≤ ∥ J∥2
+
+X
+
+> μ̸=1
+
+X
+
+> j
+
+(xμj )2 , (36) where the right-hand side is of the same order as the en-ergy coming from the anisotropy at large times t ≥ tb +τb.The start time, tb, is chosen such that the system has enough time to settle into a low-energy vector spin state before the dimensional annealing kicks in (cf., Fig. 1). Similarly to τa, τb is chosen such that the dimensional annealing takes place over a significant fraction of the total run time, while leaving enough time for the system to settle into a steady state at the end. Our MA simula-tions use the same b(t) as in AGA, with the same values for tb and τb. Lastly, for GCPP annealing, we use 
+
+P (t) = Pmax b(t) (37) where b(t) again stays the same, while Pmax = ∥J∥2/N .The heuristic for setting Pmax to this values follows a sim-ilar logic to that of ∆a in AGA. Assuming ∥xi∥2∥xj ∥2 −
+
+(xi · xj )2 ≈ 1, the maximal penalty term contribution to the energy is of roughly similar size to the interaction term this way.  
+
+> 3. Numerical integration and example trajectories
+
+In all cases we integrate the equation of motion 
+
+dx
+
+dt = −∇Eda (38) (in conjunction with Eq. (33) in the case of feedback-driven schedules) in a time interval [0 , t f ] using SciPy’s 
+
+solve_ivp function [33] which uses an adaptive RK45 method [34] internally. The default tolerances are used ( 10 −3 and 10 −6 for relative and absolute toler-ances, respectively). In the above, the energy Eda =
+
+Eag , E am , E gcpp is the energy associated with the dimen-sional annealing method. Initial conditions are always sampled from the uniform distribution on [−0.1, 0.1] N ×d.Additionally, we normalize all coupling matrices J by a scale factor such that the Ising ground state energies are roughly between −1 and −10 . This is done mainly to en-sure that the gradient of the interaction energy does not become very large which would require very small step sizes in the numerical integration. The scale factors for different coupling matrices are shown in Table I. We per-form simulations for soft vector spin dimensions ranging from d = 1 to d = 5 . Note that for d = 1 , dimensional reduction is not possible, and we only use gain anneal-ing. Nevertheless, we include the d = 1 simulations as a baseline to compare the dimensional annealing methods for d > 1 with. Fig. 1 shows the evolution of EIsing and Evec for differ-ent dimensional annealing methods in d = 3 and d = 1 .7Note that for this example, tf = 2 × 10 3, and feedback-driven gain annealing has been used. After an initial transient, the soft vector spins reach a minimum of the vector spin energy. When dimensional annealing starts, the energy is driven upwards again to settle into the min-imum of the Ising energy. Projected to Ising spins (see Sec. III C), this looks like a series of spin flips that leads to jumps in the Ising energy. In comparison, the d = 1 
+
+soft Ising spins quickly settle into a local minimum of the Ising energy from which they are unable to escape. Fig. 2 shows example trajectories for soft vector spins in d = 2 . Evidently, the different dimensional anneal-ing methods display quite distinct dynamical behaviour. The final states in both AGA and MA are aligned in the x1-direction, while in GCPP, the final states are aligned along a random axis. That is because Egcpp re-tains the O(d) symmetry of the soft vector spin energy E,and the symmetry is spontaneously broken during time-evolution. The additional dimensional reduction terms in 
+
+Eag and Eam , on the other hand, break the O(d) symme-try explicitly by making either gain or metric explicitly anisotropic.  
+
+> B. Problem classes
+
+We sample coupling matrices J from a number of dif-ferent problem classes: the 2D and 3D tile planted en-semble (TPE) [35, 36], the Wishart planted ensemble 
+
+(WPE) [37], and random sparse matrices . The reason we choose these problems is that they represent a wide range of possible coupling matrices (local vs. all-to-all, struc-tured vs. unstructured, easy vs. hard, etc.) which allows us to generalize our findings with greater confidence. Fur-thermore, the planted ensembles are useful because their exact ground states are always known. In the case of ran-dom sparse matrices, ground states have been previously computed through extensive Monte Carlo search. Matrices from the 2D-TPE describe a square lattice graph based on four families of frustrated unit-cells. De-pending on the frequency with which the different unit cell families occur, the 2D-TPE can have a varying com-putational hardness. Similarly, the 3D-TPE describes a cubic lattice graph consisting of unit cells coming from six different families with varying hardness depending on the distribution of unit cell families within the total graph. Crucially, in both the 2D and 3D case, the lattice is con-structed in such a way that the fully ferromagnetic state 
+
+{si = 1 }i=1 ,...N is always the ground state. The WPE is a kind of anti-Hopfield model [38] with a number M = αN of patterns that are correlated in such a way to guarantee that the fully ferromagnetic state is always the ground state. Varying the number of patterns 
+
+M drives the WPE through a easy-hard-easy transition with the hardest problems occurring at M ∗ ≈ 1.63 + 0.073 N [37]. We use the library Chook [39] to sample instances each of 2D-TPE, 3D-TPE, and WPE coupling matrices for varying difficulties (see Table I). For each difficulty and problem class, we generate 100 different instances. Chook 
+
+automatically transforms all coupling matrices via Z2
+
+gauge transformations to yield random ground states in-stead of just the ferromagnetic one. The WPE matrices use a slightly modified formulation, where all matrix en-tries are integers. This helps to avoid any rounding errors when comparing exact ground states. Note also that the size N = 16 is quite small for WPE instances. This is be-cause even the “easy” instances appear to already be quite hard for soft vector spin solvers. Random sparse matrices are as in Ref. [22]: each matrix element is nonzero with probability 0.2, with the value of the nonzero elements being ±J0 with equal probability. In our case, J0 = 0 .03 . 
+
+> C. Projection of soft vector to Ising spins
+
+After integrating the equations of motion we are left with a final soft vector spin state 
+
+xf = x(tf ) = ( x1(tf ), . . . , xN (tf )) , (39) which still has to be converted to an Ising state sf ∈{− 1, 1}N to be inserted into the Ising energy, EIsing .There are multiple ways to do this. For AGA and MA, it would suffice to just project to the easy axis defined by the gain or metric anisotropy (the first axis in our case), i.e., 
+
+sf = (sign( x11), . . . , sign( x1 
+
+> N
+
+)) . (40) In the case of GCPP, however, we do not know a priori 
+
+which axis the system will align with at the fixed point. Hence, we generally use an averaging procedure to decide the projection axis. The procedure works as follows: For each site i, we compute qi = xi · x1. Based on that, we compute the state 
+
+˜xf = ( ˜x1, . . . , ˜xN ) , (41) where 
+
+˜xi =
+
+(
+
+xi , qi ≥ 0
+
+−xi , otherwise. (42) The state ˜xf has each spin aligned along the same axis as the corresponding spin in xf , but has the additional prop-erty that all spins live in a common hemisphere. Next, we average all these spins and obtain 
+
+xavg = 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+˜xi (43) If the norm of xavg is sufficiently large (greater than 10 −5
+
+in our case), we take 
+
+ˆπ = xavg 
+
+∥xavg ∥ (44) 8
+
+FIG. 2. Trajectories in a d = 2 , N = 16 soft vector spin system for different dimensional annealing methods and linear annealing schedules. Note that tf = 2 × 10 3 in this case. The couplings matrix in this case comes from the WPE. Each line shows the trajectory of a single spin with lighter colours signifying increasing times. Faded out lines in the background show trajectories obtained from other initial conditions and the same coupling matrix. Initial and final states are marked with black and pale yellow dots respectively. Note also that the set of initial conditions is the same for all three methods. TABLE I. Scale factors multiplying the coupling matrix and ensemble parameters governing difficulty for different problem classes. The ensemble parameters in Chook for TPE and WPE have been chosen according to the hardness phase transitions predicted in Refs. [35–37]. In the case of TPE instances, they determine the probabilities of the various unit cell families being generated in the graph. For WPE, there is just one parameter that determines the number of correlated patterns M = αN .problem class size scale factor ensemble parameters 2D TPE 8 × 8 0.02 p1 = 0 .1, p2 = 0 .0, p3 = 0 .9 (easy) 
+
+p1 = 0 .5, p2 = 0 .4, p3 = 0 .1 (medium) 
+
+p1 = 0 .05 , p2 = 0 .9, p3 = 0 .05 (hard) 3D TPE 4 × 4 × 4 0.02 pF 22 = pF 42 = 0 .4 (easy) 
+
+pF 22 = pF 42 = 0 .2 (medium) 
+
+pF 22 = pF 42 = 0 .0 (hard) WPE easy 16 2 × 10 −5 α = 0 .88 
+
+WPE hard 16 1 × 10 −4 α = 0 .19 ≈ M ∗/N 
+
+random sparse 30 1.0 n/a 40 1.0 n/a 
+
+as the projection vector, such that 
+
+sf = (sign( ˆπ · x1), . . . , sign( ˆπ · xN )) , (45) where we use the convention that sign(0) = 1 to decide ambiguous cases. If the norm of xavg is too small, which usually happens if the spins are either not aligned enough or amplitudes are too small, we simply take 
+
+sf = (sign( x11), . . . , sign( x1 
+
+> N
+
+)) . (46) However, it is quite rare to end up in this case as long as the annealing parameters are properly chosen. Finally we note that more efficient and robust methods to find a good projection axis probably exist, but the simple pro-cedure outlined above suffices for our purposes. In partic-ular, for our annealing parameters, we usually find final configurations that are already strongly aligned along a single axis. In that regime, the particulars of the projec-tion method should not matter much as long as the axis of alignment is correctly identified. 
+
+D. Comparison of annealing schemes for different problem classes and dimensions 
+
+In Figs. 3 and 4, we compare the success probabilities of finding the ground state for different problem classes, difficulties, dimensional annealing methods, and soft vec-tor spin dimensionalities. The success probabilty here is calculated via 
+
+psuccess = #( final states with EIsing ≈ E0)
+
+Ninit 
+
+, (47) where E0 is the known ground state energy of the given coupling matrix, and Ninit is the number of different ini-tial conditions for the time evolution. In all cases, we chose Ninit = 200 . We define EIsing ≈ E0 to be true if they do not differ within an absolute tolerance of 10 −5
+
+and a relative tolerance of 5 × 10 −3.Generally, we find that soft vector spins with d > 1
+
+have a higher probability of finding the ground state than one-dimensional soft spins ( d = 1 , i.e., ordinary Ising machines). In almost all cases, psuccess ≈ 0 for d = 1 for 9         
+
+> FIG. 3. Success probabilities for finding ground states of “easy”, “medium”, and “hard” problems using soft vector spins in dimensions d= 1 , . . . , 5and linear annealing schedules. The horizontal axes show the 100 different instances of each problem class, while the vertical axes show the success probability for different dimensional annealing methods. To aid visualization, instances are sorted on the horizontal axis in order of the success rate of d= 2 AGA.
+
+the problem classes and parameters we tested (the only exception being some of the hard WPE instances and random sparse matrices). The largest jump in success probability usually occurs going from d = 1 to d = 2 ,with a slightly smaller jump going from d = 2 to d > 
+
+2. Dimensionality does not seem to strongly affect the success probability beyond d > 2.At this point, we should also note that our catego-rization into “easy”, “medium”, and “hard” problems is quite a rough estimate of actual complexity. In particu-lar, “easy” problems are still not trivial in many cases for the optimization methods under consideration; “medium” problems often have sub-percentage success probabilities, and “hard” problems seem often to be impossible for our soft vector spin solvers. Recently, it has been shown [25] that recovering the planted solution of the WPE is in fact impossible for small α and d = 1 . Another notable observation is that roughly a sixth of “WPE” instances have actually very high success probabilities for all tested methods. We conjecture that this could be a finite-size effect, and that the location and sharpness of the hard-ness phase transition in the WPE is affected by the quite 10          
+
+> FIG. 4. Success probabilities for finding ground states of “easy”, “medium”, and “hard” problems using soft vector spins in dimensions d= 1 , . . . , 5and a feedback mechanism to control gains. The horizontal axes show the 100 different instances of each problem class, while the vertical axes show the success probability for different dimensional annealing methods. To aid visualization, instances are sorted on the horizontal axis in order of the success rate of d= 2 AGA.
+
+small size ( N = 16 ) of our WPE instances. While qualitatively similar in most respects, the results for the various dimensional annealing methods do exhibit some minor differences. AGA and MA have roughly simi-lar success probabilities, while GCPP’s tend to be slightly higher on average. However, this is not consistent across problem classes and the relatively small differences might vanish for slightly different parameters. Comparing the results in Fig. 3 with those in Fig. 4, we find that the feedback-driven approach generally pro-duces higher success probabilities across the board. This is to be expected due to its ability to avoid amplitude het-erogeneity. The qualitative differences between dimen-sional annealing methods in different dimensions remain roughly the same as in the linear case. Our results thus seem to be robust against some variations in the gain annealing schedule. We further confirm the robustness with regards to vari-ations in parameters and annealing schedules by checking how the success probabilities change when tf is varied. To reduce the amount of simulations needed, we only com-pare d = 3 and d = 1 , and only on the “easy” problems. 11                
+
+> FIG. 5. Scaling of success probabilities with tfon “easy” problems. We calculate the success probability over 200 different initializations of each method for 11 values of tfranging from 1to 2×10 3, comparing AGA, MA, and GCPP in d= 3 dimensions to just performing gain annealing in d= 1 dimension. All of this is done for both linear and feedback-driven gain annealing schedules.
+
+The results are displayed in Fig. 5. As one might expect, the success probabilities generally increase when the to-tal run time tf is increased. As with our previous results, there is a clear improvement in success probability for 
+
+d = 3 compared to d = 1 for all values of tf we tested. Similarly, feedback-driven gain annealing again shows an advantage over linear schedules.  
+
+> IV. DISCUSSION
+
+We have shown how soft vector spin systems with di-mensional annealing can be used as combinatorial opti-mization solvers for finding the ground state of the Ising model. In particular, we have analyzed the dependence of dimensional annealing on vector spin dimension for three different dimensional reduction methods based on an anisotropic gain, an anisotropic metric, and a gener-alized cross product penalty respectively. For all these methods, and across different classes of coupling matri-ces with varying hardness levels, we have shown that multi-dimensional soft vector spins fare better at find-ing the ground state than their one dimensional coun-terpart. More specifically, there seems to be a distinct jump in the probability of finding the ground state when going from d = 1 to d = 2 and from d = 2 to d = 3 .Increasing the dimension beyond that yields diminish-ing returns. We note also, however, that for the hardest problem instances, success probabilities remain near zero even with dimensional annealing, indicating that the ap-proach primarily benefits easy-to-medium difficulty prob-lems in the regimes we tested. Of course, this advantage comes with a cost: on an ordinary computer it takes more computational resources to simulate higher dimensional soft vector spins. However, this cost could be absent (or at least lower) when analog hardware is used. In fact, many analog hardware platforms already have the capa-bility of implementing d = 2 soft vector spins. That is because many Ising machines consist of analog units with 2D amplitude and phase degrees of freedom; this includes coherent laser light [7, 19], polariton condensates [9, 10], or electronic oscillators [17]. We have thus shown that significant performance improvements could be achieved in such platforms by implementing dimensional anneal-ing. Let us also note that recent work [40] successfully implemented a highly optimized version of d = 2 AGA in nondegenerate optical parametric oscillators—further corroborating our results. 12 On top of that, recent work [15, 21, 22] has made progress in finding analog hardware capable of imple-menting higher dimensional spins with d ≥ 2. In par-ticular Refs. [21, 22] introduced dimensional annealing through anisotropic metrics in the context of the hyper-spin machine. We have expanded on their work by gen-eralizing the notion of dimensional annealing to include different dimensional reduction methods as well as apply-ing it to a more abstract and general model of soft vector spins. An obvious question is the implementability of the different dimensional reduction mechanisms and dimen-sional annealing methods in hardware. The answer to this question is rather straightforward in the case of AGA: as mentioned in Sec. II B 1, anisotropic gain cor-responds directly to second-harmonic injection locking. As outlined in Ref. [22], MA can be implemented us-ing parametric oscillators, either in an all-optical setup (d = 2 ), or in an opto-electronic hybrid approach ( d > 2). GCPP might be the most challenging of the methods to implement, due to the penalty term representing a 4-body interaction of the soft vector spins. This leads to an additional nonlinear coupling of the spins which suitable hardware platforms would have to be capable of implementing. Such nonlinear couplings may be real-ized in integrated photonic circuits or free space optics via nonlinear optical effects, or outsourced to electronic hardware in a hybrid setup, as argued in Ref. [23]. When Refs. [21, 22] introduced dimensional annealing, showing how it can help optimization, they did so with fixed gains and sparse random coupling matrices. We have now verified that their results also hold for dynam-ically varying gains, either with homogeneous linear an-nealing schedules, or heterogeneous feedback-driven an-nealing, and with a wide range of different coupling ma-trices. Furthermore, we have shown how the advantage of dimensional annealing persists even when the total run time increases. In total, this yields even more robust ev-idence that the use of vectorial degrees of freedom offers an advantage for analogue optimization solvers. That being said, more extensive benchmarking might be useful for identifying optimal parameters and anneal-ing schedules or how to adapt these to specific cou-pling matrices. More advanced feedback-based anneal-ing schemes like chaotic amplitude control [29, 41] would also be worthwhile to examine in conjunction with dimen-sional annealing. Additionally, benchmarking against es-tablished solvers such as simulated annealing or parallel tempering would help to contextualize the absolute per-formance of soft vector spin methods beyond the relative comparison between d = 1 and d > 1 presented here. Apart from that, theoretical calculations could provide hints on how to optimize the performance of soft vector spin systems. Previously, studies of the high-dimensional energy landscape of Ising machines [24, 25] have proven useful to find optimal annealing schedules in the d = 1 
+
+case. Soft vector spins might also be intriguing to study removed from the context of optimization. For purely ferromagnetic couplings, the soft vector spin model rep-resents a discretized version of the O(d) field theory, rel-evant for quantum and classical critical phenomena [42]. Our model thus represents a generalization of this model with disordered couplings. We hope that our work can inspire further research into the dynamics of soft vector spins as combinatorial optimization solvers specifically and as a complex system generally. 
+
+> ACKNOWLEDGMENTS
+
+The authors wish to thank Marcello Calvanese Strinati for useful discussions as well as for providing the dataset of random sparse coupling matrices and their ground states. The authors acknowledge the support from HORIZON EIC-2022-PATHFINDERCHALLENGES-01 HEISINGBERG Project 101114978. M.S. acknowledges support from EPSRC (grant UKRI2897). R.Z.W. and N.G.B. acknowledge the support from Julian Schwinger Foundation Grant No. JSF-19-02-0005. N.G.B. also ac-knowledges support from Weizmann-UK Make Connec-tion Grant 142568 and the EPSRC UK Multidisciplinary Centre for Neuromorphic Computing (grant UKRI982).                                 
+
+> [1] A. Lucas, Ising formulations of many NP problems, Front. Phys. 2(2014). [2] H. Goto, K. Tatsumura, and A. R. Dixon, Combinatorial optimization by simulating adiabatic bifurcations in non-linear Hamiltonian systems, Sci. Adv. 5, eaav2372 (2019). [3] T. Kanao and H. Goto, Simulated bifurcation for higher-order cost functions, Appl. Phys. Express 16 , 014501 (2022). [4] M. Aramon, G. Rosenberg, E. Valiante, T. Miyazawa, H. Tamura, and H. G. Katzgraber, Physics-Inspired Optimization for Quadratic Unconstrained Prob-lems Using aDigital Annealer, Front. Phys. 7,10.3389/fphy.2019.00048 (2019). [5] T. Byrnes, K. Yan, and Y. Yamamoto, Accelerated opti-mization problem search using Bose–Einstein condensa-tion, New J. Phys. 13 , 113025 (2011). [6] S. Utsunomiya, K. Takata, and Y. Yamamoto, Mapping of Ising models onto injection-locked laser systems, Opt. Express 19 , 18091 (2011). [7] Z. Wang, A. Marandi, K. Wen, R. L. Byer, and Y. Ya-mamoto, Coherent Ising machine based on degenerate optical parametric oscillators, Phys. Rev. A 88 , 063853 (2013). [8] Y. Yamamoto, K. Aihara, T. Leleu, K.-i. Kawarabayashi, S. Kako, M. Fejer, K. Inoue, and H. Takesue, Coherent Ising machines—optical neural networks operating at the quantum limit, npj Quantum Inf. 3, 49 (2017). [9] N. G. Berloff, M. Silva, K. Kalinin, A. Askitopoulos, J. D.
+
+13 
+
+Töpfer, P. Cilibrizzi, W. Langbein, and P. G. Lagoudakis, Realizing the classical XY Hamiltonian in polariton sim-ulators, Nat. Mater. 16 , 1120 (2017). [10] P. G. Lagoudakis and N. G. Berloff, A polariton graph simulator, New J. Phys. 19 , 125008 (2017). [11] K. P. Kalinin and N. G. Berloff, Simulating Ising and 
+
+n-State Planar Potts Models and External Fields with Nonequilibrium Condensates, Phys. Rev. Lett. 121 ,235302 (2018). [12] K. P. Kalinin and N. G. Berloff, Global optimization of spin hamiltonians with gain-dissipative systems, Sci. Rep. 8, 17791 (2018). [13] D. Veraldi, D. Pierangeli, S. Gentilini, M. C. Stri-nati, J. Sakellariou, J. S. Cummins, A. Kamaletdinov, M. Syed, R. Z. Wang, N. G. Berloff, D. Karanikolopou-los, P. G. Savvidis, and C. Conti, Fully Programmable Spatial Photonic Ising Machine by Focal Plane Division, Phys. Rev. Lett. 134 , 063802 (2025). [14] R. Z. Wang, J. S. Cummins, M. Syed, N. Stroev, G. Pas-tras, J. Sakellariou, S. Tsintzos, A. Askitopoulos, D. Ve-raldi, M. Calvanese Strinati, S. Gentilini, D. Pierangeli, C. Conti, and N. G. Berloff, Efficient computation using spatial-photonic Ising machines with low-rank and circu-lant matrix constraints, Commun. Phys. 8, 86 (2025). [15] S. Chiavazzo, M. C. Strinati, C. Conti, and D. Pierangeli, Ising machine by dimensional collapse of nonlinear polar-ization oscillators (2025), arXiv:2504.08695 [physics]. [16] T. Wang and J. Roychowdhury, OIM: Oscillator-Based Ising Machines for Solving Combinatorial Optimisation Problems, in Unconventional Computation and Natural Computation , edited by I. McQuillan and S. Seki (Cham, 2019) pp. 232–256. [17] D. I. Albertsson and A. Rusu, Highly reconfigurable oscillator-based Ising Machine through quasiperiodic modulation of coupling strength, Sci. Rep. 13 , 4005 (2023). [18] M. Syed and N. G. Berloff, Physics-Enhanced Bifurcation Optimisers: All You Need Is a Canonical Complex Net-work, IEEE J. Sel. Top. Quantum Electron. , 1 (2023). [19] K. Kim, M. Kumagai, and Y. Yamamoto, Combinatorial clustering with a coherent XY machine, Opt. Express 32 ,33737 (2024). [20] R. Z. Wang, G. Li, S. Gentilini, M. C. Strinati, C. Conti, and N. G. Berloff, Phase Retrieval via Gain-Based Photonic XY-Hamiltonian Optimization (2025), arXiv:2505.04766 [physics]. [21] M. Calvanese Strinati and C. Conti, Multidimensional hyperspin machine, Nat. Commun. 13 , 7248 (2022). [22] M. Calvanese Strinati and C. Conti, Hyperscaling in the Coherent Hyperspin Machine, Phys. Rev. Lett. 132 ,017301 (2024). [23] J. S. Cummins and N. G. Berloff, Vector Ising spin annealer for minimizing Ising Hamiltonians, Commun. Phys. 8, 225 (2025). [24] A. Yamamura, H. Mabuchi, and S. Ganguli, Geometric Landscape Annealing as an Optimization Principle Un-derlying the Coherent Ising Machine, Phys. Rev. X 14 ,031054 (2024). [25] F. Ghimenti, A. Sriram, A. Yamamura, H. Mabuchi, and S. Ganguli, The geometry and dynamics of annealed op-timization in the coherent Ising machine with hidden and planted solutions (2025), arXiv:2510.21109 [cond-mat]. [26] R. Kühn and U. Horstmann, Random Matrix Approach to Glassy Physics: Low Temperatures and Beyond, Phys. Rev. Lett. 78 , 4067 (1997). [27] C. Rainone, P. Urbani, F. Zamponi, E. Lerner, and E. Bouchbinder, Mean-field model of interacting quasilo-calized excitations in glasses, SciPost Phys. Core 4, 008 (2021). [28] K. P. Kalinin and N. G. Berloff, Computational complex-ity continuum within Ising formulation of NP problems, Commun. Phys. 5, 1 (2022). [29] T. Leleu, Y. Yamamoto, P. L. McMahon, and K. Aihara, Destabilization of Local Minima in Analog Spin Systems by Correction of Amplitude Heterogeneity, Phys. Rev. Lett. 122 , 040607 (2019). [30] F. Böhm, T. V. Vaerenbergh, G. Verschaffelt, and G. Van der Sande, Order-of-magnitude differences in computa-tional performance of analog Ising machines induced by the choice of nonlinearity, Commun. Phys. 4, 149 (2021). [31] Y. Inui, M. D. S. H. Gunathilaka, S. Kako, T. Aonishi, and Y. Yamamoto, Control of amplitude homogeneity in coherent Ising machines with artificial Zeeman terms, Commun. Phys. 5, 154 (2022). [32] J. S. Cummins, H. Salman, and N. G. Berloff, Ising Hamiltonian minimization: Gain-based computing with manifold reduction of soft spins vs quantum annealing, Phys. Rev. Res. 7, 013150 (2025). [33] P. Virtanen, R. Gommers, T. E. Oliphant, M. Haber-land, T. Reddy, D. Cournapeau, E. Burovski, P. Pe-terson, W. Weckesser, J. Bright, S. J. van der Walt, M. Brett, J. Wilson, K. J. Millman, N. Mayorov, A. R. J. Nelson, E. Jones, R. Kern, E. Larson, C. J. Carey, İ. Po-lat, Y. Feng, E. W. Moore, J. VanderPlas, D. Laxalde, J. Perktold, R. Cimrman, I. Henriksen, E. A. Quintero, C. R. Harris, A. M. Archibald, A. H. Ribeiro, F. Pe-dregosa, and P. van Mulbregt, SciPy 1.0: Fundamen-tal algorithms for scientific computing in Python, Nat. Methods 17 , 261 (2020). [34] J. R. Dormand and P. J. Prince, A family of embedded Runge-Kutta formulae, J. Comput. Appl. Math. 6, 19 (1980). [35] F. Hamze, D. C. Jacob, A. J. Ochoa, D. Perera, W. Wang, and H. G. Katzgraber, From near to eter-nity: Spin-glass planting, tiling puzzles, and constraint-satisfaction problems, Phys. Rev. E 97 , 043303 (2018). [36] D. Perera, F. Hamze, J. Raymond, M. Weigel, and H. G. Katzgraber, Computational hardness of spin-glass problems with tile-planted solutions, Phys. Rev. E 101 ,023316 (2020). [37] F. Hamze, J. Raymond, C. A. Pattison, K. Biswas, and H. G. Katzgraber, Wishart planted ensemble: A tunably rugged pairwise Ising model with a first-order phase tran-sition, Phys. Rev. E 101 , 052102 (2020). [38] K. Nokura, Spin glass states of the anti-Hopfield model, J. Phys. A: Math. Gen. 31 , 7447 (1998). [39] D. Perera, I. Akpabio, F. Hamze, S. Mandra, N. Rose, M. Aramon, and H. G. Katzgraber, Chook – A compre-hensive suite for generating binary optimization problems with planted solutions (2021), arXiv:2005.14344 [quant-ph]. [40] K. Kim and Y. Yamamoto, Accelerating a coherent Ising machine by XY-Ising spin transition, Sci. Rep. 16 , 10396 (2026). [41] T. Leleu, F. Khoyratee, T. Levi, R. Hamerly, T. Kohno, and K. Aihara, Scaling advantage of chaotic amplitude control for high-performance combinatorial optimization, Commun. Phys. 4, 266 (2021). 14 
+
+[42] J. Zinn-Justin, Quantum Field Theory and Critical Phe-nomena: Fifth Edition (Oxford University Press, 2021).

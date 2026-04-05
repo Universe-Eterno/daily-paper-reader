@@ -1,0 +1,529 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-05T19:53:07.395617+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 1,
+    "deep_cap": 7,
+    "deep_selected": 1,
+    "quick_candidates": 26,
+    "quick_skim_target": 12,
+    "quick_selected": 12
+  },
+  "deep_dive": [
+    {
+      "id": "2604.02134v1",
+      "title": "Semantic Evolution over Populations for LLM-Guided Automated Program Repair",
+      "abstract": "Large language models (LLMs) have recently shown strong potential for automated program repair (APR), particularly through iterative refinement that generates and improves candidate patches. However, state-of-the-art iterative refinement LLM-based APR approaches cannot fully address challenges, including maintaining useful diversity among repair hypotheses, identifying semantically related repair families, composing complementary partial fixes, exploiting structured failure information, and escaping structurally flawed search regions. In this paper, we propose a Population-Based Semantic Evolution framework for APR iterative refinement, called EvolRepair, that formulates LLM-based APR as a semantic evolutionary algorithm. EvolRepair reformulates the search paradigm of classic genetic algorithm for APR, but replaces its syntax-based operators with semantics-aware components powered by LLMs and structured execution feedback. Candidate repairs are organized into behaviorally coherent groups, enabling the algorithm to preserve diversity, reason over repair families, and synthesize stronger candidates by recombining complementary repair insights across the population. By leveraging structured failure patterns to guide search direction, EvolRepair can both refine promising repair strategies and shift toward alternative abstractions when necessary. Our experiments show that EvolRepair substantially improves repair effectiveness over existing LLM-based APR approaches.",
+      "authors": [
+        "Cuong Chi Le",
+        "Minh Le-Anh",
+        "Cuong Duc Van",
+        "Tien N. Nguyen"
+      ],
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE"
+      ],
+      "published": "2026-04-02T15:08:58+00:00",
+      "link": "https://arxiv.org/pdf/2604.02134v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "LLM-based semantic evolutionary algorithm for iterative refinement",
+      "llm_evidence_cn": "基于大语言模型的语义进化算法用于迭代优化",
+      "llm_evidence": "基于大语言模型的语义进化算法用于迭代优化",
+      "canonical_evidence": "基于大语言模型的语义进化算法用于迭代优化",
+      "llm_tldr_en": "Introduces EvolRepair, a framework using LLMs as semantic evolutionary algorithms for automated program repair.",
+      "llm_tldr_cn": "引入EvolRepair框架，将大语言模型作为语义进化算法用于自动程序修复。",
+      "llm_tldr": "引入EvolRepair框架，将大语言模型作为语义进化算法用于自动程序修复。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM-based heuristic search and optimization",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2603.29068v2",
+      "title": "ARCS: Autoregressive Circuit Synthesis with Topology-Aware Graph Attention and Spec Conditioning",
+      "abstract": "This paper presents ARCS (Autoregressive Circuit Synthesis), a system for amortized analog circuit generation that produces complete, SPICE-simulatable designs (topology and component values) in milliseconds rather than the minutes required by search-based methods. A hybrid pipeline combining two learned generators (a graph VAE and a flow-matching model) with SPICE-based ranking achieves 99.9% simulation validity (reward 6.43/8.0) across 32 topologies using only 8 SPICE evaluations, 40x fewer than genetic algorithms. For single-model inference, a topology-aware Graph Transformer with Best-of-3 candidate selection reaches 85% simulation validity in 97ms, over 600x faster than random search. The key technical contribution adapts Group Relative Policy Optimization (GRPO) to multi-topology circuit reinforcement learning, resolving a critical failure mode of REINFORCE (cross-topology reward distribution mismatch) through per-topology advantage normalization. This improves simulation validity by +9.6 percentage points over REINFORCE in only 500 RL steps (10x fewer). Grammar-constrained decoding additionally guarantees 100% structural validity by construction via topology-aware token masking.",
+      "authors": [
+        "Tushar Dhananjay Pathak"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AR"
+      ],
+      "published": "2026-03-30T23:14:08+00:00",
+      "link": "https://arxiv.org/pdf/2603.29068v2",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Graph Transformer and learned generators for circuit synthesis optimization",
+      "llm_evidence_cn": "用于电路综合优化的图Transformer和学习生成器",
+      "llm_evidence": "用于电路综合优化的图Transformer和学习生成器",
+      "canonical_evidence": "用于电路综合优化的图Transformer和学习生成器",
+      "llm_tldr_en": "Uses graph-based deep learning to accelerate complex circuit design optimization compared to search methods.",
+      "llm_tldr_cn": "利用基于图的深度学习加速复杂电路设计优化，性能优于传统搜索方法。",
+      "llm_tldr": "利用基于图的深度学习加速复杂电路设计优化，性能优于传统搜索方法。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Deep learning models for solving NP hard combinatorial problems",
+      "matched_requirement_id": "req-23",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.27156v1",
+      "title": "GSR-GNN: Training Acceleration and Memory-Saving Framework of Deep GNNs on Circuit Graph",
+      "abstract": "Graph Neural Networks (GNNs) show strong promise for circuit analysis, but scaling to modern large-scale circuit graphs is limited by GPU memory and training cost, especially for deep models. We revisit deep GNNs for circuit graphs and show that, when trainable, they significantly outperform shallow architectures, motivating an efficient, domain-specific training framework. We propose Grouped-Sparse-Reversible GNN (GSR-GNN), which enables training GNNs with up to hundreds of layers while reducing both compute and memory overhead. GSR-GNN integrates reversible residual modules with a group-wise sparse nonlinear operator that compresses node embeddings without sacrificing task-relevant information, and employs an optimized execution pipeline to eliminate fragmented activation storage and reduce data movement. On sampled circuit graphs, GSR-GNN achieves up to 87.2\\% peak memory reduction and over 30$\\times$ training speedup with negligible degradation in correlation-based quality metrics, making deep GNNs practical for large-scale EDA workloads.",
+      "authors": [
+        "Yuebo Luo",
+        "Shiyang Li",
+        "Yifei Feng",
+        "Vishal Kancharla",
+        "Shaoyi Huang",
+        "Caiwen Ding"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-28T06:47:20+00:00",
+      "link": "https://arxiv.org/pdf/2603.27156v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "deep GNN framework for circuit graph analysis",
+      "llm_evidence_cn": "用于电路图分析的深度图神经网络框架",
+      "llm_evidence": "用于电路图分析的深度图神经网络框架",
+      "canonical_evidence": "用于电路图分析的深度图神经网络框架",
+      "llm_tldr_en": "Presents an efficient framework for training very deep GNNs on large-scale circuit graphs.",
+      "llm_tldr_cn": "提出了一种在大型电路图上训练深层图神经网络的高效框架。",
+      "llm_tldr": "提出了一种在大型电路图上训练深层图神经网络的高效框架。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Graph Neural Networks for solving combinatorial problems",
+      "matched_requirement_id": "req-15",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.29632v1",
+      "title": "An Empirical Study of Multi-Agent Collaboration for Automated Research",
+      "abstract": "As AI agents evolve, the community is rapidly shifting from single Large Language Models (LLMs) to Multi-Agent Systems (MAS) to overcome cognitive bottlenecks in automated research. However, the optimal multi-agent coordination framework for these autonomous agents remains largely unexplored. In this paper, we present a systematic empirical study investigating the comparative efficacy of distinct multi-agent structures for automated machine learning optimization. Utilizing a rigorously controlled, execution-based testbed equipped with Git worktree isolation and explicit global memory, we benchmark a single-agent baseline against two multi-agent paradigms: a subagent architecture (parallel exploration with post-hoc consolidation) and an agent team architecture (experts with pre-execution handoffs). By evaluating these systems under strictly fixed computational time budgets, our findings reveal a fundamental trade-off between operational stability and theoretical deliberation. The subagent mode functions as a highly resilient, high-throughput search engine optimal for broad, shallow optimizations under strict time constraints. Conversely, the agent team topology exhibits higher operational fragility due to multi-author code generation but achieves the deep theoretical alignment necessary for complex architectural refactoring given extended compute budgets. These empirical insights provide actionable guidelines for designing future autoresearch systems, advocating for dynamically routed architectures that adapt their collaborative structures to real-time task complexity.",
+      "authors": [
+        "Yang Shen",
+        "Zhenyi Yi",
+        "Ziyi Zhao",
+        "Lijun Sun",
+        "Dongyang Li",
+        "Chin-Teng Lin",
+        "Yuhui Shi"
+      ],
+      "primary_category": "cs.MA",
+      "categories": [
+        "cs.MA",
+        "cs.AI"
+      ],
+      "published": "2026-03-31T11:57:00+00:00",
+      "link": "https://arxiv.org/pdf/2603.29632v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Multi-agent LLM systems for automated machine learning optimization",
+      "llm_evidence_cn": "多智能体大模型系统用于自动化机器学习优化",
+      "llm_evidence": "多智能体大模型系统用于自动化机器学习优化",
+      "canonical_evidence": "多智能体大模型系统用于自动化机器学习优化",
+      "llm_tldr_en": "Evaluates multi-agent LLM structures for efficacy in automated machine learning optimization tasks.",
+      "llm_tldr_cn": "评估了多智能体大模型结构在自动化机器学习优化任务中的有效性。",
+      "llm_tldr": "评估了多智能体大模型结构在自动化机器学习优化任务中的有效性。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Large Language Models (LLM) for optimization tasks",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.27309v1",
+      "title": "MeshTailor: Cutting Seams via Generative Mesh Traversal",
+      "abstract": "We present MeshTailor, the first mesh-native generative framework for synthesizing edge-aligned seams on 3D surfaces. Unlike prior optimization-based or extrinsic learning-based methods, MeshTailor operates directly on the mesh graph, eliminating projection artifacts and fragile snapping heuristics. We introduce ChainingSeams, a hierarchical serialization of the seam graph that prioritizes global structural cuts before local details in a coarse-to-fine manner, and a dual-stream encoder that fuses topological and geometric context. Leveraging this hierarchical representation and enriched vertex embeddings, our MeshTailor Transformer utilizes an autoregressive pointer layer to trace seams vertex-by-vertex within local neighborhoods, ensuring projection-free, edge-aligned seams. Extensive evaluations show that MeshTailor produces more coherent, professional-quality seam layouts compared to recent optimization-based and learning-based baselines.",
+      "authors": [
+        "Xueqi Ma",
+        "Xingguang Yan",
+        "Congyue Zhang",
+        "Hui Huang"
+      ],
+      "primary_category": "cs.GR",
+      "categories": [
+        "cs.GR",
+        "cs.CV"
+      ],
+      "published": "2026-03-28T15:30:24+00:00",
+      "link": "https://arxiv.org/pdf/2603.27309v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "generative mesh traversal via Transformer and pointer layer",
+      "llm_evidence_cn": "通过Transformer和指针层进行生成式网格遍历",
+      "llm_evidence": "通过Transformer和指针层进行生成式网格遍历",
+      "canonical_evidence": "通过Transformer和指针层进行生成式网格遍历",
+      "llm_tldr_en": "Uses a Transformer with an autoregressive pointer layer to solve a path-finding problem on mesh graphs.",
+      "llm_tldr_cn": "使用带有自回归指针层的Transformer解决网格图上的路径寻找问题。",
+      "llm_tldr": "使用带有自回归指针层的Transformer解决网格图上的路径寻找问题。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Learning search heuristics with neural networks",
+      "matched_requirement_id": "req-21",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.00264v1",
+      "title": "Autonomous Adaptive Solver Selection for Chemistry Integration via Reinforcement Learning",
+      "abstract": "The computational cost of stiff chemical kinetics remains a dominant bottleneck in reacting-flow simulation, yet hybrid integration strategies are typically driven by hand-tuned heuristics or supervised predictors that make myopic decisions from instantaneous local state. We introduce a constrained reinforcement learning (RL) framework that autonomously selects between an implicit BDF integrator (CVODE) and a quasi-steady-state (QSS) solver during chemistry integration. Solver selection is cast as a Markov decision process. The agent learns trajectory-aware policies that account for how present solver choices influence downstream error accumulation, while minimizing computational cost under a user-prescribed accuracy tolerance enforced through a Lagrangian reward with online multiplier adaptation. Across sampled 0D homogeneous reactor conditions, the RL-adaptive policy achieves a mean speedup of approximately $3\\times$, with speedups ranging from $1.11\\times$ to $10.58\\times$, while maintaining accurate ignition delays and species profiles for a 106-species \\textit{n}-dodecane mechanism and adding approximately $1\\%$ inference overhead. Without retraining, the 0D-trained policy transfers to 1D counterflow diffusion flames over strain rates $10$--$2000~\\mathrm{s}^{-1}$, delivering consistent $\\approx 2.2\\times$ speedup relative to CVODE while preserving near-reference temperature accuracy and selecting CVODE at only $12$--$15\\%$ of space-time points. Overall, the results demonstrate the potential of the proposed reinforcement learning framework to learn problem-specific integration strategies while respecting accuracy constraints, thereby opening a pathway toward adaptive, self-optimizing workflows for multiphysics systems with spatially heterogeneous stiffness.",
+      "authors": [
+        "Eloghosa Ikponmwoba",
+        "Opeoluwa Owoyele"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-31T21:44:58+00:00",
+      "link": "https://arxiv.org/pdf/2604.00264v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Reinforcement learning for autonomous solver selection",
+      "llm_evidence_cn": "用于自主求解器选择的强化学习",
+      "llm_evidence": "用于自主求解器选择的强化学习",
+      "canonical_evidence": "用于自主求解器选择的强化学习",
+      "llm_tldr_en": "Uses RL to learn policies for selecting optimal solvers in complex chemical simulations.",
+      "llm_tldr_cn": "使用强化学习学习策略，在复杂的化学模拟中选择最优求解器。",
+      "llm_tldr": "使用强化学习学习策略，在复杂的化学模拟中选择最优求解器。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Learning search heuristics with neural networks",
+      "matched_requirement_id": "req-21",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.27515v1",
+      "title": "Match or Replay: Self Imitating Proximal Policy Optimization",
+      "abstract": "Reinforcement Learning (RL) agents often struggle with inefficient exploration, particularly in environments with sparse rewards. Traditional exploration strategies can lead to slow learning and suboptimal performance because agents fail to systematically build on previously successful experiences, thereby reducing sample efficiency. To tackle this issue, we propose a self-imitating on-policy algorithm that enhances exploration and sample efficiency by leveraging past high-reward state-action pairs to guide policy updates. Our method incorporates self-imitation by using optimal transport distance in dense reward environments to prioritize state visitation distributions that match the most rewarding trajectory. In sparse-reward environments, we uniformly replay successful self-encountered trajectories to facilitate structured exploration. Experimental results across diverse environments demonstrate substantial improvements in learning efficiency, including MuJoCo for dense rewards and the partially observable 3D Animal-AI Olympics and multi-goal PointMaze for sparse rewards. Our approach achieves faster convergence and significantly higher success rates compared to state-of-the-art self-imitating RL baselines. These findings underscore the potential of self-imitation as a robust strategy for enhancing exploration in RL, with applicability to more complex tasks.",
+      "authors": [
+        "Gaurav Chaudhary",
+        "Laxmidhar Behera",
+        "Washim Uddin Mondal"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-29T04:44:48+00:00",
+      "link": "https://arxiv.org/pdf/2603.27515v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "self-imitating proximal policy optimization for RL agents",
+      "llm_evidence_cn": "强化学习智能体的自我模仿近端策略优化",
+      "llm_evidence": "强化学习智能体的自我模仿近端策略优化",
+      "canonical_evidence": "强化学习智能体的自我模仿近端策略优化",
+      "llm_tldr_en": "An RL algorithm that enhances exploration and efficiency by imitating past high-reward trajectories.",
+      "llm_tldr_cn": "一种通过模仿过去高奖励轨迹来增强探索和效率的强化学习算法。",
+      "llm_tldr": "一种通过模仿过去高奖励轨迹来增强探索和效率的强化学习算法。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Deep Reinforcement Learning for combinatorial optimization",
+      "matched_requirement_id": "req-14",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.00536v1",
+      "title": "Optimsyn: Influence-Guided Rubrics Optimization for Synthetic Data Generation",
+      "abstract": "Large language models (LLMs) achieve strong downstream performance largely due to abundant supervised fine-tuning (SFT) data. However, high-quality SFT data in knowledge-intensive domains such as humanities, social sciences, medicine, law, and finance is scarce because expert curation is expensive, privacy constraints are strict, and label consistency is hard to ensure. Recent work uses synthetic data, typically by prompting a generator over domain documents and filtering outputs with handcrafted rubrics. Yet rubric design is expert-dependent, transfers poorly across domains, and is often optimized through a brittle heuristic loop of writing rubrics, synthesizing data, training, inspecting results, and manually guessing revisions. This process lacks reliable quantitative feedback about how a rubric affects downstream performance. We propose evaluating synthetic data by its training utility on the target model and using this signal to guide data generation. Inspired by influence estimation, we adopt an optimizer-aware estimator that uses gradient information to quantify each synthetic sample's contribution to a target model's objective on specific tasks. Our analysis shows that even when synthetic and real samples are close in embedding space, their influence on learning can differ substantially. Based on this insight, we propose an optimization-based framework that adapts rubrics using target-model feedback. We provide lightweight guiding text and use a rubric-specialized model to generate task-conditioned rubrics. Influence score is used as the reward to optimize the rubric generator with reinforcement learning. Experiments across domains, target models, and data generators show consistent improvements and strong generalization without task-specific tuning.",
+      "authors": [
+        "Zhiting Fan",
+        "Ruizhe Chen",
+        "Tianxiang Hu",
+        "Ru Peng",
+        "Zenan Huang",
+        "Haokai Xu",
+        "Yixin Chen",
+        "Jian Wu",
+        "Junbo Zhao",
+        "Zuozhu Liu"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI"
+      ],
+      "published": "2026-04-01T06:28:44+00:00",
+      "link": "https://arxiv.org/pdf/2604.00536v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "LLM-driven heuristic loop for rubric optimization",
+      "llm_evidence_cn": "大模型驱动的评分标准优化启发式循环",
+      "llm_evidence": "大模型驱动的评分标准优化启发式循环",
+      "canonical_evidence": "大模型驱动的评分标准优化启发式循环",
+      "llm_tldr_en": "Optimizes synthetic data generation using an influence-guided heuristic loop with LLMs.",
+      "llm_tldr_cn": "利用大语言模型的影响力引导启发式循环来优化合成数据的生成。",
+      "llm_tldr": "利用大语言模型的影响力引导启发式循环来优化合成数据的生成。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM driven heuristic generation for combinatorial optimization",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.27884v1",
+      "title": "Near-Optimal Primal-Dual Algorithm for Learning Linear Mixture CMDPs with Adversarial Rewards",
+      "abstract": "We study safe reinforcement learning in finite-horizon linear mixture constrained Markov decision processes (CMDPs) with adversarial rewards under full-information feedback and an unknown transition kernel. We propose a primal-dual policy optimization algorithm that achieves regret and constraint violation bounds of $\\widetilde{O}(\\sqrt{d^2 H^3 K})$ under mild conditions, where $d$ is the feature dimension, $H$ is the horizon, and $K$ is the number of episodes. To the best of our knowledge, this is the first provably efficient algorithm for linear mixture CMDPs with adversarial rewards. In particular, our regret bound is near-optimal, matching the known minimax lower bound up to logarithmic factors. The key idea is to introduce a regularized dual update that enables a drift-based analysis. This step is essential, as strong duality-based analysis cannot be directly applied when reward functions change across episodes. In addition, we extend weighted ridge regression-based parameter estimation to the constrained setting, allowing us to construct tighter confidence intervals that are crucial for deriving the near-optimal regret bound.",
+      "authors": [
+        "Kihyun Yu",
+        "Seoungbin Bae",
+        "Dabeen Lee"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "math.OC"
+      ],
+      "published": "2026-03-29T21:51:33+00:00",
+      "link": "https://arxiv.org/pdf/2603.27884v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "safe reinforcement learning in constrained MDPs",
+      "llm_evidence_cn": "约束马尔可夫决策过程中的安全强化学习",
+      "llm_evidence": "约束马尔可夫决策过程中的安全强化学习",
+      "canonical_evidence": "约束马尔可夫决策过程中的安全强化学习",
+      "llm_tldr_en": "Develops a primal-dual policy optimization algorithm for constrained reinforcement learning tasks.",
+      "llm_tldr_cn": "为约束强化学习任务开发了一种原对偶策略优化算法。",
+      "llm_tldr": "为约束强化学习任务开发了一种原对偶策略优化算法。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Reinforcement learning frameworks for combinatorial optimization",
+      "matched_requirement_id": "req-24",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.00703v1",
+      "title": "G-ICSO-NAS: Shifting Gears between Gradient and Swarm for Robust Neural Architecture Search",
+      "abstract": "Neural Architecture Search (NAS) has become a pivotal technique in automated machine learning. Evolutionary Algorithm (EA)-based methods demonstrate superior search quality but suffer from prohibitive computational costs, while gradient-based approaches like DARTS offer high efficiency but are prone to premature convergence and performance collapse. To bridge this gap, we propose G-ICSO-NAS, a hybrid framework implementing a three-stage optimization strategy. The Warm-up Phase pre-trains supernet weights ($w$) via differentiable methods while architecture parameters ($α$) remain frozen. The Exploration Phase adopts a hybrid co-optimization mechanism: an Improved Competitive Swarm Optimizer (ICSO) with diversity-aware fitness navigates the architecture space to update $α$, while gradient descent concurrently updates $w$. The Stability Phase employs fine-grained gradient-based search with early stopping to converge to the optimal architecture. By synergizing ICSO's global navigation capability with differentiable methods' efficiency, G-ICSO-NAS achieves remarkable performance with minimal cost. In the context of the DARTS search space, an accuracy of 97.46\\% is achieved on CIFAR-10 with a computational budget of just 0.15 GPU-Days. The method also exhibits strong transfer potential, recording accuracies of 83.1\\% (CIFAR-100) and 75.02\\% (ImageNet). Furthermore, regarding the NAS-Bench-201 benchmark, G-ICSO-NAS is shown to deliver state-of-the-art results across all evaluated datasets.",
+      "authors": [
+        "Xingbang Du",
+        "Enzhi Zhang",
+        "Rui Zhong",
+        "Yang Cao",
+        "Masaharu Munetomo"
+      ],
+      "primary_category": "cs.NE",
+      "categories": [
+        "cs.NE"
+      ],
+      "published": "2026-04-01T10:06:59+00:00",
+      "link": "https://arxiv.org/pdf/2604.00703v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Hybrid framework combining gradient and swarm optimization for NAS",
+      "llm_evidence_cn": "结合梯度和群体优化的混合神经架构搜索框架",
+      "llm_evidence": "结合梯度和群体优化的混合神经架构搜索框架",
+      "canonical_evidence": "结合梯度和群体优化的混合神经架构搜索框架",
+      "llm_tldr_en": "Combines differentiable methods and swarm intelligence to optimize neural architecture search.",
+      "llm_tldr_cn": "结合可微方法和群体智能算法，优化自动化机器学习中的神经架构搜索过程。",
+      "llm_tldr": "结合可微方法和群体智能算法，优化自动化机器学习中的神经架构搜索过程。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Learning search heuristics with neural networks",
+      "matched_requirement_id": "req-21",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.28573v1",
+      "title": "Learning Partial Action Replacement in Offline MARL",
+      "abstract": "Offline multi-agent reinforcement learning (MARL) faces a critical challenge: the joint action space grows exponentially with the number of agents, making dataset coverage exponentially sparse and out-of-distribution (OOD) joint actions unavoidable. Partial Action Replacement (PAR) mitigates this by anchoring a subset of agents to dataset actions, but existing approach relies on enumerating multiple subset configurations at high computational cost and cannot adapt to varying states. We introduce PLCQL, a framework that formulates PAR subset selection as a contextual bandit problem and learns a state-dependent PAR policy using Proximal Policy Optimisation with an uncertainty-weighted reward. This adaptive policy dynamically determines how many agents to replace at each update step, balancing policy improvement against conservative value estimation. We prove a value-error bound showing that the estimation error scales linearly with the expected number of deviating agents. Compared with the previous PAR-based method SPaCQL, PLCQL reduces the number of per-iteration Q-function evaluations from n to 1, significantly improving computational efficiency. Empirically, PLCQL achieves the highest normalised scores on 66% of tasks across MPE, MaMuJoCo, and SMAC benchmarks, outperforming SPaCQL on 84% of tasks while substantially reducing computational cost.",
+      "authors": [
+        "Yue Jin",
+        "Giovanni Montana"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.MA"
+      ],
+      "published": "2026-03-30T15:28:13+00:00",
+      "link": "https://arxiv.org/pdf/2603.28573v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Offline multi-agent reinforcement learning for joint action space optimization",
+      "llm_evidence_cn": "针对联合动作空间优化的离线多智能体强化学习",
+      "llm_evidence": "针对联合动作空间优化的离线多智能体强化学习",
+      "canonical_evidence": "针对联合动作空间优化的离线多智能体强化学习",
+      "llm_tldr_en": "Introduces a framework for subset selection in MARL using PPO to handle exponential action spaces.",
+      "llm_tldr_cn": "引入PLCQL框架，利用PPO算法解决多智能体强化学习中动作空间爆炸的优化问题。",
+      "llm_tldr": "引入PLCQL框架，利用PPO算法解决多智能体强化学习中动作空间爆炸的优化问题。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Reinforcement learning frameworks for combinatorial optimization",
+      "matched_requirement_id": "req-24",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.01003v1",
+      "title": "Soft vector spins with dimensional annealing for combinatorial optimization",
+      "abstract": "Recently, purpose-built analog hardware that can efficiently minimize the Ising energy and thereby solve a variety of combinatorial optimization problems has been receiving widespread attention. In this work, we show how multidimensional, vectorial degrees of freedom, that are either naturally present or can be artificially created in such hardware, could strengthen the capability to find optimal solutions to optimization problems. In order to achieve this, we introduce a simple model of soft vector spins that should be implementable on a variety of analog hardware platforms as well as three different dimensional annealing methods which harness the enlarged phase space of the vectorial degrees of freedom to minimize the Ising energy. We perform simulations on different benchmark problems and show that for all dimensional annealing methods we tested, vectorial degrees of freedom improve upon one-dimensional degrees of freedom when it comes to finding the ground state of the Ising model. In particular, we find that this advantage becomes most pronounced for $d \\gtrsim 3$ dimensional degrees of freedom, with diminishing returns as the dimension is increased further. Our results could inspire new analog optimization hardware and algorithms that explicitly incorporate the advantage of vectorial degrees of freedom.",
+      "authors": [
+        "Marvin Syed",
+        "Richard Zhipeng Wang",
+        "Natalia G. Berloff"
+      ],
+      "primary_category": "cond-mat.dis-nn",
+      "categories": [
+        "cond-mat.dis-nn",
+        "nlin.AO"
+      ],
+      "published": "2026-04-01T15:03:38+00:00",
+      "link": "https://arxiv.org/pdf/2604.01003v1",
+      "tags": [
+        "keyword:NCO",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "soft vector spins for combinatorial optimization",
+      "llm_evidence_cn": "用于组合优化的软向量自旋",
+      "llm_evidence": "用于组合优化的软向量自旋",
+      "canonical_evidence": "用于组合优化的软向量自旋",
+      "llm_tldr_en": "Introduces soft vector spins and dimensional annealing to solve combinatorial optimization problems on analog hardware.",
+      "llm_tldr_cn": "引入软向量自旋和维度退火方法，在模拟硬件上解决组合优化问题。",
+      "llm_tldr": "引入软向量自旋和维度退火方法，在模拟硬件上解决组合优化问题。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Deep learning models for solving NP hard combinatorial problems",
+      "matched_requirement_id": "req-23",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.28678v1",
+      "title": "Subspace Optimization for Backpropagation-Free Continual Test-Time Adaptation",
+      "abstract": "We introduce PACE, a backpropagation-free continual test-time adaptation system that directly optimizes the affine parameters of normalization layers. Existing derivative-free approaches struggle to balance runtime efficiency with learning capacity, as they either restrict updates to input prompts or require continuous, resource-intensive adaptation regardless of domain stability. To address these limitations, PACE leverages the Covariance Matrix Adaptation Evolution Strategy with the Fastfood projection to optimize high-dimensional affine parameters within a low-dimensional subspace, leading to superior adaptive performance. Furthermore, we enhance the runtime efficiency by incorporating an adaptation stopping criterion and a domain-specialized vector bank to eliminate redundant computation. Our framework achieves state-of-the-art accuracy across multiple benchmarks under continual distribution shifts, reducing runtime by over 50% compared to existing backpropagation-free methods.",
+      "authors": [
+        "Damian Sójka",
+        "Sebastian Cygert",
+        "Marc Masana"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-30T16:58:13+00:00",
+      "link": "https://arxiv.org/pdf/2603.28678v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Evolution strategy for optimizing high-dimensional parameters in neural layers",
+      "llm_evidence_cn": "用于优化神经层高维参数的进化策略",
+      "llm_evidence": "用于优化神经层高维参数的进化策略",
+      "canonical_evidence": "用于优化神经层高维参数的进化策略",
+      "llm_tldr_en": "Uses evolution strategies for backpropagation-free optimization of neural network parameters during adaptation.",
+      "llm_tldr_cn": "在模型适配过程中，使用进化策略对神经网络参数进行无反向传播的优化。",
+      "llm_tldr": "在模型适配过程中，使用进化策略对神经网络参数进行无反向传播的优化。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Hybrid approaches combining deep learning and traditional optimization",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

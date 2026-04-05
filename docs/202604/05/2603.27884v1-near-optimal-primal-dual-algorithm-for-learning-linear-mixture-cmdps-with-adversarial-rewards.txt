@@ -1,0 +1,6149 @@
+Title: Near-Optimal Primal-Dual Algorithm for Learning Linear Mixture CMDPs with Adversarial Rewards
+
+URL Source: https://arxiv.org/pdf/2603.27884v1
+
+Published Time: Tue, 31 Mar 2026 01:25:37 GMT
+
+Number of Pages: 23
+
+Markdown Content:
+# Near-Optimal Primal-Dual Algorithm for Learning Linear Mixture CMDPs with Adversarial Rewards 
+
+Kihyun Yu, Seoungbin Bae Department of Industrial and Systems Engineering, KAIST 
+
+{khyu99, sbbae31 }@kaist.ac.kr 
+
+Dabeen Lee* Department of Mathematical Sciences, Seoul National University 
+
+dabeenl@snu.ac.kr 
+
+Abstract — We study safe reinforcement learning in finite-horizon linear mixture constrained Markov decision processes (CMDPs) with adversarial rewards under full-information feed-back and an unknown transition kernel. We propose a primal-dual policy optimization algorithm that achieves regret and constraint violation bounds of eO(√d2H3K) under mild condi-tions, where d is the feature dimension, H is the horizon, and K
+
+is the number of episodes. To the best of our knowledge, this is the first provably efficient algorithm for linear mixture CMDPs with adversarial rewards. In particular, our regret bound is near-optimal, matching the known minimax lower bound up to logarithmic factors. The key idea is to introduce a regularized dual update that enables a drift-based analysis. This step is essential, as strong duality-based analysis cannot be directly applied when reward functions change across episodes. In addition, we extend weighted ridge regression–based parameter estimation to the constrained setting, allowing us to construct tighter confidence intervals that are crucial for deriving the near-optimal regret bound. 
+
+I. I NTRODUCTION 
+
+In this paper, we study online linear mixture constrained Markov decision processes (CMDPs) with adversarial re-wards. A CMDP can be described by the following standard formulation: 1
+
+max  
+
+> π
+
+V r,π 
+
+> 1
+
+(s1) subject to V g,π 
+
+> 1
+
+(s1) ≥ b, (1) where π denotes a policy, V r,π 
+
+> 1
+
+(s1) = Eπ [∑Hh=1 rh(sh, ah) |
+
+s1], V g,π 
+
+> 1
+
+(s1) = Eπ [∑Hh=1 gh(sh, ah) | s1], and b denotes the constraint threshold. Recently, a large number of algorithms for learning CMDPs have been proposed [1]. However, many existing ap-proaches are limited to settings with tabular state spaces [2], and their theoretical guarantees do not readily extend to large state spaces. To address scalability, one common direction in RL is to consider linear function approximation, where transition kernels admit a linear representation. In the CMDP literature, [3]–[6] proposed algorithms in this setting; how-ever, these works considered fixed rewards and constraints and thus could not capture non-stationary environments. To address this limitation, more recently, [7], [8] proposed algorithms for non-stationary environments; however, [7]          
+
+> *Additional affiliations: Research Institute of Mathematics, Seoul Na-tional University; Interdisciplinary Program in Artificial Intelligence, Seoul National University; Korea Institute for Advanced Study.
+> 1We note that (1) represents the standard CMDP formulation; the formal definition of linear mixture CMDPs with adversarial rewards will be introduced in Section II.
+
+required the variation budget—a quantity that characterizes the change in a CMDP—to be known and bounded, and [8] only attained suboptimal regret and violation bounds. In summary, the existing algorithms for safe RL with linear function approximation either suffer from suboptimal regret guarantees or rely on restrictive assumptions, such as sta-tionarity or a bounded variation budget. Motivated by these limitations, we design an algorithm for linear mixture CMDPs with adversarial rewards that achieves near-optimal regret bounds. In this setting, the linear mixture structure enables function approximation, while adversarial rewards capture non-stationary environments. This goal is particularly challenging. Specifically, when rewards change arbitrarily, strong duality-based analysis— a key tool in previous works [3], [4]—cannot be directly applied. Moreover, achieving the optimal sample complexity requires constructing tighter confidence intervals. Despite these challenges, our main contributions are as follows.  
+
+> •
+
+We propose a provably efficient primal-dual policy optimization algorithm for finite-horizon linear mixture CMDPs with adversarial reward functions under full-information feedback, a fixed constraint, and an un-known transition kernel.  
+
+> •
+
+Our algorithm achieves regret and constraint violation bounds of eO(√d2H3K). Here, d is the feature dimen-sion, H is the horizon, and K is the number of episodes. We emphasize that our regret bound is near-optimal in the sense that it matches the known minimax regret lower bound for unconstrained linear mixture MDPs up to logarithmic factors [9].  
+
+> •
+
+The key idea of our algorithm is to combine primal-dual policy optimization with (i) a regularized dual update that enables a drift-based analysis, which does not rely on strong duality, and (ii) weighted ridge regression–based parameter estimation to obtain tighter confidence intervals, which are crucial for attaining near-optimal regret bounds. In Table I, we compare algorithms for safe RL with linear function approximation. [10]–[12] consider infinite-horizon linear CMDPs, and [13] studies qπ -realizable CMDPs. Al-though these works fall under safe RL with linear function approximation, their settings differ significantly from ours. 
+
+> arXiv:2603.27884v1 [cs.LG] 29 Mar 2026
+
+TABLE I: Comparison of safe RL with linear function approximation.                 
+
+> Algorithm MDP Setting Reward Reg. & Vio. [3] Linear Mixture Fixed eO(√d2H4K)
+> [4] Linear Fixed eO(√d3H4K)
+> [8] Linear Adversarial eO(poly (d,H)K3/4)
+> Ours Linear Mixture Adversarial eO(√d2H3K)
+
+A. Additional Related Works 
+
+We provide additional prior works on learning CMDPs. [14]–[20] propose online algorithms for tabular CMDPs. [21]–[24] are particularly relevant to our work as they con-sider adversarial rewards; however, their results are restricted to the tabular setting. Beyond the tabular case, several works study CMDPs with function approximation. In particular, [25]–[28] focus on instantaneous constraints, where the con-straint must be satisfied at each step rather than in expectation over the entire trajectory. II. P ROBLEM FORMULATION 
+
+Notation. For a positive integer n, let [n] = {1, . . . , n}. For x ∈
+
+Rd , let ∥x∥A = √x⊤Ax for some positive definite matrix A ∈
+
+Rd×d . For a, b ∈ R such that a ≤ b, let [a, b] = {x ∈ R : a ≤ x ≤
+
+b}, let [·]+ = max {· , 0}, and let [·][a,b] = max {min {· , b}, a}.Let I ∈ Rd×d denote the identity matrix, let 0 00 ∈ Rd denote the all-0 vector, and let ⟨· , ·⟩ denote the inner product. Let 
+
+∆(A) denote the probability simplex over set A.
+
+Finite-Horizon CMDP. We consider a finite-horizon CMDP with adversarial rewards and a fixed constraint function. A finite-horizon CMDP is defined by M =(S, A, H, P, r, g, b, s1), where S is the finite state space, A is the finite action space, and H is the horizon. The collection of unknown transition kernels is denoted by P = {Ph}h∈[H],where Ph(s′|s, a) is the probability of transitioning from state 
+
+s to state s′ by taking action a at step h. The collections of reward and constraint functions are denoted by r =
+
+{rkh}h∈[H],k∈[K] and g = {gh}h∈[H], where rkh, gh : S ×A → [0, 1]
+
+for each h, k. The constraint threshold is denoted by b ∈
+
+[0, H], and s1 is the fixed initial state. We assume adversarial deterministic rewards with full-information feedback, while the deterministic constraint function is fixed and known. 2. In particular, at the beginning of each episode k, an adversary chooses an arbitrary reward function rk = {rkh}h∈[H]. The full information of rk is revealed at the end of episode k. On the other hand, the constraint function g = {gh}h∈[H] is assumed to be fixed across all 
+
+k ∈ [K] and known. The agent interacts with the environment as follows. At the beginning of episode k, the agent selects a policy {πkh }h∈[H],where πkh (a|s) denotes the probability of taking action a at state s and step h. During episode k, for each step h, the agent observes the current state skh and selects an action akh ∼
+
+πkh (·| skh). The next state is then sampled as skh+1 ∼ Ph(·| skh, akh).At the end of the episode, rk is revealed to the agent. 
+
+> 2As in [3], [4], we assume the constraint function is fixed and determin-istic for simplicity. Our results can be extended to an unknown stochastic constraint function with linear structure under bandit feedback.
+
+Given P and π, we define the value function V ℓ, π 
+
+> h
+
+(s) = 
+
+Eπ[∑Hj=h ℓ j(s j, a j)|sh = s], where ℓ = {ℓh}h∈[H] is any function such that ℓh : S × A → [0, 1], and Eπ [·] denotes the expec-tation over the trajectory (sh, ah, . . . , sH , aH ) induced by P
+
+and π. Likewise, we define the Q-function as Qℓ, π 
+
+> h
+
+(s, a) = 
+
+Eπ[∑Hj=h ℓ j(s j, a j)|sh = s, ah = a].
+
+The goal of the agent is to learn an optimal policy π∗ ∈ Π
+
+for the following optimization problem, where for the set of policies Π = {{ πh}h∈[H] : πh : S → ∆(A)}:max 
+
+> π∈Π
+> K
+
+# ∑
+
+> k=1
+
+V rk,π 
+
+> 1
+
+(s1) subject to V g,π 
+
+> 1
+
+(s1) ≥ b. (2) The performance metrics are defined as follows. Given a sequence of policies {πk}k∈[K], we define the regret as Reg (K) = ∑Kk=1
+
+ V rk,π∗ 
+
+> 1
+
+(s1) − V rk,πk 
+
+> 1
+
+(s1), and the constraint violation as Vio (K) = 
+
+h
+
+∑Kk=1
+
+ b −V g,πk 
+
+> 1
+
+(s1)i
+
+> +
+
+.We introduce additional notations as follows. For any 
+
+V : S → R, PhV (s, a) = ∑s′ Ph(s′|s, a)V (s′) and VhV (s, a) = 
+
+PhV 2(s, a) − (PhV (s, a)) 2. Moreover, we present the Slater assumption, as in [8]. 
+
+Assumption 1 (Slater condition): There exists a Slater policy ¯ π such that V g, ¯π 
+
+> 1
+
+(s1) ≥ b + γ, where γ > 0 is the Slater constant. Note that ¯ π and γ are unknown to the agent. 
+
+Linear Mixture CMDP. Finally, we introduce the definition of linear mixture CMDPs, adapted from [29]–[31], which we assume throughout the paper. 
+
+Definition 1 (Linear Mixture CMDP): We say that M
+
+is an inhomogeneous, episodic B-bounded linear mixture CMDP if, for each h ∈ [H], there exist a known feature mapping φ : S × A × S → Rd and an unknown parame-ter θ ∗ 
+
+> h
+
+∈ Rd such that Ph(s′|s, a) = ⟨φ (s′|s, a), θ ∗ 
+
+> h
+
+⟩ for any 
+
+(s, a, s′) ∈ S × A × S. Moreover, we assume that ∥θ ∗ 
+
+> h
+
+∥2 ≤ B
+
+and ∥φV (s, a)∥2 ≤ 1 for all (s, a, h) ∈ S × A × [H] and any 
+
+V : S → [0, 1], where φV (s, a) = ∑s′∈S φ (s′|s, a)V (s′).III. P ROPOSED ALGORITHM 
+
+In this section, we present our algorithm, called Primal-Dual Policy Optimization With BERnstein bonuS (PD-POWERS, Algorithm 1), tailored for finite-horizon linear mixture CMDPs with adversarial rewards and a fixed con-straint function. Intuitively, PD-POWERS can be viewed as a primal-dual variant of POWERS, proposed in [9] for the unconstrained setting. 
+
+A. Challenges in Algorithm Design 
+
+To extend an algorithm for the unconstrained problem to the constrained setting, a standard approach is to con-struct a primal-dual variant. In this framework, the primal variable—maximizing a Lagrangian objective—and the dual variable—balancing reward maximization and constraint sat-isfaction—are updated alternately. The main challenge lies in the design of the dual update, as previously proposed dual updates do not directly apply to our setting with adversarial rewards. In the fixed-reward setup, [3], [4] adopt a dual update that naturally leads to Algorithm 1 PD-POWERS 
+
+Require: regularization parameter λ ; step sizes α, η; mixing parameter θ ; the constraint function {gh(·, ·)}h∈[H]
+
+Initialize: ∀(h, ℓ ) ∈ [H] × { r, g}, bΣℓ
+
+> 1,h
+
+, eΣℓ 
+
+> 1,h
+
+← λ I; bbℓ
+
+> 1,h
+
+,ebℓ 
+
+> 1,h
+
+←
+
+000; bθ ℓ
+
+> 1,h
+
+, eθ ℓ 
+
+> 1,h
+
+← 000; V r
+
+> 1,H+1
+
+(·),V g
+
+> 1,H+1
+
+(·); π1 
+
+> h
+
+← πunif ; Y1 ← 0;  
+
+> 1:
+
+for k = 1, . . . , K do  
+
+> 2:
+
+if k > 1 then  
+
+> 3:
+
+Update {πkh }h∈[H] as in (3)  
+
+> 4:
+
+Update Yk as in (4)  
+
+> 5:
+
+end if  
+
+> 6:
+
+for h = 1, . . . , H do  
+
+> 7:
+
+Take action akh ∼ πkh (· | skh) 
+
+> 8:
+
+Receive skh+1 ∼ Ph(· | skh, akh) 
+
+> 9:
+
+end for  
+
+> 10:
+
+Receive {rkh(·, ·)}h∈[H] 
+
+> 11:
+
+for h = H, . . . , 1 do  
+
+> 12:
+
+for ℓ = r, g do  
+
+> 13:
+
+Compute Qℓ
+
+> k,h
+
+(·, ·) as in (6)  
+
+> 14:
+
+V ℓ
+
+> k,h
+
+(·) ← ∑a∈A πkh (a | · )Qℓ
+
+> k,h
+
+(·, a) 
+
+> 15:
+
+Set bθ ℓ
+
+> k+1,h
+
+, bΣℓ
+
+> k+1,h
+
+,bbℓ 
+
+> k+1,h
+
+as in (8)  
+
+> 16:
+
+Set eθ ℓ
+
+> k+1,h
+
+, eΣℓ
+
+> k+1,h
+
+,ebℓ 
+
+> k+1,h
+
+as in (10)  
+
+> 17:
+
+Set ¯ VhV ℓ 
+
+> k,h+1
+
+as in (9)  
+
+> 18:
+
+Set Eℓ
+
+> k,h
+
+, ¯σ ℓ 
+
+> k,h
+
+as in (11), (12)  
+
+> 19:
+
+end for  
+
+> 20:
+
+end for  
+
+> 21:
+
+end for 
+
+a strong duality-based analysis. However, such an analysis becomes non-trivial when the rewards vary across episodes. To address this issue, our key idea is to introduce a regularized dual update, inspired by [8]. This update enables a drift-based analysis that does not rely on strong duality. In particular, the regularization term induces a negative drift in the dual variable, which plays a crucial role in controlling its growth. This justifies the suitability of our dual update in the adversarial-reward setting. For more details, we refer the reader to III-B and IV-A. 
+
+B. Description of PD-POWERS 
+
+We now describe PD-POWERS. We first introduce the policy optimization step, which combines entropy regular-ization with policy perturbation. We then present the reg-ularized dual update and discuss its role in controlling the dual variable. Finally, we present the parameter estimation procedure based on weighted ridge regression. 
+
+Policy Optimization (Line 3). Our policy optimization step proceeds in the following two steps: 
+
+eπk−1 
+
+> h
+
+(·| s) ← (1 − θ )πk−1 
+
+> h
+
+(·| s) + θ π unif (·| s)
+
+πkh (·| s) ∝ eπk−1 
+
+> h
+
+(·| s) exp (α(Qrk−1,h(s, ·) + Yk−1Qgk−1,h(s, ·))) 
+
+(3) In the first step of (3), we define eπk−1 
+
+> h
+
+, which is a perturbed version of πk−1 
+
+> h
+
+. This step ensures that eπk−1 
+
+> h
+
+(a|s) ≥ θ /|A| for all a ∈ A, and hence keeps eπk−1 
+
+> h
+
+away from the boundary of the probability simplex. This is essential for controlling the growth of the dual variable. We refer the reader to Section IV for further technical motivation. Moreover, a key difference from [8] is that we perturb the policy at every episode. In [8], the perturbation is applied every K3/4 episodes to handle the trade-off between the covering number 3 and the dual variable, which leads to suboptimal dependence on K in the regret. In contrast, since our setting does not require such covering number arguments, it allows more frequent perturbations and yields optimal dependence on K.In the second step of (3), we perform policy optimization following [32]. Equivalently, it can be rewritten as the follow-ing online mirror descent (OMD) step over the policy space: 
+
+πkh (·| s) ∈ arg max π∈Π⟨π(·| s), Qrk−1,h(s, ·) + Yk−1Qgk−1,h(s, ·)⟩ −  
+
+> 1
+> α
+
+D(π(·| s)|| eπk−1 
+
+> h
+
+(·| s)) , where D(·||· ) denotes the KL diver-gence, and Yk−1 is the dual variable that balances between reward maximization and constraint satisfaction. The KL regularizer encourages the updated policy to remain close to eπk−1 
+
+> h
+
+.
+
+Regularized Dual Update (Line 4). Next, we present the dual update, inspired by [8]: 
+
+Yk ← (1 − αη H3)Yk−1
+
++ η(b −V gk−1,1(s1) − αH3 − 2θ H2)
+
+> +
+
+. (4) The dual variable Yk increases when the estimated constraint value falls below the threshold b and decreases otherwise. Thus, it adaptively balances reward maximization and con-straint satisfaction. For comparison, we recall the dual update used in [3], [4] for the fixed-reward setup: 
+
+Yk ←
+
+h
+
+Yk−1 + η(b −V gk−1,1(s1)) 
+
+i   
+
+> [0,2
+> γ]
+
+. (5) In this update, the dual variable is upper clipped by 2 /γ
+
+to prevent it from diverging. The threshold 2 /γ is chosen because it serves as a strict upper bound on the optimal dual variable under Assumption 1. In contrast, our update (4) introduces additional regularizers −αη H3Yk−1 − η(αH3 +
+
+2θ H2), instead of relying on upper clipping. Hence, our update does not require knowledge of γ.
+
+Parameter Estimation (Lines 11 - 19). To obtain tighter confidence intervals, we extend the weighted ridge re-gression technique—previously used in unconstrained set-tings [31]—to our constrained setting. This differs from [3], which uses standard ridge regression and does not account for the conditional variance of the next-state value. In con-trast, we employ weighted ridge regression–based parameter estimation, where the weights are chosen as estimates of this variance, enabling Bernstein-type concentration inequalities and yielding optimal dependence on H in the regret bound. Before describing the weighted ridge regression step, we introduce the basic structure of the Q-function estimates, 
+
+> 3Note that [8] considers linear CMDPs, while our setting is linear mixture CMDPs. In their setting, the covering number of the value function class must be controlled to ensure uniform convergence over all possible value function estimates induced by their algorithm.
+
+denoted by Qrk,h, Qgk,h. These estimates are computed by backward induction from h = H to 1 as follows: 
+
+Qrk,h(·, ·) ←
+
+
+
+rkh(·, ·) + ⟨bθ rk,h, φV rk,h+1 (·, ·)⟩
+
++ bβk φV rk,h+1 (·, ·) (bΣrk,h)−1
+
+
+
+> [0,H−h+1]
+
+,
+
+Qgk,h(·, ·) ←
+
+
+
+gh(·, ·) + ⟨bθ gk,h, φV gk,h+1 (·, ·)⟩
+
++ bβk φV gk,h+1 (·, ·) (bΣgk,h)−1
+
+
+
+> [0,H−h+1]
+
+,
+
+(6) where the optimistic bonus parameter bβk is given by 
+
+bβk = 8
+
+q
+
+d log (1 + k/λ ) log (8Hk 2/δ )+ 4√d log (8Hk 2/δ ) + √λ B
+
+The intuition behind the Q-function estimates is as follows. Given a policy πk, we expect that Qrk,h(s, a) ≈
+
+Qrk,πk 
+
+> h
+
+(s, a) = rkh(s, a) + PhV rk,πk 
+
+> h+1
+
+(s, a), where the equality follows from the Bellman equation. Assuming bθ rk,h ≈ θ ∗ 
+
+> h
+
+, by the definition of linear mixture CMDPs (Definition 1), we have ⟨bθ rk,h, φV rk,h+1 (s, a)⟩ ≈ ⟨θ ∗ 
+
+> h
+
+, φV rk,h+1 (s, a)⟩ =
+
+∑s′ ⟨θ ∗ 
+
+> h
+
+, φ (s′|s, a)⟩V rk,h+1(s′) = PhV rk,h+1(s, a). Moreover, 
+
+bβk∥φV rk,h+1 (·, ·)∥(bΣrk,h)−1 serves as an optimistic bonus term to promote exploration. These arguments validate the design of Qrk,h in (6), and can be applied to Qgk,h as well. Now, we present how to obtain bθ rk,h and bθ gk,h through weighted ridge regression, which approximate θ ∗ 
+
+> h
+
+. For ℓ ∈{r, g}, we define 
+
+bθ ℓ 
+
+> k,h
+
+← arg min  
+
+> θ∈Rd
+
+λ ∥θ ∥22
+
++
+
+> k−1
+
+# ∑
+
+> τ=1
+
+⟨φV ℓ
+
+> τ,h+1
+
+(sτ
+
+> h
+
+, aτ
+
+> h
+
+), θ ⟩ − V ℓ
+
+> τ,h+1
+
+(sτ
+
+> h+1
+
+)2
+
+( ¯σ ℓ
+
+> τ,h
+
+)2 ,
+
+(7) where ( ¯σ ℓ
+
+> τ,h
+
+)2 is an upper bound on VhV ℓ
+
+> τ,h+1
+
+(sτ
+
+> h
+
+, aτ
+
+> h
+
+). Equa-tion (7) admits the following closed form: for ℓ ∈ { r, g},
+
+bθ ℓ 
+
+> k,h
+
+←
+
+bΣℓ
+
+> k,h
+
+−1 bbℓ
+
+> k,h
+
+,
+
+bΣℓ 
+
+> k,h
+
+← λ I +
+
+> k−1
+
+# ∑
+
+> τ=1
+
+
+
+¯σ ℓ
+
+> τ,h
+
+−2
+
+φV ℓ
+
+> τ,h+1
+
+(sτ
+
+> h
+
+, aτ
+
+> h
+
+)φV ℓ
+
+> τ,h+1
+
+(sτ
+
+> h
+
+, aτ
+
+> h
+
+)⊤,
+
+bbℓ 
+
+> k,h
+
+←
+
+> k−1
+
+# ∑
+
+> τ=1
+
+
+
+¯σ ℓ
+
+> τ,h
+
+−2
+
+φV ℓ
+
+> τ,h+1
+
+(sτ
+
+> h
+
+, aτ
+
+> h
+
+)V ℓ
+
+> τ,h+1
+
+(sτ
+
+> h+1
+
+).
+
+(8) We emphasize that the weighted ridge regression in (7) is useful for handling heteroscedastic noise induced by the time-inhomogeneous transition kernel. Since PhV ℓ
+
+> k,h+1
+
+(s, a)
+
+is not directly observable, we estimate bθ ℓ 
+
+> k,h
+
+by regressing the samples V ℓ
+
+> τ,h+1
+
+(sτ
+
+> h+1
+
+). This introduces a noise term 
+
+V ℓ
+
+> τ,h+1
+
+(sτ
+
+> h+1
+
+) − PhV ℓ
+
+> τ,h+1
+
+(sτ
+
+> h
+
+, aτ
+
+> h
+
+), whose conditional variance 
+
+VhV ℓ
+
+> τ,h+1
+
+(sτ
+
+> h
+
+, aτ
+
+> h
+
+) depends on h, resulting in heteroscedastic noise. In such cases, standard ridge regression is statistically inefficient due to the heteroscedastic structure [33]. In con-trast, weighted ridge regression effectively accounts for this heteroscedasticity [31], enabling the use of Bernstein-type concentration inequalities and yielding tighter confidence intervals. One remaining question for the parameter estimation step is how to construct ( ¯σ rk,h)2, ( ¯σ gk,h)2, which are upper bounds on VhV rk,h+1(skh, akh), VhV gk,h+1(skh, akh), respectively. Again, since Ph is unknown, we construct the following vari-ance estimate, motivated by the relation that VhV ℓ
+
+> k,h+1
+
+(s, a) = 
+
+⟨φ(V ℓ 
+
+> k,h+1)2
+
+(s, a), θ ∗ 
+
+> h
+
+⟩ − ⟨ φV ℓ
+
+> k,h+1
+
+(s, a), θ ∗ 
+
+> h
+
+⟩2: for ℓ ∈ { r, g},¯VhV ℓ
+
+> k,h+1
+
+(·, ·) = 
+
+h
+
+⟨φ(V ℓ 
+
+> k,h+1)2
+
+, eθ ℓ
+
+> k,h
+
+(·, ·)⟩
+
+i
+
+[0,H2]
+
+−
+
+h
+
+⟨φV ℓ
+
+> k,h+1
+
+, bθ ℓ
+
+> k,h
+
+(·, ·)⟩
+
+i2
+
+> [0,H]
+
+.
+
+(9) where bθ ℓ 
+
+> k,h
+
+is defined in (8) and 
+
+eθ ℓ 
+
+> k,h
+
+←
+
+eΣℓ
+
+> k,h
+
+−1 ebℓ
+
+> k,h
+
+,
+
+eΣℓ 
+
+> k,h
+
+← λ I +
+
+> k−1
+
+# ∑
+
+> τ=1
+
+φ(V ℓ 
+
+> τ,h+1)2
+
+(sτ
+
+> h
+
+, aτ
+
+> h
+
+)φ(V ℓ 
+
+> τ,h+1)2
+
+(sτ
+
+> h
+
+, aτ
+
+> h
+
+)⊤,
+
+ebℓ 
+
+> k,h
+
+←
+
+> k−1
+
+# ∑
+
+> τ=1
+
+φ(V ℓ 
+
+> τ,h+1)2
+
+(sτ
+
+> h
+
+, aτ
+
+> h
+
+)( V ℓ
+
+> τ,h+1
+
+)2(sτ
+
+> h+1
+
+).
+
+(10) Note that (10) is a consequence of standard ridge regression with respect to (V ℓ
+
+> k,h+1
+
+)2, so that ⟨φ(V ℓ 
+
+> k,h+1)2
+
+, eθ ℓ
+
+> k,h
+
+(s, a)⟩ ≈ 
+
+Ph(V ℓ
+
+> k,h+1
+
+)2(s, a). Moreover, the following proposition char-acterizes the discrepancy between the variance estimated in (9) and its true value VhV ℓ
+
+> k,h+1
+
+(·, ·).
+
+Proposition 1: For any (s, a, h, k, ℓ ) ∈ S × A × [H] × [K] ×{r, g},
+
+¯VhV ℓ
+
+> k,h+1
+
+(s, a) − VhV ℓ
+
+> k,h+1
+
+(s, a)
+
+≤ min 
+
+
+
+H2, φ(V ℓ 
+
+> k,h+1)2
+
+(s, a) (eΣℓ
+
+> k,h)−1
+
+eθ ℓ 
+
+> k,h
+
+− θ ∗ 
+
+> heΣℓ
+> k,h
+
+
+
++ min 
+
+
+
+H2, 2H φV ℓ 
+
+> k,h+1
+
+(s, a) (bΣℓ
+
+> k,h
+
+)−1 bθ ℓ 
+
+> k,h
+
+− θ ∗ 
+
+> hbΣℓ
+> k,h
+
+
+
+.
+
+Combining this with Theorem 4.1 in [31] implies that 
+
+∥(eθ ℓ 
+
+> k,h
+
+− θ ∗ 
+
+> h
+
+)∥eΣℓ
+
+> k,h
+
+≤ eβk, ∥bθ ℓ 
+
+> k,h
+
+− θ ∗ 
+
+> h
+
+∥bΣℓ
+
+> k,h
+
+≤ ˇβk, where 
+
+eβk = 8H2
+
+q
+
+d log (1 + kH 4/(dλ )) log (8Hk 2/δ )+ 4H2 log (8Hk 2/δ ) + √λ B,
+
+ˇβk = 8d
+
+q
+
+log (1 + k/λ ) log (8Hk 2/δ )+ 4√d log (8Hk 2/δ ) + √λ B.
+
+Based on these observations, we have | ¯VhV ℓ
+
+> k,h+1
+
+(s, a) −
+
+VhV ℓ
+
+> k,h+1
+
+(s, a)| ≤ Eℓ
+
+> k,h
+
+, where the offset term Eℓ 
+
+> k,h
+
+is defined as follows: for ℓ ∈ { r, g},
+
+Eℓ 
+
+> k,h
+
+= min 
+
+(
+
+H2, eβk φ(V ℓ 
+
+> k,h+1)2
+
+(s, a) (eΣℓ
+
+> k,h)−1
+
+)
+
++ min 
+
+(
+
+H2, 2H ˇβk φV ℓ
+
+> k,h+1
+
+(s, a) bΣℓ
+
+> k,h
+> −1
+
+)
+
+.
+
+(11) Finally, we present ¯ σ rk,h and ¯ σ gk,h, defined for ℓ ∈ { r, g} as 
+
+( ¯σ ℓ
+
+> k,h
+
+)2 = max 
+
+n
+
+H2/d, ¯VhV ℓ
+
+> k,h+1
+
+(skh, akh) + Eℓ
+
+> k,h
+
+o
+
+. (12) The effectiveness of our estimates is supported by the following lemma. 
+
+Lemma 1: For any (k, h, ℓ ) ∈ [H] × [K] × { r, g}, with prob-ability at least 1 − 3δ ,
+
+θ ∗ 
+
+> h
+
+− bθ ℓ 
+
+> k,hbΣℓ
+> k,h
+
+≤ bβk, |VhV ℓ
+
+> k,h+1
+
+(s, a) − ¯VhV ℓ
+
+> k,h+1
+
+(s, a)| ≤ Eℓ
+
+> k,h
+
+.
+
+Remark 1: The computational complexity of PD-POWERS is comparable to that of its unconstrained counterpart (POWERS, [9]). Specifically, it is 
+
+O(min {d3HK 2|A|, |S|| A|K} + d3HK ) with O(HK ) calls to the integrating oracle O for computing ∑s′ ψ(s′)V (s′),where ψ : S → Rd satisfies φ (s′|s, a) = ψ(s′) ⊙ μ(s, a) for some μ : S × A → Rd , and ⊙ denotes the component-wise product. For more details, we refer the reader to [9]. IV. A NALYSIS 
+
+In this section, we present our main result (Theorem 1), which establishes upper bounds on both the regret and the constraint violation. We also provide a high-level overview of the analysis; the full proofs are deferred to the appendix. 
+
+Theorem 1: Suppose that Assumption 1 holds and K ≥
+
+max {2H, H2, d3H3}. Set λ = 1/B2, α = 1/(H2√K), η =
+
+1/(H√K), and θ = 1/K. With probability at least 1 − 6δ ,Reg (K) = eO
+
+√dH 4K + √d2H3K + H5√K/γ2
+
+,
+
+Vio (K) = eO
+
+√dH 4K + √d2H3K + H3√K/γ
+
+
+
+.
+
+Remark 2: The bounds in Theorem 1 depend on the Slater constant γ. Such dependence naturally arises in primal-dual approaches for CMDPs, where controlling the dual variable is essential for enforcing the constraint, as also observed in prior works such as [3], [4], [8]. Moreover, in many practical applications where the feature dimension d is large, this dependence need not be the leading term. In particular, when d = Ω(H3.5 log |A|/γ2), the regret bound in Theorem 1 matches the lower bound Ω(√d2H3K) established in [9] 4 up to logarithmic factors. Under this condition on d, the regret bounds are summarized in Table I, highlighting that our algorithm guarantees the lowest regret among these methods. 
+
+A. Limitations of Strong Duality-Based Analysis 
+
+Before presenting the overview of our analysis, we explain why the strong duality-based approach induced by (5) fails when the rewards vary across episodes. On top of (5), the strong duality–based analysis [3], [4] begins by upper bounding the following composite regret term for any Y ∈ [0, 2/γ]:
+
+> K
+
+# ∑
+
+> k=1
+
+ V r,π∗ 
+
+> 1
+
+(s1) −V r,πk 
+
+> 1
+
+(s1) +Y
+
+> K
+
+# ∑
+
+> k=1
+
+ b −V g,πk 
+
+> 1
+
+(s1). (13)   
+
+> 4Note that unconstrained adversarial linear mixture MDPs can be viewed as a special case of our setting by introducing a trivial constraint. Therefore, the known lower bound Ω(√d2H3K)for that setting also applies here.
+
+The next step is to separate the composite regret into regret and violation terms. Here, [34] shows that the following holds under strong duality: for an optimal policy π∗ ∈
+
+arg max π V r,π 
+
+> 1
+
+(s1) s.t. V g,π 
+
+> 1
+
+(s1) ≥ b and some ∆k, if 
+
+V r,π∗ 
+
+> 1
+
+(s1) −V r,πk 
+
+> 1
+
+(s1) + 2
+
+γ
+
+ b −V g,πk 
+
+> 1
+
+(s1) ≤ ∆k, (14) then 
+
+V r,π∗ 
+
+> 1
+
+(s1) −V r,πk 
+
+> 1
+
+(s1) ≤ ∆k and b −V g,πk 
+
+> 1
+
+(s1) ≤ γ
+
+2 ∆k. (15) Applying this argument for all k ∈ [K] yields regret and violation bounds from a bound on (13). Now, let us examine whether the same argument can be applied in our setting. Since the rewards change over k, the analogue of (14) becomes 
+
+V rk,πk,∗ 
+
+> 1
+
+(s1) −V rk,πk 
+
+> 1
+
+(s1) + 2
+
+γ
+
+ b −V g,πk 
+
+> 1
+
+(s1) ≤ ∆k,
+
+where πk,∗ ∈ arg max π V rk,π 
+
+> 1
+
+(s1) s.t. V g,π 
+
+> 1
+
+(s1) ≥ b for each 
+
+k. Consequently, as the analogue of (13), the correspond-ing composite regret must use the sequence {πk,∗}k∈[K] as comparator policies, namely, 
+
+> K
+
+# ∑
+
+> k=1
+
+ V rk,πk,∗ 
+
+> 1
+
+(s1) −V rk,πk 
+
+> 1
+
+(s1) +Y
+
+> K
+
+# ∑
+
+> k=1
+
+ b −V g,πk 
+
+> 1
+
+(s1).
+
+However, obtaining an upper bound on this term is non-trivial unless rk is known before episode k, which is not allowed in the adversarial-reward setting. This highlights the limitations of strong duality-based analysis in our setting. 
+
+B. Our Analysis 
+
+To overcome these limitations, we establish a drift-based analysis based on (4), which does not rely on strong duality. As a first step, we provide decompositions of Reg (K) and Vio (K). Since the optimal policy π∗ satisfies V g,π∗ 
+
+> 1
+
+(s1) ≥ b
+
+and Yk ≥ 0, we have Reg (K)
+
+≤
+
+> K
+
+# ∑
+
+> k=1
+
+
+
+V rk,π∗ 
+
+> 1
+
+(s1) + YkV g,π∗ 
+
+> 1
+
+(s1) −V rk,1(s1) −YkV gk,1(s1)
+
+
+
++
+
+> K
+
+# ∑
+
+> k=1
+
+
+
+V rk,1(s1) −V rk,πk 
+
+> 1
+
+(s1)
+
+
+
++
+
+> K
+
+# ∑
+
+> k=1
+
+Yk
+
+
+
+V gk,1(s1) − b
+
+
+
+,
+
+Vio (K) = 
+
+> K
+
+# ∑
+
+> k=1
+
+(b −V gk,1(s1)) + 
+
+> K
+
+# ∑
+
+> k=1
+
+(V gk,1(s1) −V g,πk 
+
+> 1
+
+(s1)) .
+
+Since we employ weighted ridge regression for parameter estimation, the bias terms appearing in both the regret and violation decompositions admit the following bounds. 
+
+Lemma 2: Suppose that K ≥ d3H3. With probability at least 1 − 6δ ,
+
+> K
+
+# ∑
+
+> k=1
+
+
+
+V rk,h(skh) −V rk,πk 
+
+> h
+
+(skh)
+
+
+
+= eO
+
+√dH 4K + √d2H3K
+
+
+
+,
+
+> K
+
+# ∑
+
+> k=1
+
+
+
+V gk,h(skh) −V g,πk 
+
+> h
+
+(skh)
+
+
+
+= eO
+
+√dH 4K + √d2H3K
+
+
+
+.Next, we focus on ∑Kk=1(b −V gk,1(s1)) . By the dual update, 
+
+> K
+
+# ∑
+
+> k=1
+
+(b −V gk,1(s1)) ≤ YK+1
+
+η + αH3 K
+
+# ∑
+
+> k=1
+
+Yk + αKH 3 + 2θ KH 2.
+
+Therefore, it suffices to bound Yk uniformly over k. To this end, we employ drift-based arguments [35], [36]. Based on the observation that our regularizer in (4) satisfies 
+
+−αη H2(1 +Yk) − 2ηθ H ≤ η⟨πk+1 
+
+> h
+
+− πkh , Qgk,h⟩ (Lemma 18), we establish the following drift inequality: 
+
+Y 2 
+
+> k+1
+
+−Y 2
+
+> k
+
+2 ≤ − γη Yk +C (16) 
+
++ ηα E ¯π
+
+" H
+
+# ∑
+
+> h=1
+
+D( ¯πh(·| sh)|| eπkh (·| sh)) − D( ¯πh(·| sh)|| πk+1 
+
+> h
+
+(·| sh)) 
+
+#
+
+where C = αη H3 
+
+> 2
+
++ 2ηH2θ + 2ηH2 + 2η2(H2 + α2H6 +
+
+9η2α2H8K2 + 4θ 2H4).
+
+From (16), we observe that eπkh is a perturbed policy, and hence the KL divergence term D( ¯πh(·| sh)∥eπkh (·| sh)) admits a small upper bound. This highlights the necessity of the policy perturbation step. Without this perturbation, the KL divergence term D( ¯πh(·| sh)∥πkh (·| sh)) could be unbounded, as πkh approaches the boundary of the simplex. With further analysis, we obtain the following bound. 
+
+Lemma 3: Suppose that Assumption 1 holds and K ≥
+
+max {2H, H2}. For all k ∈ [K], with probability at least 1 − 6δ ,
+
+Yk = eO(H2/γ).
+
+Since Yk is bounded by Lemma 3, it follows that 
+
+∑Kk=1 Yk
+
+
+
+V gk,1(s1) − b
+
+
+
+= eO  H√K + H5√K/γ2 . The de-tailed derivation is deferred to the appendix. To complete the analysis, it remains to bound 
+
+∑Kk=1
+
+
+
+V rk,π∗ 
+
+> 1
+
+(s1) + YkV g,π∗ 
+
+> 1
+
+(s1) −V rk,1(s1) −YkV gk,1(s1)
+
+
+
+.By Lemma 1 and the value difference lemma (Lemma 1 of [37]), this term can be bounded as 
+
+> K
+
+# ∑
+
+> k=1
+
+Eπ∗
+
+" H
+
+# ∑
+
+> h=1
+
+⟨Qrk,h(sh, ·) + YkQgk,h(sh, ·), π∗ 
+
+> h
+
+(·| sh) − πkh (·| sh)⟩| s1
+
+#
+
+.
+
+Moreover, since we employ the policy optimization (3), the above term can be effectively controlled. Specifically, we apply the standard OMD lemma [38], together with the policy perturbation step. Combining these ingredients, we obtain the following lemma. 
+
+Lemma 4: Let K ≥ max {2H, H2}. With probability at least 1 − 6δ ,
+
+> K
+
+# ∑
+
+> k=1
+
+
+
+V rk,π∗ 
+
+> 1
+
+(s1) + YkV g,π∗ 
+
+> 1
+
+(s1) −V rk,1(s1) −YkV gk,1(s1)
+
+
+
+= eO
+
+
+
+H5√K/γ2 + H3√K + H4/γ
+
+
+
+.
+
+V. N UMERICAL EXPERIMENTS 
+
+In Figure 1, we evaluate PD-POWERS on a CMDP instance adapted from [9], with modifications including the addition of a constraint. The details of the setting are described below. We conduct 5 simulations with K = 2,000 
+
+Fig. 1: Regret and constraint violation of PD-POWERS. under different random seeds. Each plot shows the average, and the shaded regions indicate 95% confidence intervals. As in [9], we compare both the regret and violation of our algorithm with those of a random policy—one that selects a uniformly sampled action at each step. As shown in the figure, our algorithm exhibits sublinear growth in both regret and violation with respect to the number of episodes, while those of the random policy grow linearly. Therefore, the numerical results support our theoretical findings. Let H = 10 and d = 5. Let S = {0, . . . , H + 1} and A =
+
+{− 1, 1}d−1. Let s = 0 be the initial state and b = 6. For 
+
+s < H, we define Ph(s + 1|s, a) = −0.01 · 111⊤a + 0.95 and 
+
+Ph(H + 1|s, a) = 1 − Ph(s + 1|s, a). For s = H or H + 1, we set Ph(s|s, a) = 1. For s < H, if ⌊k/10 ⌋ ≡ 0 mod 2, then 
+
+rk(s, a) = 0.4 ∑d−1 
+
+> i=1
+> ai+12(d−1)
+
+, and if ⌊k/10 ⌋ ≡ 1 mod 2, then 
+
+rk(s, a) = 0.4(1 − ∑d−1 
+
+> i=1
+> ai+12(d−1)
+
+). For all k ∈ [K], rk(H, a) = 
+
+0 and rk(H + 1, a) = 1. Let g(s, a) = ∑d−1 
+
+> i=1
+> ai+12(d−1)
+
+if s <
+
+H, and g(s, a) = 0 otherwise. The code is available at: https://github.com/kihyun-yu/pd-powers. VI. C ONCLUSION 
+
+In this paper, we study online linear mixture CMDPs with adversarial rewards under full-information feedback and a fixed constraint function. We propose PD-POWERS, a primal-dual policy optimization algorithm combining a regularized dual update and weighted ridge regression-based parameter estimation. Moreover, we show that PD-POWERS achieves a near-optimal regret bound. Despite these results, several limitations remain. First, when the integration oracle 
+
+O is not available, the computational complexity may de-pend on |S|, making the algorithm inefficient for large state spaces. Second, the regret and constraint violation bounds become large when γ ≪ 1. Therefore, developing algorithms that remain robust under such degenerate conditions is an important direction for future work. VII. ACKNOWLEDGMENTS This work was supported by the National Research Foun-dation of Korea (NRF) grant (No. RS-2024-00350703) and the Institute of Information & communications Technology Planning & evaluation (IITP) grants (No. IITP-2026-RS-2024-00437268) and (No. RS-2021-II211343, Artificial In-telligence Graduate School Program (Seoul National Univer-sity)) funded by the Korea government (MSIT). REFERENCES [1] Y. Efroni, S. Mannor, and M. Pirotta, “Exploration-exploitation in constrained mdps,” arXiv preprint arXiv:2003.02189 , 2020. [2] T. Liu, R. Zhou, D. Kalathil, P. Kumar, and C. Tian, “Learning policies with zero or bounded constraint violation for constrained mdps,” Advances in Neural Information Processing Systems , vol. 34, pp. 17 183–17 193, 2021. [3] D. Ding, X. Wei, Z. Yang, Z. Wang, and M. Jovanovic, “Provably efficient safe exploration via primal-dual policy optimization,” in In-ternational conference on artificial intelligence and statistics . PMLR, 2021, pp. 3304–3312. [4] A. Ghosh, X. Zhou, and N. Shroff, “Provably efficient model-free constrained rl with linear function approximation,” Advances in Neural Information Processing Systems , vol. 35, pp. 13 303–13 315, 2022. [5] ——, “Towards achieving sub-linear regret and hard constraint vi-olation in model-free rl,” in International Conference on Artificial Intelligence and Statistics . PMLR, 2024, pp. 1054–1062. [6] T. Kitamura, A. Ghosh, T. Kozuno, W. Kumagai, K. Kasaura, K. Hoshino, Y. Hosoe, and Y. Matsuo, “Provably efficient rl under episode-wise safety in constrained mdps with linear function approx-imation,” arXiv preprint arXiv:2502.10138 , 2025. [7] Y. Ding and J. Lavaei, “Provably efficient primal-dual reinforcement learning for cmdps with non-stationary objectives and constraints,” in 
+
+Proceedings of the AAAI Conference on Artificial Intelligence , vol. 37, no. 6, 2023, pp. 7396–7404. [8] K. Yu, S. Bae, and D. Lee, “Primal-dual policy optimization for ad-versarial linear CMDPs,” in The Fourteenth International Conference on Learning Representations , 2026. [9] J. He, D. Zhou, and Q. Gu, “Near-optimal policy optimization algo-rithms for learning adversarial linear mixture mdps,” in International Conference on Artificial Intelligence and Statistics . PMLR, 2022, pp. 4259–4280. [10] A. Ghosh, X. Zhou, and N. Shroff, “Achieving sub-linear regret in infinite horizon average reward constrained MDP with linear function approximation,” in The Eleventh International Conference on Learning Representations , 2023. [11] X. Liu, L. F. Yang, and S. Vaswani, “Sample complexity bounds for linear constrained mdps with a generative model,” arXiv preprint arXiv:2507.02089 , 2025. [12] Y. Wei, X. Li, and L. F. Yang, “Near-optimal sample complexity bounds for constrained average-reward MDPs,” in The Fourteenth International Conference on Learning Representations , 2026. [13] T. Tian, L. F. Yang, and C. Szepesv´ ari, “Confident natural policy gra-dient for local planning in qπ -realizable constrained mdps,” Advances in Neural Information Processing Systems , vol. 37, pp. 76 139–76 176, 2024. [14] H. Wei, X. Liu, and L. Ying, “Triple-q: A model-free algorithm for constrained reinforcement learning with sublinear regret and zero con-straint violation,” in International Conference on Artificial Intelligence and Statistics . PMLR, 2022, pp. 3274–3307. [15] A. Bura, A. HasanzadeZonuzy, D. Kalathil, S. Shakkottai, and J.-F. Chamberland, “Dope: Doubly optimistic and pessimistic exploration for safe reinforcement learning,” Advances in neural information processing systems , vol. 35, pp. 1047–1059, 2022. [16] K. Yu, D. Lee, W. Overman, and D. Lee, “Improved regret bound for safe reinforcement learning via tighter cost pessimism and reward optimism,” Reinforcement Learning Journal , 2025. [17] A. M¨ uller, P. Alatur, V. Cevher, G. Ramponi, and N. He, “Truly no-regret learning in constrained mdps,” in International Conference on Machine Learning . PMLR, 2024, pp. 36 605–36 653. [18] J. Zhu, K. Yu, D. Lee, X. Liu, and H. Wei, “An optimistic algorithm for online CMDPS with anytime adversarial constraints,” in Forty-second International Conference on Machine Learning , 2025. [19] F. E. Stradi, M. Castiglioni, A. Marchesi, and N. Gatti, “Optimal strong regret and violation in constrained MDPs via policy optimization,” in 
+
+The Thirteenth International Conference on Learning Representations ,2025. [20] C. Liu, Y. Li, and L. Yang, “Near-optimal sample complexity for online constrained MDPs,” in The Thirty-ninth Annual Conference on Neural Information Processing Systems , 2025. [21] S. Qiu, X. Wei, Z. Yang, J. Ye, and Z. Wang, “Upper confidence primal-dual reinforcement learning for cmdp with adversarial loss,” 
+
+Advances in Neural Information Processing Systems , vol. 33, pp. 15 277–15 287, 2020. [22] F. E. Stradi, J. Germano, G. Genalti, M. Castiglioni, A. Marchesi, and N. Gatti, “Online learning in cmdps: Handling stochastic and adversarial constraints,” in Forty-first International Conference on Machine Learning , 2024. [23] F. E. Stradi, M. Castiglioni, A. Marchesi, and N. Gatti, “Learning adversarial MDPs with stochastic hard constraints,” in Forty-second International Conference on Machine Learning , 2025. [24] F. E. Stradi, A. Lunghi, M. Castiglioni, A. Marchesi, and N. Gatti, “Policy optimization for cmdps with bandit feedback: Learning stochastic and adversarial constraints,” in Forty-second International Conference on Machine Learning , 2025. [25] S. Amani, C. Thrampoulidis, and L. Yang, “Safe reinforcement learn-ing with linear function approximation,” in International Conference on Machine Learning . PMLR, 2021, pp. 243–253. [26] M. Shi, Y. Liang, and N. Shroff, “A near-optimal algorithm for safe reinforcement learning under instantaneous hard constraints,” in 
+
+International Conference on Machine Learning . PMLR, 2023, pp. 31 243–31 268. [27] H. Wei, X. Liu, and L. Ying, “Safe reinforcement learning with instantaneous constraints: The role of aggressive exploration,” in 
+
+Proceedings of the AAAI Conference on Artificial Intelligence , vol. 38, no. 19, 2024, pp. 21 708–21 716. [28] A. Roknilamouki, A. Ghosh, M. Shi, F. Nourzad, E. Ekici, and N. Shroff, “Provably efficient RL for linear MDPs under instantaneous safety constraints in non-convex feature spaces,” in Forty-second International Conference on Machine Learning , 2025. [29] Z. Jia, L. Yang, C. Szepesvari, and M. Wang, “Model-based rein-forcement learning with value-targeted regression,” in Learning for Dynamics and Control . PMLR, 2020, pp. 666–686. [30] A. Ayoub, Z. Jia, C. Szepesvari, M. Wang, and L. Yang, “Model-based reinforcement learning with value-targeted regression,” in Inter-national Conference on Machine Learning . PMLR, 2020, pp. 463– 474. [31] D. Zhou, Q. Gu, and C. Szepesvari, “Nearly minimax optimal rein-forcement learning for linear mixture markov decision processes,” in 
+
+Conference on Learning Theory . PMLR, 2021, pp. 4532–4576. [32] Q. Cai, Z. Yang, C. Jin, and Z. Wang, “Provably efficient exploration in policy optimization,” in International Conference on Machine Learning . PMLR, 2020, pp. 1283–1294. [33] J. Kirschner and A. Krause, “Information directed sampling and ban-dits with heteroscedastic noise,” in Conference On Learning Theory .PMLR, 2018, pp. 358–384. [34] D. Ding, K. Zhang, T. Basar, and M. Jovanovic, “Natural policy gradient primal-dual method for constrained markov decision pro-cesses,” Advances in Neural Information Processing Systems , vol. 33, pp. 8378–8390, 2020. [35] H. Yu, M. Neely, and X. Wei, “Online convex optimization with stochastic constraints,” Advances in Neural Information Processing Systems , vol. 30, 2017. [36] X. Wei, H. Yu, and M. J. Neely, “Online primal-dual mirror descent under stochastic constraints,” Proceedings of the ACM on Measure-ment and Analysis of Computing Systems , vol. 4, no. 2, pp. 1–36, 2020. [37] L. Shani, Y. Efroni, A. Rosenberg, and S. Mannor, “Optimistic policy optimization with bandit feedback,” in International Conference on Machine Learning . PMLR, 2020, pp. 8604–8613. [38] E. Hazan, “Introduction to online convex optimization,” Foundations and Trends in Optimization , vol. 2, no. 3-4, pp. 157–325, 2016. [39] C. Jin, Z. Allen-Zhu, S. Bubeck, and M. I. Jordan, “Is q-learning provably efficient?” Advances in neural information processing sys-tems , vol. 31, 2018. [40] Y. Abbasi-Yadkori, D. P´ al, and C. Szepesv´ ari, “Improved algorithms for linear stochastic bandits,” Advances in neural information process-ing systems , vol. 24, 2011. CONTENTS 
+
+I Introduction 1I-A Additional Related Works . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 2
+
+II Problem Formulation 2
+
+III Proposed Algorithm 2III-A Challenges in Algorithm Design . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 2III-B Description of PD-POWERS . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 3
+
+IV Analysis 5IV-A Limitations of Strong Duality-Based Analysis . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5IV-B Our Analysis . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 5
+
+V Numerical Experiments 6
+
+VI Conclusion 6
+
+VII ACKNOWLEDGMENTS 7
+
+References 7
+
+Appendix I: Auxiliary Notions 8
+
+Appendix II: Proof of Lemma 1 8
+
+Appendix III: Proof of Lemma 2 12 
+
+Appendix IV: Proof of Lemma 3 17 
+
+Appendix V: Proof of Lemma 4 20 
+
+Appendix VI: Proof of Theorem 1 21 APPENDIX IAUXILIARY NOTIONS 
+
+Definition 2 (High-probability good event): We define a high-probability good event E as 
+
+E = E1 ∩ E2 ∩ E3 ∩ E4,
+
+where E1, E2, E3, E4 hold when the statement of Lemmas 1, 7, 8, and 9 hold, respectively. 
+
+Definition 3 (Filtration): Let Fk,h denote the σ -algebra that includes all randomness up to step h and episode k, i.e., 
+
+Fk,h = σ
+
+n
+
+{(sτ 
+
+> j
+
+, aτ 
+
+> j
+
+)}τ∈[k−1], j∈[H] ∪ { rτ }τ∈[k] ∪ { (skj, akj)} j∈[h]
+
+o
+
+. (17) Let Gk,h denote the σ -algebra that includes all randomness fixed before sampling akh, i.e., 
+
+Gk,h = σ
+
+n
+
+{(sτ 
+
+> j
+
+, aτ 
+
+> j
+
+)}τ∈[k−1], j∈[H] ∪ { rτ }τ∈[k] ∪ { (skj, akj)} j∈[h−1] ∪ skh
+
+o
+
+. (18) Since the adversarial reward in episode k is determined at the beginning of the episode, {rkh}h∈[H] is Fk,1-measurable. Moreover, we note that, {πkh }h∈[H], {Qrk,h, Qgk,h}h∈[H], and {V rk,h,V gk,h}h∈[H] are Fk,1-measurable, since they are determined by 
+
+{(sτ 
+
+> j
+
+, aτ 
+
+> j
+
+)} j∈[H],τ∈[k−1] and {rτ }τ∈[k].APPENDIX II PROOF OF LEMMA 1
+
+Proposition 2 (Restatement of Proposition 1): For any (s, a, h, k, ℓ ) ∈ S × A × [H] × [K] × { r, g},
+
+¯VhV ℓ
+
+> k,h+1
+
+(s, a) − VhV ℓ
+
+> k,h+1
+
+(s, a) ≤ min 
+
+
+
+H2,
+
+eΣℓ
+
+> k,h
+
+−1/2
+
+φ(V ℓ 
+
+> k,h+1)2
+
+(s, a) 2
+
+eΣℓ
+
+> k,h
+
+1/2
+
+(eθ ℓ 
+
+> k,h
+
+− θ ∗ 
+
+> h
+
+) 2
+
+
+
++ min 
+
+
+
+H2, 2H
+
+bΣℓ
+
+> k,h
+
+−1/2
+
+φV ℓ
+
+> k,h+1
+
+(s, a) 2
+
+bΣℓ
+
+> k,h
+
+1/2
+
+(bθ ℓ 
+
+> k,h
+
+− θ ∗ 
+
+> h
+
+) 2
+
+Proof: Consider the case of r. By definition and the triangle inequality, 
+
+¯VhV rk,h+1(s, a) − VhV rk,h+1(s, a) ≤
+
+h
+
+⟨φ(V rk,h+1)2 (s, a), eθ rk,h⟩
+
+i
+
+[0,H2] − ⟨ φ(V rk,h+1)2 (s, a), θ ∗ 
+
+> h
+
+⟩
+
+| {z }
+
+> (a)
+
++ ⟨φV rk,h+1 (s, a), θ ∗ 
+
+> h
+
+⟩2 −
+
+h
+
+⟨φV rk,h+1 (s, a), bθ rk,h⟩
+
+i2
+
+> [0,H]
+
+| {z }
+
+> (b)
+
+.
+
+Term (a) can be bounded as Term (a) ≤ ⟨φ(V rk,h+1)2 (s, a), eθ rk,h⟩ − ⟨ φ(V rk,h+1)2 (s, a), θ ∗ 
+
+> h
+
+⟩
+
+≤
+
+eΣrk,h
+
+−1/2
+
+φ(V rk,h+1)2 (s, a) 2
+
+eΣrk,h
+
+1/2
+
+(eθ rk,h − θ ∗ 
+
+> h
+
+) 2
+
+where the first inequality is due to the fact that ⟨φ(V rk,h+1)2 (s, a), θ ∗ 
+
+> h
+
+⟩ = Ph(V rk,h+1)2(s, a) ≤ H2, and the second inequality is due to the Cauchy-Schwarz inequality. Furthermore, since term (a) ≤ H2, we have the following upper bound. Term (a) ≤ min 
+
+
+
+H2,
+
+eΣrk,h
+
+−1/2
+
+φ(V rk,h+1)2 (s, a) 2
+
+eΣrk,h
+
+1/2
+
+(eθ rk,h − θ ∗ 
+
+> h
+
+) 2
+
+
+
+.
+
+Next, term (b) is bounded as Term (b) =
+
+h
+
+⟨φV rk,h+1 (s, a), bθ rk,h⟩
+
+i 
+
+> [0,H]
+
++ ⟨φV rk,h+1 (s, a), θ ∗ 
+
+> h
+
+⟩
+
+h
+
+⟨φV rk,h+1 (s, a), bθ rk,h⟩
+
+i 
+
+> [0,H]
+
+− ⟨ φV rk,h+1 (s, a), θ ∗ 
+
+> h
+
+⟩
+
+≤ 2H
+
+h
+
+⟨φV rk,h+1 (s, a), bθ rk,h⟩
+
+i 
+
+> [0,H]
+
+− ⟨ φV rk,h+1 (s, a), θ ∗ 
+
+> h
+
+⟩
+
+≤ 2H ⟨φV rk,h+1 (s, a), bθ rk,h⟩ − ⟨ φV rk,h+1 (s, a), θ ∗ 
+
+> h
+
+⟩
+
+≤ 2H
+
+bΣrk,h
+
+−1/2
+
+φV rk,h+1 (s, a) 2
+
+bΣrk,h
+
+1/2
+
+(bθ rk,h − θ ∗ 
+
+> h
+
+) 2
+
+where the first and second inequalities are due to ⟨φV rk,h+1 (s, a), θ ∗ 
+
+> h
+
+⟩ = PhV rk,h+1(s, a) ≤ H, and the last inequality is due to the Cauchy-Schwarz inequality. Again, since term (b) ≤ H2, we have Term (b) ≤ min 
+
+
+
+H2, 2H
+
+bΣrk,h
+
+−1/2
+
+φV rk,h+1 (s, a) 2
+
+bΣrk,h
+
+1/2
+
+(bθ rk,h − θ ∗ 
+
+> h
+
+) 2
+
+
+
+Combining those, we have the desired result. By applying the same argument to g, we conclude the proof. 
+
+Lemma 5 (Restatement of Lemma 1): For any (k, h, ℓ ) ∈ [H] × [K] × { r, g}, with probability at least 1 − 3δ ,
+
+bΣℓ
+
+> k,h
+
+1/2
+
+(θ ∗ 
+
+> h
+
+− bθ ℓ
+
+> k,h
+
+) 2
+
+≤ bβk, |VhV ℓ
+
+> k,h+1
+
+(s, a) − ¯VhV ℓ
+
+> k,h+1
+
+(s, a)| ≤ Eℓ
+
+> k,h
+
+.
+
+Proof: Consider the case of r. We prove the first statement as follows. Let 
+
+eC rk,h =
+
+
+
+θ ∗ 
+
+> h
+
+∈ Rd :
+
+eΣrk,h
+
+1/2
+
+(θ ∗ 
+
+> h
+
+− eθ rk,h) 2
+
+≤ eβk
+
+
+
+,
+
+ˇC rk,h =
+
+
+
+θ ∗ 
+
+> h
+
+∈ Rd :
+
+bΣrk,h
+
+1/2
+
+(θ ∗ 
+
+> h
+
+− bθ rk,h) 2
+
+≤ ˇβk
+
+
+
+,
+
+C rk,h =
+
+
+
+θ ∗ 
+
+> h
+
+∈ Rd :
+
+bΣrk,h
+
+1/2
+
+(θ ∗ 
+
+> h
+
+− bθ rk,h) 2
+
+≤ bβk
+
+
+
+.
+
+For a fixed h ∈ [H], we first show that θ ∗ 
+
+> h
+
+∈ eC rk,h and θ ∗ 
+
+> h
+
+∈ ˇC rk,h for all k ∈ [K] with high probability. Based on these, we then show that θ ∗ 
+
+> h
+
+∈ C rk,h.Proof of θ ∗ 
+
+> h
+
+∈ eC rk,h. Fix h ∈ [H]. Take 
+
+μ∗ = θ ∗ 
+
+> h
+
+, xk = φ(V rk,h+1)2 (skh, akh), yk = ( V rk,h+1)2(skh+1),
+
+ηk = ( V rk,h+1)2(skh+1) − ⟨ φ(V rk,h+1)2 (skh, akh), θ ∗ 
+
+> h
+
+⟩,
+
+Zk = eΣrk,h = λ I +
+
+> k−1
+
+# ∑
+
+> i=1
+
+φ(V ri,h+1)2 (sih, aih)φ(V ri,h+1)2 (sih, aih)⊤,
+
+μk = eθk,h =
+
+eΣrk,h
+
+−1 k−1
+
+# ∑
+
+> i=1
+
+(V ri,h+1)2(sih+1)φ(V ri,h+1)2 (sih, aih)
+
+!
+
+.
+
+Here, V rk,h+1 is Fk,1-measurable, skh, akh are Fk,h-measurable. So, xk is Fk,h-measurable. Since skh+1 is Fk,h+1-measurable, so is ηk. Furthermore, Fk,h+1 ⊂ Fk+1,h, ηk is Fk+1,h-measurable. Also, E[ηk | Fk,h] = 0. Now, we apply Lemma 16 with the following parameters. 
+
+∥xk∥2 ≤ H2, |ηk| ≤ H2, E η2 
+
+> k
+
+|Fk,h
+
+ ≤ H4.
+
+Hence, with probability at least 1 − δ /(2H),
+
+∀k ≥ 2,
+
+eΣrk,h
+
+1/2
+
+(θ ∗ 
+
+> h
+
+− eθ rk,h) 2
+
+≤ eβk. (19) where 
+
+eβk = 8H2
+
+q
+
+d log (1 + kH 4/(dλ )) log (8Hk 2/δ ) + 4H2 log (8Hk 2/δ ) + √λ B.
+
+Proof of θ ∗ 
+
+> h
+
+∈ ˇC rk,h. Fix h ∈ [H]. Take 
+
+μ∗ = θ ∗ 
+
+> h
+
+, xk = φV rk,h+1 (skh, akh)/ ¯σ rk,h, yk = V rk,h+1(skh+1)/ ¯σ rk,h,
+
+ηk =
+
+
+
+V rk,h+1(skh+1) − ⟨ φV rk,h+1 (skh, akh), θ ∗ 
+
+> h
+
+⟩
+
+
+
+/ ¯σ rk,h,
+
+Zk = bΣrk,h = λ I +
+
+> k−1
+
+# ∑
+
+> i=1
+
+φV ri,h+1 (sih, aih)φV ri,h+1 (sih, aih)⊤/( ¯σ ri,h)2,
+
+μk = bθ rk,h =
+
+bΣrk,h
+
+−1 k−1
+
+# ∑
+
+> i=1
+
+V ri,h+1(sih+1)φV ri,h+1 (sih, aih)/( ¯σ ri,h)2
+
+!
+
+.
+
+Here, V rk,h+1 is Fk,1-measurable, ¯ σ rk,h, skh, akh are Fk,h-measurable. So, xk is Fk,h-measurable. Since skh+1 is Fk,h+1-measurable, so is ηk. Furthermore, Fk,h+1 ⊂ Fk+1,h, ηk is Fk+1,h-measurable. Also, E[ηk | Fk,h] = 0. Now, we apply Lemma 16 with the following parameters. 
+
+∥xk∥2 ≤ H/
+
+q
+
+H2/d = √d, |ηk| ≤ H/
+
+q
+
+H2/d = √d, E η2 
+
+> k
+
+|Fk,h
+
+ ≤ d.
+
+Hence, with probability at least 1 − δ /(2H),
+
+∀k ≥ 2,
+
+bΣrk,h
+
+1/2
+
+(θ ∗ 
+
+> h
+
+− bθ rk,h) 2
+
+≤ ˇβk. (20) where ˇβk = 8d
+
+q
+
+log (1 + k/λ ) log (8Hk 2/δ ) + 4√d log (8Hk 2/δ ) + √λ B.
+
+a) Proof of θ ∗ 
+
+> h
+
+∈ C rk,h.: Fix h ∈ [H]. Take 
+
+μ∗ = θ ∗ 
+
+> h
+
+, xk = φV rk,h+1 (skh, akh)/ ¯σ rk,h, yk = ⟨θ ∗ 
+
+> h
+
+, xk⟩ + ηk,
+
+ηk = 1{θ ∗ 
+
+> h
+
+∈ eC rk,h ∩ ˇC rk,h}
+
+
+
+V rk,h+1(skh+1) − ⟨ φV rk,h+1 (skh, akh), θ ∗ 
+
+> h
+
+⟩
+
+
+
+/ ¯σ rk,h,
+
+Zk = bΣrk,h = λ I +
+
+> k−1
+
+# ∑
+
+> i=1
+
+φV ri,h+1 (sih, aih)φV ri,h+1 (sih, aih)⊤/( ¯σ ri,h)2, μk = Z−1
+
+> kk−1
+
+# ∑
+
+> i=1
+
+xiyi.
+
+(21) Note that 1{θ ∗ 
+
+> h
+
+∈ eC rk,h ∩ ˇC rk,h} is Fk,h-measurable. By applying the same argument in the proof of θ ∗ 
+
+> h
+
+∈ ˇC rk,h, it follows that 
+
+E[η2 
+
+> k
+
+|Fk,h] ≤ 1{θ ∗ 
+
+> h
+
+∈ eC rk,h ∩ ˇC rk,h}( ¯σ rk,h)−2[VhV rk,h+1]( skh, akh)
+
+≤ 1{θ ∗ 
+
+> h
+
+∈ eC rk,h ∩ ˇC rk,h}( ¯σ rk,h)−2 · ¯VhV rk,h+1(skh, akh)+ min 
+
+
+
+H2,
+
+eΣrk,h
+
+−1/2
+
+φ(V rk,h+1)2 (skh, akh) 2
+
+eΣrk,h
+
+1/2
+
+(eθk,h − θ ∗ 
+
+> h
+
+) 2
+
+
+
++ min 
+
+
+
+H2, 2H
+
+bΣrk,h
+
+−1/2
+
+φV rk,h+1 (skh, akh) 2
+
+bΣrk,h
+
+1/2
+
+(bθk,h − θ ∗ 
+
+> h
+
+) 2
+
+ !
+
+≤ ( ¯σ rk,h)−2 · ¯VhV rk,h+1(skh, akh) + min 
+
+
+
+H2, eβk
+
+eΣrk,h
+
+−1/2
+
+φ(V rk,h+1)2 (skh, akh) 2
+
+
+
++ min 
+
+
+
+H2, ˇβk
+
+bΣrk,h
+
+−1/2
+
+φV rk,h+1 (skh, akh) 2
+
+ !
+
+≤ 1where the second inequality follows from Proposition 1, the second inequality is due to 1{θ ∗ 
+
+> h
+
+∈ eC rk,h ∩ ˇC rk,h}, and the last inequality is due to the definition of ¯ σ rk,h. Again, by Lemma 16, with probability at least 1 − δ /(2H)
+
+bΣrk,h
+
+1/2
+
+(θ ∗ 
+
+> h
+
+− μk) 2
+
+≤ bβk,h (22) where μk is defined in (21) and 
+
+bβk = 8
+
+q
+
+d log (1 + k/λ ) log (8Hk 2/δ ) + 4√d log (8Hk 2/δ ) + √λ B.
+
+By union bound, (19), (20), and (22) hold with probability at least 1 −3δ /(2H). On this event, since 1{θ ∗ 
+
+> h
+
+∈ eC rk,h ∩ ˇC rk,h} =
+
+1, yk and μk defined in (21) become 
+
+yk = V rk,h+1(skh+1)/ ¯σ rk,h, μk = bθ rk,h.
+
+Thus, we have θ ∗ 
+
+> h
+
+∈ C rk,h, as (22) is assumed to be true. Moreover, we can apply the same argument to g. Finally, by taking union bound over h ∈ [H] and ℓ ∈ { r, g}, with probability at least 1 − 3δ ,
+
+∀(k, h, ℓ ) ∈ [K] × [H] × { r, g} : θ ∗ 
+
+> h
+
+∈ C ℓ
+
+> k,h
+
+. (23) Additionally, on the event (19), (20), and (23), by Proposition 1, the second statement of the lemma is proved. Additionally, we introduce the following lemma, which follows from Lemma 1. 
+
+Lemma 6: Suppose that the statement of Lemma 1 holds. For any (s, a, h, k),
+
+rkh(s, a) + PhV rk,h+1(s, a) − Qrk,h(s, a) ≤ 0, gh(s, a) + PhV gk,h+1(s, a) − Qgk,h(s, a) ≤ 0.
+
+Moreover, for all (s, a, h, k) ∈ S × A × [H] × [K],
+
+V rk,h(s) ≥ V rk,πk 
+
+> k,h
+
+(s), Qrk,h(s, a) ≥ Qrk,πk 
+
+> k,h
+
+(s, a),
+
+V gk,h(s) ≥ V g,πk 
+
+> k,h
+
+(s), Qgk,h(s, a) ≥ Qg,πk 
+
+> k,h
+
+(s, a).
+
+Proof: Note that 
+
+rkh(s, a) + ⟨bθ rk,h, φV rk,h+1 (s, a)⟩ + bβk
+
+bΣrk,h
+
+−1/2
+
+φV rk,h+1 (s, a) 2
+
+≥ rkh(s, a) + [ PhV rk,h+1]( s, a) + bβk
+
+bΣrk,h
+
+−1/2
+
+φV rk,h+1 (s, a) 2
+
+−
+
+bΣrk,h
+
+1/2
+
+(θ ∗ 
+
+> h
+
+− bθ rk,h) 2
+
+bΣrk,h
+
+−1/2
+
+φV rk,h+1 (s, a) 2
+
+≥ rkh(s, a) + [ PhV rk,h+1]( s, a)
+
+where the first inequality is due to the triangle inequality and the Cauchy-Schwarz inequality, and the second inequality is due to Lemma 1. Note that rkh(s, a) + [ PhV rk,h+1]( s, a) ≤ H − h + 1. Then it follows that 
+
+
+
+rkh(s, a) + ⟨bθ rk,h, φV rk,h+1 (s, a)⟩ + bβk
+
+bΣrk,h
+
+−1/2
+
+φV rk,h+1 (s, a) 2
+
+
+
+> [0,H−h+1]
+
+≥ rkh(s, a) + [ PhV rk,h+1]( s, a).Note that the left-hand side is equal to Qrk,h(s, a). Moreover, we can apply the same argument to g. Then we conclude the proof of the first statement. Next, we prove the second statement by induction. Consider the case of r. For h = H +1, recall that V rk,H+1(s) = V rk,πk 
+
+> H+1
+
+(s) = 
+
+0 and Qrk,H+1(s, a) = Qrk,πk 
+
+> H+1
+
+(s, a) = 0. Now, suppose that V rk,h+1(s) ≥ V rk,πk 
+
+> h+1
+
+(s) and Qrk,h+1(s, a) ≥ Qrk,πk 
+
+> h+1
+
+(s, a) for all (s, a). It follows that 
+
+Qrk,h(s, a) ≥ rkh(s, a) + PhV rk,h+1(s, a)
+
+≥ rkh(s, a) + PhV rk,πk 
+
+> h+1
+
+(s, a)= Qrk,πk 
+
+> h
+
+(s, a)
+
+where the first inequality follows from the first statement, the second inequality follows from the induction hypothesis, and the equality is due to the Bellman equation. Furthermore, it follows that 
+
+V rk,h(s) = ∑
+
+> a
+
+πkh (a|s)Qrk,h(s, a) ≥ ∑
+
+> a
+
+πkh (a|s)Qrk,πk 
+
+> h
+
+(s, a) = V rk,πk 
+
+> h
+
+(s).
+
+This concludes the induction. Since the same argument can be applied to g, the proof is completed. APPENDIX III PROOF OF LEMMA 2
+
+Lemma 7: With probability at least 1 − δ ,
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+VhV rk,πk 
+
+> h+1
+
+(skh, akh) ≤ 3(HT + H3 log (2/δ )) ,
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+VhV g,πk 
+
+> h+1
+
+(skh, akh) ≤ 3(HT + H3 log (2/δ )) .
+
+Proof: The statement is proved by Lemma C.5 in [39]. 
+
+Lemma 8 (Lemma C.3 of [31]): For any h ∈ [H], with probability at least 1 − δ ,
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> j=h
+
+h
+
+Pj(V rk, j+1 −V rk,πk 
+
+> j+1
+
+)( skj, akj) − (V rk, j+1 −V rk,πk 
+
+> j+1
+
+)( skj+1)
+
+i
+
+≤ 4Hp2T log (2H/δ ),
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> j=h
+
+h
+
+Pj(V gk, j+1 −V g,πk 
+
+> j+1
+
+)( skj, akj) − (V gk, j+1 −V g,πk 
+
+> j+1
+
+)( skj+1)
+
+i
+
+≤ 4Hp2T log (2H/δ ).
+
+Proof: Consider the case of r. Recall that {rkh}h∈[H], {V rk,h+1}h∈[H], and {πkh }h∈[H] are Fk,1-measurable, skh, akh are 
+
+Fk,h-measurable, and skh+1 is Fk,h+1-measurable. Let 
+
+Xk,h = Ph(V rk,h+1 −V rk,πk 
+
+> h+1
+
+)( skh, akh) − (V rk,h+1 −V rk,πk 
+
+> h+1
+
+)( skh+1).
+
+For any h ∈ [H], the following is a martingale difference sequence: 
+
+{X1,h, . . . , X1,H , X2,h, . . . , X2,H , . . . , XK,h, . . . , XK,H }.
+
+Moreover, we have Ph(V rk,h+1 −V rk,πk 
+
+> h+1
+
+)( skh, akh) − (V rk,h+1 −V rk,πk 
+
+> h+1
+
+)( skh+1) ≤ 4H. Then the Azuma-Hoeffding inequality implies that for a given h ∈ [H], with probability at least 1 − δ /(2H),
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> j=h
+
+Pj(V rk, j+1 −V rk,πk 
+
+> j+1
+
+)( skj, akj) − (V rk, j+1 −V rk,πk 
+
+> j+1
+
+)( skj+1) ≤ 4Hp2T log (2H/δ ).
+
+By union bound over h ∈ [H], we can prove that the above inequality holds for all j with probability at least 1 − δ /2. Moreover, the same argument can be applied to g, and by union bound, the statement of the lemma holds with probability at least 1 − δ .
+
+Lemma 9: For any h ∈ [H], with probability at least 1 − δ ,
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> j=h
+
+h
+
+V rk, j(skj) −V rk,πk 
+
+> j
+
+(skj) − Qrk, j(skj, akj) + Qrk,πk 
+
+> j
+
+(skj, akj)
+
+i
+
+≤ 4Hp2T log (2H/δ ),
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> j=h
+
+h
+
+V gk, j(skj) −V g,πk 
+
+> j
+
+(skj) − Qgk, j(skj, akj) + Qg,πk 
+
+> j
+
+(skj, akj)
+
+i
+
+≤ 4Hp2T log (2H/δ ).Proof: Consider the case of r. Note that E[Qrk, j(skj, akj) − Qrk,πk 
+
+> j
+
+(skj, akj)|Gk, j] = V rk, j(skj) − V rk,πk 
+
+> j
+
+(skj), where the only randomness comes from akj ∼ πkj (·| skj). Therefore, using the Azuma-Hoeffding inequality, it can be bounded with probability at least 1 − δ /(2H),
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> j=h
+
+h
+
+V rk, j(skj) −V rk,πk 
+
+> j
+
+(skj) − Qrk, j(skj, akj) + Qrk,πk 
+
+> j
+
+(skj, akj)
+
+i
+
+≤ 4Hp2T log (2H/δ ).
+
+By union bound over h ∈ [H], we can prove that the above inequality holds for all h with probability at least 1 − δ /2. Moreover, the same argument can be applied to g, and by union bound, the statement of the lemma holds with probability at least 1 − δ .
+
+Lemma 10 (Lemma C.5 of [31]): On the good event E (Definition 2), for any h ∈ [H], we have 
+
+> K
+
+# ∑
+
+> k=1
+
+
+
+V rk,h(skh) −V rk,πk 
+
+> h
+
+(skh)
+
+
+
+≤ 2 bβK
+
+vuut K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> j=1
+
+( ¯σ rk, j)2p2Hd log (1 + K/λ ) + 8Hp2T log (2H/δ ),
+
+> K
+
+# ∑
+
+> k=1
+
+
+
+V gk,h(skh) −V g,πk 
+
+> h
+
+(skh)
+
+
+
+≤ 2 bβK
+
+vuut K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> j=1
+
+( ¯σ gk, j)2p2Hd log (1 + K/λ ) + 8Hp2T log (2H/δ ).
+
+Proof: Consider the case of r. Note that 
+
+V rk,h(skh) −V rk,πk 
+
+> h
+
+(skh)= V rk,h(skh) −V rk,πk 
+
+> h
+
+(skh) − Qrk,h(skh, akh) + Qrk,πk 
+
+> h
+
+(skh, akh) + Qrk,h(skh, akh) − Qrk,πk 
+
+> h
+
+(skh, akh).
+
+Note that Qrk,h(skh, akh) − Qrk,πk 
+
+> h
+
+(skh, akh) can be further derived as follows. 
+
+Qrk,h(skh, akh) − Qrk,πk 
+
+> h
+
+(skh, akh) ≤ ⟨ φV rk,h+1 (skh, akh), bθ rk,h⟩ + bβk
+
+bΣrk,h
+
+−1/2
+
+φV rk,h+1 (skh, akh) 2
+
+− PhV rk,πk 
+
+> h+1
+
+(skh, akh)= ⟨φV rk,h+1 (skh, akh), bθ rk,h − θ ∗ 
+
+> h
+
+⟩ + bβk
+
+bΣrk,h
+
+−1/2
+
+φV rk,h+1 (skh, akh) 2
+
++ Ph
+
+
+
+V rk,h+1 −V rk,πk
+
+> h+1
+
+
+
+(skh, akh)
+
+≤
+
+bΣrk,h
+
+−1/2
+
+φV rk,h+1 (skh, akh) 2
+
+bΣrk,h
+
+1/2
+
+(bθ rk,h − θ ∗ 
+
+> h
+
+) 2
+
++ bβk
+
+bΣrk,h
+
+−1/2
+
+φV rk,h+1 (skh, akh) 2
+
++ Ph
+
+
+
+V rk,h+1 −V rk,πk
+
+> h+1
+
+
+
+(skh, akh)
+
+≤ 2 bβk
+
+bΣrk,h
+
+−1/2
+
+φV rk,h+1 (skh, akh) 2
+
++ Ph
+
+
+
+V rk,h+1 −V rk,πk
+
+> h+1
+
+
+
+(skh, akh)
+
+where the first inequality is due to the definition of Qrk,h, Qrk,πk 
+
+> h
+
+and that Qrk,h(s, a) ≥ Qrk,πk 
+
+> h
+
+(s, a) ≥ 0 (Lemma 6), the second inequality is due to the Cauchy-Schwarz inequality, and the last inequality is due to the good event E . Note that 
+
+Qrk,h(skh) − Qrk,πk 
+
+> h
+
+(skh) ≤ H. Then we take min {H, ·} on both sides. 
+
+Qrk,h(skh, akh) − Qrk,πk 
+
+> h
+
+(skh, akh) ≤ min 
+
+
+
+H, 2 bβk
+
+bΣrk,h
+
+−1/2
+
+φV rk,h+1 (skh, akh) 2
+
++ Ph
+
+
+
+V rk,h+1 −V rk,πk
+
+> h+1
+
+
+
+(skh, akh)
+
+
+
+≤ min 
+
+
+
+H, 2 bβk
+
+bΣrk,h
+
+−1/2
+
+φV rk,h+1 (skh, akh) 2
+
+
+
++ Ph
+
+
+
+V rk,h+1 −V rk,πk
+
+> h+1
+
+
+
+(skh, akh)= min 
+
+
+
+H, 2 bβk
+
+bΣrk,h
+
+−1/2
+
+φV rk,h+1 (skh, akh) 2
+
+
+
++ Ph
+
+
+
+V rk,h+1 −V rk,πk
+
+> h+1
+
+
+
+(skh, akh) −
+
+
+
+V rk,h+1 −V rk,πk
+
+> h+1
+
+
+
+(skh+1)+
+
+
+
+V rk,h+1 −V rk,πk
+
+> h+1
+
+
+
+(skh+1)
+
+where the second inequality is true because Ph
+
+
+
+V rk,h+1 −V rk,πk
+
+> h+1
+
+
+
+(skh, akh) ≥ 0 due to Lemma 1. We deduce that 
+
+V rk,h(skh) −V rk,πk 
+
+> h
+
+(skh) ≤ V rk,h(skh) −V rk,πk 
+
+> h
+
+(skh) − Qrk,h(skh, akh) + Qrk,πk 
+
+> h
+
+(skh, akh) + min 
+
+
+
+H, 2 bβk
+
+bΣrk,h
+
+−1/2
+
+φV rk,h+1 (skh, akh) 2
+
+
+
++ Ph
+
+
+
+V rk,h+1 −V rk,πk
+
+> h+1
+
+
+
+(skh, akh) −
+
+
+
+V rk,h+1 −V rk,πk
+
+> h+1
+
+
+
+(skh+1) + V rk,h+1(skh+1) −V rk,πk 
+
+> h+1
+
+(skh+1)Due to the above recursion, it follows that 
+
+V rk,h(skh) −V rk,πk 
+
+> h
+
+(skh) ≤
+
+> H
+
+# ∑
+
+> j=h
+
+V rk, j(skj) −V rk,πk 
+
+> j
+
+(skj) − Qrk, j(skj, akj) + Qrk,πk 
+
+> j
+
+(skj, akj)+
+
+> H
+
+# ∑
+
+> j=h
+
+Pj
+
+
+
+V rk, j+1 −V rk,πk
+
+> j+1
+
+
+
+(skj, akj) −
+
+
+
+V rk, j+1 −V rk,πk
+
+> j+1
+
+
+
+(skj+1)+
+
+> H
+
+# ∑
+
+> j=h
+
+min 
+
+
+
+H, 2 bβk
+
+bΣrk, j
+
+−1/2
+
+φV rk, j+1 (skj, akj) 2
+
+
+
+.
+
+By summing over k = 1, . . . , K, for all h ∈ [H], we have 
+
+> K
+
+# ∑
+
+> k=1
+
+V rk,h(skh) −V rk,πk 
+
+> h
+
+(skh) ≤
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> j=h
+
+V rk, j(skj) −V rk,πk 
+
+> j
+
+(skj) − Qrk, j(skj, akj) + Qrk,πk 
+
+> j
+
+(skj, akj)
+
+| {z }
+
+> (a)
+
++
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> j=h
+
+Pj
+
+
+
+V rk, j+1 −V rk,πk
+
+> j+1
+
+
+
+(skj, akj) −
+
+
+
+V rk, j+1 −V rk,πk
+
+> j+1
+
+
+
+(skj+1)
+
+| {z }
+
+> (b)
+
++
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> j=h
+
+min 
+
+
+
+H, 2 bβk
+
+bΣrk, j
+
+−1/2
+
+φV rk, j+1 (skj, akj) 2
+
+| {z }
+
+> (c)
+
+.
+
+Now, we bound terms individually. On the good event E , (a) and (b) can be bounded as 4 Hp2T log (2H/δ ). For (c), we bound it as follows. (c) ≤
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> j=1
+
+2 bβk ¯σ rk, j min 
+
+(
+
+H
+
+2 bβk ¯σ rk, j
+
+,
+
+bΣrk, j
+
+−1/2
+
+φV rk, j+1 (skj, akj)/ ¯σ rk, j 2
+
+)
+
+≤
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> j=1
+
+2 bβk ¯σ rk, j min 
+
+
+
+1,
+
+bΣrk, j
+
+−1/2
+
+φV rk, j+1 (skj, akj)/ ¯σ rk, j 2
+
+
+
+≤ 2 bβKK
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> j=1
+
+¯σ rk, j min 
+
+
+
+1,
+
+bΣrk, j
+
+−1/2
+
+φV rk, j+1 (skj, akj)/ ¯σ rk, j 2
+
+
+
+≤ 2 bβK
+
+vuut K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> j=1
+
+( ¯σ rk, j)2
+
+vuut K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> j=1
+
+min 
+
+(
+
+1,
+
+bΣrk, j
+
+−1/2
+
+φV rk, j+1 (skj, akj)/ ¯σ rk, j
+
+> 22
+
+)
+
+where the second inequality is due to H/(2 bβk ¯σ rk, j) ≤ 1, and the third inequality is due to the fact that bβK ≥ bβk for all k ∈ [K].This is because H/(2 bβk ¯σ rk, j) ≤ H/(√dH /√d) = 1, due to bβk ≥ √d, ¯ σ rk, j ≥ H/√d. Furthermore, the last inequality is due to the Cauchy-Schwarz inequality. Finally, by Lemma 15, term (c) is bounded as (c) ≤ 2 bβK
+
+vuut K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> j=1
+
+( ¯σ rk, j)2p2Hd log (1 + K/λ ).
+
+Consequently, we deduce that for all h ∈ [H],
+
+> K
+
+# ∑
+
+> k=1
+
+V rk,h(skh) −V rk,πk 
+
+> h
+
+(skh) ≤ 2 bβK
+
+vuut K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> j=1
+
+( ¯σ rk, j)2p2Hd log (1 + K/λ ) + 8Hp2T log (2H/δ ).
+
+We conclude the proof by applying the same argument to g.
+
+Lemma 11 (Lemma C.6 of [31]): Let λ = 1/B2. On the good event E (Definition 2), for any ℓ ∈ { r, g}
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+( ¯σ ℓ
+
+> k,h
+
+)2 = eO
+
+ H2Td + HT + H5d2 + H5 + H4d3
+
+
+
+.Proof: Consider the case of r. By the definition of ¯ σ rk,h,
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+( ¯σ rk,h)2 ≤
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+H2
+
+d +
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+¯VhV rk,h+1(skh, akh) + 
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+Erk,h
+
+= H2Td +
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+ ¯VhV rk,h+1(skh, akh) − VhV rk,h+1(skh, akh) − Erk,h
+
+| {z }
+
+> (a)
+
++
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+VhV rk,πk 
+
+> h+1
+
+(skh, akh)
+
+| {z }
+
+> (b)
+
++
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+
+
+VhV rk,h+1(skh, akh) − VhV rk,πk 
+
+> h+1
+
+(skh, akh)
+
+| {z }
+
+> (c)
+
++ 2
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+Erk,h
+
+| {z }
+
+> (d)
+
+.
+
+Note that term (a) is nonpositive due to Lemma 1, and Lemma 7 implies that term (b) is bounded as (b) ≤ 3(HT + H3 log (2/δ )) .
+
+Next, we bound term (c) as follows. (c) =
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+
+
+⟨φ(V rk,h+1)2 (skh, akh), θ ∗ 
+
+> h
+
+⟩ − ⟨ φV rk,h+1 (skh, akh), θ ∗ 
+
+> h
+
+⟩2
+
+−
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+
+
+⟨φ(V r,πkh+1 )2 (skh, akh), θ ∗ 
+
+> h
+
+⟩ − ⟨ φV r,πkk,h+1
+
+(skh, akh), θ ∗ 
+
+> h
+
+⟩2
+
+
+
+≤
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+
+
+⟨φ(V rk,h+1)2 (skh, akh), θ ∗ 
+
+> h
+
+⟩ − ⟨ φ(V r,πkh+1 )2 (skh, akh), θ ∗ 
+
+> h
+
+⟩
+
+
+
+=
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+Ph
+
+ V rk,h+1
+
+2 −
+
+
+
+V r,πk
+
+> h+1
+
+2
+
+(skh, akh)
+
+≤ 2H
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+Ph
+
+
+
+V rk,h+1 −V r,πk
+
+> h+1
+
+
+
+(skh, akh)
+
+where the first inequality is due to PhV rk,h+1(s, a) ≥ PhV r,πk 
+
+> h+1
+
+(s, a) by Lemma 6, and the last inequality is due to V rk,h+1(s, a) + 
+
+V r,πk 
+
+> h+1
+
+(s, a) ≤ 2H. We can further deduce as follows. 
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+Ph
+
+
+
+V rk,h+1 −V r,πk
+
+> h+1
+
+
+
+(skh, akh)=
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+
+
+Ph
+
+
+
+V rk,h+1 −V r,πk
+
+> h+1
+
+
+
+(skh, akh) −
+
+
+
+V rk,h+1 −V r,πk
+
+> h+1
+
+
+
+(skh+1)
+
+
+
++
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+
+
+V rk,h+1 −V r,πk
+
+> h+1
+
+
+
+(skh+1)
+
+≤ 4Hp2T log (2H/δ ) + ( H − 1) 2 bβK
+
+s K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+( ¯σ rk,h)2p2Hd log (1 + K/λ ) + 8Hp2T log (2H/δ )
+
+!
+
+≤ 2H bβK
+
+s K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+( ¯σ rk,h)2p2Hd log (1 + K/λ ) + 12 H2p2T log (2H/δ )
+
+where the first inequality is due to Lemmas 8 and 10. Then, term (c) is bounded as (c) ≤ 4H2 bβK
+
+s K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+( ¯σ rk,h)2p2Hd log (1 + K/λ ) + 24 H3p2T log (2H/δ ).Next, term (d) is bounded as follows. 
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+Erk,h =
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+min 
+
+n
+
+H2, eβk (eΣrk,h)−1/2φ(V rk,h+1)2 (skh, akh) 2
+
+o
+
++
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+min 
+
+n
+
+H2, 2H ˇβk (bΣrk,h)−1/2φV rk,h+1 (skh, akh) 2
+
+o
+
+=
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+eβk min 
+
+(
+
+H2
+
+eβk
+
+, (eΣrk,h)−1/2φ(V rk,h+1)2 (skh, akh) 2
+
+)
+
++
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+2H ˇβk ¯σ rk,h min 
+
+(
+
+H
+
+2 ˇβk ¯σ rk,h
+
+, (bΣrk,h)−1/2φV rk,h+1 (skh, akh)/ ¯σ rk,h 2
+
+)
+
+.
+
+Note that eβK ≥ eβk, ˇβK ≥ ˇβk for all k ∈ [K]. Furthermore, eβk ≥ H2, ˇβk ¯σ rk,h ≥ dpH2/d ≥ H, and ¯ σ rk,h is bounded as ¯σ rk,h ≤
+
+q
+
+max {H2/d, H2 + 2H2} ≤ 2H.
+
+Then we have 
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+Erk,h ≤ eβKK
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+min 
+
+n
+
+1, (eΣrk,h)−1/2φ(V rk,h+1)2 (skh, akh) 2
+
+o
+
++ 4H2 ˇβKK
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+min 
+
+n
+
+1, (bΣrk,h)−1/2φV rk,h+1 (skh, akh)/ ¯σ rk,h 2
+
+o
+
+≤ eβK
+
+√T
+
+s K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+min 
+
+
+
+1, (eΣrk,h)−1/2φ(V rk,h+1)2 (skh, akh) 22
+
+
+
++ 4H2 ˇβK
+
+√T
+
+s K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+min 
+
+
+
+1, (bΣrk,h)−1/2φV rk,h+1 (skh, akh)/ ¯σ rk,h
+
+> 22
+
+
+
+≤ eβK
+
+√T
+
+q
+
+2Hd log (1 + H4K/(dλ )) + 4H2 ˇβK
+
+√T p2Hd log (1 + K/λ )
+
+where the last inequality follows from Lemma 15. Finally, with all things together, 
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+( ¯σ rk,h)2 ≤ H2Td + 3(HT + H3 log (2/δ )) + 4H2 bβK
+
+s K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+( ¯σ rk,h)2p2Hd log (1 + K/λ ) + 16 H3p2T log (2H/δ )+ 2 eβK
+
+√T
+
+q
+
+2Hd log (1 + H4K/(dλ )) + 8H2 ˇβK
+
+√T p2Hd log (1 + K/λ ).
+
+For λ = 1/B2, we have bβK = eO(√d), eβK = eO(H2√d), and ˇβK = eO (d). Then it can be rewritten as 
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+( ¯σ rk,h)2 = eO H2Td + HT + H3 + H2√d
+
+s K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+( ¯σ rk,h)2√Hd + H3√T + H2√T √Hd + H2d√T √Hd 
+
+!
+
+= eO H2Td + HT + H2.5d
+
+s K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+( ¯σ rk,h)2 + H3√T + H2.5d0.5√T + H2.5d1.5√T
+
+!
+
+.
+
+Due to the AM-GM inequality, we have 
+
+H3√T = eO
+
+
+
+HT + H5
+
+,
+
+H2.5d0.5√T = eO  HT + H4d ,
+
+H2.5d1.5√T = eO  HT + H4d3 .
+
+Then it follows that 
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+( ¯σ rk,h)2 = eO H2Td + HT + H2.5dξ
+
+s K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+( ¯σ rk,h)2 + H5 + H4d3
+
+!
+
+.Furthermore, we know that if x ≤ a√x + b, then x ≤ (3/2)( a2 + b). Finally, we have 
+
+> K
+
+# ∑
+
+> k=1
+> H
+
+# ∑
+
+> h=1
+
+( ¯σ rk,h)2 = eO
+
+ H2Td + HT + H5d2 + H5 + H4d3
+
+
+
+.
+
+We conclude the proof by applying the same argument to g.
+
+Proof: [Proof of Lemma 2] On the good event E (Definition 2), by Lemmas 10 and 11, we have 
+
+> K
+
+# ∑
+
+> k=1
+
+
+
+V rk,h(skh) −V rk,πk 
+
+> h
+
+(skh)
+
+
+
+= eO
+
+√dH 4K + √d2H3K + d2.5H3
+
+,
+
+> K
+
+# ∑
+
+> k=1
+
+
+
+V gk,h(skh) −V g,πk 
+
+> h
+
+(skh)
+
+
+
+= eO
+
+√dH 4K + √d2H3K + d2.5H3
+
+.
+
+Moreover, under K = Ω(d3H3), we have d2.5H3 = eO(√d2H3K). This concludes the proof. APPENDIX IV PROOF OF LEMMA 3In this section, we provide more detailed proof of Lemma 3. 
+
+Lemma 12: Suppose that η ≤ 1, α ≤ 1/H2, and θ ≤ 1/(2H). For all k ∈ [K], Yk ≤ 3Hηk.
+
+Proof: Note that our dual update can be written as Yk+1 =
+
+h
+
+(1 − αη H3)Yk + η
+
+
+
+b −V gk,1(s1) − αH3 − 2θ H2
+
+i  
+
+> +
+
+for 
+
+k ≥ 1. It follows that 
+
+Yk+1 ≤ | (1 − αη H3)Yk| + η b −V gk,h(s1) − αH3 − 2θ H2
+
+≤ Yk + η b −V gk,h(s1) − αH3 − 2θ H2 .
+
+where the second inequality follows from 0 ≤ (1 − αη H3)Yk ≤ Yk by the assumption. Moreover, |b −V gk,h(s1)| ≤ H, αH3 ≤ H,and 2 θ H2 ≤ H. Then by the triangle inequality for all k,
+
+Yk+1 ≤ Yk + 3ηH.
+
+Recall that Y1 = 0. Then we have Yk+1 ≤ 3ηHk . This concludes the proof. 
+
+Lemma 13: Suppose that η ≤ 1, α ≤ 1/H2, and θ ≤ 1/(2H). On the good event E (Definition 2), for all k ∈ [K]
+
+Y 2 
+
+> k+1
+
+−Y 2
+
+> k
+
+2 ≤ − γη Yk + ηα E ¯π
+
+" H
+
+# ∑
+
+> h=1
+
+D( ¯πh(·| sh)|| eπkh (·| sh)) − D( ¯πh(·| sh)|| πk+1 
+
+> h
+
+(·| sh)) 
+
+#
+
++C (24) where C is defined as 
+
+C = αη H3
+
+2 + 2ηH2θ + 2ηH2 + 2η2(H2 + α2H6 + 9η2α2H8K2 + 4θ 2H4).
+
+Proof: The proof closely follows the proof of Lemma 17 in [8]. By the definition of Yk, we have 
+
+Y 2 
+
+> k+1
+
+≤ Y 2 
+
+> k
+
++ 2Ykη
+
+
+
+b −V gk,1(s1) − αH3(1 +Yk) − 2θ H2
+
++ η2 
+
+b −V gk,1(s1) − αH3(1 +Yk) − 2θ H22
+
+.
+
+We rearrange it as follows. 
+
+Y 2 
+
+> k+1
+
+−Y 2
+
+> k
+
+2 ≤ Ykη
+
+
+
+b −V gk,1(s1) − αH3(1 +Yk) − 2θ H2| {z }
+
+> (I)
+
++ η2
+
+2
+
+
+
+b −V gk,1(s1) − αH3(1 +Yk) − 2θ H22
+
+| {z }
+
+> (II)
+
+.
+
+Term (II) is bounded as (II) ≤ 2η2(( b −V gk,1(s1)) 2 + α2H6 + α2H6Y 2 
+
+> k
+
++ 4θ 2H4)
+
+≤ 2η2(H2 + α2H6 + 9η2α2H8K2 + 4θ 2H4)
+
+where the first inequality follows from the Cauchy-Schwarz inequality, the second inequality follows from |b −V gk,1(s1)| ≤ H
+
+and 0 ≤ Yk ≤ 3ηHK for all k (Lemma 12). Now, we further deduce (I). Recall that ¯ π is the Slater policy that satisfies V g, ¯π 
+
+> 1
+
+(s1) ≥ b + γ for some γ > 0. We have 
+
+V g, ¯π 
+
+> 1
+
+(s1) −V gk,1(s1) = E ¯π
+
+" H
+
+# ∑
+
+> h=1
+
+⟨Qgk,h(sh, ·), ¯πh(·| sh) − πkh (·| sh)⟩| s1
+
+#
+
++ E ¯π
+
+" H
+
+# ∑
+
+> h=1
+
+gh(sh, ah) + PhV gh+1(sh, ah) − Qgk,h(sh, ah)|s1
+
+#
+
+≤ E ¯π
+
+" H
+
+# ∑
+
+> h=1
+
+⟨Qgk,h(sh, ·), ¯πh(·| sh) − πkh (·| sh)⟩| s1
+
+#
+
+where the equality is due to Lemma 19, and the inequality is due to Lemma 6. Due to the Slater assumption, the above can be written as 
+
+b −V gk,1(s1) ≤ E ¯π
+
+" H
+
+# ∑
+
+> h=1
+
+⟨Qgk,h(sh, ·), ¯πh(·| sh) − πkh (·| sh)⟩| s1
+
+#
+
+− γ.
+
+By adopting this into (I), it follows that (I) ≤ − γη Yk +Ykη E ¯π
+
+" H
+
+# ∑
+
+> h=1
+
+⟨Qgk,h(sh, ·), ¯πh(·| sh) − πkh (·| sh)⟩| s1
+
+#
+
+− αH3(1 +Yk) − 2θ H2
+
+!| {z }
+
+> (III)
+
+.
+
+We further deduce (III) as follows. Note that πk+1 
+
+> h
+
+(·| s) ∈ arg max π ⟨Qrk,h(s, ·) + YkQgk,h(s, ·), π(·| s)⟩ − 1 
+
+> α
+
+D(π(·| s)|| eπkh (·| s)) . Then by Lemma 20, 
+
+⟨Qrk,h(sh, ·) + YkQgk,h(sh, ·), πk+1 
+
+> h
+
+(·| sh)⟩ − 1
+
+α D(πk+1 
+
+> h
+
+(·| sh)|| eπkh (·| sh)) 
+
+≥ ⟨ Qrk,h(sh, ·) + YkQgk,h(sh, ·), ¯πh(·| sh)⟩ − 1
+
+α D( ¯πh(·| sh)|| eπkh (·| sh)) + 1
+
+α D( ¯πh(·| sh)|| πk+1 
+
+> h
+
+(·| sh)) .
+
+It can be rewritten as 
+
+Yk⟨Qgk,h(sh, ·), ¯πh(·| sh) − πkh (·| sh)⟩ ≤ ⟨ Qrk,h(sh, ·), πk+1 
+
+> h
+
+(·| sh) − πkh (·| sh)⟩ − 1
+
+α D(πk+1 
+
+> h
+
+(·| sh)|| eπkh (·| sh)) + ⟨Qrk,h(sh, ·), πkh (·| sh) − ¯πh(·| sh)⟩ + 1
+
+α D( ¯πh(·| sh)|| eπkh (·| sh)) − 1
+
+α D( ¯πh(·| sh)|| πk+1 
+
+> h
+
+(·| sh)) +Yk⟨Qgk,h(sh, ·), πk+1 
+
+> h
+
+(·| sh) − πkh (·| sh)⟩≤ αH2
+
+2 + 2Hθ + 2H + 1
+
+α D( ¯πh(·| sh)|| eπkh (·| sh)) − 1
+
+α D( ¯πh(·| sh)|| πk+1 
+
+> h
+
+(·| sh)) +Yk
+
+ αH2(1 +Yk) + 2θ H
+
+where the second inequality comes from Lemma 17 and that ⟨Qrk,h(sh, ·), πk+1 
+
+> h
+
+(·| sh) − ¯πh(·| sh)⟩ ≤ ∥ Qrk,h(sh, ·)∥∞∥πk+1 
+
+> h
+
+(·| sh) −
+
+¯πh(·| sh)∥1 ≤ 2H (H¨ older’s inequality). Now, we take the sum over h = 1, . . . , H and E ¯π on both sides. Moreover, we multiply both sides by η. Then, it is written as 
+
+Ykη E ¯π
+
+" H
+
+# ∑
+
+> h=1
+
+⟨Qgk,h(sh, ·), ¯πh(·| sh) − πkh (·| sh)⟩
+
+#
+
+− αH3(1 +Yk) − 2θ H2
+
+!
+
+≤ αη H3
+
+2 + 2ηH2θ + 2ηH2 + ηα E ¯π
+
+" H
+
+# ∑
+
+> h=1
+
+D( ¯πh(·| sh)|| eπkh (·| sh)) − D( ¯πh(·| sh)|| πk+1 
+
+> h
+
+(·| sh)) 
+
+#
+
+Observe that the left-hand side equals (III). Thus, it follows that (I) ≤ − γη Yk + αη H3
+
+2 + 2ηH2θ + 2ηH2 + ηα E ¯π
+
+" H
+
+# ∑
+
+> h=1
+
+D( ¯πh(·| sh)|| eπkh (·| sh)) − D( ¯πh(·| sh)|| πk+1 
+
+> h
+
+(·| sh)) 
+
+#
+
+.
+
+Finally, we have 
+
+Y 2 
+
+> k+1
+
+−Y 2
+
+> k
+
+2 ≤ − γη Yk + αη H3
+
+2 + 2ηH2θ + 2ηH2 + ηα E ¯π
+
+" H
+
+# ∑
+
+> h=1
+
+D( ¯πh(·| sh)|| eπkh (·| sh)) − D( ¯πh(·| sh)|| πk+1 
+
+> h
+
+(·| sh)) 
+
+#
+
++ 2η2(H2 + α2H6 + 9η2α2H8K2 + 4θ 2H4).Lemma 14 (Restatement of Lemma 3): Let K ≥ max {2H, H2}. Suppose that we set η = 1/(H√K), α = 1/(H2√K), θ =
+
+1/K and E (Definition 2) holds. For all k ∈ [K],
+
+Yk = eO(H2/γ).
+
+Proof: Under K ≥ 2H, we know that η ≤ 1, α ≤ 1/H2, θ ≤ 1/(2H). Thus, Lemmas 12 and 13 are applicable. Note that 
+
+|Yk+1 −Yk| ≤ | − αη H3Yk + η(b −V gk,1(s1) − αH3 − 2θ H2)|≤ 3αη 2H4k + 3ηH
+
+≤ 3αη 2H4K + 3ηH
+
+(25) where the first inequality follows from that | max {0, x} − y| ≤ | x − y| for any x ∈ R and y ∈ R+, and the second inequality follows from Lemma 12. Moreover, by summing (24) over from k to k + n0 − 1 (later, n0 will be specified), it follows that 
+
+Y 2 
+
+> k+n0
+
+−Y 2
+
+> k
+
+2 ≤ − γη 
+
+> k+n0−1
+
+# ∑
+
+> τ=k
+
+Yτ + ηα
+
+> k+n0−1
+
+# ∑
+
+> τ=k
+
+E ¯π
+
+" H
+
+# ∑
+
+> h=1
+
+D( ¯πh(·| sh)|| eπτ 
+
+> h
+
+(·| sh)) − D( ¯πh(·| sh)|| πτ+1 
+
+> h
+
+(·| sh)) 
+
+#| {z }
+
+> (I)
+
++Cn 0.
+
+Term (I) can be bounded as (I) =
+
+> k+n0−1
+
+# ∑
+
+> τ=k
+
+E ¯π
+
+" H
+
+# ∑
+
+> h=1
+
+D( ¯πh(·| sh)|| eπτ 
+
+> h
+
+(·| sh)) − D( ¯πh(·| sh)|| eπτ+1 
+
+> h
+
+(·| sh)) 
+
+#
+
++
+
+> k+n0−1
+
+# ∑
+
+> τ=k
+
+E ¯π
+
+" H
+
+# ∑
+
+> h=1
+
+D( ¯πh(·| sh)|| eπτ+1 
+
+> h
+
+(·| sh)) − D( ¯πh(·| sh)|| πτ+1 
+
+> h
+
+(·| sh)) 
+
+#
+
+≤
+
+> H
+
+# ∑
+
+> h=1
+
+E ¯π
+
+h
+
+D( ¯πh(·| sh)|| eπkh (·| sh)) − D( ¯πh(·| sh)|| eπk+n0 
+
+> h
+
+(·| sh)) 
+
+i
+
++ n0Hθ log |A |≤ H log (|A |/θ ) + n0Hθ log |A |
+
+where the second and third inequalities follows from Lemma 17 and that the nonnegativeness of KL divergence. Therefore, we deduce that for any n0 ≥ 1 and k ≤ K − n0,
+
+Y 2 
+
+> k+n0
+
+−Y 2
+
+> k
+
+2 ≤ − γη 
+
+> k+n0−1
+
+# ∑
+
+> τ=k
+
+Yτ +C′, (26) where C′ = 3γη 2H n0(n0−1) 
+
+> 2
+
+(αη H3K + 1) + ηα (H log (|A |/θ ) + n0Hθ log |A |) + Cn 0.Suppose that there exists k ∈ [K] such that Yk > 2C′ 
+
+> ηγ n0
+
++ n0(3αη 2H4K + 3ηH). Then we can take khit = min {k ∈ [K] : Yk > 
+
+> 2C′
+> ηγ n0
+
++ n0(3αη 2H4K + 3ηH)}, i.e., the first episode such that Yk exceeds the threshold 2C′ 
+
+> ηγ n0
+
++ n0(3αη 2H4K + 3ηH). Since 
+
+|Yk+1 −Yk| ≤ 3αη 2H4K + 3ηH, we know that khit > n0 and Ykhit −n0 , . . . , Ykhit −1 ≥ 2C′ 
+
+> ηγ n0
+
+(If not, Ykhit never reach the threshold). Then, by (26), it implies that, 
+
+Y 2 
+
+> khit
+
+−Y 2
+
+> khit −n0
+
+2 ≤ − γη 
+
+> khit
+
+# ∑
+
+> τ=khit −n0
+
+Yτ +C′ ≤ − C′ < 0. (27) This implies that Ykhit < Ykhit −n0 < 2C′ 
+
+> ηγ n0
+
++ n0(3αη 2H4K + 3ηH), where the second inequality follows from the fact that 
+
+khit − n0 < khit and khit is the first episode that exceeds the threshold. This contradicts Ykhit > 2C′ 
+
+> ηγ n0
+
++ n0(3αη 2H4K + 3ηH).Therefore, Yk ≤ 2C′ 
+
+> ηγ n0
+
++ n0(3αη 2H4K + 3ηH) for all k ∈ [K]. By taking n0 = H√K, η = 1 
+
+> H√K
+
+, α = 1 
+
+> H2√K
+
+, θ = 1 
+
+> K
+
+, it follows that Yk = eO(H2/γ).APPENDIX VPROOF OF LEMMA 4
+
+Proof: Fix k ∈ [K]. Note that 
+
+V rk,π∗ 
+
+> 1
+
+(s1) + YkV g,π∗ 
+
+> 1
+
+(s1) −V rk,1(s1) −YkV gk,1(s1) = Eπ∗
+
+" H
+
+# ∑
+
+> h=1
+
+⟨Qrk,h(sh, ·) + YkQgk,h(sh, ·), π∗ 
+
+> h
+
+(·| sh) − πkh (·| sh)⟩| s1
+
+#
+
++ Eπ∗
+
+" H
+
+# ∑
+
+> h=1
+
+rkh(sh, ah) + PhV rk,h+1(sh, ah) − Qrk,h(sh, ah)|s1
+
+#
+
++YkEπ∗
+
+" H
+
+# ∑
+
+> h=1
+
+gh(sh, ah) + PhV gk,h+1(sh, ah) − Qgk,h(sh, ah)|s1
+
+#
+
+.
+
+Note that the second and third terms are nonpositive by Lemma 6. Thus, we focus on the first term. Since πk+1 
+
+> h
+
+(·| s) ∈
+
+arg max π ⟨Qrk,h(s, ·) + YkQgk,h(s, ·), π(·| s)⟩ − 1 
+
+> α
+
+D(π(·| s)|| eπkh (·| s)) , by Lemma 20, for any s ∈ S ,
+
+⟨Qrk,h(s, ·) + YkQgk,h(s, ·), πk+1 
+
+> h
+
+(·| s)⟩ − 1
+
+α D(πk+1 
+
+> h
+
+(·| s)|| eπkh (·| s)) 
+
+≥ ⟨ Qrk,h(s, ·) + YkQgk,h(s, ·), π∗ 
+
+> h
+
+(·| s)⟩ − 1
+
+α D(π∗ 
+
+> h
+
+(·| s)|| eπkh (·| s)) + 1
+
+α D(π∗ 
+
+> h
+
+(·| s)|| πk+1 
+
+> h
+
+(·| s)) .
+
+By rearranging the inequality, we have 
+
+⟨Qrk,h(s, ·) + YkQgk,h(s, ·), π∗ 
+
+> h
+
+(·| s) − πkh (·| s)⟩ ≤ ⟨ Qrk,h(s, ·) + YkQgk,h(s, ·), πk+1 
+
+> h
+
+(·| s) − πkh (·| s)⟩ − 1
+
+α D(πk+1 
+
+> h
+
+(·| s)|| eπkh (·| s)) + 1
+
+α D(π∗ 
+
+> h
+
+(·| s)|| eπkh (·| s)) − 1
+
+α D(π∗ 
+
+> h
+
+(·| s)|| πk+1 
+
+> h
+
+(·| s)) = ⟨Qrk,h(s, ·) + YkQgk,h(s, ·), πk+1 
+
+> h
+
+(·| s) − πkh (·| s)⟩ − 1
+
+α D(πk+1 
+
+> h
+
+(·| s)|| eπkh (·| s)) + 1
+
+α D(π∗ 
+
+> h
+
+(·| s)|| πkh (·| s)) − 1
+
+α D(π∗ 
+
+> h
+
+(·| s)|| πk+1 
+
+> h
+
+(·| s)) + 1
+
+α D(π∗ 
+
+> h
+
+(·| s)|| eπkh (·| s)) − 1
+
+α D(π∗ 
+
+> h
+
+(·| s)|| πkh (·| s)) .
+
+Then we take the sum over k = 1, . . . , K. Then it follows that 
+
+> K
+
+# ∑
+
+> k=1
+
+⟨Qrk,h(s, ·) + YkQgk,h(s, ·), π∗ 
+
+> h
+
+(·| s) − πkh (·| s)⟩≤
+
+> K
+
+# ∑
+
+> k=1
+
+⟨Qrk,h(s, ·) + YkQgk,h(s, ·), πk+1 
+
+> h
+
+(·| s) − πkh (·| s)⟩ − 
+
+> K
+
+# ∑
+
+> k=1
+
+1
+
+α D(πk+1 
+
+> h
+
+(·| s)|| eπkh (·| s)) + 1
+
+α D(π∗ 
+
+> h
+
+(·| s)|| π1 
+
+> h
+
+(·| s)) − 1
+
+α D(π∗ 
+
+> h
+
+(·| s)|| πK+1 
+
+> h
+
+(·| s)) + 1
+
+α
+
+> K
+
+# ∑
+
+> k=1
+
+
+
+D(π∗ 
+
+> h
+
+(·| s)|| eπkh (·| s)) − D(π∗ 
+
+> h
+
+(·| s)|| πkh (·| s)) 
+
+
+
+≤
+
+> K
+
+# ∑
+
+> k=1
+
+⟨Qrk,h(s, ·) + YkQgk,h(s, ·), πk+1 
+
+> h
+
+(·| s) − πkh (·| s)⟩ + 1
+
+α D(π∗ 
+
+> h
+
+(·| s)|| π1 
+
+> h
+
+(·| s)) + 1
+
+α
+
+> K
+
+# ∑
+
+> k=1
+
+
+
+D(π∗ 
+
+> h
+
+(·| s)|| eπkh (·| s)) − D(π∗ 
+
+> h
+
+(·| s)|| πkh (·| s)) 
+
+
+
+≤
+
+> K
+
+# ∑
+
+> k=1
+
+⟨Qrk,h(s, ·) + YkQgk,h(s, ·), πk+1 
+
+> h
+
+(·| s) − πkh (·| s)⟩ + log |A |
+
+α
+
++ 1
+
+α
+
+> K
+
+# ∑
+
+> k=1
+
+
+
+D(π∗ 
+
+> h
+
+(·| s)|| eπkh (·| s)) − D(π∗ 
+
+> h
+
+(·| s)|| πkh (·| s)) 
+
+where the second inequality follows from the nonnegativeness of KL divergence, and the last inequality is due to π1 
+
+> h
+
+(·| s) = 
+
+1/|A | for any s. Moreover, 
+
+> K
+
+# ∑
+
+> k=1
+
+⟨Qrk,h(s, ·) + YkQgk,h(s, ·), πk+1 
+
+> h
+
+(·| s) − πkh (·| s)⟩≤
+
+> K
+
+# ∑
+
+> k=1
+
+∥Qrk,h(s, ·) + YkQgk,h(s, ·)∥∞∥πk+1 
+
+> h
+
+(·| s) − πkh (·| s)∥1
+
+≤
+
+> K
+
+# ∑
+
+> k=1
+
+∥Qrk,h(s, ·) + YkQgk,h(s, ·)∥∞∥πk+1 
+
+> h
+
+(·| s) − eπkh (·| s)∥1
+
++
+
+> K
+
+# ∑
+
+> k=1
+
+∥Qrk,h(s, ·) + YkQgk,h(s, ·)∥∞∥eπkh (·| s) − πkh (·| s)∥1
+
+≤
+
+> K
+
+# ∑
+
+> k=1
+
+αH2(1 +Yk)2 + θ
+
+> K
+
+# ∑
+
+> k=1
+
+∥Qrk,h(s, ·) + YkQgk,h(s, ·)∥∞∥πunif (·| s) − πkh (·| s)∥1
+
+= eO
+
+ αH6K
+
+γ2 + θ KH 3
+
+γ
+
+
+
+(28) where the first inequality is due to H¨ older’s inequality, the second inequality is due to the triangle inequality, the third inequality is due to Lemma 21 and that eπkh (·| s) = ( 1 − θ )πkh (·| s) + θ π unif (·| s), and the last equality is due to Lemma 3. Moreover, 1
+
+α
+
+> K
+
+# ∑
+
+> k=1
+
+
+
+D(π∗ 
+
+> h
+
+(·| s)|| eπkh (·| s)) − D(π∗ 
+
+> h
+
+(·| s)|| πkh (·| s)) 
+
+
+
+≤ 1
+
+α
+
+> K
+
+# ∑
+
+> k=1
+
+θ log |A | ≤ θ K log |A |
+
+α . (29) Finally, by applying (28) and (29), we have 
+
+> K
+
+# ∑
+
+> k=1
+
+⟨Qrk,h(s, ·) + YkQgk,h(s, ·), π∗ 
+
+> h
+
+(·| s) − πkh (·| s)⟩ = eO
+
+ αH6K
+
+γ2 + θ K
+
+α + 1
+
+α + θ KH 3
+
+γ
+
+
+
+.
+
+Then it follows that 
+
+> K
+
+# ∑
+
+> k=1
+
+Eπ∗
+
+" H
+
+# ∑
+
+> h=1
+
+⟨Qrk,h(sh, ·) + YkQgk,h(sh, ·), π∗ 
+
+> h
+
+(·| sh) − πkh (·| sh)⟩| s1
+
+#
+
+= eO
+
+ αH7K
+
+γ2 + θ HK 
+
+α + H
+
+α + θ KH 4
+
+γ
+
+
+
+.
+
+Finally, we have 
+
+> K
+
+# ∑
+
+> k=1
+
+
+
+V rk,π∗ 
+
+> 1
+
+(s1) + YkV g,π∗ 
+
+> 1
+
+(s1) −V rk,1(s1) −YkV gk,1(s1)
+
+
+
+= eO
+
+ αH7K
+
+γ2 + θ HK 
+
+α + H
+
+α + θ KH 4
+
+γ
+
+
+
+.
+
+Since we set α = 1/(H2√K), θ = 1/K, the proof is completed. APPENDIX VI PROOF OF THEOREM 1
+
+Proof: By Lemmas 1, 7, 8, and 9, by union bound, the good event E holds with probability at least 1 − 6δ . Moreover, under E and K ≥ max {2H, H2}, Lemma 3 holds. Therefore, with probability at least 1 − 6δ , the good event E and Yk =
+
+eO(H2/γ) for all k. We assume these throughout the proof. Next, we bound the regret. Note that the regret can be decomposed as follows. 
+
+> K
+
+# ∑
+
+> k=1
+
+
+
+V rk,π∗ 
+
+> 1
+
+(s1) −V rk,πk 
+
+> 1
+
+(s1)
+
+
+
+=
+
+> K
+
+# ∑
+
+> k=1
+
+
+
+V rk,π∗ 
+
+> 1
+
+(s1) + Ykb −V rk,1(s1) −YkV gk,1(s1)
+
+
+
++
+
+> K
+
+# ∑
+
+> k=1
+
+
+
+V rk,1(s1) −V rk,πk 
+
+> 1
+
+(s1)
+
+
+
++
+
+> K
+
+# ∑
+
+> k=1
+
+Yk
+
+
+
+V gk,1(s1) − b
+
+
+
+≤
+
+> K
+
+# ∑
+
+> k=1
+
+
+
+V rk,π∗ 
+
+> 1
+
+(s1) + YkV g,π∗ 
+
+> 1
+
+(s1) −V rk,1(s1) −YkV gk,1(s1)
+
+| {z }
+
+> (I)
+
++
+
+> K
+
+# ∑
+
+> k=1
+
+
+
+V rk,1(s1) −V rk,πk 
+
+> 1
+
+(s1)
+
+| {z }
+
+> (II)
+
++
+
+> K
+
+# ∑
+
+> k=1
+
+Yk
+
+
+
+V gk,1(s1) − b
+
+| {z }
+
+> (III)
+
+By Lemma 4, (I) = eO H5√K
+
+γ2 + H3√K + H4
+
+γ
+
+!
+
+.
+
+By Lemma 2, (II) = eO
+
+√dH 4K + √d2H3K
+
+
+
+.
+
+Note that (III) can be bounded as follows. Due to the dual update 0 ≤ Y 2
+
+> K+1
+
+=
+
+> K
+
+# ∑
+
+> k=1
+
+(Y 2 
+
+> k+1
+
+−Y 2 
+
+> k
+
+)
+
+≤
+
+> K
+
+# ∑
+
+> k=1
+
+
+
+2Ykη(b −V gk,1(s1) − αH3(1 +Yk) − 2θ H2) + η2(b −V gk,1(s1) − αH3(1 +Yk) − 2θ H2)2
+
+.
+
+It can be rewritten as (III) =
+
+> K
+
+# ∑
+
+> k=1
+
+Yk(V gk,1(s1) − b)
+
+≤ − 
+
+> K
+
+# ∑
+
+> k=1
+
+Yk(αH3(1 +Yk) + 2θ H2) + 
+
+> K
+
+# ∑
+
+> k=1
+
+η
+
+2
+
+
+
+b −V gk,1(s1) − αH3(1 +Yk) − 2θ H22
+
+≤
+
+> K
+
+# ∑
+
+> k=1
+
+3η
+
+2
+
+
+
+H2 + α2H6(1 +Yk)2 + 4θ 2H4
+
+= eO
+
+
+
+H√K + H5
+
+γ2√K
+
+
+
+where the second inequality follows from the Cauchy-Schwarz inequality, and the equality follows from the choice of η, α, θ ,the assumption K ≥ H2, and Lemma 3. Finally, we deduce that Reg (K) = eO √dH 4K + √d2H3K + H5√K
+
+γ2 + H3√K + H4
+
+γ
+
+!
+
+Next, we analyze constraint violation. Note that the violation can be decomposed as 
+
+> K
+
+# ∑
+
+> k=1
+
+(b −V g,πk 
+
+> 1
+
+(s1)) = 
+
+> K
+
+# ∑
+
+> k=1
+
+(b −V gk,1(s1)) 
+
+| {z }
+
+> (IV)
+
++
+
+> K
+
+# ∑
+
+> k=1
+
+(V gk,1(s1) −V g,πk 
+
+> 1
+
+(s1)) 
+
+| {z }
+
+> (V)
+
+To bound (IV), note that Yk+1 ≥ (1 − αη H3)Yk + η(b −V gk,1(s1) − αH3 − 2θ H2). This leads to 
+
+b −V gk,1(s1) ≤ Yk+1 −Yk
+
+η + αH3Yk + αH3 + 2θ H2.
+
+By summing the above inequality over k = 1, . . . , K,
+
+> K
+
+# ∑
+
+> k=1
+
+(b −V gk,1(s1)) ≤ YK+1
+
+η + αH3 K
+
+# ∑
+
+> k=1
+
+Yk + αKH 3 + 2θ KH 2
+
+= eO
+
+ H3
+
+γ
+
+√K
+
+
+
+.
+
+By Lemma 2, (V) = eO
+
+√dH 4K + √d2H3K
+
+
+
+.
+
+Finally, Vio (K) = eO √dH 4K + √d2H3K + H3√K
+
+γ
+
+!
+
+.Lemma 15 (Lemma 11 in [40]): For any λ > 0 and sequence {xt }Tt=1 ⊂ Rd for t ∈ { 0, . . . , T }, define Zt = λ I + ∑ti=1 xix⊤ 
+
+> i
+
+.Then, provided that ∥xt ∥2 ≤ L holds for all t ∈ [T ], we have 
+
+> T
+
+# ∑
+
+> t=1
+
+min {1, ∥xt ∥2
+
+> Z−1
+> t−1
+
+} ≤ 2d log dλ + T L 2
+
+dλ .
+
+Lemma 16 (Theorem 4.1 in [31]): Let {Gt }∞ 
+
+> t=1
+
+be a filtration, {xt , ηt }t≥1 a stochastic process so that xt ∈ Rd is Gt -measurable and ηt ∈ R is Gt+1-measurable. Fix R, L, σ , λ > 0, μμμ∗ ∈ Rd . For t ≥ 1, let yt = ⟨μμμ∗, xt ⟩ + ηt and suppose that 
+
+ηt , xt also satisfy 
+
+|ηt | ≤ R, E[ηt |Gt ] = 0, E[η2 
+
+> t
+
+|Gt ] ≤ σ 2, ∥xt ∥2 ≤ L.
+
+Then, for any 0 < δ < 1, with probability at least 1 − δ , we have 
+
+∀t > 0,
+
+> t
+
+# ∑
+
+> i=1
+
+xiηi
+
+> Z−1
+> t
+
+≤ βt , ∥μμμt − μμμ∗∥Zt ≤ βt + √λ ∥μμμ∗∥2,
+
+where for t ≥ 1, μμμt = Z−1 
+
+> t
+
+bt , Zt = λ I + ∑ti=1 xix⊤ 
+
+> i
+
+, bt = ∑ti=1 yixi and 
+
+βt = 8σ
+
+q
+
+d log (1 + tL 2/(dλ )) log (4t2/δ ) + 4R log (4t2/δ ).
+
+Lemma 17 (Lemma 31 of [36]): Let π1, π2 be two probability distributions in ∆(A ). Let ˜ π2 = ( 1 − θ )π2 + θ /|A | where 
+
+θ ∈ (0, 1). Then, 
+
+D(π1∥ ˜π2) − D(π1∥π2) ≤ θ log |A |, D(π1∥ ˜π2) ≤ log (|A |/θ ).
+
+Lemma 18 (Lemma 22 of [8]): Let πkh : S → ∆(A ) be any policies. For θ ∈ [0, 1], let eπkh (·| s) = ( 1−θ )πkh (·| s)+ θ π unif (·| s).For Qrk,h, Qgk,h : S × A → [0, H], Yk ∈ R+, and α > 0, let πk+1(· | s) ∝ eπk(· | s) exp (α(Qrk,h(s, ·) + YkQgk,h(s, ·)) . For any s ∈ S ,we have 1) ∥πk+1 
+
+> h
+
+(· | s) − eπkh (· | s)∥1 ≤ αH(1 +Yk),
+
+2) ⟨πk+1 
+
+> h
+
+(·| s) − πkh (·| s), Qgk,h(s, ·)⟩ ≤ αH2(1 +Yk) + 2θ H.
+
+3) ⟨πk+1 
+
+> h
+
+(·| s) − πkh (·| s), Qrk,h(s, ·)⟩ − 1 
+
+> α
+
+D(πk+1 
+
+> h
+
+(·| s)|| eπkh (·| s)) ≤ αH2/2 + 2Hθ .
+
+Lemma 19 (Lemma 1 of [37]): Let π, π′ be two policies, and let M = ( H, S , A , P, r, s1) be an MDP. For all h ∈ [H], let 
+
+Qrh : S × A → R be an arbitrary function, and let V rh (s) = Qrh(s, ·), π′
+
+> h
+
+(· | s) for all s ∈ S . Then, 
+
+V r,π 
+
+> 1
+
+(s1) −V r 
+
+> 1
+
+(s1) = Eπ
+
+" H
+
+# ∑
+
+> h=1
+
+Qrh(sh, ·), πh(· | sh) − π′
+
+> h
+
+(· | sh) s1
+
+#
+
++ Eπ
+
+" H
+
+# ∑
+
+> h=1
+
+rh(sh, ah) + PhV rh+1(sh, ah) − Qrh(sh, ah) s1
+
+#
+
+,
+
+where V r,π 
+
+> 1
+
+= Eπ [∑Hj=1 rh(sh, ah)|s1].
+
+Lemma 20 (Lemma 1 of [36]): Let ∆, int (∆) be the probability simplex and its interior, respectively, and let f : C → R
+
+be a convex function. Fix α > 0, y ∈ int (∆). Suppose x∗ ∈ arg max x∈∆ f (x) − (1/α)D(x|| y) and x∗ ∈ int (∆), then, for any 
+
+z ∈ ∆,
+
+f (x∗) − 1
+
+α D(x∗|| y) ≥ f (z) − 1
+
+α D(z|| y) + 1
+
+α D(z|| x∗).
+
+Lemma 21 (Lemma 33 of [6]): Let Q1, Q2 : A → R be two functions. For α > 0, let π1 ∝ exp (αQ1), π2 ∝ exp (αQ2).Then we have 
+
+∥π1 − π2∥1 ≤ 8α∥Q1 − Q2∥∞.
