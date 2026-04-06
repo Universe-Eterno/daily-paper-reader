@@ -1,0 +1,1157 @@
+Title: Scalable and Near-Optimal Discrete Phase Shift Optimization for Reconfigurable Intelligent Surfaces with Over 20,000 Elements
+
+URL Source: https://arxiv.org/pdf/2603.29144v1
+
+Published Time: Wed, 01 Apr 2026 00:27:25 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+> 1
+
+# Scalable and Near-Optimal Discrete Phase Shift Optimization for Reconfigurable Intelligent Surfaces with Over 20,000 Elements 
+
+Yuto Hama, Member, IEEE, Daisuke Kitayama, Kensuke Inaba, Toshimori Honjo, Hiroki Takesue, Member, IEEE ,Naoki Ishikawa, Senior Member, IEEE , and Hiroyuki Takahashi, Member, IEEE 
+
+Abstract — This paper proposes a novel optimization frame-work for discrete phase shifts of a reconfigurable intelligent surface (RIS) using a coherent Ising machine (CIM). Unlike conventional methods based on iterative convex approximation or combinatorial search with exponentially increasing complexity, the CIM physically explores the solution space of Ising Hamilto-nians through collective mode competition in a network of optical oscillators, enabling efficient large-scale discrete optimization. We formulate the RIS discrete phase optimization problem as a quadratic Ising model, which supports both binary and quaternary phase shifts by appropriately mapping quantized phase states to spin variables. Using a real hardware CIM, we ex-perimentally solve quadratic optimization problems for RISs with up to 22,201 elements. The results demonstrate that the proposed method achieves physically consistent beam patterns under both line-of-sight and non-line-of-sight environments and attains the theoretical gain when transitioning from binary to quaternary phase shift. To further enhance scalability, we introduce a spin-size reduction approach that removes spins deterministically fixed by dominant channel components. This technique efficiently reduces the problem size for CIM in line-of-sight conditions without performance loss. These results confirm that CIM-based optimization offers a practical and highly scalable solution for large RIS deployments with discrete phase shift constraints. 
+
+Index Terms — Coherent Ising machine (CIM), discrete phase shift, Ising model, quadratic unconstrained binary optimiza-tion (QUBO), reconfigurable intelligent surface (RIS). 
+
+I. I NTRODUCTION 
+
+Reconfigurable intelligent surface (RIS) has recently emerged as a transformative technology that enables the recon-figuration of wireless propagation environments by controlling a large number of passive reflecting elements. By appropriately adjusting the reflection phases, RIS can significantly enhance signal power, improve coverage, and boost both spectral and energy efficiency, making it a promising candidate for beyond 5G and 6G networks. A unique feature of RIS is that its beamforming gain increases quadratically with the number of reflecting elements [1–3], motivating the deployment of large RISs with tens of thousands of elements to fully exploit its potential. 
+
+Yuto Hama and Naoki Ishikawa are with the Department of Electrical and Computer Engineering, Yokohama National University, Yokohama 2410851, Japan (email: yuto.hama@ieee.org; ishikawa-naoki-fr@ynu.ac.jp). Daisuke Kitayama and Hiroyuki Takahashi are with the Device Technology Laborato-ries, NTT, Inc., Atsugi 2430198, Japan (email: daisuke.kitayama@ntt.com; hryk.takahashi@ntt.com). Kensuke Inaba, Toshimori Honjo, and Hiroki Takesue are with the Basic Research Laboratories, NTT, Inc., Atsugi 2430198, Japan (email: hiroki.takesue@ntt.com; toshimori.honjo@ntt.com; kensuke.inaba@ntt.com). (Corresponding author: Yuto Hama) 
+
+While the theoretical performance of RIS is often ana-lyzed under the assumption of continuous phase shift , such idealization is impractical because hardware implementations typically allow only a limited set of discrete phase levels [1, 4, 5]. Despite prior studies showing that even four quantization levels can nearly achieve the performance with continuous phase shifts [6], the optimization of discrete phase shifts is inherently challenging. Unlike the continuous case, where convex optimization and closed-form designs are possible [7], the optimization of discrete phase shifts is an NP-hard problem and the globally optimal solution is attainable only through exhaustive search [8], whose complexity scales exponentially with the number of elements. A significant body of work has explored RIS optimization under the discrete phase constraint. In the literature, early studies on RIS-aided communications have established fun-damental design methodologies from multiple perspectives. In particular, channel estimation and passive beamforming under discrete phase shifts were investigated in [8], where a progres-sive refinement framework was developed for efficient acqui-sition of cascaded channels. From a system-level viewpoint, the joint optimization of active beamforming at the access point and passive phase shifts at the RIS was studied in [9] via weighted sum-rate maximization for multiuser systems. Furthermore, the fundamental performance limits of RIS-aided multiple-input multiple-output (MIMO) communications were characterized in [7], where the channel capacity was analyzed through joint optimization of transmit covariance and RIS reflection coefficients. Despite these advances, most existing works rely on ide-alized hardware assumptions in which each RIS element is modeled with unit-modulus reflection independent of its phase shift. However, practical RIS implementations exhibit non-negligible hardware impairments, where the reflection amplitude depends on the phase shift due to circuit-level losses. To address this issue, a practical phase shift model incorporating amplitude–phase coupling was proposed in [10], demonstrating that ignoring such hardware effects may lead to noticeable performance degradation. Another fundamen-tal challenge in RIS design arises from the discrete nature of phase configurations. The resulting optimization problem is inherently non-convex and combinatorial. To tackle this, [11] reformulated the discrete beamforming problem as an inner product maximization problem and proposed an effi-cient divide-and-sort algorithm that achieves global optimality 
+
+> arXiv:2603.29144v1 [cs.IT] 31 Mar 2026 2
+
+with significantly reduced complexity compared to exhaustive search. More recently, [12] extended this line of work to more realistic scenarios with non-uniform phase quantization across RIS elements and developed a partition-and-traversal algo-rithm to obtain globally optimal solutions under heterogeneous discrete constraints. However, existing methods inherently suffer from funda-mental limitations in terms of scalability and practical ap-plicability. Most approaches rely on iterative optimization procedures whose convergence behavior and computational cost become increasingly prohibitive as the problem size grows. At the same time, methods that directly address discrete phase constraints typically involve combinatorial search over exponentially large solution spaces, which quickly becomes in-tractable for large-scale RISs. Moreover, many existing frame-works are not fully compatible with hardware-constrained discrete phase models when the number of reflecting elements is large, further limiting their applicability in practical deploy-ments. These challenges highlight the need for fundamentally different optimization paradigms that can efficiently handle large-scale discrete optimization problems beyond the scope of conventional iterative or combinatorial methods. In this paper, we introduce a novel approach for discrete phase shift optimization based on the coherent Ising machine (CIM) . CIMs are unconventional computing architectures that solve large-scale combinatorial optimization problems by ex-ploiting the collective dynamics of coupled oscillators [13– 16]. Notably, CIMs inherently support all-to-all connectivity among spins, which provides a significant advantage over quantum annealers [17]. By mapping the RIS discrete phase shift problem into an Ising Hamiltonian, we leverage the collective mode competition inherent in CIM to efficiently obtain near-optimal solutions [18], even when the number of RIS elements reaches tens of thousands. Unlike conven-tional digital algorithms, the CIM-based approach enables scalable optimization under strict discrete constraints, offering a promising solution to the fundamental bottleneck of RIS implementation. The main contributions of this work are as follows:  
+
+> •
+
+We propose a novel optimization framework for discrete phase shifts by formulating the RIS-assisted beamforming problem as an Ising Hamiltonian and solving it with a coherent Ising machine (CIM), enabling highly efficient physical parallel search for large-scale combinatorial op-timization.  
+
+> •
+
+We show that the proposed CIM-based approach supports both binary and quaternary discrete phase shifts and demonstrate that the CIM achieves physically consistent beam patterns and the theoretical gain improvement when transitioning from binary to quaternary phase shift.  
+
+> •
+
+We introduce a spin-size reduction technique that exploits the dominance of the line-of-sight (LoS) terms to deter-ministically remove trivial spins. The simulation result demonstrates that this technique reduces the number of spins without any performance loss.  
+
+> •
+
+We conduct performance evaluations using a real hard-ware CIM and validate that the proposed approach suc-cessfully optimizes large-scale RISs with 22,201 ele- 
+
+> Fig. 1. The system model of RIS-assisted single user downlink communi-cation.
+
+ments. It is important to note that the number of spins required by the CIM scales linearly with the number of RIS elements, indicating that the proposed method is scal-able to large-scale RISs. To the best of our knowledge, this is the first work to introduce the CIM for discrete phase shift design for RISs. The remainder of this paper is organized as follows. Sec-tion II introduces the system model. Section III presents the proposed CIM-based optimization method together with the formulation of the discrete phase optimization problem. Section IV proposes the spin size reduction approach for LoS channels. The simulation results are given in Section V, where the achievable performance of our proposed method is evaluated in terms of the channel gain by using a real hardware CIM. Section VI concludes this work. II. S YSTEM MODEL 
+
+In this section, we describe the system model of RIS-assisted cellular networks shown in Fig. 1. Throughout this work, we consider a downlink single-user multiple-input single-output (SU-MISO) system, where a base station (BS) with NBS antennas communicates with a single-antenna user equipment (UE) with the assistance of a single RIS with NRIS 
+
+elements. 
+
+A. Symbol Representation 
+
+Let s ∈ C and r ∈ C denote the transmit and receive sym-bols, respectively, where we assume that the transmit symbol is normalized to unit power, i.e., E
+
+{
+
+|s|2}
+
+= 1 . The channel between BS and UE, denoted by h ∈ CNBS ×1, is composed of two different channels of direct link between BS and UE denoted by hd = ( hd, 1, · · · , h d,N BS )⊤ ∈ CNBS ×1 and reflecting link via RIS denoted by hr = ( hr, 1, · · · , h r,N BS )⊤ ∈ CNBS ×1.Let Φ = diag (φ) = diag (φ1, · · · , φ NRIS ) ∈ CNRIS ×NRIS denote the diagonal reflection coefficient matrix of the RIS, and its 
+
+nth element is given by φn , βnejθ n , where βn ∈ [0 , 1] and 
+
+θn ∈ [0 , 2π) denote the reflection amplitude and phase shift performed at the nth element of the RIS, respectively. The channel of reflecting link is expressed as 
+
+h⊤ 
+
+> r
+
+= f ⊤ΦG , (1) where f = ( f1, · · · , f NRIS )⊤ ∈ CNRIS ×1 is the channel from the RIS to the UE, and G ∈ CNRIS ×NBS is the channel matrix 3
+
+from the BS to the RIS. Hence, the channel from the BS to the UE is given by 
+
+h⊤ = h⊤ 
+
+> d
+
++ h⊤ 
+
+> r
+
+= h⊤ 
+
+> d
+
++ f ⊤ΦG . (2) Therefore, the received symbol at the UE is expressed as 
+
+r = h⊤ws + z = (h⊤ 
+
+> d
+
++ h⊤
+
+> r
+
+) ws + z
+
+= (h⊤ 
+
+> d
+
++ f ⊤ΦG ) ws + z, (3) where w = ( w1, · · · , w NBS )⊤ ∈ CNBS ×1 is the beamform-ing (BF) weight vector performed at the BS, and z represents an additive white Gaussian noise (AWGN) term, which follows complex Gaussian distribution with zero mean and complex variance of N0, i.e., z ∼ CN (0 , N 0).
+
+B. Channel Model 
+
+In this work, we consider a free-space propagation environ-ment where the BS, the UE, and the RIS are located in a free space without any additional scatterers. Under this assumption, all channel components are modeled solely based on geometric distances and free-space propagation loss. 
+
+1) Direct Channel: We first consider the direct path be-tween the BS and the UE. Using the free-space path-loss model, the channel from the kth BS antenna to the UE is expressed as 
+
+hd,k = λ
+
+4πd BS -UE ,k 
+
+exp 
+
+(
+
+−j 2π
+
+λ dBS -UE ,k 
+
+)
+
+, (4) where dBS -UE ,k is the distance between the kth BS antenna and the UE, and λ is the wavelength. 
+
+2) RIS-Assisted Reflected Channel: For the reflected path via the RIS, we adopt a physically consistent RIS channel model that is aligned with experimentally validated formu-lations presented in [19]. The overall reflected channel is determined by the BS-RIS channel matrix G ∈ CNRIS ×NBS 
+
+and the RIS-UE channel vector f ∈ CNRIS ×1.Let Gn,k denote the channel between the kth BS antenna and the nth RIS element, which corresponds to the (n, k )th element of G. According to the Friis transmission formula, the element-wise channel is 
+
+Gn,k =
+
+√
+
+ABS ,n,k 
+
+4πd BS -RIS ,n,k 
+
+exp 
+
+(
+
+−j 2π
+
+λ dBS -RIS ,n,k 
+
+)
+
+, (5) where dBS -RIS ,n,k is the distance between the kth BS antenna and the nth RIS element, and ABS ,n,k is the effective aperture area of the nth RIS element as viewed from the kth BS antenna. Similarly, the channel between the nth RIS element and the UE is given by 
+
+fn =
+
+√
+
+AUE ,n 
+
+4πd RIS -UE ,n 
+
+exp 
+
+(
+
+−j 2π
+
+λ dRIS -UE ,n 
+
+)
+
+, (6) where dRIS -UE ,n denotes the distance between the nth RIS element and the UE, and AUE ,n is the effective aperture area of the nth RIS element as observed from the UE.           
+
+> TABLE I POWER LOSS BY DISCRETE PHASE SHIFTS [20]
+> Phase shift level L248∞
+> Power loss 3.9 dB 0.9 dB 0.2 dB 0 dB
+
+Combining (5) and (6), the cascaded channel from the kth BS antenna to the UE via the nth RIS element with reflection coefficient φn = βnejθ n is expressed as 
+
+fn φn Gn,k =
+
+√
+
+AUE ,n 
+
+4πd RIS -UE ,n 
+
+exp 
+
+(
+
+−j 2π
+
+λ dRIS -UE ,n 
+
+)
+
+× φn
+
+√
+
+ABS ,n,k 
+
+4πd BS -RIS ,n,k 
+
+exp 
+
+(
+
+−j 2π
+
+λ dBS -RIS ,n,k 
+
+)
+
+= βnejθ n
+
+√AUE ,n ABS ,n,k 
+
+4π √dRIS -UE ,n dBS -RIS ,n,k 
+
+× exp 
+
+(
+
+−j 2π
+
+λ
+
+(dBS -RIS ,n,k + dRIS -UE ,n 
+
+))
+
+.
+
+(7) 
+
+C. Discrete Phase Shift 
+
+Throughout this work, we consider discrete phase shifts of RIS. Thus, each element on the RIS keeps amplitude unchanged and controls the phase only, i.e., βn = 1 with 
+
+n ∈ { 1, · · · , N RIS }. Furthermore, the phase at each element θn
+
+is chosen from a set of finite discrete phase candidates denoted by DL, where L represents the number of phase shift levels. Thus, |D L| = L holds with |·| representing the cardinality. The set of discrete phases is expressed as 
+
+DL =
+
+{
+
+0, 2π
+
+L , · · · , (L − 1) 2π
+
+L
+
+}
+
+. (8) Therefore, the discrete phase vector of RIS is given by 
+
+θ = ( θ1, · · · , θ NRIS ) ∈ D LNRIS . (9) As a result, the reflection coefficient corresponding to the nth element is reduced to 
+
+φn = ejθ n , θn ∈ D L. (10) The number of combinations for discrete phase shifts of RIS with NRIS elements is given by ∣∣DLNRIS 
+
+∣∣ = LNRIS . Since the computational complexity required for the exhaustive search grows exponentially, the optimization for a large NRIS is unattainable even with the lowest case of L = 2 .Performance loss caused by discrete phase shift compared to continuous counterpart is given in Table I [20]. As given, the power loss is sufficiently suppressed to 0.9 dB at L = 4 , and it becomes nearly negligible for L > 4. Therefore, throughout this work, we focus only on the practical cases of L = 2 and 4
+
+for simplicity as follows, and these phase sets are illustrated in Fig. 2. 
+
+1) Binary Phase Shift ( L = 2 ): We first consider binary phase shifts of RIS, i.e., L = 2 . The set of discrete phase candidates is given by 
+
+D2 = {0, π } . (11) 4
+
+θn       
+
+> ℜ { φn}
+> ℑ { φn}
+> !"#$%&'"()$*+",-$,+&./ !"#$01"'/-('"()$*+",-$,+&./
+> Fig. 2. Discrete phase shifts with phase shift levels of L= 2 (left) and
+> L= 4 (right).
+
+Hence, the nth coefficient on the RIS φn is chosen from the set P2 (i.e., φn ∈ P 2), which is expressed as 
+
+P2 , {ej0, e jπ } = {1, −1} . (12) 
+
+2) Quaternary Phase Shift ( L = 4): We now consider the quaternary case, i.e., L = 4 . For the sake of analysis in Section III-D, we apply the phase rotation of π/ 4 to (9). The set of discrete phase candidates for quaternary phase shift is given by 
+
+D4: rotated =
+
+{ π
+
+4 , 3
+
+4 π, 5
+
+4 π, 7
+
+4 π
+
+}
+
+. (13) As a result, the nth coefficient on the RIS φn is chosen from the set P4, which is expressed as 
+
+P4 ,
+
+{
+
+ej π 
+
+> 4
+
+, e j 3π 
+
+> 4
+
+, e j 5π 
+
+> 4
+
+, e j 7π
+
+> 4
+
+}
+
+=
+
+{ 1
+
+√2 (1 + j) , 1
+
+√2 (−1 + j) , 1
+
+√2 (−1 − j) , 1
+
+√2 (1 − j)
+
+}
+
+.
+
+(14) III. D ISCRETE PHASE SHIFT OPTIMIZATION BASED ON 
+
+COHERENT ISING MACHINE 
+
+In this section, we propose an optimization approach based on CIM for discrete phase shifts of RIS. To this end, we first describe the principle of CIM together with the Ising model. Then, we derive that the discrete phase shifts of RISs can be formulated as an Ising model that makes it compatible with the CIM. 
+
+A. Principle of Coherent Ising Machine 
+
+The CIM is a physics-inspired computing architecture that efficiently solves large-scale combinatorial optimization prob-lems by searching for the ground state of the Ising Hamil-tonian. The Ising model represents a system of binary spins interacting with each other through a coupling coefficient and subject to an external magnetic field. Let σi ∈ { +1 , −1}
+
+denote the ith Ising spin. The total energy of the system, or Ising Hamiltonian, is defined as 
+
+HIsing (σ) = 
+
+> N
+
+∑
+
+> i=1
+> N
+
+∑
+
+> j=1
+
+Jij σiσj +
+
+> N
+
+∑
+
+> i=1
+
+λiσi, (15) where σ = [ σ1, σ 2, . . . , σ N ]⊤ ∈ { +1 , −1}N ×1 denotes the spin configuration, Jij ∈ R is the mutual interaction between the ith and jth spins, and λi ∈ R is the external magnetic field of the ith spin. By introducing a vector λ ∈ RN ×1, whose ith element is given by λi and a matrix J ∈ RN ×N , whose (i, j )th element is given by Jij , the Ising Hamiltonian in (15) can be expressed in vector form as 
+
+HIsing (σ) = σ⊤Jσ + λ⊤σ. (16) The objective of the CIM is to obtain the spin configuration 
+
+ˆσ that minimizes HIsing (σ), and this optimization problem can be formulated as 
+
+E = min  
+
+> σ
+
+HIsing (σ) , (17a) s.t. σ ∈ { +1 , −1}N . (17b) 
+
+B. Problem Formulation 
+
+In this work, we consider the optimization problem so as to maximize the capacity subject to the discrete phase shift constraints in (8). From (3), the signal-to-noise ratio (SNR) for the given channel h is defined as 
+
+γ (h) = 
+
+∣∣h⊤w∣∣2
+
+E
+
+{
+
+|z|2} =
+
+∣∣(h⊤ 
+
+> d
+
++ f ⊤ΦG ) w∣∣2
+
+N0
+
+. (18) Thus, the capacity is expressed as 
+
+C = log 2 (1 + γ (h)) = log 2
+
+(
+
+1 + 
+
+∣∣h⊤w∣∣2
+
+N0
+
+)
+
+= log 2
+
+(
+
+1 + 
+
+∣∣(h⊤ 
+
+> d
+
++ f ⊤ΦG ) w∣∣2
+
+N0
+
+)
+
+. (19) Throughout this work, we consider discrete phase shifts of the RIS in terms of capacity maximization. Therefore, the optimization problem can be formulated as 
+
+E , max  
+
+> w,θ
+
+C
+
+= max  
+
+> w,θ
+
+log 2
+
+(
+
+1 + 
+
+∣∣h⊤w∣∣2
+
+N0
+
+)
+
+, (20a) s.t. ‖w‖2 ≤ 1, (20b) s.t. θ ∈ D LNRIS , (20c) where ‖a‖ ,
+
+√∑Nn=1 |an|2 denotes the ℓ2-norm of the vector a ∈ CN ×1.It is important to note that the optimal BF weight vector at BS is always given by the maximum ratio transmission independent of any phase shifts of RIS θ in single-user MISO system [20, 21]. Thus, the BF weight vector at the BS is expressed as 
+
+w =
+
+(h⊤)H
+
+‖h⊤‖ =
+
+(h⊤ 
+
+> d
+
++ f ⊤ΦG )H
+
+∥∥h⊤ 
+
+> d
+
++ f ⊤ΦG ∥∥ . (21) 5
+
+Therefore, the optimization problem in (20) can be rewritten as 
+
+E = max 
+
+> θ
+
+∥∥h⊤∥∥2 , (22a) s.t. θ ∈ D LNRIS . (22b) 
+
+C. Binary Phase Shift 
+
+We first consider the optimization for binary phase shift. In this case, from (12), the nth reflection coefficient is given by 
+
+φn = {+1 , −1}. Hence, the reflection coefficient vector φ =
+
+(ejθ 1 , · · · , e jθ NRIS 
+
+)⊤ ∈ { +1 , −1}NRIS ×1 directly corresponds to the spin vector σ in Ising model. Therefore, (22) can be rewritten as 
+
+E = min 
+
+> φ
+
+[
+
+− ∥∥h⊤ 
+
+> d
+
++ f ⊤ΦG ∥∥2]
+
+= min 
+
+> φ
+
+[
+
+− ∥∥h⊤ 
+
+> d
+
++ f ⊤diag (φ) G∥∥2]
+
+, (23a) s.t. φ ∈ { +1 , −1}NRIS ×1. (23b) From (1), the channel corresponding to reflecting link can be rewritten as 
+
+h⊤ 
+
+> r
+
+= f ⊤ΦG = f ⊤diag (φ) G
+
+= φHdiag (f ) G , φHV, (24) where V , diag (f ) G ∈ CNRIS ×NBS . Thus, we have 
+
+∥∥h⊤∥∥2 = ∥∥h⊤ 
+
+> d
+
++ h⊤
+
+> r
+
+∥∥2 = ∥∥h⊤ 
+
+> d
+
++ φHV∥∥2
+
+= (h⊤ 
+
+> d
+
++ φHV) ( h⊤ 
+
+> d
+
++ φHV)H
+
+= ∥∥h⊤
+
+> d
+
+∥∥2 + φHVV Hφ + 2 ℜ {h⊤ 
+
+> d
+
+VHφ} . (25) Since ∥∥h⊤∥∥2 ∈ R is a real value and each element of φ ∈{+1 , −1}NRIS takes real values, (25) can be rewritten as 
+
+∥∥h⊤∥∥2 = ∥∥h⊤
+
+> d
+
+∥∥2 + φ⊤ℜ {VV H} φ + 2 ℜ {h⊤ 
+
+> d
+
+VH} φ.
+
+(26) Since the first term ∥∥h⊤
+
+> d
+
+∥∥2 in (26) is independent of the reflecting coefficient vector φ, the optimization problem for binary phase shift is expressed from (23) and (26) as 
+
+E = min 
+
+> φ
+
+[φ⊤ (−ℜ {VV H}) φ − 2ℜ {hdVH} φ]
+
+, min 
+
+> φ
+
+[φ⊤Jbφ + λ⊤ 
+
+> b
+
+φ] , (27a) s.t. φ ∈ { +1 , −1}NRIS ×1 , (27b) where the mutual interaction matrix and the external magnetic field vector for binary phase shift on RIS, denoted by Jb ∈
+
+RNRIS ×NRIS and λb ∈ RNRIS ×1, respectively, are expressed as 
+
+Jb = −ℜ {VV H}
+
+= −ℜ 
+
+{
+
+diag (f ) GG Hdiag (f )H}
+
+, (28) 
+
+λ⊤ 
+
+> b
+
+= −2ℜ {h⊤ 
+
+> d
+
+VH}
+
+= −2ℜ
+
+{
+
+h⊤ 
+
+> d
+
+GHdiag (f )H}
+
+. (29) 
+
+D. Quaternary Phase Shift 
+
+We next consider quaternary phase shift case. It is important to note that the reflection coefficient φn can be represented in binary by dividing it into real and imaginary parts even though the reflection coefficient φn itself is not binary. From (14), the real and imaginary parts of the reflection coefficient φn are given by 
+
+ℜ { φn} ∈ 
+
+{
+
++ 1
+
+√2 , − 1
+
+√2
+
+}
+
+= 1
+
+√2 {+1 , −1} , (30) 
+
+ℑ { φn} ∈ 
+
+{
+
++ 1
+
+√2 , − 1
+
+√2
+
+}
+
+= 1
+
+√2 {+1 , −1} . (31) Equation (25) can be rewritten by separating the reflecting coefficient vector φ into its real and imaginary parts as 
+
+∥∥h⊤∥∥2 = ∥∥h⊤
+
+> d
+
+∥∥2 + φHVV Hφ + 2 ℜ {h⊤ 
+
+> d
+
+VHφ}
+
+= ∥∥h⊤
+
+> d
+
+∥∥2
+
++ (ℜ {φH} ℜ {VV H} ℜ { φ}− ℑ {φH} ℜ {VV H} ℑ { φ}− ℜ {φH} ℑ {VV H} ℑ { φ}−ℑ {φH} ℑ {VV H} ℜ { φ})
+
++ (2ℜ {h⊤ 
+
+> d
+
+VH} ℜ { φ} − 2ℑ {h⊤ 
+
+> d
+
+VH} ℑ { φ}) .
+
+(32) Let φ ∈ { +1 + 1 j, −1 + 1 j, −1 − 1j, +1 − 1j}NRIS ×1 be separated into its real and imaginary parts, and define a new vector ¯φ = (ℜ{ φ}⊤, ℑ{ φ}⊤)⊤ ∈ { +1 , −1}2NRIS ×1 of twice length. From (32), the optimization problem for quaternary phase shift can be formulated as 
+
+E = min 
+
+> ¯φ
+
+[
+
+φ⊤
+
+(−ℜ {VV H} +ℑ {VV H}
+
++ℑ {VV H} +ℜ {VV H})
+
+¯φ
+
++ (−2ℜ {h⊤ 
+
+> d
+
+VH} +2 ℑ {h⊤ 
+
+> d
+
+VH}) ¯φ]
+
+, min 
+
+> φ
+
+[ ¯φ⊤Jq ¯φ + λ⊤ 
+
+> q
+
+¯φ] , (33a) s.t. ¯φ ∈ { +1 , −1}2NRIS ×1 , (33b) where the mutual interaction matrix and the external magnetic field vector for quaternary phase shift on RIS, denoted by Jq ∈
+
+R2NRIS ×2NRIS and λq ∈ R2NRIS ×1, respectively, are expressed as 
+
+Jq =
+
+
+
+−ℜ 
+
+{ diag( f ) G
+
+× GH diag( f )H
+
+}
+
++ℑ
+
+{ diag( f ) G
+
+× GH diag( f )H
+
+}
+
++ℑ
+
+{ diag( f ) G
+
+× GH diag( f )H
+
+}
+
++ℜ
+
+{ diag( f ) G
+
+× GH diag( f )H
+
+} ,
+
+(34) 
+
+λ⊤ 
+
+> q
+
+=
+
+(
+
+−2ℜ
+
+{
+
+h⊤ 
+
+> d
+
+GHdiag (f )H}
+
++2 ℑ
+
+{
+
+h⊤ 
+
+> d
+
+GHdiag (f )H}) 
+
+.
+
+(35) IV. S PIN -S IZE REDUCTION FOR LARGE -S CALE ISING 
+
+OPTIMIZATION 
+
+In the previous section, we formulated the discrete phase shift optimization problem for RISs as an Ising model suit-able for CIM. In this formulation, the number of required spins increases with the number of RIS elements. For binary 6
+
+phase shift, the number of spins equals the number of RIS elements NRIS , whereas that becomes 2NRIS for quaternary phase shift so as to assign the I- and Q-components of the reflection coefficient to separate spins. Current hardware CIM implementation supports about 50 , 000 spins [22], and RISs with larger aperture or higher carrier frequencies are expected to exceed the limit of available spins, as they require a larger number of reflecting elements. Moreover, in practical CIM implementations, multiple combinatorial optimization prob-lems can be embedded within a single pulse train composed of 10 4 pulses, and reducing the problem size allows more problems to be embedded simultaneously. For these reasons, reducing the problem size prior to CIM execution is highly beneficial, even if the obtained result slightly deviates from the optimal solution. In this section, we propose a spin-size reduction method for CIM specifically tailored for discrete phase optimization of RISs over LoS channels by analyzing the structure of the Ising Hamiltonian. 
+
+A. Dominance of the Magnetic Field Term 
+
+Recall that the optimization problem is expressed by (15), the external magnetic field λi is computed based on the direct channel between BS and UE hd, and it becomes zero in NLoS environment from (29) and (35). In free-space propagation, the direct BS-UE path experiences a single path-loss, whereas the reflected path via the RIS experiences two multiplicative path-loss components (BS-RIS and RIS-UE) and typically longer geometric distances, i.e., dBS -UE < d BS -RIS + dRIS -UE . As a result, the external magnetic field term λi is generally much larger than the mutual interaction term Jij as 
+
+|λi| ≫ | Jij |. (36) This relation is especially pronounced under LoS conditions. In such cases, the contribution of the mutual interaction terms to the final spin configuration becomes negligible, and the ith external magnetic field λi alone dictates the optimal value of the ith spin σi.If we ignore the interaction terms for a moment, the optimal spin that minimizes (15) is obtained in closed form as 
+
+σ⋆i =
+
+{
+
++1 , λi < 0,
+
+−1, λi ≥ 0. (37) This means that many spins have an almost predetermined optimal value even before running the CIM. Surely, the effects of Jij can flip the predetermined spins. However, if the energy scale of λi is larger than that of the Jij term, where the energy of the mutual term should take into account the summation such as ∑ 
+
+> j
+
+|Jij |, some of spins remain in the same direction. Such spins do not need to be explicitly included in the CIM, and removing them directly reduces the dimensionality of the optimization problem. Let S denote the set of indices corresponding to RIS elements that can be removed in the CIM optimization due to (36), and the optimal state of the ith spin for i ∈ S is effectively determined by (37). After identifying all such spins, we reconstruct a reduced Ising model by: 1) Remove the rows and columns of the matrix J corre-sponding to the indices in S.2) Insert the predetermined values σ⋆i into the objective as constant terms. 3) Calculate the effective λ after removing the spins. By using predetermined spins σ⋆i and their indices set S,the Ising Hamiltonian in (15) can be rewritten as 
+
+H(σ) = ∑
+
+> i∈S c
+
+∑
+
+> j∈S c
+
+Jij σiσj + ∑
+
+> i∈S
+
+∑
+
+> j∈S
+
+Jij σ⋆i σ⋆j
+
++ ∑
+
+> i∈S
+
+∑
+
+> j∈S c
+
+Jij σ⋆i σj + ∑
+
+> i∈S c
+
+∑
+
+> j∈S
+
+Jij σiσ⋆j
+
++ ∑
+
+> i∈S c
+
+λiσi + ∑
+
+> i∈S
+
+λiσ⋆i ,
+
+= ∑
+
+> i∈S c
+
+∑
+
+> j∈S c
+
+Jij σiσj
+
++ ∑
+
+> i∈S c
+
+λi + 2 ∑
+
+> j∈S
+
+Jij σ⋆j
+
+ σi + C, (38) where Sc denotes the complement of S, and C absorbs the constant contributions from the removed spins. Let ˜σ , σSc denote the subvector of σ indexed by Sc.The resulting Ising Hamiltonian with spin size reduction is expressed as 
+
+Hreduced (σSc ) = ∑
+
+> i∈S c
+
+∑
+
+> j∈S c
+
+Jij σiσj + ∑
+
+> i∈S c
+
+˜λiσi
+
+= ˜ σ⊤ ˜J ˜σ + ˜λ⊤ ˜σ, (39) where ˜J , JSc,Sc is a submatrix of J obtained by restricting both rows and columns to indices in Sc, and ˜λ is a vector whose ith component ˜λi is given by ˜λi = λi + 2 ∑ 
+
+> j∈S
+
+Jij σ⋆j .Although this size reduction approach relies on the domi-nance of the external magnetic term, we emphasize that this assumption naturally holds for RISs deployed in LoS environ-ments since the reflected signal through the RIS experiences two propagation losses, i.e., |hd,k |2 ≫ | fnφnGn,k |2 as given in (4) and (7). Therefore, this technique provides a practical and effective mechanism for scalable CIM-based optimization for future RIS deployments. 
+
+B. Criterion for Spin Removal 
+
+The challenge is determining which spins are safely remov-able without significantly impacting solution quality. In this work, we employ a threshold-based spin classification method, as described below. Assuming that the initial value of each spin is determined by the external magnetic term λi according to (37), the ith spin may flip when the mutual interaction Jij is taken into account if the following condition is satisfied. 
+
+Ti , −sgn (λi)
+
+λi + 2 
+
+> N
+
+∑ 
+
+> j=1 ,j 6=i
+
+Jij sgn (λj )
+
+ > 0, (40) where sgn (·) represents the sign function that returns the sign of a number. In practice, the final spin configuration is determined by the interactions among spins, and thus the 7 
+
+> Fig. 3. The geometric evaluation model of RIS-assisted single user downlink communication.
+
+flipping condition cannot be evaluated independently for each spin as in (40). In this work, as a reference criterion, we adopt the maximum value of Ti over all spin indices as a reference threshold given by 
+
+Tmax = max  
+
+> i
+
+Ti. (41) The ith spin is considered as predetermined if |Ti| > T max ,i.e., i ∈ S, and its value is then fixed deterministically based on (37). In this case, the set of predetermined indices corresponding to RIS elements is expressed as 
+
+S := {i ∈ { 1, . . . , n }|| Ti| > T max } . (42) V. S IMULATION RESULTS 
+
+The performance of discrete phase shifts by using the proposed CIM-based approach is evaluated through numerical simulations in this section. The geometric evaluation model is illustrated in Fig. 3, and the simulation parameters are listed in Table II. In a three-dimensional coordinate system, a BS is located at the origin (0 , 0, 0) , and a UE is placed 50 m away along the y-axis direction at coordinates (0 , 50 , 0) . The BS is equipped with a square-shaped uniform panel array oriented towards the positive y-axis direction, directly facing the UE. The square-shaped RIS is located near the UE at coordinates (2 , 50 , 0) ,with its front side oriented toward the positive x-axis direction, thus facing the UE. Under this environment, each design method aims to optimize the discrete phase for a UE positioned at coordinates (0 , 50 , 0) .In the subsequent simulations, we evaluate the system performance in terms of the channel gain, which is the optimization metric in the objective function of (22a), defined as channel gain [dB] = 10 log 10 
+
+(∥∥h⊤∥∥2)
+
+. (43) This channel gain is measured at positions defined by coor-dinates (0 , d, 0) , where d represents the distance along the 
+
+y-axis. 
+
+A. Hardware Implementation of Coherent Ising Machine 
+
+To evaluate the practical effectiveness of the proposed CIM-based method, we performed discrete phase shift optimization                    
+
+> TABLE II SIMULATION PARAMETERS .Parameter Value
+> Carrier frequency 28.0 GHz Wavelength λ10.71 mm Number of RIS phase shift levels L2 (binary), 4 (quaternary) Side length of RIS 0.4 m, 0.6 m, 0.8 m Number of RIS elements NRIS 5476, 12254, 22201 Number of BS antennas NBS 64 Number of UE antennas 1Element spacing of RIS elements λ/ 2
+> Element spacing of BS antennas λ/ 2
+> Coordinates of BS (0, 0, 0) Coordinates of UE (0, 50, 0) Coordinates of RIS (2, 50, 0)
+> Fig. 4. Photograph of the hardware CIM used in this work.
+
+using a CIM developed by NTT [22]. Fig. 4 shows a photo-graph of the CIM used in our experiments. The CIM consid-ered in this study is a physical Ising solver based on time-multiplexed degenerate optical parametric oscillator (DOPO) pulses with a measurement-feedback architecture. The detailed hardware configuration and operating conditions of the CIM have been reported in [23]. In particular, the CIM employs an auxiliary-spin scheme to implement effective external fields, which enables stable optimization of large-scale and dense graph problems. The CIM can realize fully connected Ising models with up to approximately 50 , 000 spins, where the interaction coefficients are controlled with 8-bit resolution. Each annealing process is executed with a fixed duration of approximately 22 ms, and the final spin states are obtained from the sign of the DOPO pulse amplitudes. Unlike software-based emulators such as simulated annealing, it physically realizes the Ising dynamics through optical and electronic components, enabling large-scale combinatorial optimization via real hardware operation. In this section, all optimization results were obtained by executing the proposed algorithm directly on this hardware CIM, thereby demonstrating the feasibility and scalability of the proposed approach under realistic computational constraints. 
+
+B. Comparison with Conventional Approaches 
+
+We first compare the performance achieved by our proposed CIM-based approach with the existing approaches. For com-parison, we introduce two conventional approaches, successive 8                        
+
+> Distance [m]
+> 020 40 60 80 100
+> Channel gain [dB]
+> -160
+> -140
+> -120
+> -100
+> -80
+> -60
+> CIM
+> Successive
+> Fresnel
+> w/o phase shift
+> (a) Overall performance ( d=0–100 m)
+> Distance [m]
+> 49.8 49.9 50.0 50.1 50.2
+> Channel gain [dB]
+> -140
+> -120
+> -100
+> -80
+> -60
+> CIM
+> Successive
+> Fresnel
+> No phase control
+> (b) Enlarged view around d=50 m Fig. 5. The channel gain comparison using different binary phase shift schemes of RIS over NLoS channel ( NRIS =5476 ). For reference, the values at d= 50 m are −63 .70 dB, −63 .70 dB, and −63 .95 dB for CIM, successive, and Fresnel, respectively.
+
+refinement algorithm [20] and Fresnel zone-based design [24]. The successive refinement algorithm is an iterative method that optimizes the discrete phase shift of each RIS element one by one while keeping the others fixed. This algorithm features low computational complexity, scales well with large numbers of reflecting elements, and achieves near-optimal performance. Fresnel zone-based design is a technique whereby each ele-ment of the RIS inverts its phase according to whether it lies within an even-order or an odd-order Fresnel zone. In the following of this subsection, we compare the perfor-mance for the cases with and without a LoS path between the BS and the UE, which is given by h⊤ 
+
+> d
+
+in (2). 
+
+1) Non-Line-of-Sight (NLoS) Channel: First, we consider the NLoS scenario in which no direct path exists between the BS and UE, i.e., hd = 0NBS ×1 with 0 representing a column zero vector, meaning signals are received solely through the RIS-assisted path. Fig. 5 shows the results for the case where the RIS com-prises NRIS = 5476 elements (corresponding to a square with a side length of 0.4 m), and we consider binary phase shift ( L =2). Hence, the number of possible phase combinations for the RIS elements is 25476 . Note that Fig. 5(a) plots the overall performance over the distance range from 0 m to 100 m, while Fig. 5(b) shows an enlarged view around the designed distance of 50 m. In addition to the conventional successive refinement algorithm and Fresnel zone-based design, results obtained without phase control, where all RIS elements fixed at phase 0, i.e., acting merely as a passive reflector, are included in Fig. 5. Comparing the three discrete phase shift methods at the UE position (0 , 50 , 0) , both the proposed CIM-based method and successive refinement yield the same received power values of −63 .70 dB, slightly outperforming the Fresnel-zone-based approach, which achieves −63 .95 dB. In addition, the achievable channel gain by ideal continuous phase shift is −59 .85 dB. The gap between CIM and ideal continuous phase shift is 3.85 dB, and the performance by CIM and successive refinement is approaching the power loss by binary phase shift of 3.9 dB. Therefore, the discrete phase shift based on the proposed CIM works appropriately and effectively. 
+
+2) Line-of-Sight (LoS) Channel: Next, we consider the LoS scenario, where a direct path between the BS and UE exists. In this scenario, the signals reflected by the RIS should be constructively combined in phase and aligned with the direct path from the BS. Fig. 6 shows the results for NRIS = 5476 obtained by each phase shift method under the LoS scenario. Here, the simulation parameters are identical to those in Fig. 5, ex-cept that the channel assumption is changed from NLoS to LoS. In addition to the proposed CIM-based method, results from conventional methods such as successive refinement and the Fresnel-based method are also presented for comparison. Examining the channel gain at the UE position for each design approach, the CIM achieves −62 .16 dB, successive refinement achieves −63 .37 dB, and the Fresnel zone-based design achieves −63 .84 dB. Unlike the NLoS scenario, in the LoS case, the proposed CIM approach slightly but clearly outperforms the other schemes. The inferior performance of the Fresnel method can be attributed to the lack of the phase alignment with the direct path, as it only considers the RIS-assisted path. Similarly, successive refinement, being a suboptimal iterative algorithm, may converge to a discrete phase configuration considerably different from the optimal solution. On the other hand, the formulation of the CIM inherently takes into account the direct path. Consequently, the proposed CIM approach successfully obtains a highly effective discrete phase combination on the RIS. The above result in Fig. 6 addresses a problem attributed to the external magnetic field term λ, which has required further investigation in previous studies on CIM [23]. Moreover, the LoS environment represents a scenario in which the external magnetic field term becomes more dominant than the mutual interaction term. Such a scenario has not been sufficiently explored in conventional CIM research. In this study, we demonstrate that the CIM operates appropriately and is capable of obtaining reasonable solutions even under such conditions. These findings confirm the applicability and facilitate its 9     
+
+> Distance [m]
+> 020 40 60 80 100
+> Channel gain [dB]
+> -90
+> -80
+> -70
+> -60
+> -50
+> CIM
+> Successive refinement
+> Fresnel
+> w/o phase shift
+
+(a) Overall performance ( d =0–100 m)     
+
+> Distance [m]
+> 49.8 49.9 50.0 50.1 50.2
+> Channel gain [dB]
+> -90
+> -85
+> -80
+> -75
+> -70
+> -65
+> -60
+> CIM
+> Successive
+> Fresnel
+> without control
+
+(b) Enlarged view around d =50 m Fig. 6. The channel gain comparison using different discrete phase shift schemes of RIS over LoS channel ( NRIS = 5476 ). For reference, the values at d = 50 m are −62 .16 dB, −63 .84 dB, and −63 .37 dB for CIM, successive, and Fresnel, respectively. 
+
+application to larger-scale RIS systems under constraints on the number of spins. 
+
+C. RIS Size Comparison 
+
+In this subsection, we investigate the impact of the RIS size, i.e., the number of reflecting elements, on the achievable channel gain under both NLoS and LoS channel conditions. In both cases, three RIS size configurations are considered, and corresponding side lengths of the RIS are 0.4 m, 0.6 m, and 
+
+0.8 m. We here consider the same element spacing of λ/ 2, and the numbers of RIS elements depending only on their aperture are given by NRIS = 5476 , NRIS = 12254 , and NRIS = 22201 ,respectively. Note that we consider binary phase shift in the following. Fig. 7 shows the channel gain of the proposed CIM method under NLoS conditions for different RIS sizes. The resulting channel gains at the UE location for three RIS configurations of NRIS = 5476 , NRIS = 12254 , and NRIS = 22201 are 
+
+−63 .70 dB, −56 .62 dB, and −51 .79 dB, respectively. Since     
+
+> Distance [m]
+> 49.8 49.9 50.0 50.1 50.2
+> Channel gain [dB]
+> -80
+> -70
+> -60
+> -50
+> N_RIS = 5476
+> N_RIS = 12254
+> N_RIS = 22201
+
+Fig. 7. The channel gain via RIS with binary discrete phase shifts based on CIM over NLoS channels for different RIS size ( NRIS = 5476 , 12544 , and 
+
+22201 ). For reference, the values at d = 50 m are −63 .70 dB, −56 .62 dB, and −51 .79 dB for NRIS = 5476 , NRIS = 12544 , and NRIS = 22201 ,respectively.     
+
+> Distance [m]
+> 49.8 49.9 50.0 50.1 50.2
+> Channel gain [dB]
+> -80
+> -75
+> -70
+> -65
+> -60
+> -55
+> -50
+> N_RIS = 5476
+> N_RIS = 12254
+> N_RIS = 22201
+
+Fig. 8. The channel gain via RIS with binary discrete phase shifts based on CIM over LoS channels for different RIS size ( NRIS = 5476 , 12544 , and 
+
+22201 ). For reference, the values at d = 50 m are −62 .19 dB, −55 .97 dB, and −51 .50 dB for NRIS = 5476 , NRIS = 12544 , and NRIS = 22201 ,respectively. 
+
+the ratios of the RIS areas relative to NRIS = 5476 are 1,
+
+2.29 , and 4.05 respectively, theoretical expectation for gain improvements by using larger aperture RISs are about 3.60 dB and 6.07 dB for NRIS = 12254 and NRIS = 22201 compared to the case of NRIS = 5476 . As the received power involves applying this RIS array gain twice, i.e., once before and once after reflection, the achievable channel gains for NRIS = 12254 
+
+and NRIS = 22201 are given by 7.20 dB and 12 .14 dB, respectively, compared to that with NRIS = 5476 . The above relative gain improvements observed by experiments agree well with the theoretical expectations. Thus, we can conclude that the proposed CIM based discrete phase shift method functions appropriately even for very large-scale RIS. Fig. 8 shows the simulation results for the LoS channel 10 
+
+case, where all system parameters are identical to those used in Fig. 7. In Fig. 8, the channel gains achieved with the RIS configurations NRIS = 5476 , NRIS = 12254 , and 
+
+NRIS = 22201 are −62 .19 dB, −55 .97 dB, and −51 .50 dB, respectively. Although these gains are smaller than the theo-retically expected improvements of 7.20 dB and 12 .14 dB for 
+
+NRIS = 12254 and NRIS = 22201 relative to NRIS = 5476 , this discrepancy can be attributed to the presence of the direct path in addition to the reflected path through RIS. Nevertheless, as in the NLoS scenario, the experimental results in Fig. 8 confirmed that the channel gain increases proportionally to the area of the RIS over the LoS channel. In the LoS environment, both the direct path between the BS and the UE and the reflected path via the RIS interfere coherently at the receiver. As a result, more rapid spatial oscillations of the channel gain are observed with respect to the distance d, corresponding to the constructive and destructive interference between the two propagation components. However, as the RIS size increases from NRIS = 5476 to NRIS = 22201 , the influence of the RIS-reflected component becomes increasingly dominant compared to the direct path. Consequently, the composite beam pattern becomes smoother, indicating that the large-scale RIS provides stronger and more coherent reflections that effectively shape the overall received field distribution. For large-scale RIS such as NRIS = 22201 , there would be 222201 possible phase combinations for exhaustive search, an astronomically large number beyond the computational ca-pabilities of practical computers. However, the present system with parameters NRIS = 22201 , a RIS aperture of about 0.8 mand the carrier frequency of 28 GHz, is practically realistic since the hardware with the similar parameters have been implemented in [24]. Therefore, the proposed discrete phase shift based on the CIM can be regarded as a groundbreaking approach capable of achieving high performance even for large-scale RISs. 
+
+D. Comparison Between Binary and Quaternary Phase Shift 
+
+We next consider quaternary phase shift. Figs. 9 and 10 compare the results between the binary and quaternary phase shift schemes under NLoS and LoS environments, respectively, with NRIS = 22201 .In Fig. 9 for the NLoS case, the UE receives the signal exclusively through the RIS-reflected path. As a result, the spatial structure of the received channel gain directly cor-responds to the beam pattern generated by the RIS. The figure clearly shows that the use of quaternary phase shifts yields approximately a 3 dB improvement over the binary case across all distances d, which agrees with the theoretical prediction for the channel gain with increasing L from 2 to 4.This consistent improvement demonstrates that the proposed CIM-based optimization effectively determines high-resolution discrete phase configurations even when the RIS has only limited quantized states. The results for the LoS scenario, shown in Fig. 10, exhibit different characteristics. In this case, the received field is formed by the coherent superposition of the direct BS-UE path and the RIS-reflected path. For the LoS, we found the rapid                           
+
+> Distance [m]
+> 49.8 49.9 50.0 50.1 50.2
+> Channel gain [dB]
+> -80
+> -70
+> -60
+> -50
+> Binary (L = 2)
+> Quaternary (L = 4)
+> Fig. 9. The channel gain via RIS with binary and quaternary discrete phase shifts based on CIM over LoS channels ( NRIS = 22201 ). For reference, the values at d= 50 m are −51 .79 dB and −48 .88 dB for binary and quaternary, respectively.
+> Distance [m]
+> 49.8 49.9 50.0 50.1 50.2
+> Channel gain [dB]
+> -80
+> -70
+> -60
+> -50
+> Binary (L = 2)
+> Quaternary (L = 4)
+> Fig. 10. The channel gain via RIS with binary and quaternary discrete phase shifts based on CIM over LoS channels ( NRIS = 22201 ). For reference, the values at d= 50 m are −51 .50 dB and −48 .57 dB for binary and quaternary, respectively.
+
+oscillation with respect to the distance d as mentioned above. Despite these oscillations, the quaternary control consistently outperforms the binary control at all distances, again providing nearly a 3 dB improvement. The uniformity of this gain across the entire range of d indicates that additional phase resolution translates directly into additional coherent combination, result-ing in the gain improvement. Overall, both figures highlight that quaternary phase shift control offers systematic performance benefits over binary control in both NLoS and LoS environments. Furthermore, the proposed CIM-based optimization successfully handles the increased number of discrete states required for quater-nary phase shift. The only additional computational cost is a doubling of the number of spins compared to the binary formulation, which remains well within the capacity of current CIM hardware. These results confirm that the CIM-based 11                        
+
+> Distance [m]
+> 49.8 49.9 50.0 50.1 50.2
+> Channel gain [dB]
+> -90
+> -80
+> -70
+> -60
+> -50
+> Full size
+> Reduced size
+> Fig. 11. Comparison of full-size and reduced-size CIM optimization for binary phase shift control with NRIS =22201 under LoS conditions. After applying the size reduction, the number of spins is reduced to 19277
+> while preserving identical channel-gain performance. For reference, the values at d= 50 m are −51 .50 dB and −51 .50 dB for full size and reduced size, respectively.
+
+approach is sufficiently scalable and effective for practical RIS deployments requiring higher phase resolution. 
+
+E. Spin Size Reduction 
+
+Finally, we investigate the effect of the spin size reduction algorithm in Section IV. Fig. 11 illustrates the effect of the proposed spin size reduction method for the large RIS with NRIS = 22201 elements under the LoS environment. In Fig. 11, we consider binary phase shift and compare the results obtained by the full Ising model in (15) with those obtained after applying the reduction algorithm in (39) in Section IV, which selectively removes spins whose optimal states are determined almost entirely by the external magnetic term only. As shown in the figure, the channel gain curves obtained from the full model and the reduced model coincide perfectly over the entire range of the distance d. Both approaches achieve an identical channel gain of −51 .50 dB at the UE distance d = 50 m, indicating that our proposed spin size reduction does not degrade the received signal power. In this particular scenario, the dominance of the direct BS-UE path results in large magnetic fields, making this algorithm highly effective. Out of the original 22201 spins, 
+
+19277 remained after reduction, meaning that 13 .2% of the spins were eliminated while preserving the optimized phase configuration. In this simulation setup, the RIS is located in close proximity to the UE, and its contribution to the received signal cannot be neglected. As a result, the proposed reduction method yields a moderate spin reduction ratio of 
+
+13 .2% . However, for users whose received signals are less influenced by the RIS, a significantly higher reduction ratio can be expected. In the extreme case where the RIS-assisted path is negligible and only the direct BS-UE channel is present, a 100% reduction is achieved, indicating that RIS phase optimization is unnecessary for such UEs. This spin size reduction demonstrates the practicality of the proposed approach when applied to RIS systems operating in LoS-dominant environments, where the magnetic field term plays a decisive role in determining the optimal spin states. The observed behavior also provides insights beyond the RIS-specific context. The reduced model yields equivalent to those of the full model, indicating that the proposed reduction strategy is applicable to a wide class of Ising-formulated optimization problems. Whenever the external magnetic term is significantly larger than the sum of the mutual interaction terms for each spin, such spin states are effectively prede-termined, and eliminating them does not affect the global optimum. Thus, the spin size reduction approach offers a general mechanism for drastically shrinking the problem size without sacrificing accuracy. VI. C ONCLUSION 
+
+This paper proposed a coherent Ising machine (CIM) based framework for discrete phase shift optimization in large RIS-assisted wireless systems, and its effectiveness was confirmed by using a real hardware CIM developed by NTT. By formulat-ing the discrete phase shift problem of RIS as an Ising Hamil-tonian, the CIM was shown to efficiently handle both binary and quaternary phase shift and to achieve physically consistent beamforming gains for RISs with more than twenty thousand elements. Experimental simulations demonstrated that the pro-posed method achieves the theoretical expectation of 3 dB improvement when moving from binary to quaternary phase shifts and accurately reproduces the expected aperture-scaling behavior in both NLoS and LoS environments. Furthermore, a spin size reduction approach was proposed, exploiting the dominance of external magnetic terms to remove spins whose optimal states are predetermined in the LoS environment, which demonstrated about 13 .2 % spin size reduction for large-scale RIS with 22,201 elements without any performance degradation. These results confirm that the CIM provides a practical, scalable, and generalizable tool for discrete phase shift optimization of RIS, and they indicate strong potential for extending the method to even larger RISs and broader classes of Ising-formulated wireless optimization problems in future work. REFERENCES [1] Q. Wu and R. Zhang, “Towards smart and reconfigurable environment: Intelligent reflecting surface aided wireless network,” IEEE Communi-cations Magazine , vol. 58, no. 1, pp. 106–112, Jan. 2019. [2] M. D. Renzo, A. Zappone, M. Debbah, C. Yuen, J. de Rosny, and S. Tretyakov, “Smart radio environments empowered by reconfigurable intelligent surfaces: How it works, state of research, and road ahead,”                              
+
+> IEEE J. Sel. Areas Commun. , vol. 38, no. 11, pp. 2450–2525, Nov. 2020. [3] C. Huang, A. Zappone, G. C. Alexandropoulos, M. Debbah, and C. Yuen, “Reconfigurable intelligent surfaces for energy efficiency in wireless communication,” IEEE Trans. Wireless Commun. , vol. 18, no. 8, pp. 4157–4170, Aug. 2019. [4] T. J. Cui, M. Q. Qi, X. Wan, J. Zhao, and Q. Cheng, “Coding metamaterials, digital metamaterials and programmable metamaterials,”
+> Light: science & applications , vol. 3, no. 10, pp. e218–e218, 2014. [5] D. Kitayama, H. Kagami, A. Pander, Y. Hama, and H. Takahashi, “Trans-missive metasurface with 3.5-μm-thick liquid crystals for subterahertz-wave dynamic beamforming,” Communications Engineering ,vol. 5, no. 56, 2026. 12
+
+[6] J. Sang, Y. Liu, and A. Nallanathan, “Quantized phase alignment by discrete phase shifts for reconfigurable intelligent surface-assisted communication systems,” IEEE Trans. Wireless Commun. , vol. 73, no. 4, pp. 5259–5275, 2024. [7] S. Zhang and R. Zhang, “Capacity characterization for intelligent reflecting surface aided MIMO communication,” IEEE J. Sel. Areas Commun. , vol. 38, no. 8, pp. 1823–1838, 2020. [8] C. You, B. Zheng, and R. Zhang, “Channel estimation and passive beamforming for intelligent reflecting surface: Discrete phase shift and progressive refinement,” IEEE J. Sel. Areas Commun. , vol. 38, no. 11, pp. 2604–2620, Nov. 2020. [9] H. Guo, Y.-C. Liang, J. Chen, and E. G. Larsson, “Weighted sum-rate maximization for reconfigurable intelligent surface aided wireless networks,” IEEE Trans. Wireless Commun. , vol. 19, no. 5, pp. 3064– 3076, 2020. [10] S. Abeywickrama, R. Zhang, Q. Wu, and C. Yuen, “Intelligent reflecting surface: Practical phase shift model and beamforming optimization,” 
+
+IEEE Trans. Commun. , vol. 68, no. 9, pp. 5849–5863, Sep. 2020. [11] R. Xiong, X. Dong, T. Mi, K. Wan, and R. C. Qiu, “Optimal discrete beamforming of RIS-aided wireless communications: An inner product maximization approach,” in IEEE Wireless Communications and Net-working Conference (WCNC) , 2024, pp. 1–6. [12] J. Lu, R. Xiong, T. Mi, K. Yin, and R. CaimingQiu, “Optimal con-figuration of reconfigurable intelligent surfaces with non-uniform phase quantization,” in IEEE Global Communications Conference , 2024, pp. 3751–3756. [13] T. Inagaki et al. , “A coherent Ising machine for 2000-node optimization problems,” Science , vol. 354, no. 6312, pp. 603–606, Nov. 2016. [14] P. L. McMahon et al. , “A fully programmable 100-spin coherent Ising machine with all-to-all connections,” Science , vol. 354, no. 6312, pp. 614–617, Nov. 2016. [15] Y. Yamamoto et al. , “Coherent ising machines—optical neural networks operating at the quantum limit,” npj Quantum Information , vol. 3, no. 49, pp. 1–15, 2017. [16] Q. Cen et al. , “Large-scale coherent ising machine based on optoelec-tronic parametric oscillator,” Light: Science & Applications , vol. 11, no. 333, pp. 1–10, 2022. [17] R. Hamerly et al. , “Experimental investigation of performance dif-ferences between coherent Ising machines and a quantum annealer,” 
+
+Science advances , vol. 5, no. 5, p. eaau0823, 2019. [18] J. S. Cummins, H. Salman, and N. G. Berloff, “Ising hamiltonian minimization: Gain-based computing with manifold reduction of soft spins vs quantum annealing,” Physical Review Research , vol. 7, no. 013150, pp. 1–11, 2025. [19] D. Kitayama, A. Pander, Y. Hama, and H. Takahashi, “Alignment-free twisted-split-ring metasurface on single substrate with 2 π phase range for linearly polarized sub-terahertz wave,” Optics Express , vol. 31, no. 13, pp. 20 769–20 786, 2023. [20] Q. Wu and R. Zhang, “Beamforming optimization for wireless network aided by intelligent reflecting surface with discrete phase shifts,” IEEE Trans. Commun. , vol. 68, no. 3, pp. 1838–1851, 2019. [21] I. E. Telatar, “Capacity of multi-antenna Gaussian channels,” Euro. Trans. Telecomm. , vol. 10, no. 6, pp. 585–595, Nov. 1999. [22] T. Honjo et al. , “100,000-spin coherent Ising machine,” Science ad-vances , vol. 7, no. 40, p. eabh0952, 2021. [23] H. Takesue et al. , “Finding independent sets in large-scale graphs with a coherent Ising machine,” Science Advances , vol. 11, no. 7, p. eads7223, 2025. [24] D. Kitayama, Y. Hama, K. Goto, K. Miyachi, T. Motegi, and O. Kagaya, “Transparent dynamic metasurface for a visually unaffected reconfig-urable intelligent surface: controlling transmission/reflection and making a window into an RF lens,” Optics Express , vol. 29, no. 18, pp. 29 292– 29 307, 2021.

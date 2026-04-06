@@ -1,0 +1,649 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-06T20:29:01.895996+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 4,
+    "deep_cap": 7,
+    "deep_selected": 4,
+    "quick_candidates": 26,
+    "quick_skim_target": 12,
+    "quick_selected": 12
+  },
+  "deep_dive": [
+    {
+      "id": "2604.02666v1",
+      "title": "Let's Have a Conversation: Designing and Evaluating LLM Agents for Interactive Optimization",
+      "abstract": "Optimization is as much about modeling the right problem as solving it. Identifying the right objectives, constraints, and trade-offs demands extensive interaction between researchers and stakeholders. Large language models can empower decision-makers with optimization capabilities through interactive optimization agents that can propose, interpret and refine solutions. However, it is fundamentally harder to evaluate a conversation-based interaction than traditional one-shot approaches. This paper proposes a scalable and replicable methodology for evaluating optimization agents through conversations. We build LLM-powered decision agents that role-play diverse stakeholders, each governed by an internal utility function but communicating like a real decision-maker. We generate thousands of conversations in a school scheduling case study. Results show that one-shot evaluation is severely limiting: the same optimization agent converges to much higher-quality solutions through conversations. Then, this paper uses this methodology to demonstrate that tailored optimization agents, endowed with domain-specific prompts and structured tools, can lead to significant improvements in solution quality in fewer interactions, as compared to general-purpose chatbots. These findings provide evidence of the benefits of emerging solutions at the AI-optimization interface to expand the reach of optimization technologies in practice. They also uncover the impact of operations research expertise to facilitate interactive deployments through the design of effective and reliable optimization agents.",
+      "authors": [
+        "Joshua Drossman",
+        "Alexandre Jacquillat",
+        "Sébastien Martin"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "math.OC"
+      ],
+      "published": "2026-04-03T02:55:24+00:00",
+      "link": "https://arxiv.org/pdf/2604.02666v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "LLM agents for interactive optimization and solution refinement",
+      "llm_evidence_cn": "用于交互式优化和方案改进的大模型智能体",
+      "llm_evidence": "用于交互式优化和方案改进的大模型智能体",
+      "canonical_evidence": "用于交互式优化和方案改进的大模型智能体",
+      "llm_tldr_en": "Explores LLM-powered agents for interactive optimization, proposing and refining solutions through conversation.",
+      "llm_tldr_cn": "探索了基于大模型的交互式优化智能体，通过对话提出、解释和改进优化方案。",
+      "llm_tldr": "探索了基于大模型的交互式优化智能体，通过对话提出、解释和改进优化方案。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "How to use Large Language Models to solve combinatorial optimization problems",
+      "matched_requirement_id": "req-12",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.03087v1",
+      "title": "Self-Supervised Graph Neural Networks for Full-Scale Tertiary Voltage Control",
+      "abstract": "A growing portion of operators workload is dedicated to Tertiary Voltage Control (TVC), namely the regulation of voltages by means of adjusting a series of setpoints and connection status. TVC may be framed as a Mixed Integer Non Linear Program, but state-of-the-art optimization methods scale poorly to large systems, making them impractical for real-scale and real-time decision support. Observing that TVC does not require any optimality guarantee, we frame it as an Amortized Optimization problem, addressed by the self-supervised training of a Graph Neural Network (GNN) to minimize voltage violations. As a first step, we consider the specific use case of post-processing the forecasting pipeline used by the French TSO, where the trained GNN would serve as a TVC proxy. After being trained on one year of full-scale HV-EHV French power grid day-ahead forecasts, our model manages to significantly reduce the average number of voltage violations.",
+      "authors": [
+        "Balthazar Donon",
+        "Geoffroy Jamgotchian",
+        "Hugo Kulesza",
+        "Louis Wehenkel"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY"
+      ],
+      "published": "2026-04-03T15:09:57+00:00",
+      "link": "https://arxiv.org/pdf/2604.03087v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Self-supervised GNN for Mixed Integer Non Linear Programming in voltage control",
+      "llm_evidence_cn": "用于电压控制中混合整数非线性规划的自监督图神经网络",
+      "llm_evidence": "用于电压控制中混合整数非线性规划的自监督图神经网络",
+      "canonical_evidence": "用于电压控制中混合整数非线性规划的自监督图神经网络",
+      "llm_tldr_en": "Applies GNNs to solve complex mixed-integer optimization problems in power systems.",
+      "llm_tldr_cn": "应用图神经网络解决电力系统中的复杂混合整数优化问题。",
+      "llm_tldr": "应用图神经网络解决电力系统中的复杂混合整数优化问题。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Graph Neural Networks for solving combinatorial problems",
+      "matched_requirement_id": "req-15",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.02554v1",
+      "title": "Principled and Scalable Diversity-Aware Retrieval via Cardinality-Constrained Binary Quadratic Programming",
+      "abstract": "Diversity-aware retrieval is essential for Retrieval-Augmented Generation (RAG), yet existing methods lack theoretical guarantees and face scalability issues as the number of retrieved passages $k$ increases. We propose a principled formulation of diversity retrieval as a cardinality-constrained binary quadratic programming (CCBQP), which explicitly balances relevance and semantic diversity through an interpretable trade-off parameter. Inspired by recent advances in combinatorial optimization, we develop a non-convex tight continuous relaxation and a Frank--Wolfe based algorithm with landscape analysis and convergence guarantees. Extensive experiments demonstrate that our method consistently dominates baselines on the relevance-diversity Pareto frontier, while achieving significant speedup.",
+      "authors": [
+        "Qiheng Lu",
+        "Nicholas D. Sidiropoulos"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.IR"
+      ],
+      "published": "2026-04-02T22:08:35+00:00",
+      "link": "https://arxiv.org/pdf/2604.02554v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Formulates diversity retrieval as binary quadratic programming using combinatorial optimization advances",
+      "llm_evidence_cn": "利用组合优化的进展将多样性检索建模为二元二次规划问题",
+      "llm_evidence": "利用组合优化的进展将多样性检索建模为二元二次规划问题",
+      "canonical_evidence": "利用组合优化的进展将多样性检索建模为二元二次规划问题",
+      "llm_tldr_en": "Applies combinatorial optimization techniques to solve diversity-aware retrieval in RAG systems.",
+      "llm_tldr_cn": "应用组合优化技术解决RAG系统中的多样性检索问题。",
+      "llm_tldr": "应用组合优化技术解决RAG系统中的多样性检索问题。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Machine learning approaches to combinatorial optimization",
+      "matched_requirement_id": "req-19",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.02910v1",
+      "title": "Analysis of Optimality of Large Language Models on Planning Problems",
+      "abstract": "Classic AI planning problems have been revisited in the Large Language Model (LLM) era, with a focus of recent benchmarks on success rates rather than plan efficiency. We examine the degree to which frontier models reason optimally versus relying on simple, heuristic, and possibly inefficient strategies. We focus on the Blocksworld domain involving towers of labeled blocks which have to be moved from an initial to a goal configuration via a set of primitive actions. We also study a formally equivalent task, the generalized Path-Star ($P^*$) graph, in order to isolate true topological reasoning from semantic priors. We systematically manipulate problem depth (the height of block towers), width (the number of towers), and compositionality (the number of goal blocks). Reasoning-enhanced LLMs significantly outperform traditional satisficing planners (e.g., LAMA) in complex, multi-goal configurations. Although classical search algorithms hit a wall as the search space expands, LLMs track theoretical optimality limits with near-perfect precision, even when domain-specific semantic hints are stripped away. To explain these surprising findings, we consider (and find evidence to support) two hypotheses: an active Algorithmic Simulation executed via reasoning tokens and a Geometric Memory that allows models to represent the $P^*$ topology as a navigable global geometry, effectively bypassing exponential combinatorial complexity.",
+      "authors": [
+        "Bernd Bohnet",
+        "Michael C. Mozer",
+        "Kevin Swersky",
+        "Wil Cunningham",
+        "Aaron Parisi",
+        "Kathleen Kenealy",
+        "Noah Fiedel"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CL"
+      ],
+      "published": "2026-04-03T09:27:16+00:00",
+      "link": "https://arxiv.org/pdf/2604.02910v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Analysis of LLM optimality on planning problems like Blocksworld",
+      "llm_evidence_cn": "分析大模型在积木世界等规划问题上的最优性",
+      "llm_evidence": "分析大模型在积木世界等规划问题上的最优性",
+      "canonical_evidence": "分析大模型在积木世界等规划问题上的最优性",
+      "llm_tldr_en": "Evaluates whether LLMs use optimal reasoning or simple heuristics for classic AI planning and graph problems.",
+      "llm_tldr_cn": "评估大模型在经典AI规划和图问题中是使用最优推理还是简单启发式策略。",
+      "llm_tldr": "评估大模型在经典AI规划和图问题中是使用最优推理还是简单启发式策略。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Large Language Models (LLM) for optimization tasks",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2603.28204v2",
+      "title": "ERPO: Token-Level Entropy-Regulated Policy Optimization for Large Reasoning Models",
+      "abstract": "Reinforcement learning from verifiable rewards has significantly advanced the reasoning capabilities of large language models. However, Group Relative Policy Optimization (GRPO) typically assigns a uniform, sequence-level advantage to all tokens, thereby overlooking the intrinsic information heterogeneity along reasoning chains. We show that this coarse-grained credit assignment leads to premature entropy collapse and encourages the model to generate redundant, low-quality reasoning paths. Through systematic empirical analysis, we identify Critical Decision Pivots (CDPs): transient high-entropy states where the policy's trajectory is most sensitive to perturbations. These pivots represent the \"forks in the road\" where effective multi-path exploration is most crucial yet often suppressed by uniform advantage signals. Building on these insights, we propose Entropy-Regulated Policy Optimization (ERPO), which transitions the optimization focus from coarse sequences to fine-grained token dynamics. ERPO introduces three synergistic components: (i) Entropy-aware Gating, which adaptively amplifies exploration at CDPs to facilitate diverse path discovery; (ii) Bucket-based Implicit Normalization, which mitigates difficulty bias by aligning token progress windows; and (iii) Result-anchored Advantage Synthesis, which re-weights token-level signals via outcome-driven anchors. Extensive experiments on competitive mathematical benchmarks demonstrate that ERPO significantly outperforms GRPO. Notably, ERPO not only boosts reasoning accuracy but also yields significantly more concise and robust derivation paths, while achieving performance comparable to large models with orders of magnitude more parameters.",
+      "authors": [
+        "Song Yu",
+        "Li Li",
+        "Wenwen Zhao",
+        "Zhisheng Yang"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-30T09:20:25+00:00",
+      "link": "https://arxiv.org/pdf/2603.28204v2",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Policy optimization for large reasoning models",
+      "llm_evidence_cn": "大型推理模型的策略优化",
+      "llm_evidence": "大型推理模型的策略优化",
+      "canonical_evidence": "大型推理模型的策略优化",
+      "llm_tldr_en": "Introduces token-level entropy-regulated policy optimization to improve LLM reasoning chains.",
+      "llm_tldr_cn": "引入令牌级熵正则化策略优化，以改进大语言模型的推理链生成。",
+      "llm_tldr": "引入令牌级熵正则化策略优化，以改进大语言模型的推理链生成。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Large Language Models (LLM) for optimization tasks",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.28052v1",
+      "title": "Meta-Harness: End-to-End Optimization of Model Harnesses",
+      "abstract": "The performance of large language model (LLM) systems depends not only on model weights, but also on their harness: the code that determines what information to store, retrieve, and present to the model. Yet harnesses are still designed largely by hand, and existing text optimizers are poorly matched to this setting because they compress feedback too aggressively. We introduce Meta-Harness, an outer-loop system that searches over harness code for LLM applications. It uses an agentic proposer that accesses the source code, scores, and execution traces of all prior candidates through a filesystem. On online text classification, Meta-Harness improves over a state-of-the-art context management system by 7.7 points while using 4x fewer context tokens. On retrieval-augmented math reasoning, a single discovered harness improves accuracy on 200 IMO-level problems by 4.7 points on average across five held-out models. On agentic coding, discovered harnesses surpass the best hand-engineered baselines on TerminalBench-2. Together, these results show that richer access to prior experience can enable automated harness engineering.",
+      "authors": [
+        "Yoonho Lee",
+        "Roshen Nair",
+        "Qizheng Zhang",
+        "Kangwook Lee",
+        "Omar Khattab",
+        "Chelsea Finn"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-03-30T05:33:50+00:00",
+      "link": "https://arxiv.org/pdf/2603.28052v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "End-to-end optimization of LLM harnesses",
+      "llm_evidence_cn": "LLM harness的端到端优化",
+      "llm_evidence": "LLM harness的端到端优化",
+      "canonical_evidence": "LLM harness的端到端优化",
+      "llm_tldr_en": "Introduces Meta-Harness for searching and optimizing the code that manages LLM context and retrieval.",
+      "llm_tldr_cn": "引入Meta-Harness系统，通过搜索和优化代码来管理LLM的上下文和检索。",
+      "llm_tldr": "引入Meta-Harness系统，通过搜索和优化代码来管理LLM的上下文和检索。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Large Language Models (LLM) for optimization tasks",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.29144v1",
+      "title": "Scalable and Near-Optimal Discrete Phase Shift Optimization for Reconfigurable Intelligent Surfaces with Over 20,000 Elements",
+      "abstract": "This paper proposes a novel optimization framework for discrete phase shifts of a reconfigurable intelligent surface (RIS) using a coherent Ising machine (CIM). Unlike conventional methods based on iterative convex approximation or combinatorial search with exponentially increasing complexity, the CIM physically explores the solution space of Ising Hamiltonians through collective mode competition in a network of optical oscillators, enabling efficient large-scale discrete optimization. We formulate the RIS discrete phase optimization problem as a quadratic Ising model, which supports both binary and quaternary phase shifts by appropriately mapping quantized phase states to spin variables. Using a real hardware CIM, we experimentally solve quadratic optimization problems for RISs with up to 22,201 elements. The results demonstrate that the proposed method achieves physically consistent beam patterns under both line-of-sight and non-line-of-sight environments and attains the theoretical gain when transitioning from binary to quaternary phase shift. To further enhance scalability, we introduce a spin-size reduction approach that removes spins deterministically fixed by dominant channel components. This technique efficiently reduces the problem size for CIM in line-of-sight conditions without performance loss. These results confirm that CIM-based optimization offers a practical and highly scalable solution for large RIS deployments with discrete phase shift constraints.",
+      "authors": [
+        "Yuto Hama",
+        "Daisuke Kitayama",
+        "Kensuke Inaba",
+        "Toshimori Honjo",
+        "Hiroki Takesue",
+        "Naoki Ishikawa",
+        "Hiroyuki Takahashi"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT"
+      ],
+      "published": "2026-03-31T01:49:14+00:00",
+      "link": "https://arxiv.org/pdf/2603.29144v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Ising machine for large-scale discrete optimization",
+      "llm_evidence_cn": "用于大规模离散优化的伊辛机",
+      "llm_evidence": "用于大规模离散优化的伊辛机",
+      "canonical_evidence": "用于大规模离散优化的伊辛机",
+      "llm_tldr_en": "Uses a coherent Ising machine to solve large-scale discrete phase shift optimization problems.",
+      "llm_tldr_cn": "利用相干伊辛机解决大规模离散相移优化问题，规避了传统组合搜索的指数复杂度。",
+      "llm_tldr": "利用相干伊辛机解决大规模离散相移优化问题，规避了传统组合搜索的指数复杂度。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Machine learning approaches to combinatorial optimization",
+      "matched_requirement_id": "req-19",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.28204v1",
+      "title": "ERPO: Token-Level Entropy-Regulated Policy Optimization for Large Reasoning Models",
+      "abstract": "Reinforcement learning from verifiable rewards (RLVR) has significantly advanced the reasoning capabilities of large language models. However, standard Group Relative Policy Optimization (GRPO) typically assigns a uniform, sequence-level advantage to all tokens, thereby overlooking the intrinsic information heterogeneity along reasoning chains. We show that this coarse-grained credit assignment leads to premature entropy collapse and encourages the model to generate redundant, low-quality reasoning paths. Through systematic empirical analysis, we identify Critical Decision Pivots (CDPs): transient high-entropy states where the policy's trajectory is most sensitive to perturbations. These pivots represent the \"forks in the road\" where effective multi-path exploration is most crucial yet often suppressed by uniform advantage signals. Building on these insights, we propose Entropy-Regulated Policy Optimization (ERPO), which transitions the optimization focus from coarse sequences to fine-grained token dynamics. ERPO introduces three synergistic components: (i) Entropy-aware Gating, which adaptively amplifies exploration at CDPs to facilitate diverse path discovery; (ii) Bucket-based Implicit Normalization, which mitigates difficulty bias by aligning token progress windows; and (iii) Result-anchored Advantage Synthesis, which re-weights token-level signals via outcome-driven anchors. Extensive experiments on competitive mathematical benchmarks (e.g., MATH, AIME) demonstrate that ERPO significantly outperforms GRPO. Notably, ERPO not only boosts reasoning accuracy but also yields significantly more concise and robust derivation paths, establishing a new efficiency-accuracy frontier for large reasoning models.",
+      "authors": [
+        "Song Yu",
+        "Li Li"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-03-30T09:20:25+00:00",
+      "link": "https://arxiv.org/pdf/2603.28204v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Reinforcement learning for reasoning capabilities in large language models",
+      "llm_evidence_cn": "强化学习用于提升大语言模型的推理能力",
+      "llm_evidence": "强化学习用于提升大语言模型的推理能力",
+      "canonical_evidence": "强化学习用于提升大语言模型的推理能力",
+      "llm_tldr_en": "Introduces token-level entropy regulation to improve reinforcement learning for LLM reasoning.",
+      "llm_tldr_cn": "引入令牌级熵调节，以改进LLM推理的强化学习效果。",
+      "llm_tldr": "引入令牌级熵调节，以改进LLM推理的强化学习效果。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Large Language Models (LLM) for optimization tasks",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.00214v1",
+      "title": "Parametric Region Search: A Mixed-Integer Bilevel Optimization Problem Primal Heuristic",
+      "abstract": "Bilevel optimization is a mathematical modeling formulation for hierarchical systems and two-player interactions, with wide-ranging applications in environmental, energy, and control engineering. Despite its utility, the mixed-integer bilevel optimization (MIBO) problem is exceptionally challenging to solve. While numerous exact and metaheuristic methods exist, the development of specialized primal heuristics for MIBO, aimed at quickly identifying high-quality feasible solutions, remains an underexplored area. This paper introduces the Parametric Region Search (PRS), a new primal heuristic for MIBO. The PRS method leverages insights from multi-parametric optimization by iteratively exploring regions defined by the lower-level problem's critical regions. We formally define the MIBO structure and the necessary parametric region formulations, and then detail the proposed heuristic's initialization and iterative search mechanism. Computational results demonstrate that the PRS heuristic consistently locates high-quality primal solutions compared to established derivative-free metaheuristics, including DOMINO-COBYLA and DOMINO-ISRES. Furthermore, we illustrate how the PRS can be effectively integrated with other heuristics like DOMINO-COBYLA to enhance the overall solution discovery process for MIBO.",
+      "authors": [
+        "Meng-Lin Tsai",
+        "Parth Brahmbhatt",
+        "Styliani Avraamidou"
+      ],
+      "primary_category": "math.OC",
+      "categories": [
+        "math.OC"
+      ],
+      "published": "2026-03-31T20:30:46+00:00",
+      "link": "https://arxiv.org/pdf/2604.00214v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "primal heuristic for mixed-integer bilevel optimization",
+      "llm_evidence_cn": "混合整数双层优化的原始启发式算法",
+      "llm_evidence": "混合整数双层优化的原始启发式算法",
+      "canonical_evidence": "混合整数双层优化的原始启发式算法",
+      "llm_tldr_en": "Develops a new primal heuristic for solving challenging mixed-integer bilevel optimization problems.",
+      "llm_tldr_cn": "开发了一种新的原始启发式算法，用于解决具有挑战性的混合整数双层优化问题。",
+      "llm_tldr": "开发了一种新的原始启发式算法，用于解决具有挑战性的混合整数双层优化问题。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Hybrid approaches combining deep learning and traditional optimization",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.28410v1",
+      "title": "Mixture-Model Preference Learning for Many-Objective Bayesian Optimization",
+      "abstract": "Preference-based many-objective optimization faces two obstacles: an expanding space of trade-offs and heterogeneous, context-dependent human value structures. Towards this, we propose a Bayesian framework that learns a small set of latent preference archetypes rather than assuming a single fixed utility function, modelling them as components of a Dirichlet-process mixture with uncertainty over both archetypes and their weights. To query efficiently, we designing hybrid queries that target information about (i) mode identity and (ii) within-mode trade-offs. Under mild assumptions, we provide a simple regret guarantee for the resulting mixture-aware Bayesian optimization procedure. Empirically, our method outperforms standard baselines on synthetic and real-world many-objective benchmarks, and mixture-aware diagnostics reveal structure that regret alone fails to capture.",
+      "authors": [
+        "Manisha Dubey",
+        "Sebastiaan De Peuter",
+        "Wanrong Wang",
+        "Samuel Kaski"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "stat.ML"
+      ],
+      "published": "2026-03-30T13:18:43+00:00",
+      "link": "https://arxiv.org/pdf/2603.28410v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Bayesian optimization for many-objective problems",
+      "llm_evidence_cn": "多目标问题的贝叶斯优化",
+      "llm_evidence": "多目标问题的贝叶斯优化",
+      "canonical_evidence": "多目标问题的贝叶斯优化",
+      "llm_tldr_en": "Proposes a mixture-model framework for preference-based many-objective Bayesian optimization.",
+      "llm_tldr_cn": "提出了一种基于偏好的多目标贝叶斯优化混合模型框架。",
+      "llm_tldr": "提出了一种基于偏好的多目标贝叶斯优化混合模型框架。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Hybrid approaches combining deep learning and traditional optimization",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.00860v1",
+      "title": "Policy Improvement Reinforcement Learning",
+      "abstract": "Reinforcement Learning with Verifiable Rewards (RLVR) has become a central post-training paradigm for improving the reasoning capabilities of large language models. Yet existing methods share a common blind spot: they optimize policies based on instantaneous group-level or batch-level statistics without ever verifying whether the resulting update actually improved the model. This open-loop design -- updating in isolation at each step, guided only by within-group (batch) reward signals -- means optimization can drift or collapse with no mechanism to detect and correct these failures. We argue that the missing ingredient is policy improvement feedback: the ability to measure and optimize inter-iteration progress directly. To this end, we introduce Policy Improvement Reinforcement Learning (PIRL), a framework that replaces surrogate reward maximization with the explicit objective of maximizing cumulative policy improvement across iterations, and prove this temporal objective is perfectly aligned with maximizing final task performance. Building on PIRL, we propose Policy Improvement Policy Optimization (PIPO), which implements closed-loop optimization through retrospective verification. At each iteration, PIPO evaluates whether the previous update yielded genuine improvement against a sliding-window historical baseline, then actively reinforces beneficial updates and suppresses the harmful ones -- transforming an open-loop process into a self-correcting one. We provide theoretical analysis showing that PIPO performs ascent on the PIRL objective in expectation, and experiments on mathematical reasoning benchmarks demonstrate improved stability and performance over GRPO and its variants.",
+      "authors": [
+        "Huaiyang Wang",
+        "Xiaojie Li",
+        "Deqing Wang",
+        "Haoyi Zhou",
+        "Zixuan Huang",
+        "Yaodong Yang",
+        "Jianxin Li",
+        "Yikun Ban"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-04-01T13:10:20+00:00",
+      "link": "https://arxiv.org/pdf/2604.00860v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Reinforcement learning for improving reasoning and optimization in large language models",
+      "llm_evidence_cn": "用于改进大语言模型推理和优化能力的强化学习方法",
+      "llm_evidence": "用于改进大语言模型推理和优化能力的强化学习方法",
+      "canonical_evidence": "用于改进大语言模型推理和优化能力的强化学习方法",
+      "llm_tldr_en": "Introduces Policy Improvement RL to enhance LLM reasoning through verifiable rewards and feedback loops.",
+      "llm_tldr_cn": "引入策略改进强化学习，通过可验证奖励和反馈循环增强大语言模型的推理能力。",
+      "llm_tldr": "引入策略改进强化学习，通过可验证奖励和反馈循环增强大语言模型的推理能力。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Large Language Models (LLM) for optimization tasks",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.29543v1",
+      "title": "Reducing Complexity for Quantum Approaches in Train Load Optimization",
+      "abstract": "Efficiently planning container loads onto trains is a computationally challenging combinatorial optimization problem, central to logistics and supply chain management. A primary source of this complexity arises from the need to model and reduce rehandle operations-unproductive crane moves required to access blocked containers. Conventional mathematical formulations address this by introducing explicit binary variables and a web of logical constraints for each potential rehandle, resulting in large-scale models that are difficult to solve. This paper presents a fundamental departure from this paradigm. We introduce an innovative and compact mathematical formulation for the Train Load Optimization (TLO) problem where the rehandle cost is calculated implicitly within the objective function. This novel approach helps prevent the need for dedicated rehandle variables and their associated constraints, leading to a dramatic reduction in model size. We provide a formal comparison against a conventional model to analytically demonstrate the significant reduction in the number of variables and constraints. The efficacy of our compact formulation is assessed through a simulated annealing metaheuristic, which finds high-quality loading plans for various problem instances. The results confirm that our model is not only more parsimonious but also practically effective, offering a scalable and powerful tool for modern rail logistics.",
+      "authors": [
+        "Zhijie Tang",
+        "Albert Nieto-Morales",
+        "Arit Kumar Bishwas"
+      ],
+      "primary_category": "quant-ph",
+      "categories": [
+        "quant-ph",
+        "cs.AI"
+      ],
+      "published": "2026-03-31T10:24:50+00:00",
+      "link": "https://arxiv.org/pdf/2603.29543v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Innovative mathematical formulation for a computationally challenging combinatorial optimization problem",
+      "llm_evidence_cn": "针对具有挑战性的组合优化问题提出创新的数学建模方法",
+      "llm_evidence": "针对具有挑战性的组合优化问题提出创新的数学建模方法",
+      "canonical_evidence": "针对具有挑战性的组合优化问题提出创新的数学建模方法",
+      "llm_tldr_en": "Proposes a compact mathematical formulation to reduce complexity in Train Load Optimization problems.",
+      "llm_tldr_cn": "提出一种紧凑的数学公式，旨在降低列车装载优化问题的计算复杂度。",
+      "llm_tldr": "提出一种紧凑的数学公式，旨在降低列车装载优化问题的计算复杂度。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Hybrid approaches combining deep learning and traditional optimization",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.01241v1",
+      "title": "A Learning-Based Cooperative Coevolution Framework for Heterogeneous Large-Scale Global Optimization",
+      "abstract": "Cooperative Coevolution (CC) effectively addresses Large-Scale Global Optimization (LSGO) via decomposition but struggles with the emerging class of Heterogeneous LSGO (H-LSGO) problems arising from real-world applications, where subproblems exhibit diverse dimensions and distinct landscapes. The prevailing CC paradigm, relying on a fixed low-dimensional optimizer, often fails to navigate this heterogeneity. To address this limitation, we propose the Learning-Based Heterogeneous Cooperative Coevolution Framework (LH-CC). By formulating the optimization process as a Markov Decision Process, LH-CC employs a meta-agent to adaptively select the most suitable optimizer for each subproblem. We also introduce a flexible benchmark suite to generate diverse H-LSGO problem instances. Extensive experiments on 3000-dimensional problems with complex coupling relationships demonstrate that LH-CC achieves superior solution quality and computational efficiency compared to state-of-the-art baselines. Furthermore, the framework exhibits robust generalization across varying problem instances, optimization horizons, and optimizers. Our findings reveal that dynamic optimizer selection is a pivotal strategy for solving complex H-LSGO problems.",
+      "authors": [
+        "Wenjie Qiu",
+        "Zixin Wang",
+        "Hongyu Fang",
+        "Zeyuan Ma",
+        "Yue-Jiao Gong"
+      ],
+      "primary_category": "cs.NE",
+      "categories": [
+        "cs.NE",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-03-30T00:18:05+00:00",
+      "link": "https://arxiv.org/pdf/2604.01241v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Learning-based meta-agent for selecting optimizers in large-scale optimization",
+      "llm_evidence_cn": "基于学习的元代理用于大规模优化中的算子选择",
+      "llm_evidence": "基于学习的元代理用于大规模优化中的算子选择",
+      "canonical_evidence": "基于学习的元代理用于大规模优化中的算子选择",
+      "llm_tldr_en": "A reinforcement learning framework that adaptively selects optimizers for heterogeneous large-scale optimization.",
+      "llm_tldr_cn": "一种通过强化学习自适应选择算子以解决异构大规模全局优化问题的框架。",
+      "llm_tldr": "一种通过强化学习自适应选择算子以解决异构大规模全局优化问题的框架。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Learning search heuristics with neural networks",
+      "matched_requirement_id": "req-21",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.30035v1",
+      "title": "Reward-Based Online LLM Routing via NeuralUCB",
+      "abstract": "This study investigates the use of NeuralUCB for cost-aware large language model (LLM) routing. Existing routing approaches can be broadly grouped into supervised routing methods and partial-feedback methods, each with different tradeoffs in efficiency and adaptivity. We implement a NeuralUCB-based routing policy and evaluate it on RouterBench under a simulated online setting. Experimental results show that the proposed method consistently outperforms random and min-cost baselines in utility reward. Compared with the max-quality reference, our method achieves substantially lower inference cost while maintaining competitive reward. These findings suggest that NeuralUCB is a promising approach for cost-aware LLM routing, while also highlighting remaining challenges in action discrimination and exploration.",
+      "authors": [
+        "Ming-Hua Tsai",
+        "Phat Tran"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.CL"
+      ],
+      "published": "2026-03-31T17:35:34+00:00",
+      "link": "https://arxiv.org/pdf/2603.30035v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "NeuralUCB for cost-aware large language model routing",
+      "llm_evidence_cn": "用于成本感知大语言模型路由的 NeuralUCB",
+      "llm_evidence": "用于成本感知大语言模型路由的 NeuralUCB",
+      "canonical_evidence": "用于成本感知大语言模型路由的 NeuralUCB",
+      "llm_tldr_en": "Uses neural reinforcement learning (NeuralUCB) to optimize the routing and selection of LLMs for tasks.",
+      "llm_tldr_cn": "使用神经强化学习（NeuralUCB）来优化任务中大语言模型的路由和选择。",
+      "llm_tldr": "使用神经强化学习（NeuralUCB）来优化任务中大语言模型的路由和选择。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Large Language Models (LLM) for optimization tasks",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.01302v1",
+      "title": "Scaling Reasoning Tokens via RL and Parallel Thinking: Evidence From Competitive Programming",
+      "abstract": "We study how to scale reasoning token budgets for competitive programming through two complementary approaches: training-time reinforcement learning (RL) and test-time parallel thinking. During RL training, we observe an approximately log-linear relationship between validation accuracy and the average number of generated reasoning tokens over successive checkpoints, and show two ways to shift this training trajectory: verification RL warmup raises the starting point, while randomized clipping produces a steeper trend in the observed regime. As scaling single-generation reasoning during RL quickly becomes expensive under full attention, we introduce a multi-round parallel thinking pipeline that distributes the token budget across threads and rounds of generation, verification, and refinement. We train the model end-to-end on this pipeline to match the training objective to the test-time structure. Starting from Seed-OSS-36B, the full system with 16 threads and 16 rounds per thread matches the underlying RL model's oracle pass@16 at pass@1 using 7.6 million tokens per problem on average, and surpasses GPT-5-high on 456 hard competitive programming problems from AetherCode.",
+      "authors": [
+        "Qianfan Zhang",
+        "Tianyu Guo",
+        "Xuandi Ren",
+        "Jiale Chen",
+        "Ming Ding",
+        "Ran Xin",
+        "Xia Xiao"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-04-01T18:05:49+00:00",
+      "link": "https://arxiv.org/pdf/2604.01302v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "scaling reasoning tokens via RL for competitive programming",
+      "llm_evidence_cn": "通过强化学习扩展竞赛编程的推理 Token",
+      "llm_evidence": "通过强化学习扩展竞赛编程的推理 Token",
+      "canonical_evidence": "通过强化学习扩展竞赛编程的推理 Token",
+      "llm_tldr_en": "Studies scaling LLM reasoning capabilities for complex algorithmic tasks using reinforcement learning.",
+      "llm_tldr_cn": "研究利用强化学习扩展大模型在复杂算法任务中的推理能力。",
+      "llm_tldr": "研究利用强化学习扩展大模型在复杂算法任务中的推理能力。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Large Language Models (LLM) for optimization tasks",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.00686v1",
+      "title": "Full-Gradient Successor Feature Representations",
+      "abstract": "Successor Features (SF) combined with Generalized Policy Improvement (GPI) provide a robust framework for transfer learning in Reinforcement Learning (RL) by decoupling environment dynamics from reward functions. However, standard SF learning methods typically rely on semi-gradient Temporal Difference (TD) updates. When combined with non-linear function approximation, semi-gradient methods lack robust convergence guarantees and can lead to instability, particularly in the multi-task setting where accurate feature estimation is critical for effective GPI. Inspired by Full Gradient DQN, we propose Full-Gradient Successor Feature Representations Q-Learning (FG-SFRQL), an algorithm that optimizes the successor features by minimizing the full Mean Squared Bellman Error. Unlike standard approaches, our method computes gradients with respect to parameters in both the online and target networks. We provide a theoretical proof of almost-sure convergence for FG-SFRQL and demonstrate empirically that minimizing the full residual leads to superior sample efficiency and transfer performance compared to semi-gradient baselines in both discrete and continuous domains.",
+      "authors": [
+        "Ritish Shrirao",
+        "Aditya Priyadarshi",
+        "Raghuram Bharadwaj Diddigi"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-04-01T09:44:13+00:00",
+      "link": "https://arxiv.org/pdf/2604.00686v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Reinforcement Learning framework for multi-task feature estimation",
+      "llm_evidence_cn": "用于多任务特征估计的强化学习框架",
+      "llm_evidence": "用于多任务特征估计的强化学习框架",
+      "canonical_evidence": "用于多任务特征估计的强化学习框架",
+      "llm_tldr_en": "Proposes a full-gradient RL algorithm to improve stability and convergence in multi-task feature learning.",
+      "llm_tldr_cn": "提出一种全梯度强化学习算法，以提高多任务特征学习中的稳定性和收敛性。",
+      "llm_tldr": "提出一种全梯度强化学习算法，以提高多任务特征学习中的稳定性和收敛性。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Deep Reinforcement Learning for combinatorial optimization",
+      "matched_requirement_id": "req-14",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

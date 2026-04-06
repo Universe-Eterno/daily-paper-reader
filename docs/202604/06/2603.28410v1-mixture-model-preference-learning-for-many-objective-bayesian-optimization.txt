@@ -1,0 +1,1064 @@
+Title: Mixture-Model Preference Learning for Many-Objective Bayesian Optimization
+
+URL Source: https://arxiv.org/pdf/2603.28410v1
+
+Published Time: Tue, 31 Mar 2026 02:32:46 GMT
+
+Number of Pages: 18
+
+Markdown Content:
+# Mixture-Model Preference Learning for Many-Objective Bayesian Optimization 
+
+Manisha Dubey *1,2 Sebastiaan De Peuter †3,4 Wanrong Wang 1 Samuel Kaski 1,3,5 1Department of Computer Science, University of Manchester, Manchester, UK 
+
+> 2
+
+Centre for AI in Assistive Autonomy, University of Edinburgh, Scotland, UK 
+
+> 3
+
+Department of Computer Science, Aalto University, Espoo, Finland 
+
+> 4
+
+Informatics Institute, University of Amsterdam, Amsterdam, Netherlands 
+
+> 5
+
+ELLIS Institute Finland, Helsinki, Finland, 
+
+# Abstract 
+
+Preference-based many-objective optimization faces two obstacles: an expanding space of trade-offs and heterogeneous, context-dependent hu-man value structures. Towards this, we propose a Bayesian framework that learns a small set of latent preference archetypes rather than assuming a single fixed utility function, modelling them as components of a Dirichlet-process mixture with uncertainty over both archetypes and their weights. To query efficiently, we designing hybrid queries that target information about (i) mode identity and (ii) within-mode trade-offs. Under mild assump-tions, we provide a simple regret guarantee for the resulting mixture-aware Bayesian optimization procedure. Empirically, our method outperforms standard baselines on synthetic and real-world many-objective benchmarks, and mixture-aware diagnostics reveal structure that regret alone fails to capture. 
+
+# 1 INTRODUCTION 
+
+Real-world problems involving design of materials and adi-tive manufacturing Hastings et al. (2025); Myung et al. (2025), power systems (involving economic-emission dis-patch) Ah King et al. (2005), robotics and autonomous driving Li et al. (2023); Shen et al. (2025) are often as-sociated with optimizing several objectives, a setting known as multi-objective optimization. Multi-objective optimiza-tion Deb et al. (2016) addresses problems in which sev-eral performance criteria must be optimized simultaneously. In realistic applications these criteria are often mutually 
+
+> *
+
+This work was carried out while the author was at University of Manchester 
+
+> †
+
+This work was carried out while the author was at Aalto University 
+
+conflicting, so a single design cannot satisfy all goals at once. The aim therefore shifts from finding one “best” so-lution to characterizing and selecting among trade-offs on the Pareto frontier—those designs for which improving one objective would necessarily degrade at least one other. For many applications the number of objectives grows into the many-objective regime (often L ≥ 4), which implies that the problem changes qualitatively. For instance, urban design frameworks include optimizing performance objectives like operational energy, comfort, daylight, cost and carbon Liu et al. (2023). Similarly, multi-objective recommenders in-clude optimizing user utility, diversity, fairness, revenue and long-term value Jannach and Abdollahpouri (2023). It has been established in the literature that the complexity of computing the Pareto front dramatically increases when the number of objectives increase to four or more Ishibuchi et al. (2008); Binois et al. (2020). Dominance relations weaken, many candidates are mutually non-dominating, so selection pressure diminishes and exploration requires sub-stantially more evaluations to achieve comparable coverage. Summarization is also harder; beyond a few objectives, vi-sualizing trade-offs, communicating them to stakeholders, and choosing a manageable set of representatives become nontrivial. Established indicators (e.g., hypervolume Zhang and Golovin (2020)) are costly to compute and less dis-criminative in higher dimensions, further complicating al-gorithm design and evaluation. The burden shifts to both cognition and computation. For decision makers, comparing high-dimensional outcome vectors quickly exceeds human working-memory limits; judgments become noisy and in-consistent, especially when objectives have incommensurate units or span different risk horizons. In practice, people of-ten default to heuristics while attending to a few salient objectives or applying non-compensatory rules. Hence, pref-erences expressed on the full objective set can be unstable and context dependent. Recent many-objective BO methods often collapse deci-sions into a single compromise solution or reduce dimen-sionality by removing redundant objectives Binois et al. 
+
+> arXiv:2603.28410v1 [cs.LG] 30 Mar 2026
+
+(2020); Lin et al. (2024); Martín and Garrido-Merchán (2021). These approaches assume calibrated objectives and a single global trade-off. In practice, however, decision mak-ing frequently exhibits multiple regimes (e.g., safety-first, cost-first, balanced), implying piecewise or multi-modal utilities rather than a single smooth scalarization. Many objectives also induce non-compensatory or conditional priorities that fixed scalarizations misrepresent. These lim-itations motivate methods that actively elicit preferences, model multiple trade-off modes, and focus sampling on decision-relevant regions of objective space. We build on this observation and propose an interactive, preference-based approach that treats heterogeneity as struc-ture rather than noise. Instead of collapsing everything to one utility, we represent preferences as a mixture of archety-pal trade-off modes. Each mode captures a distinct way of valuing objectives and is explicitly context-aware. A mode is represented by a weight vector wk ∈ ∆L−1 that defines a Chebyshev utility over outcomes y = f (x). Under this view, preference elicitation naturally decomposes into two ques-tions: which mode is currently active (identity) and how that mode trades objectives (shape). This decomposition directly informs query design. We introduce inter–mode queries that maximize mutual information about the active mode, intra–mode queries that refine the trade–off within a selected mode, and a hybrid policy that balances the two. Coupled with standard GP surrogates for the objectives, the procedure concentrates sampling where the decision-maker (DM) cares, learns a calibrated posterior over modes, and remains robust when users persist in a given style or switch across contexts. We show that treating user preferences as a mixture of archetypes and asking questions that are ex-plicitly informative about that mixture, yields faster and more calibrated preference-driven many-objective Bayesian optimization, specially when real users exhibit persistent modes, which is true for real humans. Our contributions can be summarized as follows: • We formulate preference–based many–objective Bayesian optimization with a Dirichlet–process mix-ture over Chebyshev weights, abandoning the sin-gle–utility assumption and enabling multiple, distinct trade–off archetypes to co–exist. • We propose information-theoretic cluster-aware meth-ods for active query selection in interactive preference learning. We derive inter, intra, and hybrid query rules that explicitly target information about mode identity versus within–mode shape, turning preference elicita-tion into learning both the identity and the shape of archetypes. • Beyond simple regret, we introduce diagnostics for mixture-aware evaluation like mode coverage, calibra-tion of mixture weights that regret alone can hide. • Our experiments on simulated and real-world datasets show the effectiveness of the proposed method with respect to proposed mixture-aware diagnostics. 
+
+# 2 PROBLEM FORMULATION 
+
+We consider many-objective Bayesian optimization (MaO-BO) with L ≥ 4 objectives. Let X ⊂ Rd be a design space and f : X → RL an unknown vector-valued objective. Querying a design x ∈ X returns a (possibly noisy) observa-tion y = f (x)+ ϵ where ϵ ∼ N (0 , σ 2I) and evaluations are assumed expensive. Many-objective problems typically ad-mit a large set of Pareto-optimal solutions. In human-in-the-loop settings, however, the goal is not to recover the entire Pareto front, but to identify solutions that are most desirable to a decision maker (DM). Direct evaluations of the DM’s utility are unavailable. Instead, the learner may query pair-wise preferences between previously observed outcomes. Given two outcomes yi and y′
+
+> i
+
+, the decision maker returns a binary comparison indicating whether yi ≻ y′
+
+> i
+
+. Further, we assume that the DM evaluates outcomes through an un-known utility function. To model heterogeneous trade-offs, we posit that the DM’s utility is governed by one of K
+
+latent preference modes. Each mode k ∈ [K] is parame-terized by a weight vector wk ∈ ∆L−1, and modes occur with unknown mixture weights η ∈ ∆K−1. This formula-tion captures either a single DM with context-dependent trade-offs or a heterogeneous population of DMs. We de-note the scalar utility induced by mode k as U (f (x); wk).Our objective is to identify designs that maximize the DM’s mixture-expected utility, 
+
+x⋆ ∈ arg max 
+
+> x∈X
+> K
+
+X
+
+> k=1
+
+ηk E[U (f (x); wk)] , (1) where the expectation is taken over observation noise. The learner must therefore infer the latent mixture parameters 
+
+{ηk, wk}Kk=1 from pairwise feedback while sequentially selecting designs to evaluate. 
+
+# 3 PROPOSED METHODOLOGY 
+
+In this section, we introduce a preference-aware multi-objective Bayesian optimization framework that jointly mod-els uncertainty over objective functions and heterogeneous decision-maker trade-offs. The approach combines inde-pendent Gaussian process surrogates with a latent mixture model over preference scalarizations. We describe posterior inference for the mixture parameters and present acquisition strategies that select both a new design point and an informa-tive pairwise comparison, balancing objective improvement with reduction in preference uncertainty. We also present the algorithm 1 here. 3.1 OBJECTIVE SURROGATE MODEL 
+
+We model each objective with an independent Gaussian pro-cess (GP). Let f : X → RL denote the L objectives. Each objective function fℓ is modeled independently with a Gaus-sian process: fℓ ∼ GP (mℓ, k ℓ), ℓ = 1 , . . . , L. Condition-ing on observed data yields predictive means and variances. Given observations Df = {(xi, yi)}, we obtain posterior predictive distributions fℓ(x) | D f ∼ N (μℓ(x), σ 2 
+
+> ℓ
+
+(x)) .
+
+Independence across objectives keeps inference and acquisi-tion scalable in L Rasmussen and Nickisch (2010); Williams and Rasmussen (2006). One could also employ multi-output gaussian process Alvarez and Lawrence (2008). 
+
+3.2 LATENT MIXTURE PREFERENCE MODEL 
+
+We assume the decision maker’s (DM’s) latent utility is not captured by a single scalarization Ozaki et al. (2023); Astudillo and Frazier (2020) but by a mixture over K pref-erence modes . We model heterogeneous trade-offs through a finite mixture of K latent preference modes. Each mode 
+
+k is associated with a weight vector wk ∈ ∆L−1. For a predicted outcome y, the utility under mode k is 
+
+U (y; wk) = − min 
+
+> ℓ=1 ,...,L
+
+yℓ
+
+wkℓ 
+
+, wkℓ > 0 (2) corresponding to Chebyshev scalarization for minimiza-tion. Utilities are evaluated using posterior predictive means of the GP model. We model preferences as arising from a latent mixture of trade-off modes. The mixture propor-tions over modes are drawn using a truncated stick-breaking construction Blei and Jordan (2006). The truncated stick-breaking construction provides a flexible and regularized alternative to fixing the exact number of archetypes a priori. Specifically, for k = 1 , . . . , K , vk ∼ Beta(1 , α ), ηk =
+
+vk
+
+Q
+
+> j<k
+
+(1 − vj ) where α > 0 as a concentration parame-ter controlling the expected number of active modes. This yields mixture weights η ∈ ∆K−1. For each mode k, a preference weight vector is drawn wk ∼ Dir( β) defining a distinct trade-off over the L objectives. For each observed comparison i between outcomes (yi, y′
+
+> i
+
+), a latent mode as-signment is first sampled zi ∼ Categorical( η), indicating which trade-off mode governs that comparison. Conditioned on zi = k, the observed preference is generated according to a probit model, 
+
+P (yi ≻ y′ 
+
+> i
+
+| zi = k) = Φ 
+
+ U (yi; wk) − U (y′
+
+> i
+
+; wk)
+
+√2σu
+
+
+
+.
+
+(3) Then we marginalize latent assignments as 
+
+p(Dpref | η, w1: K )= 
+
+> N
+
+Y
+
+> i=1
+> K
+
+X
+
+> k=1
+
+ηkΦ
+
+ U (yi; wk) − U (y′
+
+> i
+
+; wk)
+
+√2σu
+
+
+
+(4) Posterior inference over (η, w1: K ) is performed using stochastic variational inference, optimizing an evidence lower bound on the marginal likelihood. 
+
+3.3 INFERENCE 
+
+Let Dpref = {(yi, y′
+
+> i
+
+)}Ni=1 denote the set of observed pref-erence comparisons. Under the generative model, the joint distribution is 
+
+p(Dpref , z, η, w1: K , α ) (5) 
+
+= p(α)
+
+> K
+
+Y
+
+> k=1
+
+p(vk|α) p(wk)
+
+> N
+
+Y
+
+> i=1
+
+p(zi | η) p(yi ≻ y′ 
+
+> i
+
+| zi, w1: K )
+
+Our goal is to compute the posterior p(η, w1: K , z, α |Dpref ) which is analytically intractable due to the mixture structure and the non-conjugate probit likelihood. We there-fore introduce a mean-field variational distribution 
+
+q(η, w1: K , z, α ) = q(α)
+
+> K
+
+Y
+
+> k=1
+
+q(wk) q(vk)
+
+> N
+
+Y
+
+> i=1
+
+q(zi) (6) and approximate the true posterior by minimizing the KL divergence. Equivalently, we maximize the evidence lower bound (ELBO) L(q) = Eq [log p(Dpref , z, η, w1: K , α )] −
+
+Eq [log q(η, w1: K , z, α )] Optimization is performed using stochastic variational inference. 
+
+3.4 ACQUISITION FUNCTION 
+
+At iteration t, the learner maintains a posterior over both the objective functions and the latent preference parame-ters. And let {yi}ti=1 be the observed objective vectors. Let θ = ( η, w1: K ) denote the latent mixture parameters, and let p(θ | D t) be their posterior under the preference model. The GP surrogate induces a posterior p(f (x) | D t)
+
+over objective values at any candidate x. For a given out-come y and parameters θ, the mixture utility is defined as 
+
+Umix (y; θ) = PKk=1 ηk U (y; wk), which represents the ex-pected utility under the latent mixture of trade-off modes. To select the next design, we employ a mixture expected improvement (mixture-EI) criterion: 
+
+αEI −mix (x) = Ef (x), θ [max {Umix (f (x); θ) − Ubest , 0}] .
+
+(7) where Ubest is the current best mixture utility as Ubest =max i≤t Eθ∼p(θ|D t) [Umix (yi; θ)] . Please note that the ex-pectation is taken jointly over the GP posterior p(f (x) | D t)
+
+which captures uncertainty about objective values, and the preference posterior p(θ | D t), which captures uncertainty about DM trade-offs. This reflects the best design identified so far under posterior uncertainty about DM preferences. We approximate it using Monte Carlo sampling where sam-ples of f (x) are drawn from the GP posterior, and samples of θ are drawn from the variational posterior. 
+
+3.5 PREFERENCE QUERY ACQUISITION 
+
+In addition to evaluating new designs, the learner may select a pairwise comparison between two previously observed outcomes (yi, yj ). Let r ∈ { 0, 1} denote the random re-Algorithm 1 MIXTURE -B ASED MAOBO 
+
+Require: f : X → RL, truncation K, query mode  
+
+> 1:
+
+Initialize dataset Df and preference set Dpref  
+
+> 2:
+
+for t = 1 , 2, . . . do  
+
+> 3:
+
+Fit L independent GPs on Df 
+
+> 4:
+
+Update DP-mixture posterior via SVI to obtain 
+
+(ˆ η, { ˆwk}Kk=1 ) 
+
+> 5:
+
+xt ← arg max x∈X EI mix (x; ˆ η, { ˆwk}) (using Eq. 7)  
+
+> 6:
+
+Evaluate yt = f (xt) and update Df 
+
+> 7:
+
+(ya, yb) ← SELECT PAIR ({yi}, ˆη, { ˆwk}, mode )
+
+(using Section 3.5)  
+
+> 8:
+
+Query for preference label ypref ≻ yother  
+
+> 9:
+
+Set Dpref ← D pref ∪ { (ypref , yrej )} 
+
+> 10:
+
+end for 
+
+sponse of the decision maker (DM), where r = 1 indicates 
+
+yi ≻ yj . Under the current posterior over latent prefer-ence parameters θ = ( η, w1: K ), the predictive probability of the response is p(r = 1 | yi, yj , Dt) = R p(r = 1 |
+
+yi, yj , θ ) p(θ | D t) dθ . The DM’s preference r updates the posterior p(θ | D t), which in turn influences future design decisions. The value of a preference query can therefore be interpreted as its expected reduction in uncertainty about θ,and hence its expected improvement in downstream decision quality. Computing the full value of information exactly is intractable, as it would require recomputing the posterior and resolving the design optimization for each possible response. Inspired by Ozaki et al. (2023), we follow the Bayesian Active Learning by Disagreement (BALD) frame-work Houlsby et al. (2011). We adopt a BALD-style crite-rion because it directly targets expected reduction in pos-terior uncertainty over latent preference parameters. Other information-theoretic criteria (e.g., predictive entropy) could be substituted within the same framework. We approximate the value of a query by the mutual information between the response r and the latent parameters θ:
+
+αpref (i, j ) = I(r; θ | yi, yj , Dt) (8) Using the entropy decomposition of mutual information, this can be written as 
+
+I(r; θ) = H[r] − Eθ∼p(θ|D t) [H[r | θ]] (9) where H[·] denotes Bernoulli entropy. The first term mea-sures overall predictive uncertainty, while the second term measures expected uncertainty under a fixed parameter set-ting. Their difference quantifies how much the response would reduce posterior uncertainty. The conditional prefer-ence probability given θ is 
+
+p(r = 1 | θ) = 
+
+> K
+
+X
+
+> k=1
+
+ηk Φ
+
+ U (yi; wk) − U (yj ; wk)
+
+√2σu
+
+
+
+The marginal predictive probability is obtained by integrat-ing over the posterior p(θ | D t), which we approximate via Monte Carlo sampling. In our mixture model, the queries naturally split into MI about the mode identity (inter-cluster), MI about the within-mode weights (intra-cluster) and a con-vex combination gives the hybrid policy. 
+
+Inter-cluster query In the mixture preference model, un-certainty arises both from which trade-off mode governs the DM and from the weights within each mode. The inter-cluster acquisition specifically targets uncertainty about the latent mode identity. Let K denote the discrete latent mode variable and r ∈ { 0, 1} the response to a comparison 
+
+(yi, yj ). We define the inter-cluster acquisition as the mu-tual information between the response and the mode identity, which can be further decomposed as: 
+
+I(r; K) = H[r] − EK [H[r | K]] . (10) The entropy form becomes 
+
+I(r; K) = H[pmix ] −
+
+> K
+
+X
+
+> k=1
+
+ηkH[pk]. (11) where mixture predictive is pmix = PKk=1 ηkpk. This quan-tity is large when the mixture predictive is uncertain (high 
+
+H[pmix ]) but each individual cluster prediction is confident. 
+
+Intra-mode query While the inter-mode criterion targets uncertainty over the active mode, the intra-mode criterion targets uncertainty over the trade-off weights within a partic-ular mode. For a candidate comparison between two previ-ously observed outcomes (yi, yj ) with response r ∈ { 0, 1}
+
+and target mode c ∈ [K],we define the intra-mode acquisi-tion as the mutual information between r and the mode-c
+
+weight vector: 
+
+A(c)intra (i, j ) = I(r; wc | K = c, yi, yj , Dt) . (12) Using the BALD entropy decomposition, we obtain 
+
+A(c)intra (i, j ) = H(¯ pc) − Ew∼qt(wc) [H(pw)] 
+
+where ¯pc = Ew∼qt(wc)[pw] and qt(wc) denotes the cur-rent approximate posterior (variational factor) over wc after observing Dt.
+
+Hybrid query Here, we combine the two goals of ex-ploring between the clusters which helps to find out which preference cluster (archetype) user belongs to and exploring within the clusters which helps to refine archetype’s weight vector. We therefore consider a convex combination: 
+
+Ahybrid = λA inter + (1 − λ)Aintra , λ ∈ [0 , 1] . (13) The hyperparameter λ controls the exploration trade-off between mode disambiguation and weight refinement. 
+
+# 4 THEORETICAL PROOFS 
+
+Our analysis builds on standard high-probability concen-tration bounds for GP regression Srinivas et al. (2010); Kandasamy et al. (2016); AV et al. (2022), which hold uni-formly over any sequence of evaluation points and are there-fore algorithm-agnostic. We combine these bounds with Lipschitz properties of the Chebyshev utility to translate objective-level uncertainty into mixture-utility error. Since our acquisition differs from GP-UCB, the resulting result is a decomposition-based simple regret bound rather than a classical UCB-style regret guarantee. 
+
+Theorem 1 (Simple regret decomposition) . Let X be com-pact and let f = ( f1, . . . , f L) : X → RL be an L-objective function. Assume: (A1) Each objective fℓ lies in an RKHS Hℓ with kernel kℓ
+
+and ∥fℓ∥Hℓ ≤ Bf .(A2) For all x ∈ X , ∥f (x)∥∞ ≤ By .(A3) Preference weights satisfy wkℓ ≥ cw > 0 for all modes 
+
+k and objectives ℓ.(A4) Observations are corrupted by independent σ2–sub-Gaussian noise. Define the Chebyshev utility for minimization 
+
+U (y; w) = − min 
+
+> 1≤ℓ≤L
+
+yℓ
+
+wℓ
+
+,
+
+and the mixture utility 
+
+Umix (y; η, {wk}) = 
+
+> K
+
+X
+
+> k=1
+
+ηkU (y; wk).
+
+Let (η⋆, w ⋆k) denote the true mixture parameters and define 
+
+U ⋆ = sup 
+
+> x∈X
+
+Umix (f (x); η⋆, {w⋆k}).
+
+After T evaluations x1, . . . , x T , define the simple regret 
+
+RT = U ⋆ − max  
+
+> t≤T
+
+Umix (f (xt); η⋆, {w⋆k}).
+
+Then, with probability at least 1 − δ,
+
+RT ≤ C1
+
+r βT γT
+
+T + C2 ∆w(T ) + C3 ∆η (T ) + εT ,
+
+where γT is the maximal GP information gain, βT is the standard GP confidence parameter, ∆w(T ) = max k ∥ ˆwk −
+
+w⋆k∥1, ∆η (T ) = ∥ˆη − η⋆∥1, εT is the optimization error in maximizing the acquisition, C1, C 2, C 3 depend only on By
+
+and cw.
+
+The detailed proof is provided in the supplementary. 
+
+# 5 RELATED WORK 
+
+While there are several recent efforts along the direction of multi-objective Bayesian optimization Li et al. (2025); Haddadnia et al. (2025); Hung et al. (2025), a line of works integrate human-in-the-loop for Bayesian optimization Xu et al. (2024); AV et al. (2022). Towards interactive multi-objective optimization, Ozaki et al. (2024) proposes a frame-work that optimizes multiple objectives by actively querying the decision-maker in order to steer Bayesian optimization towards user’s preferred trade-offs. There are limited efforts in the direction of many-objectove optimization. Classical many-objective Bayesian optimization increasingly avoids recovering large Pareto sets and instead targets a principled single compromise. The Kalai-Smorodinsky (KS) solution equalizes benefit ratios from a disagreement point to utopia; subsequent work further introduces a copula-invariant vari-ant (CKS) to remove sensitivity to monotone rescalings, together with a GP-based stepwise-uncertainty-reduction (SUR) scheme that scales to 4-9 objectives Binois et al. (2020). These methods elegantly collapse decision making to a point solution, but they assume access to full objective vectors (rather than comparisons) and a single underlying taste of utility. A complementary line seeks a small set of solutions that collaboratively “cover” many objectives. Recent work proposes Tchebycheff-set (TCH-Set) scalar-ization and a smooth variant (STCH-Set) that mitigates the non-smooth max operator, with theory and empirical stud-ies showing that a handful of solutions can handle tens of objectives effectively Lin et al. (2024). Such approaches reduce downstream decision complexity, yet still optimize from full objective feedback and typically posit a single, fixed scalarization rather than heterogeneous preferences. Orthogonal to both is objective reduction where detecting re-dundant objectives via similarity between GP predictive dis-tributions and dropping them to save evaluations. This can preserve solution quality on toy, synthetic, and real setups while cutting cost Martín and Garrido-Merchán (2021), but it maintains a single user model and does not reason about preference heterogeneity. Relative to single–compromise and few–solution paradigms Binois et al. (2020); Lin et al. (2024), our framework operates directly on preferences and embraces heterogeneity as signal, not noise. Relative to ob-jective–reduction Martín and Garrido-Merchán (2021), we keep all objectives but learn which trade–off modes matter and when, delivering interpretable decisions under many objectives. 
+
+# 6 EXPERIMENTS 
+
+6.1 DATASETS 
+
+We evaluate on standard multi-objective benchmarks, DTLZ2 Deb et al. (2005) and WFG9 Huband et al. (2005). DTLZ2 uses L = 6 objectives and d = 7 decision vari-ables with search space [0 , 1] 7. WFG9 uses L = 8 ob-jectives and d = 34 variables with position parameter 
+
+k = 2( L − 1) = 14 and distance parameter l = 20 . All variables are scaled to [0 , 1] and objectives are minimized. WFG9 introduces bias and mixed separability, providing a challenging testbed for query policies. To study heteroge-neous preferences, we simulate K latent trade-off modes. Each mode k has weights wk ∈ ∆L−1 defining a Cheby-shev utility, and pairwise comparisons are generated via a probit likelihood with noise σu. For DTLZ ( L = 6 ), objec-tives are partitioned into three groups; for WFG ( L = 8 ), (a) DTLZ2 (b) WFG (c) Chemistry    
+
+> (d) Clusterless (e) Intra (f) Inter (g) Hybrid
+
+Figure 1: (Top) Mixture-aware policies reduce regret faster and achieve lower final regret than unimodal and random-scalarization baselines, with Hybrid performing best overall. This is visible from the steeper early decline and lower terminal curves of Inter and Hybrid across DTLZ2, WFG, and PET, while Clusterless and scalarization methods plateau higher with greater variability. Curves show mean simple regret over three independent runs; vertical bars denote ± one standard error.(Bottom)Hybrid most accurately and stably recovers true archetypes, showing the largest early drop and lowest final error with the narrowest band; Inter drops quickly but plateaus, Intra refines slowly with higher variance, and Clusterless remains flat. We report mean aligned L1 error per outer iteration (band = per-true min–max; lower is better). Dataset: DTLZ2, persistent context. into four groups. Each archetype assigns 80% weight to its dominant group and distributes the remaining 20% across other objectives, yielding distinct but overlapping trade-off profiles. At each comparison t, a latent mode Zt governs preferences. Under the iid regime, Zt ∼ Categorical( η⋆).Whereas under the persistent regime, Zt follows a sticky process with persistence ρ, remaining unchanged with prob-ability ρ and resampled otherwise. We further evaluate the proposed framework on a real-world, chemistry-based multi-objective process design benchmark for polyethylene terephthalate (PET) production Wang et al. (2022). The dataset comprises 10,000 simulated process designs, each defined by 12 normalized decision variables and evaluated on L = 7 objectives: Return on Investment (ROI) and six Life-Cycle Assessment (LCA) indicators, namely global warming potential (GWP), terrestrial acidi-fication, water consumption, fossil depletion, surplus ore, and human toxicity. The dataset was generated using a de-tailed process simulation and LCA workflow and is treated here as a fixed black-box multi-objective benchmark for evaluating preference-aware optimization. To model het-erogeneous stakeholder preferences, we construct K = 3 
+
+archetypes reflecting economic, environmental, and health-oriented priorities, assigning 80% weight to the dominant objective category in each case. True mixture weights are set to η = [0 .40 , 0.35 , 0.25] , and under the persistent setting the latent archetype evolves with stickiness parameter ρ = 0 .8.Additional experiment details detailed in the Supplementary. 
+
+6.2 LEARNING AND POLICIES 
+
+We adopt Chebyshev scalarization for its ability to repre-sent non-convex trade-offs and its standard use in many-objective optimization, though the framework can accom-modate alternative scalarizations. Each objective is modeled with an independent GP, and preference modes are learned via a truncated stick-breaking mixture using SVI with priors 
+
+vk ∼ Beta(1 , α ) and wk ∼ Dirichlet( β). Although we fix a truncation level K, the stick-breaking prior shrinks redun-dant components toward negligible mass, so effective modes correspond to components with non-trivial posterior weight. The hybrid parameter λ is treated as a hyperparameter and selected via validation. 
+
+Baselines We compare against: 1) Multi-Attr-EI Astudillo and Frazier (2020), which learns a single preference vector via MAP; 2) MOBO-RS : random scalarization MOBO Paria et al. (2020); and 3) EI-FP EI with fixed known preference. 4) MaOBO-WS : our method with weighted-sum scalariza-tion instead of Chebyshev. In terms of query policy base-lines, we compare four pair-selection criteria: 1) Random :(a) Clusterless (b) Hybrid 
+
+Figure 2: Mixture weight trajectory for PET production pro-cess. Clusterless (left) collapses to a dominant component, while Hybrid (right) quickly identifies and stabilizes near the correct mode proportions. selects uniform pair among previously evaluated outcomes. 2) Clusterless : This treat the preference model as unimodal using the mixture-mean weight ˆw = P 
+
+> k
+
+ηk ¯wk and score 
+
+H(ˆ p) where ˆp = Φ  (U (y; ˆ w) − U (y′; ˆ w)) /(√2σu). 3) 
+
+Inter (Mode Identification): This score the mutual infor-mation between the comparison label and the latent mode and selects query using Eq. 10 4) Intra (within-mode refine-ment): Selects query by fixing c = arg max k ηk and scoring 
+
+H(Ew∼q(wc)[p(w)]) −Ew∼q(wc)[H(p(w))] (Eq. 12). 5) Hy-brid : uses convex combination λ Inter + (1 − λ) Intra (Eq. 13). Existing preferential BO methods typically assume a single latent utility function. Random scalarization meth-ods sample trade-off weights but do not infer heterogeneous preference structure from data. Our setting explicitly models multi-modal, switching trade-offs, which is not addressed by standard unimodal preferential BO or scalarization-based MOBO approaches. This structural difference motivates our mixture-based formulation. 
+
+Metrics Across different setting, we see different plots like 1) Simple regret over outer iterations as rt = U ∗ −
+
+max i< =t U (f (xi), w true ). Lower is better 2) Mixture-aware recovery of true archetypes For each iteration, we align inferred components to ground-truth archetypes wtrue 
+
+via Hungarian matching (minimizing L1), and plot the mean of the per-true-archetype L1 errors with a min-max band. 3) 
+
+Mixture-weight trajectory We plot the posterior mean mix-ture weights ˆηk(t) over outer iterations t. Good behavior corresponds to (i) ˆηk(t) converging to η⋆k (after alignment) and (ii) reduced drift/oscillation over t. 4) L1 error tra-jectories per inferred component: L1 error trajectories per inferred component: || ¯wk −wref || 1. When mixture ground truth is available, we report errors after Hungarian alignment to true archetypes. This view reveals mode collapse, label switching, and whether all components actually learn. 
+
+# 7 RESULTS AND ANALYSIS 
+
+Figure 1 (Top) compares simple regret under the true mix-ture utility across outer iterations. Across benchmarks, the mixture-aware methods achieve faster regret reduction and lower final regret than unimodal and random-scalarization baselines. On DTLZ2, all methods improve rapidly due to the smooth landscape, but Inter and Hybrid converge more consistently to near-zero regret with lower variance, while Clusterless and fixed-preference baselines lag slightly, in-dicating consistent gains from explicit mode identification even in well-behaved settings. On the more irregular WFG benchmark, the separation is clearer: Hybrid exhibits the steepest early decline and the lowest final regret, whereas Clusterless and random scalarization plateau at higher lev-els, suggesting that preference averaging fails to resolve complex trade-offs. In the PET process design task, the gap is most pronounced: Hybrid converges faster and stabilizes at lower regret, while unimodal and scalarization baselines converge more slowly and with higher variance, highlight-ing the benefit of modeling heterogeneous archetypes in structured, multimodal trade-off landscapes. Figure 1 (Bottom) shows archetype recovery for a persistent user on DTLZ2. Clusterless exhibits a flat curve with a wide band, indicating mode averaging and poor archetype sepa-ration. Intra-queries reduce error within active modes but produce unstable overall alignment, reflected in persistent variability. Inter-queries yield a sharp early drop by rapidly disambiguating archetypes, followed by slower refinement. Hybrid combines both effects: rapid initial mode identifica-tion followed by steady within-mode calibration, achieving the lowest final aligned error and the narrowest uncertainty band. Figure 2 shows that under persistent gating with true mix-ture weights (0.40, 0.35, 0.25). For clusterless, ˆη(t) drifts and concentrates mass on a single component (e.g., the dom-inant blue curve), deviating from the true proportions; this indicates mode averaging and weak mode identification. On the contrary, hybrid (right) ˆη(t) the hybrid query policy re-covers three stable preference modes. It reallocates mass rapidly in early iterations (mode identification), then stabi-lizes near the true mixture weights. The smallest mode is slightly under-estimated, reflecting the difficulty of learning minority archetypes under finite preference queries. This suggests the query policy actively resolves mode uncertainty and yields better-calibrated mixture weights. Importantly, no spurious dominant cluster emerges and weight trajectories stabilize after approximately 20 iterations. Figure 3 shows error trajectories per inferred component for persistent user for DTLZ2 dataset for clusterless and inter-query modes. In the clusterless plot, we can observe here mode collapse happening evidently. One dominant curve imporoves a bit, and the other two sit high and flat. In the inter-query plot, we can see cross-mode learning happening first and then non-monotone adjustments as the algorithm probes identity boundaries. Figure 4 shows results for i.i.d user for DTLZ2 suite. The left plot shows errors of inferred preferences for intra-query. We can see that the three curves representing mixture-mean, (a) Clusterless (b) Inter 
+
+Figure 3: L1 error trajectories per inferred component for a persistent user on DTLZ. After Hungarian alignment (lower is better), Inter queries prevent mode collapse and rapidly reduce error for at least one archetype, while Clusterless largely collapses, with only one component improving and others remaining high 
+
+> (a) Errors of inferred prefer-ences for intra query
+> (b) L1 error trajectory per in-ferred component
+
+Figure 4: Inferred preference errors under i.i.d. user (DTLZ2); intra-query refines the dominant archetype with small fluctuations from mode switches, while inter-query rapidly reduces error for the dominant cluster but learns minority modes more slowly. MAP and expected tend to be close to each other because intra-query keeps asking questions that refine the currently most-likely archetype. Since this is iid context, we can observe small bumps happen whenever the active mode switches. The right plot shows inter-query aligned cluster error versus true archetypes. Here, we can see that the dom-inant group drops quickly, but others decline slowly becase they are queried less often due to i.i.d context. Comparing this to the persistent context, we can observe that persistent inter-query plot in 3 has step-like plateaus and occasional bumps from identity flips in the alignment. While simple regret measures performance under a fixed scalar utility, it does not reveal how optimization process explores the multi-objective trade-off surface. In mixture-preference settings, the underlying objective is not unimodal: different archetypes emphasize different regions of Pareto front. Consequently, an effective algorithm should not only minimize regret but also explore multiple trade-off regions before concentrating near mixture-preferred optimum. To examine this behavior, we visualize the distribution of eval-uated points in objective space relative to a reference Pareto front in Fig 5. We can observe across all projections that Hybrid samples along the efficient frontier and identifies  
+
+> (a) ROI vs GWP (b) ROI vs Toxicity
+
+Figure 5: Pareto coverage in objective space. Grey points-reference Pareto front; colored points - evaluated solutions; stars - final best-utility solution under the true mixture pref-erence. Efficient trade-offs lie along the grey frontier. Hybrid achieves broader frontier coverage and identifies final solu-tions closest to the mixture-preferred Pareto region. final solutions closest to the Pareto boundary under the true mixture utility. While all methods generate reasonable trade-offs, mixture modeling results in slightly better localization in the preferred region of objective space, particularly along the ROI–GWP and ROI–Toxicity trade-offs. 
+
+Limitations and Future Work: The proposed method evaluates the proposed framework in simulated settings and on a real-world process design dataset, but does not include human-subject experiments. Due to time and resource con-straints, validation with real decision makers was beyond the scope of the current study and remains an important direction for future work. We also plan to test the method on a broader range of real-world multi-objective datasets to assess generalization across domains. Finally, extending the framework to more adaptive mixture structures could further improve flexibility and practical applicability. 
+
+# 8 CONCLUSION 
+
+We address a central challenge in preference-based many-objective optimization: large trade-off spaces combined with heterogeneous, context-dependent human priorities. Rather than assuming a single scalarization, we model preferences as a small set of latent archetypes with a Dirichlet-process mixture over their weights. This mixture formulation en-ables information-efficient querying through inter-mode queries that identify the active archetype and intra-mode queries that refine within-mode trade-offs. Under mild as-sumptions, we establish a simple-regret guarantee for the resulting mixture-aware Bayesian optimization procedure. Across synthetic and real-world benchmarks, the method consistently reduces regret faster than cluster-agnostic or single-utility baselines, while mixture-aware diagnostics ex-pose failure modes such as mode collapse and miscalibration that are not visible from regret alone. These results support mixture-aware preference learning as a scalable and inter-pretable approach to many-objective Bayesian optimization. References 
+
+Robert TF Ah King, Harry CS Rughooputh, and Kalyan-moy Deb. Evolutionary multi-objective environmen-tal/economic dispatch: Stochastic versus deterministic approaches. In International conference on evolutionary multi-criterion optimization , pages 677–691. Springer, 2005. Mauricio Alvarez and Neil Lawrence. Sparse convolved gaussian processes for multi-output regression. Advances in neural information processing systems , 21, 2008. Raul Astudillo and Peter Frazier. Multi-attribute bayesian optimization with interactive preference learning. In Inter-national Conference on Artificial Intelligence and Statis-tics , pages 4496–4507. PMLR, 2020. Arun Kumar AV, Santu Rana, Alistair Shilton, and Svetha Venkatesh. Human-ai collaborative bayesian optimisation. 
+
+Advances in neural information processing systems , 35: 16233–16245, 2022. Mickaël Binois, Victor Picheny, Patrick Taillandier, and Abderrahmane Habbal. The kalai-smorodinsky solution for many-objective bayesian optimization. Journal of Machine Learning Research , 21(150):1–42, 2020. David M Blei and Michael I Jordan. Variational inference for dirichlet process mixtures. Bayesian analysis , 1(1), 2006. Kalyanmoy Deb, Lothar Thiele, Marco Laumanns, and Eckart Zitzler. Scalable test problems for evolutionary multiobjective optimization. In Evolutionary multiobjec-tive optimization: theoretical advances and applications ,pages 105–145. Springer, 2005. Kalyanmoy Deb, Karthik Sindhya, and Jussi Hakanen. Multi-objective optimization. In Decision sciences , pages 161–200. CRC Press, 2016. Mohammad Haddadnia, Leonie Grashoff, and Felix Strieth-Kalthoff. Botier: multi-objective bayesian optimization with tiered objective structures. Digital Discovery , 2025. Trevor Hastings, Mrinalini Mulukutla, Danial Khatamsaz, Daniel Salas, Wenle Xu, Daniel Lewis, Nicole Person, Matthew Skokan, Braden Miller, James Paramore, et al. Accelerated multi-objective alloy discovery through ef-ficient bayesian methods: Application to the fcc high entropy alloy space. Acta Materialia , page 121173, 2025. Neil Houlsby, Ferenc Huszár, Zoubin Ghahramani, and Máté Lengyel. Bayesian active learning for classification and preference learning. arXiv preprint arXiv:1112.5745 ,2011. Simon Huband, Luigi Barone, Lyndon While, and Phil Hingston. A scalable multi-objective test problem toolkit. In International Conference on Evolutionary Multi-Criterion Optimization , pages 280–295. Springer, 2005. Yu-Heng Hung, Kai-Jie Lin, Yu-Heng Lin, Chien-Yi Wang, Cheng Sun, and Ping-Chun Hsieh. Boformer: Learning to solve multi-objective bayesian optimization via non-markovian rl. arXiv preprint arXiv:2505.21974 , 2025. Hisao Ishibuchi, Noritaka Tsukamoto, and Yusuke Nojima. Evolutionary many-objective optimization: A short re-view. In 2008 IEEE congress on evolutionary compu-tation (IEEE world congress on computational intelli-gence) , pages 2419–2426. IEEE, 2008. Dietmar Jannach and Himan Abdollahpouri. A survey on multi-objective recommender systems. Frontiers in big Data , 6:1157899, 2023. Kirthevasan Kandasamy, Gautam Dasarathy, Junier B Oliva, Jeff Schneider, and Barnabás Póczos. Gaussian pro-cess bandit optimisation with multi-fidelity evaluations. 
+
+Advances in neural information processing systems , 29, 2016. Bingdong Li, Zixiang Di, Yongfan Lu, Hong Qian, Feng Wang, Peng Yang, Ke Tang, and Aimin Zhou. Expensive multi-objective bayesian optimization based on diffusion models. In Proceedings of the AAAI Conference on Artifi-cial Intelligence , volume 39, pages 27063–27071, 2025. Guoqiang Li, Hongliang Guo, Zhenpo Wang, and Meng Wang. Online trajectory optimization for safe au-tonomous overtaking with active obstacle avoidance. 
+
+Robotics and Autonomous Systems , 169:104528, 2023. Xi Lin, Yilu Liu, Xiaoyuan Zhang, Fei Liu, Zhenkun Wang, and Qingfu Zhang. Few for many: Tchebycheff set scalar-ization for many-objective optimization. arXiv preprint arXiv:2405.19650 , 2024. Ke Liu, Xiaodong Xu, Wenxin Huang, Ran Zhang, Lingyu Kong, and Xi Wang. A multi-objective optimization framework for designing urban block forms considering daylight, energy consumption, and photovoltaic energy potential. Building and Environment , 242:110585, 2023. Lucia Asencio Martín and Eduardo C Garrido-Merchán. Many objective bayesian optimization. arXiv preprint arXiv:2107.04126 , 2021. Jay I Myung, James R Deneault, Jorge Chang, Inhan Kang, Benji Maruyama, and Mark A Pitt. Multi-objective bayesian optimization: a case study in material extrusion. 
+
+Digital Discovery , 4(2):464–476, 2025. Ryota Ozaki, Kazuki Ishikawa, Youhei Kanzaki, Shinya Suzuki, Shion Takeno, Ichiro Takeuchi, and Masayuki Karasuyama. Multi-objective bayesian optimization with active preference learning. arXiv preprint arXiv:2311.13460 , 2023. Ryota Ozaki, Kazuki Ishikawa, Youhei Kanzaki, Shion Takeno, Ichiro Takeuchi, and Masayuki Karasuyama. Multi-objective bayesian optimization with active pref-erence learning. In Proceedings of the AAAI conference on artificial intelligence , volume 38, pages 14490–14498, 2024. Biswajit Paria, Kirthevasan Kandasamy, and Barnabás Póc-zos. A flexible framework for multi-objective bayesian optimization using random scalarizations. In Uncertainty in Artificial Intelligence , pages 766–776. PMLR, 2020. Carl Edward Rasmussen and Hannes Nickisch. Gaussian processes for machine learning (gpml) toolbox. The Jour-nal of Machine Learning Research , 11:3011–3015, 2010. NanYan Shen, Hua You, Jing Li, and Ping Song. Real-time trajectory planning for collaborative robots using incre-mental multi-objective optimization. Intelligent Service Robotics , 18(1):43–59, 2025. Niranjan Srinivas, Andreas Krause, Sham M Kakade, and Matthias Seeger. Gaussian process optimization in the bandit setting: No regret and experimental design. In 
+
+ICML , 2010. Zhiyuan Wang, Jie Li, Gade Pandu Rangaiah, and Zhe Wu. Machine learning aided multi-objective optimization and multi-criteria decision making: Framework and two appli-cations in chemical engineering. Computers & Chemical Engineering , 165:107945, 2022. Christopher KI Williams and Carl Edward Rasmussen. 
+
+Gaussian processes for machine learning , volume 2. MIT press Cambridge, MA, 2006. Wenjie Xu, Masaki Adachi, Colin N Jones, and Michael A Osborne. Principled bayesian optimization in collabora-tion with human experts. Advances in Neural Information Processing Systems , 37:104091–104137, 2024. Richard Zhang and Daniel Golovin. Random hypervol-ume scalarizations for provable multi-objective black box optimization. In International conference on machine learning , pages 11096–11105. PMLR, 2020. SUPPLEMENTARY MATERIAL A THEORETICAL PROOFS 
+
+In this section, we detail the proof of the theorem stated in the main paper. We state model setup and assumptions. Then we prove Lipschitz properties of the utility. Further, we discuss surrogate mismatch bound. Further, we combine all the pieces for the regret decomposition theorem. 
+
+MODEL ASSUMPTIONS 
+
+We consider m objectives to be minimized . For any outcome vector y ∈ Rm and weights w ∈ ∆m−1, define the Chebyshev utility 
+
+U (y, w ) := − min 
+
+> 1≤j≤m
+
+yj
+
+wj
+
+. (14) Thus larger utility is preferred. We assume all weights are bounded away from the simplex boundary: there exists cw > 0
+
+such that wj ≥ cw for all j for every true archetype w⋆k and every estimated archetype ˆwk,t .Let the true latent preferences be a mixture of K⋆ archetypes with weights η⋆ ∈ ∆K⋆−1 and archetypes {w⋆k}K⋆ 
+
+> k=1
+
+⊂ ∆m−1.Define the true mixture utility at design x ∈ X by 
+
+U⋆(x) := 
+
+> K⋆
+
+X
+
+> k=1
+
+η⋆k U f (x), w ⋆k
+
+, U⋆ := sup 
+
+> x∈X
+
+U⋆(x). (15) The algorithm fits one GP per objective fj and maintains posterior mean μt−1,j (x) and standard deviation σt−1,j (x) after 
+
+t − 1 evaluations. Let μt−1(x) ∈ Rm be the vector of means. At round t, the preference model outputs estimates ˆηt ∈ ∆K−1
+
+and { ˆwk,t }Kk=1 . Define the surrogate mixture utility used for acquisition 
+
+bUt(x) := 
+
+> K
+
+X
+
+> k=1
+
+ˆηk,t U μt−1(x), ˆwk,t 
+
+. (16) Assume the selected point xt is εt-optimal for the surrogate: 
+
+bUt(xt) ≥ sup 
+
+> x∈X
+
+bUt(x) − εt. (17) 
+
+Assumption 1 (Bounded Objectives) . ∥f (x)∥∞ ≤ By ∀x ∈ X 
+
+Alignment and estimation errors Let πt be a permutation (e.g., Hungarian matching) aligning estimated archetypes to true archetypes. Pad η⋆ with zeros if K > K ⋆. Define 
+
+∆wt := 
+
+> K⋆
+
+X
+
+> k=1
+
+η⋆k ∥ ˆwπt(k),t − w⋆k∥1, ∆ηt := ∥ˆηt − η⋆∥1. (18) 
+
+Lemma 2 (Lipschitzness of Chebyshev utility) . Let U be as in (14) and assume wj , w ′ 
+
+> j
+
+≥ cw > 0 for all j. Then for any 
+
+y, y ′ ∈ Rm and any such w, w ′ ∈ ∆m−1,
+
+U (y, w ) − U (y′, w ) ≤ 1
+
+cw
+
+∥y − y′∥∞, (19) 
+
+U (y, w ) − U (y, w ′) ≤ ∥y∥∞
+
+c2
+
+> w
+
+∥w − w′∥1. (20) 
+
+Proof. For (19), fix w and define gj (y) := −yj /w j . Each gj is (1 /c w)-Lipschitz under ∥ · ∥ ∞ because |gj (y) − gj (y′)| =
+
+|yj − y′ 
+
+> j
+
+|/w j ≤ ∥ y − y′∥∞/c w. Since U (y, w ) = min j gj (y) is the pointwise minimum of (1 /c w)-Lipschitz functions, it is itself (1 /c w)-Lipschitz, proving (19). For (20), fix y and write U (y, w ) = min j hj (w) with hj (w) := −yj /w j . For any j,
+
+|hj (w) − hj (w′)| = |yj | 1
+
+wj
+
+− 1
+
+w′
+
+> j
+
+= |yj | | wj − w′ 
+
+> j
+
+|
+
+wj w′
+
+> j
+
+≤ ∥y∥∞
+
+c2
+
+> w
+
+|wj − w′ 
+
+> j
+
+|.
+
+Therefore 
+
+|U (y, w ) − U (y, w ′)| ≤ max  
+
+> j
+
+|hj (w) − hj (w′)| ≤ ∥y∥∞
+
+c2
+
+> w
+
+max  
+
+> j
+
+|wj − w′ 
+
+> j
+
+| ≤ ∥y∥∞
+
+c2
+
+> w
+
+∥w − w′∥1,
+
+which proves (20). GP CONFIDENCE 
+
+We use a standard high-probability confidence bound for each objective GP. Assume sub-Gaussian observation noise and conditions under which the standard GP-UCB confidence event holds for each objective (e.g., Srinivas et al. (2010)). 
+
+Assumption 2 (Per-objective GP confidence event) . There exists a nondecreasing sequence {βt} such that with probability at least 1 − δ, simultaneously for all t ≥ 1, all x ∈ X , and all j ∈ { 1, . . . , m },
+
+|fj (x) − μt−1,j (x)| ≤ pβt σt−1,j (x). (21) Under (21), we have for all x,
+
+∥f (x) − μt−1(x)∥∞ ≤ pβt ∥σt−1(x)∥∞. (22) 
+
+MAIN RESULT: SIMPLE REGRET DECOMPOSITION 
+
+Define the simple regret under the true mixture utility: 
+
+RT := U⋆ − max  
+
+> t≤T
+
+U⋆(xt). (23) 
+
+Theorem 3 (Simple regret decomposition) . On the GP confidence event in Assumption 2, for any T ≥ 1,
+
+RT ≤ 2
+
+cw
+
+min  
+
+> t≤T
+
+∥f (xt) − μt−1(xt)∥∞
+
+| {z }
+
+> objective GP term
+
++ 2By
+
+c2
+
+> w
+
+min  
+
+> t≤T
+
+∆wt
+
+| {z }
+
+> archetype error
+
++ 2By
+
+cw
+
+min  
+
+> t≤T
+
+∆ηt
+
+| {z }
+
+> mixture-weight error
+
++ max  
+
+> t≤T
+
+εt
+
+| {z } 
+
+> surrogate maximization
+
+. (24) 
+
+Moreover, still on the same event, the objective GP term admits an existence-type rate: 
+
+min  
+
+> t≤T
+
+∥f (xt) − μt−1(xt)∥∞ ≤ 1
+
+T
+
+> T
+
+X
+
+> t=1
+
+∥f (xt) − μt−1(xt)∥∞ ≲
+
+r βT γT
+
+T , (25) 
+
+where γT is a (max) information-gain term for the objective GPs (taking the maximum over objectives if kernels differ), and 
+
+≲ hides constants depending only on the kernels and noise. Proof. Let x⋆ ∈ arg max x∈X U⋆(x). Fix any round t ≥ 1. Add and subtract the surrogate utility (16) at x⋆ and xt:
+
+U⋆(x⋆) − U ⋆(xt) =  U⋆(x⋆) − bUt(x⋆) +   bUt(x⋆) − bUt(xt) +   bUt(xt) − U ⋆(xt). (26) By εt-optimality (17), the middle term is at most εt. Therefore, 
+
+U⋆(x⋆) − U ⋆(xt) ≤ U⋆(x⋆) − bUt(x⋆) + U⋆(xt) − bUt(xt) + εt. (27) It remains to bound |U ⋆(x) − bUt(x)| for a generic x.
+
+Step 1: (Decomposition) Using (15) and (16), 
+
+U⋆(x) − bUt(x) = 
+
+> K⋆
+
+X
+
+> k=1
+
+η⋆kU (f (x), w ⋆k) −
+
+> K
+
+X
+
+> k=1
+
+ˆηk,t U (μt−1(x), ˆwk,t ).
+
+Insert and subtract PK⋆ 
+
+> k=1
+
+η⋆kU (μt−1(x), w ⋆k) and PK⋆ 
+
+> k=1
+
+η⋆kU (μt−1(x), ˆwπt(k),t ), then apply triangle inequality: 
+
+U⋆(x) − bUt(x) ≤
+
+> K⋆
+
+X
+
+> k=1
+
+η⋆k U (f (x), w ⋆k) − U (μt−1(x), w ⋆k)
+
++
+
+> K⋆
+
+X
+
+> k=1
+
+η⋆k U (μt−1(x), w ⋆k) − U (μt−1(x), ˆwπt(k),t )
+
++
+
+> K
+
+X
+
+> k=1
+
+(η⋆k − ˆηk,t ) U (μt−1(x), ˆwk,t ) . (28) 
+
+Step 2: (Bounding terms using Lemma 2) For the first line, apply Lipschitzness in y (19): 
+
+U (f (x), w ⋆k) − U (μt−1(x), w ⋆k) ≤ 1
+
+cw
+
+∥f (x) − μt−1(x)∥∞.
+
+Summing over k with weights η⋆k gives 
+
+> K⋆
+
+X
+
+> k=1
+
+η⋆k U (f (x), w ⋆k) − U (μt−1(x), w ⋆k) ≤ 1
+
+cw
+
+∥f (x) − μt−1(x)∥∞. (29) For the second line, apply Lipschitzness in w (20) with ∥μt−1(x)∥∞ ≤ By :
+
+U (μt−1(x), w ⋆k) − U (μt−1(x), ˆwπt(k),t ) ≤ By
+
+c2
+
+> w
+
+∥ ˆwπt(k),t − w⋆k∥1.
+
+Thus the second line is bounded by (By /c 2
+
+> w
+
+)∆ wt .For the third line, use |U (μt−1(x), ˆwk,t )| ≤ ∥ μt−1(x)∥∞/c w ≤ By /c w to obtain 
+
+> K
+
+X
+
+> k=1
+
+(η⋆k − ˆηk,t ) U (μt−1(x), ˆwk,t ) ≤ By
+
+cw
+
+∥ˆηt − η⋆∥1 = By
+
+cw
+
+∆ηt . (30) Combining (28), (29) and (30), we conclude that for all x,
+
+U⋆(x) − bUt(x) ≤ 1
+
+cw
+
+∥f (x) − μt−1(x)∥∞ + By
+
+c2
+
+> w
+
+∆wt + By
+
+cw
+
+∆ηt . (31) 
+
+Step 3: (Convert to simple regret) Apply (31) at x = x⋆ and x = xt in (27): 
+
+U⋆(x⋆) − U ⋆(xt) ≤ 1
+
+cw
+
+
+
+∥f (x⋆) − μt−1(x⋆)∥∞ + ∥f (xt) − μt−1(xt)∥∞
+
+
+
++ 2By
+
+c2
+
+> w
+
+∆wt + 2By
+
+cw
+
+∆ηt + εt. (32) Now take the minimum over t ≤ T on the right-hand side. Since RT = min t≤T
+
+ U⋆(x⋆) − U ⋆(xt) and max t≤T εt upper bounds εt, we obtain (24). On the GP confidence event (21), the bound 
+
+∥f (x) − μt−1(x)∥∞ ≤ pβt ∥σt−1(x)∥∞
+
+holds for all x ∈ X , including x⋆.
+
+Step 4: (Existence-type GP rate) On the confidence event (21), 
+
+∥f (xt) − μt−1(xt)∥∞ ≤ pβt ∥σt−1(xt)∥∞ ≤ pβT ∥σt−1(xt)∥∞.
+
+Under standard variance-sum bounds for GP regression (e.g., Lemma X), 
+
+> T
+
+X
+
+> t=1
+
+∥σt−1(xt)∥2 
+
+> ∞
+
+≤ C γ T ,
+
+which implies 
+
+min  
+
+> t≤T
+
+∥σt−1(xt)∥∞ ≤ 1
+
+T
+
+> T
+
+X
+
+> t=1
+
+∥σt−1(xt)∥∞ ≤
+
+r C γ T
+
+T .
+
+# B ADDITIONAL EXPERIMENTAL DETAILS 
+
+B.1 SIMULATED DATASETS 
+
+We use well-known MOO benchmarks for our experimental setup, called DTLZ Deb et al. (2005) and WFG suite Huband et al. (2005). We evaluate on DTLZ2 with L = 6 objectives and d = 7 decision variables (minimization), search space 
+
+[0 , 1] d. At each design x ∈ [0 , 1] 7 we observe y = f (x). We also use WFG9 with L = 8 objectives and d = 34 decision variables. Following common practice, we set the WFG position parameter k = 2( L − 1) = 14 and distance parameter 
+
+l = 20 so d = k + l. Variables are scaled to [0 , 1] and all objectives are minimized. A design x ∈ [0 , 1] d evaluates to an objective vector y = f (x) ∈ R8. WFG9 induces challenging biases and mixed separability, making it a stronger testbed for query policies. To construct distinct but overlapping preference archetypes, we partition the objectives into disjoint groups and assign structured weight vectors. For the DTLZ suite ( L = 6 ), we define three groups G1 = {0, 1}, G2 = {2, 3}, G3 = {4, 5}
+
+while for the WFG suite ( L = 8 ) we define four groups G1 = {0, 1}, G2 = {2, 3}, G3 = {4, 5}, G4 = {6, 7}. Each mode allocates 80% of its total mass uniformly across its dominant group Gk and distributes the remaining 20% uniformly over the other objectives. The resulting vector is renormalized to ensure wk ∈ ∆L−1. This construction yields clearly separated trade-off profiles while maintaining nonzero sensitivity to all objectives. Let Zt ∈ { 1, . . . , K } denote the active preference mode at query t. Under an iid context regime, each query is gen-erated independently according to a fixed mixture Zt ∼ Categorical( η⋆), with η⋆ = (0 .5, 0.3, 0.2) for DTLZ and η⋆ = {(0 .60 , 0.25 , 0.15 , 0.10) , 0.4, 0.3, 0.3, 0.1} for WFG. Under a persistent context regime, the mode evolves according to a stay-or-resample process with persistence parameter ρ ∈ [0 , 1) . The initial mode is drawn as Z1 ∼ Categorical( η⋆),and at each subsequent query the mode remains unchanged with probability ρ and is resampled from Categorical( η⋆) with probability 1 − ρ. The expected run length within a single mode is 1/(1 − ρ), and the expected number of switches over T
+
+queries is (1 − ρ)( T − 1) .
+
+B.2 REAL-WORLD: PET PROCESS DESIGN 
+
+We evaluate the proposed framework on a real-world multi-objective process design problem for polyethylene terephthalate (PET) production. The dataset comprises 10,000 previously evaluated process designs. Each design is represented by a 12-dimensional continuous decision vector x ∈ R12 corresponding to operating and design parameters such as temperatures, pressures, residence times, and feed ratios. Each variable is bounded within physically meaningful limits and normalized to 
+
+[0 , 1] for modeling purposes. For each design, we consider L = 7 objectives consisting of Return on Investment (ROI), life-Cycle Assessment (LCA) indicators, including global warming potential (GWP), terrestrial acidification, water consumption, fossil depletion, surplus ore, and human toxicity. To model heterogeneous chemist preferences, we construct K = 3 archetypal weight vectors wk ∈ ∆6 that parameterize the Chebyshev scalarization. Objectives are grouped semantically Type A (Economic) which emphasizes on ROI, Type B (Environmental) which cares about environmental LCA indicators, Type C (Health-focused) which stresses on toxicity-related indicators. Each archetype allocates 80% of its mass to its dominant objective group and distributes the remaining 
+
+20% across the other objectives, followed by renormalization. This construction yields clearly distinct yet overlapping trade-off profiles that reflect plausible real-world stakeholder types. At each comparison step t, a latent mode variable 
+
+Zt ∈ { 1, 2, 3} determines which archetype governs the user’s decision. Modes are sampled from a categorical distribution with mixture weights η = [0 .40 , 0.35 , 0.25] representing the population-level prevalence of economic, environmental, and health-oriented chemists. The parameter η therefore controls the global heterogeneity across users. To capture temporal consistency, we adopt a sticky gating process with persistence parameter ρ ∈ [0 , 1) . The initial mode is drawn from 
+
+Categorical( η), and at each subsequent step the mode remains unchanged with probability ρ and is resampled from η with probability 1 − ρ. In our experiments we set ρ = 0 .8, implying strong short-term consistency in preferences. The preferences are generated using the same method as mentioned in the simulated settings. 
+
+B.3 INTERACTION CONTEXTS 
+
+We evaluate preference learning under the following two feedback regimes. 
+
+Persistent context A latent archetype zt ∈ { 1, . . . , K ⋆} evolves with temporal inertia. At round t,
+
+zt =
+
+(
+
+zt−1, with probability ρ, 
+
+Categorical( η⋆), with probability 1 − ρ, 
+
+where η⋆ ∈ ∆K⋆−1 are the true mixture weights and ρ ∈ [0 , 1) controls stickiness. The initial archetype z1 is sampled from 
+
+Categorical( η⋆). Conditional on zt = k, pairwise feedback is generated using utility U f (x), w ⋆k
+
+ under a probit likelihood. This regime induces temporally coherent feedback and facilitates identification and refinement of active archetypes. 
+
+I.i.d. context. At each round, 
+
+zt ∼ Categorical( η⋆),
+
+independently across t. Each comparison is therefore generated from an independently sampled archetype, removing temporal continuity. This regime is more challenging for mode identification, as archetype switches occur randomly and minority modes are observed less frequently in expectation. All methods are evaluated under both regimes using identical seeds and evaluation budgets. 
+
+B.4 IMPLEMENTATION DETAILS: 
+
+We conduct our experiments on two simulated WFG and DTLZ and one real-world dataset. We consider stickiness parameter to be 0.5 for both DTLZ and WFG dataset. While simulation of clusters, we consider η⋆ = (0 .5, 0.3, 0.2) for DTLZ, 
+
+η⋆ = (0 .50 , 0.25 , 0.15 , 0.10) for WFG suite and η⋆ = (0 .40 , 0.35 , 0.25) for Chemistry Process Design. We use Python Symbol Meaning            
+
+> Lnumber of objectives
+> Ktruncation level (max modes)
+> ℓobjective index
+> kpreference mode index
+> wkweight vector for mode kηkmixture weight of mode krilatent mode for comparison iσupreference noise parameter
+
+Table 1: Notation summary. 3.12 with JAX/JAXlib, NumPyro, Optuna, and GPy. Each objective is modeled with an independent GP (RBF kernel); for synthetic/WFG experiments GPs are refit every 3 iterations with bounded noise and data-adaptive bounds on variance and lengthscale, whereas for chemistry experiments pretrained GP surrogates are loaded and queried. Preferences follow a probit likelihood with noise uσ is set to 0.02 for WFG/DTLZ dataset and 0.1 for PET process design dataset. Heterogeneous preferences are modeled via a truncated stick-breaking DP mixture with preknown K components and variational inference using SVI (Adam lr=1e-3, 500 updates per iteration). Preference queries are selected from pairs of previously observed outcomes using entropy/MI-based criteria (modes: clusterless/inter/intra/hybrid). Candidate points are proposed by MC expected improvement with 12 samples and 10 L-BFGS-B restarts. All randomness (initial seeds, EI samples, query subsampling, sticky archetype gating, and variational initialization) is controlled by a single run seed. All methods share an identical initial seed dataset injected into Optuna. Simple regret uses a common reference U ∗ estimated by random search with 500 samples (saved and reused). We report mean ± std across 3 runs (different run seeds). 
+
+B.5 ADDITIONAL METRICS 
+
+1) Mixture-weight calibration We compare the posterior mean mixture weights ˆη to the ground-truth weights η⋆ projected via the same alignment (bar plot), and track KL( η⋆ ∥ ˜η) over iterations (lower is better). Blue-only mass indicates spurious modes, orange-only mass indicates missed modes. 2) Errors of inferred preferences: Errors of inferred preferences relative to single reference wtrue : mixture-mean || wtrue − P 
+
+> k
+
+ηk ¯wk || 1, MAP-cluster || wtrue − ¯wk∗ || with k∗ = arg max k ηk
+
+and expected P 
+
+> k
+
+ηk || wtrue − ¯wk || 1. Lower is better. 
+
+# C RESULTS AND ANALYSIS 
+
+Figure 6 shows mixture-weight calibration for DTLZ2 dataset. We can observe here that in random plot blue mass is concentrated on one index and a big orange bar has almost no blue in several panels, hence indicating towards mode collapse. In intra-cluster, we can see that it is focussing on one cluster’s shape since it doesnt tru to calibrate η. In the inter-query plot, we can see separate modes, and more blue bars are lining up with orange bars where orange bars indicate projected true η∗.Figure 7 shows errors of inferred preferences for persistent user for DTLZ2 dataset for clusterless and inter-query modes. we can observe that mixture-mean/expected errors creep up, and MAP worsens. That’s consistent with uncertainty sampling under collapsed scalarizer. Since clusterless mode ignores disagreement between archetypes, it chases high entropy and can drift away from the true mode. In the plot of inter-query, we can observe that the expected and mixture-mean errors decline clearly. Here, we can also note that MAP improves more slowly. It shows how inter queries look for identity first and tend to cut mixture confusion early. The Figure 8 shows posterior probability mass assigned to the cluster k i.e. how model believes each archetype contributes to the overall mixture over series of iterations for WFG and DTLZ dataset. The query mode is hybrid in both cases. We can see for WFG dataset, cluster 0 dominates and rises to ≈ 0.7 and remains stable, cluster 1 is around ≈ 0.2, cluster 2 and cluster 3 around 0.1 and cluster 4 around 0. This describes the true weights of WFG dataset as well ( η⋆ = (0 .50 , 0.25 , 0.15 , 0.10) .The stabalization of weights happens roughly after 20 iterations. We can also see the plot for DTLZ dataset. For DTLZ dataset, we can see that cluster 0 dominates and rises to ≈ 0.7, cluster 1 is around 0.2, cluster 2 is around 0.1 and cluster 3,4 are around 0. This is also close to DTLZ η⋆ = (0 .5, 0.3, 0.2) .The Figure 8 shows posterior probability mass assigned to the cluster k i.e. how model believes each archetype contributes to (a) Random (b) Intra (c) Inter 
+
+Figure 6: Mixture-weight calibration for persistent user for DTLZ dataset. Inter queries best match the true mixture, while random collapses to one mode and intra largely ignores η. Blue bars are inferred ˆη, orange bars are projected true η∗ via Hungarian alignment. (a) Random: blue mass on one index and orange-only bars → mode collapse. (b) Intra: blue focuses on one component → poor allocation across modes. (c) Inter: clear blue–orange alignment → best identification and calibration across modes  
+
+> (a) Clusterless (b) Inter
+
+Figure 7: Errors of inferred preferences for persistent user for DTLZ dataset. Inter–queries quickly reduce mixture-mean and expected L1 errors, while MAP improves more slowly; in contrast, clusterless drifts upward, reflecting entropy-only sampling under an averaged scalarizer and mode confusion. Curves: blue = mixture-mean || wtrue − P 
+
+> k
+
+ηk ¯wk || 1, orange = MAP-cluster || wtrue − ¯wk∗ || with k∗ = arg max k ηk and green = expected P 
+
+> k
+
+ηk || wtrue − ¯wk || 1. Lower is better. (a) WFG dataset (b) DTLZ dataset 
+
+Figure 8: Evolution of posterior mixture weights ηk over outer iterations for WFG dataset    
+
+> (a) random (b) clusterless (c) Intra
+> (d) Inter (e) hybrid
+
+Figure 9: Comparison of archetype-aware querying strategies (a–e) Empirical gating frequencies versus true mixture weights for different selection modes. Hybrid scheduling achieves the closest alignment to the true mixture, demonstrating effective exploration across archetypes. the overall mixture over series of iterations for WFG and DTLZ dataset. The query mode is hybrid in both cases. We can see for WFG dataset, cluster 0 dominates and rises to ≈ 0.7 and remains stable, cluster 1 is around ≈ 0.2, cluster 2 and cluster 3 around 0.1 and cluster 4 around 0. This describes the true weights of WFG dataset as well ( η⋆ = (0 .50 , 0.25 , 0.15 , 0.10) .The stabalization of weights happens roughly after 20 iterations. We can also see the plot for DTLZ dataset. For DTLZ dataset, we can see that cluster 0 dominates and rises to ≈ 0.7, cluster 1 is around 0.2, cluster 2 is around 0.1 and cluster 3,4 are around 0. This is also close to DTLZ η⋆ = (0 .5, 0.3, 0.2) .Figure 9 gating-frequency panels (a–e) show how each policy allocates queries among latent preference archetypes, while the regret plot (f) shows the impact of that allocation on optimization performance. Random and clusterless ignore mixture structure; intra collapses to one mode; inter balances but lacks fine exploitation; hybrid balances exploration across archetypes and exploitation within them—achieving both accurate mixture recovery and lowest regret.
