@@ -1,0 +1,697 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-07T20:34:54.372450+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 5,
+    "deep_cap": 7,
+    "deep_selected": 5,
+    "quick_candidates": 35,
+    "quick_skim_target": 12,
+    "quick_selected": 12
+  },
+  "deep_dive": [
+    {
+      "id": "2604.03562v1",
+      "title": "When Adaptive Rewards Hurt: Causal Probing and the Switching-Stability Dilemma in LLM-Guided LEO Satellite Scheduling",
+      "abstract": "Adaptive reward design for deep reinforcement learning (DRL) in multi-beam LEO satellite scheduling is motivated by the intuition that regime-aware reward weights should outperform static ones. We systematically test this intuition and uncover a switching-stability dilemma: near-constant reward weights (342.1 Mbps) outperform carefully-tuned dynamic weights (103.3+/-96.8 Mbps) because PPO requires a quasistationary reward signal for value function convergence. Weight adaptation-regardless of quality-degrades performance by repeatedly restarting convergence. To understand why specific weights matter, we introduce a single-variable causal probing method that independently perturbs each reward term by +/-20% and measures PPO response after 50k steps. Probing reveals counterintuitive leverage: a +20% increase in the switching penalty yields +157 Mbps for polar handover and +130 Mbps for hot-cold regimes-findings inaccessible to human experts or trained MLPs without systematic probing. We evaluate four MDP architect variants (fixed, rule-based, learned MLP, finetuned LLM) across known and novel traffic regimes. The MLP achieves 357.9 Mbps on known regimes and 325.2 Mbps on novel regimes, while the fine-tuned LLM collapses to 45.3+/-43.0 Mbps due to weight oscillation rather than lack of domain knowledge-output consistency, not knowledge, is the binding constraint. Our findings provide an empirically-grounded roadmap for LLM-DRL integration in communication systems, identifying where LLMs add irreplaceable value (natural language intent understanding) versus where simpler methods suffice.",
+      "authors": [
+        "Yuanhang Li"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-04-04T03:04:53+00:00",
+      "link": "https://arxiv.org/pdf/2604.03562v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "LLM-guided LEO satellite scheduling using deep reinforcement learning",
+      "llm_evidence_cn": "大模型引导的低轨卫星调度深度强化学习",
+      "llm_evidence": "大模型引导的低轨卫星调度深度强化学习",
+      "canonical_evidence": "大模型引导的低轨卫星调度深度强化学习",
+      "llm_tldr_en": "Investigates LLM-guided DRL for satellite scheduling and the impact of adaptive reward signals.",
+      "llm_tldr_cn": "研究了大模型引导的深度强化学习在卫星调度中的应用及自适应奖励的影响。",
+      "llm_tldr": "研究了大模型引导的深度强化学习在卫星调度中的应用及自适应奖励的影响。",
+      "llm_tags": [
+        "query:nco-llm:composite"
+      ],
+      "matched_query_tag": "query:nco-llm:composite",
+      "matched_query_text": "Papers central to 查找神经组合优化结合大模型相关的论文, especially work that connects or combines: Neural Combinatorial Optimization (NCO) methods and frameworks; Large Language Models (LLM) for optimization tasks; Deep Reinforcement Learning in combinatorial optimization; LLM-based heuristic search and optimization; Integration of GNN and LLM for combinatorial optimization; Neural combinatorial optimization for vehicle routing problems; In-context learning for combinatorial optimization problems; LLM-guided heuristic search for optimization; Integrating large language models with combinatorial optimization solvers; LLM driven heuristic generation for combinatorial optimization.",
+      "matched_requirement_id": "req-composite-nco-llm",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.03705v1",
+      "title": "TransGP: Task-Conditioned Transformer-Guided Genetic Programming for Multitask Dynamic Flexible Job Shop Scheduling",
+      "abstract": "Hyper-heuristics have become a popular approach for solving dynamic flexible job shop scheduling (DFJSS) problems. They use gradient-free optimization techniques like Genetic Programming (GP) to evolve non-differentiable heuristics. However, conventional GP methods tend to converge slowly because they rely solely on evolutionary search to find good heuristics. Existing multitask GP methods can solve multiple tasks simultaneously and speed up the search by transferring knowledge across similar tasks. But they mostly exchange heuristic building blocks without truly generating heuristics conditioned on task information. In this paper, we aim to accelerate convergence and enable task-specific heuristic generation by incorporating a task-conditioned Transformer model. The Transformer works in two ways. First, it learns the distribution of elite heuristics, biasing the search toward promising regions of the heuristic space. Second, through conditional generation, it produces heuristics tailored to specific tasks, allowing the model to handle multiple scheduling tasks at once and improving overall optimization efficiency. Based on these ideas, we propose TransGP, a Task-Conditioned Transformer-Guided GP framework. This evolutionary paradigm integrates generative modeling with GP, enabling efficient multitask heuristic learning and knowledge transfer. We evaluate TransGP on a range of DFJSS scenarios. Experimental results show that TransGP consistently outperforms multitask GP baselines, widely used handcrafted heuristics, and the pure Transformer model, achieving faster convergence, superior solution quality, and enhanced robustness.",
+      "authors": [
+        "Meng Xu",
+        "Jiao Liu",
+        "Hua Yu",
+        "Yew Soon Ong"
+      ],
+      "primary_category": "cs.NE",
+      "categories": [
+        "cs.NE"
+      ],
+      "published": "2026-04-04T12:22:54+00:00",
+      "link": "https://arxiv.org/pdf/2604.03705v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Transformer-guided genetic programming for job shop scheduling",
+      "llm_evidence_cn": "用于作业车间调度的Transformer引导遗传规划",
+      "llm_evidence": "用于作业车间调度的Transformer引导遗传规划",
+      "canonical_evidence": "用于作业车间调度的Transformer引导遗传规划",
+      "llm_tldr_en": "Uses Transformers to guide genetic programming for generating heuristics in dynamic scheduling problems.",
+      "llm_tldr_cn": "利用Transformer引导遗传规划，为动态调度问题生成特定任务的启发式算法。",
+      "llm_tldr": "利用Transformer引导遗传规划，为动态调度问题生成特定任务的启发式算法。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Learning search heuristics with neural networks",
+      "matched_requirement_id": "req-21",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.03189v1",
+      "title": "Reflective Context Learning: Studying the Optimization Primitives of Context Space",
+      "abstract": "Generally capable agents must learn from experience in ways that generalize across tasks and environments. The fundamental problems of learning, including credit assignment, overfitting, forgetting, local optima, and high-variance learning signals, persist whether the learned object lies in parameter space or context space. While these challenges are well understood in classical machine learning optimization, they remain underexplored in context space, leading current methods to be fragmented and ad hoc. We present Reflective Context Learning (RCL), a unified framework for agents that learn through repeated interaction, reflection on behavior and failure modes, and iterative updates to context. In RCL, reflection converts trajectories and current context into a directional update signal analogous to gradients, while mutation applies that signal to improve future behavior in context space. We recast recent context-optimization approaches as instances of this shared learning problem and systematically extend them with classical optimization primitives, including batching, improved credit-assignment signal, auxiliary losses, failure replay, and grouped rollouts for variance reduction. On AppWorld, BrowseComp+, and RewardBench2, these primitives improve over strong baselines, with their relative importance shifting across task regimes. We further analyze robustness to initialization, the effects of batch size, sampling and curriculum strategy, optimizer-state variants, and the impact of allocating stronger or weaker models to different optimization components. Our results suggest that learning through context updates should be treated not as a set of isolated algorithms, but as an optimization problem whose mechanisms can be studied systematically and improved through transferable principles.",
+      "authors": [
+        "Nikita Vassilyev",
+        "William Berrios",
+        "Ruowang Zhang",
+        "Bo Han",
+        "Douwe Kiela",
+        "Shikib Mehri"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-04-03T17:05:45+00:00",
+      "link": "https://arxiv.org/pdf/2604.03189v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Reflective Context Learning for agents learning in context space",
+      "llm_evidence_cn": "针对在上下文空间学习的智能体的反思性上下文学习",
+      "llm_evidence": "针对在上下文空间学习的智能体的反思性上下文学习",
+      "canonical_evidence": "针对在上下文空间学习的智能体的反思性上下文学习",
+      "llm_tldr_en": "Proposes a framework for agents to learn and generalize across tasks via iterative context updates.",
+      "llm_tldr_cn": "提出了一个框架，使智能体通过迭代上下文更新在任务间学习和泛化。",
+      "llm_tldr": "提出了一个框架，使智能体通过迭代上下文更新在任务间学习和泛化。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "In-context learning for combinatorial optimization problems",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.28733v2",
+      "title": "See it to Place it: Evolving Macro Placements with Vision-Language Models",
+      "abstract": "We propose using Vision-Language Models (VLMs) for macro placement in chip floorplanning, a complex optimization task that has recently shown promising advancements through machine learning methods. Because human designers rely heavily on spatial reasoning to arrange components on the chip canvas, we hypothesize that VLMs with strong visual reasoning abilities can effectively complement existing learning-based approaches. We introduce VeoPlace (Visual Evolutionary Optimization Placement), a novel framework that uses a VLM, without any fine-tuning, to guide the actions of a base placer by constraining them to subregions of the chip canvas. The VLM proposals are iteratively optimized through an evolutionary search strategy with respect to resulting placement quality. On open-source benchmarks, VeoPlace outperforms the best prior learning-based approach on 9 of 10 benchmarks with peak wirelength reductions exceeding 32%. We further demonstrate that VeoPlace generalizes to analytical placers, improving DREAMPlace performance on all 8 evaluated benchmarks with gains up to 4.3%. Our approach opens new possibilities for electronic design automation tools that leverage foundation models to solve complex physical design problems.",
+      "authors": [
+        "Ikechukwu Uchendu",
+        "Swati Goel",
+        "Karly Hou",
+        "Ebrahim Songhori",
+        "Kuang-Huei Lee",
+        "Joe Wenjie Jiang",
+        "Vijay Janapa Reddi",
+        "Vincent Zhuang"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-30T17:47:34+00:00",
+      "link": "https://arxiv.org/pdf/2603.28733v2",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "using Vision-Language Models to guide evolutionary search for chip floorplanning",
+      "llm_evidence_cn": "使用视觉语言模型指导芯片布局的进化搜索",
+      "llm_evidence": "使用视觉语言模型指导芯片布局的进化搜索",
+      "canonical_evidence": "使用视觉语言模型指导芯片布局的进化搜索",
+      "llm_tldr_en": "Uses VLMs to guide evolutionary optimization for complex chip floorplanning tasks.",
+      "llm_tldr_cn": "利用视觉语言模型指导芯片布局这一复杂优化任务的进化搜索。",
+      "llm_tldr": "利用视觉语言模型指导芯片布局这一复杂优化任务的进化搜索。",
+      "llm_tags": [
+        "query:nco-llm:composite"
+      ],
+      "matched_query_tag": "query:nco-llm:composite",
+      "matched_query_text": "Papers central to 查找神经组合优化结合大模型相关的论文, especially work that connects or combines: Neural Combinatorial Optimization (NCO) methods and frameworks; Large Language Models (LLM) for optimization tasks; Deep Reinforcement Learning in combinatorial optimization; LLM-based heuristic search and optimization; Integration of GNN and LLM for combinatorial optimization; Neural combinatorial optimization for vehicle routing problems; In-context learning for combinatorial optimization problems; LLM-guided heuristic search for optimization; Integrating large language models with combinatorial optimization solvers; LLM driven heuristic generation for combinatorial optimization.",
+      "matched_requirement_id": "req-composite-nco-llm",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.04801v1",
+      "title": "Feasibility-Aware Imitation Learning for Benders Decomposition",
+      "abstract": "Mixed-integer optimization problems arise in a wide range of control applications. Benders decomposition is a widely used algorithm for solving such problems by decomposing them into a mixed-integer master problem and a continuous subproblem. A key computational bottleneck is the repeated solution of increasingly complex master problems across iterations. In this paper, we propose a feasibility-aware imitation learning framework that predicts the values of the integer variables of the master problem at each iteration while accounting for feasibility with respect to constraints governing admissible integer assignments and the accumulated Benders feasibility cuts. The agent is trained using a two-stage procedure that combines behavioral cloning with a feasibility-based logit adjustment to bias predictions toward assignments that satisfy the evolving cut set. The agent is deployed within an agent-based Benders decomposition framework that combines explicit feasibility checks with a time-limited solver computation of a valid lower bound. The proposed approach retains finite convergence properties, as the lower bound is certified at each iteration. Application to a prototypical case study shows that the proposed method improves solution time relative to existing imitation learning approaches for accelerating Benders decomposition, while preserving solution accuracy.",
+      "authors": [
+        "Bernard T. Agyeman",
+        "Zhe Li",
+        "Ilias Mitrai",
+        "Prodromos Daoutidis"
+      ],
+      "primary_category": "math.OC",
+      "categories": [
+        "math.OC",
+        "eess.SY"
+      ],
+      "published": "2026-04-06T16:07:01+00:00",
+      "link": "https://arxiv.org/pdf/2604.04801v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "imitation learning for Benders decomposition in mixed-integer optimization",
+      "llm_evidence_cn": "混合整数优化中Benders分解的模仿学习",
+      "llm_evidence": "混合整数优化中Benders分解的模仿学习",
+      "canonical_evidence": "混合整数优化中Benders分解的模仿学习",
+      "llm_tldr_en": "Proposes a feasibility-aware imitation learning framework to accelerate Benders decomposition for integer programming.",
+      "llm_tldr_cn": "提出了一种可行性感知的模仿学习框架，以加速整数规划的Benders分解。",
+      "llm_tldr": "提出了一种可行性感知的模仿学习框架，以加速整数规划的Benders分解。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Hybrid approaches combining deep learning and traditional optimization",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2604.00201v1",
+      "title": "Scalable machine learning-based approaches for energy saving in densely deployed Open RAN",
+      "abstract": "Densely deployed base stations are responsible for the majority of the energy consumed in Radio access network (RAN). While these deployments are crucial to deliver the required data rate in busy hours of the day, the network can save energy by switching some of them to sleep mode and maintain the coverage and quality of service with the other ones. Benefiting from the flexibility provided by the Open RAN in embedding machine learning (ML) in network operations, in this work we propose Deep Reinforcement Learning (DRL)-based energy saving solutions. Firstly we propose 3 different DRL-based methods in the form of xApps which control the Active/Sleep mode of up to 6 radio units (RUs) from Near Real time RAN Intelligent Controller (RIC). We also propose a further scalable federated DRL-based solution with an aggregator as an rApp in None Real time RIC and local agents as xApps. Our simulation results present the convergence of the proposed methods. We also compare the performance of our federated DRL across three layouts spanning 6--24 RUs and 500--1000\\,m regions, including a composite multi-region scenario. The results show that our proposed federated TD3 algorithm achieves up to 43.75\\% faster convergence, more than 50\\% network energy saving and 37. 4\\% lower training energy versus centralized baselines, while maintaining the quality of service and improving the robustness of the policy.",
+      "authors": [
+        "Xuanyu Liang",
+        "Ahmed Al-Tahmeesschi",
+        "Swarna Chetty",
+        "Cicek Cavdar",
+        "Berk Canberk",
+        "Hamed Ahmadi"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY"
+      ],
+      "published": "2026-03-31T20:11:35+00:00",
+      "link": "https://arxiv.org/pdf/2604.00201v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Deep Reinforcement Learning for network optimization",
+      "llm_evidence_cn": "深度强化学习用于网络优化",
+      "llm_evidence": "深度强化学习用于网络优化",
+      "canonical_evidence": "深度强化学习用于网络优化",
+      "llm_tldr_en": "Applies DRL-based methods to optimize energy saving in Open RAN base station deployments.",
+      "llm_tldr_cn": "应用基于深度强化学习的方法来优化Open RAN基站部署中的节能问题。",
+      "llm_tldr": "应用基于深度强化学习的方法来优化Open RAN基站部署中的节能问题。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Deep Reinforcement Learning for combinatorial optimization",
+      "matched_requirement_id": "req-14",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.29292v1",
+      "title": "Self-Improving Code Generation via Semantic Entropy and Behavioral Consensus",
+      "abstract": "Improving the code generation capabilities of large language models (LLMs) typically relies on supervised fine-tuning or preference optimization, both of which require costly external resources such as powerful teacher models or reliable test units. However, in real-world scenarios, it is much harder to obtain reference solutions and test oracles than problem descriptions and test inputs. In this paper, we tackle a challenging yet realistic question: Can a code language model improve itself without access to a superior teacher and a test oracle? To answer this, we propose ConSelf, a self-improving approach built upon two key ideas. First, we introduce code semantic entropy, a novel metric that measures problem-level uncertainty by assessing the functional diversity of program behaviors, enabling a curriculum construction with the most learnable problems. Second, we present consensus-driven direct preference optimization (Con-DPO), a preference-based fine-tuning method that weights each preference pair by its behavioral consensus, thereby mitigating the impact of noisy self-generated supervision. Experiments on various benchmarks and backbone LLMs demonstrate that ConSelf significantly outperforms baselines, validating the effectiveness of semantic entropy-based curriculum construction and consensus-driven optimization in improving code generation without external supervision.",
+      "authors": [
+        "Huan Zhang",
+        "Wei Cheng",
+        "Wei Hu"
+      ],
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE",
+        "cs.AI",
+        "cs.PL"
+      ],
+      "published": "2026-03-31T05:55:17+00:00",
+      "link": "https://arxiv.org/pdf/2603.29292v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Self-improving code generation and preference optimization",
+      "llm_evidence_cn": "自我改进的代码生成与偏好优化",
+      "llm_evidence": "自我改进的代码生成与偏好优化",
+      "canonical_evidence": "自我改进的代码生成与偏好优化",
+      "llm_tldr_en": "Introduces a self-improving approach for code generation using semantic entropy without external teachers.",
+      "llm_tldr_cn": "提出一种利用语义熵在无需外部教师的情况下实现代码生成自我改进的方法。",
+      "llm_tldr": "提出一种利用语义熵在无需外部教师的情况下实现代码生成自我改进的方法。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM driven heuristic generation for combinatorial optimization",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.01250v1",
+      "title": "Hybrid Classical--Quantum Optimization of Wireless Routing Using QAOA and Quantum Walks",
+      "abstract": "Routing in wireless communication networks is shaped by mobility, interference, congestion, and competing service requirements, making route selection a high-dimensional constrained optimization problem rather than a simple shortest-path task. This paper investigates the use of hybrid classical--quantum methods for wireless routing, focusing on the Quantum Approximate Optimization Algorithm (QAOA) and quantum walks as candidate mechanisms for exploring complex routing spaces. The paper examines how wireless routing can be expressed as a constrained graph optimization problem in which routing objectives, flow constraints, connectivity requirements, and interference effects are mapped into quantum-compatible Hamiltonian representations. It then discusses how these approaches can be integrated into a hybrid architecture in which classical systems perform network monitoring, graph construction, pre-processing, and deployment, while quantum subroutines are used for selected optimization components. The analysis shows that the potential value of quantum routing lies primarily in the treatment of difficult combinatorial subproblems rather than end-to-end replacement of classical routing frameworks. The paper also highlights practical limitations arising from state preparation, constraint encoding, oracle construction, hardware noise, limited qubit resources, and hybrid execution overhead. It is argued that any meaningful near-term advantage will depend on careful problem decomposition, compact encoding, and tight classical--quantum integration.",
+      "authors": [
+        "Eric Howard",
+        "Hardique Dasore",
+        "Hom Nath Dhungana",
+        "Radhika Kuttala",
+        "Samuel Murphy",
+        "Emma Soo",
+        "Shah Haque"
+      ],
+      "primary_category": "quant-ph",
+      "categories": [
+        "quant-ph",
+        "cs.NI"
+      ],
+      "published": "2026-04-01T01:48:57+00:00",
+      "link": "https://arxiv.org/pdf/2604.01250v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Hybrid classical-quantum optimization for wireless routing problems",
+      "llm_evidence_cn": "无线路由问题的混合经典-量子优化",
+      "llm_evidence": "无线路由问题的混合经典-量子优化",
+      "canonical_evidence": "无线路由问题的混合经典-量子优化",
+      "llm_tldr_en": "Uses QAOA and quantum walks to solve high-dimensional constrained wireless routing optimization problems.",
+      "llm_tldr_cn": "利用QAOA和量子行走解决高维约束无线路由优化问题。",
+      "llm_tldr": "利用QAOA和量子行走解决高维约束无线路由优化问题。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Hybrid approaches combining deep learning and traditional optimization",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.29369v1",
+      "title": "AP-DRL: A Synergistic Algorithm-Hardware Framework for Automatic Task Partitioning of Deep Reinforcement Learning on Versal ACAP",
+      "abstract": "Deep reinforcement learning has demonstrated remarkable success across various domains. However, the tight coupling between training and inference processes makes accelerating DRL training an essential challenge for DRL optimization. Two key issues hinder efficient DRL training: (1) the significant variation in computational intensity across different DRL algorithms and even among operations within the same algorithm complicates hardware platform selection, while (2) DRL's wide dynamic range could lead to substantial reward errors with conventional FP16+FP32 mixed-precision quantization. While existing work has primarily focused on accelerating DRL for specific computing units or optimizing inference-stage quantization, we propose AP-DRL to address the above challenges.   AP-DRL is an automatic task partitioning framework that harnesses the heterogeneous architecture of AMD Versal ACAP (integrating CPUs, FPGAs, and AI Engines) to accelerate DRL training through intelligent hardware-aware optimization. Our approach begins with bottleneck analysis of CPU, FPGA, and AIE performance across diverse DRL workloads, informing the design principles for AP-DRL's inter-component task partitioning and quantization optimization. The framework then addresses the challenge of platform selection through design space exploration-based profiling and ILP-based partitioning models that match operations to optimal computing units based on their computational characteristics. For the quantization challenge, AP-DRL employs a hardware-aware algorithm coordinating FP32 (CPU), FP16 (FPGA/DSP), and BF16 (AI Engine) operations by leveraging Versal ACAP's native support for these precision formats. Comprehensive experiments indicate that AP-DRL can achieve speedup of up to 4.17$\\times$ over programmable logic and up to 3.82$\\times$ over AI Engine baselines while maintaining training convergence.",
+      "authors": [
+        "Enlai Li",
+        "Zhe Lin",
+        "Sharad Sinha",
+        "Wei Zhang"
+      ],
+      "primary_category": "cs.AR",
+      "categories": [
+        "cs.AR",
+        "cs.LG"
+      ],
+      "published": "2026-03-31T07:41:23+00:00",
+      "link": "https://arxiv.org/pdf/2603.29369v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "hardware framework for accelerating deep reinforcement learning",
+      "llm_evidence_cn": "加速深度强化学习的硬件框架",
+      "llm_evidence": "加速深度强化学习的硬件框架",
+      "canonical_evidence": "加速深度强化学习的硬件框架",
+      "llm_tldr_en": "A synergistic algorithm-hardware framework to optimize and accelerate deep reinforcement learning training.",
+      "llm_tldr_cn": "一种协同算法与硬件的框架，用于优化和加速深度强化学习训练。",
+      "llm_tldr": "一种协同算法与硬件的框架，用于优化和加速深度强化学习训练。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Reinforcement learning frameworks for combinatorial optimization",
+      "matched_requirement_id": "req-24",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.01489v1",
+      "title": "CuTeGen: An LLM-Based Agentic Framework for Generation and Optimization of High-Performance GPU Kernels using CuTe",
+      "abstract": "High-performance GPU kernels are critical to modern machine learning systems, yet developing efficient implementations remains a challenging, expert-driven process due to the tight coupling between algorithmic structure, memory hierarchy usage, and hardware-specific optimizations. Recent work has explored using large language models (LLMs) to generate GPU kernels automatically, but generated implementations often struggle to maintain correctness and achieve competitive performance across iterative refinements. We present CuTeGen, an agentic framework for automated generation and optimization of GPU kernels that treats kernel development as a structured generate--test--refine workflow. Unlike approaches that rely on one-shot generation or large-scale search over candidate implementations, CuTeGen focuses on progressive refinement of a single evolving kernel through execution-based validation, structured debugging, and staged optimization. A key design choice is to generate kernels using the CuTe abstraction layer, which exposes performance-critical structures such as tiling and data movement while providing a more stable representation for iterative modification. To guide performance improvement, CuTeGen incorporates workload-aware optimization prompts and delayed integration of profiling feedback. Experimental results on matrix multiplication and activation workloads demonstrate that the framework produces functionally correct kernels and achieves competitive performance relative to optimized library implementations.",
+      "authors": [
+        "Tara Saba",
+        "Anne Ouyang",
+        "Xujie Si",
+        "Fan Long"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.DC",
+        "cs.PF",
+        "cs.SE"
+      ],
+      "published": "2026-04-01T23:55:23+00:00",
+      "link": "https://arxiv.org/pdf/2604.01489v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "LLM-based framework for generation and optimization of GPU kernels",
+      "llm_evidence_cn": "基于大模型的GPU内核生成与优化框架",
+      "llm_evidence": "基于大模型的GPU内核生成与优化框架",
+      "canonical_evidence": "基于大模型的GPU内核生成与优化框架",
+      "llm_tldr_en": "Presents CuTeGen, an agentic LLM framework for automated generation and optimization of high-performance GPU kernels.",
+      "llm_tldr_cn": "介绍了CuTeGen，一个用于自动生成和优化高性能GPU内核的智能体大模型框架。",
+      "llm_tldr": "介绍了CuTeGen，一个用于自动生成和优化高性能GPU内核的智能体大模型框架。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Large Language Models (LLM) for optimization tasks",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.29871v1",
+      "title": "ShapE-GRPO: Shapley-Enhanced Reward Allocation for Multi-Candidate LLM Training",
+      "abstract": "In user-agent interaction scenarios such as recommendation, brainstorming, and code suggestion, Large Language Models (LLMs) often generate sets of candidate recommendations where the objective is to maximize the collective utility of the entire set rather than individual candidates independently. However, existing reinforcement learning post-training paradigms, such as Group Relative Policy Optimization (GRPO), typically assign the same set-level scalar reward to every candidate in the set. This leads to noisy training signals where poor candidates free-ride on the high reward produced by a single strong peer, resulting in suboptimal exploration. To address this, we propose Shapley-Enhanced GRPO (ShapE-GRPO). By leveraging the permutation-invariant nature of set-level utility, we derive a Shapley-enhanced formulation from cooperative game theory to decompose set-level rewards into granular, candidate-specific signals. We show that our formulation preserves the fundamental axioms of the Shapley value while remaining computationally efficient with polynomial-time complexity. Empirically, ShapE-GRPO consistently outperforms standard GRPO across diverse datasets with accelerated convergence during training.",
+      "authors": [
+        "Rui Ai",
+        "Yu Pan",
+        "David Simchi-Levi",
+        "Chonghuan Wang"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-03-31T15:24:15+00:00",
+      "link": "https://arxiv.org/pdf/2603.29871v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "LLM training for maximizing collective utility of candidate sets",
+      "llm_evidence_cn": "旨在最大化候选集集体效用的LLM训练",
+      "llm_evidence": "旨在最大化候选集集体效用的LLM训练",
+      "canonical_evidence": "旨在最大化候选集集体效用的LLM训练",
+      "llm_tldr_en": "Proposes ShapE-GRPO to improve LLM training for multi-candidate recommendation tasks using Shapley values.",
+      "llm_tldr_cn": "提出ShapE-GRPO，利用Shapley值改进多候选推荐任务中的大语言模型训练。",
+      "llm_tldr": "提出ShapE-GRPO，利用Shapley值改进多候选推荐任务中的大语言模型训练。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Large Language Models (LLM) for optimization tasks",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.01664v1",
+      "title": "ContextBudget: Budget-Aware Context Management for Long-Horizon Search Agents",
+      "abstract": "LLM-based agents show strong potential for long-horizon reasoning, yet their context size is limited by deployment factors (e.g., memory, latency, and cost), yielding a constrained context budget. As interaction histories grow, this induces a trade-off between retaining past information and staying within the context limit. To address this challenge, we propose Budget-Aware Context Management (BACM), which formulates context management as a sequential decision problem with a context budget constraint. It enables agents to assess the available budget before incorporating new observations and decide when and how much of the interaction history to compress. We further develop BACM-RL, an end-to-end curriculum-based reinforcement learning approach that learns compression strategies under varying context budgets. Experiments on compositional multi-objective QA and long-horizon web browsing benchmarks show that BACM-RL consistently outperforms prior methods across model scales and task complexities, achieving over $1.6\\times$ gains over strong baselines in high-complexity settings, while maintaining strong advantages as budgets shrink, where most methods exhibit a downward performance trend.",
+      "authors": [
+        "Yong Wu",
+        "YanZhao Zheng",
+        "TianZe Xu",
+        "ZhenTao Zhang",
+        "YuanQiang Yu",
+        "JiHuai Zhu",
+        "Chao Ma",
+        "BinBin Lin",
+        "BaoHua Dong",
+        "HangCheng Zhu",
+        "RuoHui Huang",
+        "Gang Yu"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-04-02T06:09:22+00:00",
+      "link": "https://arxiv.org/pdf/2604.01664v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "LLM-based agents for long-horizon search and context management",
+      "llm_evidence_cn": "基于LLM的智能体用于长程搜索和上下文管理",
+      "llm_evidence": "基于LLM的智能体用于长程搜索和上下文管理",
+      "canonical_evidence": "基于LLM的智能体用于长程搜索和上下文管理",
+      "llm_tldr_en": "Proposes a reinforcement learning approach for managing context budgets in LLM-based search agents.",
+      "llm_tldr_cn": "提出了一种强化学习方法，用于管理基于LLM的搜索智能体中的上下文预算。",
+      "llm_tldr": "提出了一种强化学习方法，用于管理基于LLM的搜索智能体中的上下文预算。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM-based heuristic search and optimization",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.00399v1",
+      "title": "A Cross-graph Tuning-free GNN Prompting Framework",
+      "abstract": "GNN prompting aims to adapt models across tasks and graphs without requiring extensive retraining. However, most existing graph prompt methods still require task-specific parameter updates and face the issue of generalizing across graphs, limiting their performance and undermining the core promise of prompting. In this work, we introduce a Cross-graph Tuning-free Prompting Framework (CTP), which supports both homogeneous and heterogeneous graphs, can be directly deployed to unseen graphs without further parameter tuning, and thus enables a plug-and-play GNN inference engine. Extensive experiments on few-shot prediction tasks show that, compared to SOTAs, CTP achieves an average accuracy gain of 30.8% and a maximum gain of 54%, confirming its effectiveness and offering a new perspective on graph prompt learning.",
+      "authors": [
+        "Yaqi Chen",
+        "Shixun Huang",
+        "Ryan Twemlow",
+        "Lei Wang",
+        "John Le",
+        "Sheng Wang",
+        "Willy Susilo",
+        "Jun Yan",
+        "Jun Shen"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-04-01T02:34:23+00:00",
+      "link": "https://arxiv.org/pdf/2604.00399v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "GNN prompting framework for cross-graph tasks",
+      "llm_evidence_cn": "用于跨图任务的图神经网络提示框架",
+      "llm_evidence": "用于跨图任务的图神经网络提示框架",
+      "canonical_evidence": "用于跨图任务的图神经网络提示框架",
+      "llm_tldr_en": "Proposes a tuning-free GNN prompting framework to improve generalization across different graph tasks.",
+      "llm_tldr_cn": "提出一种无需微调的图神经网络提示框架，以提高在不同图任务中的泛化能力。",
+      "llm_tldr": "提出一种无需微调的图神经网络提示框架，以提高在不同图任务中的泛化能力。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Graph Neural Networks for solving combinatorial problems",
+      "matched_requirement_id": "req-15",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.02496v1",
+      "title": "On vehicle routing problems with stochastic demands -- Scenario-optimal recourse policies",
+      "abstract": "Two-Stage Vehicle Routing Problems with Stochastic Demands (VRPSDs) form a class of stochastic combinatorial optimization problems where routes are planned in advance, demands are revealed upon vehicle arrival, and recourse actions are triggered whenever capacity is exceeded. Following recent works, we consider VRPSDs where demands are given by an empirical probability distribution of scenarios. Existing approaches rely on integer L-shaped (ILS) cuts, whose coefficients are tailored for specific recourse policies. In contrast, we propose a framework that casts recourse policies as solutions of a higher-dimensional mixed-integer program, and we characterize its convex hull in the original lower-dimensional space via a new class of inequalities called scenario recourse inequalities (SRIs). We show that SRIs are valid for any recourse policy satisfying mild assumptions and are sufficient for formulating the VRPSD under a scenario-optimal recourse policy, where the recourse actions are chosen optimally for each scenario. Under this latter policy, we also show that SRIs dominate several ILS cuts. We conduct computational experiments on the VRPSD with scenarios under both the classical and the scenario-optimal recourse policies. By using the SRIs, our algorithm solves 329 more instances to optimality than the previous state-of-the-art ILS algorithm.",
+      "authors": [
+        "Matheus J. Ota",
+        "Ricardo Fukasawa"
+      ],
+      "primary_category": "math.OC",
+      "categories": [
+        "math.OC"
+      ],
+      "published": "2026-04-02T19:56:42+00:00",
+      "link": "https://arxiv.org/pdf/2604.02496v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Stochastic combinatorial optimization for vehicle routing problems",
+      "llm_evidence_cn": "针对车辆路径问题的随机组合优化",
+      "llm_evidence": "针对车辆路径问题的随机组合优化",
+      "canonical_evidence": "针对车辆路径问题的随机组合优化",
+      "llm_tldr_en": "Proposes a framework for two-stage vehicle routing problems with stochastic demands using mixed-integer programming.",
+      "llm_tldr_cn": "提出了一种利用混合整数规划解决具有随机需求的阶段性车辆路径问题的框架。",
+      "llm_tldr": "提出了一种利用混合整数规划解决具有随机需求的阶段性车辆路径问题的框架。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Neural combinatorial optimization for vehicle routing problems",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.00901v1",
+      "title": "Experience as a Compass: Multi-agent RAG with Evolving Orchestration and Agent Prompts",
+      "abstract": "Multi-agent Retrieval-Augmented Generation (RAG), wherein each agent takes on a specific role, supports hard queries that require multiple steps and sources, or complex reasoning. Existing approaches, however, rely on static agent behaviors and fixed orchestration strategies, leading to brittle performance on diverse, multi-hop tasks. We identify two key limitations: the lack of continuously adaptive orchestration mechanisms and the absence of behavior-level learning for individual agents. To this end, we propose HERA, a hierarchical framework that jointly evolves multi-agent orchestration and role-specific agent prompts. At the global level, HERA optimizes query-specific agent topologies through reward-guided sampling and experience accumulation. At the local level, Role-Aware Prompt Evolution refines agent behaviors via credit assignment and dual-axes adaptation along operational and behavioral principles, enabling targeted, role-conditioned improvements. On six knowledge-intensive benchmarks, HERA achieves an average improvement of 38.69\\% over recent baselines while maintaining robust generalization and token efficiency. Topological analyses reveal emergent self-organization, where sparse exploration yields compact, high-utility multi-agent networks, demonstrating both efficient coordination and robust reasoning.",
+      "authors": [
+        "Sha Li",
+        "Naren Ramakrishnan"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-04-01T13:45:52+00:00",
+      "link": "https://arxiv.org/pdf/2604.00901v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Evolving multi-agent orchestration and prompts",
+      "llm_evidence_cn": "进化多智能体编排与提示词",
+      "llm_evidence": "进化多智能体编排与提示词",
+      "canonical_evidence": "进化多智能体编排与提示词",
+      "llm_tldr_en": "Proposes a framework to evolve agent topologies and prompts for complex reasoning tasks.",
+      "llm_tldr_cn": "提出了一种进化智能体拓扑和提示词的框架，用于处理复杂推理任务。",
+      "llm_tldr": "提出了一种进化智能体拓扑和提示词的框架，用于处理复杂推理任务。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM-guided heuristic search for optimization",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.03419v1",
+      "title": "Adaptive Threshold-Driven Continuous Greedy Method for Scalable Submodular Optimization",
+      "abstract": "Submodular maximization under matroid constraints is a fundamental problem in combinatorial optimization with applications in sensing, data summarization, active learning, and resource allocation. While the Sequential Greedy (SG) algorithm achieves only a $\\frac{1}{2}$-approximation due to irrevocable selections, Continuous Greedy (CG) attains the optimal $\\bigl(1-\\frac{1}{e}\\bigr)$-approximation via the multilinear relaxation, at the cost of a progressively dense decision vector that forces agents to exchange feature embeddings for nearly every ground-set element. We propose \\textit{ATCG} (\\underline{A}daptive \\underline{T}hresholded \\underline{C}ontinuous \\underline{G}reedy), which gates gradient evaluations behind a per-partition progress ratio $η_i$, expanding each agent's active set only when current candidates fail to capture sufficient marginal gain, thereby directly bounding which feature embeddings are ever transmitted. Theoretical analysis establishes a curvature-aware approximation guarantee with effective factor $τ_{\\mathrm{eff}}=\\max\\{τ,1-c\\}$, interpolating between the threshold-based guarantee and the low-curvature regime where \\textit{ATCG} recovers the performance of CG. Experiments on a class-balanced prototype selection problem over a subset of the CIFAR-10 animal dataset show that \\textit{ATCG} achieves objective values comparable to those of the full CG method while substantially reducing communication overhead through adaptive active-set expansion.",
+      "authors": [
+        "Mohammadreza Rostami",
+        "Solmaz S. Kia"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "math.CO"
+      ],
+      "published": "2026-04-03T19:32:39+00:00",
+      "link": "https://arxiv.org/pdf/2604.03419v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "scalable submodular optimization in combinatorial problems",
+      "llm_evidence_cn": "组合问题中的可扩展子模优化",
+      "llm_evidence": "组合问题中的可扩展子模优化",
+      "canonical_evidence": "组合问题中的可扩展子模优化",
+      "llm_tldr_en": "Proposes an adaptive threshold-driven continuous greedy method for efficient submodular maximization.",
+      "llm_tldr_cn": "提出一种自适应阈值驱动的连续贪婪方法，用于高效的子模最大化。",
+      "llm_tldr": "提出一种自适应阈值驱动的连续贪婪方法，用于高效的子模最大化。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Machine learning approaches to combinatorial optimization",
+      "matched_requirement_id": "req-19",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.01000v1",
+      "title": "EmbedPart: Embedding-Driven Graph Partitioning for Scalable Graph Neural Network Training",
+      "abstract": "Graph Neural Networks (GNNs) are widely used for learning on graph-structured data, but scaling GNN training to massive graphs remains challenging. To enable scalable distributed training, graphs are divided into smaller partitions that are distributed across multiple machines such that inter-machine communication is minimized and computational load is balanced. In practice, existing partitioning approaches face a fundamental trade-off between partitioning overhead and partitioning quality. We propose EmbedPart, an embedding-driven partitioning approach that achieves both speed and quality. Instead of operating directly on irregular graph structures, EmbedPart leverages node embeddings produced during the actual GNN training workload and clusters these dense embeddings to derive a partitioning. EmbedPart achieves more than 100x speedup over Metis while maintaining competitive partitioning quality and accelerating distributed GNN training. Moreover, EmbedPart naturally supports graph updates and fast repartitioning, and can be applied to graph reordering to improve data locality and accelerate single-machine GNN training. By shifting partitioning from irregular graph structures to dense embeddings, EmbedPart enables scalable and high-quality graph data optimization.",
+      "authors": [
+        "Nikolai Merkel",
+        "Ruben Mayer",
+        "Volker Markl",
+        "Hans-Arno Jacobsen"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.DB",
+        "cs.DC"
+      ],
+      "published": "2026-04-01T15:00:01+00:00",
+      "link": "https://arxiv.org/pdf/2604.01000v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "embedding-driven graph partitioning for GNN training",
+      "llm_evidence_cn": "用于图神经网络训练的嵌入驱动图划分",
+      "llm_evidence": "用于图神经网络训练的嵌入驱动图划分",
+      "canonical_evidence": "用于图神经网络训练的嵌入驱动图划分",
+      "llm_tldr_en": "Introduces EmbedPart for scalable GNN training via embedding-driven graph partitioning.",
+      "llm_tldr_cn": "引入了 EmbedPart，通过嵌入驱动的图划分实现可扩展的 GNN 训练。",
+      "llm_tldr": "引入了 EmbedPart，通过嵌入驱动的图划分实现可扩展的 GNN 训练。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Graph Neural Networks for solving combinatorial problems",
+      "matched_requirement_id": "req-15",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

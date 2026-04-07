@@ -1,0 +1,3577 @@
+Title: On vehicle routing problems with stochastic demands -- Scenario-optimal recourse policies
+
+URL Source: https://arxiv.org/pdf/2604.02496v1
+
+Published Time: Mon, 06 Apr 2026 00:12:34 GMT
+
+Number of Pages: 47
+
+Markdown Content:
+# On vehicle routing problems with stochastic demands – Scenario-optimal recourse policies 
+
+Matheus J. Ota ∗1 and Ricardo Fukasawa †11University of Waterloo, Waterloo, Ontario, Canada April 6, 2026 
+
+Two-Stage Vehicle Routing Problems with Stochastic Demands (VRPSDs) form a class of stochastic combinatorial optimization problems where routes are planned in advance, demands are revealed upon vehicle arrival, and recourse actions are triggered whenever capacity is ex-ceeded. Following recent works, we consider VRPSDs where demands are given by an empirical probability distribution of scenarios. Existing approaches rely on integer L-shaped (ILS) cuts, whose coefficients are tailored for specific recourse policies. In contrast, we propose a frame-work that casts recourse policies as solutions of a higher-dimensional mixed-integer program, and we characterize its convex hull in the original lower-dimensional space via a new class of inequalities called scenario recourse inequalities (SRIs). We show that SRIs are valid for any recourse policy satisfying mild assumptions and are sufficient for formulating the VRPSD un-der a scenario-optimal recourse policy, where the recourse actions are chosen optimally for each scenario. Under this latter policy, we also show that SRIs dominate several ILS cuts. We con-duct computational experiments on the VRPSD with scenarios under both the classical and the scenario-optimal recourse policies. By using the SRIs, our algorithm solves 329 more instances to optimality than the previous state-of-the-art ILS algorithm. 
+
+Keywords: integer programming, stochastic programming, vehicle routing problem. 
+
+# 1 Introduction 
+
+Two-Stage Vehicle Routing Problems with Stochastic Demands (VRPSDs) constitute a class of stochastic variants of the classic Capacitated Vehicle Routing Problem (CVRP) in which routing decisions are fixed in advance, customer demands are revealed upon vehicle arrival, and capacity violations trigger additional recourse actions . Since their introduction over 50 years ago (Tillman, 1969), VRPSDs have attracted considerable attention, with strong interest in recent years (Gendreau et al., 2016; Louveaux and Salazar-Gonz´ alez, 2018; Hoogendoorn and Spliet, 2023; Florio et al., 2022, 2020; Ota and Fukasawa, 2024; Parada et al., 2024; Salavati-Khoshghalb et al., 2019b,a,c; Legault et al., 2025; Ota and Fukasawa, 2025; Hoogendoorn and Spliet, 2025). A key limitation of most existing literature is its reliance on simplifying assumptions on the demand distributions; in particular, most studies assume independence (Gendreau et al., 2016; Laporte et al., 2002; Jabali et al., 2014; Salavati-Khoshghalb et al., 2019b,a,c; Hoogendoorn and Spliet, 2023; Parada et al., 2024; Legault et al., 2025). Motivated by scenario-based approaches in the general stochastic programming literature (Birge and Louveaux, 2011), Ota and Fuka-sawa (2025) recently addressed this limitation by using demand scenarios . The authors also 
+
+> ∗(mjota@uwaterloo.ca)
+> †(rfukasawa@uwaterloo.ca)
+
+1
+
+> arXiv:2604.02496v1 [math.OC] 2 Apr 2026
+
+generalized previous integer L-shaped (ILS) formulations for VRPSDs, allowing them to derive the first branch-and-cut algorithm for the VRPSD with scenarios under the classical recourse policy , where a vehicle traverses the route and, as soon as the capacity gets exceeded, it returns to the depot to unload. For the most part, the framework of Ota and Fukasawa (2025) is independent of the scenario assumption and does not rely on a specific choice of recourse function. However, it relies on ILS cuts to capture recourse costs, and the coefficients of these cuts depend on the chosen recourse policy. As a result, ILS cuts derived for one policy cannot be directly applied to other policies. This policy-specific dependence is also present in all other ILS-based methods, whether they consider the classical (Laporte and Nobert, 1983; Jabali et al., 2014; Parada et al., 2024; Gendreau et al., 1995, 2016), optimal (Salavati-Khoshghalb et al., 2019b; Hoogendoorn and Spliet, 2023; Legault et al., 2025), or rule-based (Salavati-Khoshghalb et al., 2019c) recourse policies. It is not entirely clear how approaches developed for one policy can be adapted or extended to different policies. In this work, we develop an approach tailored to scenario-based VRPSDs that yields cuts whose validity is not tied to specific recourse policies. To accomplish this, we propose a common framework that can accommodate all recourse policies satisfying a natural assumption. Within this framework, recourse policies are represented as feasible solutions of a higher-dimensional mixed-integer program (MIP). This naturally leads us to define scenario-optimal recourse poli-cies as the optimal solutions of such a MIP, which correspond to policies that optimally select the recourse actions for each scenario. Beyond unifying the modeling of recourse policies, this representation reveals a previously unexplored polyhedral structure, which we use to derive our main results. First, although recourse policies are defined in a higher-dimensional space, we characterize their convex hull using inequalities in the original space. This leads to the introduction of scenario recourse inequalities (SRIs), which are valid for any recourse policy satisfying the assumptions of our framework. Second, we show that SRIs enable a formulation for the VRPSD under a scenario-optimal recourse policy that includes decision variables for both the route edges and the recourse actions. Finally, we project this last formulation onto the space of ILS formulations. Using our convex hull characterization, we express recourse lower bounds for scenario-optimal recourse policies as optimal values of linear programs (LPs). This allows us to apply LP duality to show that several ILS cuts are dominated by SRIs. In summary, our contributions are: 
+
+• We propose a common framework that accommodates several recourse policies and re-quires only mild assumptions (see Definition 1 and Assumptions 1, 2, 3 and 4); 
+
+• We describe the convex hull of recourse policies (Theorem 2); 
+
+• We define scenario-optimal recourse policies as optimal solutions within this framework, and we formulate the VRPSD under a scenario-optimal recourse policy using SRIs (Defi-nition 2 and Theorem 3); 
+
+• We demonstrate that SRIs can be used to solve the VRPSD with scenarios under any recourse policy that satisfies the assumptions of our framework (Proposition 1); 
+
+• We show that, under a scenario-optimal recourse policy, several ILS inequalities are dom-inated by the SRIs (Theorem 5, Corollary 3 and Theorem 4); 
+
+• We present computational experiments that validate our theoretical results and show that SRIs can substantially enhance the performance of a state-of-the-art branch-and-cut approach (Section 6). In particular, by incorporating SRIs, we are able to solve 329 more instances to optimality compared to the approach in (Ota and Fukasawa, 2025). 2The rest of this paper is organized as follows. Section 2 formally defines the class of problems we study and briefly reviews concepts introduced by Ota and Fukasawa (2025). Section 3 defines recourse policies and characterizes their convex hull. Section 4 introduces scenario-optimal recourse policies and a VRPSD formulation based on SRIs. Section 5 examines the projection of the polytope defined by SRIs onto the space of ILS formulations. Section 6 presents computational results, and Section 7 concludes the paper. 
+
+Notation. We let R+ and R++ denote the nonnegative and positive real numbers, respectively, with analogous notation for Q and Z. For any real number a, we define ( a)+ := max {0, a }.For any integer a, we define [ a] := {1, . . . , a } if a > 0, and [ a] := ∅ otherwise. The symbol I(·)represents the indicator function. For any vector f , we use fi and f (i) interchangeably. For any function (or vector) f and a subset S of its domain (or coordinates), f (S) := P 
+
+> i∈S
+
+f (i). We write 1 and 0 to refer to the all-ones and all-zeroes vectors, respectively. For an undirected graph G, V (G) and E(G) refer to the sets of vertices and edges, while for a directed graph, A(G) denotes its arcs. We sometimes write an edge {u, v } (or an arc ( u, v )) as uv .For every S ⊆ V (G), δG(S) (respectively, EG(S)) is the set of edges with exactly one endpoint (respectively, two endpoints) in S, omitting the subscript when the graph is clear. When S is a singleton {v}, we abbreviate S to v. For any two disjoint subsets S, T ⊆ V (G), EG(S, T ) := 
+
+{e ∈ E(G) : |e ∩ S| = |e ∩ T | = 1 }.
+
+# 2 Problem description and ILS formulations 
+
+As mentioned earlier, we consider in this work the VRPSD with scenarios (Ota and Fukasawa, 2025), a class of problems where customer demands are uncertain and modeled via a finite set of scenarios. We adopt the two-stage (or a priori ) paradigm (Oyola et al., 2018; Gendreau et al., 2016), where the first-stage decisions specify a feasible routing plan , while during the second-stage , the planned routes are traversed, and the customer demands are revealed upon vehicle arrival. Consequently, a vehicle may have insufficient capacity to serve a customer, leading to a 
+
+route failure . To handle such failures, a given recourse policy prescribes certain recourse actions 
+
+that the vehicle should execute — typically, these are either back-and-forth trips between the failure location and the depot, or preventive returns , where the vehicle returns to the depot to unload and then proceeds directly to the next customer in the route. In this sense, all the different recourse policies previously proposed share the key property that the vehicle never carries more load than its capacity, and they only differ in when the trips to the depot are performed to unload (Dror et al., 1989; Yee and Golden, 1980; Yang et al., 2000; Salavati-Khoshghalb et al., 2019b,a,c). The goal of the VRPSD with scenarios is to find a routing plan that minimizes the sum of the first-stage routing costs and the expected costs of executing the recourse actions. In Section 2.1, we describe the input of the VRPSD with scenarios, and in Section 2.2, we cast it as an instance of the more general class of problems introduced in (Ota and Fukasawa, 2025). This allows us to represent several variants of the VRPSD with scenarios studied in this paper under a common notation. Sections 2.3 and 2.4 then briefly review key concepts from the ILS-based approach of Ota and Fukasawa (2025), which will serve as a baseline for our approach. We highlight that while Section 2.4 presents in detail the ILS cuts from Ota and Fukasawa (2025), these cuts are not used in this paper until Section 5, where we compare certain ILS cuts with the SRIs. 32.1 Input data 
+
+Let G = ( V, E ) be a complete undirected graph with edge weights c ∈ QE
+
+> +
+
+. The vertex set V
+
+is partitioned as {0} ˙∪V+, where 0 represents the depot and V+ denotes the set of customers. We denote by D = ( V, A ) the digraph obtained from G by replacing each edge with two arcs in opposite directions. Each vehicle has a capacity of C ∈ Q++ , and the demands are modeled by a random vector d, which follows a probability distribution P and whose components d(v)correspond to the random demand of customer v ∈ V+. As mentioned earlier, we assume that P
+
+is given by scenarios , and we describe the associated input data next. Let N be a positive integer. We refer to any ξ ∈ [N ] as a scenario , and we associate with this scenario a demand vector dξ ∈ QV+ 
+
+> +
+
+and a realization probability pξ ∈ [0 , 1] ∩ Q+. As their names suggest, these parameters satisfy P  
+
+> ξ∈[N]
+
+pξ = 1 and P(d = dξ) = pξ, for all ξ ∈ [N ]. For convenience, we use ¯d as an abbreviation for E[d]. An instance of the VRPSD with scenarios is given by the tuple I = ( G, c, C, d 1, . . . , d N , p 1, . . . , p N ), which we assume is fixed throughout the entire paper. As in (Ota and Fukasawa, 2025), we also assume that the customer demands in each scenario are never larger than the vehicle capacity: 
+
+Assumption 1. For every ξ ∈ [N ] and v ∈ V+, we have that dξ(v) ≤ C.The reasoning for Assumption 1 is that, whenever scenario ξ is realized, the vehicle is guaranteed to execute ⌊dξ(v)/C ⌋ back-and-forth trips between the depot and customer v in the second stage. Therefore, if ⌊dξ(v)/C ⌋ ≥ 1, we can add pξ(2 c0v) · ⌊ dξ(v)/C ⌋ to the objective function and preprocess the demand accordingly. 
+
+2.2 Problem description 
+
+A route R is a simple undirected cycle in G that includes the depot, i.e., V (R) = {0, v 1, v 2, . . . , v ℓ}
+
+and E(R) = {{ 0, v 1}, {v1, v 2}, . . . , {vℓ, 0}} , where v1, . . . , v ℓ ∈ V+ are all distinct. The set of cus-tomers in R is denoted V+(R) = {v1, . . . , v ℓ} and we often represent R by the tuple ( v1, . . . , v ℓ)(implicitly assuming v0 = vℓ+1 = 0). A subroute of R is any route of the form R′ = ( vi, . . . , v j )with j ∈ [ℓ] and i ∈ [j], and we write R′ ⊆ R to indicate that R′ is a subroute of R (even though R′ is not necessarily a subgraph of R). The notation c(R) is a shorthand for c(E(R)). A 
+
+routing plan R = {R1, . . . , R k} is a collection of routes such that {V+(Ri)}ki=1 forms a partition of V+ (note that k is not necessarily fixed here). When discussing specific recourse policies, it is often necessary to distinguish between the two orientations of a route. Accordingly, we associate with each route R = ( v1, . . . , v ℓ) two 
+
+directed routes ⃗ R,⃗ R ⊆ D, which are digraphs with the same vertex set as R, but with arc sets A(⃗R) = {(0 , v 1), . . . , (vℓ, 0) } and A(⃗ R) = {(0 , v ℓ), . . . , (v1, 0) }. Similarly to undirected routes, we represent directed routes using tuples, so ⃗ R = ( v1, . . . , v ℓ) and ⃗ R = ( vℓ, . . . , v 1)(see Ota and Fukasawa (2025) for a clarification on a minor ambiguity with this notation). It is well known (Toth and Vigo, 2002; Dantzig et al., 1954) that routing plans can be represented as integer vectors inside the polytope 
+
+Xsub =
+
+(
+
+x ∈ [0 , 2] E : x(δ(v)) = 2 , ∀v ∈ V+
+
+x(E(S)) ≤ | S| − 1, ∀∅ ⊊ S ⊆ V+
+
+)
+
+. (Xsub )In this sense, we sometimes refer to a vector ¯ x ∈ X sub ∩ZE as a routing plan, and we use R(¯ x) to denote its corresponding collection of routes. As mentioned before, routing plans ¯ x ∈ X sub ∩ ZE
+
+may not contain a given fixed number k of routes. Most works on the VRPSD (see Table 1 of Hoogendoorn and Spliet (2025)) assume that feasible routing plans satisfy the classical CVRP feasibility conditions with respect to the ex-pected demands. That is, k ∈ Z++ is now given as a fixed input parameter and routing plans x
+
+4belong to the set 
+
+Xcvrp := Xsub ∩
+
+(
+
+x ∈ [0 , 2] E : x(δ(0)) = 2 k, x(E(S)) ≤ | S| − ¯k(S), ∀∅ ⊊ S ⊆ V+
+
+)
+
+, (Xcvrp )where ¯k(S) := ⌈ ¯d(S)/C ⌉.However, Hoogendoorn and Spliet (2025) question the use of Xcvrp as somewhat arbitrary, and show that, in some settings, using Xcvrp instead of Xsub can significantly increase the solution cost. Therefore, we consider both sets in this work, and henceforth, whenever we write X , we assume that X ∈ {X sub , Xcvrp } (if X = Xcvrp , we also assume that k is part of the input I). To model the expected recourse cost of a route, we let Q be a recourse function (Ota and Fukasawa, 2024), meaning that it takes the fixed input I as a parameter and maps each route R
+
+to a nonnegative rational number, i.e., Q(R; I) ∈ Q+ for every route R. Since I is fixed, we omit it from the notation. Also with respect to I, we define the VRPSD with scenarios with respect to X ∈ {X sub , Xcvrp } and Q as min 
+
+X
+
+> R∈R (x)
+
+[c(R) + Q(R)] : x ∈ X ∩ ZE
+
+ . (vrpsd (X , Q)) We remark that the problem above has precisely the form of the vehicle routing problems with recourse (VRPRs) introduced by Ota and Fukasawa (2024). In this way, problem vrpsd (X , Q)can be viewed as a subclass of the VRPRs where the input is fixed as in Section 2.1, and the recourse function Q takes as input the route R (together with the scenario demands and probabilities) and outputs the expected cost of the trips to the depot that ensures the vehicle never carries more load than its capacity. Section 3 will more formally define the conditions on Q.With this notation, we can conveniently refer to several variants of the VRPSD with sce-narios. For instance, if QC corresponds to the classical recourse policy (see Example 1), then the problem considered in the computational experiments of Ota and Fukasawa (2025) is de-noted as vrpsd (Xcvrp , QC ). Following the work of Hoogendoorn and Spliet (2025), we may also drop the assumption of CVRP feasibility, which yields the variant vrpsd (Xsub , QC ). Fur-thermore, Section 4 introduces a new scenario-optimal recourse function Q∗, which gives rise to problems vrpsd (Xcvrp , Q∗) and vrpsd (Xsub , Q∗). 
+
+2.3 Recourse disaggregations and feasible regions 
+
+In this subsection, we review the recourse disaggregation model studied in Ota and Fukasawa (2025), which was motivated by the computational success of different algorithms that disaggre-gate the recourse function (Hoogendoorn and Spliet, 2023; Parada et al., 2024; Legault et al., 2025). We refer the reader to Ota and Fukasawa (2025) for a more detailed discussion. For our purposes, we take from that work the assumption that any recourse function Q satisfies the following: 
+
+Assumption 2. For each route R, we have access to values {Q (R, v )}v∈V+ such that Q(R) = P 
+
+> v∈V+(R)
+
+Q(R, v ), and Q(R, v ) = 0, for every customer v / ∈ V+(R). Note that Ota and Fukasawa (2025) has a discussion on why Assumption 2 is both natural and theoretically justified. The Q(R, v )-values are referred to as the disaggregation of Q.For any recourse function Q, there is always a choice of disaggregation that satisfies As-sumption 2 (e.g., pick an arbitrary customer v ∈ V+(R) and assign Q(R, v ) = Q(R)). More interestingly, the following example shows that, in some cases, the disaggregation can be chosen so that each term Q(R, v ) corresponds to the expected cost of executing recourse actions at customer v ∈ V+(R) while traversing route R.5Example 1. Intuitively, the classical recourse policy simply determines that the vehicle executes back-and-forth trips whenever it observes a failure. Since we assume P is given by scenarios, we compute the recourse cost of the directed route ⃗ R = ( v1, . . . , v ℓ) under the classical recourse policy using the following formula (Dror et al., 1989): 
+
+QC (⃗ R) = X
+
+> j∈[ℓ]
+
+2 c0vj
+
+X 
+
+> ξ∈[N]
+
+pξ
+
+> ∞
+
+X
+
+> t=1
+
+I
+
+ X
+
+> i∈[j−1]
+
+dξ(vi) ≤ tC < X
+
+> i∈[j]
+
+dξ(vi)
+
+ . (QC )Without loss of generality, assume QC (⃗ R) ≤ Q C (⃗R) and define QC (R) := QC (⃗ R). The disag-gregation used in Ota and Fukasawa (2025) is such that, for each j ∈ [ℓ], 
+
+QC (R, v j ) = 2 c0vj
+
+X 
+
+> ξ∈[N]
+
+pξ
+
+> ∞
+
+X
+
+> t=1
+
+I
+
+ X
+
+> i∈[j−1]
+
+dξ(vi) ≤ tC < X
+
+> i∈[j]
+
+dξ(vi)
+
+ .
+
+Having established Assumption 2, Ota and Fukasawa (2025) associate with a recourse func-tion Q (and its disaggregation) the feasible region 
+
+F(X , Q) := 
+
+(x, θ ) ∈ (X ∩ ZE ) × RV+ 
+
+> +
+
+: θv ≥ X
+
+> R∈R (x)
+
+Q(R, v ), ∀v ∈ V+
+
+ , (F(X , Q)) and show that problem vrpsd (X , Q) is equivalent to min {cTx + 1Tθ : ( x, θ ) ∈ F (X , Q)}.Ota and Fukasawa (2025) also argue that previous approaches (Hoogendoorn and Spliet, 2023; Parada et al., 2024; Legault et al., 2025) all replace the nonlinear constraints on the θ-variables with certain (linear) ILS cuts that preserve the optimal value of the problem. Moreover, they show that these ILS cuts can be generalized to accommodate essentially any choice of X ⊆ Xsub and Q. We briefly discuss these cuts in the next subsection. 
+
+2.4 ILS cuts 
+
+Roughly speaking, ILS cuts are valid inequalities for F(X , Q) that have the following simple structure. Given a subset X ′ ⊆ X ∩ ZE and a lower bound L ∈ Q+, an ILS cut is “active” whenever x ∈ X ′, in which case it enforces a lower bound of L on the sum of certain θ-variables; otherwise, the cut is “inactive” and does not impose any additional restrictions. Formally, an affine function W (x; X ′) is called an activation function (with respect to X ′ ⊆X ∩ ZE ) if, for every x ∈ X ∩ ZE , we have W (x; X ′) = 1 whenever x ∈ X ′, and W (x; X ′) ≤
+
+0 otherwise. Given a subset of customers S ⊆ V+ and a recourse function Q that satisfies Assumption 2, we define an ILS cut as a valid inequality for F(X , Q) of the form 
+
+θ(S) ≥ L · W (x; X ′),
+
+where L ∈ Q+ is called a recourse lower bound with respect to X ′ ⊆ X ∩ ZE and S ⊆ V+. By the definition of F(X , Q), for every ¯ x ∈ X ′, we have that L ≤ P
+
+> v∈S
+
+P 
+
+> R∈R (¯ x)
+
+Q(R, v ). We now briefly describe two of the main classes of ILS cuts discussed in Ota and Fukasawa (2025). 
+
+Partial route cuts. Partial routes are generalizations of routes that were introduced by Hjor-ring and Holt (1999) and are commonly used in ILS-based algorithms for VRPSDs. A partial route is a tuple H = ( S1, . . . , S ℓ) of disjoint customer subsets such that there exists no in-dex i ∈ [ℓ] for which both Si and Si+1 are not singletons (for convenience, S0 = Sℓ+1 = {0}). The customers in H are represented by V+(H) := ∪ℓi=1 Si.6Intuitively, partial route H compactly represents all routes that visit the customers in V+(H)in the same order as prescribed by H. In this sense, we say that a route R = ( v1, . . . , v h)
+
+adheres to H if |V+(R)| = |V+(H)| and, for each i ∈ [ℓ], we can label Si = {vi
+
+> 1
+
+, . . . , v iti }, so that ( v1, . . . , v h) = ( v11 , . . . , v 1 
+
+> t1
+
+, . . . , v ℓ
+
+> 1
+
+, . . . , v ℓtℓ ). To refer to the set of routing plans containing routes (or subroutes) that adhere to H, define 
+
+X=(H) := x ∈ X ∩ ZE : ∃R ∈ R (x) s.t. R adheres to H , (X=(H)) 
+
+X⊇(H) := x ∈ X ∩ ZE : ∃R ∈ R (x), R ′ ⊆ R s.t. R′ adheres to H . (X⊇(H)) Ota and Fukasawa (2025) introduced an activation function WOF (x; X⊇(H)) and showed that the activation function WHS (x; X=(H)) of Hoogendoorn and Spliet (2023) can be obtained by adding nonpositive terms to WOF (x; X⊇(H)). In this paper, we define a partial route cut as an ILS cut (with respect to F(X , Q)) with one of the following two forms: 
+
+θ(V+(H)) ≥ L =(H) · WHS (x; X=(H)) , (1) 
+
+θ(V+(H)) ≥ L ⊇(H) · WOF (x; X⊇(H)) , (2) where L=(H) and L⊇(H) are recourse lower bounds. We refer the reader to Ota and Fukasawa (2025) for details on how such bounds are derived when Q = QC . Note that when H corresponds to a route R (i.e., every set in H is a singleton), Ota and Fukasawa (2025) set L=(H) = QC (R), which implies that inequalities (1) ensure that the θ-variables correctly capture the recourse cost of a solution. 
+
+Set cuts. Set cuts are ILS cuts that enforce a lower bound on the recourse cost incurred when visiting a set of customers using the minimum required number of vehicles. They were introduced by Parada et al. (2024) for the VRPSD under the classical recourse policy with specific demand distributions, and later extended to more general recourse functions by Legault et al. (2025) and Ota and Fukasawa (2025) .
+
+Let ∅ ⊊ S ⊆ V+ and suppose that k′ ∈ Z++ is a lower bound on the number of routes required to serve the customers in S, i.e., inequality x(E(S)) ≤ | S| − k′ is valid for X ∩ ZE .Define the set 
+
+X (S, k ′) := x ∈ X ∩ ZE : x(E(S)) = |S| − k′ . (X (S, k ′)) A set cut is an ILS cut of the form 
+
+θ(S) ≥ L (S) · WDL (x; X (S, k ′)) , (3) where WDL (x; X (S, k ′)) := 1 + ( x(E(S)) − | S| + k′) is the activation function employed by the DL-shaped method of Parada et al. (2024), and L(S) is a recourse lower bound. We present the specific recourse lower bound used by Ota and Fukasawa (2025) in Section 5, where we compare their set cuts with the SRIs. 
+
+# 3 Recourse policies 
+
+As mentioned in the beginning of Section 2, there are multiple different recourse functions that have been studied in the literature. A key difficulty in placing these functions within a common framework is that they are typically defined through sets of rules used to compute the recourse, as illustrated in Example 1. In this section, we take a different view and cast recourse policies 
+
+and recourse actions as feasible solutions of a MIP based on a network-flow formulation. Section 3.1 provides the formal definition of recourse policies under this framework. Sec-tion 3.2 then leverages polyhedra and network-flow theory to characterize the convex hull of the 7set of recourse policies. While these structural results do not seem directly connected with the solution of problem vrpsd (X , Q), subsequent sections will use these results for that purpose. In particular, Section 4 shows that, by adding an objective function to the MIP formulation studied here, we are able to derive valid inequalities for problem vrpsd (X , Q). 
+
+3.1 Definition via network flows 
+
+Henceforth, we reserve the notation y for a vector in R[N ]×V+ with entries yξv, for each sce-nario ξ ∈ [N ] and customer v ∈ V+. We often represent y with the tuple ( y1, . . . , y N ), where, for each scenario ξ ∈ [N ], yξ ∈ RV+ is the restriction of y to the entries {yξv}v∈V+ .Based on the intuitive description of the VRPSD given in the beginning of Section 2 (where a vehicle never carries more load than its capacity), we formalize the notions of recourse actions 
+
+and recourse policies as follows (see Figure 1). 
+
+Definition 1. Fix a directed route ⃗ R = ( v1, . . . , v ℓ) and let ξ ∈ [N ]. (Recall that v0 = vℓ+1 = 0.) A vector yξ ∈ RV+ 
+
+> +
+
+is a recourse action for ⃗ R and scenario ξ if it is integer and there exist f ξ ∈ RA
+
+> +
+
+and gξ ∈ RV+ 
+
+> +
+
+such that 
+
+f ξ 
+
+> (vi−1,v i)
+
++ dξ(vi) = f ξ 
+
+> (vi,v i+1 )
+
++ gξvi , ∀i ∈ [ℓ], (4a) 
+
+f ξ 
+
+> (vi−1,v i)
+
+≤ C, ∀i ∈ [ℓ + 1] (4b) 
+
+gξvi ≤ C · yξvi , ∀i ∈ [ℓ]. (4c) The set of all recourse actions for ⃗ R and ξ is denoted Yξ(⃗ R). A recourse policy for ⃗ R is a vector y = ( y1, . . . , y N ) ∈ Π( ⃗ R), where Π( ⃗ R) := Y1(⃗ R) × . . . × Y N (⃗ R) is the set of all recourse policies for ⃗ R.In a sense, Definition 1 is natural: for each scenario ξ ∈ [N ], the flow variables f ξ determine the load of the vehicle along the route, the recourse action yξ specifies at which customers and how many times we unload at the depot, and the flow variables gξ determine the corresponding amount that we unload. The following example shows that previously proposed recourse policies are indeed covered by Definition 1. 
+
+Example 2. Fix a directed route ⃗ R = ( v1, . . . , v ℓ). Suppose that a given recourse policy specifies, for each customer vi, a threshold value τi ∈ [0 , C ] ∩ Q+ indicating that the vehicle should execute a recourse action whenever the accumulated load upon arrival at vi (including the demand of vi) exceeds τi. As observed in Salavati-Khoshghalb et al. (2019a), several recourse policies fall within this setup: the classical recourse policy (Gendreau et al., 1995; Laporte et al., 2002; Jabali et al., 2014; Christiansen and Lysgaard, 2007; Gauvin et al., 2014) sets all the threshold values to C; preventive recourse policies (Yee and Golden, 1980; Hoogendoorn and Spliet, 2023; Yang et al., 2000; Salavati-Khoshghalb et al., 2019b; Florio et al., 2020) sets the threshold values according to a dynamic-programming algorithm; finally, rule-based recourse policies assign thresholds according to other route measures such as volume, risk and distances (see Salavati-Khoshghalb et al. (2019c,a) for more details). Let dξ be any realization of the random vector d and let ¯ yξ ∈ ZV+ 
+
+> +
+
+be such that each entry ¯ yξvi ,with i ∈ [ℓ], counts how many times the given recourse policy executes a recourse action at customer vi (either through back-and-forth or preventive returns) under this realization. One can check that ¯ yξ is feasible for Formulation (4). In fact, ¯ yξ is feasible for a more restricted variant of Formulation (4) where we add the constraints f ξ 
+
+> (vi−1,v i)
+
++ dξ(vi) ≤ τi + ( C + dξ(vi) −
+
+τi) yξvi , for all i ∈ [ℓ]. Before continuing, we need to address a technicality concerning the directions of the routes. The next lemma shows that, whenever we speak of recourse policies (in the sense of Definition 1), 8we may ignore route directions. In other words, for every scenario ξ ∈ [N ] and route R, we may write Π( R) := Π( ⃗ R) = Π( ⃗ R) and Yξ(R) := Yξ(⃗R) = Yξ(⃗ R). The proof is given in Appendix A and was inspired by the work of Hern´ andez-P´ erez and Salazar-Gonz´ alez (2003). 
+
+Lemma 1. Let R be a route and ξ ∈ [N ]. For any vector yξ ∈ ZV+ , we have that yξ ∈ Y ξ(⃗ R)
+
+if and only if there exist f ξ ∈ RA 
+
+> +
+
+and gξ ∈ RV+ 
+
+> +
+
+such that 
+
+f ξ 
+
+> (vi−1,v i)
+
++ f ξ 
+
+> (vi+1 ,v i)
+
++ dξ(vi) = f ξ 
+
+> (vi,v i+1 )
+
++ f ξ 
+
+> (vi,v i−1)
+
++ gξvi , ∀i ∈ [ℓ], (5a) 
+
+f ξ 
+
+> (vi−1,v i)
+
+≤ C
+
+2 , ∀i ∈ [ℓ + 1] , (5b) 
+
+f ξ 
+
+> (vi,v i−1)
+
+≤ C
+
+2 , ∀i ∈ [ℓ + 1] , (5c) 
+
+gξvi ≤ C · yξvi , ∀i ∈ [ℓ]. (5d) 
+
+In particular, this implies that Yξ(⃗ R) = Yξ(⃗ R).v1v2v3v401192012130010 0        
+
+> (a) Recourse action yξv1=yξv2=yξv4= 0 and yξv3= 1 corresponding to the classical recourse policy.
+
+v1v2v3v4011920109102010         
+
+> (b) Recourse action with yξv1=yξv3= 0 and yξv2=yξv4= 1.
+
+Figure 1: Illustration for a route with 4 customers and C = 10. We show two recourse actions for a given scenario ξ ∈ [N ] and a directed route ⃗ R = ( v1, v 2, v 3, v 4). The black numbers refer to the demands in scenario ξ,the blue numbers (solid arcs) indicate the values of f ξ and the red numbers (dashed arcs) indicate the values of gξ .
+
+3.2 The convex hull of recourse policies 
+
+The following extension of Hoffman’s circulation theorem (Hoffman, 1958) (which is a classical application of the max-flow/min-cut theorem, see Section 3.3 of Cook et al. (2011)) will be key for our discussion. 
+
+Theorem 1 (Theorem 3.18 of Cook et al. (2011)) . Let D′ = ( V ′, A ′) be a directed graph. Let h ∈ RA′ 
+
+> +
+
+be a vector of arc capacities and let d′ ∈ RV ′
+
+be a vector of node demands such that d′(V ′) = 0 . There exists a vector f ∈ RA′ 
+
+> +
+
+satisfying 
+
+f (δ−(v)) − f (δ+(v)) = d′
+
+> v
+
+, ∀v ∈ V ′,
+
+0 ≤ fa ≤ ha, ∀a ∈ A′,
+
+if and only if h(δ−(S)) ≥ d′(S), for all ∅ ⊊ S ⊊ V ′ (or equivalently, h(δ+(S)) ≥ d′(V ′ \ S), for all ∅ ⊊ S ⊊ V ′). 
+
+Let R = ( v1, . . . , v ℓ) be a route. From now on, we abbreviate yξ(V+(R)) as yξ(R). Moreover, for every scenario ξ ∈ [N ] and set S ⊆ V+, we define kξ(S) := ⌈dξ(S)/C ⌉, and we use kξ(R) as a shorthand for kξ(V+(R)). The next lemma applies Hoffman’s circulation theorem to project out the flow variables in Definition 1. 9Lemma 2. Let ¯y ∈ R[N ]×V+ 
+
+> +
+
+and ξ ∈ [N ]. There exist vectors f ξ and gξ feasible to Formulation 4 with respect to ¯yξ if and only if 
+
+¯yξ(R′) ≥ dξ(R′)
+
+C − 1, ∀R′ ⊆ R. 
+
+Proof. Let D′ be a digraph with vertex set V (R) and arc set given by the union of the sets A1 =
+
+A(R) and A2 = {(vi, 0) }i∈[ℓ]. Set d′ 
+
+> 0
+
+= dξ(R) and d′ 
+
+> vi
+
+= −dξ(vi), for each i ∈ [ℓ]. Additionally, set arc arc capacities as ha = C if a ∈ A1, and ha = C ¯yξvi if a = ( vi, 0) ∈ A2.Theorem 1 implies that Formulation (4) is feasible if and only if h(δ+(S)) ≥ d′(V (R) \ S), for every S ⊆ V+(R). Fix one such set S ⊆ V+(R). Write S = {V+(Ri)}i∈[p], where R1, . . . , R p
+
+are subroutes of R with V+(Ri) ∩ V+(Rj ) = ∅, for all i, j ∈ [p], i̸ = j. Since h(δ+(S)) = 
+
+C · Ppi=1 (¯ yξ(Ri) + 1) and d′(V (R) \ S) = dξ(S) = Ppi=1 dξ(Ri), it follows that h(δ+(S)) ≥
+
+d′(V (R) \ S) is equivalent to C · Ppi=1 (¯ yξ(Ri) + 1) ≥ Ppi=1 dξ(Ri), as desired (the necessity of the condition in the statement follows from the case p = 1). Lemma 2 allows us to derive a perfect formulation (see Chapter 4 of Conforti et al. (2014)) for the set of recourse policies. The key observation that enables this result is that the matrix associated with the constraints in Lemma 2 has the consecutive ones property, meaning that it is totally unimodular .
+
+Theorem 2. For every route R,
+
+conv(Π( R)) = 
+
+n
+
+y ∈ R[N ]×V+ 
+
+> +
+
+: yξ(R′) ≥ kξ(R′) − 1, ∀R′ ⊆ R, ξ ∈ [N ]
+
+o
+
+.
+
+Proof. Fix a route R and let ˜Π be the set in the RHS of the statement. We first show that Π( R) = ˜Π ∩ Z[N ]×V+ . If ¯ y ∈ ˜Π ∩ Z[N ]×V+ , then it follows from Lemma 2 that ¯ y ∈ Π( R). Conversely, if y′ ∈ Π( R), then y′ satisfies the inequalities in Lemma 2, and as y′ is integer (by Definition 1), we can round the RHS of these inequalities to learn that y′ ∈ ˜Π ∩ ZV+ .Let M be the matrix given by the inequalities defining ˜Π. Note that we may rearrange the columns of M so that its rows have the consecutive ones property, meaning that M is totally unimodular (Corollary 2.10 of Nemhauser and Wolsey (1988) or Exercise 4.8 of Conforti et al. (2014)). Hence, Theorem 4.4 of Conforti et al. (2014) implies that ˜Π is integral, and by the definition of an integral convex set, ˜Π = conv( ˜Π ∩ Z[N ]×V+ ) = conv(Π( R)). Using Theorem 4.5 of Conforti et al. (2014), one can also extend the previous characterization to the case in which upper bounds are imposed on the recourse action vectors. 
+
+Corollary 1. For every route R and b ∈ ZV+ 
+
+> +
+
+, conv(Π( R) ∩ [0, b ]N ) = conv(Π( R)) ∩ [0, b ]N .
+
+# 4 Scenario-optimal recourse policies and scenario-recourse in-equalities 
+
+As discussed in Sections 2.3 and 2.4, Ota and Fukasawa (2025) show that existing approaches for the VRPSD (Gendreau et al., 1995; Hoogendoorn and Spliet, 2023; Parada et al., 2024; Legault et al., 2025) replace the nonlinear constraints θv ≥ P 
+
+> R∈R (x)
+
+Q(R, v ) in F(X , Q) with families of valid linear inequalities known as ILS cuts . Importantly, these cuts rely on recourse lower bounds derived under very specific forms of the recourse function, which makes it difficult to extend their validity to other variants of the problem. Given our study in Section 3 of recourse policies as solutions to a network-flow model (For-mulation (4)), we now assign weights to the variables yξv in order to obtain lower bounds on the terms Q(R, v ). This allows us to derive stronger non-ILS cuts that remain valid for F(X , Q)across different recourse functions Q associated with VRPSD recourse policies. Moreover, we show that, for a scenario-optimal recourse policy Q∗, these new cuts can replace the con-straints θv ≥ P 
+
+> R∈R (x)
+
+Q∗(R, v ) in F(X , Q∗). 10 4.1 Assigning weights to recourse policies 
+
+To link a generic recourse function Q with a recourse policy, we assume that the recourse cost along a route can be lower bounded by a linear function of the recourse actions vector: 
+
+Assumption 3. The given recourse function Q satisfies Assumption 2. Moreover, we have vectors w ∈ QV+ 
+
+> +
+
+and b ∈ ZV+ 
+
+> +
+
+such that, for every route R, there exists ¯ yR ∈ Π( R) ∩ [0, b ]N
+
+satisfying 
+
+Q(R, v ) ≥ X 
+
+> ξ∈[N]
+
+pξwv(¯ yR)ξv, ∀v ∈ V+(R).
+
+For example, for the classical recourse policy considered in several works Gendreau et al. (1995); Laporte et al. (2002); Jabali et al. (2014); Hoogendoorn and Spliet (2023); Parada et al. (2024) and extended to scenarios in Ota and Fukasawa (2025), we can set wv = 2 c0v. In fact, as we argue next (recall also Example 2), Assumption 3 captures a structural property shared by several recourse functions used in VRPSDs. The strength of the inequalities derived in the next sections depends critically on the lower bounding vector w ∈ RV+ 
+
+> +
+
+. For example, one may always set w = 0 and then Assumption 3 is trivially satisfied, but this would lead to weak inequalities. Intuitively, one should try to set wv
+
+as a “tight” lower bound on the cost of executing recourse actions at customer v ∈ V+(R). For example, for recourse policies that allow preventive return trips between the customers and the depot (Yee and Golden, 1980; Salavati-Khoshghalb et al., 2019b,c; Laporte et al., 2002; Hoogendoorn and Spliet, 2023; Jabali et al., 2014; Gauvin et al., 2014; Florio et al., 2020; Christiansen and Lysgaard, 2007), we may use wv = (min u∈V+\{ v}{2 c0v, c 0u + c0v − cuv })+, for all v ∈ V+ (see Remark 1). Similarly, one should seek for the lowest possible upper bound vector b satisfying Assump-tion 3. In fact, for any recourse policy (in the sense of Definition 1), we may always assume that b ≤ 2 · 1. To see this, fix a directed route ⃗ R = ( v1, . . . , v ℓ) and let ( ¯f , ¯g, ¯y) be feasible for (4). By Assumption 1, for any i ∈ [ℓ] and ξ ∈ [N ], we know that ¯f ξ 
+
+> (vi−1,v i)
+
++ dξ(vi) ≤ 2C,which implies that at most two unload trips are needed at vi (i.e., we may assume that ¯ yξvi ≤ 2). Actually, since the classical recourse policy never fails at the same customer more than once, we may set b = 1 whenever Q = QC .Having said this, we now fix Q as a recourse function that satisfies Assumption 3 with parameters w and b. In view of the definition of recourse actions/policies from the previous section (Definition 1), we introduce a scenario-optimal recourse policy that, given a route, optimally selects the recourse actions for each scenario. 
+
+Definition 2. Let w ∈ QV+ 
+
+> +
+
+and b ∈ ZV+ 
+
+> +
+
+be such that, for every route R, the set Π( R) ∩ [0, b ]N
+
+is nonempty. The scenario-optimal recourse cost for a route R is given by the optimization problem: 
+
+Q∗(R) := min 
+
+X 
+
+> ξ∈[N]
+
+X
+
+> v∈V+
+
+pξwvyξv : y ∈ Π( R) ∩ [0, b ]N
+
+ . (Q∗)A scenario-optimal recourse policy is a vector y∗ ∈ Π( R) that attains the above minimum. Since we fixed w and b, we omit these parameters from the notation for Q∗, and we some-times refer to Q∗ as the scenario-optimal recourse function . It will also be useful to refer to the scenario-optimal recourse cost of a route R in a specific scenario. Thus, for each ξ ∈ [N ], we de-fine Q∗ 
+
+> ξ
+
+(R) := min 
+
+nP 
+
+> v∈V+
+
+wvyξv : yξ ∈ Y ξ(R) ∩ [0, b ]
+
+o
+
+, meaning that Q∗(R) = P  
+
+> ξ∈[N]
+
+pξ Q∗ 
+
+> ξ
+
+(R). In the remainder of this section, we leverage the polyhedral results from Section 3 to derive a formulation for vrpsd (X , Q∗) that does not rely on flow variables. This formulation captures the scenario-optimal recourse function through a new class of (non-ILS) cuts, which we call 11 scenario-recourse inequalities (SRIs) . These inequalities not only model Q∗ (Theorem 3), but they are also valid for any recourse function satisfying Assumption 3 (Proposition 1). 
+
+Remark 1. It was recently observed by Legault et al. (2025) that, in some cases, the lower bound wv = (min u∈V+\{ v}{2 c0v, c 0u + c0v − cuv })+ can be quite weak. This situation occurs, for example, when there exist two customers u and v which are located somewhat diametrically opposite to each other (with respect to the depot), so that the quantity c0u + c0v − cuv is close to zero. One might attempt to address such cases by modifying Definition 1 so that the recourse action vector is indexed by edges rather than vertices. However, this breaks the symmetry in Lemma 1, which is later used in Lemma 4. Thus, we propose instead the following weakening of Assumption 3: 
+
+Assumption 4. We are given w ∈ QV+×V+ 
+
+> +
+
+and b ∈ ZV+ 
+
+> +
+
+such that, for every route R =(v1, . . . , v ℓ), there exists ¯ yR ∈ Π( R) ∩ [0, b ]N satisfying 
+
+Q(R, v i) ≥ min {wvi,u : u ∈ { vi, v i−1, v i+1 } ∩ V+} · X 
+
+> ξ∈[N]
+
+pξ(¯ yR)ξvi , ∀i ∈ [ℓ].
+
+Under Assumption 4, for every u, v ∈ V+, we may set wu,v = c0u + c0v − cuv (cuv = 0, if u = v). In Appendix M, we extend part of the forthcoming results to the case where Q
+
+satisfies Assumption 4. 
+
+4.2 Formulations under a scenario-optimal recourse policy 
+
+Recall that polytope X is either Xsub or Xcvrp . We start by extending the definition of recourse policies from routes to solutions (routing plans) in X ∩ ZE . Thus, for each ¯ x ∈ X ∩ ZE ,we define Π(¯ x) := T 
+
+> R∈R (¯ x)
+
+Π( R). The next lemma shows that we can easily map recourse policies defined over solutions to those defined over the associated routes. The proof is given in Appendix B. 
+
+Lemma 3. Let ¯x ∈ X ∩ ZE and R(¯ x) = {R1, . . . , R k}. Let ¯y ∈ R[N ]×V+ and ¯y1, . . . , ¯yk ∈ R[N ]×V+
+
+be such that 
+
+(¯ yi)ξv = I(v ∈ V+(Ri)) · ¯yξv, ∀i ∈ [k], ξ ∈ [N ], v ∈ V+.
+
+Then ¯y ∈ Π(¯ x) if and only if (¯ y1, . . . , ¯yk) ∈ Π( R1) × . . . × Π( Rk).
+
+Combining Definition 2 and Lemma 3 yields the following nonlinear formulation for vrpsd (X , Q∗): min cTx + X
+
+> v∈V+
+
+θv,
+
+s.t. θv ≥ X 
+
+> ξ∈[N]
+
+pξwvyξv, ∀v ∈ V+, (7a) 
+
+x ∈ X ∩ ZE , (7b) 
+
+y ∈ Π( x) ∩ [0, b ]N . (7c) It follows from Assumption 3 that the projection of the feasible region of Formulation (7) onto the ( x, θ )-space yields a relaxation of F(X , Q). To present this result, for any set H ⊆ Rn1+n2
+
+containing vectors of the form ( h, g ) with h ∈ Rn1 and g ∈ Rn2 , we define proj h(H) := {h ∈
+
+Rn1 : exists g ∈ Rn2 such that ( h, g ) ∈ H} .
+
+Proposition 1. For any recourse function Q that satisfies Assumption 3, 
+
+F(X , Q) ⊆ proj (x,θ ) ({(x, θ, y ) : ( x, θ, y ) is feasible for Formulation (7) }) .
+
+12 Proof. Fix a recourse function Q as in the statement and let (¯ x, ¯θ) ∈ F (X , Q). We need to show that there exists y ∈ Π(¯ x) ∩ [0, b ]N such that ( ¯θ, y ) satisfies (7a). Let R(¯ x) = {R1, . . . , R k} and, for each i ∈ [k], choose ¯ yi ∈ Π( Ri) ∩ [0, b ]N according to Assumption 3. Apply Lemma 3 to get a vector ¯ y ∈ Π(¯ x) ∩ [0, b ]N . For every i ∈ [k] and v ∈ V+(Ri), ¯θv ≥ X
+
+> R∈R (¯ x)
+
+Q(R, v ) Assumption 2 
+
+= Q(Ri, v ) Assumption 3 
+
+≥ X 
+
+> ξ∈[N]
+
+pξwv(¯ yi)ξv
+
+> Lemma 3
+
+= X 
+
+> ξ∈[N]
+
+pξwv ¯yξv,
+
+as desired. Proposition 1 motivates our study of valid inequalities for Formulation (7), since these inequalities can be applied to the recourse function Q that we fixed in the beginning of this section. As a first step in this direction, we build on Lemma 1 to reformulate the family of sets Π( x)x∈X ∩ ZE as a single MILP, parameterized by a vector ¯ x ∈ X ∩ ZE . We defer the proof to Appendix C. 
+
+Lemma 4. Fix b ∈ ZV+ 
+
+> +
+
+. For every ¯x ∈ X , define 
+
+flow (¯ x) := 
+
+
+
+y ∈ [0, b ]N :
+
+f ξ(δ−(v)) + dξ(v) = f ξ(δ+(v)) + gξv, ∀v ∈ V+, ξ ∈ [N ]
+
+f ξ 
+
+> (u,v )
+
+≤ C
+
+2 ¯x{u,v }, ∀uv ∈ A, ξ ∈ [N ]
+
+gξv ≤ C · yξv, ∀v ∈ V+, ξ ∈ [N ]
+
+f ∈ R[N ]×A 
+
+> +
+
+, g ∈ R[N ]×V+
+
+> +
+
+
+
+.
+
+Then flow (¯ x) ∩ Z[N ]×V+ = Π(¯ x) ∩ [0, b ]N , for every ¯x ∈ X ∩ ZE .
+
+Lemma 4 yields an MILP model for Formulation (7), since we can replace constraint (7c) with the constraints and variables in the (parametric) MILP formulation for flow (¯ x)∩Z[N ]×V+ .However, this approach may be inefficient, since it leads to a formulation for vrpsd (X , Q∗) that has integrality on the y-variables and uses N · (|A| + |V+|) additional flow variables. Similarly to Lemma 2, we address this issue by using Hoffman’s circulation theorem (The-orem 1) to project out the flow variables. The proof is left to Appendix D. 
+
+Proposition 2. Fix b ∈ ZV+ 
+
+> +
+
+. For every ¯x ∈ X ,
+
+flow (¯ x) = 
+
+
+
+y ∈ [0, b ]N : yξ(S) ≥ dξ(S)
+
+C + ¯ x(E(S)) − | S|, ∀∅ ⊊ S ⊆ V+, ξ ∈ [N ]
+
+
+
+.
+
+Recall that kξ(S) = ⌈dξ(S)/C ⌉. Since Formulation (7) enforces integrality on the ( x, y )-variables, we may round the RHS of the inequalities in Proposition 2 to obtain 
+
+yξ(S) ≥ kξ(S) + x(E(S)) − | S|, (8) which we call a scenario-recourse inequality (SRI) . (We invite the reader to compare the SRIs with the inequalities in Theorem 2.) The following example illustrates that SRIs may indeed yield a stronger relaxation than the set flow (¯ x) in Lemma 4. 
+
+Example 3. Consider the setting in Figure 1b. Suppose that ¯ x ∈ X ∩ ZE is such that R(¯ x) only contains the route R = ( v1, v 2, v 3, v 4) and let (¯ y, ¯f , ¯g) be feasible for the formulation of flow (¯ x)in Lemma 4. We illustrate these vectors in Figure 2 for a fixed scenario ξ ∈ [N ]. Note that the recourse cost captured by the vector ¯ yξ is given by P 
+
+> v∈V+
+
+wv ¯yξv = 2 .4, which is lower than the scenario-optimal recourse cost Q∗ 
+
+> ξ
+
+(R) = 4. 13 v1v2v3v40119200.504.550.554.500.5016¯yξv2 = 0 .1¯yξv4 = 0 .6¯yξv3 = 0 ¯yξv1 = 0 .5Figure 2: Graphical representation of (¯ x, ¯yξ , ¯f ξ , ¯gξ ). Here we have C = 10, wv3 = 6 and wv1 = wv2 = wv4 = 2. The black numbers next to each vertex indicate the scenario demand vector dξ . The blue and solid arcs represent the vector ¯f ξ , while the red and dashed arcs represent the vector ¯ gξ .
+
+Let S1 = {v1, v 2, v 3} and S2 = {v3, v 4} (green and violet regions in Figure 2, respectively). Observe that ¯ yξ violates the SRIs for S1 and S2 (with respect to scenario ξ), since 0.6 = ¯ yξ(Si) < ⌈dξ(Si)/C ⌉ + ¯ x(E(Si)) − | Si| = 1 ,
+
+for all i ∈ [2]. Interestingly, in this case, the SRIs are sufficient to correctly capture the scenario-optimal recourse cost Q∗ 
+
+> ξ
+
+(R). To see this, consider the vector ( y′)ξ ∈ Y ξ(R) defined as ( y′)ξv2 = ( y′)ξv4 = 1 and ( y′)ξv1 = ( y′)ξv3 = 0, and notice that Q∗ 
+
+> ξ
+
+(R) = P 
+
+> v∈V+
+
+wv(y′)ξv = 4. Summing the SRIs for S1
+
+and S2 (and fixing x = ¯ x) yields yξv1 + yξv2 + 2 yξv3 + yξv4 ≥ 2, and multiplying this inequality by 2 we learn that X
+
+> v∈V+
+
+wvyξv ≥ 2yξv1 + 2 yξv2 + 4 yξv3 + 2 yξv4 ≥ 4.
+
+Therefore, (¯ x, (y′)ξ) minimizes P 
+
+> v∈V+
+
+wvyξv subject to the constraints that yξ ∈ [0, b ] and (¯ x, y ξ)satisfies all the SRIs of the form yξ(S) ≥ kξ(S) + ¯ x(E(S)) − | S|, for every S ⊆ V+.It turns out that a consequence of our polyhedral study in Section 3.2 is that the situation illustrated in Example 3 holds more generally, and constraint (7c) can be replaced by the SRIs (and the box constraint y ∈ [0, b ]N ). We prove this result in Appendix E. 
+
+Theorem 3. Fix b ∈ ZV+ 
+
+> +
+
+. For every ¯x ∈ X , define 
+
+sri (¯ x) := 
+
+n
+
+y ∈ [0, b ]N : yξ(S) ≥ kξ(S) + ¯ x(E(S)) − | S|, ∀∅ ⊊ S ⊆ V+, ξ ∈ [N ]
+
+o
+
+.
+
+Then sri (¯ x) = conv(Π(¯ x) ∩ [0, b ]N ), for every ¯x ∈ X ∩ ZE .
+
+Hence, we can formulate vrpsd (X , Q∗) as min cTx + X
+
+> v∈V+
+
+θv,
+
+s.t. θv ≥ X 
+
+> ξ∈[N]
+
+pξwvyξv, ∀v ∈ V+, (9a) 
+
+yξ(S) ≥ kξ(S) + x(E(S)) − | S|, ∀∅ ⊊ S ⊆ V+, ξ ∈ [N ], (9b) (x, y ) ∈ (X ∩ ZE ) × [0, b ]N . (9c) Due to the exponential number of SRIs, we describe in Appendix F the heuristics that we use to iteratively separate these inequalities as cutting planes. In these heuristics, whenever a violated inequality is found, we “aggregate” the SRIs using the following simple fact. 14 Fact 1. Let (¯ x, ¯y) ∈ X × [0, b ]N , ξ′ ∈ [N ] and S ⊆ V+ be such that ¯yξ′
+
+(S) < k ξ(S)+¯ x(E(S)) −| S|.Define Ξ := {ξ ∈ [N ] : ¯ yξ(S) < k ξ(S) + ¯ x(E(S)) − | S|} , then P 
+
+> ξ∈Ξ
+
+¯yξ(S) < P
+
+> ξ∈Ξ
+
+(kξ(S) + ¯x(E(S)) − | S|).
+
+Accordingly, we call inequality P 
+
+> ξ∈Ξ
+
+yξ(S) ≥ P
+
+> ξ∈Ξ
+
+(kξ(S) + x(E(S)) − | S|) an aggregated SRI 
+
+with respect to Ξ ⊆ [N ] and S ⊆ V+. Preliminary experiments indicate that separating aggregated SRIs, rather than individual SRIs, significantly improves the overall efficiency of the algorithm. 
+
+4.3 LP formulation for the scenario-optimal recourse function 
+
+Besides Theorem 3, another consequence of the characterization in Theorem 2 is that the scenario-optimal recourse cost of a route can be formulated as an LP (note that the optimization problem in Definition 2 is an MILP). Specifically, for a given route R, we may write Q∗(R) = P  
+
+> ξ∈[N]
+
+pξ Q∗ 
+
+> ξ
+
+(R), where 
+
+Q∗ 
+
+> ξ
+
+(R) = min X
+
+> v∈V+
+
+wvyξv,
+
+s.t. yξ(R′) ≥ kξ(R′) − 1, ∀R′ ⊆ R, (10a) 
+
+yξ ∈ [0, b ]. (10b) As a result, scenario-optimal recourse policies satisfy the following conditions. 
+
+Corollary 2. Let Q∗ be a recourse function as in Definition 2 with parameters w ∈ QV+
+
+> +
+
+and b ∈ ZV+ 
+
+> +
+
+. Suppose we have a disaggregation of Q∗ satisfying the following: 
+
+• for every route R, there exists a scenario-optimal recourse policy y∗ ∈ Π( R) such that Q∗(R, v ) = 
+
+P  
+
+> ξ∈[N]
+
+pξwv(y∗)ξv, for every customer v ∈ V+.Then, for every route R and subroute R′ ⊆ R, P 
+
+> v∈V+(R′)
+
+Q∗(R′, v ) ≤ P 
+
+> v∈V+(R′)
+
+Q∗(R, v ).Proof. Let R be a route and R′ ⊆ R. Let y∗ ∈ Π( R) be a scenario-optimal recourse policy such that, for all v ∈ V+, Q∗(R, v ) = P  
+
+> ξ∈[N]
+
+pξwv(y∗)ξv. Note that, for each scenario ξ ∈
+
+[N ], ( y∗)ξ is feasible for Formulation (10) with respect to route R′, which shows that Q∗ 
+
+> ξ
+
+(R′) ≤
+
+P 
+
+> v∈V+(R′)
+
+pξwv(y∗)ξv. Summing this inequality over all scenarios ξ ∈ [N ] yields the desired result. Corollary 2 implies that scenario-optimal recourse policies satisfy the monotonicity/(restricted) superadditivity properties discussed in the context of the DL-shaped method (Parada et al., 2024; Legault et al., 2025; Ota and Fukasawa, 2025). Therefore, rather than using SRIs, one could also solve vrpsd (X , Q∗) using the path and set cuts of the DL-shaped method (path cuts are a special case of the partial route cuts (2) from Section 2.4). However, as we demonstrate next, we can instead leverage Formulation (10) to prove that these ILS cuts are dominated by the SRIs. 
+
+# 5 Projecting out the scenario variables and a branch-and-cut algorithm 
+
+In this section, we study the projection of Formulation (9) onto the ( x, θ )-space of F(X , Q)from both theoretical and computational perspectives. In view of the results in the previous section, it is natural to ask whether it is preferable to formulate vrpsd (X , Q∗) using ILS cuts, SRIs, or a combination of both. 15 From a theoretical standpoint, we show in Section 5.1 that the projection of Formulation (9) onto the ( x, θ )-variables can be described by a family of inequalities which we call projected SRIs .1 Section 5.2 then shows that, under certain assumptions on the recourse lower bounds, projected SRIs dominate the ILS cuts from Ota and Fukasawa (2025) with respect to the recourse function Q∗. In other words, these ILS cuts are already satisfied by every feasible solution to the LP relaxation of Formulation (9). From a computational perspective, we first note that the proofs in Section 5.2 are construc-tive, and they provide algorithms to generate the dominating projected SRIs. In addition, our preliminary experiments indicate that the LP relaxation of Formulation (9) often provides strong dual bounds, even when the SRIs are separated heuristically (as in Appendix F). However, the large number of yξv-variables can make solving the formulation to integrality computationally expensive. Motivated by this observation, Section 5.3 shows that solving the LP relaxation of Formulation (9) also provides a single projected SRI that recovers the LP bound of Formula-tion (9) in the ( x, θ )-space. The results of Sections 5.2 and 5.3 are then combined in Section 5.4 to develop a branch-and-cut algorithm for solving vrpsd (X , Q∗) using projected SRIs. Finally, Section 5.5 discusses how we can extend this algorithm to different recourse policies. In the remainder of this section, we fix the parameters w ∈ QV+ 
+
+> +
+
+and b ∈ ZV+ 
+
+> +
+
+of the scenario-optimal recourse function Q∗ (Definition 2). We also fix a disaggregation of Q∗ as specified in Corollary 2. 
+
+5.1 Projected scenario recourse inequalities 
+
+For every ¯ x ∈ X , we augment the set sri (¯ x) as follows: 
+
+csri (¯ x) := 
+
+(θ, y ) ∈ RV+ 
+
+> +
+
+× [0, b ]N :
+
+yξ(S) ≥ kξ(S) + ¯ x(E(S)) − | S|, ∀∅ ⊊ S ⊆ V+, ξ ∈ [N ]
+
+θv ≥ X 
+
+> ξ∈[N]
+
+pξwvyξv, ∀v ∈ V+
+
+ .
+
+( csri (¯ x)) Therefore, we express the projection of the feasible region of the LP relaxation of Formulation (9) as 
+
+P := (x, θ ) : x ∈ X , θ ∈ proj θ( csri (x)) . (P)To better understand the strength of the LP relaxation of Formulation (9), we study the poly-hedron P, which in turn leads us to analyze the set proj θ( csri (x)). In this way, one of our goals in this subsection is to explicitly write proj θ( csri (x)) as the intersection of half-spaces defined by inequalities on the θ-variables. We start by addressing in Lemma 5 the simpler case of projecting a single inequality defined on the y-variables. This result is not only useful for characterizing proj θ( csri (x)), but it will also be key in Section 5.2 to construct projected SRIs that dominate certain ILS cuts. The proof is deferred to Appendix G. 
+
+Lemma 5. Let a1, . . . , a N be vectors in RV+ and let h ∈ R. Consider the set 
+
+H =
+
+(θ, y ) ∈ RV+ 
+
+> +
+
+× R[N ]×V+ 
+
+> +
+
+: X 
+
+> ξ∈[N]
+
+(aξ)Tyξ ≥ h, θ v ≥ X 
+
+> ξ∈[N]
+
+pξwvyξv, ∀v ∈ V+
+
+ .
+
+Then the following holds:      
+
+> 1In stochastic programming, the term aggregated cuts is sometimes used to refer to the inequalities obtained in a single-cut implementation of the Benders decomposition method (Rahmaniani et al., 2017), where the scenario recourse variables are projected onto a single variable given by their sum. Our projected SRIs are similar, in the sense that we project from the ( x, y )-variables onto the ( x, θ )-space. (Note that the term aggregated SRI was already used in Fact 1.)
+
+16 • if there exists v ∈ V+ and ξ ∈ [N ] such that wv = 0 and aξv > 0, then proj θ(H) = RV+ 
+
+> +
+
+;
+
+• otherwise, proj θ(H) = 
+
+
+
+θ ∈ RV+ 
+
+> +
+
+: P 
+
+> v∈V+:wv>0
+
+
+
+max ξ∈[N ]
+
+n aξv 
+
+> pξwv
+
+o +
+
+θv ≥ h
+
+
+
+.
+
+In what follows, we apply Lemma 5 to the case where the inequality P 
+
+> ξ∈[N]
+
+(aξ)Tyξ ≥ h
+
+is given by a conic combination of SRIs and upper bound constraints on the y-variables. To this end, we reserve the symbol α for a vector of multipliers associated with the SRIs, with components αξS , for all S ⊆ V+ and ξ ∈ [N ]. Similarly, β is reserved for a vector of multipliers associated with the upper bound constraints yξv ≤ bv, with components βξv , for all v ∈ V+
+
+and ξ ∈ [N ]. Given α ≥ 0 and β ≤ 0, we construct the inequalities: 
+
+X 
+
+> ξ∈[N]
+
+X
+
+> S⊆V+
+
+αξS yξ(S) ≥ X 
+
+> ξ∈[N]
+
+X
+
+> S⊆V+
+
+αξS (kξ(S) + x(E(S)) − | S|), (11) 
+
+X 
+
+> ξ∈[N]
+
+X
+
+> v∈V+
+
+βξv yξv ≥ X 
+
+> ξ∈[N]
+
+X
+
+> v∈V+
+
+βξv bv. (12) Summing (11) with (12) and rearranging the terms gives 
+
+X 
+
+> ξ∈[N]
+
+X
+
+> v∈V+
+
+βξv + X
+
+> S⊆V+:v∈S
+
+αξS
+
+ yξv ≥ X 
+
+> ξ∈[N]
+
+X
+
+> S⊆V+
+
+αξS x(E(S)) + ν(α, β ), (13) where 
+
+ν(α, β ) := X 
+
+> ξ∈[N]
+
+X 
+
+> U⊆V+
+
+αξS (kξ(S) − | S|) + X 
+
+> ξ∈[N]
+
+X
+
+> v∈V+
+
+βξv bv. (ν)Next, for each ¯ x ∈ X , define Γ(¯ x, α, β ) := 
+
+(θ, y ) ∈ RV+ 
+
+> +
+
+× [0, b ]N : (¯ x, y ) satisfies (13) , θ v ≥ X 
+
+> ξ∈[N]
+
+pξwvyξv, ∀v ∈ V+
+
+ .
+
+(Γ) By Lemma 5, if 
+
+
+
+βξv + P 
+
+> S⊆V+:v∈S
+
+αξS
+
+
+
+≤ 0, for all ξ ∈ [N ] and v ∈ V+ with wv = 0, we have that proj θ(Γ(¯ x, α, β )) = 
+
+θ ∈ RV+ 
+
+> +
+
+: X 
+
+> v∈V+:wv>0
+
+ϕv(α, β ) θv ≥ X 
+
+> ξ∈[N]
+
+X
+
+> S⊆V+
+
+αξS ¯x(E(S)) + ν(α, β )
+
+ ,
+
+(14) where, for each v ∈ V+ with wv > 0, 
+
+ϕv(α, β ) := max  
+
+> ξ∈[N]
+
+( βξv + P 
+
+> S⊆V+:v∈S
+
+αξS
+
+pξwv
+
+)! +
+
+. (ϕv)We refer to the inequality used to define the set in (14) as a projected SRI . For con-venience, we also define A as the set of multipliers ( α, β ), with α ≥ 0 and β ≤ 0, such that 
+
+
+
+βξv + P 
+
+> S⊆V+:v∈S
+
+αξS
+
+
+
+≤ 0, for all ξ ∈ [N ] and v ∈ V+ with wv = 0. The next result builds on Lemma 5 to prove that projected SRIs characterize the set proj θ( csri (¯ x)). The proof is left to Appendix H. 17 Proposition 3. For every ¯x ∈ X ,
+
+proj θ( csri (¯ x)) = 
+
+θ ∈ RV+ 
+
+> +
+
+: X 
+
+> v∈V+:wv>0
+
+ϕv(α, β ) θv ≥ X 
+
+> ξ∈[N]
+
+X
+
+> S⊆V+
+
+αξS ¯x(E(S)) + ν(α, β ), ∀(α, β ) ∈ A 
+
+ .
+
+Consequently, 
+
+P =
+
+
+
+(x, θ ) ∈ X × RV+ 
+
+> +
+
+:
+
+X 
+
+> v∈V+:wv>0
+
+ϕv(α, β ) θv ≥ X 
+
+> ξ∈[N]
+
+X
+
+> S⊆V+
+
+αξS x(E(S)) + ν(α, β ), ∀(α, β ) ∈ A 
+
+.
+
+Example 4. Suppose that X = Xcvrp and let ∅ ⊊ S ⊆ V+ be such that wv > 0, for all v ∈ S.Let Ξ = {ξ ∈ [N ] : kξ(S) > ¯k(S)} and assume that Ξ is nonempty. Set β = 0 and αξU ′ = I(U ′ =
+
+U and ξ ∈ Ξ), for all U ′ ⊆ V+ and ξ ∈ [N ]. The pair ( α, β ) yields the following aggregated SRI (see Fact 1): 
+
+X
+
+> ξ∈Ξ
+
+yξ(S) ≥ X
+
+> ξ∈Ξ
+
+(kξ(S) + x(E(S)) − | S|) = |Ξ| · (x(E(S)) − | S|) + X
+
+> ξ∈Ξ
+
+kξ(S)By Lemma 5, for any ¯ x ∈ X , ¯θ belongs to proj θ Γ(¯ x, α, β ) if and only if ¯θ satisfy the projected SRI: X
+
+> v∈S
+
+max 
+
+> ξ∈Ξ
+
+ 1
+
+pξwv
+
+
+
+θv ≥ | Ξ| · (x(E(S)) − | S|) + X
+
+> ξ∈Ξ
+
+kξ(S). (15) We henceforth call inequality (15) a projected aggregated SRI associated with Ξ ⊆ [N ] and S ⊆
+
+V+.
+
+5.2 Theoretical comparisons with ILS cuts 
+
+In this subsection, we show that, under some conditions on the recourse lower bounds, the ILS cuts shown in Section 2.4 (applied to the scenario-optimal recourse function Q∗) are valid for the set P. Furthermore, using Lemma 5 (and Equation (14)), we also construct the corresponding projected SRIs that dominate these cuts. The general proof strategy consists of two main steps: (1) leverage Formulation (10) to express a recourse lower bound as the optimal value of an LP; and (2) use the dual multipliers ( α, β ) of this LP to construct a dominating projected SRI. 
+
+5.2.1 Comparison with set cuts 
+
+The approach of Ota and Fukasawa (2025) to compute a recourse lower bound for the set cut (17) can be interpreted as a simple greedy algorithm. Fix S = {v1, . . . , v ℓ} ⊆ V+ and a scenario ξ ∈ [N ]. Let k′ ∈ Z++ be such that inequality ¯ x(E(S)) ≤ | S|− k′ is valid for X ∩ ZE , and let ¯ x ∈ X ∩ ZE satisfy this inequality at equality. Additionally, suppose that 0 < k ξ(S)−k′ ≤ b(S)(see Remark 2). To obtain a lower bound on the recourse cost, we assign the kξ(S) − k′ failures observed by ¯ x
+
+to the customers in S in increasing order of their recourse weights. Thus, assume that wv1 ≤
+
+. . . ≤ wvℓ , and let j ∈ [ℓ] be the smallest index such that kξ(S) − k′ ≤ P 
+
+> i∈[j]
+
+bvi . A lower bound on the recourse cost paid in scenario ξ ∈ [N ] is then given by L∗ 
+
+> ξ
+
+(S, k ′) = P 
+
+> i∈[j−1]
+
+bvi wvi +(( kξ(S) − k′) − P 
+
+> i∈[j−1]
+
+bvi ) wvj . (Recall that [ t] = ∅, for every integer t ≤ 0.) It is easy to see that this greedy algorithm is equivalent to the LP: 
+
+L∗ 
+
+> ξ
+
+(S, k ′) := min X
+
+> v∈V+
+
+wvyξv,
+
+s.t. yξ(S) ≥ kξ(S) − k′, (αξS ) (16a) 
+
+yξv ≤ bv, ∀v ∈ V+, (βξv ) (16b) 
+
+yξ ≥ 0. (16c) 18 This yields the recourse lower bound L∗(S, k ′) = PNξ=1 pξ L∗ 
+
+> ξ
+
+(S, k ′) (note that L∗ 
+
+> ξ
+
+(S, k ′) = 0 whenever kξ(S) ≤ k′). Replacing this recourse lower bound in inequality (3) we obtain the set cut 
+
+θ(S) ≥ L ∗(S, k ′) · WDL (x; X (S, k ′)) , (17) where we recall from Section 2.4 that WDL (x; X (S, k ′)) = 1 + ( x(E(S)) − | S| + k′). 
+
+Remark 2. Observe that Formulation (16) is feasible if and only if kξ(S) − k′ ≤ b(S). This condition always holds when b ≥ 1, since kξ(S) = ⌈dξ(S)/C ⌉ ≤ | S| ≤ b(S) (by Assump-tion 1, dξ(v) ≤ C, for all v ∈ V+). Alternatively, suppose that there exists ¯ x ∈ X (S, k ′)(so ¯ x(E(S)) = |S| − k′) and let R(¯ x) = {R1, . . . , R k}. Since b satisfies the condition in Def-inition 2, for each i ∈ [k], there exists ¯ yi ∈ Π( Ri) ∩ [0, b ]N . Applying Lemma 3 to these vectors we obtain ¯ y ∈ Π(¯ x) ∩ [0, b ]N , and since SRIs (with x fixed to ¯ x) are valid for Π(¯ x), we get b(S) ≥ ¯yξ(S) ≥ kξ(S) + ¯ x(E(S)) − | S| = kξ(S) − k′.One may note that Formulation (16) has a similar structure to the inner optimization prob-lems found in robust optimization problems with budget uncertainty sets (Bertsimas and Sim, 2003, 2004). Thus, analogously to known results in the robust optimization literature, we can write closed-form expressions for an optimal dual solution for Formulation (16). Combining this with the general strategy outlined at the beginning of this subsection yields the desired results. The proofs are deferred to Appendix I, and a concrete example is provided in Appendix J. 
+
+Lemma 6. Let w ∈ QV+ 
+
+> +
+
+and b ∈ ZV+ 
+
+> +
+
+. Fix a scenario ξ ∈ [N ] and let S = {v1, . . . , v ℓ} ⊆ V+ be such that wv1 ≤ . . . ≤ wvℓ . Let k′ ∈ Z++ be such that kξ(S) − k′ ≤ b(S) and choose j ∈ [ℓ] as the smallest index such that kξ(S) − k′ ≤ P 
+
+> i∈[j]
+
+bvi . Set 
+
+¯αξS = I(kξ(S) > k ′) · wvj , and 
+
+¯βξv = I(v ∈ { vi}i∈[j−1] ) · (wv − wvj ), ∀v ∈ V+.
+
+Then (¯ αξS , ¯βξ) is optimal for the dual of Formulation (16) and ¯αξS ≤ L ∗ 
+
+> ξ
+
+(S, k ′).
+
+Theorem 4. Let w ∈ QV+ 
+
+> +
+
+, b ∈ ZV+ 
+
+> +
+
+, ∅ ⊊ S ⊆ V+ and k′ ∈ Z++ . Assume that Formulation (16) 
+
+is feasible for every scenario ξ ∈ [N ] (see Remark 2). For each ξ ∈ [N ], let (¯ αξS , ¯βξ) be as specified in Lemma 6, and set ˆα ≥ 0 and ˆβ ≤ 0 as 
+
+ˆαξS′ = I(S′ = S) · (pξ ¯αξS ), ∀∅ ⊊ S′ ⊆ V+, ξ ∈ [N ],
+
+ˆβξv = pξ ¯βξv , ∀v ∈ V+, ξ ∈ [N ].
+
+Then, (ˆ α, ˆβ) ∈ A and for every ¯x ∈ { x ∈ X : x(E(S)) ≤ | S| − k′}, inequality (17) (with x fixed to ¯x) is valid for proj θ(Γ(¯ x, ˆα, ˆβ)) . In particular, if x(E(S)) ≤ | S| − k′ is valid for P, then inequality (17) (with x free) is also valid for P.
+
+5.2.2 Comparisons with partial route cuts 
+
+To compute recourse lower bounds for the partial route cuts (1) and (2), we propose an approach based on Formulation (10). To this end, let H = ( S1, . . . , S ℓ) be a partial route. We write H′ ⊆
+
+H to refer to a partial route of the form H′ = ( Si, . . . , S j ) for some j ∈ [ℓ] and i ∈ [j]. Moreover, for every scenario ξ ∈ [N ], we use the shorthands yξ(H′) = yξ(V+(H′)) and kξ(H′) = 19 kξ(V+(H′)). For each scenario ξ ∈ [N ], let L∗ 
+
+> ξ
+
+(H) be the optimal value of the following LP: 
+
+L∗ 
+
+> ξ
+
+(H) := min X
+
+> v∈H
+
+wvyξv,
+
+s.t. yξ(H′) ≥ kξ(H′) − 1, ∀H′ ⊆ H, (αξH′ ) (18a) 
+
+yξv ≤ bv, ∀v ∈ V+, (βξv ) (18b) 
+
+yξv ≥ 0, ∀v ∈ V+, (18c) and define L∗(H) := PNξ=1 pξ L∗ 
+
+> ξ
+
+(H). Observe that, if Si = {vi}, for all i ∈ [ℓ], then L∗(H) = 
+
+Q∗(R), where R = ( v1, . . . , v ℓ). Replacing L∗(H) into the partial route cut (2) yields 
+
+θ(V+(H)) ≥ L ∗(H) · WOF (x; X⊇(H)) . (19) It is not hard to see that (19) is valid for F(X , Q∗). Indeed, this follows from the monotonicity of the disaggregation of Q∗ (Corollary 2) together with the fact that Formulation (18) provides a relaxation of Formulation (10) for any route R that adheres to H. Rather than providing more details on this argument, we establish validity by proving that (19) is valid for P ⊇ F (X , Q∗). Specifically, let αξ and βξ be the dual variables associated with Formulation (18). We prove the following result in Appendix K. 
+
+Theorem 5. Let H be a partial route. There exist (α, β ) ∈ A such that the projected SRI 
+
+X
+
+> v∈V+
+
+ϕv(α, β ) θv ≥ X 
+
+> ξ∈[N]
+
+X
+
+> S⊆V+
+
+αξS x(E(S)) + ν(α, β )
+
+dominates inequality (19) . In particular, inequality (19) is valid for P.
+
+Combining Theorem 5 with the results in Ota and Fukasawa (2025) yields the following consequences. 
+
+Corollary 3. The following inequalities are dominated by projected SRIs (and thus valid for P): (a) the partial route cuts of Hoogendoorn and Spliet (2023): 
+
+θ(V+(H)) ≥ L ∗(H) · WHS (x; X=(H)) ,
+
+for every partial route H;(b) the path cuts of Parada et al. (2024): 
+
+θ(V+(R)) ≥ Q ∗(R) ·
+
+1 + X
+
+> e∈E(R)\δ(0)
+
+(xe − 1) 
+
+ ,
+
+for every route R;(c) the ILS cuts of Gendreau et al. (2016): 
+
+1Tθ ≥
+
+ X
+
+> R∈R (¯ x)
+
+Q∗(R)
+
+ ·
+
+1 + X
+
+> e∈E\δ(0):¯ xe=1
+
+xe − | V+| + k
+
+ ,
+
+for every ¯x ∈ X ∩ ZE .Proof. Item (a) holds because Ota and Fukasawa (2025) showed that WOF (¯ x; X⊇(H)) ≥ WHS (¯ x; X=(H)) for all ¯ x ∈ X . For item (b), consider a route R = ( v1, . . . , v ℓ) and apply Theorem 5 to the partial route H = ( {v1}, . . . , {vℓ}). In this case, L∗(H) = Q∗(R) and WOF (¯ x; X⊇(H)) = 1 + P
+
+> e∈E(R)\δ(0)
+
+(xe − 1). Finally, Claim 2 of Ota and Fukasawa (2025) shows that the path cuts dominate those of Gendreau et al. (2016), proving item (c). 20 5.3 Recovering the higher-dimensional LP relaxation bound with a single projected SRI 
+
+Inspired by the theoretical results in Sections 5.1 and 5.2, we now develop a procedure that uses a single projected SRI to recover the LP relaxation bound of Formulation (9), denoted z∗.The approach consists of first solving the LP relaxation of Formulation (9), and then using the optimal dual variables associated with the SRIs and upper bound constraints on the y-variables to construct the desired projected SRI. We remark that the ideas here were inspired by recent advances on recovering the Dantzig–Wolfe bound via cutting planes (Chen et al., 2024; Ota et al., 2025). We start by replacing every occurrence of variable θv in Formulation (9) with the expres-sion P  
+
+> ξ∈[N]
+
+pswvyξv. We then dualize the SRIs and the upper bound constraints on the y-variables into the objective function of the resulting formulation. This yields the Lagrangian dual: 
+
+z∗ = max 
+
+> α≥0,β ≤0
+
+
+
+min  
+
+> x∈X ,y ≥0
+
+
+
+cTx + X
+
+> v∈V+
+
+X 
+
+> ξ∈[N]
+
+pξwvyξv + X 
+
+> ξ∈[N]
+
+X
+
+> S⊆V+
+
+αξS (kξ(S) + x(E(S)) − | S| − yξ(S)) + X 
+
+> ξ∈[N]
+
+X
+
+> v∈V+
+
+βξv (bv − yξv)
+
+
+
+.
+
+Since this problem is separable, we write z∗ = max α≥0,β ≤0{σx(α) + σy(α, β ) + ν(α, β )}, where 
+
+σx(α) := min 
+
+> x∈X
+
+X 
+
+> ξ∈[N]
+
+X
+
+> uv ∈E
+
+cuv + X
+
+> S⊆V+:u,v ∈S
+
+αξS
+
+ xuv 
+
+ and (σx)
+
+σy(α, β ) := min 
+
+> y≥0
+
+X 
+
+> ξ∈[N]
+
+X
+
+> v∈V+
+
+pξwv − βξv − X
+
+> S⊆V+:v∈S
+
+αsS
+
+ yξv
+
+ . (σy)The following theorem is proved in Appendix L. 
+
+Theorem 6. For every α ≥ 0 and β ≤ 0,
+
+min {cTx + 1Tθ : x ∈ X , θ ∈ proj θ(Γ( x, α, β )) } ≥ σx(α) + σy(α, β ) + ν(α, β ).
+
+Corollary 4. Suppose that we solve the LP relaxation of Formulation (9) to optimality. Let α∗ ≥
+
+0 and β∗ ≤ 0 be optimal dual solutions associated with the SRIs and upper bound constraints on the y-variables, respectively. Then 
+
+z∗ = min {cTx + 1Tθ : x ∈ X , θ ∈ proj θ(Γ( x, α ∗, β ∗)) }.
+
+Proof. Let z′ = min {cTx + 1Tθ : x ∈ X , θ ∈ proj θ(Γ( x, α ∗, β ∗)) }. By Proposition 3, the feasible region of the problem in the RHS is a relaxation of P, meaning that z∗ ≥ z′. For the converse, apply Theorem 6 to obtain z′ ≥ σx(α∗) + σy(α∗, β ∗) + ν(α∗, β ∗). We are now done by the fact that ( α∗, β ∗) is optimal for Formulation (5.3) (Frangioni (2005) has a nice proof via “partial dualization”). Since the separation of SRIs and RCIs is performed heuristically, the LP relaxation of Formulation (9) is not solved to optimality in practice, and we instead obtain a bound ˜ z ≤ z∗.Nevertheless, we can still apply Theorem 6 to learn that, by querying the duals of the separated SRIs and the upper bound constraints on the y-variables, we obtain a projected SRI that implies the bound ˜ z in the ( x, θ )-space. 21 5.4 Branch-and-cut algorithm for the VRPSD under a scenario-optimal re-course policy 
+
+Inspired by the previous theoretical results, we propose a two-phase branch-and-cut algorithm for solving problem vrpsd (X , Q∗). First, we solve the LP relaxation of Formulation (9) and construct projected SRIs using the results from Sections 5.1 and 5.3. This allows us to recover strong bounds in the ( x, θ )-space. In the second step, we solve the problem to integrality by separating the projected SRIs developed in Sections 5.1 and 5.2. Since these projected SRIs dominate the ILS path cuts (Corollary 3), it follows from Theorem 1 of Ota and Fukasawa (2025) that this procedure yields an exact algorithm for solving vrpsd (X , Q∗). We describe the procedure in detail next. 
+
+Step 1: Solving the high-dimensional LP to obtain a strong root node relaxation. 
+
+We first solve the LP relaxation of Formulation (9) with a time limit of 60 seconds, using the separation of SRIs described in Appendix F. Let ˜ z be the resulting LP bound and let (˜ α, ˜β) be the corresponding optimal dual multipliers associated with the SRIs and upper bound constraints on the y-variables. Recall that we use aggregated SRIs of the form P 
+
+> ξ∈Ξ
+
+yξ(S) ≥ P
+
+> ξ∈Ξ
+
+(kξ(S) + x(E(S)) − | S|), for Ξ ⊆ [N ] and ∅ ⊊ S ⊆ V+ (see Fact 1). For each such constraint, we have a corresponding dual multiplier ˜ ιΞ 
+
+> S
+
+. To build ˜ α from ˜ ι, we may set ˜ αξS = P  
+
+> Ξ⊆[N]
+
+˜ιΞ 
+
+> S
+
+, for each ξ ∈ [N ] and S ⊆ V+.We emphasize that we present this construction only for conceptual purposes; our algorithm works directly with ˜ ι and builds the projected SRI associated with (˜ α, ˜β) without explicitly constructing ˜ α.Let ˜X be the relaxation of X obtained by considering only the RCIs (or SECs, if X = Xsub )that were separated when solving the LP relaxation of Formulation (9). Moreover, let S := 
+
+{(S, Ξ) : ˜ ιΞ 
+
+> S
+
+> 0 and wv > 0 for all v ∈ S}. We then solve the following relaxation: min cTx + 1Tθ, 
+
+s.t. X
+
+> v∈S
+
+max  
+
+> ξ∈[N]
+
+ 1
+
+pξwv
+
+
+
+θv ≥ | Ξ| · (x(E(S)) − | S|) + X
+
+> ξ∈Ξ
+
+kξ(S), ∀(S, Ξ) ∈ S , (20a) (x, θ ) ∈ ˜X × RV+ 
+
+> +
+
+. (20b) As observed in Example 4, inequalities (20a) are projected aggregated SRIs. Preliminary com-putational results show that it is better to use projected aggregated SRIs than the inequalities developed in Theorem 4. If the optimal value of Formulation (20) is at least ˜ z, we proceed to Step 2. Otherwise, we add the projected SRI P  
+
+> v∈V+:wv>0
+
+ϕv(˜ α, ˜β) θv ≥ P 
+
+> ξ∈[N]
+
+P 
+
+> S⊆V+
+
+˜αξS x(E(S)) + ν(˜ α, ˜β) which, by Theorem 6, guarantees the bound ˜ z.One may wonder why we add inequalities (20a) if Theorem 6 already guarantees that one projected SRI is enough to recover the bound ˜ z. Our reasoning here is the same as highlighted in (Chen et al., 2024; Gamrath and L¨ ubbecke, 2010; Ota et al., 2025): using a single inequality to recover a strong bound can be detrimental to the MIP solver performance, since it leads to a high-dimensional optimal face. By adding several projected SRIs, we try to mitigate this issue. 
+
+Step 2: Branch-and-cut algorithm based on the separation of projected SRIs. After constructing a strong root-node relaxation in Step 1, we proceed similarly to the branch-and-cut algorithm of Ota and Fukasawa (2025), which separates ILS partial route and set cuts. However, whenever a violated ILS partial route cut is identified, we leverage the results from Section 5.2 to separate the corresponding dominating projected SRI instead. Specifically, given a candidate solution (¯ x, ¯θ), we use the separation algorithm of Ota and Fukasawa (2025) to find partial routes H = ( S1, . . . , S ℓ) such that WOF (¯ x; X⊇(H)) > 0. We 22 then construct a single LP with N · | V+(H)| variables to simultaneously solve the LPs (18) for every scenario ξ ∈ [N ]. To improve the efficiency, for each scenario ξ ∈ [N ], we only consider constraints of type (18a) corresponding to minimal partial routes H′ ⊆ H, meaning that kξ(H′′ ) < k ξ(H′), for every H′′ ⊆ H′ with H′′ ̸ = H′. In this way, for each scenario ξ ∈ [N ], our formulation only requires ℓ(kξ(H) − 1) constraints of type (18a), rather than ℓ2.By solving the previous LP, we obtain dual multipliers ( α, β ) and a corresponding projected SRI that we add to the formulation. Theorem 5 implies that this projected SRI dominates the ILS partial route cut θ(V+(H)) ≥ L ∗(H) · WOF (x; X⊇(H)). Consequently, it follows from Theorem 1 of Ota and Fukasawa (2025) that this procedure already yields a correct branch-and-cut algorithm for vrpsd (X , Q∗). To improve performance, the algorithm of Ota and Fukasawa (2025) also separates set cuts. Whenever a violated set cut is detected, we instead add a corresponding projected aggregated SRI (15). Preliminary experiments indicate that these inequalities are more effective in practice than the dominating projected SRI described in Theorem 4. Further details on our separation procedures are provided in Appendix N. 
+
+5.5 Extension to other recourse functions 
+
+Suppose now that Q ≥ Q ∗ is a recourse function satisfying Assumptions 2 and 3 (with the same parameters w ∈ QV+ 
+
+> +
+
+and b ∈ ZV+ 
+
+> ++
+
+used for defining Q∗). By Proposition 1, we know that projected SRIs are valid for F(X , Q) ⊆ P . Consequently, we can solve vrpsd (X , Q) by separating additional inequalities on top of the algorithm described in Section 5.4. Specifically, for any candidate solution (¯ x, ¯θ) ∈ (X ∩ ZE ) × RV+ 
+
+> +
+
+, we can verify if every route R ∈ R (¯ x) satisfies P 
+
+> v∈V+(R)
+
+¯θv ≥ Q (R). If not, we add the (partial) route cut θ(V+(R)) ≥Q(R) · WHS (x; X=(R)) to the formulation. As shown by Ota and Fukasawa (2025), these cuts suffice to recover the recourse cost of a solution. In our implementation, we also incorporate additional partial route cuts developed in Ota and Fukasawa (2025) for the recourse function QC .Appendix N contains more details. 
+
+# 6 Computational experiments 
+
+We conducted computational experiments on the VRPSD with scenarios under both the scenario-optimal and classical recourse policies, with and without the assumption of CVRP feasibility. In other words, we considered problems vrpsd (X , Q), for X ∈ {X cvrp , Xsub } and Q ∈ {Q ∗, QC }.Our goal here is twofold. First, we complement the theoretical findings in Section 5.2 by empir-ically comparing the performance of projected SRIs and ILS cuts with respect to Q∗. Second, since Proposition 1 ensures that inequalities valid for Q∗ are also valid for QC , we also in-vestigate whether incorporating projected SRIs can improve the performance of the ILS-based algorithm for vrpsd (X , QC ) proposed by Ota and Fukasawa (2025). 
+
+6.1 Experimental setup 
+
+Our approaches were evaluated on the instances developed by Ota and Fukasawa (2025) for the VRPSD with scenarios, which in turn are based on the 270 instances of Jabali et al. (2014) and the 20 instances of Dinh et al. (2018). We implemented three algorithmic approaches: 
+
+• ils: the ILS-based method proposed by Ota and Fukasawa (2025), which we applied to both Q∗ and QC ;
+
+• sri: the SRI-based algorithm discussed in Section 5.4, which only applies to Q∗;
+
+• ils+sri: the extension combining projected SRIs with ILS cuts described in Section 5.5, which we applied only to QC .23 All algorithms were implemented in C++ using Gurobi 12 as the LP/MIP solver and the Lemon library (Dezs˝ o et al., 2011) for basic graph operations. Experiments were executed in single-thread mode with a time limit of 1800 seconds per instance on a machine equipped with an Intel(R) Xeon(R) Gold 6142 CPU @ 2.60 GHz. 
+
+6.2 Numerical results 
+
+We first consider in Table 1 the scenario-optimal recourse function Q∗. Each row represents a different choice of first-stage feasibility region ( X ∈ {X cvrp , Xsub }) and instance set (“Dinh” or “Jabali”). The “Total” column indicates the total number of instances in each set. For each algorithm, we report the number of instances solved to optimality within the time limit (“Solved”), the average solution time in seconds (“T(s)”), the average optimality gap for un-solved instances (“G(%)”), and the average root node gap (“RG(%)”). The average solution times were computed considering only the instances that were solved to optimality by both algorithms. Moreover, the optimality and root gaps were measured relative to the best primal bound found across the algorithms.                                                            
+
+> ils sri
+> XQInstance set Total Solved T(s) G(%) RG(%) Solved T(s) G(%) RG(%)
+> Xcvrp Q∗Dinh 20 9204.08 8.15 7.75 9117.53 7.71 6.65
+> Xcvrp Q∗Jabali 270 267 54.02 1.56 1.73 267 92.34 0.70 1.23
+> Xsub Q∗Dinh 20 0–29.00 34.39 4–9.39 12.44
+> Xsub Q∗Jabali 270 77 211.58 6.74 8.00 249 67.99 2.40 2.41 Table 1: Comparison of ILS and SRI algorithms on VRPSD instances with Q=Q∗.
+
+We see that algorithm sri consistently achieved smaller root gaps than ils , which validates our theoretical findings from Section 5.2, where we proved that the inequalities used by algo-rithm sri dominate the ILS cuts used by ils (since Q = Q∗). Although this improved relaxation does not translate into an overall better performance when X = Xcvrp , it yields a substantial improvement when X = Xsub , with sri solving 176 more instances than ils in total. These different behaviors can be explained by the fact that enforcing CVRP feasibility (i.e., x ∈ X cvrp ∩ ZE ) may significantly restrict the feasible region, strengthening the ILS set cuts and leaving little room for improvement via better recourse approximation. On the other hand, when X = Xsub , the feasible region is typically much larger, which makes the quality of the recourse approximation critical. As discussed in (Hoogendoorn and Spliet, 2025), while the CVRP-feasibility assumption is often reasonable, it can be arbitrary and undesirable in certain settings. In such situations, our experiments highlight that projected SRIs provide a tighter recourse approximation without artificially restricting the problem formulation. Table 2 shows that a similar situation occurs for the classical recourse policy ( Q = QC ). The hybrid approach ils+sri consistently achieved stronger root gaps than ils , and this improvement translated into an overall better performance of the algorithm. As with the scenario-optimal recourse policy, the gains were much more pronounced for X = Xsub , but algorithm ils+sri still solved 5 more instances than ils when X = Xcvrp . These results highlight the value of our generic treatment and Proposition 1, which enables the use of SRIs to recourse functions besides the scenario-optimal one. In this case, we successfully applied (projected) SRIs to the recourse function QC .Lastly, to complement the results from Tables 1 and 2, we show in Figure 3 the empirical cumulative distribution of execution times for both algorithms. Specifically, consider Figure 3a and take as an example a point p = ( p1, p 2) ∈ R2 on the line of algorithm ils . Let I be the union of the instance sets of Jabali et al. (2014) and Dinh et al. (2018), so |I| = 290. For a given 24 ils ils+sri                                                        
+
+> XQInstance set Total Solved T(s) G(%) RG(%) Solved T(s) G(%) RG(%)
+> Xcvrp QCDinh 20 8246.56 7.34 7.48 11 125.14 8.67 6.38
+> Xcvrp QCJabali 270 261 47.72 1.13 1.81 263 90.26 0.96 1.32
+> Xsub QCDinh 20 0–30.59 35.80 4–12.56 14.89
+> Xsub QCJabali 270 73 203.90 7.21 8.42 217 90.24 2.87 2.83 Table 2: Comparison of ILS and SRI algorithms on VRPSD instances.
+
+recourse function Q ∈ {Q C , Q∗}, let ˆI(Q) ⊆ I be the subset of instances that algorithm ils 
+
+solved within p1 seconds using first-stage feasible region Xcvrp and recourse function Q. Point p2
+
+is then given by the ratio p2 = |ˆI(Q∗)|+|ˆI(QC )| 
+
+> 2|I|
+
+. Figure 3b was constructed similarly for X = Xsub .These plots confirm that projected SRIs are particularly effective when no CVRP-feasibility assumption is imposed. We also point out that the “ (ils+) sri ” curve exhibits slow progress in the first seconds. This is due to the procedure described in Step 1 of Section 5.4, where we solve a high-dimensional formulation in the ( x, y )-space for 60 seconds. Overall, after 200 seconds and with X = Xcvrp , we see no significant difference between the performance of ILS and SRI-based methods. More detailed computational results can be found in Appendix O.                
+
+> (a) Execution time for Xcvrp .(b) Execution time for Xsub .
+> Figure 3: Empirical cumulative distribution of the execution times. The legend (ils+) sri refers to algorithm sri
+> when Q=Q∗, and to algorithm ils+sri when Q=QC.
+
+# 7 Conclusion and future work 
+
+In this paper, we introduced a framework for the VRPSD with scenarios in which recourse policies are represented as feasible solutions of a MIP. We characterized the convex hull of such recourse policies and introduced a new class of inequalities termed scenario recourse inequalities (SRIs). We showed that SRIs yield a formulation for the VRPSD under a scenario-optimal recourse policy, and we further demonstrated that they are valid for other recourse policies and dominate certain ILS cuts. Our computational results show that, compared to ILS cuts, SRIs provide a better ap-proximation of the recourse function and are particularly useful when CVRP feasibility is not imposed. Since we can now better approximate the recourse function, there is less need to rely on the assumption of CVRP feasibility, which imposes a somewhat arbitrary hard capacity 25 constraint on the sum of expected demands (see Hoogendoorn and Spliet (2025)). Using our results, one could instead consider more flexible approaches, such as assigning larger costs to recourse actions to reduce the occurrence of failures. We leave this direction for future work. Overall, this work shows that modeling recourse decisions via a network flow formulation can be useful and yields a polyhedral structure that can be exploited. For the future, it would be interesting to study the separation of projected SRIs and to explore similar ideas in other stochastic routing problems where the recourse policy involves other types of resource collec-tion/consumption along routes. 
+
+# References 
+
+Dimitris Bertsimas and Melvyn Sim. Robust discrete optimization and network flows. Mathe-matical programming , 98(1):49–71, 2003. Dimitris Bertsimas and Melvyn Sim. The price of robustness. Operations research , 52(1):35–53, 2004. John R Birge and Francois Louveaux. Introduction to stochastic programming . Springer Science & Business Media, 2011. Rui Chen, Oktay G¨ unl¨ uk, and Andrea Lodi. Recovering Dantzig–Wolfe bounds by cutting planes. Operations Research , 2024. Christian H. Christiansen and Jens Lysgaard. A branch-and-price algorithm for the capacitated vehicle routing problem with stochastic demands. Operations Research Letters , 35(6):773–781, 2007. ISSN 0167-6377. Michele. Conforti, Gerard Cornuej´ ols, and Giacomo. Zambelli. Integer Programming. Grad-uate Texts in Mathematics, 271. Springer International Publishing, Cham, 2014. ISBN 9783319110080. W.J. Cook, W.H. Cunningham, W.R. Pulleyblank, and A. Schrijver. Combinatorial Opti-mization . Wiley Series in Discrete Mathematics and Optimization. Wiley, 2011. ISBN 9781118031391. G.B. Dantzig, R. Fulkerson, and S.M. Johnson. Solution of a large-scale traveling salesman problem. Operations Research , 2:393–410, 1954. Bal´ azs Dezs˝ o, Alp´ ar J¨ uttner, and P´ eter Kov´ acs. Lemon–an open source c++ graph template library. Electronic Notes in Theoretical Computer Science , 264(5):23–45, 2011. Ibrahima Diarrassouba. On the complexity of the separation problem for rounded capacity inequalities. Discrete Optimization , 25:86–104, 2017. ISSN 1572-5286. Thai Dinh, Ricardo Fukasawa, and James Luedtke. Exact algorithms for the chance-constrained vehicle routing problem. Mathematical Programming , 172(1):105–138, Nov 2018. ISSN 1436-4646. Moshe Dror, Gilbert Laporte, and Pierre Trudeau. Vehicle routing with stochastic demands: Properties and solution frameworks. Transportation Science , 23(3):166–176, 1989. Alexandre M. Florio, Richard F. Hartl, and Stefan Minner. New exact algorithm for the vehicle routing problem with stochastic demands. Transportation Science , 54(4):1073–1090, 2020. 26 Alexandre M Florio, Michel Gendreau, Richard F Hartl, Stefan Minner, and Thibaut Vidal. Recent advances in vehicle routing with stochastic demands: Bayesian learning for correlated demands and elementary branch-price-and-cut. European Journal of Operational Research ,2022. Antonio Frangioni. About lagrangian methods in integer optimization. Annals of Operations Research , 139:163–193, 2005. Gerald Gamrath and Marco E L¨ ubbecke. Experiments with a generic Dantzig-Wolfe decompo-sition for integer programs. In International Symposium on Experimental Algorithms , pages 239–252. Springer, 2010. Charles Gauvin, Guy Desaulniers, and Michel Gendreau. A branch-cut-and-price algorithm for the vehicle routing problem with stochastic demands. Computers & Operations Research , 50: 141–153, 2014. ISSN 0305-0548. Michel Gendreau, Gilbert Laporte, and Ren´ e S´ eguin. An exact algorithm for the vehicle routing problem with stochastic demands and customers. Transportation Science , 29(2):143–155, 1995. Michel Gendreau, Ola Jabali, and Walter Rei. 50th anniversary invited article—future research directions in stochastic vehicle routing. Transportation Science , 50(4):1163–1173, 2016. Hip´ olito Hern´ andez-P´ erez and Juan-Jos´ e Salazar-Gonz´ alez. The one-commodity pickup-and-delivery travelling salesman problem. In Combinatorial Optimization—Eureka, You Shrink! Papers Dedicated to Jack Edmonds 5th International Workshop Aussois, France, March 5–9, 2001 Revised Papers , pages 89–104. Springer, 2003. Curt Hjorring and John Holt. New optimality cuts for a single-vehicle stochastic routing prob-lem. Annals of Operations Research , 86(0):569–584, 1999. Alan J Hoffman. Some recent applications of the theory of linear inequalities to extremal combinatorial analysis. New York, NY , pages 113–117, 1958. YN Hoogendoorn and R Spliet. An improved integer L-shaped method for the vehicle routing problem with stochastic demands. INFORMS Journal on Computing , 35(2):423–439, 2023. YN Hoogendoorn and R Spliet. An evaluation of common modeling choices for the vehicle routing problem with stochastic demands. European Journal of Operational Research , 321 (1):107–122, 2025. Ola Jabali, Walter Rei, Michel Gendreau, and Gilbert Laporte. Partial-route inequalities for the multi-vehicle routing problem with stochastic demands. Discrete Applied Mathematics ,177:121–136, 2014. ISSN 0166-218X. Gilbert Laporte and Yves Nobert. A branch and bound algorithm for the capacitated vehicle routing problem. Operations-Research-Spektrum , 5(2):77–85, 1983. Gilbert Laporte, Fran¸ cois V. Louveaux, and Luc van Hamme. An integer L-shaped algorithm for the capacitated vehicle routing problem with stochastic demands. Operations Research ,50(3):415–423, 2002. Robin Legault, Panca Jodiawan, Jean-Fran¸ cois Cˆ ot´ e, and Leandro C Coelho. Superadditivity properties and new valid inequalities for the vehicle routing problem with stochastic demands. 
+
+arXiv preprint arXiv:2508.05877 , 2025. 27 Fran¸ cois V Louveaux and Juan-Jos´ e Salazar-Gonz´ alez. Exact approach for the vehicle routing problem with stochastic demands and preventive returns. Transportation Science , 52(6): 1463–1478, 2018. Jens Lysgaard, Adam N. Letchford, and Richard W. Eglese. A new branch-and-cut algorithm for the capacitated vehicle routing problem. Mathematical Programming , 100(2):423–445, 2004. ISSN 1436-4646. G.L. Nemhauser and L.A. Wolsey. Integer and Combinatorial Optimization . John Wiley & Sons, 1988. Matheus J Ota and Ricardo Fukasawa. Hardness of pricing routes for two-stage stochastic vehicle routing problems with scenarios. Operations Research , 2024. Matheus J. Ota, Ricardo Fukasawa, and Aleksandr M. Kazachkov. Approximating value func-tions via corner Benders’ cuts. Online preprint: https://arxiv.org/abs/2509.21758 , 2025. Matheus Jun Ota and Ricardo Fukasawa. On vehicle routing problems with stochastic demands – Generic integer L-shaped formulations. Online preprint: 
+
+https://arxiv.org/abs/2510.04043 , 2025. Jorge Oyola, Halvard Arntzen, and David L. Woodruff. The stochastic vehicle routing problem, a literature review, Part I: models. EURO Journal on Transportation and Logistics , 7(3): 193–221, 2018. ISSN 2192-4376. Lucas Parada, Robin Legault, Jean-Fran¸ cois Cˆ ot´ e, and Michel Gendreau. A disaggregated integer L-shaped method for stochastic vehicle routing problems with monotonic recourse. 
+
+European Journal of Operational Research , 2024. Konstantin Pavlikov, Niels Christian Petersen, and Jon Lilholt Sørensen. Exact separation of the rounded capacity inequalities for the capacitated vehicle routing problem. Networks , 83 (1):197–209, 2024. Ragheb Rahmaniani, Teodor Gabriel Crainic, Michel Gendreau, and Walter Rei. The benders decomposition algorithm: A literature review. European Journal of Operational Research ,259(3):801–817, 2017. Majid Salavati-Khoshghalb, Michel Gendreau, Ola Jabali, and Walter Rei. A hybrid recourse policy for the vehicle routing problem with stochastic demands. EURO Journal on Trans-portation and Logistics , 8(3):269–298, Sep 2019a. ISSN 2192-4384. Majid Salavati-Khoshghalb, Michel Gendreau, Ola Jabali, and Walter Rei. An exact algorithm to solve the vehicle routing problem with stochastic demands under an optimal restocking policy. European Journal of Operational Research , 273(1):175–189, 2019b. ISSN 0377-2217. Majid Salavati-Khoshghalb, Michel Gendreau, Ola Jabali, and Walter Rei. A rule-based recourse for the vehicle routing problem with stochastic demands. Transportation Science , 53(5):1334– 1353, 2019c. Frank A Tillman. The multiple terminal delivery problem with probabilistic demands. Trans-portation Science , 3(3):192–204, 1969. Paolo Toth and Daniele Vigo, editors. The Vehicle Routing Problem . SIAM Monographs on Discrete Mathematics and Applications. SIAM, 2002. Wen-Huei Yang, Kamlesh Mathur, and Ronald H Ballou. Stochastic vehicle routing problem with restocking. Transportation science , 34(1):99–112, 2000. 28 James R. Yee and Bruce L. Golden. A note on determining operating strategies for probabilistic vehicle routing. Naval Research Logistics Quarterly , 27(1):159–163, 1980. 
+
+# A Proof of Lemma 1 
+
+Lemma 1. Let R be a route and ξ ∈ [N ]. For any vector yξ ∈ ZV+ , we have that yξ ∈ Y ξ(⃗ R)
+
+if and only if there exist f ξ ∈ RA 
+
+> +
+
+and gξ ∈ RV+ 
+
+> +
+
+such that 
+
+f ξ 
+
+> (vi−1,v i)
+
++ f ξ 
+
+> (vi+1 ,v i)
+
++ dξ(vi) = f ξ 
+
+> (vi,v i+1 )
+
++ f ξ 
+
+> (vi,v i−1)
+
++ gξvi , ∀i ∈ [ℓ], (5a) 
+
+f ξ 
+
+> (vi−1,v i)
+
+≤ C
+
+2 , ∀i ∈ [ℓ + 1] , (5b) 
+
+f ξ 
+
+> (vi,v i−1)
+
+≤ C
+
+2 , ∀i ∈ [ℓ + 1] , (5c) 
+
+gξvi ≤ C · yξvi , ∀i ∈ [ℓ]. (5d) 
+
+In particular, this implies that Yξ(⃗ R) = Yξ(⃗ R).Proof. Let ¯ yξ ∈ Y ξ(⃗ R). We first show that ¯ yξ also belongs to Yξ(⃗ R). Using Definition 1, we know that there exist ⃗ f ξ and ¯ gξ satisfying (4). Construct vector ⃗ f ξ ∈ RA 
+
+> +
+
+by setting ⃗ f ξa = C −⃗ f ξ
+
+> (vi,v i+1 )
+
+if a = ( vi+1 , v i) and ⃗ f ξa = 0 otherwise. For each i ∈ [ℓ], we have that ⃗f ξ 
+
+> (vi−1,v i)
+
++ dξ(vi) = ⃗ f ξ 
+
+> (vi,v i+1 )
+
++ gξvi
+
+⇐⇒ C −⃗ f ξ 
+
+> (vi,v i+1 )
+
++ dξ(vi) = C −⃗ f ξ 
+
+> (vi−1,v i)
+
++ gξvi
+
+⇐⇒ ⃗ f ξ 
+
+> (vi+1 ,v i)
+
++ dξ(vi) = ⃗ f ξ 
+
+> (vi,v i−1)
+
++ gξvi .
+
+So the pair ( ⃗ f ξ, ¯gξ) verifies that ¯ yξ ∈ Y ξ(⃗R). Take ¯f ξ = ( ⃗f ξ +⃗ f ξ)/2 and observe that ( ¯f ξ, ¯gξ) is feasible for Formulation (5). Suppose now that ( ¯f ξ, ¯gξ) is an arbitrary pair that is feasible for Formulation (5) with yξ = ¯ yξ
+
+integer. We use ¯f ξ to construct a vector ⃗ f ξ ∈ RA 
+
+> +
+
+feasible for Formulation (4) by setting ⃗ f ξa =¯f ξ 
+
+> (vi,v i+1 )
+
++
+
+ C 
+
+> 2
+
+− ¯f ξ
+
+> (vi+1 ,v i)
+
+
+
+if a = ( vi, v i+1 ), and ⃗ f ξa = 0 otherwise. Clearly 0 ≤⃗ f ξa ≤ C, for all a ∈ A. Moreover, for each i ∈ [ℓ], ¯f ξ 
+
+> (vi−1,v i)
+
++ ¯f ξ 
+
+> (vi+1 ,v i)
+
++ dξ(vi) = ¯f ξ 
+
+> (vi,v i+1 )
+
++ ¯f ξ 
+
+> (vi,v i−1)
+
++ ¯ gξvi
+
+⇐⇒ ¯f ξ 
+
+> (vi−1,v i)
+
++
+
+ C
+
+2 − ¯f ξ
+
+> (vi,v i−1)
+
+
+
++ dξ(vi) = f ξ 
+
+> (vi,v i+1 )
+
++
+
+ C
+
+2 − ¯f ξ
+
+> (vi+1 ,v i)
+
+
+
++ ¯ gξvi
+
+⇐⇒ ⃗ f ξ 
+
+> (vi−1,v i)
+
++ dξ(vi) = ⃗ f ξ 
+
+> (vi,v i+1 )
+
++ ¯ gξvi ,
+
+which shows that ¯ yξ ∈ Y ξ(⃗ R). 
+
+# B Proof of Lemma 3 
+
+Lemma 3. Let ¯x ∈ X ∩ ZE and R(¯ x) = {R1, . . . , R k}. Let ¯y ∈ R[N ]×V+ and ¯y1, . . . , ¯yk ∈ R[N ]×V+
+
+be such that 
+
+(¯ yi)ξv = I(v ∈ V+(Ri)) · ¯yξv, ∀i ∈ [k], ξ ∈ [N ], v ∈ V+.
+
+Then ¯y ∈ Π(¯ x) if and only if (¯ y1, . . . , ¯yk) ∈ Π( R1) × . . . × Π( Rk).
+
+29 Proof. Suppose ¯ y ∈ Π(¯ x) and fix an arbitrary i ∈ [k]. Clearly ¯ yi is integral. Additionally, Formulation (4) (with respect to route Ri) only has constraints for the y-variables associated with customers v ∈ V+(Ri), in which case ¯ yξv = (¯ yi)ξv, for all ξ ∈ [N ]. This implies that ¯ yi ∈
+
+Π( Ri). Conversely, whenever (¯ y1, . . . , ¯yk) ∈ Π( R1) × . . . × Π( Rk), we have that ¯ y is integral and (¯ yi)ξv ≤ ¯yξv, for all i ∈ [k], ξ ∈ [N ] and v ∈ V+. By Definition 1 (and Formulation (4)), we conclude that ¯ y is a recourse policy for routes R1, . . . , R k, meaning that ¯ y ∈ ∩ ki=1 Π( Ri) = Π(¯ x). 
+
+# C Proof of Lemma 4 
+
+Lemma 4. Fix b ∈ ZV+ 
+
+> +
+
+. For every ¯x ∈ X , define 
+
+flow (¯ x) := 
+
+
+
+y ∈ [0, b ]N :
+
+f ξ(δ−(v)) + dξ(v) = f ξ(δ+(v)) + gξv, ∀v ∈ V+, ξ ∈ [N ]
+
+f ξ 
+
+> (u,v )
+
+≤ C
+
+2 ¯x{u,v }, ∀uv ∈ A, ξ ∈ [N ]
+
+gξv ≤ C · yξv, ∀v ∈ V+, ξ ∈ [N ]
+
+f ∈ R[N ]×A 
+
+> +
+
+, g ∈ R[N ]×V+
+
+> +
+
+
+
+.
+
+Then flow (¯ x) ∩ Z[N ]×V+ = Π(¯ x) ∩ [0, b ]N , for every ¯x ∈ X ∩ ZE .Proof. Fix ¯ x ∈ X ∩ ZE and let R(¯ x) = {R1, . . . , R k}. Let (¯ y, ¯f , ¯g) be feasible for the formulation of flow (¯ x) ∩ Z[N ]×V+ and set ¯ y1, . . . , ¯yk as in Lemma 3. To show that ¯ y ∈ Π(¯ x) it suffices to show that ¯ yi ∈ Π( Ri), for each i ∈ [k]. Fix an arbitrary i ∈ [k]. Suppose that Ri has a single customer v. By Assumption 1, dξ(v) ≤ C, for all ξ ∈ [N ], so Π( Ri) contains the zero vector and Z[N ]×V+ 
+
+> +
+
+∩ [0, b ]N ⊆ Π( Ri). So assume |V+(Ri)| ≥ 2. Set ¯f i ∈ R[N ]×A 
+
+> +
+
+and ¯ gi ∈ R[N ]×V+ 
+
+> +
+
+as follows. ( ¯f i)ξa = I(a ∈ A(⃗ Ri) ∪ A(⃗ Ri)) · ¯f ξa , ∀a ∈ A, ξ ∈ [N ],
+
+(¯ gi)ξv = I(v ∈ V+(Ri)) · ¯gξv, ∀v ∈ V+, ξ ∈ [N ].
+
+Then one can check that (¯ yi, ¯fi, ¯gi) is feasible for Formulation (5). A similar reasoning is applied for the reverse direction. Let ˆ y ∈ Π(¯ x) ∩ [0, b ]N and apply Lemma 3 to get vectors ˆ y1, . . . , ˆyk. For every i ∈ [k], there exists ˆf i ∈ R[N ]×A 
+
+> +
+
+and ˆ gi ∈ R[N ]×V+
+
+> +
+
+such that (ˆ yi, ˆf i, ˆgi) is feasible for Formulation (5). Moreover, without loss of generality, we may assume that, for every ξ ∈ [N ], we have ( ¯fi)ξa = 0, for a ∈ A \ (A(⃗Ri) ∪ A(⃗ Ri)), and (¯ gi)ξv = 0, for v / ∈ V+(Ri). Set ˆf = Pki=1 ˆf i and ˆ g = Pki=1 ˆgi and note that (ˆ y, ˆf , ˆg) is feasible for the formulation defining flow (¯ x). 
+
+# D Proof of Proposition 2 
+
+Proposition 2. Fix b ∈ ZV+ 
+
+> +
+
+. For every ¯x ∈ X ,
+
+flow (¯ x) = 
+
+
+
+y ∈ [0, b ]N : yξ(S) ≥ dξ(S)
+
+C + ¯ x(E(S)) − | S|, ∀∅ ⊊ S ⊆ V+, ξ ∈ [N ]
+
+
+
+.
+
+Proof. Let ¯ x ∈ X and ¯ y ∈ [0, b ]N . Fix a scenario ξ ∈ [N ] and create a digraph D′ = ( V, A ′)obtained from D by duplicating the arcs ( v, 0), for each v ∈ V+. Next, construct a vector of arc capacities h ∈ RA′
+
+by setting ha = ( C/ 2) ¯ x{u,v }, for each a = uv ∈ A; and ha = C ¯yξv, for each a = ( v, 0) ∈ A′ \ A. Additionally, set d′ 
+
+> 0
+
+= dξ(V+) and d′ 
+
+> v
+
+= −dξ(v), for all v ∈ V+.30 From this construction, apply Theorem 1 to learn that a tuple (¯ yξ, f ξ, g ξ) satisfying the constraints in flow (¯ x) with respect to scenario ξ ∈ [N ] exists if and only if 
+
+h(δ+(S)) ≥ d′(V \ S), ∀∅ ⊊ S ⊆ V, 
+
+⇐⇒ h(δ+(S)) ≥ d′(V \ S), ∀∅ ⊊ S ⊆ V+, (as d′ 
+
+> v
+
+≤ 0, for all v ∈ V+)
+
+⇐⇒ C (¯ yξ(S) + ¯ x(δ(S)) /2) ≥ dξ(S) ∀∅ ⊊ S ⊆ V+.
+
+Since ¯ x ∈ X , we close the proof by applying ¯ x(δ(S)) = 2 |S|− 2¯ x(E(S)) to the last inequality. 
+
+# E Proof of Theorem 3 
+
+We first show a simple reformulation of the set conv(Π(¯ x) ∩ [0, b ]N ): 
+
+Lemma 7. Let ¯x ∈ X ∩ ZE . Then 
+
+conv(Π(¯ x) ∩ [0, b ]N ) = \
+
+> R∈R (¯ x)
+
+conv(Π( R) ∩ [0, b ]N ).
+
+Proof. Call H the set in the RHS of the statement. One direction of the inclusion follows from standard arguments: conv(Π(¯ x) ∩ [0, b ]N ) = conv 
+
+ \
+
+> R∈R (¯ x)
+
+(Π( R) ∩ [0, b ]N )
+
+ ⊆ conv( H) = H,
+
+where the last equality follows because the intersection of convex sets is convex. For the other direction, let R(¯ x) = {R1, . . . , R k} and let ¯ y be an extreme point of H.Set ¯ y1, . . . , ¯yk according to Lemma 3. We show that ¯ yi ∈ Π( Ri), for all i ∈ [k]. Sup-pose by contradiction that, for some i ∈ [k], ¯ yi /∈ Π( Ri). Without loss of generality, as-sume i = k. Then ¯ yk is a (strict) convex combination of points in Π( Rk) ∩ [0, b ]N , i.e., there exists {r1, . . . r p} ⊆ Π( Rk) ∩ [0, b ]N and λ ∈ Rp 
+
+> ++
+
+such that p ≥ 2, ¯ yk = Ppj=1 λj rj and 1Tλ = 1. For each ξ ∈ [N ] and v / ∈ V+(Rk), (¯ yk)ξv = 0 implies ( rj )ξv = 0, for all j ∈ [p]. Hence, for each j ∈ [p], ˆ yj = ( Pk−1 
+
+> i=1
+
+¯yi) + rj belongs to H. Therefore, ¯ y = Ppj=1 λj ˆyj , contradicting the extremality of ¯ y.
+
+Theorem 3. Fix b ∈ ZV+ 
+
+> +
+
+. For every ¯x ∈ X , define 
+
+sri (¯ x) := 
+
+n
+
+y ∈ [0, b ]N : yξ(S) ≥ kξ(S) + ¯ x(E(S)) − | S|, ∀∅ ⊊ S ⊆ V+, ξ ∈ [N ]
+
+o
+
+.
+
+Then sri (¯ x) = conv(Π(¯ x) ∩ [0, b ]N ), for every ¯x ∈ X ∩ ZE .Proof. Fix ¯ x ∈ X ∩ ZE and let R(¯ x) = {R1, . . . , R k}. Define 
+
+H := 
+
+n
+
+y ∈ [0, b ]N : yξ(R′) ≥ kξ(R′) − 1, ∀i ∈ [k], R ′ ⊆ Ri, ξ ∈ [N ]
+
+o
+
+.
+
+Then 
+
+H Corollary 1 
+
+=
+
+> k
+
+\
+
+> i=1
+
+conv(Π( Ri) ∩ [0, b ]N ) Lemma 7 
+
+= conv(Π(¯ x) ∩ [0, b ]N )Since SRIs are valid for Π(¯ x) ∩ [0, b ]N , we have conv(Π(¯ x) ∩ [0, b ]N ) ⊆ sri (¯ x). Conversely, for every ξ ∈ [N ], i ∈ [k] and R′ ⊆ Ri, inequality 
+
+yξ(R′) ≥ kξ(R′) − 1 = kξ(R′) + ¯ x(V+(R′)) − | V+(R′)|
+
+is an SRI, so sri (¯ x) ⊆ H = conv(Π(¯ x) ∩ [0, b ]N ). 31 F Heuristics for separating scenario recourse inequalities 
+
+Before discussing our separation routines, we remark that the separation of SRIs is strongly NP -hard in general. Indeed, suppose that (¯ x, ¯y) ∈ X × [0, b ]N is a candidate solution with ¯ yξ = 0,for some ξ ∈ [N ]. Since for every ∅ ⊊ S ⊆ V+, we have that ¯ yξ(S) ≥ kξ(S) + ¯ x(E(S)) − | S| is equivalent to ¯ x(E(S)) ≤ | S| − ⌈ dξ(S)/C ⌉, it follows that separating a violated SRI reduces to finding a violated rounded-capacity inequality (RCI). As the separation of RCIs is strongly NP -hard (Diarrassouba, 2017), we do not expect to separate the SRIs exactly in pseudo-polynomial time. Instead, we propose two separation heuristics: one based on the CVRPSEP package of Lysgaard et al. (2004), and another one based on an MILP formulation. By ordering the scenarios by their total demands, we assume henceforth that d1(V+) ≥ . . . ≥ dN (V+). 
+
+F.1 Heuristic based on the CVRPSEP package 
+
+This separation heuristic simply calls CVRPSEP, for each scenario ξ = 1 , . . . , N , and checks whether the returned candidate sets correspond to violated SRIs. The overall procedure is summarized in Algorithm 1. We make a few brief observations regarding this algorithm. First, we limit CVRPSEP to return at most 10 sets, so |S| ≤ 10 in line 4. Second, line 6 effectively constructs the aggregated SRIs discussed in Fact 1. Finally, we stop the algorithm earlier in line 10 to avoid calling CVRPSEP for every scenario. 
+
+Algorithm 1 SRI-CVRPSEP 
+
+Input: (¯ x, ¯y) ∈ X × [0, b ]N .
+
+Output: A set of pairs ( S, Ξ), with ∅ ⊊ S ⊆ V+ and Ξ ⊆ [N ], such that P 
+
+> ξ∈Ξ
+
+¯yξ(S) <P
+
+> ξ∈Ξ
+
+(kξ(S) + ¯ x(E(S)) − | S|). Each of these violated inequalities will be later added to a relaxation of Formulation (9).  
+
+> 1:
+
+procedure SRI-CVRPSEP (¯ x, ¯y) 
+
+> 2:
+
+C ← ∅  
+
+> 3:
+
+for ξ = 1 , . . . , N do  
+
+> 4:
+
+Call CVRPSEP with demand vector dξ to get a family of sets S ⊆ 2V+ such that ¯ x(E(S)) > |S| − kξ(S), for every S ∈ S . 
+
+> 5:
+
+for S ∈ S do  
+
+> 6:
+
+Ξ ← { ξ′ ∈ [N ] : ¯ yξ′
+
+(S) < k ξ′ (S) + ¯ x(E(S)) − | S|}  
+
+> 7:
+
+if Ξ̸ = ∅ then  
+
+> 8:
+
+C ← C ∪ { (S, Ξ) } 
+
+> 9:
+
+if C̸ = ∅ then  
+
+> 10:
+
+break  
+
+> 11:
+
+return C
+
+F.2 MILP formulation 
+
+We also adapt the mixed-integer linear programming model of Pavlikov et al. (2024), originally proposed for the exact separation of RCIs, to separate SRIs. To explain this model, let (¯ x, ¯y) ∈ X × [0, b ]N be a candidate solution. This solution violates an SRI if and only if there exists a scenario ξ ∈ [N ] and a set S ⊆ V+ such that 
+
+ dξ(S)
+
+C
+
+
+
++ ¯ x(E(S)) − | S| − ¯yξ(S) > 0. (21) Fix an arbitrary ε ∈ (0 , 1). The problem of maximizing the LHS of (21) can be solved with the 32 following formulation: max (γ + 1) − X
+
+> v∈V+
+
+(¯ yv + 1) qv + X
+
+> e∈E\δ(0)
+
+¯xehe,
+
+s.t. γC ≤ X
+
+> v∈V+
+
+dξvqv − ε, (22a) 
+
+huv ≤ qu, ∀uv ∈ E \ δ(0) , (22b) 
+
+huv ≤ qv, ∀uv ∈ E \ δ(0) , (22c) 
+
+huv ≥ qu + qv − 1, ∀uv ∈ E \ δ(0) , (22d) 
+
+γ ∈ Z, q ∈ { 0, 1}V+ , h ∈ RE\δ(0) + . (22e) The binary variables qv, for each v ∈ V+, indicate whether customer v belongs to the set S.Constraints (22b)-(22d) enforce that huv = 1 if and only if qu = qv = 1, meaning that huv 
+
+indicates whether uv ∈ E belongs to E(S). Finally, since we maximize γ ∈ Z in the objective and ε ∈ (0 , 1), inequality (22a) determines that, at an optimal solution (¯ γ, ¯q, ¯h) with S = {v ∈
+
+V+ : ¯ qv = 1 }, we have that ¯ γ = ⌈(P 
+
+> v∈V+
+
+dξv ¯qv)/C ⌉ − 1 = ⌈dξ(S)/C ⌉ − 1. Although Formulation (22) exactly separates SRIs, our implementation yields a heuristic for the following reasons. First, rather than maximizing the original objective function, we change the objective function to zero and enforce the constraint ( γ + 1) − P 
+
+> v∈V+
+
+(¯ yv + 1) qv +P 
+
+> e∈E\δ(0)
+
+¯xehe ≥ 0.01. Second, for each scenario ξ = 1 , . . . , N , we solve Formulation (22) with a time limit of 30 seconds. Whenever we find a violated SRI of the form yξ(S) < k ξ(S) + ¯ x(E(S)) − | S|, we apply Fact 1 and add the corresponding aggregated SRI. As in line 10 of Algorithm 1, we stop the separation procedure whenever a violated (aggregated) SRI is found. 
+
+# G Proof of Lemma 5 
+
+Lemma 5. Let a1, . . . , a N be vectors in RV+ and let h ∈ R. Consider the set 
+
+H =
+
+(θ, y ) ∈ RV+ 
+
+> +
+
+× R[N ]×V+ 
+
+> +
+
+: X 
+
+> ξ∈[N]
+
+(aξ)Tyξ ≥ h, θ v ≥ X 
+
+> ξ∈[N]
+
+pξwvyξv, ∀v ∈ V+
+
+ .
+
+Then the following holds: 
+
+• if there exists v ∈ V+ and ξ ∈ [N ] such that wv = 0 and aξv > 0, then proj θ(H) = RV+ 
+
+> +
+
+;
+
+• otherwise, proj θ(H) = 
+
+
+
+θ ∈ RV+ 
+
+> +
+
+: P 
+
+> v∈V+:wv>0
+
+
+
+max ξ∈[N ]
+
+n aξv 
+
+> pξwv
+
+o +
+
+θv ≥ h
+
+
+
+.Proof. It is clear that proj θ(H) ⊆ RV+ 
+
+> +
+
+. Now take any θ′ ∈ RV+ 
+
+> +
+
+and suppose that v ∈ V+
+
+and ξ ∈ [N ] are such that wv = 0 and aξv > 0. Choosing ¯ y ∈ R[N ]×V+ 
+
+> +
+
+so that ¯ yξv is arbitrary large, we can guarantee that P 
+
+> ξ∈[N]
+
+(aξ)T ¯yξ ≥ h and θ′ 
+
+> u
+
+≥ P  
+
+> ξ′∈[N]
+
+pξ′ wu ¯yξ′ 
+
+> u
+
+, for all u ∈ V+
+
+(as wv = 0). Therefore, θ′ ∈ proj θ(H) and we assume for the rest of the proof that aξv ≤ 0, for every v ∈ V+ with wv = 0 and ξ ∈ [N ]. Let ¯θ be an arbitrary vector RV+ 
+
+> +
+
+. Then ¯θ belongs to proj θ(H) if and only if the optimal 33 value of the LP below is zero: min 0s.t. X 
+
+> ξ∈[N]
+
+pξwvyξv ≤ ¯θv, ∀v ∈ V+ with wv > 0, (γv)
+
+X 
+
+> ξ∈[N]
+
+(aξ)Tyξ ≥ h, (η)
+
+yξv ≥ 0, ∀v ∈ V+, ξ ∈ [N ].
+
+The dual formulation is: max X
+
+> v∈V+
+
+γv ¯θv + ηh, (24a) s.t. pξwvγv + η a ξv ≤ 0, ∀v ∈ V+ with wv > 0 and ξ ∈ [N ], (24b) 
+
+η ≥ 0 (24c) 
+
+γv ≤ 0, ∀v ∈ V+ with wv > 0. (24d) Note that, for every ξ ∈ [N ], we omitted the constraints η a ξv ≤ 0, for v ∈ V+ with wv = 0, as these are already satisfied by our assumption that aξv ≤ 0. By LP duality, ¯θ ∈ proj θ(H) if and only if ( γ, η ) = ( 0, 0) is optimal for Formulation (24). Since ¯θ is nonnegative, we know that at optimality, for every v ∈ V+ with wv > 0, 
+
+γv = min  
+
+> ξ∈[N]
+
+(
+
+−η aξv
+
+pξwv
+
+!+)
+
+= −η · max  
+
+> ξ∈[N]
+
+(
+
+aξv
+
+pξwv
+
+)! +
+
+.
+
+Therefore, ¯θ ∈ RV+ 
+
+> +
+
+belongs to proj θ(H) if and only if max 
+
+> η≥0
+
+η
+
+− X 
+
+> v∈V+:wv>0
+
+max  
+
+> ξ∈[N]
+
+(
+
+aξv
+
+pξwv
+
+)! +
+
+¯θv + h
+
+ ≤ 0.
+
+Normalizing η, we may assume that η = 1. 
+
+# H Proof of Proposition 3 
+
+Proposition 3. For every ¯x ∈ X ,
+
+proj θ( csri (¯ x)) = 
+
+θ ∈ RV+ 
+
+> +
+
+: X 
+
+> v∈V+:wv>0
+
+ϕv(α, β ) θv ≥ X 
+
+> ξ∈[N]
+
+X
+
+> S⊆V+
+
+αξS ¯x(E(S)) + ν(α, β ), ∀(α, β ) ∈ A 
+
+ .
+
+Consequently, 
+
+P =
+
+
+
+(x, θ ) ∈ X × RV+ 
+
+> +
+
+:
+
+X 
+
+> v∈V+:wv>0
+
+ϕv(α, β ) θv ≥ X 
+
+> ξ∈[N]
+
+X
+
+> S⊆V+
+
+αξS x(E(S)) + ν(α, β ), ∀(α, β ) ∈ A 
+
+.
+
+Proof. Let ¯θ ∈ RV+ 
+
+> +
+
+. The vector ¯θ belongs to proj z ( csri (¯ x)) if and only if the optimal value of the linear program below is zero: min 0s.t. X 
+
+> ξ∈[N]
+
+pξwvyξv ≤ ¯θv, ∀v ∈ V+
+
+yξ(S) ≥ kξ(S) + ¯ x(E(S)) − | S|, ∀S ⊆ V+, ξ ∈ [N ], (αξS )
+
+yξv ≤ bv, ∀v ∈ V+, ξ ∈ [N ], (βξv )
+
+yξv ≥ 0, ∀v ∈ V+, ξ ∈ [N ].
+
+34 By Lagrangian duality, this holds if and only if, for every α ≥ 0 and β ≤ 0, 0 ≥ min ν(α, β ) − X 
+
+> ξ∈[N]
+
+X
+
+> v∈V+
+
+βξv + X
+
+> S⊆V+:v∈S
+
+αξS
+
+ yξv + X 
+
+> ξ∈[N]
+
+X
+
+> S⊆V+
+
+αξS ¯x(E(S)) s.t. X 
+
+> ξ∈[N]
+
+pξwvyξv ≤ ¯θv, ∀v ∈ V+
+
+yξv ≥ 0, ∀v ∈ V+, ξ ∈ [N ].
+
+which is equivalent to stating that ¯θ ∈ proj θ(Γ(¯ x, α, β )). By Lemma 5, ¯θ ∈ proj θ(Γ(¯ x, α, β )) = 
+
+RV+ 
+
+> +
+
+whenever ( α, β ) /∈ A . Otherwise, it follows from Lemma 5 (and Equation (14)) that ¯θ ∈
+
+proj θ(Γ(¯ x, α, β )) if and only if 
+
+X
+
+> v∈V+
+
+ϕv(α, β ) ¯θv ≥ X 
+
+> ξ∈[N]
+
+X
+
+> S⊆V+
+
+αξS ¯x(E(S)) + ν(α, β ).
+
+# I Proofs of Lemma 6 and Theorem 4 
+
+Lemma 6. Let w ∈ QV+ 
+
+> +
+
+and b ∈ ZV+ 
+
+> +
+
+. Fix a scenario ξ ∈ [N ] and let S = {v1, . . . , v ℓ} ⊆ V+ be such that wv1 ≤ . . . ≤ wvℓ . Let k′ ∈ Z++ be such that kξ(S) − k′ ≤ b(S) and choose j ∈ [ℓ] as the smallest index such that kξ(S) − k′ ≤ P 
+
+> i∈[j]
+
+bvi . Set 
+
+¯αξS = I(kξ(S) > k ′) · wvj , and 
+
+¯βξv = I(v ∈ { vi}i∈[j−1] ) · (wv − wvj ), ∀v ∈ V+.
+
+Then (¯ αξS , ¯βξ) is optimal for the dual of Formulation (16) and ¯αξS ≤ L ∗ 
+
+> ξ
+
+(S, k ′).Proof. The condition kξ(S) − k′ ≤ b(S) guarantees that Formulation (16) is feasible, so the following dual formulation is bounded and attains the same objective value of L∗ 
+
+> ξ
+
+(S, k ′). max αξS (kξ(S) − k′) + X
+
+> v∈V+
+
+βξv bv (27a) s.t.: αξS + βξv ≤ wv, ∀v ∈ S, (27b) 
+
+βξv ≤ wv, ∀v ∈ V+ \ S, (27c) 
+
+αξS ≥ 0, β ξ ≤ 0. (27d) One can check that (¯ αξS , ¯βξ) is feasible for Formulation (27). If kξ(S) ≤ k′, then (¯ αξS , ¯βξ) = (0 , 0), so we may safely assume that kξ(S) > k ′. In this case, since ¯αξS (kξ(S) − k′) + X
+
+> v∈V+
+
+¯βξv bv = X
+
+> i∈[j−1]
+
+bvi wvi +
+
+(kξ(S) − k′) − X
+
+> i∈[j−1]
+
+bvi
+
+ wvj = L∗ 
+
+> s
+
+(S, k ′),
+
+we have that (¯ αξS , ¯βξ) is optimal for Formulation (27). To show that ¯ αξS ≤ L ∗ 
+
+> s
+
+(S, k ′), suppose first that j = 1. Then P 
+
+> i∈[j−1]
+
+bvi wvi = 0 and we are done. On the other hand, if j ≥ 2, the choice of j implies that kξ(S) − k′ > P 
+
+> i∈[j−1]
+
+bvi ,meaning that L∗ 
+
+> s
+
+(S, k ′) ≥ P 
+
+> i∈[j−1]
+
+bvi wvi + wvj ≥ ¯αξS .35 Theorem 4. Let w ∈ QV+ 
+
+> +
+
+, b ∈ ZV+ 
+
+> +
+
+, ∅ ⊊ S ⊆ V+ and k′ ∈ Z++ . Assume that Formulation (16) 
+
+is feasible for every scenario ξ ∈ [N ] (see Remark 2). For each ξ ∈ [N ], let (¯ αξS , ¯βξ) be as specified in Lemma 6, and set ˆα ≥ 0 and ˆβ ≤ 0 as 
+
+ˆαξS′ = I(S′ = S) · (pξ ¯αξS ), ∀∅ ⊊ S′ ⊆ V+, ξ ∈ [N ],
+
+ˆβξv = pξ ¯βξv , ∀v ∈ V+, ξ ∈ [N ].
+
+Then, (ˆ α, ˆβ) ∈ A and for every ¯x ∈ { x ∈ X : x(E(S)) ≤ | S| − k′}, inequality (17) (with x fixed to ¯x) is valid for proj θ(Γ(¯ x, ˆα, ˆβ)) . In particular, if x(E(S)) ≤ | S| − k′ is valid for P, then inequality (17) (with x free) is also valid for P.Proof. Fix ¯ x ∈ { x ∈ X : x(E(S)) ≤ | S| − k′}. We first rewrite the inequality defining the set Γ(¯ x, ˆα, ˆβ): 
+
+X 
+
+> ξ∈[N]
+
+X
+
+> v∈V+
+
+ ˆβξv + X
+
+> ∅⊊S′⊆V+:v∈S′
+
+ˆαξS′
+
+ yξv ≥ X 
+
+> ξ∈[N]
+
+X
+
+> ∅⊊S′⊆V+
+
+ˆαξS′ ¯x(E(S)) + ν(ˆ α, ˆβ)
+
+⇐⇒ X 
+
+> ξ∈[N]
+
+pξ
+
+X
+
+> v∈S
+
+ ¯βξv + ¯ αξS
+
+
+
+yξv ≥ X 
+
+> ξ∈[N]
+
+ps ¯αξS (kξ(S) + ¯ x(E(S)) − | S|) + X
+
+> v∈S
+
+¯βξv bv
+
+!
+
+.
+
+Fix a scenario ξ ∈ [N ]. It follows from Lemma 6 and the choice of (¯ αξS , ¯βξ) that ¯βξv + ¯ αξS ≤ wv,for all v ∈ S. In particular, whenever wv = 0, we have that ˆβξv + ˆ αξS ≤ 0, so (ˆ α, ˆβ) ∈ A . Moreover, ¯αξS (kξ(S) + ¯ x(E(S)) − | S|) + X
+
+> v∈V+
+
+¯βξv bv = ¯αξS (kξ (S) − k′) + X
+
+> v∈S
+
+¯βξv bv
+
+| {z } 
+
+> =L∗
+> ξ(S,k ′)
+
++ ¯αξS (x(E(S)) − | S| + k′)
+
+| {z } 
+
+> ≥L ∗
+> ξ(S,k ′)( x(E(S)) −| S|+k′)
+
+.
+
+Summing over all scenarios ξ ∈ [N ], we learn that inequality 
+
+θ(S) ≥ X 
+
+> ξ∈[N]
+
+X
+
+> v∈S
+
+pξwvyξv ≥ X 
+
+> ξ∈[N]
+
+pξ
+
+X
+
+> v∈S
+
+ ¯βξv + ¯ αξS
+
+
+
+yξv ≥ L ∗(S, k ′) (1 + ¯ x(E(S)) − | S| + k′)is valid for proj θ(Γ(¯ x, ˆα, ˆβ)). To prove the second part of the statement, it suffices to observe that, if x(E(S)) ≤ | S| − k′ is valid for X , then the above inequality (with ¯ x replaced by a free variable x) is valid for P.
+
+# J Example of a projected SRI dominating a set cut 
+
+Let S = {v1, v 2, v 3} ⊆ V+, and suppose that wv1 = 2, wv2 = 3, wv3 = 4, and b = 1. Assume that x(E(S)) ≤ | S| − 1 is valid for X , so k′ = 1 in Formulation (16). Suppose that ξ ∈ [N ] is such that kξ(S) = 3, while for every other ξ′ ∈ [N ] \ ξ we have kξ′ (S) ≤ 1. Since L∗(S, 1) = 
+
+pξ (2 + 3) = 5 pξ, the set cut (17) becomes 
+
+θv1 + θv2 + θv3 ≥ 5pξ + 5 pξ · (x(E(S)) − | S| + 1) . (28) Applying Lemma 6, we obtain a dual solution (¯ αξS , ¯βξ) with ¯ αξS = 3, ¯βξv1 = −1, and ¯βξv = 0 for all v ∈ V+ \ { v1}. Note that L∗ 
+
+> ξ
+
+(S, 1) = ¯ αξS (kξ(S) − k′) + P
+
+> v∈V+
+
+¯βξv bv = 3 · 2 − 1 = 5. Following the construction in the proof of Theorem 4, we sum the following two inequalities: (3 pξ) · yξ(S) ≥ (3 pξ) · (kξ(S) + x(E(S)) − | S|) = (3 pξ) · (2 + x(E(S)) − | S| + 1) (−1pξ) · yξv1 ≥ (−1pξ) · 1,
+
+36 which yields (2 pξ)yξv1 + (3 pξ)yξv2 + (3 pξ)yξv3 ≥ 5pξ + 3 pξ · (x(E(S)) − | S| + 1) .
+
+By Lemma 5, the projection of the above inequality onto the ( x, θ )-space is given by the pro-jected SRI 22 θv1 + 33 θv2 + 34 θv3 ≥ 5pξ + 3 pξ · (x(E(S)) − | S| + 1) ,
+
+which indeed dominates the set cut (28). 
+
+# K Proof of Theorem 5 
+
+We first need a few technical lemmas. 
+
+Lemma 8. For every partial route H and scenario ξ ∈ [N ], there exists an optimal dual solution (¯ αξ, ¯βξ) associated with (18) such that 
+
+• P 
+
+> H′⊆H
+
+¯αξH′ ≤ L ∗ 
+
+> ξ
+
+(H); and 
+
+• P 
+
+> H′⊆H:v∈V+(H′)
+
+¯αξH′ + ¯βξv ≤ 0, for every v ∈ V+ with wv = 0 .Proof. Consider the dual of (18): max X
+
+> H′⊆H
+
+αξH′ (kξ(H′) − 1) + X
+
+> v∈V+
+
+βξv bv (29a) s.t.: X
+
+> H′⊆H:v∈V+(H′)
+
+αξH′ + βξv ≤ wv, ∀v ∈ V+(H), (29b) 
+
+αξ ≥ 0, (29c) 
+
+βξ ≤ 0. (29d) Let (¯ αξ, ¯βξ) be an optimal solution to Formulation (29) and let S = {v ∈ V+ : ¯βξv <
+
+0}. Assume that we choose (¯ αξ, ¯βξ) so that the size of its support (i.e., |{ H′ ⊆ H : ¯ αξH′ >
+
+0}| + |S|) is minimum. By optimality of (¯ αξ, ¯βξ), we may also assume that ¯βξv = min {wv −
+
+P 
+
+> H′⊆H:v∈V+(H′)
+
+¯αξH′ , 0}, for all v ∈ V+.Rewriting the objective value of (¯ αξ, ¯βξ) we get 
+
+L∗ 
+
+> ξ
+
+(H) = X
+
+> H′⊆H
+
+¯αξH′ (kξ(H′) − 1) + X
+
+> v∈V+
+
+¯βξv bv
+
+= X
+
+> H′⊆H
+
+¯αξH′ (kξ(H′) − 1) + X
+
+> v∈S
+
+wv − X
+
+> H′⊆H:v∈V+(H′)
+
+¯αξH′
+
+ bv
+
+= X
+
+> v∈S
+
+wvbv + X
+
+> H′⊆H
+
+¯αξH′ (kξ(H′) − b(V+(H′) ∩ S) − 1) . (30) We now build on the support minimality to prove the following claim. 
+
+Claim 1. For every H′ ⊆ H with ¯αξH′ > 0, we have that kξ(H′)−b(V+(H′)∩S) ≥ 2.
+
+37 Proof. Suppose by contradiction that there exists H′ ⊆ H such that ¯αξH′ > 0and kξ(H′) − b(V+(H′) ∩ S) ≤ 1. Consider the direction r = ( −1H′ , P 
+
+> v∈V+(H′)∩S
+
+1v)and take ε = min 
+
+n
+
+¯αξH′ , min v∈V+(H′)∩S {− ¯βξv }
+
+o
+
+> 0. Construct (ˆ αξ, ˆβξ) = (¯ αξ, ¯βξ) + 
+
+ε r and observe that, by the choice of ε, (ˆ αξ, ˆβξ) is feasible for Formulation (29), has smaller support than (¯ αξ, ¯βξ), and has cost 
+
+L∗ 
+
+> ξ
+
+(H) + ε (−kξ(H′) + b(V+(H′) ∩ S) + 1) ≥ L ∗ 
+
+> ξ
+
+(H),
+
+since −kξ(H′) + b(V+(H′) ∩ S) + 1 ≥ 0 by the choice of H′. Therefore, (ˆ αξ, ˆβξ) is optimal for Formulation (29), contradicting the minimality of the support of (¯ αξ, ¯βξ). Applying Claim 1 to (30), we conclude that L∗ 
+
+> ξ
+
+(H) ≥ P 
+
+> v∈S
+
+wvbv+P 
+
+> H′⊆H
+
+¯αξH′ ≥ P 
+
+> H′⊆H
+
+¯αξH′ .To conclude the proof, note that, by the feasibility of (¯ αξ, ¯βξ) to Formulation (29), it follows that P 
+
+> H′⊆H:v∈V+(H′)
+
+¯αξH′ + ¯βξv ≤ 0, for every v ∈ V+ with wv = 0. Recall that H = ( S1, . . . , S ℓ). The activation function proposed by Ota and Fukasawa (2025) is shown below: 
+
+WOF (x; X⊇(H)) = 1 + ( x(H) − | V+(H)| + 1) + X
+
+> i∈{ 2,ℓ −1}∩ [ℓ]
+
+(x(E(Si)) − | Si| + 1) , (31) where x(H) := P 
+
+> i∈[ℓ]
+
+x(E(Si)) + P 
+
+> i∈[ℓ−1]
+
+x(E(Si, S i+1 )). To prove Theorem 5, we use the following property of WOF (x; X⊇(H)). 
+
+Lemma 9. For every H′ ⊆ H and ¯x ∈ X , ¯x(H′) − | V+(H′)| + 1 ≥ WOF (¯ x; X⊇(H)) − 1.Proof. Suppose by contradiction that H′ = ( Si, . . . , S j ) ⊆ H and ¯ x ∈ X is such that ¯ x(H′) −|V+(H′)| + 1 < W OF (¯ x; X⊇(H)) − 1. Furthermore, assume that H′ is a maximal counterex-ample, meaning that, for every H′′ ⊇ H′ with H′′ ̸ = H′, we have ¯ x(H′′ ) − | V+(H′′ )| + 1 ≥
+
+WOF (¯ x; X⊇(H)) − 1. 
+
+Claim 2. j ≥ ℓ − 1 and i ≤ 2.Proof. By symmetry, we only show that j ≥ ℓ−1. Suppose by contradiction that j ≤
+
+ℓ − 2 (so ℓ ≥ 3). We first consider the case |Sj+1 | > 1. By the definition of partial routes, we know that |Sj | = 1, so ¯ x(E(Sj , S j+1 )) + ¯ x(E(Sj+1 )) = ¯ x(E(Sj ∪ Sj+1 )) ≤|Sj ∪ Sj+1 | − 1 = |Sj+1 |. Hence, for H′′ = ( Si, . . . , S j+1 ), ¯x(H′′ ) − | V+(H′′ )| + 1 = (¯ x(H′) + ¯ x(E(Sj , S j+1 )) + ¯ x(E(Sj+1 ))) − (|V+(H′)| + |Sj+1 |) + 1 = (¯ x(H′) − | V+(H′)| + 1) + (¯ x(E(Sj ∪ Sj+1 )) − | Sj+1 |)
+
+≤ ¯x(H′) − | V+(H′)| + 1 .
+
+On the other hand, if Sj+1 = {v}, set H′′ = ( Si, . . . , S j+2 ) and note that ¯x(H′′ ) − | V+(H′′ )| + 1 = (¯ x(H′) + ¯ x(E(v, S j ∪ Sj+2 )) + ¯ x(E(Sj+2 )) − (|V+(H′)| + |Sj+2 | + 1) + 1 = (¯ x(H′) + ¯ x(E(v, S j ∪ Sj+2 )) + ¯ x(E(Sj+2 )) − (|V+(H′)| + |Sj+2 | + 2) + 2 = (¯ x(H′) − | V+(H′)| + 1) + (¯ x(E(v, S j ∪ Sj+2 )) − 2) + (¯ x(E(Sj+2 )) − | Sj+2 | + 1) 
+
+≤ ¯x(H′) − | V+(H′)| + 1 .
+
+38 By Claim 2, it remains to check the cases where i ∈ { 1, 2} and j ∈ { ℓ − 1, ℓ }. Note that ¯ x(H) − | V+(H)| + 1 ≥ WOF (¯ x; X⊇(H)) − 1, so we cannot have i = 1 and j = ℓ, which implies that ℓ ≥ 2. Assume first that j = ℓ − 1 and i = 1 (so ℓ ≥ 2). Using the formula in (31) we get 
+
+WOF (¯ x; X⊇(H)) − 1 ≤ (¯ x(H) − | V+(H)| + 1) + (¯ x(E(Sℓ−1)) − | Sℓ−1| + 1) = (¯ x(H′) − | V+(H′)| + 1) + (¯ x(E(Sℓ−1 ∪ Sℓ)) − | Sℓ−1 ∪ Sℓ| + 1) 
+
+≤ ¯x(H′) − | V+(H′)| + 1 .
+
+By symmetry, this also handles the case i = 2 and j = ℓ.It remains to check when i = 2 and j = ℓ − 1. Since i ≤ j, this implies that ℓ ≥ 3. If ℓ = 3, we have that H′ = ( S2), so 
+
+WOF (¯ x; X⊇(H)) − 1 = (¯ x(H) − | V+(H)| + 1) + (¯ x(H′) − | V+(H′)| + 1) ≤ ¯x(H′) − | V+(H′)| + 1 .
+
+On the other hand, if ℓ ≥ 4, we rearrange (31) to obtain 
+
+WOF (¯ x; X⊇(H)) − 1 = (¯ x(H′) − | V+(H′)| + 1) + (¯ x(E(S1 ∪ S2)) − | S1 ∪ S2| + 1) + (¯ x(E(Sℓ−1 ∪ Sℓ)) − | Sℓ−1 ∪ Sℓ| + 1) 
+
+≤ ¯x(H′) − | V+(H′)| + 1 .
+
+Theorem 5. Let H be a partial route. There exist (α, β ) ∈ A such that the projected SRI 
+
+X
+
+> v∈V+
+
+ϕv(α, β ) θv ≥ X 
+
+> ξ∈[N]
+
+X
+
+> S⊆V+
+
+αξS x(E(S)) + ν(α, β )
+
+dominates inequality (19) . In particular, inequality (19) is valid for P.Proof. Take an arbitrary scenario ξ ∈ [N ]. We first show that inequality 
+
+X
+
+> v∈V+(H)
+
+wvyξv ≥ L ∗ 
+
+> ξ
+
+(H) · WOF (x; X⊇(H)) (32) is valid for the LP relaxation of Formulation (9). Let (¯ αξ, ¯βξ) be an optimal dual solution chosen according to Lemma 8. We construct an inequality from (¯ αξ, ¯βξ) as follows. For each H′ ⊆ H, we multiply the SRI yξ(H′) ≥
+
+(kξ(H′) − 1) + x(E(V+(H′))) − | H′| + 1 by ¯ αξH′ ≥ 0, and for each v ∈ V+(H), we multiply yξv ≤ bv
+
+by ¯βξv ≤ 0. Summing these inequalities we get an inequality (valid for the LP relaxation of (9)) of the form Aξ(y) ≥ Bξ(x), where 
+
+Aξ(y) = X
+
+> v∈V+(H)
+
+ X
+
+> H′⊆H:v∈V+(H′)
+
+¯αξH′ + ¯βξv
+
+ yξv, and 
+
+Bξ(x) = X
+
+> H′⊆H
+
+¯αξH′
+
+(kξ(H′) − 1) + x(E(V+(H′))) − | H′| + 1  + X
+
+> v∈V+(H)
+
+¯βξv bv.
+
+Feasibility of (¯ αξ, ¯βξ) to the dual of (18) implies Aξ(y) ≤ P 
+
+> v∈V+(H)
+
+wvyξv. Moreover, for ev-ery ¯ x ∈ X ,
+
+Bξ(¯ x) = L∗ 
+
+> ξ
+
+(H) + X
+
+> H′⊆H
+
+¯αH′ · (¯ x(E(V+(H′))) − | H′| + 1) (by optimality of (¯ αξ, ¯βξ)) 
+
+≥ L ∗ 
+
+> ξ
+
+(H) + X
+
+> H′⊆H
+
+¯αξH′ · (WOF (¯ x; X⊇(H)) − 1) (by Lemma 9) 
+
+≥ L ∗ 
+
+> ξ
+
+(H) · WOF (¯ x; X⊇(H)) , (by Lemma 8 and since WOF (¯ x; X⊇(H)) − 1 ≤ 0) 39 proving that (32) is indeed valid for the LP relaxation of Formulation (9). To obtain the projected SRI that dominates inequality (32), construct (ˆ α, ˆβ) by concate-nating the optimal dual solutions obtained from Lemma 8 and multiplying by the correspond-ing probabilities, i.e., ˆ α = ( p1 ¯α1, . . . , p N ¯αN ) and ¯β = ( p1 ¯β1, . . . , p N ¯βN ). Observe that, by Lemma 8, ¯βξv + P 
+
+> S⊆V+:v∈S
+
+¯αξS is nonpositive for every ξ ∈ [N ] and v ∈ V+ with wv = 0, meaning that (ˆ α, ˆβ) ∈ A .Applying the argument used to show that (32) is valid for the LP relaxation of Formula-tion (9), it follows that, for every ¯ x ∈ X , inequality 
+
+θ(V+(H)) ≥ X 
+
+> ξ∈[N]
+
+X
+
+> v∈V+(H)
+
+pξwvyξv ≥ X 
+
+> ξ∈[N]
+
+pξ Aξ(y) ≥ X 
+
+> ξ∈[N]
+
+pξ Bξ(x) ≥ L ∗(H) · WOF (¯ x; X⊇(H)) is valid for Γ(¯ x, ˆα, ˆβ). Lemma 5 then yields the desired projected SRI, and since P satisfies all projected SRIs (Proposition 3), inequality (19) is valid for P.
+
+# L Proof of Theorem 6 
+
+Theorem 6. For every α ≥ 0 and β ≤ 0,
+
+min {cTx + 1Tθ : x ∈ X , θ ∈ proj θ(Γ( x, α, β )) } ≥ σx(α) + σy(α, β ) + ν(α, β ).
+
+Proof. Fix α ≥ 0 and β ≤ 0 and consider 
+
+z′ := min {cTx + 1Tθ : x ∈ X , θ ∈ proj θ(Γ( x, α, β )) }
+
+= min 
+
+cTx + X
+
+> v∈V+
+
+X 
+
+> ξ∈[N]
+
+pξwvyξv : x ∈ X , y ∈ Γ( x, α, β )
+
+ .
+
+Multiplying the inequality defining Γ( x, α, β ) by η ∈ R+ and dualizing into the objective function yields 
+
+z′ = max 
+
+> η≥0
+
+
+
+min  
+
+> x∈X ,y ≥0
+
+
+
+cTx + X
+
+> v∈V+
+> N
+
+X
+
+> s=1
+
+pswvysv + η
+
+> N
+
+X
+
+> s=1
+
+X
+
+> S⊆V+
+
+αsS x(E(S)) + η ν (α, β )
+
+− η
+
+> N
+
+X
+
+> s=1
+
+X
+
+> v∈V+
+
+βsv + X
+
+> S⊆V+:v∈S
+
+αsS
+
+ ysv
+
+
+
+.
+
+Taking η = 1 we conclude that z′ ≥ σx(α) + σy(α, β ) + ν(α, β ). 
+
+# M Extension to Assumption 4 
+
+Fix w ∈ QV+×V+ 
+
+> +
+
+and b ∈ ZV+ 
+
+> +
+
+according to Assumption 4. Let R = ( v1, . . . , v ℓ) and consider the recourse function ˜Q∗(R) := min 
+
+X 
+
+> ξ∈[N]
+
+X
+
+> i∈[ℓ]
+
+pξ min {wvi,u : u ∈ { vi, v i−1, v i+1 } ∩ V+} · (¯ yR)ξvi : y ∈ Π( R) ∩ [0, b ]N
+
+ .
+
+( ˜Q∗)Recall that X ∈ {X sub , Xcvrp }. We first show that the SRI-based formulation developed in Section 4 can be adapted to the recourse function ˜Q∗. To achieve this, we introduce ex-tra variables sv, for v ∈ V+, and rvu , for every pair ( v, u ) ∈ V+ × V+. To gain an intu-ition for the following formulation, suppose that ¯ x ∈ X ∩ ZE is a first-stage solution such 40 that R = ( v1, . . . , v ℓ) ∈ R (¯ x) and let i ∈ { 2, . . . , ℓ − 1}. For this solution, variable svi rep-resents the expected number of failures that route R observes at customer vi. This value is then “distributed” as sv = rvi,v i + rvi,v i−1 + rvi,v i+1 , where rvi,v i , r vi,v i−1 and rvi,v i+1 are as-sociated with edges 0 vi, v i−1vi and vivi+1 . Although variables sv could be replaced by the expression P  
+
+> ξ∈[N]
+
+pξyξv, keeping these variables now will be useful later on. 
+
+Corollary 5. Problem vrpsd (X , ˜Q∗) can be formulated as 
+
+min cTx + X
+
+> v∈V+
+
+θv,
+
+s.t. yξ(S) ≥ kξ(S) + x(E(S)) − | S|, ∀∅ ⊊ S ⊆ V+, ξ ∈ [N ], (33a) 
+
+θv ≥ X
+
+> u∈V+
+
+wvu rvu , ∀v ∈ V+,
+
+(33b) 
+
+sv ≥ X 
+
+> ξ∈[N]
+
+pξyξv, ∀v ∈ V+, (33c) 
+
+sv = X
+
+> u∈V+
+
+rvu , ∀v ∈ V+,
+
+(33d) 
+
+rvu ≤ bv · xvu , ∀vu ∈ E \ δ(0) , (33e) (x, θ, y, s, r ) ∈ (X ∩ ZE ) × RV+ 
+
+> +
+
+× [0, b ]N × RV+ 
+
+> +
+
+× RV+×V+ 
+
+> +
+
+. (33f) 
+
+Proof. We first simplify the formulation to min cTx + X
+
+> v∈V+
+
+θv,
+
+s.t. yξ(S) ≥ kξ(S) + x(E(S)) − | S|, ∀∅ ⊊ S ⊆ V+, ξ ∈ [N ], (34a) 
+
+θv ≥ X
+
+> u∈V+
+
+wvu rvu , ∀v ∈ V+, (34b) 
+
+X
+
+> u∈V+
+
+rvu ≥ X 
+
+> ξ∈[N]
+
+pξyξv, ∀v ∈ V+, (34c) 
+
+rvu ≤ bv · xvu , ∀vu ∈ E \ δ(0) , (34d) (x, θ, y, r ) ∈ (X ∩ ZE ) × RV+ 
+
+> +
+
+× [0, b ]N × RV+×V+ 
+
+> +
+
+. (34e) Now fix x = ¯ x ∈ X ∩ ZE in the above formulation. For each R = ( v1, . . . , v ℓ) ∈ R (¯ x)and i ∈ [ℓ], set ˜ wvi = min {wvi,v i , w vi,v i−1 , w vi,v i+1 }. Note that we may assume that whenever variable rvi,u attains a positive value, then u ∈ { vi, v i−1, v i+1 } ∩ V+ and wvi,u = ˜ wvi . Moreover, since P  
+
+> ξ∈[N]
+
+pξ = 1, we know that P  
+
+> ξ∈[N]
+
+pξyξv ≤ bv, for all v ∈ V+. Hence, fixing x = ¯ x we rewrite Formulation (34) as: min cT ¯x + X
+
+> v∈V+
+
+θv,
+
+s.t. yξ(S) ≥ kξ(S) + ¯ x(E(S)) − | S|, ∀∅ ⊊ S ⊆ V+, ξ ∈ [N ],θv ≥ ˜wv
+
+X 
+
+> ξ∈[N]
+
+pξyξv, ∀v ∈ V+,y ∈ [0, b ]N .
+
+41 By Theorem 2, this is equivalent to min 
+
+cT ¯x + X 
+
+> ξ∈[N]
+
+X
+
+> v∈V+
+
+pξ ˜wvyξv : y ∈ conv(Π(¯ x) ∩ [0, b ]N )
+
+ ,
+
+as desired. Let ¯ x ∈ X ∩ ZE . Similarly to csri (¯ x), let us now define 
+
+fsri (¯ x) := 
+
+(s, y ) ∈ RV+ 
+
+> +
+
+× [0, b ]N :
+
+yξ(S) ≥ kξ(S) + ¯ x(E(S)) − | S|, ∀∅ ⊊ S ⊆ V+, ξ ∈ [N ]
+
+sv ≥ X 
+
+> ξ∈[N]
+
+pξyξv, ∀v ∈ V+
+
+ .
+
+(35) In this way, fsri (¯ x) is equivalent to csri (¯ x) in the special case that wv = 1, for every customer v ∈
+
+V+.This implies that Proposition 3 can be naturally extended to fsri (¯ x). To this end, for any α ≥ 0, β ≤ 0 and v ∈ V+, define ˜ϕv(α, β ) := max  
+
+> ξ∈[N]
+
+( βξv + P 
+
+> S⊆V+:v∈S
+
+αξS
+
+pξ
+
+)! +
+
+. (36) 
+
+Corollary 6. For every ¯x ∈ X ,
+
+proj s( fsri (¯ x)) = 
+
+s ∈ RV+ 
+
+> +
+
+: X
+
+> v∈V+
+
+˜ϕv(α, β ) sv ≥ X 
+
+> ξ∈[N]
+
+X
+
+> S⊆V+
+
+αξS ¯x(E(S)) + ν(α, β ), ∀α ≥ 0, β ≤ 0
+
+
+
+Consequently, Formulation (33) can be reformulated as 
+
+min cTx + X
+
+> v∈V+
+
+θv,
+
+s.t. ˜ϕv(α, β ) sv ≥ X 
+
+> ξ∈[N]
+
+X
+
+> S⊆V+
+
+αξS x(E(S)) + ν(α, β ), ∀α ≥ 0, β ≤ 0, (37a) 
+
+θv ≥ X
+
+> u∈V+
+
+wvu rvu , ∀v ∈ V+, (37b) 
+
+sv = X
+
+> u∈V+
+
+rvu , ∀v ∈ V+, (37c) 
+
+rvu ≤ bv · xvu , ∀vu ∈ E \ δ(0) , (37d) (x, θ, s, r ) ∈ (X ∩ ZE ) × RV+ 
+
+> +
+
+× RV+ 
+
+> +
+
+× RV+×V+ 
+
+> +
+
+. (37e) To simplify further, we replace sv by P 
+
+> u∈V+
+
+rvu to obtain the following formulation for vrpsd (X , ˜Q∗): min cTx + X
+
+> v∈V+
+
+θv,
+
+s.t. ˜ϕv(α, β )
+
+ X
+
+> u∈V+
+
+rvu 
+
+ ≥ X 
+
+> ξ∈[N]
+
+X
+
+> S⊆V+
+
+αξS x(E(S)) + ν(α, β ), ∀α ≥ 0, β ≤ 0, (38a) 
+
+θv ≥ X
+
+> u∈V+
+
+wvu rvu , ∀v ∈ V+, (38b) 
+
+rvu ≤ bv · xvu , ∀vu ∈ E \ δ(0) , (38c) (x, θ, r ) ∈ (X ∩ ZE ) × RV+ 
+
+> +
+
+× RV+×V+ 
+
+> +
+
+. (38d) 42 N Separation algorithms 
+
+The following are the pseudocodes for our separation of ILS cuts and SRIs. Algorithm Get-PartialRoutes refers to the heuristic described in (Ota and Fukasawa, 2025). 
+
+Algorithm 2 AddSetCutOrSRI  
+
+> 1:
+
+procedure AddSetCutOrSRI (¯ x, ¯θ, use sri , S, k ′) 
+
+> 2:
+
+Compute L∗(S, k ′) using the greedy algorithm mentioned in Section 5.2.1.  
+
+> 3:
+
+if use sri = true then  
+
+> 4:
+
+Ξ ← { ξ ∈ [N ] : kξ(S) + ¯ x(E(S)) − | S| > 0} 
+
+> 5:
+
+if X = Xcvrp then  
+
+> 6:
+
+Ξ ← { ξ ∈ Ξ : kξ(S) > ¯k(S)} 
+
+> 7:
+
+if P 
+
+> v∈S
+
+max ξ∈[N ]
+
+n 1 
+
+> pξwv
+
+o ¯θv < |Ξ| · (¯ x(E(S)) − | S|) + P 
+
+> ξ∈Ξ
+
+kξ(S) then  
+
+> 8:
+
+Add projected SRI P 
+
+> v∈S
+
+max ξ∈[N ]
+
+n 1 
+
+> pξwv
+
+o
+
+θv ≥ | Ξ|· (x(E(S)) −| S|)+ P 
+
+> ξ∈Ξ
+
+kξ(S).  
+
+> 9:
+
+return true  
+
+> 10:
+
+else  
+
+> 11:
+
+if ¯θ(S) < L∗(S, k ′) · (¯ x(E(S)) − | S| + k′) then  
+
+> 12:
+
+Add set cut θ(S) ≥ L ∗(S, k ′) · (x(E(S)) − | S| + k′).  
+
+> 13:
+
+return true  
+
+> 14:
+
+return false 
+
+Algorithm 3 AddPartialRouteCutOrSRI  
+
+> 1:
+
+procedure AddPartialRouteCutOrSRI (¯ x, ¯θ, use sri , H ) 
+
+> 2:
+
+Compute L∗(H) using Formulation (18).  
+
+> 3:
+
+if use sri = true then  
+
+> 4:
+
+Compute ( α, β ) using Theorem 5.  
+
+> 5:
+
+if P 
+
+> v∈V+
+
+ϕv(α, β ) ¯θv < P 
+
+> ξ∈[N]
+
+P 
+
+> S⊆V+
+
+αξS ¯x(E(S)) + ν(α, β ) then  
+
+> 6:
+
+Add projected SRI P 
+
+> v∈V+
+
+ϕv(α, β ) θv ≥ P 
+
+> ξ∈[N]
+
+P 
+
+> S⊆V+
+
+αξS x(E(S)) + ν(α, β ).  
+
+> 7:
+
+return true  
+
+> 8:
+
+else  
+
+> 9:
+
+if ¯θ(V+(H)) < L∗(H) · WOF (¯ x; X⊇(H)) then  
+
+> 10:
+
+Add partial route cut θ(V+(H)) ≥ L ∗(H) · WOF (x; X⊇(H)).  
+
+> 11:
+
+return true  
+
+> 12:
+
+return false 
+
+43 (a) Execution time and final optimality gaps. (b) Root gaps. 
+
+Figure 4: Empirical cumulative distribution of the execution times and root gaps for Jabali et al. (2014) instances, with X = Xcvrp and Q = Q∗.
+
+Algorithm 4 SeparationVRPSD 
+
+Input: A candidate solution (¯ x, ¯θ) ∈ RE × QV+ 
+
+> +
+
+and a boolean flag use sri , which indicates if we use projected SRIs or not. 
+
+1: procedure SeparationVRPSD (¯ x, ¯θ, use sri )
+
+2: Call CVRPSEP to get a family of customer sets S ⊆ 2V+ .
+
+3: for S ∈ S do 
+
+4: k′ ← 1 + ( ¯k(S) − 1) · I(X = Xcvrp )
+
+5: Add inequality x(E(S)) ≤ | S| − k′.
+
+6: AddSetCutOrSRI (¯ x, ¯θ, use sri , S, k ′)
+
+7: if S̸ = ∅ then 
+
+8: return 
+
+9: H ← GetPartialRoutes (¯ x, ¯θ)
+
+10: for H ∈ H do 
+
+11: k′ ← 1 + ( ¯k(S) − 1) · I(X = Xcvrp )
+
+12: if AddSetCutOrSRI (¯ x, ¯θ, use sri , V +(H), k ′) = true then 
+
+13: continue 
+
+14: if AddPartialRouteCutOrSRI (¯ x, ¯θ, use sri , H ) = true then 
+
+15: continue 
+
+16: if Q = QC and ¯θ(V+(H)) < LC (H) · WOF (¯ x; X⊇(H)) then 
+
+17: Add inequality θ(V+(H)) ≥ L C (H) · WOF (x; X⊇(H)). 
+
+# O Detailed computational experiments 
+
+44 (a) Execution time and final optimality gaps. (b) Root gaps. 
+
+Figure 5: Empirical cumulative distribution of the execution times and root gaps for Dinh et al. (2018) instances, with X = Xcvrp and Q = Q∗. 
+
+> (a) Execution time and final optimality gaps. (b) Root gaps.
+
+Figure 6: Empirical cumulative distribution of the execution times and root gaps for Jabali et al. (2014) instances, with X = Xsub and Q = Q∗. 
+
+> (a) Execution time and final optimality gaps. (b) Root gaps.
+
+Figure 7: Empirical cumulative distribution of the execution times and root gaps for Dinh et al. (2018) instances, with X = Xsub and Q = Q∗.
+
+45 (a) Execution time and final optimality gaps. (b) Root gaps. 
+
+Figure 8: Empirical cumulative distribution of the execution times and root gaps for Jabali et al. (2014) instances, with X = Xcvrp and Q = QC . 
+
+> (a) Execution time and final optimality gaps. (b) Root gaps.
+
+Figure 9: Empirical cumulative distribution of the execution times and root gaps for Dinh et al. (2018) instances, with X = Xcvrp and Q = QC . 
+
+> (a) Execution time and final optimality gaps. (b) Root gaps.
+
+Figure 10: Empirical cumulative distribution of the execution times and root gaps for Jabali et al. (2014) instances, with X = Xsub and Q = QC .
+
+46 (a) Execution time and final optimality gaps. (b) Root gaps. 
+
+Figure 11: Empirical cumulative distribution of the execution times and root gaps for Dinh et al. (2018) instances, with X = Xsub and Q = Q∗.
+
+47
