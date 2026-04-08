@@ -1,0 +1,778 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-08T20:49:14.027221+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 8,
+    "deep_cap": 7,
+    "deep_selected": 7,
+    "quick_candidates": 30,
+    "quick_skim_target": 12,
+    "quick_selected": 12
+  },
+  "deep_dive": [
+    {
+      "id": "2604.05195v1",
+      "title": "Vehicle-as-Prompt: A Unified Deep Reinforcement Learning Framework for Heterogeneous Fleet Vehicle Routing Problem",
+      "abstract": "Unlike traditional homogeneous routing problems, the Heterogeneous Fleet Vehicle Routing Problem (HFVRP) involves heterogeneous fixed costs, variable travel costs, and capacity constraints, rendering solution quality highly sensitive to vehicle selection. Furthermore, real-world logistics applications often impose additional complex constraints, markedly increasing computational complexity. However, most existing Deep Reinforcement Learning (DRL)-based methods are restricted to homogeneous scenarios, leading to suboptimal performance when applied to HFVRP and its complex variants. To bridge this gap, we investigate HFVRP under complex constraints and develop a unified DRL framework capable of solving the problem across various variant settings. We introduce the Vehicle-as-Prompt (VaP) mechanism, which formulates the problem as a single-stage autoregressive decision process. Building on this, we propose VaP-CSMV, a framework featuring a cross-semantic encoder and a multi-view decoder that effectively addresses various problem variants and captures the complex mapping relationships between vehicle heterogeneity and customer node attributes. Extensive experimental results demonstrate that VaP-CSMV significantly outperforms existing state-of-the-art DRL-based neural solvers and achieves competitive solution quality compared to traditional heuristic solvers, while reducing inference time to mere seconds. Furthermore, the framework exhibits strong zero-shot generalization capabilities on large-scale and previously unseen problem variants, while ablation studies validate the vital contribution of each component.",
+      "authors": [
+        "Shihong Huang",
+        "Shengjie Wang",
+        "Lei Gao",
+        "Hong Ma",
+        "Zhanluo Zhang",
+        "Feng Zhang",
+        "Weihua Zhou"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-04-06T21:48:52+00:00",
+      "link": "https://arxiv.org/pdf/2604.05195v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "Deep Reinforcement Learning for Heterogeneous Fleet Vehicle Routing Problem",
+      "llm_evidence_cn": "针对异构车队路径规划问题的深度强化学习框架",
+      "llm_evidence": "针对异构车队路径规划问题的深度强化学习框架",
+      "canonical_evidence": "针对异构车队路径规划问题的深度强化学习框架",
+      "llm_tldr_en": "Proposes a unified DRL framework for solving complex heterogeneous vehicle routing problems.",
+      "llm_tldr_cn": "提出了一种统一的深度强化学习框架，用于解决复杂的异构车辆路径规划问题。",
+      "llm_tldr": "提出了一种统一的深度强化学习框架，用于解决复杂的异构车辆路径规划问题。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Neural combinatorial optimization for vehicle routing problems",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.05547v1",
+      "title": "COSMO-Agent: Tool-Augmented Agent for Closed-loop Optimization,Simulation,and Modeling Orchestration",
+      "abstract": "Iterative industrial design-simulation optimization is bottlenecked by the CAD-CAE semantic gap: translating simulation feedback into valid geometric edits under diverse, coupled constraints. To fill this gap, we propose COSMO-Agent (Closed-loop Optimization, Simulation, and Modeling Orchestration), a tool-augmented reinforcement learning (RL) framework that teaches LLMs to complete the closed-loop CAD-CAE process. Specifically, we cast CAD generation, CAE solving, result parsing, and geometry revision as an interactive RL environment, where an LLM learns to orchestrate external tools and revise parametric geometries until constraints are satisfied. To make this learning stable and industrially usable, we design a multi-constraint reward that jointly encourages feasibility, toolchain robustness, and structured output validity. In addition, we contribute an industry-aligned dataset that covers 25 component categories with executable CAD-CAE tasks to support realistic training and evaluation. Experiments show that COSMO-Agent training substantially improves small open-source LLMs for constraint-driven design, exceeding large open-source and strong closed-source models in feasibility, efficiency, and stability.",
+      "authors": [
+        "Liyuan Deng",
+        "Shujian Deng",
+        "Yongkang Chen",
+        "Yongkang Dai",
+        "Zhihang Zhong",
+        "Linyang Li",
+        "Xiao Sun",
+        "Yilei Shi",
+        "Huaxi Huang"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.GR"
+      ],
+      "published": "2026-04-07T07:45:17+00:00",
+      "link": "https://arxiv.org/pdf/2604.05547v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "LLM-based agent for closed-loop industrial design optimization",
+      "llm_evidence_cn": "基于LLM的闭环工业设计优化智能体",
+      "llm_evidence": "基于LLM的闭环工业设计优化智能体",
+      "canonical_evidence": "基于LLM的闭环工业设计优化智能体",
+      "llm_tldr_en": "COSMO-Agent uses RL to teach LLMs to orchestrate tools for parametric geometry optimization.",
+      "llm_tldr_cn": "COSMO-Agent利用强化学习教LLM编排工具进行参数化几何优化。",
+      "llm_tldr": "COSMO-Agent利用强化学习教LLM编排工具进行参数化几何优化。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Large Language Models (LLM) for optimization tasks",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.05856v1",
+      "title": "Neural Network Pruning via QUBO Optimization",
+      "abstract": "Neural network pruning can be formulated as a combinatorial optimization problem, yet most existing approaches rely on greedy heuristics that ignore complex interactions between filters. Formal optimization methods such as Quadratic Unconstrained Binary Optimization (QUBO) provide a principled alternative but have so far underperformed due to oversimplified objective formulations based on metrics like the L1-norm. In this work, we propose a unified Hybrid QUBO framework that bridges heuristic importance estimation with global combinatorial optimization. Our formulation integrates gradient-aware sensitivity metrics - specifically first-order Taylor and second-order Fisher information - into the linear term, while utilizing data-driven activation similarity in the quadratic term. This allows the QUBO objective to jointly capture individual filter relevance and inter-filter functional redundancy. We further introduce a dynamic capacity-driven search to strictly enforce target sparsity without distorting the optimization landscape. Finally, we employ a two-stage pipeline featuring a Tensor-Train (TT) Refinement stage - a gradient-free optimizer that fine-tunes the QUBO-derived solution directly against the true evaluation metric. Experiments on the SIDD image denoising dataset demonstrate that the proposed Hybrid QUBO significantly outperforms both greedy Taylor pruning and traditional L1-based QUBO, with TT Refinement providing further consistent gains at appropriate combinatorial scales. This highlights the potential of hybrid combinatorial formulations for robust, scalable, and interpretable neural network compression.",
+      "authors": [
+        "Osama Orabi",
+        "Artur Zagitov",
+        "Hadi Salloum",
+        "Viktor A. Lobachev",
+        "Kasymkhan Khubiev",
+        "Yaroslav Kholodov"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI",
+        "cs.LG",
+        "cs.NE"
+      ],
+      "published": "2026-04-07T13:16:40+00:00",
+      "link": "https://arxiv.org/pdf/2604.05856v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Formulating neural network pruning as a QUBO combinatorial optimization problem",
+      "llm_evidence_cn": "将神经网络剪枝建模为QUBO组合优化问题",
+      "llm_evidence": "将神经网络剪枝建模为QUBO组合优化问题",
+      "canonical_evidence": "将神经网络剪枝建模为QUBO组合优化问题",
+      "llm_tldr_en": "Bridges heuristic importance estimation with global combinatorial optimization for neural network pruning.",
+      "llm_tldr_cn": "将启发式重要性估计与全局组合优化相结合，用于神经网络剪枝。",
+      "llm_tldr": "将启发式重要性估计与全局组合优化相结合，用于神经网络剪枝。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Deep learning models for solving NP hard combinatorial problems",
+      "matched_requirement_id": "req-23",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.03815v1",
+      "title": "k-Maximum Inner Product Attention for Graph Transformers and the Expressive Power of GraphGPS The Expressive Power of GraphGPS",
+      "abstract": "Graph transformers have shown promise in overcoming limitations of traditional graph neural networks, such as oversquashing and difficulties in modelling long-range dependencies. However, their application to large-scale graphs is hindered by the quadratic memory and computational complexity of the all-to-all attention mechanism. Although alternatives such as linearized attention and restricted attention patterns have been proposed, these often degrade performance or limit expressive power. To better balance efficiency and effectiveness, we introduce k-Maximum Inner Product (k-MIP) attention for graph transformers. k-MIP attention selects the most relevant key nodes per query via a top-k operation, yielding a sparse yet flexible attention pattern. Combined with an attention score computation based on symbolic matrices, this results in linear memory complexity and practical speedups of up to an order of magnitude compared to all-to-all attention, enabling the processing of graphs with over 500k nodes on a single A100 GPU. We provide a theoretical analysis of expressive power, showing that k-MIP attention does not compromise the expressiveness of graph transformers: specifically, we prove that k-MIP transformers can approximate any full-attention transformer to arbitrary precision. In addition, we analyze the expressive power of the GraphGPS framework, in which we integrate our attention mechanism, and establish an upper bound on its graph distinguishing capability in terms of the S-SEG-WL test. Finally, we validate our approach on the Long Range Graph Benchmark, the City-Networks benchmark, and two custom large-scale inductive point cloud datasets, consistently ranking among the top-performing scalable graph transformers.",
+      "authors": [
+        "Jonas De Schouwer",
+        "Haitz Sáez de Ocáriz Borde",
+        "Xiaowen Dong"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-04-04T17:45:50+00:00",
+      "link": "https://arxiv.org/pdf/2604.03815v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "attention mechanism for graph transformers",
+      "llm_evidence_cn": "图Transformer的注意力机制",
+      "llm_evidence": "图Transformer的注意力机制",
+      "canonical_evidence": "图Transformer的注意力机制",
+      "llm_tldr_en": "Introduces k-MIP attention to improve efficiency and expressive power in graph transformers.",
+      "llm_tldr_cn": "引入k-MIP注意力机制，以提高图Transformer的效率和表达能力。",
+      "llm_tldr": "引入k-MIP注意力机制，以提高图Transformer的效率和表达能力。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Transformer architectures for combinatorial optimization",
+      "matched_requirement_id": "req-20",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.03473v1",
+      "title": "Evolutionary Search for Automated Design of Uncertainty Quantification Methods",
+      "abstract": "Uncertainty quantification (UQ) methods for large language models are predominantly designed by hand based on domain knowledge and heuristics, limiting their scalability and generality. We apply LLM-powered evolutionary search to automatically discover unsupervised UQ methods represented as Python programs. On the task of atomic claim verification, our evolved methods outperform strong manually-designed baselines, achieving up to 6.7% relative ROC-AUC improvement across 9 datasets while generalizing robustly out-of-distribution. Qualitative analysis reveals that different LLMs employ qualitatively distinct evolutionary strategies: Claude models consistently design high-feature-count linear estimators, while Gpt-oss-120B gravitates toward simpler and more interpretable positional weighting schemes. Surprisingly, only Sonnet 4.5 and Opus 4.5 reliably leverage increased method complexity to improve performance -- Opus 4.6 shows an unexpected regression relative to its predecessor. Overall, our results indicate that LLM-powered evolutionary search is a promising paradigm for automated, interpretable hallucination detector design.",
+      "authors": [
+        "Mikhail Seleznyov",
+        "Daniil Korbut",
+        "Viktor Moskvoretskii",
+        "Oleg Somov",
+        "Alexander Panchenko",
+        "Elena Tutubalina"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI"
+      ],
+      "published": "2026-04-03T21:41:41+00:00",
+      "link": "https://arxiv.org/pdf/2604.03473v1",
+      "tags": [
+        "keyword:NCO+LLM",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "LLM-powered evolutionary search for automated design",
+      "llm_evidence_cn": "大模型驱动的进化搜索用于自动化设计",
+      "llm_evidence": "大模型驱动的进化搜索用于自动化设计",
+      "canonical_evidence": "大模型驱动的进化搜索用于自动化设计",
+      "llm_tldr_en": "Uses LLM-powered evolutionary search to automatically discover uncertainty quantification methods as programs.",
+      "llm_tldr_cn": "利用大模型驱动的进化搜索，自动发现作为程序的确定性量化方法。",
+      "llm_tldr": "利用大模型驱动的进化搜索，自动发现作为程序的确定性量化方法。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM-guided heuristic search for optimization",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.03614v1",
+      "title": "Neural Global Optimization via Iterative Refinement from Noisy Samples",
+      "abstract": "Global optimization of black-box functions from noisy samples is a fundamental challenge in machine learning and scientific computing. Traditional methods such as Bayesian Optimization often converge to local minima on multi-modal functions, while gradient-free methods require many function evaluations. We present a novel neural approach that learns to find global minima through iterative refinement. Our model takes noisy function samples and their fitted spline representation as input, then iteratively refines an initial guess toward the true global minimum. Trained on randomly generated functions with ground truth global minima obtained via exhaustive search, our method achieves a mean error of 8.05 percent on challenging multi-modal test functions, compared to 36.24 percent for the spline initialization, a 28.18 percent improvement. The model successfully finds global minima in 72 percent of test cases with error below 10 percent, demonstrating learned optimization principles rather than mere curve fitting. Our architecture combines encoding of multiple modalities including function values, derivatives, and spline coefficients with iterative position updates, enabling robust global optimization without requiring derivative information or multiple restarts.",
+      "authors": [
+        "Qusay Muzaffar",
+        "David Levin",
+        "Michael Werman"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-04-04T07:02:38+00:00",
+      "link": "https://arxiv.org/pdf/2604.03614v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Neural approach for global optimization via iterative refinement",
+      "llm_evidence_cn": "通过迭代细化的神经全局优化方法",
+      "llm_evidence": "通过迭代细化的神经全局优化方法",
+      "canonical_evidence": "通过迭代细化的神经全局优化方法",
+      "llm_tldr_en": "A neural model that learns to find global minima of black-box functions through iterative refinement.",
+      "llm_tldr_cn": "一种通过迭代细化学习寻找黑盒函数全局最小值的神经模型。",
+      "llm_tldr": "一种通过迭代细化学习寻找黑盒函数全局最小值的神经模型。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Neural Combinatorial Optimization (NCO) methods and frameworks",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.04383v1",
+      "title": "Optimizing Service Operations via LLM-Powered Multi-Agent Simulation",
+      "abstract": "Service system performance depends on how participants respond to design choices, but modeling these responses is hard due to the complexity of human behavior. We introduce an LLM-powered multi-agent simulation (LLM-MAS) framework for optimizing service operations. We pose the problem as stochastic optimization with decision-dependent uncertainty: design choices are embedded in prompts and shape the distribution of outcomes from interacting LLM-powered agents. By embedding key numerical information in prompts and extracting it from LLM-generated text, we model this uncertainty as a controlled Markov chain. We develop an on-trajectory learning algorithm that, on a single simulation run, simultaneously constructs zeroth-order gradient estimates and updates design parameters to optimize steady-state performance. We also incorporate variance reduction techniques. In a sustainable supply chain application, our method outperforms benchmarks, including blackbox optimization and using LLMs as numerical solvers or as role-playing system designers. A case study on optimal contest design with real behavioral data shows that LLM-MAS is both as a cost-effective evaluator of known designs and an exploratory tool that can uncover strong designs overlooked by traditional approaches.",
+      "authors": [
+        "Yanyuan Wang",
+        "Xiaowei Zhang"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.MA",
+        "math.OC"
+      ],
+      "published": "2026-04-06T03:14:33+00:00",
+      "link": "https://arxiv.org/pdf/2604.04383v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "LLM-powered simulation for stochastic optimization",
+      "llm_evidence_cn": "大模型驱动的随机优化模拟",
+      "llm_evidence": "大模型驱动的随机优化模拟",
+      "canonical_evidence": "大模型驱动的随机优化模拟",
+      "llm_tldr_en": "Introduces an LLM-powered multi-agent simulation framework for optimizing service operations.",
+      "llm_tldr_cn": "引入大模型驱动的多智能体模拟框架，用于优化服务运营中的随机决策问题。",
+      "llm_tldr": "引入大模型驱动的多智能体模拟框架，用于优化服务运营中的随机决策问题。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Large Language Models (LLM) for optimization tasks",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2604.05942v1",
+      "title": "BOSCH: Black-Box Binary Optimization for Short-Context Attention-Head Selection in LLMs",
+      "abstract": "Post-training hybridization of large language models (LLMs) often replaces quadratic self-attention with sliding-window attention (SWA) to reduce KV cache usage and improve latency. Existing hybridization schemes are typically defined either at the layer level (e.g., interleaving) or at the head level via static rankings from local to global. Layer-level schemes ignore that local and global dependencies are routed through heads within the same layer, while static head-level rankings suffer from entanglement: a head's local/global behavior can change after hybridization. We propose BOSCH, Black-box Binary Optimization for Short-context Head Selection, a training-free method that formulates the problem as a Large Neighborhood Search and decomposes it into three subproblems: (i) layer-importance detection via small-budget black-box probes, (ii) adaptive per-layer SWA-ratio assignment based on these sensitivities, and (iii) grouped head-level optimization within ratio buckets. Extensive experiments on 4 LLMs ranging from 1.7B to 30B parameters, across 4 SWA ratios, show that BOSCH consistently outperforms layer-level heuristics and 6 strong static head-level methods, with larger gains at higher SWA ratios. Under continual pretraining, BOSCH recover original long-context performance faster and to a higher level. Analysis of the selected heads reveals substantial turnover for BOSCH across different SWA ratios, underscoring the importance of performing head-level selection for each target ratio rather than relying on fixed locality rankings.",
+      "authors": [
+        "Abbas Ghaddar",
+        "Ivan Kobyzev",
+        "Boxing Chen",
+        "Yufei Cui"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-04-07T14:38:05+00:00",
+      "link": "https://arxiv.org/pdf/2604.05942v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Large Neighborhood Search for LLM attention selection",
+      "llm_evidence_cn": "使用大邻域搜索进行LLM注意力头选择",
+      "llm_evidence": "使用大邻域搜索进行LLM注意力头选择",
+      "canonical_evidence": "使用大邻域搜索进行LLM注意力头选择",
+      "llm_tldr_en": "Uses Large Neighborhood Search to optimize attention-head selection for efficient LLM inference.",
+      "llm_tldr_cn": "使用大邻域搜索优化注意力头选择，以实现高效的LLM推理。",
+      "llm_tldr": "使用大邻域搜索优化注意力头选择，以实现高效的LLM推理。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM-based heuristic search and optimization",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2604.01564v1",
+      "title": "A Unified Performance-Cost Landscape of Parallel p-bit Ising Machines Based on Update Dynamics",
+      "abstract": "Parallel p-bit Ising machines are a promising platform for fast and energy-efficient combinatorial optimization, but their scalability depends on update synchronization, hardware delay, and architectural cost. In this work, we establish a unified performance-cost framework by analyzing synchronous and asynchronous update schemes under realistic constraints, including finite delay, time-multiplexed p-bit reuse, and limited DAC precision. We show that synchronous updates are not inherently unstable but can exhibit oscillations under excessive simultaneity, while asynchronous updates require slower operation due to hardware delay. To address this trade-off, we introduce time-multiplexed p-bit reuse with structured synchronous control, preserving correct annealing dynamics while reducing hardware requirements. This approach decouples statistical correctness from physical resources, enabling the number of p-bits and DACs to scale inversely with the reuse factor. As a result, synchronous architectures achieve comparable or better solution quality at less than half the hardware cost of optimized asynchronous designs on G-set MaxCut benchmarks (800-2000 nodes). We also show that low-resolution DACs (3-4 bits) are sufficient to reach near-optimal solutions when annealing time is properly adjusted. These findings provide practical design guidelines for scalable probabilistic computing hardware under realistic constraints.",
+      "authors": [
+        "Naoya Onizawa",
+        "Takahiro Hanyu"
+      ],
+      "primary_category": "cs.ET",
+      "categories": [
+        "cs.ET"
+      ],
+      "published": "2026-04-02T03:23:00+00:00",
+      "link": "https://arxiv.org/pdf/2604.01564v1",
+      "tags": [
+        "keyword:NCO",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "combinatorial optimization using Ising machines",
+      "llm_evidence_cn": "使用伊辛机进行组合优化",
+      "llm_evidence": "使用伊辛机进行组合优化",
+      "canonical_evidence": "使用伊辛机进行组合优化",
+      "llm_tldr_en": "Analyzes performance-cost trade-offs in parallel p-bit Ising machines for efficient combinatorial optimization.",
+      "llm_tldr_cn": "分析了并行p-bit伊辛机在高效组合优化中的性能与成本权衡。",
+      "llm_tldr": "分析了并行p-bit伊辛机在高效组合优化中的性能与成本权衡。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Machine learning approaches to combinatorial optimization",
+      "matched_requirement_id": "req-19",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.00830v1",
+      "title": "Learning to Learn-at-Test-Time: Language Agents with Learnable Adaptation Policies",
+      "abstract": "Test-Time Learning (TTL) enables language agents to iteratively refine their performance through repeated interactions with the environment at inference time. At the core of TTL is an adaptation policy that updates the actor policy based on experience from previous episodes, thereby improving future behavior. Existing methods rely on fixed, hand-crafted adaptation policies rather than optimizing them for downstream improvement. We argue that optimal adaptation policies should be learned from task environments, not hand-engineered based on human intuition. To achieve this, we introduce Meta-TTL, a framework that formulates the discovery of effective adaptation policies as a bi-level optimization problem. Within this framework, the inner loop executes the standard TTL process, measuring how effectively a candidate adaptation policy helps an agent correct errors across sequential episodes. Guided by the agent's performance, the outer loop employs evolutionary search over a diverse distribution of training tasks to iteratively refine the adaptation policy. We evaluate Meta-TTL on Jericho and WebArena-Lite across both in-distribution (ID) and out-of-distribution (OOD) settings, using multiple meta-agent backbones. Results on both benchmarks show that Meta-TTL consistently outperforms hand-crafted baselines, suggesting that the optimized adaptation policy encodes transferable strategies that generalize beyond the training task distribution.",
+      "authors": [
+        "Zhanzhi Lou",
+        "Hui Chen",
+        "Yibo Li",
+        "Qian Wang",
+        "Bryan Hooi"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-04-01T12:41:01+00:00",
+      "link": "https://arxiv.org/pdf/2604.00830v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Bi-level optimization for learning adaptation policies in language agents",
+      "llm_evidence_cn": "用于学习语言智能体自适应策略的双层优化",
+      "llm_evidence": "用于学习语言智能体自适应策略的双层优化",
+      "canonical_evidence": "用于学习语言智能体自适应策略的双层优化",
+      "llm_tldr_en": "Introduces Meta-TTL to discover optimal adaptation policies for LLM agents via bi-level optimization.",
+      "llm_tldr_cn": "引入Meta-TTL，通过双层优化为LLM智能体发现最佳自适应策略。",
+      "llm_tldr": "引入Meta-TTL，通过双层优化为LLM智能体发现最佳自适应策略。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "How to use Large Language Models to solve combinatorial optimization problems",
+      "matched_requirement_id": "req-12",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.03675v1",
+      "title": "PRAISE: Prefix-Based Rollout Reuse in Agentic Search Training",
+      "abstract": "In agentic search, large language models (LLMs) are trained to perform multi-turn retrieval and reasoning for complex tasks such as multi-hop question answering (QA). However, current search-based Reinforcement Learning (RL) methods suffer from two core limitations: expensive long-horizon rollouts are under-utilized during training, and supervision is typically available only at the final answer, resulting in severe reward sparsity. We present Prefix-based Rollout reuse for Agentic search with Intermediate Step rEwards (PRAISE), a framework for improving both data efficiency and credit assignment in agentic search training. Given a complete search trajectory, PRAISE extracts prefix states at different search turns, elicits intermediate answers from them, and uses these prefixes both to construct additional training trajectories and to derive step-level rewards from performance differences across prefixes. Our method uses a single shared model for both search policy learning and prefix answer evaluation, enabling joint optimization without extra human annotations or a separate reward model. Experiments on multi-hop QA benchmarks show that PRAISE consistently improves performance over strong baselines.",
+      "authors": [
+        "Erhan Zhang",
+        "Yiqun Chen",
+        "Zechun Niu",
+        "Wei Yang",
+        "Xiaochi Wei",
+        "Yan Gao",
+        "Yi Wu",
+        "Yao Hu",
+        "Jiaxin Mao"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-04-04T10:23:46+00:00",
+      "link": "https://arxiv.org/pdf/2604.03675v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "LLM-based agentic search and reinforcement learning for multi-turn reasoning",
+      "llm_evidence_cn": "基于大语言模型的代理搜索与强化学习多轮推理",
+      "llm_evidence": "基于大语言模型的代理搜索与强化学习多轮推理",
+      "canonical_evidence": "基于大语言模型的代理搜索与强化学习多轮推理",
+      "llm_tldr_en": "Introduces PRAISE, a framework to improve data efficiency in LLM-based search and reasoning tasks using RL.",
+      "llm_tldr_cn": "提出了PRAISE框架，通过强化学习提高大模型在搜索和推理任务中的数据效率。",
+      "llm_tldr": "提出了PRAISE框架，通过强化学习提高大模型在搜索和推理任务中的数据效率。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM-based heuristic search and optimization",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.01591v1",
+      "title": "ThinkTwice: Jointly Optimizing Large Language Models for Reasoning and Self-Refinement",
+      "abstract": "We introduce ThinkTwice, a simple two-phase framework that jointly optimizes LLMs to solve reasoning problems and refine the answers, based on Group Relative Policy Optimization (GRPO). In each pair of training steps, ThinkTwice first optimizes the model on solving reasoning problems, then optimizes it on refining its own solutions to the same problems, using the same binary correctness reward in both phases without correctness signals or critique annotations. Across five mathematical reasoning benchmarks and two model families including Qwen3-4B and Olmo3-7B, ThinkTwice substantially improves both reasoning and refinement performance over competitive online policy optimization baselines. Specifically, on Qwen3-4B, ThinkTwice outperforms GRPO on AIME by 5 percentage points before refinement and by 11.5 points after one self-refinement step, measured by pass@4. Analysis of the training dynamics of ThinkTwice reveals an implicit rectify-then-fortify curriculum: refinement predominantly corrects errors early in training and naturally shifts toward preserving already-correct solutions as the model improves, yielding a more rectified reward signal. Our work establishes joint training of reasoning and self-refinement as a principled and effective methodology for RLVR.",
+      "authors": [
+        "Difan Jiao",
+        "Qianfeng Wen",
+        "Blair Yang",
+        "Zhenwei Tang",
+        "Ashton Anderson"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-04-02T04:02:04+00:00",
+      "link": "https://arxiv.org/pdf/2604.01591v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Optimizing LLMs for reasoning and self-refinement",
+      "llm_evidence_cn": "优化大模型的推理和自我完善能力",
+      "llm_evidence": "优化大模型的推理和自我完善能力",
+      "canonical_evidence": "优化大模型的推理和自我完善能力",
+      "llm_tldr_en": "A framework to jointly optimize LLMs for solving and refining reasoning problems using policy optimization.",
+      "llm_tldr_cn": "一个通过策略优化共同提升大模型解决和完善推理问题能力的框架。",
+      "llm_tldr": "一个通过策略优化共同提升大模型解决和完善推理问题能力的框架。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Large Language Models (LLM) for optimization tasks",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.04079v1",
+      "title": "Multi-AUV Trajectory Learning for Sustainable Underwater IoT with Acoustic Energy Transfer",
+      "abstract": "The Internet of Underwater Things (IoUT) supports ocean sensing and offshore monitoring but requires coordinated mobility and energy-aware communication to sustain long-term operation. This letter proposes a multi-AUV framework that jointly addresses trajectory control and acoustic communication for sustainable IoUT operation. The problem is formulated as a Markov decision process that integrates continuous AUV kinematics, propulsion-aware energy consumption, acoustic energy transfer feasibility, and Age of Information (AoI) regulation. A centralized deep reinforcement learning policy based on Proximal Policy Optimization (PPO) is developed to coordinate multiple AUVs under docking and safety constraints. The proposed approach is evaluated against structured heuristic baselines and demonstrates significant reductions in average AoI while improving fairness and data collection efficiency. Results show that cooperative multi-AUV control provides scalable performance gains as the network size increases.",
+      "authors": [
+        "Mohamed Afouene Melki",
+        "Mohammad Shehab",
+        "Mohamed-Slim Alouini"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY"
+      ],
+      "published": "2026-04-05T11:55:15+00:00",
+      "link": "https://arxiv.org/pdf/2604.04079v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Deep reinforcement learning for trajectory control and coordination",
+      "llm_evidence_cn": "用于轨迹控制和协调的深度强化学习",
+      "llm_evidence": "用于轨迹控制和协调的深度强化学习",
+      "canonical_evidence": "用于轨迹控制和协调的深度强化学习",
+      "llm_tldr_en": "Develops a DRL framework using PPO for multi-AUV trajectory control and energy-aware communication.",
+      "llm_tldr_cn": "开发了一个基于PPO的深度强化学习框架，用于多AUV轨迹控制和能源感知通信。",
+      "llm_tldr": "开发了一个基于PPO的深度强化学习框架，用于多AUV轨迹控制和能源感知通信。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Deep Reinforcement Learning for combinatorial optimization",
+      "matched_requirement_id": "req-14",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.01597v1",
+      "title": "Learning from the Right Rollouts: Data Attribution for PPO-based LLM Post-Training",
+      "abstract": "Traditional RL algorithms like Proximal Policy Optimization (PPO) typically train on the entire rollout buffer, operating under the assumption that all generated episodes provide a beneficial optimization signal. However, these episodes frequently contain noisy or unfaithful reasoning, which can degrade model performance and slow down training. In this paper, we propose \\textbf{Influence-Guided PPO (I-PPO)}, a novel framework that integrates data attribution into the RL post-training loop. By calculating an influence score for each episode using a gradient-based approximation, I-PPO identifies and eliminates episodes that are anti-aligned with a validation gradient. Our experiments demonstrate that I-PPO consistently outperforms SFT and PPO baselines. We show that our filtering process acts as an intrinsic early stopping mechanism, accelerating training efficiency while effectively reducing unfaithful CoT reasoning.",
+      "authors": [
+        "Dong Shu",
+        "Denghui Zhang",
+        "Jessica Hullman"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-04-02T04:09:31+00:00",
+      "link": "https://arxiv.org/pdf/2604.01597v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "PPO-based LLM post-training and optimization signal improvement",
+      "llm_evidence_cn": "基于PPO的LLM训练后优化与信号改进",
+      "llm_evidence": "基于PPO的LLM训练后优化与信号改进",
+      "canonical_evidence": "基于PPO的LLM训练后优化与信号改进",
+      "llm_tldr_en": "Introduces I-PPO to improve LLM post-training by filtering noisy rollout data using influence scores.",
+      "llm_tldr_cn": "引入I-PPO，通过影响分数过滤噪声数据，改进大语言模型的训练后优化过程。",
+      "llm_tldr": "引入I-PPO，通过影响分数过滤噪声数据，改进大语言模型的训练后优化过程。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Fine tuning language models for neural combinatorial optimization tasks",
+      "matched_requirement_id": "req-13",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.05112v1",
+      "title": "Vintix II: Decision Pre-Trained Transformer is a Scalable In-Context Reinforcement Learner",
+      "abstract": "Recent progress in in-context reinforcement learning (ICRL) has demonstrated its potential for training generalist agents that can acquire new tasks directly at inference. Algorithm Distillation (AD) pioneered this paradigm and was subsequently scaled to multi-domain settings, although its ability to generalize to unseen tasks remained limited. The Decision Pre-Trained Transformer (DPT) was introduced as an alternative, showing stronger in-context reinforcement learning abilities in simplified domains, but its scalability had not been established. In this work, we extend DPT to diverse multi-domain environments, applying Flow Matching as a natural training choice that preserves its interpretation as Bayesian posterior sampling. As a result, we obtain an agent trained across hundreds of diverse tasks that achieves clear gains in generalization to the held-out test set. This agent improves upon prior AD scaling and demonstrates stronger performance in both online and offline inference, reinforcing ICRL as a viable alternative to expert distillation for training generalist agents.",
+      "authors": [
+        "Andrei Polubarov",
+        "Lyubaykin Nikita",
+        "Alexander Derevyagin",
+        "Artyom Grishin",
+        "Igor Saprygin",
+        "Aleksandr Serkov",
+        "Mark Averchenko",
+        "Daniil Tikhonov",
+        "Maksim Zhdanov",
+        "Alexander Nikulin",
+        "Ilya Zisman",
+        "Albina Klepach",
+        "Alexey Zemtsov",
+        "Vladislav Kurenkov"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.RO"
+      ],
+      "published": "2026-04-06T19:18:12+00:00",
+      "link": "https://arxiv.org/pdf/2604.05112v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Scalable in-context reinforcement learning for generalist agents",
+      "llm_evidence_cn": "通用智能体的可扩展上下文强化学习",
+      "llm_evidence": "通用智能体的可扩展上下文强化学习",
+      "canonical_evidence": "通用智能体的可扩展上下文强化学习",
+      "llm_tldr_en": "Extends Decision Pre-Trained Transformer to multi-domain environments for scalable in-context RL.",
+      "llm_tldr_cn": "将决策预训练Transformer扩展到多领域环境，实现可扩展的上下文强化学习。",
+      "llm_tldr": "将决策预训练Transformer扩展到多领域环境，实现可扩展的上下文强化学习。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "In-context learning for combinatorial optimization problems",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.02569v1",
+      "title": "RFOX (Rotated-Field Oscillatory eXchange) quantum algorithm: Towards Parameter-Free Quantum Optimizers",
+      "abstract": "We introduce RFOX (Rotated-Field Oscillatory eXchange), a parameter-free quantum algorithm for combinatorial optimization. RFOX combines an almost constant non-stoquastic $XX$ catalyst with a weak harmonic $ZX$ counter-diabatic term. Using the Floquet-Magnus expansion, we derive a closed-form effective Hamiltonian whose first-order term retains the full $XX$ driver, while the leading correction consists of a single qubit $Y$ field at high drive frequency. This structure ensures that the instantaneous spectral gap remains essentially flat, independent of both the interpolation parameter and the disorder strength, modulated only by a $δ$ parameter. This behavior stands in stark contrast to the unpredictable gap reductions, or even collapses, exhibited by the $X$ (stoquastic), $XX$, and $X+sXX$ (non-stoquastic) driver schedules. Extensive noiseless simulations on random-field Ising model (RFIM) instances with 7, 9, and 12 qubits, across three magnetic-field ranges, validate these spectral predictions: RFOX attains near-optimal, and in some cases exact, ground states using up to an order of magnitude fewer Trotter slices. Its performance advantage grows with increasing disorder, as conventional methods slow down near vanishing gaps, whereas RFOX maintains a constant runtime scaling of $T \\propto Δ_{\\min}^{-2}$. Hardware experiments on IBM Quantum processors (Eagle r3 and Heron r1, with 12, 15, and 20 physical qubits) reproduce similar performance rankings. These results suggest that fixed-gap, non-stoquastic drivers augmented with analytically derived counter-diabatic terms offer a promising, scalable, and tuning-free route toward quantum optimizers for combinatorial optimization problems.",
+      "authors": [
+        "Brian García Sarmina",
+        "Guo-Hua Sun",
+        "Shi-Hai Dong"
+      ],
+      "primary_category": "quant-ph",
+      "categories": [
+        "quant-ph",
+        "math.OC"
+      ],
+      "published": "2026-04-02T22:44:10+00:00",
+      "link": "https://arxiv.org/pdf/2604.02569v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "quantum algorithm for combinatorial optimization",
+      "llm_evidence_cn": "组合优化的量子算法",
+      "llm_evidence": "组合优化的量子算法",
+      "canonical_evidence": "组合优化的量子算法",
+      "llm_tldr_en": "Introduces a parameter-free quantum algorithm for solving combinatorial optimization problems.",
+      "llm_tldr_cn": "介绍了一种用于解决组合优化问题的无参数量子算法。",
+      "llm_tldr": "介绍了一种用于解决组合优化问题的无参数量子算法。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "State of the art neural combinatorial optimization techniques",
+      "matched_requirement_id": "req-22",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.05681v1",
+      "title": "LUDOBENCH: Evaluating LLM Behavioural Decision-Making Through Spot-Based Board Game Scenarios in Ludo",
+      "abstract": "We introduce LudoBench, a benchmark for evaluating LLM strategic reasoning in Ludo, a stochastic multi-agent board game whose dice mechanics, piece capture, safe-square navigation, and home-path progression introduce meaningful planning complexity. LudoBench comprises 480 handcrafted spot scenarios across 12 behaviorally distinct decision categories, each isolating a specific strategic choice. We additionally contribute a fully functional 4-player Ludo simulator supporting Random, Heuristic, Game-Theory, and LLM agents. The game-theory agent uses Expectiminimax search with depth-limited lookahead to provide a principled strategic ceiling beyond greedy heuristics. Evaluating six models spanning four model families, we find that all models agree with the game-theory baseline only 40-46% of the time. Models split into distinct behavioral archetypes: finishers that complete pieces but neglect development, and builders that develop but never finish. Each archetype captures only half of the game theory strategy. Models also display measurable behavioral shifts under history-conditioned grudge framing on identical board states, revealing prompt-sensitivity as a key vulnerability. LudoBench provides a lightweight and interpretable framework for benchmarking LLM strategic reasoning under uncertainty. All code, the spot dataset (480 entries) and model outputs are available at https://anonymous.4open.science/r/LudoBench-5CBF/",
+      "authors": [
+        "Ojas Jain",
+        "Dhruv Kumar"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CL",
+        "cs.GT",
+        "cs.LG",
+        "cs.MA"
+      ],
+      "published": "2026-04-07T10:34:13+00:00",
+      "link": "https://arxiv.org/pdf/2604.05681v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "LLM strategic reasoning and heuristic agents in board games",
+      "llm_evidence_cn": "LLM在棋盘游戏中的策略推理与启发式代理",
+      "llm_evidence": "LLM在棋盘游戏中的策略推理与启发式代理",
+      "canonical_evidence": "LLM在棋盘游戏中的策略推理与启发式代理",
+      "llm_tldr_en": "Benchmarks LLM strategic decision-making in Ludo, comparing LLMs with heuristic and game-theory agents.",
+      "llm_tldr_cn": "在飞行棋中评估LLM的策略决策能力，并与启发式和博弈论代理进行对比。",
+      "llm_tldr": "在飞行棋中评估LLM的策略决策能力，并与启发式和博弈论代理进行对比。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM-guided heuristic search for optimization",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.03489v1",
+      "title": "Improving Feasibility via Fast Autoencoder-Based Projections",
+      "abstract": "Enforcing complex (e.g., nonconvex) operational constraints is a critical challenge in real-world learning and control systems. However, existing methods struggle to efficiently enforce general classes of constraints. To address this, we propose a novel data-driven amortized approach that uses a trained autoencoder as an approximate projector to provide fast corrections to infeasible predictions. Specifically, we train an autoencoder using an adversarial objective to learn a structured, convex latent representation of the feasible set. This enables rapid correction of neural network outputs by projecting their associated latent representations onto a simple convex shape before decoding into the original feasible set. We test our approach on a diverse suite of constrained optimization and reinforcement learning problems with challenging nonconvex constraints. Results show that our method effectively enforces constraints at a low computational cost, offering a practical alternative to expensive feasibility correction techniques based on traditional solvers.",
+      "authors": [
+        "Maria Chzhen",
+        "Priya L. Donti"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "math.OC"
+      ],
+      "published": "2026-04-03T22:33:17+00:00",
+      "link": "https://arxiv.org/pdf/2604.03489v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Data-driven approach for enforcing operational constraints",
+      "llm_evidence_cn": "强制执行运行约束的数据驱动方法",
+      "llm_evidence": "强制执行运行约束的数据驱动方法",
+      "canonical_evidence": "强制执行运行约束的数据驱动方法",
+      "llm_tldr_en": "Uses autoencoders as approximate projectors to efficiently enforce complex constraints in learning systems.",
+      "llm_tldr_cn": "利用自动编码器作为近似投影算子，在学习系统中高效执行复杂的非凸运行约束。",
+      "llm_tldr": "利用自动编码器作为近似投影算子，在学习系统中高效执行复杂的非凸运行约束。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Hybrid approaches combining deep learning and traditional optimization",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.05846v1",
+      "title": "AgentGL: Towards Agentic Graph Learning with LLMs via Reinforcement Learning",
+      "abstract": "Large Language Models (LLMs) increasingly rely on agentic capabilities-iterative retrieval, tool use, and decision-making-to overcome the limits of static, parametric knowledge. Yet existing agentic frameworks treat external information as unstructured text and fail to leverage the topological dependencies inherent in real-world data. To bridge this gap, we introduce Agentic Graph Learning (AGL), a paradigm that reframes graph learning as an interleaved process of topology-aware navigation and LLM-based inference. Specifically, we propose AgentGL, the first reinforcement learning (RL)-driven framework for AGL. AgentGL equips an LLM agent with graph-native tools for multi-scale exploration, regulates tool usage via search-constrained thinking to balance accuracy and efficiency, and employs a graph-conditioned curriculum RL strategy to stabilize long-horizon policy learning without step-wise supervision. Across diverse Text-Attributed Graph (TAG) benchmarks and multiple LLM backbones, AgentGL substantially outperforms strong GraphLLMs and GraphRAG baselines, achieving absolute improvements of up to 17.5% in node classification and 28.4% in link prediction. These results demonstrate that AGL is a promising frontier for enabling LLMs to autonomously navigate and reason over complex relational environments. The code is publicly available at https://github.com/sunyuanfu/AgentGL.",
+      "authors": [
+        "Yuanfu Sun",
+        "Kang Li",
+        "Dongzhe Fan",
+        "Jiajin Liu",
+        "Qiaoyu Tan"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-04-07T13:11:17+00:00",
+      "link": "https://arxiv.org/pdf/2604.05846v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Integration of LLM agents with graph-native tools and reinforcement learning for navigation",
+      "llm_evidence_cn": "LLM智能体与图原生工具及强化学习的结合，用于拓扑导航",
+      "llm_evidence": "LLM智能体与图原生工具及强化学习的结合，用于拓扑导航",
+      "canonical_evidence": "LLM智能体与图原生工具及强化学习的结合，用于拓扑导航",
+      "llm_tldr_en": "Introduces AgentGL, an RL-driven framework for LLM agents to perform topology-aware graph learning and navigation.",
+      "llm_tldr_cn": "提出AgentGL，一个由强化学习驱动的框架，使LLM智能体能够进行拓扑感知的图学习和导航。",
+      "llm_tldr": "提出AgentGL，一个由强化学习驱动的框架，使LLM智能体能够进行拓扑感知的图学习和导航。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Integration of GNN and LLM for combinatorial optimization",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}

@@ -6,73 +6,79 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-07
-- 运行时间：2026-04-07 20:37:01 UTC
+- 最新运行日期：2026-04-08
+- 运行时间：2026-04-08 20:51:19 UTC
 - 运行状态：成功
-- 本次总论文数：17
-- 精读区：5
+- 本次总论文数：19
+- 精读区：7
 - 速读区：12
 
 ### 今日简报（AI）
-今日深度解析 17 篇前沿论文，聚焦 LLM 与视觉语言模型在卫星调度、芯片设计及 GPU 算子优化等硬核领域的突破性应用。
-重点关注 9.0 分佳作揭示的卫星调度“稳定性困境”，以及视觉语言模型（VLM）在进化芯片宏单元布局上的创新潜力。
-建议读者紧跟大模型从通用对话向物理世界复杂决策转型的趋势，探索 AI 在硬件优化与通信调度中的落地路径。
-- 详情：[/202604/07/README](/202604/07/README)
+今日深度解析 19 篇 AI 论文，重点突破了异构车队调度与闭环仿真优化两大核心领域。
+满分论文提出将车辆视为 Prompt 的统一强化学习框架，COSMO-Agent 则实现了建模与仿真的全流程自动化编排。
+建议关注大模型在运筹优化与工业仿真中的落地应用，探索 Agent 驱动的复杂决策新范式。
+- 详情：[/202604/08/README](/202604/08/README)
 
 ### 精读区论文标签
-1. [When Adaptive Rewards Hurt: Causal Probing and the Switching-Stability Dilemma in LLM-Guided LEO Satellite Scheduling](/202604/07/2604.03562v1-when-adaptive-rewards-hurt-causal-probing-and-the-switching-stability-dilemma-in-llm-guided-leo-satellite-scheduling)  
+1. [Vehicle-as-Prompt: A Unified Deep Reinforcement Learning Framework for Heterogeneous Fleet Vehicle Routing Problem](/202604/08/2604.05195v1-vehicle-as-prompt-a-unified-deep-reinforcement-learning-framework-for-heterogeneous-fleet-vehicle-routing-problem)  
+   标签：评分：10.0/10、query:nco-llm
+   evidence：针对异构车队路径规划问题的深度强化学习框架
+2. [COSMO-Agent: Tool-Augmented Agent for Closed-loop Optimization,Simulation,and Modeling Orchestration](/202604/08/2604.05547v1-cosmo-agent-tool-augmented-agent-for-closed-loop-optimizationsimulationand-modeling-orchestration)  
    标签：评分：9.0/10、query:nco-llm
-   evidence：大模型引导的低轨卫星调度深度强化学习
-2. [See it to Place it: Evolving Macro Placements with Vision-Language Models](/202604/07/2603.28733v2-see-it-to-place-it-evolving-macro-placements-with-vision-language-models)  
+   evidence：基于LLM的闭环工业设计优化智能体
+3. [Neural Network Pruning via QUBO Optimization](/202604/08/2604.05856v1-neural-network-pruning-via-qubo-optimization)  
+   标签：评分：9.0/10、query:nco
+   evidence：将神经网络剪枝建模为QUBO组合优化问题
+4. [Evolutionary Search for Automated Design of Uncertainty Quantification Methods](/202604/08/2604.03473v1-evolutionary-search-for-automated-design-of-uncertainty-quantification-methods)  
    标签：评分：8.0/10、query:nco-llm
-   evidence：使用视觉语言模型指导芯片布局的进化搜索
-3. [Reflective Context Learning: Studying the Optimization Primitives of Context Space](/202604/07/2604.03189v1-reflective-context-learning-studying-the-optimization-primitives-of-context-space)  
+   evidence：大模型驱动的进化搜索用于自动化设计
+5. [Neural Global Optimization via Iterative Refinement from Noisy Samples](/202604/08/2604.03614v1-neural-global-optimization-via-iterative-refinement-from-noisy-samples)  
    标签：评分：8.0/10、query:nco-llm
-   evidence：针对在上下文空间学习的智能体的反思性上下文学习
-4. [TransGP: Task-Conditioned Transformer-Guided Genetic Programming for Multitask Dynamic Flexible Job Shop Scheduling](/202604/07/2604.03705v1-transgp-task-conditioned-transformer-guided-genetic-programming-for-multitask-dynamic-flexible-job-shop-scheduling)  
+   evidence：通过迭代细化的神经全局优化方法
+6. [k-Maximum Inner Product Attention for Graph Transformers and the Expressive Power of GraphGPS The Expressive Power of GraphGPS](/202604/08/2604.03815v1-k-maximum-inner-product-attention-for-graph-transformers-and-the-expressive-power-of-graphgps-the-expressive-power-of-graphgps)  
    标签：评分：8.0/10、query:nco
-   evidence：用于作业车间调度的Transformer引导遗传规划
-5. [Feasibility-Aware Imitation Learning for Benders Decomposition](/202604/07/2604.04801v1-feasibility-aware-imitation-learning-for-benders-decomposition)  
+   evidence：图Transformer的注意力机制
+7. [Optimizing Service Operations via LLM-Powered Multi-Agent Simulation](/202604/08/2604.04383v1-optimizing-service-operations-via-llm-powered-multi-agent-simulation)  
    标签：评分：8.0/10、query:nco-llm
-   evidence：混合整数优化中Benders分解的模仿学习
+   evidence：大模型驱动的随机优化模拟
 
 ### 速读区论文标签
-1. [Scalable machine learning-based approaches for energy saving in densely deployed Open RAN](/202604/07/2604.00201v1-scalable-machine-learning-based-approaches-for-energy-saving-in-densely-deployed-open-ran)  
+1. [BOSCH: Black-Box Binary Optimization for Short-Context Attention-Head Selection in LLMs](/202604/08/2604.05942v1-bosch-black-box-binary-optimization-for-short-context-attention-head-selection-in-llms)  
+   标签：评分：8.0/10、query:nco-llm
+   evidence：使用大邻域搜索进行LLM注意力头选择
+2. [A Unified Performance-Cost Landscape of Parallel p-bit Ising Machines Based on Update Dynamics](/202604/08/2604.01564v1-a-unified-performance-cost-landscape-of-parallel-p-bit-ising-machines-based-on-update-dynamics)  
    标签：评分：7.0/10、query:nco
-   evidence：深度强化学习用于网络优化
-2. [Hybrid Classical--Quantum Optimization of Wireless Routing Using QAOA and Quantum Walks](/202604/07/2604.01250v1-hybrid-classical--quantum-optimization-of-wireless-routing-using-qaoa-and-quantum-walks)  
+   evidence：使用伊辛机进行组合优化
+3. [PRAISE: Prefix-Based Rollout Reuse in Agentic Search Training](/202604/08/2604.03675v1-praise-prefix-based-rollout-reuse-in-agentic-search-training)  
    标签：评分：7.0/10、query:nco-llm
-   evidence：无线路由问题的混合经典-量子优化
-3. [CuTeGen: An LLM-Based Agentic Framework for Generation and Optimization of High-Performance GPU Kernels using CuTe](/202604/07/2604.01489v1-cutegen-an-llm-based-agentic-framework-for-generation-and-optimization-of-high-performance-gpu-kernels-using-cute)  
-   标签：评分：7.0/10、query:nco-llm
-   evidence：基于大模型的GPU内核生成与优化框架
-4. [ContextBudget: Budget-Aware Context Management for Long-Horizon Search Agents](/202604/07/2604.01664v1-contextbudget-budget-aware-context-management-for-long-horizon-search-agents)  
-   标签：评分：7.0/10、query:nco-llm
-   evidence：基于LLM的智能体用于长程搜索和上下文管理
-5. [On vehicle routing problems with stochastic demands -- Scenario-optimal recourse policies](/202604/07/2604.02496v1-on-vehicle-routing-problems-with-stochastic-demands----scenario-optimal-recourse-policies)  
-   标签：评分：7.0/10、query:nco-llm
-   evidence：针对车辆路径问题的随机组合优化
-6. [Adaptive Threshold-Driven Continuous Greedy Method for Scalable Submodular Optimization](/202604/07/2604.03419v1-adaptive-threshold-driven-continuous-greedy-method-for-scalable-submodular-optimization)  
+   evidence：基于大语言模型的代理搜索与强化学习多轮推理
+4. [Multi-AUV Trajectory Learning for Sustainable Underwater IoT with Acoustic Energy Transfer](/202604/08/2604.04079v1-multi-auv-trajectory-learning-for-sustainable-underwater-iot-with-acoustic-energy-transfer)  
    标签：评分：7.0/10、query:nco
-   evidence：组合问题中的可扩展子模优化
-7. [Self-Improving Code Generation via Semantic Entropy and Behavioral Consensus](/202604/07/2603.29292v1-self-improving-code-generation-via-semantic-entropy-and-behavioral-consensus)  
+   evidence：用于轨迹控制和协调的深度强化学习
+5. [Vintix II: Decision Pre-Trained Transformer is a Scalable In-Context Reinforcement Learner](/202604/08/2604.05112v1-vintix-ii-decision-pre-trained-transformer-is-a-scalable-in-context-reinforcement-learner)  
+   标签：评分：7.0/10、query:nco-llm
+   evidence：通用智能体的可扩展上下文强化学习
+6. [LUDOBENCH: Evaluating LLM Behavioural Decision-Making Through Spot-Based Board Game Scenarios in Ludo](/202604/08/2604.05681v1-ludobench-evaluating-llm-behavioural-decision-making-through-spot-based-board-game-scenarios-in-ludo)  
+   标签：评分：7.0/10、query:nco-llm
+   evidence：LLM在棋盘游戏中的策略推理与启发式代理
+7. [AgentGL: Towards Agentic Graph Learning with LLMs via Reinforcement Learning](/202604/08/2604.05846v1-agentgl-towards-agentic-graph-learning-with-llms-via-reinforcement-learning)  
+   标签：评分：7.0/10、query:nco-llm
+   evidence：LLM智能体与图原生工具及强化学习的结合，用于拓扑导航
+8. [Learning to Learn-at-Test-Time: Language Agents with Learnable Adaptation Policies](/202604/08/2604.00830v1-learning-to-learn-at-test-time-language-agents-with-learnable-adaptation-policies)  
    标签：评分：6.0/10、query:nco-llm
-   evidence：自我改进的代码生成与偏好优化
-8. [AP-DRL: A Synergistic Algorithm-Hardware Framework for Automatic Task Partitioning of Deep Reinforcement Learning on Versal ACAP](/202604/07/2603.29369v1-ap-drl-a-synergistic-algorithm-hardware-framework-for-automatic-task-partitioning-of-deep-reinforcement-learning-on-versal-acap)  
-   标签：评分：6.0/10、query:nco
-   evidence：加速深度强化学习的硬件框架
-9. [ShapE-GRPO: Shapley-Enhanced Reward Allocation for Multi-Candidate LLM Training](/202604/07/2603.29871v1-shape-grpo-shapley-enhanced-reward-allocation-for-multi-candidate-llm-training)  
+   evidence：用于学习语言智能体自适应策略的双层优化
+9. [ThinkTwice: Jointly Optimizing Large Language Models for Reasoning and Self-Refinement](/202604/08/2604.01591v1-thinktwice-jointly-optimizing-large-language-models-for-reasoning-and-self-refinement)  
    标签：评分：6.0/10、query:nco-llm
-   evidence：旨在最大化候选集集体效用的LLM训练
-10. [A Cross-graph Tuning-free GNN Prompting Framework](/202604/07/2604.00399v1-a-cross-graph-tuning-free-gnn-prompting-framework)  
-   标签：评分：6.0/10、query:nco
-   evidence：用于跨图任务的图神经网络提示框架
-11. [Experience as a Compass: Multi-agent RAG with Evolving Orchestration and Agent Prompts](/202604/07/2604.00901v1-experience-as-a-compass-multi-agent-rag-with-evolving-orchestration-and-agent-prompts)  
+   evidence：优化大模型的推理和自我完善能力
+10. [Learning from the Right Rollouts: Data Attribution for PPO-based LLM Post-Training](/202604/08/2604.01597v1-learning-from-the-right-rollouts-data-attribution-for-ppo-based-llm-post-training)  
    标签：评分：6.0/10、query:nco-llm
-   evidence：进化多智能体编排与提示词
-12. [EmbedPart: Embedding-Driven Graph Partitioning for Scalable Graph Neural Network Training](/202604/07/2604.01000v1-embedpart-embedding-driven-graph-partitioning-for-scalable-graph-neural-network-training)  
+   evidence：基于PPO的LLM训练后优化与信号改进
+11. [RFOX (Rotated-Field Oscillatory eXchange) quantum algorithm: Towards Parameter-Free Quantum Optimizers](/202604/08/2604.02569v1-rfox-rotated-field-oscillatory-exchange-quantum-algorithm-towards-parameter-free-quantum-optimizers)  
    标签：评分：6.0/10、query:nco
-   evidence：用于图神经网络训练的嵌入驱动图划分
+   evidence：组合优化的量子算法
+12. [Improving Feasibility via Fast Autoencoder-Based Projections](/202604/08/2604.03489v1-improving-feasibility-via-fast-autoencoder-based-projections)  
+   标签：评分：6.0/10、query:nco-llm
+   evidence：强制执行运行约束的数据驱动方法
 
 
 <div class="dpr-home-promo-card">
