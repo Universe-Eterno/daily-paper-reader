@@ -1,0 +1,1037 @@
+Title: Block-Bench: A Framework for Controllable and Transparent Discrete Optimization Benchmarking
+
+URL Source: https://arxiv.org/pdf/2604.06973v1
+
+Published Time: Thu, 09 Apr 2026 00:54:47 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+# Block-Bench: A Framework for Controllable and Transparent Discrete Optimization Benchmarking 
+
+# Furong Ye 
+
+f.ye@liacs.leidenuniv.nl LIACS, Leiden University Leiden, the Netherlands 
+
+# Frank Neumann 
+
+frank.neumann@adelaide.edu.au Optimisation and Logistics, School of Computer Science and Information Technology, Adelaide University Adelaide, Australia 
+
+# Thomas Bäck Niki van Stein 
+
+t.h.w.baeck@liacs.leidenuniv.nl n.van.stein@liacs.leidenuniv.nl LIACS, Leiden University Leiden, the Netherlands 
+
+## Abstract 
+
+We present a novel approach for constructing discrete optimiza-tion benchmarks that enables fine-grained control over problem properties, and such benchmarks can facilitate analyzing discrete algorithm behaviors. We build benchmark problems based on a set of block functions, where each block function maps a subset of variables to a real value. Problems are instantiated through a set of block functions, weight factors, and an adjacency graph represent-ing the dependency among the block functions. Through analyzing intermediate block values, our framework allows to analyze algo-rithm behavior not only in the objective space but also at the level of variable representations in the obtained solutions. This capacity is particularly useful for analyzing discrete heuristics in large-scale multi-modal problems, thereby enhancing the practical relevance of benchmark studies. We demonstrate how the proposed approach can inspire the related work in self-adaptation and diversity control in evolutionary algorithms. Moreover, we explain that the proposed benchmark design enables explicit control over problem properties, supporting research in broader domains such as dynamic algorithm configuration and multi-objective optimization. 
+
+ACM Reference Format: 
+
+Furong Ye, Frank Neumann, Thomas Bäck, and Niki van Stein. 2026. Block-Bench: A Framework for Controllable and Transparent Discrete Optimiza-tion Benchmarking. In Genetic and Evolutionary Computation Conference (GECCO ’26), July 13–17, 2026, San Jose, Costa Rica. ACM, New York, NY, USA, 13 pages. https://doi.org/10.1145/3795095.3805071 
+
+## 1 Introduction 
+
+Understanding the behavior of evolutionary algorithms (EAs) and iterative heuristics is important for enhancing the explainability, robustness, and novel design of algorithms [ 5 ]. Recent advances in theory and benchmarking studies have enhanced fundamental analysis for iterative algorithms. Theoretical runtime analysis helps us to know the performance guarantee and the role of operators in searching for better solutions [ 23 ]. On the other hand, benchmark studies provide empirical evidence of algorithms’ behavior across various problems [ 24 , 28 , 45 , 53 , 59 ], and the numerous experimental  
+
+> This work is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License.
+> GECCO ’26, San Jose, Costa Rica
+> ©2026 Copyright held by the owner/author(s). ACM ISBN 979-8-4007-2487-9/2026/07 https://doi.org/10.1145/3795095.3805071
+
+datasets generated support advances in ML (machine learning)-driven automated algorithm selection or assembly methods for complex practical applications [1, 8, 60, 64]. However, in contrast to the rapid development of systematic anal-yses for continuous optimization, related work in discrete optimiza-tion is either limited to classic functions in theoretical analysis [ 23 ]or tailored to particular application domains such as satisfiabil-ity (SAT) [ 37 ], routing [ 57 ], scheduling [ 58 ], etc. These practical problems often come with high dimensionality, and the objective search space is too complex to support effective analysis of al-gorithm behavior. For example, escaping local optima is usually considered an important capacity of algorithms, but this is evident only from the final results, without illustrating the frequency and timing of encounters with these local optima [ 44 ]. Existing general discrete benchmarks [ 6 , 24 ] evaluate algorithms primarily based on the fitness values following the concept of black-box optimization. However, this work largely overlooks the impact of variable rep-resentations, even though many operators have been specifically proposed to address specific representation patterns in practical domains [ 31 ]. Some initial effort has been conducted to implement tunable features [ 62 ] for discrete benchmarks, but their usage re-mains rather limited. The lack of granular and representation-aware discrete benchmarks hinders practical adoption and communica-tion between theoretical and practical research, as well as prevents effective idea exchange across practical scenarios. Consequently, we lack a comprehensive foundation for examining and promoting advanced techniques, such as parameter control and automated algorithm design, in general discrete optimization studies. We propose block-structured optimization benchmarks to effec-tively address the issues faced by the discrete community. First, by introducing a set of block functions to form objective functions, our benchmark problems enable analysis of the sensitivity of algorithms to different local optima patterns by observing corresponding block values. The block structure is helpful for analyzing algorithms’ behavior at the level of variable representations with determined settings of block functions. It also benefits the study of large-scale discrete optimization, as we can analyze block values in a reduced-dimensional space. In addition, by controlling the contribution (i.e., weights) of each block function to the objective function and its dependencies, we can formulate various benchmark problems with deterministic landscapes and local optima, revealing the poten-tial of block-structured benchmarks in building a foundation for examining broader algorithm design topics in discrete optimization. Overall, the contributions of this paper are:  
+
+> arXiv:2604.06973v1 [cs.NE] 8 Apr 2026 GECCO ’26, July 13–17, 2026, San Jose, Costa Rica Furong Ye, Frank Neumann, Thomas Bäck, and Niki van Stein
+
+• Proposing a novel approach to construct discrete optimiza-tion benchmarks. This approach enables controlling problem properties, particularly the objective search space and local optima patterns. In addition, it supports analyzing large-scale discrete optimization over block values in a lower-dimensional space. 
+
+• Benefiting from the block-structures, we examine several questions that existing benchmarks cannot address. 
+
+– We analyze several self-adaptive EAs on problems with diverse landscape properties, highlighting the challenges posed by dynamic landscapes. 
+
+– We revisited the idea that maintaining diversity can help EAs deal with multi-modality, showing that this advantage varies with modality and landscape complexity. 
+
+– With our bi-objective optimization benchmarks, our ex-perimental results reveal that simple evolutionary multi-objective optimizers (SEMOs) and MOEA/D encounter greater difficulty in handling condition based landscapes, compared to NSGA-II and SMSEMOA. 
+
+• We provide a list of discrete benchmarks and together with corresponding experimental results in our repository 1.
+
+## 2 Related Work 
+
+In this section, we provide a brief overview of the state of the art in benchmarking in Evolutionary Computation, and summarize the key discrete Evolutionary Algorithms used in our work. 
+
+## 2.1 Evolutionary Computation Benchmarking 
+
+To better understand the behavior and performance guarantees of evolutionary computation (EC), theoretical and empirical anal-yses [ 23 ] have been widely studied in recent years. Meanwhile, parameter tuning and control [25], and other learning-based tech-niques [ 12 , 43 ] have been proposed to improve the efficiency of algorithms. To support these studies and ensure fairness and repro-ducibility of the results, several benchmarking platforms have been developed to generate standard experimental data [6, 14, 29]. 
+
+2.1.1 Practice in the continuous and discrete optimization. Continu-ous optimization benchmarks have been developed rapidly in recent years. The well-known bbob suite [ 30 ] has significantly enhanced related studies in the continuous optimization domain. Its problems are systematically classified based on well-defined properties such as multi-modality, global structure, separability, etc [ 30 , 46 ]. Apart from the original COCO platform [ 29 ], the bbob suite has also been integrated into other platforms such as IOHprofiler [ 14 ] and Never-grad [ 6]. An extended many-affine combinations of existing prob-lems have been proposed to generate more diverse problems [ 61 ], and Exploratory Landscape Analysis has also been proposed to investigate the properties of unknown problems [ 46 ]. Moreover, ML-related learning techniques have been studied, addressing top-ics such as algorithm selection for continuous optimization [ 39 , 60 ]. While the design of continuous benchmarks is driven primarily by capturing different problem characteristics to support bench-marking and a broad range of applications, discrete benchmarks, 
+
+> 1https://github.com/FurongYe/BlockBuildingBenchmark
+
+which are usually constructed with simple but explainable land-scapes, come from runtime analysis. The pseudo-Boolean optimiza-tion (PBO) benchmark set proposed in IOHprofiler [ 24 ] consists of classic theory-oriented problems and practical constrained prob-lems with pre-defined penalty factors. Another common approach is to discretize continuous benchmark sets, such as those from bbob and the CEC competitions [ 30 ], to evaluate discrete EC methods. Nevertheless, these discretized problems can not exactly capture the intrinsic difficulties of discrete landscapes. Beyond these generic benchmarks, many discrete benchmark suites are tailored to specific research domains. For example, the-oretical studies commonly focus on the classic OneMax , Leadin-gOnes , Jump , etc., which are characterized by particular and under-stood landscape properties. In contrast, practical research directly works on domain-specific test suites such as those for the SAT [ 37 ]problem, the vehicle routing problem [ 57 ], and flowshop schedul-ing [ 58 ]. While these benchmarks are highly relevant to practical situations, the corresponding algorithm performance is usually evaluated solely on the obtained solution quality, and the underly-ing search spaces are often too complex to provide interpretable insights into algorithm behavior. Moreover, benchmarking and the-oretical studies have been developed to address specific problem classes, such as submodular problems [26, 49]. 
+
+## 2.2 Discrete Evolutionary Algorithms 
+
+In this section, we provide an overview of several algorithms con-sidered in this work, and more details are described in the Appendix. Note that we particularly work on the pseudo-Boolean optimization (PBO) problems 𝑓 : {1, 0}𝑛 → R𝑑 in this paper and show examples illustrating both the single- and multi-objective case. 
+
+2.2.1 Self-adaptation in Single-objective Optimization. The (1 + 𝜆 )
+
+EAs apply a mutation-only scheme that applies the current best solution as the parent and creates 𝜆 offspring solutions at each iteration. The offspring is generated by flipping ℓ distinct bits of the parent, and the value ℓ is sampled by a distribution correlated to the mutation rate 𝑝 . We consider the following (1 + 𝜆 ) EAs that follow different methods of sampling ℓ.
+
+• ( 1 + 1) EA with a fixed mutation rate 𝑝 = 1/𝑛 .
+
+• Fast Genetic Algorithm (fGA) [ 22 ], which follows the (1 + 1)
+
+scheme and samples ℓ from a fixed long-tail distribution. 
+
+• ( 1 +𝜆 ) two-rate EA [ 20 ], of which 𝑝 is adapted by 2𝑝 or 𝑝 /2 based on a success rule at each iteration. 
+
+• ( 1 + 𝜆 ) var EA [ 63 ], which sampling ℓ from a normal distribution with adaptive mean and variance. Additionally, we consider another theory-inspired self-adaptive algorithm applying both crossover and mutation: 
+
+• ( 1 + ( 𝜆, 𝜆 )) GA [ 18 ], which adapts the values of 𝜆 , and this 𝜆 
+
+determines its crossover and mutation rate dynamically. We set 𝜆 = 10 throughout this paper, and refer readers to the recent benchmark study in [24] for their performance discussions. We note that the algorithms listed above are primarily theory-driven. While such algorithms have been widely studied and evalu-ated on established benchmarks [ 6, 24 ], other advanced techniques, such as partition crossover and linkage learning, have been pro-posed to address the complexity of practical problems [ 10 , 55 , 56 ]. Block-Bench: A Framework for Controllable and Transparent Discrete Optimization Benchmarking GECCO ’26, July 13–17, 2026, San Jose, Costa Rica 
+
+Furthermore, tailored local search methods have been developed for specific applications, including the maximal satisfiability problem and constrained pseudo-boolean optimization [13, 41]. 
+
+2.2.2 Bi-objective Optimization. We refer readers to [ 16 ] for the essential concepts of multi-objective optimization. In this work, we particularly consider five algorithms, SEMO, Global SEMO (GSEMO) [ 3], NSGA-II [ 15 ], MOEA/D [ 65 ], and SMSEMOA [ 7 ]. In our experiments, the pymoo [ 9] package is used for the latter three algorithms, with population size 𝑛 , and we set the mutation rate of GSEMO to 𝑝 = 1/𝑛 . The computational budget is set to 𝑛 3.Theoretical runtime analyses [ 23 , 38 , 50 ] have deepened our understanding of the performance of evolutionary algorithms and provided valuable insights into algorithm design for multi-objective problems [ 34 –36 ]. Extensive runtime analyses have been conducted on functions such as OneMinMax , LeadingOnes-TrailingZeros ,
+
+OneJump-ZeroJump , and OneRoyalRoad-ZeroRoyalRoad [3, 19 ,21 , 27 , 40 , 51 , 67 ]. Theoretical studies have also addressed com-binatorial problems such as multi-objective minimum spanning tree [ 11 , 17 , 48 ], shortest paths [ 33 ], and submodular problems [ 4 ,26 , 47 , 52 ]. A recent study [ 42 ] introduced an extended benchmark set by combining different objective formulations of these prob-lems and illustrated several of their properties, but the benchmarks remain restricted to specific landscape properties. 
+
+## 3 Block-Structured Benchmarks 
+
+We introduce a novel approach to construct discrete optimization benchmarks that allows explicit control over problem properties and provides additional insights into algorithmic behavior. Block is not a novel concept in the EC community. It has appeared in clas-sic building block hypothesis [ 32 ], as well as in recent theoretical analyses [ 66 ]. Moreover, some advanced learning techniques aim to identify representative blocks that capture specific variable interac-tions [55, 56]. The well-known NK-landscape problem can also be viewed as being constructed from a set of interacting blocks [ 2]. In contrast, this paper focuses on benchmark construction, aiming to address the challenges of large-dimensional discrete search spaces by introducing explainable units (i.e., blocks) and mitigating the bottlenecks introduced by randomness. In this paper, we focus on PBO, but the proposed approach can naturally extend to general discrete search spaces. Formally, we de-fine a pseudo-Boolean problem as a function 𝑓 : {0, 1}𝑛 → R, 𝑥 ↦ →
+
+𝑓 (𝑥 ), which is composed of a set of block functions {𝑣 1, . . . , 𝑣 𝑚 },and we work on maximization . Each block function 𝑣 𝑖 : {0, 1}𝑛 𝑖 →
+
+R≥0, 𝑥 𝑖 ↦ → 𝑣 𝑖 (𝑥 𝑖 ) operates on a substring 𝑥 𝑖 of 𝑥 with length 
+
+𝑛 𝑖 = |𝑥 𝑖 |, where 𝑖 ∈ [ 𝑚 ]. We denote {1, . . . , 𝑚 } by [𝑚 ] throughout this paper. An instance of problem 𝑓 is specified by the set of block values 𝑉 = {𝑣 1 (𝑥 1), . . . , 𝑣 𝑚 (𝑥 𝑚 )} 2, a corresponding set of weights for the blocks 𝑊 = {𝑤 1, . . . , 𝑤 𝑚 }, a dependency graph 𝐺 = (𝑉 , 𝐸 )
+
+defining the dependencies among block functions by an adjacency matrix 𝐸 ∈ R𝑚 ×𝑚 , and a constant vector 𝐴 = {𝑎 1, . . . , 𝑎 𝑚 }. Ac-cording to the structure of the dependency graph 𝐺 , we define two categories of benchmarks. Detailed descriptions of a selected bench-mark set, following the definition below, are provided in Table 1.       
+
+> 2We denote 𝑥 is partitioned into 𝑚 equal-length substrings 𝑥 1, . . . , 𝑥 𝑚 in this paper.
+
+Figure 1: Correlations between block function values (in axes) to the minimal ( Left ) and maximal ( Right ) attainable objec-tive values (indicated by colors) for a DBP. 
+
+Figure 2: Diverse landscapes constructed by block functions 
+
+OneMax (Left, F1), Jump 2 (Mid, F3), or Epistasis (Right, F4). 
+
+## 3.1 Undirected Graph Based Problems 
+
+A general representation of our dependency-based problems (DBPs) is defined by 
+
+𝑓 (𝑥 ) =∑︁  
+
+> 𝑖 ∈ [ 𝑚 ]
+
+(𝑎 𝑖 + 𝑤 𝑖 𝑣 𝑖 (𝑥 𝑖 )) + ∑︁  
+
+> 𝑖,𝑗 ∈ [ 𝑚 ]
+
+𝑒 𝑖 𝑗 𝑣 𝑖 (𝑥 𝑖 )𝑣 𝑗 (𝑥 𝑗 ) (1) where 𝑣 𝑖 (𝑥 𝑖 ) denotes the value of the 𝑖 -th block function. We use an undirected graph 𝐺 = (𝑉 , 𝐸 ) to represent dependencies among block functions, in which the node set is denoted by the set of block functions 𝑉 . To avoid redundant calculations, the edge set is represented by a strict lower triangular matrix 𝐸 . 𝑒 𝑖 𝑗 = 1 indicates dependency exists between 𝑣 𝑖 and 𝑣 𝑗 , 𝑒 𝑖 𝑗 = 0 otherwise. As shown in Eq. 1, given the weight vector 𝑊 , the dependency matrix 𝐸 , and a constant vector 𝐴 , the mapping from block values 𝑉 to the objective 
+
+𝑓 is fully determined. Furthermore, we construct specific landscape structures by controlling the definitions of block functions. As an example, Figure 1 illustrates the correlation between block values for 40 -dimensional (40D) DBPs with 𝑚 = 4 block func-tions 𝑣 (·) ∈ { 0, . . . , 10 }. In the plotted setting, all blocks contribute equally to the objective, i,e., 𝑤 𝑖 = 1, ∀𝑖 ∈ [ 𝑚 ], all block functions are independent from each other, i.e., 𝑒 𝑖 𝑗 = 0 and 𝑎 𝑖 = 0, ∀𝑖, 𝑗 ∈ [ 𝑚 ].Building upon this setting, Figure 2 demonstrates how different block functions determine the structure of the search landscape. With the above setting plotted in Figure 1, we consider three types of block functions: OneMax , Jump , and a modified OneMax with 
+
+Epistasis , defined as below: 
+
+OneMax : 𝑣 (𝑥 ) =∑︁  
+
+> 𝑖 ∈ [ 𝑛 ]
+
+𝑥 𝑖 , (2) 
+
+Jump 𝑘 : 𝑣 (𝑥 ) =
+
+ |𝑥 |1 + 𝑘, if |𝑥 |1 ≤ 𝑛 − 𝑘 or |𝑥 |1 = 𝑛 𝑛 − | 𝑥 |1, otherwise , (3) where |𝑥 |1 = Í𝑖 ∈ [ 𝑛 ] 𝑥 𝑖 .
+
+Epistasis : 𝑣 (𝑥 ) = OneMax (𝑥 ′), (4) GECCO ’26, July 13–17, 2026, San Jose, Costa Rica Furong Ye, Frank Neumann, Thomas Bäck, and Niki van Stein 
+
+Type Block functions 𝐴 𝑊 𝐸 𝐵 
+
+F1 DBP OneMax {0}𝑚 {1}𝑚 {0}𝑚 ×𝑚 -F2 DBP LeadingOnes {0}𝑚 {1}𝑚 {0}𝑚 ×𝑚 -F3 DBP Jump 𝑘 {0}𝑚 {1}𝑚 {0}𝑚 ×𝑚 -F4 DBP Epistasis {0}𝑚 {1}𝑚 {0}𝑚 ×𝑚 -F5 DBP OneMax ,LeadingOnes ,
+
+Jump 3,Epistasis {0}𝑚 {1}𝑚 {0}𝑚 ×𝑚 -F6 DBP OneMax ,Jump 2,
+
+Jump 3,Epistasis {0}𝑚 {1}𝑚 {0}𝑚 ×𝑚 -F7 GCP Jump 3 {0}𝑚 {1}𝑚 𝑒 𝑖 𝑗 = 1, if 𝑗 = 𝑖 + 1;
+
+𝑒 𝑖 𝑗 = 0, otherwise { 𝑛 𝑚 + 3}𝑚 
+
+F8 GCP Epistasis {0}𝑚 {1}𝑚 𝑒 𝑖 𝑗 = 1, if 𝑗 = 𝑖 + 1;
+
+𝑒 𝑖 𝑗 = 0, otherwise { 𝑛 𝑚 }𝑚 
+
+F9 GCP OneMax ,Jump 2,
+
+Jump 3,Epistasis {0}𝑚 {1}𝑚 𝑒 𝑖 𝑗 = 1, if 𝑗 = 𝑖 + 1;
+
+𝑒 𝑖 𝑗 = 0, otherwise { 𝑛 𝑚 + 5}𝑚 
+
+F10 GCP OneMax ,LeadingOnes ,
+
+Jump ,Epistasis {0}𝑚 {1}𝑚 𝑒 𝑖 𝑗 = 1, if 𝑗 = 𝑖 + 1;
+
+𝑒 𝑖 𝑗 = 0, otherwise { 𝑛 𝑚 + 3}𝑚 
+
+BF1 DBP OneMax {0}𝑚 {1}𝑚 {0}𝑚 ×𝑚 -DBP OneMax {𝑎 𝑖 = 𝑛 𝑖 } {− 1}𝑚 {0}𝑚 ×𝑚 -BF2 GCP OneMax {0}𝑚 {1}𝑚 𝑒 𝑖 𝑗 = 1, if 𝑗 = 𝑖 + 1;
+
+𝑒 𝑖 𝑗 = 0, otherwise {𝑏 𝑖 = 𝑛 𝑖 }
+
+GCP OneMax {𝑎 𝑖 = 𝑛 𝑖 } {− 1}𝑚 𝑒 𝑖 𝑗 = 1, if 𝑗 = 𝑖 − 1;
+
+𝑒 𝑖 𝑗 = 0, otherwise {0}𝑚 
+
+BF3 GCP LeadingOnes {0}𝑚 {1}𝑚 𝑒 𝑖 𝑗 = 1, if 𝑗 = 𝑖 + 1;
+
+𝑒 𝑖 𝑗 = 0, otherwise {𝑏 𝑖 = 𝑛 𝑖 }
+
+GCP LeadingOnes {𝑎 𝑖 = 𝑛 𝑖 } {− 1}𝑚 𝑒 𝑖 𝑗 = 1, if 𝑗 = 𝑖 − 1;
+
+𝑒 𝑖 𝑗 = 0, otherwise {0}𝑚 
+
+BF4 GCP OneMax {𝑎 𝑖 |𝑎 𝑖 = 𝑛 𝑖 (1−𝑤 𝑖 ) 
+
+> 2
+
+} {𝑤 𝑖 |𝑤 𝑖 = 𝛿 𝑖 %5 , 𝛿 = (1, −1, 1, 1) } 𝑒 𝑖 𝑗 = 1, if 𝑗 = 𝑖 + 1;
+
+𝑒 𝑖 𝑗 = 0, otherwise {𝑏 𝑖 |𝑏 𝑖 = 𝑛 𝑖 (1+𝑤 𝑖 ) 
+
+> 2
+
+}
+
+GCP OneMax {𝑎 𝑖 |𝑎 𝑖 = 𝑛 𝑖 (1−𝑤 𝑖 ) 
+
+> 2
+
+} {𝑤 𝑖 |𝑤 𝑖 = 𝛿 𝑖 %5 , 𝑝 = (− 1, 1, 1, −1) } 𝑒 𝑖 𝑗 = 1, if 𝑗 = 𝑖 − 1;
+
+𝑒 𝑖 𝑗 = 0, otherwise {𝑏 𝑖 |𝑏 𝑖 = 𝑛 𝑖 (1+𝑤 𝑖 ) 
+
+> 2
+
+}
+
+BF5 GCP LeadingOnes {𝑎 𝑖 |𝑎 𝑖 = 𝑛 𝑖 (1−𝑤 𝑖 ) 
+
+> 2
+
+} {𝑤 𝑖 |𝑤 𝑖 = 𝛿 𝑖 %5 , 𝛿 = (1, −1, 1, 1) } 𝑒 𝑖 𝑗 = 1, if 𝑗 = 𝑖 + 1;
+
+𝑒 𝑖 𝑗 = 0, otherwise {𝑏 𝑖 |𝑏 𝑖 = 𝑛 𝑖 (1+𝑤 𝑖 ) 
+
+> 2
+
+}
+
+GCP LeadingOnes {𝑎 𝑖 |𝑎 𝑖 = 𝑛 𝑖 (1−𝑤 𝑖 ) 
+
+> 2
+
+} {𝑤 𝑖 |𝑤 𝑖 = 𝛿 𝑖 %5 , 𝛿 = (− 1, 1, 1, −1) } 𝑒 𝑖 𝑗 = 1, if 𝑗 = 𝑖 − 1;
+
+𝑒 𝑖 𝑗 = 0, otherwise {𝑏 𝑖 |𝑏 𝑖 = 𝑛 𝑖 (1+𝑤 𝑖 ) 
+
+> 2
+
+}
+
+Table 1: The instances of block-structure problems mentioned in this paper. 𝑛 is the problem dimensionality, 𝑚 is the number of blocks, 𝑖, 𝑗 ∈ [ 𝑚 ]. The functions listed in the “Blocks functions” column are sequentially added as 𝑚 increases. “F*” are single-objective problems, and “BF*” are bi-objective problems formed by the corresponding two problem instances. 
+
+where 𝑥 ′ is transformed from 𝑥 by mapping its Hamming-1 neigh-bors 𝑠 1, 𝑠 2, ∈ { 0, 1}𝜈 to strings with distance at least 𝜈 − 1. We set 
+
+𝜈 = 3 in this paper. Details of the transformation refer to [62]. Figure 2 shows the best attainable objective value vs. the Ham-ming distance between each block’s substring 𝑥 𝑖 and its correspond-ing optimum. Since all block functions are identical for the problems plotted in Figure 2, the correlation of each pair of block functions is the same. The Left subfigure illustrates the identical search space of OneMax , which exhibits a smooth and monotonic gradient to-ward the optimum. The Mid subfigure, using Jump 2 block function, demonstrates a pronounced discontinuity near the optimum, while the majority of its search space remains smooth and monotonic as 
+
+OneMax . The Right subfigure shows a more irregular and rugged landscape caused by the epistasis transformation. While these land-scape properties have been well studied individually in existing benchmarks, our block-structured benchmark can facilitate the co-existence of heterogeneous landscape characteristics within a single objective function. Figure 3 illustrates this capacity by presenting the best objective value attainable for a 40 D problem composed of OneMax , Jump 2, Jump 3, and Epistasis (F6), regarding the Ham-ming distance between blocks’ substrings and their corresponding optimum. This example demonstrates our approach can construct complex landscapes with diverse but controllable properties. 
+
+## 3.2 Directed Acyclic Graph Based Problems 
+
+We define gate-constrained problems (GCP) by representing correla-tion among block functions using a directed acyclic graph 𝐺 (𝑉 , 𝐸 ), in which 𝑒 𝑖 𝑗 ≠ 0, 𝑒 𝑖 𝑗 ∈ { 0, 1} indicates there exists a directed edge (i.e., gate constraint) from block 𝑣 𝑖 to 𝑣 𝑗 . Let Anc (𝑖 ) denote the set of pre-decessors of block 𝑣 𝑖 , defined as all nodes 𝑣 𝑗 for which there exists a path from 𝑣 𝑗 to 𝑣 𝑖 . Formally, Anc (𝑖 ) = ∪   
+
+> 𝑗 ∈P(𝑖 )
+
+(Anc ( 𝑗 ) ∪ 𝑗 ), 𝑃 (𝑖 ) =
+
+{ 𝑗 |𝑒 𝑗𝑖 ≠ 0, 𝑖, 𝑗 ∈ [ 𝑚 ]} . Then, a 𝑛 -dimensional GCP with 𝑚 block Block-Bench: A Framework for Controllable and Transparent Discrete Optimization Benchmarking GECCO ’26, July 13–17, 2026, San Jose, Costa Rica 
+
+Figure 3: A complex but designed landscape constructed by several distinct block functions. 
+
+functions is defined by 
+
+𝑓 (𝑥 ) =∑︁  
+
+> 𝑖 ∈ [ 𝑚 ]
+
+(𝑎 𝑖 + 𝑤 𝑖 𝑣 𝑖 (𝑥 𝑖 )) · 𝑐 𝑖 , (5) where the gate constraint function 𝑐 𝑖 is given by 
+
+𝑐 𝑖 (𝑥 ) = Π  
+
+> 𝑗 ∈Anc (𝑖 )
+
+𝑔 (𝑣 𝑗 (𝑥 𝑗 ), 𝑏 𝑗 ), 𝑔 (𝑣 𝑗 (𝑥 𝑗 ), 𝑏 𝑗 ) = 1𝑣 𝑗 (𝑥 𝑗 ) ≥ 𝑏 𝑗 (6) The contribution of each block function 𝑣 𝑖 to the objective value 
+
+𝑓 (𝑥 ) is thus controlled by a gate function 𝑐 𝑖 , which depends on the values of all blocks that have a directed path to 𝑣 𝑖 . According to Eq. 6, block 𝑣 𝑖 contributes to the objective 𝑓 only if all block values in Anc (𝑖 ) satisfy the specific constraints, e.g., reaching the optimum of their respective block function. Overall, the weight vector 𝑊 ,the adjacency matrix 𝐸 of a directed acyclic graph, the constant vector 𝐴 , the constraint factors 𝐵 = {𝑏 1, . . . , 𝑏 𝑚 }, and the definition of block functions 𝑉 determine a GCP instance. For example, we can formulate a 𝑛 -dimensional LeadingOnes problem: 
+
+LeadingOnes : 𝑣 (𝑥 ) =∑︁  
+
+> 𝑖 ∈ [ 𝑛 ]
+
+Ö  
+
+> 𝑗 ∈ [ 𝑖 ]
+
+𝑥 𝑗 , (7) using a GCP with a setting of 𝑚 = 𝑛 OneMax block functions, 
+
+𝐸 1 =
+
+ 𝑒 𝑖 𝑗 = 1, if 𝑗 = 𝑖 + 10, otherwise , 𝑎 𝑖 = 0, and 𝑏 𝑖 = 1, ∀𝑖, 𝑗 ∈ [ 𝑚 ].We plot in Figure 4 the minimal and maximal attainable objective value of 40 D GCPs regarding the block values, with the setting of 
+
+𝑚 = 4 block functions 𝑣 (·) ∈ { 0, . . . , 10 }, 𝑊 = {1}𝑚 , 𝐸 = 𝐸 1, 𝑎 𝑖 = 0
+
+and 𝑏 𝑖 = 𝑛 𝑖 , ∀𝑖, 𝑗 ∈ [ 𝑚 ]
+
+Although all block functions obtain identical weights (all 1s), the gate-constrained design introduces a strong asymmetry among different blocks. Figure 4 shows large regions of neutrality in the lower bounds of attainable objective values, indicating that no meaningful objective gradient can be achieved when constraints are not satisfied. In contrast, the upper bounds of attainable objec-tive values exhibit sharp fitness cliffs rather than gradual slopes in Figure 1. These neutrality landscape patterns and sharp fitness cliffs with respect to the Hamming distance to optimal blocks can also be observed in Figure 5 (F10), in which a GCP is embedded with heterogeneous block functions. Recall that the definition of 
+
+Figure 4: Correlations between block function values (in axes) to the minimal (Top) and maximal (Bottom) attainable objec-tive values (indicated by colors) for a GCP. We present the pairs between 𝑣 4 and the others. 
+
+Figure 5: The minimal (Top) and maximal (Bottom) attainable objective values with respect to the corresponding Hamming distance of each block to its optimal solution, for the GCP F10 with the same objective space in Figure 4. 
+
+block functions introduces structured modality and local optima patterns into our benchmarks. For DBPs, the objective values typ-ically change gradually as the block values are updated, since all blocks are simultaneously active and jointly contribute to the ob-jective function. However, the contribution of block functions is hierarchically ordered for GCPs due to the gate constraints, result-ing in ordered local optima patterns. 
+
+## 4 Novel Insights from Benchmarking 
+
+While our block-structured approach supports generating various benchmark problems, we illustrate how it can yield novel insights by using specific problem instances. Particularly, we address the topics of self-adaptation , evolutionary multimodal optimization , and 
+
+bi-objective optimization by revisiting several existing works. 
+
+## 4.1 Self-Adaptation with Coexisting Landscape Properties 
+
+Recall that the (1 + 𝜆 ) EAs generate offspring by flipping ℓ bits of the parent solutions, and the mutation rate, which determines the sampling of ℓ, has a vital impact on the performance of algorithms. GECCO ’26, July 13–17, 2026, San Jose, Costa Rica Furong Ye, Frank Neumann, Thomas Bäck, and Niki van Stein     
+
+> (a) Convergence in terms of the best-found fitness.
+> (b) Block values of OneMax ,LeadingOnes ,Jump 3, and Epis-tasis .
+
+Figure 6: Convergence process of EAs for F5 over the FEs. Results are the average of 50 runs.     
+
+> (a) Convergence in terms of the best-found fitness.
+> (b) Block values of OneMax ,LeadingOnes ,Jump 3, and Epis-tasis .
+
+Figure 7: Convergence process of EAs for F10 over the FEs. Results are the average of 50 runs. 
+
+Various self-adaptive mutation rate methods have been proposed (see Section 2.2.1). However, these methods have been commonly evaluated on particular problems such as OneMax , LeadingOnes ,and Jump [18 , 20 , 22 , 24 , 63 ], without considering more complex landscapes. By leveraging the proposed benchmark, we are able to investigate how these self-adaptive methods perform for the coexis-tence of multiple landscape properties within a single search space .Precisely, we investigate the performance of the five algorithms introduced in Section 2.2.1 on 40 D DBP and GCP instances with 
+
+𝑚 = 4 block functions (i.e., OneMax , LeadingOnes , Jump 3, and 
+
+Epistasis ), of which configurations correspond to F5 and F10 in Table 1. Figure 6 and Figure 7 illustrate the convergence in terms of the best-so-far fitness 𝑓 and the blocks values 𝑣 𝑖 , 𝑖 ∈ [ 4].As shown in Figure 6, for the DBP where improvements in block functions simultaneously contribute to the objective 𝑓 , the values of all block functions are optimized from the early stage of opti-mization. In contrast, due to the presence of gate constraints in GCP, the four block values are optimized sequentially along the optimization process, as shown in Figure 7-b. The proposed bench-mark preserves information at the block level, enabling distinct optimization behaviors to be directly observed and analyzed. Table 2 lists the number of function evaluations (FEs) of the EAs used to achieve the optimum, and it shows that the EAs exhibit different performance across four classic problems. In particular, 
+
+(1 + 𝜆 ) var EA outperforms the others on OneMax and Leadin-gOnes , and (1 + 𝜆 ) two-rate EA shows superior performance on 
+
+Jump and Epistasis . However, when heterogeneous landscape prop-erties of these four problems are embedded within a single search space, (1+𝜆 ) two-rate EA retains its advantages on the DBP, but the performance of (1 + 𝜆 ) var EA deteriorates substantially on both DBP and GCP. Notably, fGA, despite its comparatively weak perfor-mance on the classic problems, achieves the best performance on the conditioned space of the GCP. This finding highlights that self-adaptive methods can behave differently when multiple landscape properties coexist. 
+
+## 4.2 Diversity Helps beyond Simple Multimodal Landscapes 
+
+In this section, we investigate a recent study on maintaining diver-sity to improve the performance of GAs [ 54 ]. In the (𝜇 + 1) GA, of which details are available in [ 54 ] and the Appendix, the solution with the worst objective value is removed from the population, with broken ties uniformly at random. The work of [ 54 ] proposed a diversity maintenance mechanism that considers the solution repre-sentation in the search space. In particular, the mechanism ensures that the two solutions with the largest Hamming distance in the population are preserved. While the advantage of this approach has been theoretically proved, its empirical evaluation has been limited to the Jump problem. In this section, we investigate whether such a mechanism of maintaining diversity guarantees advantages beyond the simple multimodal landscape of Jump .
+
+First, we illustrate how our benchmark approach can generate novel and structured problems. Figure 8 demonstrates the attainable objective values of the 40 D DBP (F3) and GCP (F7) constructed solely from Jump block functions, regarding the number of 1-bits in the solution. The problem is identical to the classic Jump problem when 𝑚 = 1, exhibiting a single fitness valley. As 𝑚 increases, the interaction among Jump block functions produces several disjoint regions of attainable objective values aligned along the number of 1-bits, resulting in a multimodal search space with multiple separable local optima. We can also observe that, for GCP, the attainable objective values are more densely distributed regarding the number of 1-bits, and this increased density arises from the gate constraints. Figure 9 shows the FEs required by the (𝜇 + 1) GA with and without diversity maintenance to reach the optimum of 40 D prob-lems with different block function choices. Figure 9-a shows that, for the problem constructed solely from Jump , the FEs required by the standard GA significantly increase substantially as 𝑚 increases, that is, when more multimodal structures are introduced. In con-trast, the GA with diversity maintenance (GA-diversity) exhibits stable performance across different 𝑚 . Furthermore, we examine problems constructed only from Epistasis blocks (F4 and F8, Fig-ure 9-b) and problems with heterogeneous block functions (F5 and F10, Figure 9-c). Across all tested problem instances, GA-diversity consistently outperforms the standard GA. However, for the search space with only Epistasis , the FEs required by GAs remain rela-tively stable compared to the performance shift on Jump blocks, as 
+
+Epistasis introduces ruggedness rather than modality. For search spaces constructed by heterogeneous block functions, the advan-tage of GA-diversity can be observed once Jump and Epistasis are Block-Bench: A Framework for Controllable and Transparent Discrete Optimization Benchmarking GECCO ’26, July 13–17, 2026, San Jose, Costa Rica                                              
+
+> (1+ ( 𝜆, 𝜆 ) ) GA (1+𝜆 )EA (1+𝜆 )two-rate EA (1+𝜆 )var EA fGA
+> OneMax 474 (4) 284 (2) 504 (5) 273 (1) 346 (3)
+> LeadingOnes 2 070 (5) 970 (2) 1542 (4) 903 (1) 1190 (3)
+> Jump 216 926 (5) 130 661 (4) 65 110 (1) 91 394 (2) 126 513 (3)
+> Epistasis 22 636 (5) 10 241 (2) 9 386 (1) 12 756 (3) 15 609 (4) DBP (F5) 194 190 (5) 37 086 (2) 15 505 (1) 67 061 (4) 43 790 (3) GCP (F16) 156 569 (4) 46 326 (2) 62 190 (3) 175 894 (5) 40 883 (1)
+
+Table 2: FEs and ranks (in brackets) of the EAs to reach the optimum of 40 D problems. Results are the average of 50 runs. 
+
+> (a) DBP
+> (b) GCP
+
+Figure 8: The attainable objective values of a 40 D DBP (F3) and GCP (F7) with only Jump 3 block functions vs. the number of 1-bits in the solution. 𝑚 = 1, 2, 4 from left to right.      
+
+> (a) Jump blocks
+> (b) Epistasis blocks (c) Distinct block functions
+
+Figure 9: The FEs of (𝜇 + 1) GAs to reach the optimum of 40 DDBPs and GCPs with Jump 3, Epistasis , and heterogeneous block functions. 
+
+added into block functions ( 𝑚 ≥ 3). In addition, when compar-ing the performance on DBP and GCP instances, DBP generally appears to be easier for both algorithms, except for a noticeable performance shift of the standard GA in Figure 9-c at 𝑚 = 4.Overall, our results validate that maintaining diversity can im-prove the performance and robustness of the GA across complex search spaces. The proposed block-structure benchmark enables systematic investigations across distinct landscapes, providing a testbed for future studies of adaptive diversity mechanisms that explicitly consider the structure of the solution representation. 
+
+## 4.3 Structured Bi-objective Search Spaces 
+
+Existing theoretical studies of EC in multi-objective optimization are largely based on classic bi-objective problems such as OneMin-Max , LOTZ , etc. Recent attempts [ 42 ] to expand these benchmarks have yielded only limited combinations of existing problem ob-jectives. In contrast, with the ability to systematically construct objectives with transparent properties, our approach can also serve bi-objective PBO benchmarks, while the problems proposed in [ 42 ]can be instantiated as specific cases within our framework. In this section, we demonstrate how different objective search spaces can be constructed by controlling the weight vector of GCPs. Figure 10 presents the objective spaces of two bi-objective optimiza-tion problems derived from 40 D GCP problem instances with four blocks 𝑚 = 4. Specifically, the two objectives 𝑦 1 and 𝑦 2 are defined by GCPs with gate constraint structures 𝐸 =
+
+ 𝑒 𝑖 𝑗 = 1, if 𝑗 = 𝑖 + 10, otherwise and 𝐸 =
+
+ 𝑒 𝑖 𝑗 = 1, if 𝑗 = 𝑖 − 10, otherwise , respectively. The corresponding parameters 𝐴,𝑊 , and 𝐵 follows the relations 𝑎 𝑖 = (1 − 𝑤 𝑖 )𝑛 𝑖 /2 and 
+
+𝑏 𝑖 = (1 + 𝑤 𝑖 )𝑛 𝑖 /2, ∀𝑖 ∈ [ 4]. We use OneMax and LeadingOnes as the block functions in this section. Consequently, 𝑛 𝑖 is the optimal value for each block 𝑣 𝑖 . The left objective space in Figure 10 ex-hibits a continuous Pareto front, indicating a strong and uniform conflict between the two objectives, corresponding to the perfectly negatively correlated weight vectors {1}𝑚 and {− 1}𝑚 . In contrast, under a particular setting of weight vectors 𝑊 = {1, −1, 1, 1} and 
+
+{− 1, 1, 1, −1}, the right objective space shows an irregular structure with a disconnected Pareto front. We investigated the performance of five multi-objective algo-rithms on the four newly constructed bi-objective pseudo-Boolean problems (BF2-5). Figure 11 compares the convergence in terms of Hypervolume (HV) of these algorithms. The left subfigures show the results of the GCPs with 𝑊 = {1}𝑚 vs. {− 1}𝑚 , while the right figures correspond to another weight vector setting. The plots show the obtained HV values over the FEs, and higher convergence curves therefore indicate better performance. For the GCPs with objectives space of weight vectors {1}4 vs. {− 1}4, SMSEMOA converges com-petitively early on but slows down later in solving the GCP with 
+
+OneMax blocks (Figure 11-a), resulting in a significant performance gap compared to the other algorithms, although OneMax is known to be easier for EAs than LeadingOnes . A similar deterioration in performance in the late stage is also observed for SMSEMOA when GECCO ’26, July 13–17, 2026, San Jose, Costa Rica Furong Ye, Frank Neumann, Thomas Bäck, and Niki van Stein 
+
+Figure 10: The bi-objective search space of GCPs with the weight vectors of the objectives are {1}4 vs. {− 1}4 on the Left ,and {1, −1, 1, 1} vs. {− 1, 1, 1, −1} on the Right .    
+
+> (a) OneMax blocks
+> (b) LeadingOnes blocks
+
+Figure 11: The HV convergence on the bi-objective optimiza-tion problems with objective space in Figure 10. The block functions are all OneMax in (a) and LeadingOnes in (b). 
+
+dealing with another objective space with OneMax blocks. For the GCPs with the disjoint Pareto front (right subfigures), GSEMO, SEMO, and NSGA-II exhibit similar performance across both One-Max and LeadingOnes blocks, whereas MOEA/D converges sig-nificantly more slowly than the other algorithms. Overall, these results demonstrate that the compared algorithms are significantly affected by the objective space, which is controlled by the weight vectors. Moreover, even when targeting Pareto fronts of the same shape, the behavior of algorithms may differ greatly when the underlying search spaces in terms of solution representa-tions, which are defined here by OneMax and LeadingOnes . These observations further highlight the potential of our block-structured benchmarks for systematically evaluating algorithms for general bi- and multi-objective discrete optimization. 
+
+## 5 Extensions Beyond the Discussed Instances 
+
+Beyond the concrete problem instances described in the study cases and listed in Table 1, the proposed block-structured approach pro-vides a general framework for systematically generating a wider range of useful discrete optimization benchmarks. Particularly, this paper considers weight vectors 𝑊 ∈ { 1, −1}𝑚 ,associated with constant factors 𝐴 and constraint bounds 𝐵 that ensure that the objective of each block is to reach either the maximal or minimal values of the corresponding function. Regarding the adjacency matrix 𝐸 , we consider {0}𝑚 ×𝑚 for DBPs, and graphs consisting of a single directed path traversing all blocks for GCPs. Under these settings, the proposed instances can already cover several classic benchmark problems and revisit existing studies. These settings can be naturally extended to more general scenar-ios. For example, the weight factor can be generalized to 𝑊 ∈ R𝑚 ,allowing block values to positively or negatively contribute to the objective function in different scales. Also, the dependency struc-ture encoded by 𝐸 can be varied. For DBPs, dependencies between two blocks 𝑣 𝑖 and 𝑣 𝑗 may be defined based on their relative positions, e.g., 𝑒 𝑖 𝑗 = | 𝑗 − 𝑖 |. For GCPs, beyond the gate constraints defined by a single directed path, more complex and practical constraints can be formulated. For example, block functions may be assigned to multiple layers 𝐿 𝑙 , 𝑙 > 2 such that block value contributions to the objective functions are subject to hierarchical constraints. These extensions have already been included in our repository. Regarding the bi-objective optimization, classical benchmark problems, including OneMinMax (BF1) and LOTZ , can be naturally instantiated by our approach. For problems such as OJZJ and ORZR 
+
+that are defined based on the total number of one-bits and zero-bits, direct block representation is less straightforward. However, by introducing a bijection mapping 𝜋 : {0, 1}𝑚 → { 0, 1}𝑚 , the variable presentation can be transformed such that the counting ones and zeros can be embedded into the internal structure of a single block function. Under such transformation, our approach can instantiate bi-objective problems such as OJZJ and ORZR by using a single block function set via 𝑣 (𝜋 (𝑥 𝑖 )) , 𝑖 ∈ [ 𝑚 ].Overall, the proposed approach enables generating a wide range of discrete benchmark problems, from covering existing classic problems to constructing more diverse instances with controllable landscape structures. We will investigate theoretical needs and prac-tical applicability in benchmarking and further enrich the testbed for the discrete optimization community. 
+
+## 6 Conclusions 
+
+Motivated by the analysis of algorithms that address the search space of solution representations, which is a common challenge in large-scale discrete optimization, we propose a block-structure approach to construct discrete benchmarks with controllable, trans-parent structural landscapes. We illustrate, with several representa-tive novel problem instances, how the approach enables systematic investigation of fundamental research questions, and establish that it can cover existing benchmarks. In particular, it facilitates the studies of (1) the self-adaptation on search spaces with heteroge-neous landscape properties, (2) the practical impact of diversity mechanisms beyond simple multimodal landscapes, and (3) the behavior of multi-objective optimization across search spaces with diverse objective distributions in terms of solution representations. Apart from the representative problem instances mentioned in this paper, we also provide a wider range of benchmarks in our repository for research exploration and communication. In the long term, we aim to deliver a well-structured, discrete benchmark set with diverse and explainable landscape properties. Moreover, we ex-pect that such a benchmark set can connect and benefit theoretical analysis and practical needs in discrete optimization. Beyond algo-rithm analysis, the proposed benchmark can also provide a founda-tion for advancing research on dynamic algorithm configuration and other learning-based techniques for discrete optimization. Block-Bench: A Framework for Controllable and Transparent Discrete Optimization Benchmarking GECCO ’26, July 13–17, 2026, San Jose, Costa Rica 
+
+## 7 Acknowledgments 
+
+This publication is supported by the XAIPre project (with project number 19455) of the research program Smart Industry 2020, which is (partly) financed by the Dutch Research Council (NWO). 
+
+## References 
+
+[1] Adriaensen, S., Biedenkapp, A., Shala, G., Awad, N., Eimer, T., Lindauer, M., and Hutter, F. Automated dynamic algorithm configuration. Journal of Artificial Intelligence Research 75 (2022), 1633–1699. [2] Altenberg, L. B2. 7.2 nk fitness landscapes. Evolution 2 (1996), 1–11. [3] Antipov, D., Neumann, A., and Neumann, F. Rigorous runtime analysis of diver-sity optimization with gsemo on oneminmax. In Proceedings of the ACM/SIGEVO Conference on Foundations of Genetic Algorithms (FOGA ’23) (2023), pp. 3–14. [4] Badanidiyuru, A., and Vondrák, J. Fast algorithms for maximizing submodular functions. In Proceedings of the ACM-SIAM symposium on Discrete algorithms (SODA’14) (2014), SIAM, pp. 1497–1514. [5] Bartz-Beielstein, T., Doerr, C., Berg, D. v. d., Bossek, J., Chandrasekaran, S., Eftimov, T., Fischbach, A., Kerschke, P., La Cava, W., Lopez-Ibanez, M., et al. 
+
+Benchmarking in optimization: Best practice and open issues. arXiv preprint arXiv:2007.03488 (2020). [6] Bennet, P., Doerr, C., Moreau, A., Rapin, J., Teytaud, F., and Teytaud, O. 
+
+Nevergrad: black-box optimization platform. Acm Sigevolution 14 , 1 (2021), 8–15. [7] Beume, N., Naujoks, B., and Emmerich, M. Sms-emoa: Multiobjective selection based on dominated hypervolume. European Journal of Operational Research 181 ,3 (2007), 1653–1669. [8] Biedenkapp, A., Dang, N., Krejca, M. S., Hutter, F., and Doerr, C. Theory-inspired parameter control benchmarks for dynamic algorithm configuration. In 
+
+Proceedings of the Genetic and Evolutionary Computation Conference (GECCO ’22) 
+
+(2022), pp. 766–775. [9] Blank, J., and Deb, K. Pymoo: Multi-objective optimization in python. IEEE Access 8 (2020), 89497–89509. [10] Bosman, P. A., Luong, N. H., and Thierens, D. Expanding from discrete cartesian to permutation gene-pool optimal mixing evolutionary algorithms. In Proceed-ings of the Genetic and Evolutionary Computation Conference (GECCO’16) (2016), pp. 637–644. [11] Cerf, S., Doerr, B., Hebras, B., Kahane, Y., and Wietheger, S. The first proven performance guarantees for the non-dominated sorting genetic algorithm ii (nsga-ii) on a combinatorial optimization problem. In Proceedings of the International Joint Conference on Artificial Intelligence (IJCAI’23) (2023), pp. 5522–5530. [12] Chen, D., Buzdalov, M., Doerr, C., and Dang, N. Using automated algorithm configuration for parameter control. In Proceedings of the ACM/SIGEVO Confer-ence on Foundations of Genetic Algorithms (FOGA ’23) (2023), pp. 38–49. [13] Chu, Y., Li, C.-M., Ye, F., and Cai, S. Enhancing maxsat local search via a unified soft clause weighting scheme. In Proceedings of International Conference on Theory and Applications of Satisfiability Testing (SAT’24) (2024), Schloss Dagstuhl– Leibniz-Zentrum für Informatik, pp. 8–1. [14] de Nobel, J., Ye, F., Vermetten, D., Wang, H., Doerr, C., and Bäck, T. Io-hexperimenter: Benchmarking platform for iterative optimization heuristics. 
+
+Evolutionary Computation 32 , 3 (2024), 205–210. [15] Deb, K., Pratap, A., Agarwal, S., and Meyarivan, T. A fast and elitist multiob-jective genetic algorithm: Nsga-ii. IEEE Transactions on Evolutionary Computation 6, 2 (2002), 182–197. [16] Deb, K., Sindhya, K., and Hakanen, J. Multi-objective optimization. In Decision Sciences . CRC Press, 2016, pp. 161–200. [17] Do, A. V., Neumann, A., Neumann, F., and Sutton, A. Rigorous runtime analysis of moea/d for solving multi-objective minimum weight base problems. Advances in Neural Information Processing Systems (NeurIPS’23) 36 (2023), 36434–36448. [18] Doerr, B., and Doerr, C. Optimal static and self-adjusting parameter choices for the (1+( 𝜆 , 𝜆 )) genetic algorithm. Algorithmica 80 , 5 (2018), 1658–1709. [19] Doerr, B., Gao, W., and Neumann, F. Runtime analysis of evolutionary diversity maximization for oneminmax. In Proceedings of the Genetic and Evolutionary Computation Conference (GECCO ’16) (2016), pp. 557–564. [20] Doerr, B., Gie 𝛽 en, C., Witt, C., and Yang, J. The (1+ 𝜆 ) evolutionary algorithm with self-adjusting mutation rate. Algorithmica 81 , 2 (2019), 593–631. [21] Doerr, B., Krejca, M. S., and Weeks, N. Proven runtime guarantees for how the moea/d: Computes the pareto front from the subproblem solutions. In Proceedings of the International Conference on Parallel Problem Solving from Nature (PPSN ’24) 
+
+(2024), Springer, pp. 197–212. [22] Doerr, B., Le, H. P., Makhmara, R., and Nguyen, T. D. Fast genetic algorithms. In 
+
+Proceedings of the Genetic and Evolutionary Computation Conference (GECCO ’17) 
+
+(2017), pp. 777–784. [23] Doerr, B., and Neumann, F. Theory of evolutionary computation: Recent develop-ments in discrete optimization . Springer Nature, 2019. [24] Doerr, C., Ye, F., Horesh, N., Wang, H., Shir, O., and Back, T. Benchmarking discrete optimization heuristics with iohprofiler. Applied Soft Computing 88 
+
+(2020), 106027. [25] Eiben, Á. E., Hinterding, R., and Michalewicz, Z. Parameter control in evolu-tionary algorithms. IEEE Transactions on Evolutionary Computation 3 , 2 (2002), 124–141. [26] Friedrich, T., and Neumann, F. Maximizing submodular functions under ma-troid constraints by evolutionary algorithms. Evolutionary Computation 23 , 4 (2015), 543–558. [27] Giel, O., and Lehre, P. K. On the effect of populations in evolutionary multi-objective optimization. In Proceedings of the Genetic and Evolutionary Computation Conference (GECCO ’06) (2006), pp. 651–658. [28] Hansen, N., Auger, A., Brockhoff, D., and Tušar, T. Anytime performance assessment in blackbox optimization benchmarking. IEEE Transactions on Evolu-tionary Computation 26 , 6 (2022), 1293–1305. [29] Hansen, N., Auger, A., Ros, R., Mersmann, O., Tušar, T., and Brockhoff, D. 
+
+Coco: A platform for comparing continuous optimizers in a black-box setting. 
+
+Optimization Methods and Software 36 , 1 (2021), 114–144. [30] Hansen, N., Finck, S., Ros, R., and Auger, A. Real-parameter black-box opti-mization benchmarking 2009: Noiseless functions definitions . PhD thesis, INRIA, 2009. [31] Helsgaun, K. An effective implementation of the lin–kernighan traveling sales-man heuristic. European journal of Operational Research 126 , 1 (2000), 106–130. [32] Holland, J. H. Adaptation in natural and artificial systems: an introductory analysis with applications to biology, control, and artificial intelligence . MIT press, 1992. [33] Horoba, C. Exploring the runtime of an evolutionary algorithm for the multi-objective shortest path problem. Evolutionary Computation 18 , 3 (2010), 357–381. [34] Horoba, C., and Neumann, F. Benefits and drawbacks for the use of epsilon-dominance in evolutionary multi-objective optimization. In Proceedings of the Genetic and Evolutionary Computation Conference (GECCO ’08) (2008), ACM Press, pp. 641–648. [35] Horoba, C., and Neumann, F. Additive approximations of Pareto-optimal sets by evolutionary multi-objective algorithms. In Proceedings of the International Workshop on Foundations of Genetic Algorithms (FOGA ’09) (2009), ACM Press, pp. 79–86. [36] Horoba, C., and Neumann, F. Approximating pareto-optimal sets using di-versity strategies in evolutionary multi-objective optimization. In Advances in Multi-Objective Nature Inspired Computing , vol. 272 of Studies in Computational Intelligence . Springer, 2010, pp. 23–44. [37] International SAT Competition Organizers . Sat competitions. https:// satcompetition.github.io/, 2026. Accessed: 2026-01-13. [38] Jansen, T. Analyzing evolutionary algorithms: The computer science perspective .Springer, 2013. [39] Kostovska, A., Jankovic, A., Vermetten, D., de Nobel, J., Wang, H., Efti-mov, T., and Doerr, C. Per-run algorithm selection with warm-starting using trajectory-based features. In Proceedings of the International Conference on Parallel Problem Solving from Nature (PPSN ’22) (2022), Springer, pp. 46–60. [40] Laumanns, M., Thiele, L., and Zitzler, E. Running time analysis of multiobjec-tive evolutionary algorithms on pseudo-boolean functions. IEEE Transactions on Evolutionary Computation 8 , 2 (2004), 170–182. [41] Lei, Z., Cai, S., Luo, C., and Hoos, H. Efficient local search for pseudo boolean optimization. In Proceedings of International Conference on Theory and Applications of Satisfiability Testing (SAT’21) (2021), Springer, pp. 332–348. [42] Liang, Z., and Li, M. On the problem characteristics of multi-objective pseudo-boolean functions in runtime analysis. In Proceedings of the ACM/SIGEVO Con-ference on Foundations of Genetic Algorithms (FOGA ’25) (2025), pp. 166–177. [43] Liu, X., Sun, J., Zhang, Q., Wang, Z., and Xu, Z. Learning to learn evolutionary algorithm: A learnable differential evolution. IEEE Transactions on Emerging Topics in Computational Intelligence 7 , 6 (2023), 1605–1620. [44] Luo, C., Cai, S., Wu, W., Jie, Z., and Su, K. Ccls: an efficient local search algorithm for weighted maximum satisfiability. IEEE Transactions on Computers 64 , 7 (2014), 1830–1843. [45] Marty, T., Semet, Y., Auger, A., Héron, S., and Hansen, N. Benchmarking cma-es with basic integer handling on a mixed-integer test problem suite. In 
+
+Proceedings of the Genetic and Evolutionary Computation Conference Companion (GECCO ’23) (2023), pp. 1628–1635. [46] Mersmann, O., Bischl, B., Trautmann, H., Preuss, M., Weihs, C., and Rudolph, G. Exploratory landscape analysis. In Proceedings of the Genetic and Evolutionary Computation Conference (GECCO ’21) (2011), pp. 829–836. [47] Neumann, A., and Neumann, F. Optimising monotone chance-constrained sub-modular functions using evolutionary multi-objective algorithms. In Proceedings of International Conference on Parallel Problem Solving from Nature (PPSN’20) 
+
+(2020), Springer, pp. 404–417. [48] Neumann, F. Expected runtimes of a simple evolutionary algorithm for the multi-objective minimum spanning tree problem. European Journal of Operational Research 181 , 3 (2007), 1620–1629. [49] Neumann, F., Neumann, A., Qian, C., Do, A. V., de Nobel, J., Vermetten, D., Ahouei, S. S., Ye, F., Wang, H., and Bäck, T. Benchmarking algorithms for GECCO ’26, July 13–17, 2026, San Jose, Costa Rica Furong Ye, Frank Neumann, Thomas Bäck, and Niki van Stein 
+
+submodular optimization problems using iohprofiler. In Proceedings of IEEE Congress on Evolutionary Computation (CEC ’23) (2023), IEEE, pp. 1–9. [50] Neumann, F., and Witt, C. Bioinspired Computation in Combinatorial Optimiza-tion: Algorithms and Their Computational Complexity . Springer, 2010. [51] Nguyen, A. Q., Sutton, A. M., and Neumann, F. Population size matters: Rigorous runtime results for maximizing the hypervolume indicator. Theoretical Computer Science 561 (2015), 24–36. [52] Qian, C., Yu, Y., Tang, K., Yao, X., and Zhou, Z.-H. Maximizing submodular or monotone approximately submodular functions by multi-objective evolutionary algorithms. Artificial Intelligence 275 (2019), 279–294. [53] Rapin, J., Gallagher, M., Kerschke, P., Preuss, M., and Teytaud, O. Exploring the mlda benchmark on the nevergrad platform. In Proceedings of the Genetic and Evolutionary Computation Conference Companion (GECCO ’19) (2019), pp. 1888– 1896. [54] Ren, S., Qiu, Z., Bian, C., Li, M., and Qian, C. Maintaining diversity provably helps in evolutionary multimodal optimization. In Proceedings of the International Joint Conference on Artificial Intelligence (IJCAI ’24) (2024), pp. 7012–7020. [55] Thierens, D. The linkage tree genetic algorithm. In Proceedings of International Conference on Parallel Problem Solving from Nature (PPSN’10) (2010), Springer, pp. 264–273. [56] Tinós, R., Whitley, D., and Chicano, F. Partition crossover for pseudo-boolean optimization. In Proceedings of Foundations of Genetic Algorithms (FOGA’15) 
+
+(2015), pp. 137–149. [57] Uchoa, E., Pecin, D., Pessoa, A., Poggi, M., Vidal, T., and Subramanian, A. 
+
+New benchmark instances for the capacitated vehicle routing problem. European Journal of Operational Research 257 , 3 (2017), 845–858. [58] Vallada, E., Ruiz, R., and Framinan, J. M. New hard benchmark for flowshop scheduling problems minimising makespan. European Journal of Operational Research 240 , 3 (2015), 666–677. [59] van Stein, N., Vermetten, D., V. Kononova, A., and Bäck, T. Explainable bench-marking for iterative optimization heuristics. ACM Transactions on Evolutionary Learning 5 , 2 (2025), 1–30. [60] Vermetten, D., van Rijn, S., Bäck, T., and Doerr, C. Online selection of cma-es variants. In Proceedings of the Genetic and Evolutionary Computation Conference (GECCO ’19) (2019), pp. 951–959. [61] Vermetten, D., Ye, F., Bäck, T., and Doerr, C. Ma-bbob: A problem generator for black-box optimization using affine combinations and shifts. ACM Transactions on Evolutionary Learning 5 , 1 (2025), 1–19. [62] Weise, T., and Wu, Z. Difficult features of combinatorial optimization problems and the tunable w-model benchmark problem for simulating them. In Proceedings of the Genetic and Evolutionary Computation Conference Companion (GECCO ’18) 
+
+(2018), pp. 1769–1776. [63] Ye, F., Doerr, C., and Bäck, T. Interpolating local and global search by con-trolling the variance of standard bit mutation. In Proceedins of IEEE Congress on Evolutionary Computation (CEC ’19) (2019), IEEE, pp. 2292–2299. [64] Ye, F., Doerr, C., Wang, H., and Bäck, T. Automated configuration of genetic algorithms by tuning for anytime performance. IEEE Transactions on Evolutionary Computation 26 , 6 (2022), 1526–1538. [65] Zhang, Q., and Li, H. Moea/d: A multiobjective evolutionary algorithm based on decomposition. IEEE Transactions on Evolutionary Computation 11 , 6 (2007), 712–731. [66] Zheng, W., and Doerr, B. Runtime analysis of the sms-emoa for many-objective optimization. In Proceedings of the AAAI Conference on Artificial Intelligence (AAAI ’24) (2024), vol. 38, pp. 20874–20882. [67] Zheng, W., Liu, Y., and Doerr, B. A first mathematical runtime analysis of the non-dominated sorting genetic algorithm ii (nsga-ii). In Proceedings of the AAAI conference on artificial intelligence (AAAI’22) (2022), vol. 36(9), pp. 10408–10416. [68] Zitzler, E., and Thiele, L. Multiobjective evolutionary algorithms: a com-parative case study and the strength pareto approach. IEEE Transactions on Evolutionary Computation 3 , 4 (1999), 257–271. Block-Bench: A Framework for Controllable and Transparent Discrete Optimization Benchmarking GECCO ’26, July 13–17, 2026, San Jose, Costa Rica 
+
+## A The EAs with Self-adaptive Mutation Rates 
+
+In this section, we provide the pseudocode for the compared EAs. The (1+𝜆 ) EA is presented in Algorithm 1, and the compared EAs with self-adaptive mutation rate will focus on adjusting 𝑝 at line 4. The algorithm follows a standard bit mutation, which samples 
+
+ℓ following a conditioned Binomial distribution based on a static mutation rate 𝑝 , and then flips ℓ distinct bits of 𝑥 (i.e., Mut ℓ (𝑥 )). The conditioned sampling ensures that a ℓ > 0 is obtained by repeating the sampling. 
+
+Algorithm 1: The (1 + 1) EA with a fixed mutation rate 
+
+𝑝 ∈ ( 0, 1) for the maximization of 𝑓 . 
+
+> 1
+
+Initialization: Sample 𝑥 ∈ { 0, 1}𝑛 u.a.r.;  
+
+> 2
+
+Optimization: for 𝑡 = 1, 2, 3, . . . do  
+
+> 3
+
+for 𝑖 = 1, . . . , 𝜆 do  
+
+> 4
+
+Sample ℓ (𝑖 ) from Bin >0 (𝑛, 𝑝 ); 
+
+> 5
+
+𝑦 (𝑖 ) ← Mut ℓ (𝑖 ) (𝑥 ); 
+
+> 6
+
+Sample 𝑥 from arg max {𝑓 (𝑥 ), 𝑓 (𝑦 (1) ), . . . , 𝑓 (𝑦 (𝜆 ) )} 
+
+uniformly at random (u.a.r.); The fGA samples ℓ from a static long-tail distribution. Specifi-cally, it alters the line 4 in Algorithm 1 by sampling ℓ from a power-law distribution 𝐷 𝛽 𝑛 /2, which assigns to each integer 𝑘 ∈ [ 𝑛 /2] aprobability of Pr [𝐷 𝛽 𝑛 /2 = 𝑘 ] = (𝐶 𝛽 𝑛 /2)−1
+
+𝑘 −𝛽 , where 𝐶 𝛽 𝑛 /2 = Í𝑛 /2 
+
+> 𝑖 =1
+
+𝑖 −𝛽 .We set 𝛽 = 1.5 in our experiments following the suggestion in [ 22 ]. The (1 + 𝜆 ) two-rate EA adjust a parameter 𝑟 online that deter-mines the value of mutation rates, as presented in Algorithm 2. In each iteration, the (1 + 𝜆 ) two-rate EA creates 𝜆 /2 offspring by standard bit mutation with mutation rate 𝑟 /( 2𝑛 ), and it creates the other half of offspring with mutation rate 2𝑟 /𝑛 . After each iteration, with probability 1/2, 𝑟 is set by the value of the best offspring that been created with (ties broken u.a.r.). Otherwise, it is updated by either 𝑟 /2 or 2𝑟 with the same probability. 𝑟 is capped by [2, 𝑛 /4].We use 𝑟 = 2 as the initial value in our experiment following [20]. Unlike the (1 + 𝜆 ) EA and (1 + 𝜆 ) two-rate EA sampling ℓ from a Binomial distribution, the (1 + 𝜆 ) var EA samples ℓ from a normal distribution such that it can adapt not only to the expected value of 
+
+ℓ but also its variance. The normalized bit mutation is presented at line 6 in Algorithm 3. We reset 𝑐 = 0 if there exists no improvement after 𝑛 function evaluations and set 𝐹 = 0.98 following [63]. Furthermore, we also consider the (1 + ( 𝜆, 𝜆 )) GA, which ap-plies crossover and mutation controlled by an adaptive population size 𝜆 , as presented in Algorithm 9. Its mutation operator follows the same procedure as the algorithms introduced above, and the crossover Cross 𝑐 (𝑥, 𝑥 ∗) replaces ℓ𝑐 distinct bits of 𝑥 by the values at the corresponding positions of 𝑥 ∗. ℓ𝑐 is sampled by Bin >0 (𝑛, 𝑐 ).We set 𝐹 = 1.5 following the suggestion in [18]. 
+
+## B Evolutionary Multi-objective Algorithms 
+
+We refer the readers to [ 16 ] for the essential concepts of multi-objective optimization and provide the definition of the perfor-mance indicator Hypervolume (HV) here:[ 68 ]: The hypervolume indicator 𝐼 𝐻 (𝑃 ) is the volume of the objective space that is dom-inated by the solution set 𝑃 . Given a reference point 𝑠 ∈ R𝑚 ,
+
+Algorithm 2: The two-rate (1 + 𝜆 ) EA  
+
+> 1
+
+Initialization: Sample 𝑥 ∈ { 0, 1}𝑛 u.a.r and evaluate 𝑓 (𝑥 ); 
+
+> 2
+
+𝑟 ← 2; 
+
+> 3
+
+Optimization: for 𝑡 = 1, 2, 3, . . . do  
+
+> 4
+
+for 𝑖 = 1, . . . , 𝜆 /2 do  
+
+> 5
+
+Sample ℓ (𝑖 ) ∼ Bin >0 (𝑛, 𝑟 /( 2𝑛 )) , create 
+
+𝑦 (𝑖 ) ← Mut ℓ (𝑖 ) (𝑥 ), and evaluate 𝑓 (𝑦 (𝑖 ) ); 
+
+> 6
+
+for 𝑖 = 𝜆 /2 + 1, . . . , 𝜆 do  
+
+> 7
+
+Sample ℓ (𝑖 ) ∼ Bin >0 (𝑛, 2𝑟 /𝑛 ), create 
+
+𝑦 (𝑖 ) ← Mut ℓ (𝑖 ) (𝑥 ), and evaluate 𝑓 (𝑦 (𝑖 ) ); 
+
+> 8
+
+𝑥 ∗ ← arg max {𝑓 (𝑦 (1) ), . . . , 𝑓 (𝑦 (𝜆 ) )} (ties broken u.a.r.);  
+
+> 9
+
+if 𝑓 (𝑥 ∗) ≥ 𝑓 (𝑥 ) then  
+
+> 10
+
+𝑥 ← 𝑥 ∗ 
+
+> 11
+
+if 𝑥 ∗ has been created with mutation rate 𝑟 /2 then  
+
+> 12
+
+𝑠 ← 3/4 
+
+> 13
+
+else  
+
+> 14
+
+𝑠 ← 1/4 
+
+> 15
+
+Sample 𝑞 ∈ [ 0, 1] u.a.r.;  
+
+> 16
+
+if 𝑞 ≤ 𝑠 then  
+
+> 17
+
+𝑟 ← max {𝑟 /2, 2} 
+
+> 18
+
+else  
+
+> 19
+
+𝑟 ← min {2𝑟, 𝑛 /4}
+
+Algorithm 3: The (1 + 𝜆 ) var EA.  
+
+> 1
+
+Initialization: Sample 𝑥 ∈ { 0, 1}𝑛 u.a.r and evaluate 𝑓 (𝑥 ); 
+
+> 2
+
+𝑟 ← 2; 
+
+> 3
+
+𝑐 ← 0; 
+
+> 4
+
+Optimization: for 𝑡 = 1, 2, 3, . . . do  
+
+> 5
+
+for 𝑖 = 1, . . . , 𝜆 do  
+
+> 6
+
+Sample ℓ (𝑖 ) ∼ min {𝑁 >0 (𝑟, 𝐹 𝑐 𝑟 (1 − 𝑟 /𝑛 )) , 𝑛 }, create 
+
+𝑦 (𝑖 ) ← Mut ℓ (𝑖 ) (𝑥 ), and evaluate 𝑓 (𝑦 (𝑖 ) ); 
+
+> 7
+
+𝑖 ← min 𝑗 | 𝑓 (𝑦 ( 𝑗 ) ) = max {𝑓 (𝑦 (𝑘 ) ) | 𝑘 ∈ [ 𝑛 ]} ; 
+
+> 8
+
+if 𝑟 = ℓ (𝑖 ) then  
+
+> 9
+
+𝑐 ← 𝑐 + 1 
+
+> 10
+
+else  
+
+> 11
+
+𝑐 ← 0 
+
+> 12
+
+𝑟 ← ℓ (𝑖 ) ; 
+
+> 13
+
+if 𝑓 (𝑦 (𝑖 ) ) ≥ 𝑓 (𝑥 ) then  
+
+> 14
+
+𝑥 ← 𝑦 (𝑖 )
+
+𝐼 𝐻 (𝑃 ) = Λ (Ð𝑥 ∈𝑃 [𝑓 1 (𝑥 ), 𝑠 1] × . . . × [ 𝑓 𝑚 (𝑥 ), 𝑠 𝑚 ]) , where Λ(𝑃 ) is the Lebesgue measure of 𝑃 and [𝑓 1 (𝑥 ), 𝑠 1] × . . . × [ 𝑓 𝑚 (𝑥 ), 𝑠 𝑚 ] is the or-thotope with 𝑓 (𝑥 ) and 𝑟 in opposite corners. The paper calculates HV regarding the reference point (0, 0).In the following, we provide the pseudocode for the compared multi-objective evolutionary algorithms. The Simple Evolutionary Multi-objective Evolutionary Algo-rithm (SEMO) [ 3] maintains a population 𝑃 of non-dominated so-lutions. It primarily applies mutation operators to generate new GECCO ’26, July 13–17, 2026, San Jose, Costa Rica Furong Ye, Frank Neumann, Thomas Bäck, and Niki van Stein 
+
+Algorithm 4: The self-adjusting (1 + ( 𝜆, 𝜆 )) GA  
+
+> 1
+
+Initialization: Sample 𝑥 ∈ { 0, 1}𝑛 u.a.r. and evaluate 𝑓 (𝑥 ); 
+
+> 2
+
+Optimization: for 𝑡 = 1, 2, 3, . . . do  
+
+> 3
+
+Mutation phase:  
+
+> 4
+
+Sample ℓ ∼ Bin >0 (𝑛, 𝜆 /𝑛 ); 
+
+> 5
+
+for 𝑖 = 1, . . . , 𝜆 do  
+
+> 6
+
+create 𝑦 (𝑖 ) ← Mut ℓ (𝑥 ), and evaluate 𝑓 (𝑦 (𝑖 ) ); 
+
+> 7
+
+𝑥 ∗ ← arg max {𝑓 (𝑦 (1) ), . . . , 𝑓 (𝑦 (𝜆 ) )} (ties broken u.a.r.);  
+
+> 8
+
+Crossover phase:  
+
+> 9
+
+for 𝑖 = 1, . . . , 𝜆 do  
+
+> 10
+
+create 𝑦 (𝑖 ) ← Cross 𝑐 (𝑥, 𝑥 ∗), and evaluate 𝑓 (𝑦 (𝑖 ) ); 
+
+> 11
+
+𝑦 ∗ ← arg max {𝑓 (𝑦 (1) ), . . . , 𝑓 (𝑦 (𝜆 ) )} (ties broken u.a.r.);  
+
+> 12
+
+Selection phase:  
+
+> 13
+
+if 𝑓 (𝑦 ∗) > 𝑓 (𝑥 ) then  
+
+> 14
+
+𝑥 ← 𝑦 ∗; 
+
+> 15
+
+𝜆 ← max {𝜆 /𝐹, 1}; 
+
+> 16
+
+if 𝑓 (𝑦 ∗) = 𝑓 (𝑥 ) then  
+
+> 17
+
+𝑥 ← 𝑦 ∗; 
+
+> 18
+
+𝜆 ← min {𝜆𝐹 1/4, 𝑛 }; 
+
+> 19
+
+if 𝑓 (𝑦 ∗) < 𝑓 (𝑥 ) then  
+
+> 20
+
+𝜆 ← min {𝜆𝐹 1/4, 𝑛 };solutions and updates the Pareto front iteratively. SEMO starts with a randomly generated solution. At each iteration, a parent solution 
+
+𝑥 is selected from 𝑃 u.a.r. to generate offspring 𝑦 by flipping one 
+
+randomly selected bit of 𝑥 . If 𝑦 dominates any solutions in 𝑃 , those solutions will be removed from 𝑃 , and 𝑦 will be added to 𝑃 . The algorithm runs until a predefined computational budget, e.g., the maximum function evaluations, is exhausted. The key difference between the Global SEMO (GSEMO) [ 3] and SEMO lies in the mutation step. GSEMO applies the standard bit mu-tation rather than flipping exactly one bit when creating offspring. In practice, as shown in Algorithm 5, GSEMO flips ℓ randomly selected bits of 𝑥 to create offspring 𝑦 , and ℓ is sampled from a conditional binomial distribution Bin >0 (𝑛, 𝑝 ).
+
+Algorithm 5: Global SEMO  
+
+> 1
+
+Initialization: Sample 𝑥 ∈ { 0, 1}𝑛 u.a.r., and evaluate 𝑓 (𝑥 ); 
+
+> 2
+
+𝑃 ← { 𝑥 }; 
+
+> 3
+
+Optimization: while not stop condition do  
+
+> 4
+
+Select 𝑥 ∈ 𝑃 u.a.r.;  
+
+> 5
+
+Sample ℓ ∼ Bin >0 (𝑛, 𝑝 ), create 𝑦 ← Mut ℓ (𝑥 ), and evaluate 𝑓 (𝑦 ); 
+
+> 6
+
+if there is no 𝑧 ∈ 𝑃 such that 𝑦 ⪯ 𝑧 then  
+
+> 7
+
+𝑃 = {𝑧 ∈ 𝑃 | 𝑧 ⪯̸ 𝑦 } ∪ { 𝑦 }
+
+NSGA-II [ 15 ], as presented in Algorithm 6, employs non-dominated sorting to rank all the solutions and partition them into different Pareto fronts. When selecting the solutions to form the parent pop-ulation, it prefers solutions located at better-ranked Pareto fronts. If multiple solutions belong to the same Pareto front, NSGA-II selects those with a larger crowding distance to ensure the diversity of populations by favoring well-spread solutions. Additionally, NSGA-II usually employs elitist selection, considering both parent and offspring populations at each iteration. Detailed calculation of non-dominated sorting and crowding distance can be found in [15], and we apply the implementation of the pymoo package [9]. 
+
+Algorithm 6: Non-dominated Sorting Genetic Algorithm  
+
+> 1
+
+Initialization: Sample an initial population 
+
+𝑃 0 = {𝑥 1, . . . , 𝑥 𝜇 } u.a.r., where 𝑥 ∈ { 0, 1}𝑛 , and evaluate all 
+
+𝑥 ∈ 𝑃 0; 
+
+> 2
+
+for 𝑡 = 1, 2, 3, . . . do  
+
+> 3
+
+Generate offspring population 𝑄 𝑡 with size 𝜇 from 𝑃 𝑡 ; 
+
+> 4
+
+Evaluate all offspring in 𝑄 𝑡 ; 
+
+> 5
+
+𝑅 𝑡 ← 𝑃 𝑡 ∪ 𝑄 𝑡 ; 
+
+> 6
+
+Perform non-dominated sorting of 𝑅 𝑡 into fronts 
+
+𝐹 1, 𝐹 2, . . . ; 
+
+> 7
+
+𝑃 𝑡 +1 ← ∅ ; 
+
+> 8
+
+𝑖 ← 1; 
+
+> 9
+
+while |𝑃 𝑡 +1 | + | 𝐹 𝑖 | ≤ 𝜇 do  
+
+> 10
+
+𝑃 𝑡 +1 ← 𝑃 𝑡 +1 ∪ 𝐹 𝑖 ; 
+
+> 11
+
+𝑖 ← 𝑖 + 1; 
+
+> 12
+
+Calculate the crowding distance of each individual in 𝐹 𝑖 ; 
+
+> 13
+
+Let 𝐹 𝑖 ∗ be the first 𝜇 − | 𝑃 𝑡 +1 | in 𝐹 𝑖 with the largest 
+
+crowding distance (ties broken u.a.r.);  
+
+> 14
+
+𝑃 𝑡 +1 ← 𝑃 𝑡 ∪ 𝐹 𝑖 ∗
+
+Algorithm 7: Multiobjective selection based on dominated hypervolume  
+
+> 1
+
+Initialization: Sample an initial population 
+
+𝑃 0 = {𝑥 1, . . . , 𝑥 𝜇 } u.a.r., where 𝑥 ∈ { 0, 1}𝑛 , and evaluate all 
+
+𝑥 ∈ 𝑃 0; 
+
+> 2
+
+for 𝑡 = 1, 2, 3, . . . do  
+
+> 3
+
+Generate offspring population 𝑄 𝑡 with size 𝜇 from 𝑃 𝑡 ; 
+
+> 4
+
+Evaluate all offspring in 𝑄 𝑡 ; 
+
+> 5
+
+𝑅 𝑡 ← 𝑃 𝑡 ∪ 𝑄 𝑡 ; 
+
+> 6
+
+Perform non-dominated sorting of 𝑅 𝑡 into fronts 
+
+𝐹 1, 𝐹 2, . . . ; 
+
+> 7
+
+𝑃 𝑡 +1 ← ∅ ; 
+
+> 8
+
+𝑖 ← 1; 
+
+> 9
+
+while |𝑃 𝑡 +1 | + | 𝐹 𝑖 | ≤ 𝜇 do  
+
+> 10
+
+𝑃 𝑡 +1 ← 𝑃 𝑡 +1 ∪ 𝐹 𝑖 ; 
+
+> 11
+
+𝑖 ← 𝑖 + 1; 
+
+> 12
+
+Calculate the hypervolume contribution of each individual in 𝐹 𝑖 ; 
+
+> 13
+
+Let 𝐹 𝑖 ∗ be the first 𝜇 − | 𝑃 𝑡 +1 | in 𝐹 𝑖 with the largest 
+
+hypervolume contribution (ties broken u.a.r.);  
+
+> 14
+
+𝑃 𝑡 +1 ← 𝑃 𝑡 ∪ 𝐹 𝑖 ∗Block-Bench: A Framework for Controllable and Transparent Discrete Optimization Benchmarking GECCO ’26, July 13–17, 2026, San Jose, Costa Rica 
+
+SMSEMOA [ 7], as presented in Algorithm 7, deals with multi-objective problems by focusing on optimizing hypervolume. It prefers solutions that contribute most to increasing hypervolume during the optimization process. By maximizing the dominated hypervolume, SMSEMOA can ensure the convergence to the Pareto front while maintaining the diversity of preserved non-dominated solutions. The difference between NSGA-II and SMSEMOA occurs at lines 12-13 in Algorithm 7, where SMSEMOA selects the individ-uals with the largest hypervolume contribution in the critical front 
+
+𝐹 𝑖 . Detailed calculation of hypervolume contribution can be found in [7]. MOEA/D [ 65 ], as presented in Algorithm 8, uses a decomposition-based approach to solve multi-objective problems. It transforms the original multi-objective problem into a set of scalar single-objective subproblems, based on predefined reference directions. These subproblems are optimized simultaneously, with neighboring solutions collaborating to enhance convergence. The formulation of subproblems can be found in [65]. 
+
+Algorithm 8: The multi-objective evolutionary algorithm based on decomposition  
+
+> 1
+
+Initialization: ; 
+
+> 2
+
+Generate weight vectors {𝑤 1, . . . , 𝑤 𝜇 } and construct ℎ𝑖 
+
+subproblem according to 𝑤 𝑖 . We denote 𝐵 𝑖 as the neighbor of the 𝑖 -th subproblem;  
+
+> 3
+
+Sample initial population 𝑃 = {𝑥 1, . . . , 𝑥 𝜇 } u.a.r. and evaluate objectives and 𝑓 𝑖 (𝑥 𝑖 ), 𝑖 ∈ [ 𝜇 ]; 
+
+> 4
+
+Initialize reference point 𝑧 ∗ = {𝑧 ∗
+
+> 1
+
+, . . . } ∈ { 0, 1}𝑛 ; 
+
+> 5
+
+Initialize 𝑃 𝑒 = ∅; 
+
+> 6
+
+for 𝑡 = 1, 2, 3, . . . do  
+
+> 7
+
+for 𝑖 = 1, . . . , 𝜇 do  
+
+> 8
+
+Generate offspring 𝑥 ′ 
+
+> 𝑖
+
+from 𝑥 𝑖 ; 
+
+> 9
+
+Evaluate objectives 𝑓 (𝑥 ′ 
+
+> 𝑖
+
+) of 𝑥 ′ 
+
+> 𝑖
+
+; 
+
+> 10
+
+Update reference point z; 
+
+> 11
+
+For each 𝑦 ∈ 𝐵 𝑖 such that ℎ𝑖 (𝑥 ′ 
+
+> 𝑖
+
+) ≤ ℎ𝑖 (𝑦 ), set 𝑦 = 𝑥 ′
+
+> 𝑖
+
+and 𝑓 (𝑦 ) = 𝑓 (𝑥 ′ 
+
+> 𝑖
+
+); 
+
+> 12
+
+if there is no 𝑦 ∈ 𝑃 𝑒 such that 𝑥 ′ 
+
+> 𝑖
+
+⪯ 𝑦 then  
+
+> 13
+
+𝑃 = {𝑦 ∈ 𝑃 | 𝑦 ⪯̸ 𝑥 ′ 
+
+> 𝑖
+
+} ∪ { 𝑥 ′ 
+
+> 𝑖
+
+}
+
+Algorithm 9: The (𝜇 + 1) Genetic Algorithm  
+
+> 1
+
+Initialization:  
+
+> 2
+
+Sample an initial population 𝑃 = {𝑥 0, . . . , 𝑥 𝜇 } u.a.r., where 
+
+𝑥 ∈ { 0, 1}𝑛 ; 
+
+> 3
+
+Evaluate all 𝑥 ∈ 𝑃 ; 
+
+> 4
+
+Optimization: for 𝑡 = 1, 2, 3, . . . do  
+
+> 5
+
+Sample 𝑥 ∈ 𝑃 u.a.r.;  
+
+> 6
+
+if with probability 𝑝 𝑐 then  
+
+> 7
+
+Sample 𝑦 ∈ 𝑃 \ { 𝑥 } u.a.r.;  
+
+> 8
+
+𝑥 ′ ← Crossover (𝑥, 𝑦 ); 
+
+> 9
+
+else  
+
+> 10
+
+𝑥 ′ ← 𝑥 ; 
+
+> 11
+
+Flip each bit of 𝑥 ′ with probability 1/𝑛 ; 
+
+> 12
+
+Evaluate 𝑓 (𝑥 ′); 
+
+> 13
+
+𝑃 ← 𝑃 ∪ { 𝑥 ′ }; 
+
+> 14
+
+Remove one individual from arg min 𝑧 ∈𝑃 𝑓 (𝑧 ) u.a.r.; 
+
+## C Genetic Algorithms 
+
+For the (𝜇 + 1) GA, we consider the version presented in our revis-iting study [ 54 ], as presented in Algorithm 9. The corresponding GA-diversity updates line 14. Instead of removing the worst indi-viduals u.a.r., GA-diversity preserves the individuals pair with the largest Hamming distance, then removes the worst ones from the remaining population.

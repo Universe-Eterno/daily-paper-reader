@@ -1,0 +1,38 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.06973v1/fig-001.webp",
+      "caption": "Figure 6: Convergence process of EAs for F5 over the FEs.",
+      "page": 6,
+      "index": 1,
+      "width": 461,
+      "height": 270
+    },
+    {
+      "url": "assets/figures/arxiv/2604.06973v1/fig-002.webp",
+      "caption": "Figure 7: Convergence process of EAs for F10 over the FEs.",
+      "page": 6,
+      "index": 2,
+      "width": 461,
+      "height": 271
+    },
+    {
+      "url": "assets/figures/arxiv/2604.06973v1/fig-003.webp",
+      "caption": "Figure 9: The FEs of (𝜇 + 1) GAs to reach the optimum of 40D",
+      "page": 7,
+      "index": 3,
+      "width": 408,
+      "height": 305
+    },
+    {
+      "url": "assets/figures/arxiv/2604.06973v1/fig-004.webp",
+      "caption": "Table 1: The instances of block-structure problems mentioned in this paper. 𝑛 is the problem dimensionality,𝑚 is the number of blocks, 𝑖, 𝑗 ∈ [𝑚]. The functions listed in the “Blocks functions” column are sequentially added as𝑚 increases. “F*” are",
+      "page": 4,
+      "index": 4,
+      "width": 1006,
+      "height": 769
+    }
+  ]
+}

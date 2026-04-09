@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.03562v1/fig-001.webp",
+      "caption": "Fig. 3. Outage weight trajectories for MLP (top) and FT-LLM (bottom) architects during generalization experiments (seed 42). The MLP produces stable weights (range 0.94–1.57), while the LLM oscillates between extreme values (0.004–0.999). Dashed gray line marks the transition to novel regimes at step 250k.",
+      "page": 6,
+      "index": 1,
+      "width": 506,
+      "height": 321
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03562v1/fig-002.webp",
+      "caption": "Fig. 2. Mean sum rate comparison across architect variants. The MLP (M3) achieves the highest throughput on both known and novel regimes. The FT-LLM (M4) collapses on novel regimes due to weight oscillation (see Section V-H).",
+      "page": 4,
+      "index": 2,
+      "width": 511,
+      "height": 282
+    }
+  ]
+}
