@@ -1,0 +1,54 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.07951v1/fig-001.webp",
+      "caption": "FIG. 8. Episode-dependence of (a) the expectation value of the Hamiltonian ⟨H⟩, (b) cumulative reward R, (c) gate count g, and (d) circuit depth D averaged over 100 trials for the hydrogen molecular Hamiltonian. The orange and red lines in (a) represent EHF and EFCI, respectively.",
+      "page": 7,
+      "index": 1,
+      "width": 506,
+      "height": 379
+    },
+    {
+      "url": "assets/figures/arxiv/2604.07951v1/fig-002.webp",
+      "caption": "FIG. 11. (a)-(c) Examples of circuits reaching EFCI obtained in the present RL method. By comparing the architectures of circuits (a)–(c) and isolating their overlapping components, the “essential skeleton” was identified in circuit (d); this refined structure successfully reached EFCI.",
+      "page": 10,
+      "index": 2,
+      "width": 506,
+      "height": 291
+    },
+    {
+      "url": "assets/figures/arxiv/2604.07951v1/fig-003.webp",
+      "caption": "FIG. 1. Schematics of the framework and the process of experience replay when applied to quantum circuit design.",
+      "page": 3,
+      "index": 3,
+      "width": 517,
+      "height": 254
+    },
+    {
+      "url": "assets/figures/arxiv/2604.07951v1/fig-004.webp",
+      "caption": "FIG. 9. Episode-dependence of (a) the expectation value of the Hamiltonian ⟨H⟩, (b) cumulative reward R, (c) gate count g, and (d) circuit depth D averaged over 10 trials for the hydrogen molecular Hamiltonian upto 5,000 episodes. In (a), the orange and red dashed lines represent EHF and EFCI, respectively. In (c) and (d), the green lines denote the prescribed upper bounds.",
+      "page": 8,
+      "index": 4,
+      "width": 506,
+      "height": 254
+    },
+    {
+      "url": "assets/figures/arxiv/2604.07951v1/fig-005.webp",
+      "caption": "FIG. 2. Schematics of Quantum Circuit Design Workflow.",
+      "page": 4,
+      "index": 5,
+      "width": 714,
+      "height": 293
+    },
+    {
+      "url": "assets/figures/arxiv/2604.07951v1/fig-006.webp",
+      "caption": "FIG. 5. (a) Example of 4-qubit quantum circuit, (b) List representation of the quantum circuit on (a). In the table (b), the label 0 indicates the absence of the gate, (1, 2, 3, 4) represents (Rx, Ry, Rz, I), and (5, 6) represents (control, target) part of the CNOT gate.",
+      "page": 5,
+      "index": 6,
+      "width": 506,
+      "height": 243
+    }
+  ]
+}

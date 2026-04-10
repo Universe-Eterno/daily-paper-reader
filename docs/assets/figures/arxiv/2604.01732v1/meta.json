@@ -1,0 +1,38 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.01732v1/fig-001.webp",
+      "caption": "Table 3: Best SAT/MaxSAT configurations vs. commercial solvers. Best values per block are in bold.",
+      "page": 11,
+      "index": 1,
+      "width": 658,
+      "height": 462
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01732v1/fig-002.webp",
+      "caption": "Table 2: SAT/MaxSAT performance on the Cui–Zhao benchmark (with rotation). Best values per column are in bold.",
+      "page": 10,
+      "index": 2,
+      "width": 895,
+      "height": 334
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01732v1/fig-003.webp",
+      "caption": "Figure 1: A 2D-CSSP instance: sheet size 6×4, two item types (t1: 3×2, d1=3; t2: 2×2, d2=3), optimal packing on k∗=2 sheets. Hatched regions are waste.",
+      "page": 4,
+      "index": 3,
+      "width": 507,
+      "height": 342
+    },
+    {
+      "url": "assets/figures/arxiv/2604.01732v1/fig-004.webp",
+      "caption": "Table 1: SAT/MaxSAT performance on the Cui–Zhao benchmark (no rotation). Best values per column are in bold.",
+      "page": 9,
+      "index": 4,
+      "width": 895,
+      "height": 333
+    }
+  ]
+}
