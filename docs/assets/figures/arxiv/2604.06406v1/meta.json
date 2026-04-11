@@ -1,0 +1,46 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.06406v1/fig-001.webp",
+      "caption": "Fig. 1: (Left) Complete graph on 7 target sets. (Middle) Augmented GCS, representing a Bellman-Held-Karp (BHK) lattice containing 27 = 128 subgraphs, where each node is a copy of the graph on the left, and the inter-layer edges represent target set visits. (Right) Optimal solution to the TSP in GCS.",
+      "page": 2,
+      "index": 1,
+      "width": 948,
+      "height": 210
+    },
+    {
+      "url": "assets/figures/arxiv/2604.06406v1/fig-002.webp",
+      "caption": "TABLE I: Cost and Time Comparison of the AGCS-TSPS and TSP-GCS. A * denotes a relaxation. Empty entries were intractable",
+      "page": 7,
+      "index": 2,
+      "width": 500,
+      "height": 281
+    },
+    {
+      "url": "assets/figures/arxiv/2604.06406v1/fig-003.webp",
+      "caption": "TABLE II: δ Percent Error Of Lower Bounds",
+      "page": 7,
+      "index": 3,
+      "width": 481,
+      "height": 263
+    },
+    {
+      "url": "assets/figures/arxiv/2604.06406v1/fig-004.webp",
+      "caption": "Fig. 4: Comparison of four heuristics for a 100 vertex graph: greedy, 2-Opt, Bounded Branch and Bound (BBB), and Convex Branch and Bound (CBB) heuristics. Each tour shows its Realized Cost (RC) in blue and Bounded Cost (BC) in purple. Calculating the bounded cost matrix took 10 seconds. The BBB and CBB each took a minute to solve.",
+      "page": 8,
+      "index": 4,
+      "width": 973,
+      "height": 234
+    },
+    {
+      "url": "assets/figures/arxiv/2604.06406v1/fig-005.webp",
+      "caption": "Fig. 5: (Top) Example tour, (Middle) candidate tour, (Bottom) combination of both tours. Gray vertices and edges are not included in the AGCS-TSPS.",
+      "page": 8,
+      "index": 5,
+      "width": 437,
+      "height": 325
+    }
+  ]
+}

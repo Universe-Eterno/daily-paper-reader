@@ -1,0 +1,110 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.02496v1/fig-001.webp",
+      "caption": "Table 2: Comparison of ILS and SRI algorithms on VRPSD instances.",
+      "page": 25,
+      "index": 1,
+      "width": 984,
+      "height": 187
+    },
+    {
+      "url": "assets/figures/arxiv/2604.02496v1/fig-002.webp",
+      "caption": "Figure 3: Empirical cumulative distribution of the execution times. The legend (ils+) sri refers to algorithm sri when Q = Q∗, and to algorithm ils+sri when Q = QC .",
+      "page": 25,
+      "index": 2,
+      "width": 941,
+      "height": 382
+    },
+    {
+      "url": "assets/figures/arxiv/2604.02496v1/fig-003.webp",
+      "caption": "Figure 11: Empirical cumulative distribution of the execution times and root gaps for Dinh et al. (2018) instances, with X = Xsub and Q = Q∗.",
+      "page": 47,
+      "index": 3,
+      "width": 941,
+      "height": 331
+    },
+    {
+      "url": "assets/figures/arxiv/2604.02496v1/fig-004.webp",
+      "caption": "Figure 2: Graphical representation of (x̄, ȳξ, f̄ξ, ḡξ). Here we have C = 10, wv3 = 6 and wv1 = wv2 = wv4 = 2. The black numbers next to each vertex indicate the scenario demand vector dξ. The blue and solid arcs represent the vector f̄ξ, while the red and dashed arcs represent the vector ḡξ.",
+      "page": 14,
+      "index": 4,
+      "width": 469,
+      "height": 257
+    },
+    {
+      "url": "assets/figures/arxiv/2604.02496v1/fig-005.webp",
+      "caption": "Figure 8: Empirical cumulative distribution of the execution times and root gaps for Jabali et al. (2014) instances, with X = Xcvrp and Q = QC .",
+      "page": 46,
+      "index": 5,
+      "width": 941,
+      "height": 331
+    },
+    {
+      "url": "assets/figures/arxiv/2604.02496v1/fig-006.webp",
+      "caption": "Figure 9: Empirical cumulative distribution of the execution times and root gaps for Dinh et al. (2018) instances, with X = Xcvrp and Q = QC .",
+      "page": 46,
+      "index": 6,
+      "width": 941,
+      "height": 331
+    },
+    {
+      "url": "assets/figures/arxiv/2604.02496v1/fig-007.webp",
+      "caption": "Figure 10: Empirical cumulative distribution of the execution times and root gaps for Jabali et al. (2014) instances, with X = Xsub and Q = QC .",
+      "page": 46,
+      "index": 7,
+      "width": 941,
+      "height": 332
+    },
+    {
+      "url": "assets/figures/arxiv/2604.02496v1/fig-008.webp",
+      "caption": "Figure 5: Empirical cumulative distribution of the execution times and root gaps for Dinh et al. (2018) instances, with X = Xcvrp and Q = Q∗.",
+      "page": 45,
+      "index": 8,
+      "width": 941,
+      "height": 331
+    },
+    {
+      "url": "assets/figures/arxiv/2604.02496v1/fig-009.webp",
+      "caption": "Figure 6: Empirical cumulative distribution of the execution times and root gaps for Jabali et al. (2014) instances, with X = Xsub and Q = Q∗.",
+      "page": 45,
+      "index": 9,
+      "width": 941,
+      "height": 331
+    },
+    {
+      "url": "assets/figures/arxiv/2604.02496v1/fig-010.webp",
+      "caption": "Figure 7: Empirical cumulative distribution of the execution times and root gaps for Dinh et al. (2018) instances, with X = Xsub and Q = Q∗.",
+      "page": 45,
+      "index": 10,
+      "width": 941,
+      "height": 332
+    },
+    {
+      "url": "assets/figures/arxiv/2604.02496v1/fig-011.webp",
+      "caption": "Figure 4: Empirical cumulative distribution of the execution times and root gaps for Jabali et al. (2014) instances, with X = Xcvrp and Q = Q∗.",
+      "page": 44,
+      "index": 11,
+      "width": 941,
+      "height": 331
+    },
+    {
+      "url": "assets/figures/arxiv/2604.02496v1/fig-012.webp",
+      "caption": "Table 1: Comparison of ILS and SRI algorithms on VRPSD instances with Q = Q∗.",
+      "page": 24,
+      "index": 12,
+      "width": 980,
+      "height": 204
+    },
+    {
+      "url": "assets/figures/arxiv/2604.02496v1/fig-013.webp",
+      "caption": "Figure 1: Illustration for a route with 4 customers and C = 10. We show two recourse actions for a given scenario ξ ∈ [N ] and a directed route R⃗ = (v1, v2, v3, v4). The black numbers refer to the demands in scenario ξ, the blue numbers (solid arcs) indicate the values of fξ and the red numbers (dashed arcs) indicate the values of gξ.",
+      "page": 9,
+      "index": 13,
+      "width": 853,
+      "height": 301
+    }
+  ]
+}

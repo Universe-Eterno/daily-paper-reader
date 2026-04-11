@@ -1,0 +1,142 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.03189v1/fig-001.webp",
+      "caption": "Figure 1: The RCL optimization loop with primitives mapped to stages. A batch of B tasks is sampled from D (with replay, §3.4), each executed G times (§3.1). Failed traces are passed — alongside dual-trace annotations (§3.2) — to a multi-head reflector (§3.3) that produces per-trace diagnostics ∆i. The mutator f aggregates these into structured edits to individual playbook entries ei, conditioned on a rolling optimization state document (§3.5).",
+      "page": 6,
+      "index": 1,
+      "width": 826,
+      "height": 340
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03189v1/fig-002.webp",
+      "caption": "Table 4: Leave-one-out ablation of the composed RCL optimizer. Each row removes one primitive from the full RCL composition. Deltas are relative to full RCL. Positive deltas indicate settings where removing a primitive improves over the full composition, while negative deltas indicate settings where that primitive contributes positively in composition. Largest degradation per column is underlined.",
+      "page": 11,
+      "index": 2,
+      "width": 830,
+      "height": 258
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03189v1/fig-003.webp",
+      "caption": "Figure 9: Base system prompt for RewardBench2 benchmark. The playbook section header is followed by dynamically generated playbook entries during evaluation.",
+      "page": 25,
+      "index": 3,
+      "width": 829,
+      "height": 900
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03189v1/fig-004.webp",
+      "caption": "Figure 11: Seed Playbook – RewardBench2. Contains 6 entries across 6 sections.",
+      "page": 26,
+      "index": 4,
+      "width": 829,
+      "height": 496
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03189v1/fig-005.webp",
+      "caption": "Figure 10: Seed Playbook – AppWorld. Contains 9 entries across 5 sections.",
+      "page": 26,
+      "index": 5,
+      "width": 829,
+      "height": 516
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03189v1/fig-006.webp",
+      "caption": "Figure 4: Training dynamics for all primitives with a 5-iteration sliding window. Format follows Figure 2: solid = current TGC; dashed = recently solved rate (per-example union over 5 iterations); colored shading = active instability (solved within window but not now); gray shading = stale regressions (solved historically but not within window). This is the strictest recency condition and produces the widest active instability gaps.",
+      "page": 21,
+      "index": 6,
+      "width": 826,
+      "height": 502
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03189v1/fig-007.webp",
+      "caption": "Table 2: Optimization primitives, the classical pathologies they address, and the RCL loop stage each targets.",
+      "page": 7,
+      "index": 7,
+      "width": 822,
+      "height": 224
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03189v1/fig-008.webp",
+      "caption": "Figure 5: Training dynamics with a 10-iteration sliding window. Tasks solved anywhere in the last 10 iterations count as recently solvable, shifting instability from the active to the stale category. Active gaps narrow relative to the 5-iteration view (Figure 4), but the relative ordering of primitives is preserved.",
+      "page": 22,
+      "index": 8,
+      "width": 826,
+      "height": 502
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03189v1/fig-009.webp",
+      "caption": "Figure 6: Training dynamics with the all-time best-so-far envelope (no window). The dashed line is now monotonically non-decreasing and converges to 100% for all runs. All instability is active by definition (the stale category is empty). The remaining gap measures capabilities ever demonstrated but not currently retained. This is the most permissive view and produces the narrowest gaps.",
+      "page": 22,
+      "index": 9,
+      "width": 826,
+      "height": 502
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03189v1/fig-010.webp",
+      "caption": "Table 3: Main results. Each primitive is added individually to the ACE baseline. AppWorld: TGC; BrowseComp+/RewardBench2: accuracy. Lite = Gemini 3.1 Flash Lite, Nano = GPT5.4 Nano. All runs use Claude Opus; 30 training iterations. Deltas vs. Seed.",
+      "page": 10,
+      "index": 10,
+      "width": 830,
+      "height": 188
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03189v1/fig-011.webp",
+      "caption": "Figure 3: Design choice analysis (Gemini 3.1 Flash-Lite). (a) Seed robustness on AppWorld Challenge: RCL converges to 72–76 TGC from all three seeds; ACE without primitives diverges from weaker initializations. (b) Reflector × mutator allocation across benchmarks. Performance depends on the interaction between both roles and the task regime; no single configuration dominates uniformly. (c) Per-trace vs. batched reflection with B=3. Batched reflection helps on harder tasks (AW Challenge, BC+) but hurts when failures are diverse.",
+      "page": 14,
+      "index": 11,
+      "width": 826,
+      "height": 204
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03189v1/fig-012.webp",
+      "caption": "Figure 7: Base system prompt for AppWorld benchmark. The playbook section header is followed by dynamically generated playbook entries during evaluation.",
+      "page": 23,
+      "index": 12,
+      "width": 829,
+      "height": 1250
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03189v1/fig-013.webp",
+      "caption": "Figure 2: Learning dynamics on AppWorld dev (Gemini 3.1 Flash-Lite, 57 tasks). Solid lines: current TGC at each checkpoint. Dashed lines: recently solved rate (fraction of tasks solved ≥1× in the trailing 5 iterations). Colored shading: active instability — the gap between the recently solved rate and current TGC, measuring tasks solved within the window but not currently retained. Gray shading: stale regressions — the gap between the all-time per-example best-so-far and the recently solved rate, measuring tasks solved historically but not within the window. Stars: peak TGC achieved during training. Green verticals: first iteration at which every dev task has been solved at least once (full coverage).",
+      "page": 13,
+      "index": 13,
+      "width": 826,
+      "height": 369
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03189v1/fig-014.webp",
+      "caption": "Table 1: Functional correspondence between classical gradient-based learning and reflective context learning, with representative prior work that explored each context-space analogue.",
+      "page": 4,
+      "index": 14,
+      "width": 812,
+      "height": 534
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03189v1/fig-015.webp",
+      "caption": "Figure 12: Seed Playbook (Decent) – AppWorld. Contains 7 entries across 4 sections.",
+      "page": 27,
+      "index": 15,
+      "width": 829,
+      "height": 475
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03189v1/fig-016.webp",
+      "caption": "Figure 13: Seed Playbook (High Quality) – AppWorld. Contains 9 entries across 5 sections.",
+      "page": 27,
+      "index": 16,
+      "width": 829,
+      "height": 611
+    },
+    {
+      "url": "assets/figures/arxiv/2604.03189v1/fig-017.webp",
+      "caption": "Figure 8: Base system prompt for BrowseComp benchmark. The playbook section header is followed by dynamically generated playbook entries during evaluation.",
+      "page": 24,
+      "index": 17,
+      "width": 829,
+      "height": 492
+    }
+  ]
+}
