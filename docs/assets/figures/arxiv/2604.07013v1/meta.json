@@ -1,0 +1,78 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.07013v1/fig-001.webp",
+      "caption": "TABLE III: Search results: top configurations by accuracy and Pareto optimal solutions. Rows marked • are Pareto optimal over (F1, F2, F3); unmarked rows are top accuracy configurations. Angle-y with CNOT mode “none-odd” dominates both categories.",
+      "page": 6,
+      "index": 1,
+      "width": 529,
+      "height": 335
+    },
+    {
+      "url": "assets/figures/arxiv/2604.07013v1/fig-002.webp",
+      "caption": "Fig. 1: Comparison of QAS without F3 versus with F3 on MNIST: (a) Bar chart showing average number of cuts (for Qtarget=4) across 5% accuracy bins (solutions with accuracy ≥ 65%). (b) Cumulative distribution function (CDF) of circuit cost (F2) showing percentage of solutions with F2 ≤ x. The “With F3” approach reduces both cutting overhead and circuit cost while maintaining similar accuracy.",
+      "page": 2,
+      "index": 2,
+      "width": 519,
+      "height": 376
+    },
+    {
+      "url": "assets/figures/arxiv/2604.07013v1/fig-003.webp",
+      "caption": "Fig. 2: Overview of QNAS Framework.",
+      "page": 2,
+      "index": 3,
+      "width": 529,
+      "height": 231
+    },
+    {
+      "url": "assets/figures/arxiv/2604.07013v1/fig-004.webp",
+      "caption": "Fig. 15: Circuit cutting for the best 8q-2d angle-y architecture (F3=5): 5 subcircuits for a 4 qubit device. SC1-2: embedding and Layer 1; SC3-4: Layer 2; SC5: cross group CNOTs and measurements.",
+      "page": 7,
+      "index": 4,
+      "width": 528,
+      "height": 315
+    },
+    {
+      "url": "assets/figures/arxiv/2604.07013v1/fig-005.webp",
+      "caption": "TABLE IX: Iris search results: top configurations by accuracy and selected Pareto optimal solutions. Amplitude embedding dominates; best accuracy is 4q-2d with none-odd.",
+      "page": 7,
+      "index": 5,
+      "width": 529,
+      "height": 244
+    },
+    {
+      "url": "assets/figures/arxiv/2604.07013v1/fig-006.webp",
+      "caption": "Fig. 4: NAS pipeline. Data and objectives feed a NAS engine that evolves DNN architectures via a supernet and accuracy predictor.",
+      "page": 3,
+      "index": 6,
+      "width": 508,
+      "height": 269
+    },
+    {
+      "url": "assets/figures/arxiv/2604.07013v1/fig-007.webp",
+      "caption": "Fig. 5: QNAS pipeline with NSGA-II. See Sec. III for details.",
+      "page": 3,
+      "index": 7,
+      "width": 512,
+      "height": 410
+    },
+    {
+      "url": "assets/figures/arxiv/2604.07013v1/fig-008.webp",
+      "caption": "Fig. 3: Hybrid quantum classical neural network used in QNAS.",
+      "page": 3,
+      "index": 8,
+      "width": 1046,
+      "height": 193
+    },
+    {
+      "url": "assets/figures/arxiv/2604.07013v1/fig-009.webp",
+      "caption": "Fig. 9: NSGA-II selection mechanism. Left: Parent population Pt. Middle: Combined population Pt ∪ Qt sorted into non dominated fronts (darker = better front). Right: Selection of Pt+1 from top fronts; the dashed line indicates where crowding distance breaks ties within a partially selected front.",
+      "page": 4,
+      "index": 9,
+      "width": 514,
+      "height": 290
+    }
+  ]
+}
