@@ -1,0 +1,814 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-13T20:15:48.854565+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 11,
+    "deep_cap": 7,
+    "deep_selected": 7,
+    "quick_candidates": 48,
+    "quick_skim_target": 12,
+    "quick_selected": 12
+  },
+  "deep_dive": [
+    {
+      "id": "2604.07872v1",
+      "source": "arxiv",
+      "title": "PyVRP$^+$: LLM-Driven Metacognitive Heuristic Evolution for Hybrid Genetic Search in Vehicle Routing Problems",
+      "abstract": "Designing high-performing metaheuristics for NP-hard combinatorial optimization problems, such as the Vehicle Routing Problem (VRP), remains a significant challenge, often requiring extensive domain expertise and manual tuning. Recent advances have demonstrated the potential of large language models (LLMs) to automate this process through evolutionary search. However, existing methods are largely reactive, relying on immediate performance feedback to guide what are essentially black-box code mutations. Our work departs from this paradigm by introducing Metacognitive Evolutionary Programming (MEP), a framework that elevates the LLM to a strategic discovery agent. Instead of merely reacting to performance scores, MEP compels the LLM to engage in a structured Reason-Act-Reflect cycle, forcing it to explicitly diagnose failures, formulate design hypotheses, and implement solutions grounded in pre-supplied domain knowledge. By applying MEP to evolve core components of the state-of-the-art Hybrid Genetic Search (HGS) algorithm, we discover novel heuristics that significantly outperform the original baseline. By steering the LLM to reason strategically about the exploration-exploitation trade-off, our approach discovers more effective and efficient heuristics applicable across a wide spectrum of VRP variants. Our results show that MEP discovers heuristics that yield significant performance gains over the original HGS baseline, improving solution quality by up to 2.70\\% and reducing runtime by over 45\\% on challenging VRP variants.",
+      "authors": [
+        "Manuj Malik",
+        "Jianan Zhou",
+        "Shashank Reddy Chirra",
+        "Zhiguang Cao"
+      ],
+      "primary_category": "cs.NE",
+      "categories": [
+        "cs.NE",
+        "cs.AI"
+      ],
+      "published": "2026-04-09T06:36:15+00:00",
+      "link": "https://arxiv.org/pdf/2604.07872v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "LLM-driven heuristic evolution for Vehicle Routing Problems",
+      "llm_evidence_cn": "大模型驱动的车辆路径问题启发式演化",
+      "llm_evidence": "大模型驱动的车辆路径问题启发式演化",
+      "canonical_evidence": "大模型驱动的车辆路径问题启发式演化",
+      "llm_tldr_en": "Introduces a framework using LLMs as strategic agents to evolve high-performing heuristics for VRP.",
+      "llm_tldr_cn": "引入了一个利用大模型作为战略代理来演化VRP高性能启发式算法的框架。",
+      "llm_tldr": "引入了一个利用大模型作为战略代理来演化VRP高性能启发式算法的框架。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM-guided heuristic search for optimization",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.05547v1",
+      "source": "arxiv",
+      "title": "COSMO-Agent: Tool-Augmented Agent for Closed-loop Optimization,Simulation,and Modeling Orchestration",
+      "abstract": "Iterative industrial design-simulation optimization is bottlenecked by the CAD-CAE semantic gap: translating simulation feedback into valid geometric edits under diverse, coupled constraints. To fill this gap, we propose COSMO-Agent (Closed-loop Optimization, Simulation, and Modeling Orchestration), a tool-augmented reinforcement learning (RL) framework that teaches LLMs to complete the closed-loop CAD-CAE process. Specifically, we cast CAD generation, CAE solving, result parsing, and geometry revision as an interactive RL environment, where an LLM learns to orchestrate external tools and revise parametric geometries until constraints are satisfied. To make this learning stable and industrially usable, we design a multi-constraint reward that jointly encourages feasibility, toolchain robustness, and structured output validity. In addition, we contribute an industry-aligned dataset that covers 25 component categories with executable CAD-CAE tasks to support realistic training and evaluation. Experiments show that COSMO-Agent training substantially improves small open-source LLMs for constraint-driven design, exceeding large open-source and strong closed-source models in feasibility, efficiency, and stability.",
+      "authors": [
+        "Liyuan Deng",
+        "Shujian Deng",
+        "Yongkang Chen",
+        "Yongkang Dai",
+        "Zhihang Zhong",
+        "Linyang Li",
+        "Xiao Sun",
+        "Yilei Shi",
+        "Huaxi Huang"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.GR"
+      ],
+      "published": "2026-04-07T07:45:17+00:00",
+      "link": "https://arxiv.org/pdf/2604.05547v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Tool-augmented RL framework teaching LLMs to complete closed-loop industrial design optimization",
+      "llm_evidence_cn": "工具增强的强化学习框架，教LLM完成闭环工业设计优化",
+      "llm_evidence": "工具增强的强化学习框架，教LLM完成闭环工业设计优化",
+      "canonical_evidence": "工具增强的强化学习框架，教LLM完成闭环工业设计优化",
+      "llm_tldr_en": "Proposes COSMO-Agent, an RL framework for LLMs to orchestrate tools for industrial design optimization.",
+      "llm_tldr_cn": "提出了COSMO-Agent，一个让LLM编排工具进行工业设计优化的强化学习框架。",
+      "llm_tldr": "提出了COSMO-Agent，一个让LLM编排工具进行工业设计优化的强化学习框架。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Large Language Models (LLM) for optimization tasks",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.07148v1",
+      "source": "arxiv",
+      "title": "Multi-Turn Reasoning LLMs for Task Offloading in Mobile Edge Computing",
+      "abstract": "Emerging computation-intensive applications impose stringent latency requirements on resource-constrained mobile devices. Mobile Edge Computing (MEC) addresses this challenge through task offloading. However, designing effective policies remains difficult due to dynamic task arrivals, time-varying channels, and the spatio-temporal coupling of server queues. Conventional heuristics lack adaptability, while Deep Reinforcement Learning (DRL) suffers from limited generalization and architectural rigidity, requiring retraining when network topology changes. Although Large Language Models (LLMs) offer semantic reasoning capabilities, standard Supervised Fine-Tuning (SFT) yields myopic policies that greedily minimize immediate latency without accounting for long-term system evolution. To address these limitations, we propose COMLLM, a generative framework that enables foresighted decision-making in MEC systems. COMLLM integrates Group Relative Policy Optimization (GRPO) with a Look-Ahead Collaborative Simulation (LACS) mechanism, which performs multi-step Monte Carlo rollouts while jointly modeling server queue dynamics. By incorporating these rollouts into the reward design, the framework captures the long-term impact of current decisions on future system states. Experimental results demonstrate that COMLLM achieves near-optimal latency and improved load-balancing fairness. Notably, it exhibits zero-shot topological scalability, allowing a model trained on small-scale networks to generalize to larger, unseen topologies without retraining, outperforming SFT, DRL, and heuristic baselines.",
+      "authors": [
+        "Ning Yang",
+        "Chuangxin Cheng",
+        "Haijun Zhang"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-04-08T14:38:48+00:00",
+      "link": "https://arxiv.org/pdf/2604.07148v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "LLMs for task offloading optimization in mobile edge computing",
+      "llm_evidence_cn": "大语言模型用于移动边缘计算中的任务卸载优化",
+      "llm_evidence": "大语言模型用于移动边缘计算中的任务卸载优化",
+      "canonical_evidence": "大语言模型用于移动边缘计算中的任务卸载优化",
+      "llm_tldr_en": "Explores multi-turn reasoning LLMs to solve complex task offloading optimization in mobile edge computing.",
+      "llm_tldr_cn": "探索了多轮推理大语言模型在解决移动边缘计算中复杂任务卸载优化问题中的应用。",
+      "llm_tldr": "探索了多轮推理大语言模型在解决移动边缘计算中复杂任务卸载优化问题中的应用。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Large Language Models (LLM) for optimization tasks",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.09001v1",
+      "source": "arxiv",
+      "title": "Hypergraph Neural Networks Accelerate MUS Enumeration",
+      "abstract": "Enumerating Minimal Unsatisfiable Subsets (MUSes) is a fundamental task in constraint satisfaction problems (CSPs). Its major challenge is the exponential growth of the search space, which becomes particularly severe when satisfiability checks are expensive. Recent machine learning approaches reduce this cost for Boolean satisfiability problems but rely on explicit variable-constraint relationships, limiting their application domains. This paper proposes a domain-agnostic method to accelerate MUS enumeration using Hypergraph Neural Networks (HGNNs). The proposed method incrementally builds a hypergraph with constraints as vertices and MUSes enumerated until the current step as hyperedges, and employs an HGNN-based agent trained via reinforcement learning to minimize the number of satisfiability checks required to obtain an MUS. Experimental results demonstrate the effectiveness of our approach in accelerating MUS enumeration, showing that our method can enumerate more MUSes within the same satisfiability check budget compared to conventional methods.",
+      "authors": [
+        "Hiroya Ijima",
+        "Koichiro Yawata"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.LG",
+        "cs.LO"
+      ],
+      "published": "2026-04-10T06:13:41+00:00",
+      "link": "https://arxiv.org/pdf/2604.09001v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Hypergraph Neural Networks and RL for constraint satisfaction problems",
+      "llm_evidence_cn": "用于约束满足问题的超图神经网络和强化学习",
+      "llm_evidence": "用于约束满足问题的超图神经网络和强化学习",
+      "canonical_evidence": "用于约束满足问题的超图神经网络和强化学习",
+      "llm_tldr_en": "Uses Hypergraph Neural Networks and RL to accelerate the enumeration of Minimal Unsatisfiable Subsets.",
+      "llm_tldr_cn": "利用超图神经网络和强化学习加速最小不可满足子集的枚举。",
+      "llm_tldr": "利用超图神经网络和强化学习加速最小不可满足子集的枚举。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Graph Neural Networks for solving combinatorial problems",
+      "matched_requirement_id": "req-15",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.09202v1",
+      "source": "arxiv",
+      "title": "On the Role of DAG topology in Energy-Aware Cloud Scheduling : A GNN-Based Deep Reinforcement Learning Approach",
+      "abstract": "Cloud providers must assign heterogeneous compute resources to workflow DAGs while balancing competing objectives such as completion time, cost, and energy consumption. In this work, we study a single-workflow, queue-free scheduling setting and consider a graph neural network (GNN)-based deep reinforcement learning scheduler designed to minimize workflow completion time and energy usage. We identify specific out-of-distribution (OOD) conditions under which GNN-based deep reinforcement learning schedulers fail and provide a principled explanation of why these failures occur. Through controlled OOD evaluations, we demonstrate that performance degradation stems from structural mismatches between training and deployment environments, which disrupt message passing and undermine policy generalization. Our analysis exposes fundamental limitations of current GNN-based schedulers and highlights the need for more robust representations to ensure reliable scheduling performance under distribution shifts.",
+      "authors": [
+        "Anas Hattay",
+        "Fred Ngole Mboula",
+        "Eric Gascard",
+        "Zakaria Yahoun"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-04-10T10:44:30+00:00",
+      "link": "https://arxiv.org/pdf/2604.09202v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "GNN-based deep reinforcement learning for cloud scheduling optimization",
+      "llm_evidence_cn": "基于GNN的深度强化学习用于云调度优化",
+      "llm_evidence": "基于GNN的深度强化学习用于云调度优化",
+      "canonical_evidence": "基于GNN的深度强化学习用于云调度优化",
+      "llm_tldr_en": "Evaluates GNN-based DRL for workflow scheduling and identifies failure conditions under structural mismatches.",
+      "llm_tldr_cn": "评估了基于GNN的深度强化学习在工作流调度中的应用，并识别了结构失配下的失效条件。",
+      "llm_tldr": "评估了基于GNN的深度强化学习在工作流调度中的应用，并识别了结构失配下的失效条件。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Deep Reinforcement Learning for combinatorial optimization",
+      "matched_requirement_id": "req-14",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.09240v1",
+      "source": "arxiv",
+      "title": "DiffHLS: Differential Learning for High-Level Synthesis QoR Prediction with GNNs and LLM Code Embeddings",
+      "abstract": "High-Level Synthesis (HLS) compiles C/C++ into RTL, but exploring pragma-driven optimization choices remains expensive because each design point requires time-consuming synthesis. We propose \\textbf{\\DiffHLS}, a differential learning framework for HLS Quality-of-Result (QoR) prediction that learns from kernel--design pairs: a kernel baseline and a pragma-inserted design variant. \\DiffHLS~encodes kernel and design intermediate-representation graphs with dedicated graph neural network (GNN) branches, and augments the delta pathway with code embeddings from a pretrained code large language model (LLM). Instead of regressing absolute targets directly, we jointly predict the kernel baseline and the design-induced delta, and compose them to obtain the design prediction. On PolyBench, \\DiffHLS~attains lower average MAPE than GNN baselines under four GNN backbones, and LLM code embeddings consistently improve over a GNN-only ablation. We further validate scalability on the ForgeHLS dataset.",
+      "authors": [
+        "Zedong Peng",
+        "Zeju Li",
+        "Qiang Xu",
+        "Jieru Zhao"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-04-10T11:54:56+00:00",
+      "link": "https://arxiv.org/pdf/2604.09240v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Integration of GNNs and LLM embeddings for HLS optimization",
+      "llm_evidence_cn": "结合GNN与LLM嵌入进行高层综合优化",
+      "llm_evidence": "结合GNN与LLM嵌入进行高层综合优化",
+      "canonical_evidence": "结合GNN与LLM嵌入进行高层综合优化",
+      "llm_tldr_en": "Combines GNNs and LLM code embeddings to predict and optimize High-Level Synthesis design choices.",
+      "llm_tldr_cn": "结合图神经网络和大模型代码嵌入，预测并优化高层综合（HLS）的设计选择。",
+      "llm_tldr": "结合图神经网络和大模型代码嵌入，预测并优化高层综合（HLS）的设计选择。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Integration of GNN and LLM for combinatorial optimization",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.04383v1",
+      "source": "arxiv",
+      "title": "Optimizing Service Operations via LLM-Powered Multi-Agent Simulation",
+      "abstract": "Service system performance depends on how participants respond to design choices, but modeling these responses is hard due to the complexity of human behavior. We introduce an LLM-powered multi-agent simulation (LLM-MAS) framework for optimizing service operations. We pose the problem as stochastic optimization with decision-dependent uncertainty: design choices are embedded in prompts and shape the distribution of outcomes from interacting LLM-powered agents. By embedding key numerical information in prompts and extracting it from LLM-generated text, we model this uncertainty as a controlled Markov chain. We develop an on-trajectory learning algorithm that, on a single simulation run, simultaneously constructs zeroth-order gradient estimates and updates design parameters to optimize steady-state performance. We also incorporate variance reduction techniques. In a sustainable supply chain application, our method outperforms benchmarks, including blackbox optimization and using LLMs as numerical solvers or as role-playing system designers. A case study on optimal contest design with real behavioral data shows that LLM-MAS is both as a cost-effective evaluator of known designs and an exploratory tool that can uncover strong designs overlooked by traditional approaches.",
+      "authors": [
+        "Yanyuan Wang",
+        "Xiaowei Zhang"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.MA",
+        "math.OC"
+      ],
+      "published": "2026-04-06T03:14:33+00:00",
+      "link": "https://arxiv.org/pdf/2604.04383v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "LLM-powered multi-agent simulation for optimizing service operations",
+      "llm_evidence_cn": "基于大模型驱动的多智能体模拟用于优化服务运营",
+      "llm_evidence": "基于大模型驱动的多智能体模拟用于优化服务运营",
+      "canonical_evidence": "基于大模型驱动的多智能体模拟用于优化服务运营",
+      "llm_tldr_en": "Introduces an LLM-MAS framework for stochastic optimization of service system designs.",
+      "llm_tldr_cn": "引入大模型驱动的多智能体模拟框架，用于服务系统设计的随机优化。",
+      "llm_tldr": "引入大模型驱动的多智能体模拟框架，用于服务系统设计的随机优化。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Large Language Models (LLM) for optimization tasks",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2604.04801v1",
+      "source": "arxiv",
+      "title": "Feasibility-Aware Imitation Learning for Benders Decomposition",
+      "abstract": "Mixed-integer optimization problems arise in a wide range of control applications. Benders decomposition is a widely used algorithm for solving such problems by decomposing them into a mixed-integer master problem and a continuous subproblem. A key computational bottleneck is the repeated solution of increasingly complex master problems across iterations. In this paper, we propose a feasibility-aware imitation learning framework that predicts the values of the integer variables of the master problem at each iteration while accounting for feasibility with respect to constraints governing admissible integer assignments and the accumulated Benders feasibility cuts. The agent is trained using a two-stage procedure that combines behavioral cloning with a feasibility-based logit adjustment to bias predictions toward assignments that satisfy the evolving cut set. The agent is deployed within an agent-based Benders decomposition framework that combines explicit feasibility checks with a time-limited solver computation of a valid lower bound. The proposed approach retains finite convergence properties, as the lower bound is certified at each iteration. Application to a prototypical case study shows that the proposed method improves solution time relative to existing imitation learning approaches for accelerating Benders decomposition, while preserving solution accuracy.",
+      "authors": [
+        "Bernard T. Agyeman",
+        "Zhe Li",
+        "Ilias Mitrai",
+        "Prodromos Daoutidis"
+      ],
+      "primary_category": "math.OC",
+      "categories": [
+        "math.OC",
+        "eess.SY"
+      ],
+      "published": "2026-04-06T16:07:01+00:00",
+      "link": "https://arxiv.org/pdf/2604.04801v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Imitation learning for predicting integer variables in Benders decomposition",
+      "llm_evidence_cn": "用于Benders分解中预测整数变量的模仿学习",
+      "llm_evidence": "用于Benders分解中预测整数变量的模仿学习",
+      "canonical_evidence": "用于Benders分解中预测整数变量的模仿学习",
+      "llm_tldr_en": "Proposes a feasibility-aware imitation learning framework to accelerate Benders decomposition for mixed-integer problems.",
+      "llm_tldr_cn": "提出一种可行性感知的模仿学习框架，用于加速混合整数规划中的Benders分解过程。",
+      "llm_tldr": "提出一种可行性感知的模仿学习框架，用于加速混合整数规划中的Benders分解过程。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Hybrid approaches combining deep learning and traditional optimization",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2604.08056v1",
+      "source": "arxiv",
+      "title": "Automating aggregation strategy selection in federated learning",
+      "abstract": "Federated Learning enables collaborative model training without centralising data, but its effectiveness varies with the selection of the aggregation strategy. This choice is non-trivial, as performance varies widely across datasets, heterogeneity levels, and compute constraints. We present an end-to-end framework that automates, streamlines, and adapts aggregation strategy selection for federated learning. The framework operates in two modes: a single-trial mode, where large language models infer suitable strategies from user-provided or automatically detected data characteristics, and a multi-trial mode, where a lightweight genetic search efficiently explores alternatives under constrained budgets. Extensive experiments across diverse datasets show that our approach enhances robustness and generalisation under non-IID conditions while reducing the need for manual intervention. Overall, this work advances towards accessible and adaptive federated learning by automating one of its most critical design decisions, the choice of an aggregation strategy.",
+      "authors": [
+        "Dian S. Y. Pang",
+        "Endrias Y. Ergetu",
+        "Eric Topham",
+        "Ahmed E. Fetit"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-04-09T10:08:28+00:00",
+      "link": "https://arxiv.org/pdf/2604.08056v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.5,
+      "llm_evidence_en": "LLMs infer strategies for federated learning optimization and genetic search",
+      "llm_evidence_cn": "大语言模型推断联邦学习优化策略并结合遗传搜索",
+      "llm_evidence": "大语言模型推断联邦学习优化策略并结合遗传搜索",
+      "canonical_evidence": "大语言模型推断联邦学习优化策略并结合遗传搜索",
+      "llm_tldr_en": "Automates federated learning aggregation strategy selection using LLMs and genetic search.",
+      "llm_tldr_cn": "利用大语言模型和遗传算法自动选择联邦学习的聚合策略。",
+      "llm_tldr": "利用大语言模型和遗传算法自动选择联邦学习的聚合策略。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Large Language Models (LLM) for optimization tasks",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.07420v1",
+      "source": "arxiv",
+      "title": "Dual-Rerank: Fusing Causality and Utility for Industrial Generative Reranking",
+      "abstract": "Kuaishou serves over 400 million daily active users, processing hundreds of millions of search queries daily against a repository of tens of billions of short videos. As the final decision layer, the reranking stage determines user experience by optimizing whole-page utility. While traditional score-and-sort methods fail to capture combinatorial dependencies, Generative Reranking offers a superior paradigm by directly modeling the permutation probability. However, deploying Generative Reranking in such a high-stakes environment faces a fundamental dual dilemma: 1) the structural trade-off where Autoregressive (AR) models offer superior Sequential modeling but suffer from prohibitive latency, versus Non-Autoregressive (NAR) models that enable efficiency but lack dependency capturing; 2) the optimization gap where Supervised Learning faces challenges in directly optimizing whole-page utility, while Reinforcement Learning (RL) struggles with instability in high-throughput data streams. To resolve this, we propose Dual-Rerank, a unified framework designed for industrial reranking that bridges the structural gap via Sequential Knowledge Distillation and addresses the optimization gap using List-wise Decoupled Reranking Optimization (LDRO) for stable online RL. Extensive A/B testing on production traffic demonstrates that Dual-Rerank achieves State-of-the-Art performance, significantly improving User satisfaction and Watch Time while drastically reducing inference latency compared to AR baselines.",
+      "authors": [
+        "Chao Zhang",
+        "Shuai Lin",
+        "ChengLei Dai",
+        "Ye Qian",
+        "Fan Mingyang",
+        "Yi Zhang",
+        "Yi Wang",
+        "Jingwei Zhuo"
+      ],
+      "primary_category": "cs.IR",
+      "categories": [
+        "cs.IR",
+        "cs.LG"
+      ],
+      "published": "2026-04-08T14:54:10+00:00",
+      "link": "https://arxiv.org/pdf/2604.07420v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.5,
+      "llm_evidence_en": "Generative Reranking models combinatorial dependencies in permutation probability",
+      "llm_evidence_cn": "生成式重排在排列概率中建模组合依赖关系",
+      "llm_evidence": "生成式重排在排列概率中建模组合依赖关系",
+      "canonical_evidence": "生成式重排在排列概率中建模组合依赖关系",
+      "llm_tldr_en": "Optimizes industrial reranking by modeling combinatorial dependencies using generative models.",
+      "llm_tldr_cn": "通过生成式模型建模组合依赖关系，优化工业级搜索重排任务。",
+      "llm_tldr": "通过生成式模型建模组合依赖关系，优化工业级搜索重排任务。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Deep learning models for solving NP hard combinatorial problems",
+      "matched_requirement_id": "req-23",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.05846v1",
+      "source": "arxiv",
+      "title": "AgentGL: Towards Agentic Graph Learning with LLMs via Reinforcement Learning",
+      "abstract": "Large Language Models (LLMs) increasingly rely on agentic capabilities-iterative retrieval, tool use, and decision-making-to overcome the limits of static, parametric knowledge. Yet existing agentic frameworks treat external information as unstructured text and fail to leverage the topological dependencies inherent in real-world data. To bridge this gap, we introduce Agentic Graph Learning (AGL), a paradigm that reframes graph learning as an interleaved process of topology-aware navigation and LLM-based inference. Specifically, we propose AgentGL, the first reinforcement learning (RL)-driven framework for AGL. AgentGL equips an LLM agent with graph-native tools for multi-scale exploration, regulates tool usage via search-constrained thinking to balance accuracy and efficiency, and employs a graph-conditioned curriculum RL strategy to stabilize long-horizon policy learning without step-wise supervision. Across diverse Text-Attributed Graph (TAG) benchmarks and multiple LLM backbones, AgentGL substantially outperforms strong GraphLLMs and GraphRAG baselines, achieving absolute improvements of up to 17.5% in node classification and 28.4% in link prediction. These results demonstrate that AGL is a promising frontier for enabling LLMs to autonomously navigate and reason over complex relational environments. The code is publicly available at https://github.com/sunyuanfu/AgentGL.",
+      "authors": [
+        "Yuanfu Sun",
+        "Kang Li",
+        "Dongzhe Fan",
+        "Jiajin Liu",
+        "Qiaoyu Tan"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-04-07T13:11:17+00:00",
+      "link": "https://arxiv.org/pdf/2604.05846v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Integration of LLM agents with graph-native tools via reinforcement learning",
+      "llm_evidence_cn": "通过强化学习将大模型智能体与图原生工具集成",
+      "llm_evidence": "通过强化学习将大模型智能体与图原生工具集成",
+      "canonical_evidence": "通过强化学习将大模型智能体与图原生工具集成",
+      "llm_tldr_en": "Introduces AgentGL, an RL-driven framework for agentic graph learning combining LLMs and topology navigation.",
+      "llm_tldr_cn": "提出AgentGL，一个结合大模型与拓扑导航的强化学习驱动图学习框架。",
+      "llm_tldr": "提出AgentGL，一个结合大模型与拓扑导航的强化学习驱动图学习框架。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Integration of GNN and LLM for combinatorial optimization",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2604.04503v2",
+      "source": "arxiv",
+      "title": "Memory Intelligence Agent",
+      "abstract": "Deep research agents (DRAs) integrate LLM reasoning with external tools. Memory systems enable DRAs to leverage historical experiences, which are essential for efficient reasoning and autonomous evolution. Existing methods rely on retrieving similar trajectories from memory to aid reasoning, while suffering from key limitations of ineffective memory evolution and increasing storage and retrieval costs. To address these problems, we propose a novel Memory Intelligence Agent (MIA) framework, consisting of a Manager-Planner-Executor architecture. Memory Manager is a non-parametric memory system that can store compressed historical search trajectories. Planner is a parametric memory agent that can produce search plans for questions. Executor is another agent that can search and analyze information guided by the search plan. To build the MIA framework, we first adopt an alternating reinforcement learning paradigm to enhance cooperation between the Planner and the Executor. Furthermore, we enable the Planner to continuously evolve during test-time learning, with updates performed on-the-fly alongside inference without interrupting the reasoning process. Additionally, we establish a bidirectional conversion loop between parametric and non-parametric memories to achieve efficient memory evolution. Finally, we incorporate a reflection and an unsupervised judgment mechanisms to boost reasoning and self-evolution in the open world. Extensive experiments across eleven benchmarks demonstrate the superiority of MIA.",
+      "authors": [
+        "Jingyang Qiao",
+        "Weicheng Meng",
+        "Yu Cheng",
+        "Zhihang Lin",
+        "Zhizhong Zhang",
+        "Xin Tan",
+        "Jingyu Gong",
+        "Kun Shao",
+        "Yuan Xie"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.MA"
+      ],
+      "published": "2026-04-06T07:59:52+00:00",
+      "link": "https://arxiv.org/pdf/2604.04503v2",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "LLM reasoning with external tools and historical search trajectories",
+      "llm_evidence_cn": "结合外部工具和历史搜索轨迹的大模型推理",
+      "llm_evidence": "结合外部工具和历史搜索轨迹的大模型推理",
+      "canonical_evidence": "结合外部工具和历史搜索轨迹的大模型推理",
+      "llm_tldr_en": "Proposes a memory-enhanced LLM agent framework for efficient reasoning and search trajectory management.",
+      "llm_tldr_cn": "提出一种记忆增强的大模型智能体框架，用于高效推理和搜索轨迹管理。",
+      "llm_tldr": "提出一种记忆增强的大模型智能体框架，用于高效推理和搜索轨迹管理。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM-based heuristic search and optimization",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.04570v1",
+      "source": "arxiv",
+      "title": "Optimal, Qubit-Efficient Quantum Vehicle Routing via Colored-Permutations",
+      "abstract": "We formulate a global-position colored-permutation encoding for the capacitated vehicle routing problem. Each of the $K$ vehicles selects a disjoint partial permutation, and the sum of these $K$ color layers forms a full $n\\times n$ permutation matrix that assigns every customer to exactly one visit position. This representation uses $n^2K$ binary decision variables arranged as $K$ color layers over a common permutation structure, while vehicle capacities are enforced by weighted sums over the entries of each color class, requiring no explicit load register and hence no extra logical qubits beyond the routing variables. In contrast, many prior quantum encodings introduce an explicit capacity or load representation with additional qubits. Our construction is designed to exploit the Constraint-Enhanced QAOA framework together with its encoded-manifold analyses. Building on a requirements-based view of quantum utility in CVRP, we develop a routing optimization formulation that directly targets one of the main near-term bottlenecks, namely the additional logical-qubit cost of vehicle labels and explicit capacity constraints. Our proposal shows strong algorithmic performance in addition to qubit efficiency. On a standard benchmark suite, our end-to-end pipeline recovers the independently verified optima. The feasibility oracle may also be of independent interest as a reusable polynomial-time decoding and certification primitive for quantum and quantum-inspired routing pipelines.",
+      "authors": [
+        "Chinonso Onah",
+        "Kristel Michielsen"
+      ],
+      "primary_category": "quant-ph",
+      "categories": [
+        "quant-ph",
+        "cs.CC",
+        "cs.DM",
+        "cs.IT",
+        "math-ph"
+      ],
+      "published": "2026-04-06T10:08:41+00:00",
+      "link": "https://arxiv.org/pdf/2604.04570v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Quantum encoding for capacitated vehicle routing problem",
+      "llm_evidence_cn": "有容量限制的车辆路径问题的量子编码",
+      "llm_evidence": "有容量限制的车辆路径问题的量子编码",
+      "canonical_evidence": "有容量限制的车辆路径问题的量子编码",
+      "llm_tldr_en": "Formulates a qubit-efficient quantum encoding for the capacitated vehicle routing problem.",
+      "llm_tldr_cn": "为有容量限制的车辆路径问题（CVRP）制定了一种量子比特高效的量子编码方案。",
+      "llm_tldr": "为有容量限制的车辆路径问题（CVRP）制定了一种量子比特高效的量子编码方案。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Neural combinatorial optimization for Vehicle Routing Problem VRP",
+      "matched_requirement_id": "req-17",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.07472v1",
+      "source": "arxiv",
+      "title": "Fast Heterogeneous Serving: Scalable Mixed-Scale LLM Allocation for SLO-Constrained Inference",
+      "abstract": "Deploying large language model (LLM) inference at scale requires jointly selecting base models, provisioning heterogeneous GPUs, configuring parallelism, and distributing workloads under tight latency, accuracy, and budget constraints. Exact mixed-integer linear programming (MILP) approaches guarantee optimality but scale poorly. We propose two constraint-aware heuristics: a Greedy Heuristic (GH) for single-pass allocation, and an Adaptive Greedy Heuristic (AGH) that enhances GH via multi-start construction, relocate-based local search, and GPU consolidation. Three constraint-aware mechanisms -- TP-aware feasibility selection, cost-per-effective-coverage ranking, and TP upgrade -- ensure feasibility under tightly coupled memory, delay, error, and budget constraints. On workloads calibrated with the Azure LLM Inference Trace (2025), both heuristics produce feasible solutions in under one second, with AGH closely approaching optimal cost while achieving over 260x speedup on large-scale instances. Under out-of-sample stress tests with up to 1.5x parameter inflation, AGH maintains controlled SLO violations and stable cost, whereas the exact solver's placement degrades sharply.",
+      "authors": [
+        "Jiaming Cheng",
+        "Duong Tung Nguyen"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.NI"
+      ],
+      "published": "2026-04-08T18:11:09+00:00",
+      "link": "https://arxiv.org/pdf/2604.07472v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Heuristics and local search for MILP-based LLM serving optimization",
+      "llm_evidence_cn": "针对MILP大模型推理优化问题的启发式与局部搜索",
+      "llm_evidence": "针对MILP大模型推理优化问题的启发式与局部搜索",
+      "canonical_evidence": "针对MILP大模型推理优化问题的启发式与局部搜索",
+      "llm_tldr_en": "Develops heuristics to solve mixed-integer linear programming problems for LLM inference allocation.",
+      "llm_tldr_cn": "开发了启发式算法来解决大语言模型推理分配中的混合整数线性规划问题。",
+      "llm_tldr": "开发了启发式算法来解决大语言模型推理分配中的混合整数线性规划问题。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Hybrid approaches combining deep learning and traditional optimization",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2604.04503v3",
+      "source": "arxiv",
+      "title": "Memory Intelligence Agent",
+      "abstract": "Deep research agents (DRAs) integrate LLM reasoning with external tools. Memory systems enable DRAs to leverage historical experiences, which are essential for efficient reasoning and autonomous evolution. Existing methods rely on retrieving similar trajectories from memory to aid reasoning, while suffering from key limitations of ineffective memory evolution and increasing storage and retrieval costs. To address these problems, we propose a novel Memory Intelligence Agent (MIA) framework, consisting of a Manager-Planner-Executor architecture. Memory Manager is a non-parametric memory system that can store compressed historical search trajectories. Planner is a parametric memory agent that can produce search plans for questions. Executor is another agent that can search and analyze information guided by the search plan. To build the MIA framework, we first adopt an alternating reinforcement learning paradigm to enhance cooperation between the Planner and the Executor. Furthermore, we enable the Planner to continuously evolve during test-time learning, with updates performed on-the-fly alongside inference without interrupting the reasoning process. Additionally, we establish a bidirectional conversion loop between parametric and non-parametric memories to achieve efficient memory evolution. Finally, we incorporate a reflection and an unsupervised judgment mechanisms to boost reasoning and self-evolution in the open world. Extensive experiments across eleven benchmarks demonstrate the superiority of MIA.",
+      "authors": [
+        "Jingyang Qiao",
+        "Weicheng Meng",
+        "Yu Cheng",
+        "Zhihang Lin",
+        "Zhizhong Zhang",
+        "Xin Tan",
+        "Jingyu Gong",
+        "Kun Shao",
+        "Yuan Xie"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.MA"
+      ],
+      "published": "2026-04-06T07:59:52+00:00",
+      "link": "https://arxiv.org/pdf/2604.04503v3",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "LLM reasoning agent with memory for historical search trajectories",
+      "llm_evidence_cn": "带有历史搜索轨迹记忆的LLM推理智能体",
+      "llm_evidence": "带有历史搜索轨迹记忆的LLM推理智能体",
+      "canonical_evidence": "带有历史搜索轨迹记忆的LLM推理智能体",
+      "llm_tldr_en": "Proposes a memory-integrated agent framework to improve LLM reasoning and search trajectory management.",
+      "llm_tldr_cn": "提出了一种集成记忆的智能体框架，以改进LLM推理和搜索轨迹管理。",
+      "llm_tldr": "提出了一种集成记忆的智能体框架，以改进LLM推理和搜索轨迹管理。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM-guided heuristic search for optimization",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.05112v1",
+      "source": "arxiv",
+      "title": "Vintix II: Decision Pre-Trained Transformer is a Scalable In-Context Reinforcement Learner",
+      "abstract": "Recent progress in in-context reinforcement learning (ICRL) has demonstrated its potential for training generalist agents that can acquire new tasks directly at inference. Algorithm Distillation (AD) pioneered this paradigm and was subsequently scaled to multi-domain settings, although its ability to generalize to unseen tasks remained limited. The Decision Pre-Trained Transformer (DPT) was introduced as an alternative, showing stronger in-context reinforcement learning abilities in simplified domains, but its scalability had not been established. In this work, we extend DPT to diverse multi-domain environments, applying Flow Matching as a natural training choice that preserves its interpretation as Bayesian posterior sampling. As a result, we obtain an agent trained across hundreds of diverse tasks that achieves clear gains in generalization to the held-out test set. This agent improves upon prior AD scaling and demonstrates stronger performance in both online and offline inference, reinforcing ICRL as a viable alternative to expert distillation for training generalist agents.",
+      "authors": [
+        "Andrei Polubarov",
+        "Lyubaykin Nikita",
+        "Alexander Derevyagin",
+        "Artyom Grishin",
+        "Igor Saprygin",
+        "Aleksandr Serkov",
+        "Mark Averchenko",
+        "Daniil Tikhonov",
+        "Maksim Zhdanov",
+        "Alexander Nikulin",
+        "Ilya Zisman",
+        "Albina Klepach",
+        "Alexey Zemtsov",
+        "Vladislav Kurenkov"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.RO"
+      ],
+      "published": "2026-04-06T19:18:12+00:00",
+      "link": "https://arxiv.org/pdf/2604.05112v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Decision Pre-Trained Transformer as a scalable in-context reinforcement learner",
+      "llm_evidence_cn": "决策预训练Transformer作为可扩展的上下文强化学习器",
+      "llm_evidence": "决策预训练Transformer作为可扩展的上下文强化学习器",
+      "canonical_evidence": "决策预训练Transformer作为可扩展的上下文强化学习器",
+      "llm_tldr_en": "Extends Decision Pre-Trained Transformers to multi-domain environments for in-context reinforcement learning.",
+      "llm_tldr_cn": "将决策预训练Transformer扩展到多领域环境，用于上下文强化学习。",
+      "llm_tldr": "将决策预训练Transformer扩展到多领域环境，用于上下文强化学习。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "In-context learning for combinatorial optimization problems",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.09297v1",
+      "source": "arxiv",
+      "title": "SkillMOO: Multi-Objective Optimization of Agent Skills for Software Engineering",
+      "abstract": "Agent skills provide modular, task-specific guidance for LLM- based coding agents, but manually tuning skill bundles to balance success rate, cost, and runtime is expensive and fragile. We present SkillMOO, a multi-objective optimization framework that automatically evolves skill bundles using LLM-proposed edits and NSGA-II survivor selection: a solver agent evaluates candidate skill bundles on coding tasks and an optimizer agent proposes bundle edits based on failure analysis. On three SkillsBench software engineering tasks, SkillMOO improves pass rate by up to 131% while reducing cost up to 32% relative to the best baseline per task at low optimization overhead. Pattern analysis reveals pruning and substitution as primary drivers of improvement, suggesting effective bundles favor minimal, focused content over accumulated instructions.",
+      "authors": [
+        "Jingzhi Gong",
+        "Ruizhen Gu",
+        "Zhiwei Fei",
+        "Yazhuo Cao",
+        "Lukas Twist",
+        "Alina Geiger",
+        "Shuo Han",
+        "Dominik Sobania",
+        "Federica Sarro",
+        "Jie M. Zhang"
+      ],
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE",
+        "cs.AI"
+      ],
+      "published": "2026-04-10T13:08:01+00:00",
+      "link": "https://arxiv.org/pdf/2604.09297v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Multi-objective optimization of agent skills using LLM-proposed edits",
+      "llm_evidence_cn": "利用大模型提议的编辑进行智能体技能的多目标优化",
+      "llm_evidence": "利用大模型提议的编辑进行智能体技能的多目标优化",
+      "canonical_evidence": "利用大模型提议的编辑进行智能体技能的多目标优化",
+      "llm_tldr_en": "Presents SkillMOO, a framework using LLMs to evolve and optimize agent skill bundles for software engineering.",
+      "llm_tldr_cn": "提出 SkillMOO 框架，利用大模型自动演化和优化软件工程智能体的技能组合。",
+      "llm_tldr": "提出 SkillMOO 框架，利用大模型自动演化和优化软件工程智能体的技能组合。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM driven heuristic generation for combinatorial optimization",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2604.05645v1",
+      "source": "arxiv",
+      "title": "Improved space-time tradeoff for TSP via extremal set systems",
+      "abstract": "The traveling salesman problem (TSP) is a cornerstone of combinatorial optimization and has deeply influenced the development of algorithmic techniques in both exact and approximate settings. Yet, improving on the decades-old bounds for solving TSP exactly remains elusive: the dynamic program of Bellman, Held, and Karp from 1962 uses $2^{n+O(\\log{n})}$ time and space, and the divide-and-conquer approach of Gurevich and Shelah from 1987 uses $4^{n + O(\\log^2{n})}$ time and polynomial space. A straightforward combination of the two algorithms trades off $T^{n+o(n)}$ time and $S^{n+o(n)}$ space at various points of the curve $ST = 4$. An improvement to this tradeoff when $2 < T < 2\\sqrt{2}$ was found by Koivisto and Parviainen (SODA 2010), yielding a minimum of $ST \\approx 3.93$. Koivisto and Parviainen show their method to be optimal among a broad class of partial-order-based approaches, and to date, no improvement or alternative method has been found.   In this paper we give a tradeoff that strictly improves all previous ones for all $2 < T < 4$, achieving a minimum of $ST < 3.572$. A key ingredient is the construction of sparse set systems (hypergraphs) that admit a large number of maximal chains. The existence of such objects is of independent interest in extremal combinatorics, likely to see further applications. Along the way we disprove a combinatorial conjecture of Johnson, Leader, and Russell from 2013, relating it with the optimality of the previous tradeoff schemes for TSP. Our techniques extend to a broad class of permutation problems over arbitrary semirings, yielding improved space-time tradeoffs in these settings as well.",
+      "authors": [
+        "Justin Dallant",
+        "László Kozma"
+      ],
+      "primary_category": "cs.DS",
+      "categories": [
+        "cs.DS",
+        "math.CO"
+      ],
+      "published": "2026-04-07T09:46:51+00:00",
+      "link": "https://arxiv.org/pdf/2604.05645v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Improving space-time tradeoffs for solving the Traveling Salesman Problem exactly",
+      "llm_evidence_cn": "改进精确求解旅行商问题（TSP）的时空权衡",
+      "llm_evidence": "改进精确求解旅行商问题（TSP）的时空权衡",
+      "canonical_evidence": "改进精确求解旅行商问题（TSP）的时空权衡",
+      "llm_tldr_en": "Develops new algorithmic techniques to improve the exact solution bounds for the Traveling Salesman Problem.",
+      "llm_tldr_cn": "开发新的算法技术，以改进旅行商问题（TSP）精确求解的时空复杂度边界。",
+      "llm_tldr": "开发新的算法技术，以改进旅行商问题（TSP）精确求解的时空复杂度边界。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Neural solvers for Traveling Salesman Problem TSP",
+      "matched_requirement_id": "req-16",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.05153v1",
+      "source": "arxiv",
+      "title": "A column-generation approach for an electricity technician routing and scheduling problem with a lexicographic objective",
+      "abstract": "Electric utility companies perform numerous technical interventions every day. Since it is generally not possible to complete all planned interventions within a single day, companies face two objectives: maximizing the total duration of completed interventions (primary objective) and minimizing the associated operational cost (secondary objective). In this paper, we introduce a multi-objective variant of the technician routing and scheduling problem in which both objectives are optimized in lexicographic order. We propose a compact mixed-integer linear formulation and an extended set-packing-based formulation. To handle the objectives within a single-objective framework, we consider weighted-sum reformulations that preserve lexicographic priorities as well as sequential reformulations that individually optimize each objective while maintaining the optimal value of higher-priority ones. For the extended formulation, we develop an exact column-generation-based algorithm, in which the pricing subproblems are solved via a labeling algorithm based on dynamic programming. As technician schedules are typically generated on a daily basis, the algorithm is designed to deliver high-quality solutions within short computation times (e.g., 5 minutes). Computational experiments on real-life instances provided by the French electric utility company show that the CG-based algorithm proves optimality on a larger number of small instances than the compact formulation and consistently outperforms it on larger instances. In particular, the sequential CG-based variant finds the best-known solutions on more instances and achieves lower mean gaps relative to the best solution found in each instance category.",
+      "authors": [
+        "Elise Bangerter",
+        "David Schindl",
+        "Meritxell Pacheco Paneque",
+        "Nour Elhouda Tellache",
+        "Rodolphe Griset"
+      ],
+      "primary_category": "math.OC",
+      "categories": [
+        "math.OC",
+        "cs.DM"
+      ],
+      "published": "2026-04-06T20:29:14+00:00",
+      "link": "https://arxiv.org/pdf/2604.05153v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Column-generation for technician routing and scheduling",
+      "llm_evidence_cn": "用于技术人员路径规划和调度的列生成算法",
+      "llm_evidence": "用于技术人员路径规划和调度的列生成算法",
+      "canonical_evidence": "用于技术人员路径规划和调度的列生成算法",
+      "llm_tldr_en": "Develops a column-generation approach for a multi-objective technician routing and scheduling problem.",
+      "llm_tldr_cn": "为多目标技术人员路径规划与调度问题开发了一种列生成方法。",
+      "llm_tldr": "为多目标技术人员路径规划与调度问题开发了一种列生成方法。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Hybrid approaches combining deep learning and traditional optimization",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

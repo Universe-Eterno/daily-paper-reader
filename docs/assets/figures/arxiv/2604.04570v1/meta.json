@@ -1,0 +1,38 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.04570v1/fig-001.webp",
+      "caption": "Figure 4: Colored decomposition: P = P (1) + P (2) with disjoint supports.",
+      "page": 21,
+      "index": 1,
+      "width": 947,
+      "height": 653
+    },
+    {
+      "url": "assets/figures/arxiv/2604.04570v1/fig-002.webp",
+      "caption": "Figure 1: Global-position CE-QAOA with 3 blocks, each of size nK = 4 wires. The diagonal entangler e−iγℓHC spans all 3 · 4 wires (green), while the mixers U (j) M (βℓ) (orange) act independently within each block j. Three layers (ℓ = 1, 2, 3) are shown.",
+      "page": 4,
+      "index": 2,
+      "width": 880,
+      "height": 515
+    },
+    {
+      "url": "assets/figures/arxiv/2604.04570v1/fig-003.webp",
+      "caption": "Figure 2: Comparison of qubit counts for two binary global-position encodings across representative CVRP instance sizes. The original separated encoding scales as Qsep = KN⌈log2 N⌉, whereas the reduced colored-permutation encoding scales as Qred = N⌈log2(KN)⌉. The horizontal lines indicate illustrative hardware thresholds. The reduced encoding changes the linear factor of K in the number of qubits to a logarithmic dependence and shifts several small-scale industrial routing regimes into the few-hundred to ∼ 103-qubit range.",
+      "page": 9,
+      "index": 3,
+      "width": 889,
+      "height": 500
+    },
+    {
+      "url": "assets/figures/arxiv/2604.04570v1/fig-004.webp",
+      "caption": "Table 1: Performance on CVRP instances (K = 2) proposed in Ref. [9].",
+      "page": 16,
+      "index": 4,
+      "width": 471,
+      "height": 338
+    }
+  ]
+}

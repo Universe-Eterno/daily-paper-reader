@@ -1,0 +1,2546 @@
+Title: Optimal, Qubit-Efficient Quantum Vehicle Routing via Colored-Permutations
+
+URL Source: https://arxiv.org/pdf/2604.04570v1
+
+Published Time: Tue, 07 Apr 2026 02:04:24 GMT
+
+Number of Pages: 30
+
+Markdown Content:
+# Optimal, Qubit-Efficient Quantum Vehicle Routing via Colored-Permutations 
+
+Chinonso Onah 1,2 and Kristel Michielsen 3,4 
+
+> 1Volkswagen AG, Berliner Ring 2, Wolfsburg 38440, Germany
+> 2Department of Physics, RWTH Aachen, Germany
+> 3Forschungszentrum Jülich, Germany
+> 4Universität zu Köln, 50923 Köln, Germany
+
+We formulate a global-position colored-permutation encoding for the capacitated vehicle routing problem. Each of the K vehicles selects a disjoint partial permutation, and the sum of these K color layers forms a full n × n
+
+permutation matrix that assigns every customer to exactly one visit position. This representation uses n2K binary decision variables arranged as K color layers over a common permutation structure, while vehicle capacities are enforced by weighted sums over the entries of each color class—requiring no explicit load register, and hence no extra logical qubits, beyond the routing variables. In contrast, prior quantum encodings introduce an explicit capacity/load representation with O(Q) or O(log Q) additional qubits for capacity Q [1, 2, 3, 4]. Our construction is designed to exploit the Constraint-Enhanced QAOA (CE-QAOA) framework [5] together with its encoded-manifold analyses [5, 6, 7]. Building on our recent requirements analysis of quantum utility in CVRP [8], we develop a routing optimization formulation that directly targets one of the main near-term bottlenecks, namely the additional logical-qubit cost of vehicle labels and explicit capacity constraints. Our proposal shows strong algorithmic performance in addition to qubit efficiency. On the benchmark suite of [9], our end-to-end pipeline recovers the independently verified optima. All results are fully reproducible from the companion artifact archive in Ref. [10]. The feasibility oracle introduced in Alg. 1 may also be of independent interest as a reusable polynomial-time decoding and certification primitive for quantum and quantum-inspired routing pipelines. 
+
+# 1 Introduction 
+
+1.1 The state of the art in quantum circuit–based routing optimization algorithms 
+
+The current gate-model literature on routing optimization remains concentrated in a very small toy-instance regime. Early direct QAOA studies of the vehicle routing problem con-sidered instances such as (4 , 2) , (5 , 2) , and (5 , 3) , where (n, K ) denotes the number of locations and vehicles, respectively [11]. Even in that line of work, the focus was primarily on demonstrating the formulation and parameter sensitivity of QAOA rather than estab-lishing a scalable routing pipeline [11]. More recent gate-model work has likewise remained 
+
+> Chinonso Onah: chinonso.calistus.onah@volkswagen.de
+
+1
+
+> arXiv:2604.04570v1 [quant-ph] 6 Apr 2026
+
+small and full hardware realizations of QAOA-based routing have been demonstrated only for three-node, two-vehicle instances [12], while heterogeneous-routing simulations have typically reached only a few customers, for example three customers and two trucks in a 21-qubit encoding [13]. Likewise, several CVRP-oriented studies have avoided a direct end-to-end routing circuit altogether by decomposing the problem into a clustering phase and a set of TSP subproblems[1, 2]. In that setting, the gate-model experiments are typi-cally restricted to 4-, 5-, and 6-node TSPs, with only the 4-node case reported to perform satisfactorily on actual hardware [2]. Even feasibility-preserving CVRP proposals remain experimentally limited to simple instances because of simulation constraints [4]. A closely related perspective was developed in Ref. [8], where the requirements for early quantum utility in CVRP were formulated in an encoding-agnostic way through ex-plicit qubit- and gate-feasibility criteria. Ref. [8] showed that the central obstacle is the resource profile induced by the qubit count and circuit depth. The present paper may be read as a constructive response to the requirements problem identified there. The present work targets the qubit overhead associated with routing encodings, and in particular the overhead caused by explicit vehicle and capacity bookkeeping. We introduce a formula-tion designed so that capacity is enforced through diagonal load expressions on the native decision register, without introducing a separate load register or slack-variable block; see Proposition 5 and the surrounding discussion in Sec. 2. This eliminates the additional logical-qubit cost of capacity handling and allows the available qubit budget to be spent on the actual assignment-and-ordering degrees of freedom of the routing problem. In the one-hot setting, this already allows us to solve the K = 2 benchmark instances in Table 1 up to the n = 8 . A further qubit saving emerges by replacing the linear dependence on K
+
+in standard CVRP formulations with a logarithmic vehicle-label dependence inside a com-posite symbol register, moving quantum routing into the regime of small-scale industrial relevance discussed in Fig. 2 and Sec. 3.4. The performance claims are discussed in Sec. 2.4 and the underlying analytical mecha-nism reviewed in Appendix C. There we summarize the positive-filtering mechanism based on the dephased Fejér reference model, define the mixer envelope and wrapped phase quantities entering the analysis, and restate the finite-depth and finite-shot success bound specialized to the present routing construction. 
+
+1.2 Constraint–Enhanced QAOA 
+
+A central objective of this work is to formulate capacitated vehicle routing in a way that remains as close as possible to the native CE–QAOA kernel of Ref. [5] to exploit the shallow depth and ancillae free constructions proposed therein. However, CVRP with heterogeneous routing data, and in particular demand-dependent capacity information, can break the full symmetry structure that underlies the clean kernel analysis[6, 7]. Our aim is therefore to preserve the core CE–QAOA architecture wherever possible while isolating the sources of symmetry breaking in a controlled way. To achieve this, we need a formalism that preserves the assignment-and-ordering structure of CVRP in the encoded-manifold. This leads to the global-position colored-permutation formalism where each global position carries one customer–vehicle label, each customer appears exactly once, and the resulting sequence of labels determines the visit order along the routing timeline. This gives a routing description whose native combinatorial structure aligns with CE–QAOA whose basic ideas we recall presently. The quantum dynamics in CE-QAOA is rooted in the quantum alternating–operator ansatze (“QAOA+”) paradigm[14] which acts invariantly on constraint projectors, thereby confining evolution to structured subspaces [14, 15, 16]. The Constraint–Enhanced QAOA 
+
+2(CE–QAOA) introduced in Ref. [5] follows this direction but makes the problem–algorithm co–design explicit. It introduces a kernel designed to operate on a tensor product of blocks of one–hot manifolds and fixes the mixer family and initial states to match the encoding as illustrated in Fig. 1. It subsequently expands the codesign choice to include symmetries derived from the hard constraints satisfied by valid solutions[5]; thus, realizing a strong alignment with problem structure [17]. A key point to note is that the quantum dynamics we study here need not preserve the feasible set itself, which is typically problem-specific and requires deeper and highly specialized circuit constructions with additional ancilla qubits. See, for example, feasibility-preserving mixer and initialization schemes for CVRP in [4, 3]. We recall the formal specifications of a CE-QAOA kernel in Def. 1. 
+
+Definition 1 (CE–QAOA kernel) . An optimization instance I belongs to the CE–QAOA kernel if there exist integers n, m ∈ N and the one-hot encoder E1hot that initializes the dynamics in the fixed-Hamming-weight space 
+
+HOH = ( H1)⊗m, H1 = span {| e1⟩ , . . . , |en⟩} (one excitation per block) .
+
+The problem Hamiltonian splits as 
+
+HC = Hpen + Hobj ,
+
+where Hobj is diagonal in the computational basis and represents the objective. The penalty Hamiltonian Hpen is also diagonal in the computational basis and satisfies the structural conditions below. 
+
+(a) Penalty structure. Hpen is a sum of squared affine one-hot/degree/capacity penalties (optionally plus linear forbids) with integer coefficients bounded by poly( n). Conse-quently, spec( Hpen ) ⊆ { 0, 1, . . . , t max } with tmax = O(m) = poly( n).
+
+(b) Pattern symmetry. Hpen is invariant under (i) block permutations Sm and (ii) global symbol relabelings Sn. Hence the configuration space decomposes into level sets Lt =
+
+{x : Hpen (x) := ⟨x | Hpen | x⟩ = t} that are preserved setwise. 
+
+(c) Mixer and initial state. The block-local normalized XY mixer is 
+
+> ˜
+
+H(b) 
+
+> XY
+
+= 1
+
+n − 1
+
+> ∑
+> 1≤u<v ≤n
+
+(X(b) 
+
+> u
+
+X(b) 
+
+> v
+
++ Y (b) 
+
+> u
+
+Y (b) 
+
+> v
+
+), (1) 
+
+with ∥ ˜H(b) 
+
+> XY
+
+∥ = O(1) on each block. The initial state is the uniform one-hot product 
+
+|s0⟩ = |sblk ⟩⊗m , |sblk ⟩ = 1
+
+√n
+
+> n∑
+> r=1
+
+|er⟩ (a Wn state per block) .
+
+Consequently, for an instance in the kernel with m blocks of local dimension n, the initial state is 
+
+|s0⟩ = |sblk ⟩⊗m ,
+
+and the mixer unitary is 
+
+UM (β) = 
+
+> m⊗
+> b=1
+
+exp (−iβ ˜H(b)
+
+> XY
+> )
+
+.
+
+A depth-p CE–QAOA stack is 
+
+> ∣∣∣
+
+ψp(⃗γ,⃗ β)
+
+> 〉
+
+= 
+
+> (p∏
+> ℓ=1
+
+UM (βℓ) e−iγ ℓHC
+
+> )
+
+|s0⟩ ,⃗ γ = ( γ 1, . . . , γ p),⃗ β = ( β1, . . . , β p).
+
+Because UM preserves the one-hot sector and HC is diagonal, each layer maps the encoded manifold HOH = ( H1)⊗m to itself. 
+
+3Two routing use cases and notation. The goal of this paper is to study two routing use cases—(A) the capacitated vehicle routing problem (CVRP) and (B) the pickup-and-delivery problem (PDP)—and develop a CE–QAOA kernel realization for each within a unified “colored permutation” routing representation. Accordingly, we present two routing formulations and their associated Hamiltonian constructions. To keep notation unambigu-ous when both constructions are referenced side-by-side, we label all CVRP Hamiltonian terms with a superscript A and all PDP terms with a superscript B (e.g., HA
+
+> obj
+
+, HA 
+
+> pen
+
+versus 
+
+HB
+
+> obj
+
+, HB
+
+> pen
+
+). The specification for PDP is given in App. A. Unless explicitly stated other-wise, our numerical study reports results for the CVRP instances only. The superscript A
+
+therefore persists throughout the Hamiltonian and circuit specification in the main text. 
+
+Block 1 |0⟩⊗nK OneHotBlock 
+
+UC (γ1)
+
+U (0)  
+
+> M
+
+(β1)
+
+UC (γ2)
+
+U (0)  
+
+> M
+
+(β2)
+
+UC (γ3)
+
+U (0)  
+
+> M
+
+(β3)
+
+Block 2 |0⟩⊗nK OneHotBlock U (1)  
+
+> M
+
+(β1) U (1)  
+
+> M
+
+(β2) U (1)  
+
+> M
+
+(β3)
+
+Block n |0⟩⊗nK OneHotBlock U (2)  
+
+> M
+
+(β1) U (2)  
+
+> M
+
+(β2) U (2)  
+
+> M
+
+(β3)
+
+Figure 1: Global-position CE-QAOA with 3 blocks, each of size nK = 4 wires. The diagonal entangler 
+
+e−iγ ℓHC spans all 3 · 4 wires (green), while the mixers U (j) 
+
+> M
+
+(βℓ) (orange) act independently within each block j. Three layers ( ℓ = 1 , 2, 3) are shown. 
+
+# 2 Kernelizing Vehicle Routing Problem 
+
+2.1 Encoding All Valid Routes as Coloured Permutations 
+
+Setup. We adopt the global-position encoding throughout. Let n be the number of items (customers for CVRP or pickup–delivery tours for PDP) and K the number of vehicles. Then we have n customers (items) indexed by i ∈ [n], K trucks indexed by k ∈ [K], and 
+
+n global positions indexed by j ∈ [n]. Consider items i ∈ [n] with demands di > 0, trucks 
+
+k ∈ [K] with capacities Qk > 0. Each truck k has a depot dep k. Let wa,b ≥ 0 be a (possibly asymmetric) metric on {dep 1, . . . , dep K } ∪ [n]. A configuration says: “at position 
+
+j, place item i and assign it to truck k.” So each position j chooses one pair (i, k ) out of the local alphabet 
+
+A = {(i, k ) : i ∈ [n], k ∈ [K]}, |A| = nK. 
+
+4Introduce binary variables 
+
+xi,j,k ∈ { 0, 1} (i ∈ [n], j ∈ [n], k ∈ [K]) ,
+
+meaning xi,j,k = 1 iff “at position j we place item i on truck k.” Stacking these gives an 
+
+n × n × K 0/1 tensor X = ( xi,j,k ), or equivalently a length-n2K bitstring in lexicographic order. Saying “each block j chooses exactly one symbol (i, k )” is exactly 
+
+∀ j ∈ [n] : 
+
+> n
+
+∑
+
+> i=1
+> K
+
+∑
+
+> k=1
+
+xi,j,k = 1 . (2) 
+
+In the quantum encoding, this is the one-hot subspace H1 on each block. We also want “each item i is used exactly once somewhere (by some truck, at some position)”: 
+
+∀ i ∈ [n] : 
+
+> n
+
+∑
+
+> j=1
+> K
+
+∑
+
+> k=1
+
+xi,j,k = 1 . (3) 
+
+Given X = ( xi,j,k ), define the n × n matrix 
+
+P := (pi,j 
+
+)ni,j =1 , pi,j := 
+
+> K
+
+∑
+
+> k=1
+
+xi,j,k . (4) 
+
+Intuitively, pi,j = 1 means “item i is placed at position j (by some truck),” while pi,j = 0 
+
+means “no truck places item i at position j.” We now prove that the feasible bitstrings under (2) and (3) are exactly those whose K
+
+slices sum to a permutation matrix over (i, j ), i.e. P has one 1 in each row and each column (and 0 elsewhere). Equivalently, a feasible X is a colored decomposition of a permutation matrix: the K color layers {X(k)}Kk=1 (where X(k) = ( xi,j,k )i,j ) are disjoint 0/1 matrices that add up to P .
+
+Lemma 2 (One-hot + item-once =⇒ P is a permutation matrix) . Suppose X = ( xi,j,k )
+
+satisfies (2) and (3) . Then P in (4) is a permutation matrix: for each column j, ∑ 
+
+> i
+
+pi,j =1, and for each row i, ∑ 
+
+> j
+
+pi,j = 1 , with pi,j ∈ { 0, 1}.Proof. Fix a position j. By (2), 
+
+> n
+
+∑
+
+> i=1
+> K
+
+∑
+
+> k=1
+
+xi,j,k = 1 .
+
+Regrouping by i,
+
+> n
+
+∑
+
+> i=1
+
+( K∑
+
+> k=1
+
+xi,j,k 
+
+)
+
+=
+
+> n
+
+∑
+
+> i=1
+
+pi,j = 1 ,
+
+so column j of P has total 1. Because all xi,j,k ∈ { 0, 1} and at a fixed j there is exactly one triple (i, k ) with xi,j,k = 1 , it follows that exactly one i has pi,j = 1 and all other 
+
+pi,j ′ = 0 . Hence column j is one-hot. Similarly, fix an item i. By (3), 
+
+> n
+
+∑
+
+> j=1
+> K
+
+∑
+
+> k=1
+
+xi,j,k = 1 ,
+
+so n∑
+
+> j=1
+
+pi,j = 1 .
+
+Again, by integrality of xi,j,k ’s, exactly one column j satisfies pi,j = 1 . Thus row i is one-hot. Therefore P is a permutation matrix. 
+
+5Lemma 3 (Colored completion: any permutation can be lifted to K layers) . Conversely, let P be any permutation matrix on [n] × [n], and let k1, . . . , k n ∈ [K] be any choice of trucks for the n positions. Define X = ( xi,j,k ) by 
+
+xi,j,k =
+
+{1, if Pi,j = 1 and k = kj ,
+
+0, otherwise. Then X satisfies (2) and (3) , and its K slices sum to P via (4) .Proof. Because P has exactly one 1 in each column j, there is a unique ij with Pij ,j = 1 .By construction, at position j we set exactly one variable to 1, namely xij ,j,k j = 1 , so (2) holds. Because P has exactly one 1 in each row i, there is a unique column j(i) with 
+
+Pi,j (i) = 1 , hence exactly one variable xi,j (i),k j(i) is 1 among {xi,j,k }j,k , so (3) holds. Finally, 
+
+pi,j = ∑
+
+> k
+
+xi,j,k =
+
+{1, if Pi,j = 1 ,
+
+0, otherwise, so ∑ 
+
+> k
+
+X(k) = P .
+
+Theorem 4 (Characterization of valid routes as colored permutations) . A tensor X =(xi,j,k ) ∈ { 0, 1}n×n×K satisfies (2) and (3) if and only if the matrices X(k) = ( xi,j,k )i,j 
+
+have pairwise disjoint supports and 
+
+P := 
+
+> K
+
+∑
+
+> k=1
+
+X(k)
+
+is a permutation matrix on [n] × [n]. In that case, each X(k) is automatically a partial permutation matrix. Proof. (⇒) By Lemma 2, the matrix P = ∑ 
+
+> k
+
+X(k) is a permutation matrix. Since every block j is one-hot, there is exactly one active pair (i, k ) at each column j, so the supports of the X(k) are pairwise disjoint. 
+
+(⇐) Suppose the supports of the X(k) are pairwise disjoint and P = ∑ 
+
+> k
+
+X(k) is a permutation matrix. Fix a column j. Since P is a permutation matrix, exactly one row i
+
+has Pi,j = 1 . Because the supports of the X(k) are disjoint and their sum equals P , there is exactly one vehicle label k for which xi,j,k = 1 , and all other entries in column j vanish. Hence n∑
+
+> i=1
+> K
+
+∑
+
+> k=1
+
+xi,j,k = 1 ,
+
+so (2) holds. The same argument applied row-wise shows that for each customer i,
+
+> n
+
+∑
+
+> j=1
+> K
+
+∑
+
+> k=1
+
+xi,j,k = 1 ,
+
+so (3) holds. Since each X(k) is supported inside a permutation matrix, it has at most one 
+
+1 in each row and column, hence each X(k) is a partial permutation matrix. 
+
+2.2 Constraint Enhanced Quantum Vehicle Routing Optimization 
+
+Denote the rank-1 projector for symbol (i, k ) on block j by X(j) 
+
+> i,k
+
+:= |(i, k )⟩⟨ (i, k )| (acting as identity elsewhere). One-hot per block is enforced by the mixer/encoder, so we penalize only the global uniqueness equality. The constraint that each customer is visited exactly once becomes 
+
+HA 
+
+> once
+
+:= λonce 
+
+> n
+
+∑
+
+> i=1
+
+( n∑
+
+> j=1
+> K
+
+∑
+
+> k=1
+
+X(j) 
+
+> i,k
+
+− 1
+
+)2
+
+. (5) 
+
+6Proposition 5 (Capacity enforcement requires no ancilla qubits) . Under the global-position one-hot encoding with decision projectors X(j) 
+
+> i,k
+
+on the native register, define the operator-valued load of vehicle k by ̂
+
+Dk := 
+
+> n∑
+> j=1
+> n∑
+> i=1
+
+di X(j) 
+
+> i,k
+
+.
+
+The hinge-square capacity penalty 
+
+HA 
+
+> cap
+
+:= λcap 
+
+> K∑
+> k=1
+> ([̂
+
+Dk − Qk
+
+> ]
+> +
+> )2
+
+(6) 
+
+is diagonal in the computational basis and acts only on the decision qubits. Therefore, enforcing capacities adds zero logical ancilla qubits .Proof. Each X(j) 
+
+> i,k
+
+is a rank-1 projector onto the basis state where global position j is occu-pied by customer i on vehicle k. In particular, each X(j) 
+
+> i,k
+
+is diagonal in the computational basis, and all such projectors commute. Hence ̂ Dk = ∑ 
+
+> j,i
+
+diX(j) 
+
+> i,k
+
+is also diagonal. For any computational basis state |x⟩ encoding decision bits {xi,j,k } ∈ { 0, 1}, the operator ̂ Dk has eigenvalue 
+
+Dk(x) = 
+
+> n∑
+> j=1
+> n∑
+> i=1
+
+di xi,j,k ,
+
+so the capacity penalty acts entrywise as 
+
+HA 
+
+> cap
+
+|x⟩ = λcap 
+
+> K∑
+> k=1
+
+max {0, D k(x) − Qk}2 |x⟩.
+
+Therefore HA 
+
+> cap
+
+is diagonal and depends only on the decision variables. Since HA 
+
+> cap
+
+is diagonal on, and supported entirely within, the native decision register, the phase separator e−iγH A 
+
+> cap
+
+acts on the decision qubits alone. Thus capacity enforcement introduces no additional logical ancilla qubits. Any scratch qubits used by a particular synthesis strategy can be uncomputed and are not part of the encoding. 
+
+Remark 6 (Quadratic surrogate in the balanced/uniform-capacity regime) . If Qk ≡ Q and routes are expected to be approximately balanced (so Dk ≈ Q), one may use the smooth quadratic deviation penalty 
+
+> ˜
+
+Hcap := λcap 
+
+> K∑
+> k=1
+> (̂
+
+Dk − Q)2, (7) which is also diagonal and ancilla-free. Unlike the hinge-square, ˜Hcap penalizes both over-load and underload, so it behaves as a load-balancing regularizer rather than a pure “no-overload” soft constraint. In particular, on the manifold where every customer is as-signed exactly once, the total demand ∑ 
+
+> k̂
+
+Dk is fixed (a constant times the identity), so (7) differs from λcap  
+
+> ∑
+> k̂
+
+D2 
+
+> k
+
+only by an additive constant and a (global) constant shift in energy. In this balanced regime, (7) often serves as a convenient diagonal surrogate, while (6) remains the faithful soft-penalty formulation for strict capacity feasibility ( Dk ≤ Qk). 
+
+In CVRP instances with heterogeneous demands {di}, capacity expressions such as ̂
+
+Dk = ∑ 
+
+> j,i
+
+di X(j) 
+
+> i,k
+
+are diagonal but carry instance-specific coefficients and therefore need not be invariant under the full global customer relabeling Sn appearing in Def. 1(b). Ac-cordingly, in the present construction we take Hpen to include only the purely combinato-rial, label-symmetric feasibility terms, such as the global uniqueness constraint HA 
+
+> once
+
+and any optional one-hot/forbid terms that are independent of {di} and {Qk}. Capacity is 
+
+7then enforced outside the symmetric penalty sector, either by classical feasibility filtering at decode time (rejecting samples with Dk(x) > Q k) or by adding an ancilla-free diagonal bias term involving ̂ Dk to the routing Hamiltonian (for example ˜Hcap from Rem. 6, or the hinge-square penalty from Prop. 5). 
+
+Objective (travel cost on the global timeline). Define the edge-cost between con-secutive global positions by 
+
+W(i,k )→(i′,k ′) := 
+
+
+
+wi,i ′ if k = k′,wi, dep k + wdep k′ , i ′ if k̸ = k′.
+
+Then 
+
+HA 
+
+> obj
+
+:= λobj 
+
+[ n−1∑
+
+> j=1
+> n
+
+∑
+
+> i,i ′=1
+> K
+
+∑
+
+> k,k ′=1
+
+W(i,k )→(i′,k ′) X(j) 
+
+> i,k
+
+X(j+1)  
+
+> i′,k ′
+
+(8) 
+
++
+
+> n
+
+∑
+
+> i=1
+> K
+
+∑
+
+> k=1
+
+wdep k , i X(1)  
+
+> i,k
+
++
+
+> n
+
+∑
+
+> i=1
+> K
+
+∑
+
+> k=1
+
+wi, dep k X(n)
+
+> i,k
+
+]
+
+.
+
+Within-truck adjacencies pay wi,i ′ ; cross-truck breaks pay depot-close + depot-start; end-points pay depot edges. The total diagonal cost Hamiltonian becomes 
+
+HA 
+
+> C
+
+:= HA 
+
+> once
+
++ HA 
+
+> cap
+
++ HA
+
+> obj
+
+. (9) 
+
+The CE–QAOA stack is 
+
+∣∣∣ψp(⃗γ,⃗ β)
+
+〉
+
+= (∏ pℓ=1 UM (βℓ) e−iγ ℓHA
+
+> C
+
+) |s0⟩. Because HA 
+
+> C
+
+couples blocks (assignment, timeline edges), UC (γ) is entangling. A measured bitstring selects, for each j, exactly one (i, k ). The subsequence of positions colored by k yields truck k’s route; depot edges insert automatically at route boundaries via (8) . Route lengths emerge from the count of positions assigned to each k. Under (2) –(3) , the marginals Xi,j := ∑Kk=1 xi,j,k 
+
+form a permutation matrix on [n] × [n] (“colored permutation” view), while the k-index partitions items across vehicles. 
+
+2.3 Qubit efficiency compared to prior CVRP formulations. 
+
+Counting sanity check. There are n! permutation matrices P over n locations. For each P , we may choose any of K trucks independently for each of the n positions, so there are Kn colorings. Thus the number of feasible bitstrings is n! Kn. (These are the computational-basis states satisfying (2) –(3) .) On each block (position j), the local Hilbert space is H1 ∼= CnK spanned by the basis {| (i, k )⟩} with one excitation (one-hot over (i, k )). The full encoded space is the tensor product HOH = H⊗n 
+
+> 1
+
+, whose computational basis states are the bitstrings satisfying the per-block one-hot condition (2) . The uniform product initial state 
+
+|s0⟩ =
+
+( 1√nK 
+
+∑
+
+> (i,k )
+
+|(i, k )⟩
+
+)⊗n
+
+(10) 
+
+is the equal-amplitude superposition over all such block-one-hot bitstrings. Adding the diagonal assignment penalty for (3) and the (diagonal) travel cost does not change the computational basis; it only rephases/weights amplitudes. Therefore, the encoded manifold 
+
+contains (as basis states) all “colored permutations” X characterized in Theorem 4, and the CE–QAOA mixer (block-local XY) preserves this manifold while the diagonal cost couples blocks. In contrast to several quantum-assisted CVRP formulations that explicitly add auxiliary binary variables for capacity handling, or formulation is qubit efficient. In the hybrid, 
+
+8Figure 2: Comparison of qubit counts for two binary global-position encodings across representative CVRP instance sizes. The original separated encoding scales as Qsep = KN ⌈log 2 N ⌉, whereas the reduced colored-permutation encoding scales as Qred = N ⌈log 2(KN )⌉. The horizontal lines indicate illustrative hardware thresholds. The reduced encoding changes the linear factor of K in the number of qubits to a logarithmic dependence and shifts several small-scale industrial routing regimes into the few-hundred to ∼ 10 3-qubit range. 
+
+cluster-first approach of Feld et al. , the capacity constraint in the knapsack-style clustering phase is modeled with extra selector/slack variables, thereby increasing the number of binary decision variables (and hence logical qubits) used by the QUBO formulation [1]. Similarly, Palackal et al. introduce additional binary variables to encode vehicle-load levels within their quantum-assisted pipeline for CVRP, which again raises the logical-qubit count required by the constraint representation [2, 3]. In both cases, the qubit overhead scales with the granularity of the capacity encoding (e.g., unary/one-hot versus binary-coded load). By contrast, our protocol maintains a logical-qubit footprint fixed by the problem’s decision variables with visible scaling benefits in the near term non-asymptotic regimes (See Fig. 2). See further discussion on industry sized quantum routing in Sec. 3.4. 
+
+2.4 Optimality and performance guarantees 
+
+The performance claims of the present routing solver are inherited from the CE-QAOA 
+
+framework developed in Refs. [5, 6, 7]. Since the CVRP and PDP formulations are re-alized as specializations of the CE–QAOA kernel, the same finite-depth, finite-shot, and encoded-manifold guarantees become available under the same instance-dependent condi-tions. In particular, our global-position construction satisfies the kernel requirements once the capacity-penalization terms are folded into the objective. Thus, the state lives in a block one-hot manifold with m = n blocks and local dimension nloc = nK for CVRP and 
+
+nloc = T K for PDP. The normalized block-XY mixer preserves the encoded manifold with operator norm O(1) on each block. Hence the routing solver inherits the same design-level performance statements proved for CE–QAOA on the encoded space. The first consequence is the encoded design baseline. Under the block permutation twirl, one-layer CE–QAOA forms an exact unitary 1-design on the encoded manifold HOH ,
+
+9so that 
+
+EU
+
+> [
+
+|⟨ x|U |ϕ⟩| 2]
+
+= 1
+
+D , D = ( nK )n
+
+for CVRP, and analogously with D = ( T K )T for PDP. At shallow depth, the interleav-ing of block-XY evolution with diagonal entanglers yields the approximate second-moment behavior established in Ref. [5]. This gives encoded anticoncentration on the native con-strained manifold rather than on the full ambient cube as shown in Fig. 3. The second consequence is a direct optimal-solution sampling guarantee in the Fejér-filtered regime. For completeness, we recall the analytic mechanism underlying the in-herited finite-depth and finite-shot success bounds in Appendix C and Theorem 12. In particular, we summarize the dephased Fejér-filter reference model, define the mixer enve-lope Wp, the wrapped phase map θ, the optimal-set weight Cβ , and the off-peak quantity 
+
+Mp(δ), and restate the resulting dimension-free lower bound on the probability of sam-pling an optimal routing configuration. Whenever the routing instance has nonzero enve-lope weight on the optimal set and a positive wrapped phase separation from competing levels, finite-depth CE–QAOA assigns a dimension-free lower bound to the probability of sampling an optimum, as proved in Ref. [7].                            
+
+> (a) Peak probabilities well above
+> 1/D . Shots ∝n3.
+> (b) Encoded anticoncentration: several feasible strings ≫1/D .
+> (c) Best-by-cost (green) recovered under S= Θ( n3)sampling.
+> Figure 3: Encoded anticoncentration and design baseline. Each panel shows the empirical histogram of feasible outcomes from a depth-p= 1 CE–QAOA run on a CVRP instance, using shots S= Θ( n3)
+> per grid point. The dashed line is the encoded design baseline 1/D with D= ( nK )n.Peaks far above 1/D and the successful identification of the optimum support the anticoncentration guarantees discussed in the text.
+
+# 3 A hybrid quantum–classical routing algorithm 
+
+3.1 Constraint handling in the hybrid pipeline. 
+
+The native constraints (2) –(3) , together with the timeline objective (8) , do not by them-selves force the positions assigned to a fixed vehicle k to form a single contiguous interval on the global timeline. Hence the encoded basis set contains all standard single-route CVRP tours as a subset, but it may also contain segmented same-vehicle timelines unless one adds an explicit contiguity constraint or imposes a decode-time post-selection rule. Conse-quently, we interpret the global-position formulation as a CE–QAOA-compatible routing model whose standard CVRP sector is selected operationally by feasibility filtering algo-rithm (Alg. 1) introduced next. Thus, the complete routing pipeline studied in this work is naturally hybrid. The quantum stage generates candidate bitstrings by sampling the CE–QAOA circuit over a coarse parameter grid, while the classical stage performs exact admissibility checks and exact scoring on the sampled outputs. For the global-position colored-permutation encoding of CVRP, the key classical routine 
+
+10 is a feasibility oracle that filters raw CE–QAOA samples before exact objective evaluation. Given a measured bitstring b ∈ { 0, 1}n2K , the oracle checks four conditions: (i) one-hot occupancy in every global-position block, (ii) global uniqueness of each customer, (iii) vehicle-capacity compliance, and (iv) route contiguity on the global timeline. 
+
+Proposition 7 (Polynomial-time feasibility certification) . Let b ∈ { 0, 1}Qbits with Qbits =
+
+n2K, let d[0: n−1] be the demand vector, and let Q[0: K−1] be the vehicle-capacity vector. Define 
+
+L := max 
+
+> {
+
+max 
+
+> 0≤i≤n−1
+
+⌈log 2(d[i] + 1) ⌉, max 
+
+> 0≤k≤K−1
+
+⌈log 2(Q[k] + 1) ⌉
+
+> }
+
+.
+
+Then Algorithm 1 decides feasibility in polynomial time. More precisely: 
+
+(i) on a unit-cost RAM (or word-RAM with word size at least L + log n), its runtime is 
+
+O(n2K); 
+
+(ii) on the standard bit model, its runtime is 
+
+O(n2K + ( n + K)( L + log n)).
+
+Proof. We analyze the steps of Algorithm 1. 
+
+Initialization. The arrays 
+
+seen [0: n−1] , load [0: K−1] , count [0: K−1] , firstpos [0: K−1] , lastpos [0: K−1] 
+
+are initialized in O(n + K) time. 
+
+Block scan. There are exactly n global-position blocks, and each block has size 
+
+S = nK. 
+
+For each block j, the inner loop scans all S entries of that block in the worst case in order to verify one-hotness and locate the unique active symbol. Hence the total number of bit inspections is 
+
+n · S = n(nK ) = n2K. 
+
+All other operations performed once the active symbol is found—namely decoding (i, k ),checking seen [i], updating count [k], and updating firstpos [k], lastpos [k]—take con-stant time per block on a unit-cost RAM. Thus, apart from arithmetic on the load vari-ables, the full scan costs O(n2K).
+
+Capacity accumulation. For each of the n blocks, the algorithm performs one update 
+
+load [k] ← load [k] + d[i].
+
+If the demands and capacities are represented using at most L bits, then every partial load satisfies 
+
+load [k] ≤
+
+> n−1∑
+> i=0
+
+d[i],
+
+so its bit-length is at most L + ⌈log 2 n⌉. Therefore, on the bit model, each addition costs 
+
+O(L + log n),
+
+and all n such additions together cost 
+
+O(n(L + log n)).
+
+11 Final checks. The final loop over vehicles has length K. For each vehicle k, the algo-rithm performs: (a) one capacity comparison load [k] > Q [k], and (b) one contiguity check 
+
+lastpos [k] − firstpos [k] + 1 ?
+
+= count [k].
+
+The contiguity check uses only indices and counters bounded by n, so it is O(1) on either model. The capacity comparison costs O(1) on a unit-cost RAM and O(L + log n) on the bit model. Thus the total cost of the final loop is 
+
+O(K) on a unit-cost RAM, and 
+
+O(K(L + log n)) on the bit model. 
+
+Total runtime. Summing all contributions yields 
+
+O(n2K)
+
+on a unit-cost RAM, and 
+
+O(n2K + n(L + log n) + K(L + log n)) = O(n2K + ( n + K)( L + log n))
+
+on the bit model. Proving the claim. 
+
+Corollary 8 (Polynomial-time classical post-processing in PHQC) . Let |G| be the number of parameter pairs in the coarse CE–QAOA grid and let Sshots be the number of samples drawn per grid point. Then the total classical feasibility-filtering cost inside PHQC is polynomial. In particular, on a unit-cost RAM it is 
+
+O(|G| Sshots n2K),
+
+and on the bit model it is 
+
+O
+
+> (
+
+|G| Sshots 
+
+> [
+
+n2K + ( n + K)( L + log n)])
+
+.
+
+Hence, whenever |G| and Sshots are polynomially bounded, the full classical post-processing stage of PHQC is polynomial-time. Proof. Apply Prop. 7 independently to each sampled bitstring processed by PHQC. Since PHQC handles |G| Sshots sampled bitstrings in total, the result follows by multiplication. 
+
+Algorithm 1 is the deterministic admissibility oracle used by the PHQC post-processing layer in App. 3.2. Proposition 7 shows that this deterministic admissibility test remains polynomial-time, so the feasibility filtering does not alter the polynomial overhead of the hybrid pipeline. For each sampled bitstring b, PHQC first calls FeasibleGlobalPosi-tions (b). If the oracle rejects, the sample is discarded. If the oracle accepts, the classical checker evaluates the exact routing score E(b) = ⟨b | Hobj | b⟩ (or, if desired, the full diago-nal score ⟨b | HC | b⟩) and retains the best feasible sample seen across the entire parameter grid. In this way, the quantum stage is used only to generate candidate solutions, while the classical stage certifies feasibility and performs exact selection. In practice, early exits on a second “1” in a block, a repeated customer, or an immediate capacity violation substan-tially reduce average runtime. The resulting hybrid structure implies that success requires only that an optimal feasible bitstring be sampled at least once, not that it dominates the output distribution. 
+
+12 Algorithm 1 FeasibleGlobalPositions — Feasibility check for a sampled bitstring 
+
+Require: Bitstring b ∈ { 0, 1}Qbits with Qbits = n2K; demands d[0: n−1] ; vehicle capacities 
+
+Q[0: K−1] ; integers n, K .
+
+Ensure: true iff b satisfies one-hot, uniqueness, capacity, and contiguity.  
+
+> 1:
+
+S ← nK ▷ block size (symbols per position)  
+
+> 2:
+
+initialize seen [0: n−1] ← false  
+
+> 3:
+
+initialize load [0: K−1] ← 0 
+
+> 4:
+
+initialize count [0: K−1] ← 0 
+
+> 5:
+
+initialize firstpos [0: K−1] ← − 1 
+
+> 6:
+
+initialize lastpos [0: K−1] ← − 1 
+
+> 7:
+
+for j ← 0 to n−1 do ▷ scan each global position block  
+
+> 8:
+
+L ← j · S 
+
+> 9:
+
+ones ← 0, s ⋆ ← − 1 
+
+> 10:
+
+for s ← 0 to S−1 do ▷ locate the unique active symbol  
+
+> 11:
+
+if b[L + s] = 1 then  
+
+> 12:
+
+ones ← ones + 1 , s⋆ ← s 
+
+> 13:
+
+if ones > 1 then  
+
+> 14:
+
+return false ▷ not one-hot  
+
+> 15:
+
+end if  
+
+> 16:
+
+end if  
+
+> 17:
+
+end for  
+
+> 18:
+
+if ones ̸ = 1 then  
+
+> 19:
+
+return false ▷ zero-hot or multi-hot block  
+
+> 20:
+
+end if  
+
+> 21:
+
+i ← s⋆ mod n, k ← ⌊ s⋆/n ⌋ ▷ decode customer and vehicle  
+
+> 22:
+
+if seen [i] then  
+
+> 23:
+
+return false ▷ customer appears more than once  
+
+> 24:
+
+else  
+
+> 25:
+
+seen [i] ← true  
+
+> 26:
+
+end if  
+
+> 27:
+
+load [k] ← load [k] + d[i] 
+
+> 28:
+
+count [k] ← count [k] + 1  
+
+> 29:
+
+if firstpos [k] = −1 then  
+
+> 30:
+
+firstpos [k] ← j 
+
+> 31:
+
+end if  
+
+> 32:
+
+lastpos [k] ← j 
+
+> 33:
+
+end for  
+
+> 34:
+
+for k ← 0 to K−1 do  
+
+> 35:
+
+if load [k] > Q [k] then  
+
+> 36:
+
+return false ▷ capacity violation for vehicle k 
+
+> 37:
+
+end if  
+
+> 38:
+
+if count [k] > 0 then  
+
+> 39:
+
+if lastpos [k] − firstpos [k] + 1 ̸ = count [k] then  
+
+> 40:
+
+return false ▷ vehicle k appears in multiple disjoint segments  
+
+> 41:
+
+end if  
+
+> 42:
+
+end if  
+
+> 43:
+
+end for  
+
+> 44:
+
+return true 
+
+13 Beyond its role inside PHQC, Algorithm 1 has independent utility as a deterministic polynomial-time decoding and feasibility-certification oracle for structured routing samples. In particular, its use is not tied to CE–QAOA itself. Any quantum or quantum-inspired pipeline that produces candidate bitstrings can use the same oracle to decode samples, certify admissibility, and isolate the standard CVRP sector before exact classical scoring. 
+
+3.2 Polynomial-time Hybrid Quantum–Classical Solver (PHQC) 
+
+We operationalize the full hybrid pipeline with clasical post-processing in the routing ver-sion of polynomial-time hybrid quantum–classical (PHQC) framework introduced in Ref. [5] ( App. 3.2) where the quantum samples generated by CE-QAOA are handed over to Alg. 1 for feasibility checks and scoring. The hybrid separation is important algorithmically. The globally optimal feasible solution need not be the most frequent sample. It is enough that the quantum stage assigns it nonzero probability, since a single optimal feasible hit is sufficient for the deterministic checker to recover it. 
+
+Algorithm 2 PHQC — CE–QAOA grid search with feasibility filtering and scoring 
+
+Require: depth p; coarse grid G ⊂ [0 , π ]2; cost Hamiltonian HC ; objective Hamiltonian 
+
+Hobj ; mixer UM ; initial state |s0⟩; shots S per grid point. 
+
+Ensure: best feasible sampled bitstring b⋆ and its score E⋆. 
+
+> 1:
+
+b⋆ ← null , E⋆ ← +∞ 
+
+> 2:
+
+for each (β, γ ) ∈ G do  
+
+> 3:
+
+for r = 1 , . . . , S do  
+
+> 4:
+
+prepare |s0⟩ 
+
+> 5:
+
+apply the CE–QAOA circuit for (β, γ ) 
+
+> 6:
+
+measure a bitstring b 
+
+> 7:
+
+if FeasibleGlobalPositions (b) then  
+
+> 8:
+
+compute E(b) = ⟨b | Hobj | b⟩ 
+
+> 9:
+
+if E(b) < E ⋆ then  
+
+> 10:
+
+b⋆ ← b, E⋆ ← E(b) 
+
+> 11:
+
+end if  
+
+> 12:
+
+end if  
+
+> 13:
+
+end for  
+
+> 14:
+
+end for  
+
+> 15:
+
+return (b⋆, E ⋆)
+
+We further extend the pipeline to include a coarse parameter-grid search. A single appearance is sufficient for exact recovery. Let p be the circuit depth and let 
+
+G = {(βa, γ b) : 0 ≤ a ≤ Nβ , 0 ≤ b ≤ Nγ } ⊂ [0 , π ] × [0 , π ]
+
+be a rectangular coarse grid, for example 
+
+βa = a ∆β , γb = b ∆γ , ∆β = πNβ
+
+, ∆γ = πNγ
+
+.
+
+For each (β, γ ) ∈ G , PHQC prepares the CE–QAOA state 
+
+|ψp(β, γ )⟩ = UM (β) e−iγH C |s0⟩
+
+(for p = 1 ; or depth-p generalization), samples it S times, and feeds each measured bitstring into the deterministic feasibility oracle FeasibleGlobalPositions from Alg. 1. 
+
+14 3.3 Numerical Implementation 
+
+On each block (local size nK ) we use the normalized XY mixer restricted to the one–hot sector H(nK )1 . The full mixer layer is the block tensor product 
+
+UM (β) = 
+
+> n⊗
+> b=1
+
+U (b) 
+
+> M
+
+(β). (11) 
+
+The per–block initial state is the uniform one–hot (a W –state) over nK symbols, 
+
+|sblk ⟩ = 1
+
+√nK 
+
+> ∑
+> (i,k )∈[n]×[K]
+> ∣∣∣
+
+e(i,k )
+
+> 〉
+
+, |s0⟩ = |sblk ⟩⊗n . (12) 
+
+A depth– p CE–QAOA circuit alternates diagonal cost and the block–XY mixer: 
+
+> ∣∣∣
+
+ψp(⃗γ,⃗ β)
+
+> 〉
+
+= 
+
+> (p∏
+> ℓ=1
+
+UM (βℓ) e−iγ ℓHC
+
+> )
+
+|s0⟩ . (13) 
+
+In the implementation we instantiate HC from a QUBO dictionary via the Ising map 
+
+x 7 → (1 −Z)/2, yielding a Z/ZZ Pauli operator. We use p = 1 and grid–search (γ, β ) on a coarse lattice ( O(nK ) points per axis); the shot budget follows the S = 50 ( nK )3 rule. The circuit primitives with a qiskit wrapper [18] were first reported in [5]. As in Ref. [5], we used the matrix_product_state backend of the IBM Qiskit Aer simulator[18]. For reproducibility, we configured the backend with aggressive truncation regime with maximum bond dimension of 128 , truncation and validation thresholds of 10 −3, and an amplitude–chopping threshold of 10 −3. These circuit simulations are in the sense of Vidal’s tensor–network formulation [19]. We collect implementation details in App. C.1. 
+
+Goal and evaluation protocol. Our numerical study is designed to evaluate the end-to-end performance of the proposed hybrid routing pipeline in Alg. 2 on small benchmark CVRP instances while preserving the modeling choices of this paper. For each instance, we run depth p = 1 CE–QAOA over a fixed (γ, β ) grid, sample the resulting circuit at each grid point, post-select feasible solutions and report the best feasible routing cost observed. We benchmark on the QOPTLib family instances used in related hybrid QUBO studies[9]. Each instance contains (i) the number of non-depot customers n, (ii) customer coordi-nates, (iii) depot coordinate, (iv) demand vector (di)ni=1 , and (v) per-vehicle capacity Q,with a fixed number of vehicles K = 2 for all instances. Distances are computed from the Euclidean metric using precomputed matrices: 
+
+Wi,i ′ = ∥ci − ci′ ∥2, wD→i = ∥cD − ci∥2, wi→D = ∥ci − cD∥2,
+
+so that subsequent cost evaluation is O(1) per queried edge. See additional implementation details in App. C.1. Results of the numerical study are collected in Table 1. The QOptLib values shown are taken from the Hybrid column in their report, where the underlying QUBO is decomposed into smaller subproblems and solved via a hybrid quantum–classical pipeline. In contrast, we treat each instance as a single, non-decomposed problem within our global-position formulation. The best feasible cost returned by our PHQC pipeline matched the independently verified optimum for every instance in Table 1. Optimality was verified separately using a branch-and-bound solver implemented in Gurobi [20]. The † symbol in the table indicates that the value reported in Ref. [9] lies below the optimum verified by our classical check. For a subset of instances, the grid point was set to γ = 0 because of the prohibitive cost of circuit simulation. i.e. those instances were restricted to the semiclassical limit of the CE-QAOA parameterized ansatz at the cost of additional shots. Both the quantum and classical implementations are made publicly available in [10]. 
+
+15 Table 1: Performance on CVRP instances ( K = 2 ) proposed in Ref. [9]. 
+
+Instance QOPTLib (Hybrid) This work P-n41.vrp 97 69 P-n42.vrp 121 96 P-n51.vrp 94 94 P-n52.vrp 295 295 P-n61.vrp 118 118 P-n62.vrp 122 121 P-n71.vrp 119 † 132 P-n72.vrp 164 163 P-n81.vrp 153 136 P-n82.vrp 269 225 
+
+3.4 Discussion: Bringing quantum routing optimization to the industrial scale in the near term 
+
+The main obstacle to scaling the present CE–QAOA-compatible routing formulation is the qubit cost of the local alphabet representation. In the one-hot global-position encoding used in this work, each of the n position blocks carries an alphabet of size S = nK , so the total qubit count is 
+
+Q1hot = nS = n2K. 
+
+This representation is theoretically attractive because it is aligned with the CE–QAOA kernel with well studied performance guarantees[5, 6, 7]. However, the quadratic-in-n
+
+footprint makes one-hot the dominant bottleneck long before circuit depth or shot count becomes the limiting factor. To push quantum routing toward industrial scale instances in the near term, the most direct route is to preserve the global-position viewpoint while compressing the local alphabet from one-hot to binary. A naive binary implementation with vehicle-separated position registers scales as 
+
+Qsep ≈ Kn log 2 n, 
+
+whereas the colored-permutation viewpoint reduces this to 
+
+Qcol ≈ n log 2(nK ),
+
+up to the usual ceiling effects. The reduction comes from encoding a single composite symbol (i, k ) ∈ [n] × [K] in each position block, instead of carrying a separate position register for each vehicle. In other words, the colored-permutation representation removes an unnecessary factor of K from the number of blocks while keeping the same global-ordering logic that makes the cost and capacity structure diagonal and ancilla-free. This compression is already substantial in the regime most relevant for early industrial use cases. As illustrated in Fig. 2, instances with 50 to 100 customer locations and 5 to 10 
+
+vehicles move from the multi-thousand-qubit regime under the separated binary encoding into the few-hundred to roughly 10 3-qubit regime under the reduced colored-permutation binary encoding. For example, at (n, K ) = (50 , 10) , the separated encoding requires about 
+
+4 × 10 3 qubits, while the reduced encoding requires only about 4.5 × 10 2. These small-scale but operationally meaningful routing instances no longer require waiting for fault-tolerant machines once the colored-permutation alphabet is binary-compressed. The remaining challenge is to formulate the dynamical layer acting on the compressed registers to inherit the sampling and concentration mechanisms that make the CE–QAOA kernel attractive. A binary-coded version must be equipped with mixer primitives that 
+
+16 are low-depth, symbol-respecting, and robust to padding leakage while still providing suf-ficiently rich exploration of the valid code space. Establishing such mixers is the key technical step toward extending the present colored-permutation routing framework to a near-term industrial routing architecture which we leave for future work. 
+
+Regimes of quantum utility. A natural way to calibrate near-term quantum utility in routing is to ask whether a quantum-enabled workflow can close open optimality gaps on benchmark instances that remain nontrivial at the current classical frontier. Classical exact methods for CVRP are already remarkably strong. Modern branch-cut-and-price solvers can solve many instances with up to a few hundred customers and have pushed the proven-optimal frontier far beyond the historical 150 -customer regime [21, 3]. Likewise, modern heuristic frameworks routinely achieve very small gaps with modest runtimes on medium-scale routing benchmarks, often remaining below ten minutes on average for prob-lems in the 100 –200 customer range [22]. Against that backdrop, the ORTEC benchmark instances ORTEC-n242-k12 and ORTEC-n323-k21 —the “242/12” and “323/21” cases high-lighted in Fig. 2—are especially interesting. They are real-world CVRP instances from the DIMACS/CVRPLIB collection, derived from a US-based grocery delivery service, and their incumbent objective values are still listed in CVRPLIB as best known rather than proven optimal [23, 24]. A quantum routing pipeline that either certifies optimality at the current incumbent values or produces a strictly better verified feasible solution for one of these small but difficult benchmark instances could reasonably mark the onset of quantum utility by contributing an improvement on a real routing instance that remains unresolved at the current classical record. 
+
+# 4 Conclusion 
+
+We introduced a global-position colored-permutation formulation for capacitated vehicle routing in which n positions choose symbols (i, k ) ∈ [n] × [K] such that each customer appears exactly once, and vehicle labels partition the resulting permutation into K dis-joint partial permutations. This viewpoint yields a compact and operational decoding where measured bitstrings reshape into an n × K × n tensor whose K slices are per-vehicle partial permutation matrices, from which ordered route segments are read off on the global timeline. On the algorithmic side, we instantiated the CE–QAOA kernel as the assignment-and-ordering formulation of CVRP. The initial state spans all block-one-hot as-signments; the normalized block-XY mixer preserves the block-one-hot manifold and mixes within it; and the diagonal routing Hamiltonian couples blocks through both assignment penalties and routing edges, ensuring entangling phase separation. A central practical outcome is that capacity enforcement is naturally ancilla-free in the logical encoding. For heterogeneous-demand instances, however, capacity is best viewed as an additional diago-nal routing constraint, enforced either by post-selection or by instance-dependent diagonal biasing, rather than as part of the fully label-symmetric penalty sector. A brief account of the analytic mechanism behind the performance guarantees is given in Appendix C. In particular, we recall how the dephased Fejér-filter reference model isolates the phase-selection mechanism responsible for the dimension-free success bound and clari-fies the instance-dependent quantities controlling finite-depth and finite-shot optimality in the CVRP formulation. Finally, we highlighted a clear scaling path obtained by replacing one-hot blocks with binary-coded symbol registers, thereby reducing the qubit footprint from n2K to Θ( n log( nK )) while retaining the global-position colored-permutation struc-ture. Achieving this at full strength will require new symbol-respecting mixers on binary 
+
+17 registers that preserve the favorable CE–QAOA dynamics on the encoded manifold. Devel-oping and benchmarking such mixers, together with sharper conditions under which con-tiguous single-route solutions are selected from the global-position formulation, appears to be the most direct route to pushing quantum routing optimization to substantially larger instance sizes without sacrificing the kernel-level advantages that motivate the approach. 
+
+# Conflict of Interests 
+
+All authors declare no competing interests. 
+
+# Additional information 
+
+All our results are reported in the main paper. 
+
+Correspondence and requests for materials should be addressed to C.O. (chinonso.calistus.onah@volkswagen.de ). 
+
+# A Pickup–Delivery Problem (PDP) 
+
+Sets and data. There are atomic tours t ∈ [T ]; each tour t internally represents a pickup location pt and a delivery location dt (pickup and delivery happen within the same job). Trucks k ∈ [K] have depots dep k (potentially distinct). Define the inter-tour cost 
+
+˜wt→t′ := dist (dt, p t′
+
+),
+
+possibly asymmetric. Depot connections are 
+
+wdep k →t := dist( dep k, p t), wt→dep k := dist( dt, dep k).
+
+When capacities are not modeled, one may set the resource weights dt to zero in the constraints so that the objective alone drives the optimization. 
+
+Blocks, symbols, one-hot manifold. As in CVRP, take m := T global positions 
+
+j ∈ [T ] and the local alphabet 
+
+APDP = {(t, k ) : t ∈ [T ], k ∈ [K]}, nPDP loc = T K. 
+
+Let X(j) 
+
+> t,k
+
+be the projector for symbol (t, k ) on block j.
+
+Global uniqueness and block one-hot. Each atomic tour appears exactly once glob-ally, so we impose 
+
+HB 
+
+> once
+
+:= λonce 
+
+> T
+
+∑
+
+> t=1
+
+( T∑
+
+> j=1
+> K
+
+∑
+
+> k=1
+
+X(j) 
+
+> t,k
+
+− 1
+
+)2
+
+. (14) 
+
+The per-block one-hot constraint 
+
+HB 
+
+> blk
+
+:= λblk 
+
+> T
+
+∑
+
+> j=1
+
+( T∑
+
+> t=1
+> K
+
+∑
+
+> k=1
+
+X(j) 
+
+> t,k
+
+− 1
+
+)2
+
+(15) 
+
+is redundant in the hard-coded one-hot encoding and may therefore be omitted, i.e. one may set HB 
+
+> blk
+
+= 0 .
+
+18 Objective (dead-miles between tours + depot endpoints). Define the PDP ad-jacency cost 
+
+˜W(t,k )→(t′,k ′) := 
+
+˜wt→t′ if k = k′,wt→dep k + wdep k′ →t′ if k̸ = k′.
+
+Then 
+
+HB 
+
+> obj
+
+:= λobj 
+
+[ T −1∑
+
+> j=1
+> T
+
+∑
+
+> t,t ′=1
+> K
+
+∑
+
+> k,k ′=1
+
+˜W(t,k )→(t′,k ′) X(j) 
+
+> t,k
+
+X(j+1)  
+
+> t′,k ′
+
+(16) 
+
++
+
+> T
+
+∑
+
+> t=1
+> K
+
+∑
+
+> k=1
+
+wdep k →t X(1)  
+
+> t,k
+
++
+
+> T
+
+∑
+
+> t=1
+> K
+
+∑
+
+> k=1
+
+wt→dep k X(T )
+
+> t,k
+
+]
+
+.
+
+If desired, add a per-truck capacity/duty-time hinge-square penalty, exactly analogous to (6) :
+
+HB 
+
+> cap
+
+:= λcap 
+
+> K
+
+∑
+
+> k=1
+
+([ T∑
+
+> j=1
+> T
+
+∑
+
+> t=1
+
+dt X(j) 
+
+> t,k
+
+− Qk
+
+]
+
+> +
+
+)2
+
+,
+
+or replace dt by a duty-time or resource weight. 
+
+HB 
+
+> C
+
+:= HB 
+
+> once
+
++ HB 
+
+> obj
+
++ HB
+
+> cap
+
+. (17) 
+
+Mixer and initial state are as in CVRP, with nloc replaced by nPDP loc = T K and (i, k )
+
+replaced by (t, k ). The CE–QAOA stack is 
+
+∣∣∣ψp(⃗γ,⃗ β)
+
+〉
+
+= ( p∏
+
+> ℓ=1
+
+UM (βℓ) e−iγ ℓHB
+
+> C
+
+) |s0⟩ .
+
+Cross-block couplings in HB 
+
+> C
+
+again make the diagonal layer entangling. 
+
+Decoding. From a measured bitstring, read for each j the unique (t, k ) with value 1.For truck k, the subsequence of such positions in increasing j lists its assigned tours in order. Depot edges are implicitly added at boundaries via (16) . No explicit precedence is needed because each t already encapsulates pickup and delivery. 
+
+A.1 Primer: Permutation matrices and bipartite view 
+
+Let σ : {1, . . . , n } → { 1, . . . , n } be a permutation. Its permutation matrix P ∈ { 0, 1}n×n
+
+is defined by 
+
+Pi,j =
+
+{1, j = σ(i),
+
+0, otherwise .
+
+Equivalently, interpret rows L = {1, . . . , n } and columns R = {1, . . . , n } as the left and right vertex sets of Kn,n . Then the support of P , supp( P ) = {(i, σ (i)) : i ∈ L} ⊆ L × R, 
+
+is a perfect matching. The cycle decomposition of σ corresponds to directed cycles in the bipartite incidence picture via alternation of L- and R-indices. 
+
+Definition 9 (Colored decomposition) . A colored decomposition of a permutation matrix 
+
+P ∈ { 0, 1}n×n is a collection of (0 , 1) -matrices {P (c)}Cc=1 such that: (i) Partition: the supports are pairwise disjoint and cover supp( P ):
+
+supp( P ) = 
+
+> C
+
+⊔
+
+> c=1
+
+supp (P (c)), P =
+
+> C
+
+∑
+
+> c=1
+
+P (c).
+
+19 (ii) Partial permutations: each P (c) has at most one 1 in every row and every column; equivalently, each P (c) is a partial permutation matrix. We visualize the class index c as a color. Each color class encodes a partial matching on the support of P .Remark 10 (Cycle-based canonical coloring) . The cycle decomposition of a permutation 
+
+σ induces a distinguished special case of a colored decomposition by assigning one color to each disjoint cycle. Concretely, if 
+
+σ = C1 C2 · · · C C
+
+is a product of disjoint cycles, then 
+
+P =
+
+> C∑
+> c=1
+
+P (c),
+
+where P (c) is the permutation matrix supported on the indices belonging to the cycle 
+
+Cc, and zero elsewhere. In this special cycle-coloring case, each nonzero color block is a permutation on its own support and decomposes into circulant cycle blocks. 
+
+Proposition 11 (Basic properties) . Let P = ∑Cc=1 P (c) be a colored decomposition. (a) Orthogonality of supports: for c̸ = d, one has 
+
+P (c) ⊙ P (d) = 0 .
+
+(b) Row/column sparsity: for each c, every row and every column contains at most one 
+
+1 in P (c).(c) Special cycle-coloring case: if the decomposition is the canonical cycle-coloring of Remark 10, then each color class is block diagonal, with one circulant permutation block per cycle, and the eigenvalues contributed by a cycle of length k are the k-th roots of unity. 
+
+As an example, consider n = 5 and the permutation σ = (1 3 4)(2 5) (written in cycle notation). The permutation matrix P has 1’s at positions 
+
+(1 , 3) , (3 , 4) , (4 , 1) and (2 , 5) , (5 , 2) .P =
+
+> 
+
+0 0 1 0 00 0 0 0 10 0 0 1 01 0 0 0 00 1 0 0 0
+
+> 
+
+A two-color decomposition P = P (1) + P (2) is: 
+
+P (1) =
+
+> 
+
+0 0 1 0 00 0 0 0 00 0 0 1 01 0 0 0 00 0 0 0 0
+
+> 
+
+, P (2) =
+
+> 
+
+0 0 0 0 00 0 0 0 10 0 0 0 00 0 0 0 00 1 0 0 0
+
+> 
+
+, P = P (1) + P (2) .
+
+Here P (1) (red color) encodes the 3-cycle (1 3 4) and P (2) (blue color) encodes the 2-cycle 
+
+(2 5) .
+
+20 L1 R1
+
+L2 R2
+
+L3 R3
+
+L4 R4
+
+L5 R5
+
+color 1 (3-cycle) color 2 (2-cycle) 
+
+P (1) P (2) P
+
+# + =
+
+Figure 4: Colored decomposition: P = P (1) + P (2) with disjoint supports. 
+
+# B CVRP Examples: from locations to colored permutations 
+
+B.1 Example A: 4 locations 2 Vehicles 
+
+Consider a routing problem with 4 locations, 2 vehicles. ⇒ n = 3 customers with K = 2 
+
+vehicles. We have n = 3 blocks and local alphabet size nK = 3 · 2 = 6 . Total binary variables/qubits n2K = 18 . Use the same distance construction as above. Assume unit demand and take di ≡ 1 set CAPACITY = 3 , then any single truck can carry up to 3 customers. 
+
+Variables. xi,j,k with i, j ∈ { 1, 2, 3}, k ∈ { 1, 2}.
+
+Constraints. 
+
+(block one–hot) 
+
+> 3
+
+∑
+
+> i=1 2
+
+∑
+
+> k=1
+
+xi, 1,k = 1 ,
+
+> 3
+
+∑
+
+> i=1 2
+
+∑
+
+> k=1
+
+xi, 2,k = 1 ,
+
+> 3
+
+∑
+
+> i=1 2
+
+∑
+
+> k=1
+
+xi, 3,k = 1; (18) 
+
+(each item once) 
+
+> 3
+
+∑
+
+> j=1 2
+
+∑
+
+> k=1
+
+x1,j,k = 1 ,
+
+> 3
+
+∑
+
+> j=1 2
+
+∑
+
+> k=1
+
+x2,j,k = 1 ,
+
+> 3
+
+∑
+
+> j=1 2
+
+∑
+
+> k=1
+
+x3,j,k = 1; (19) 
+
+(capacity, soft) 
+
+> 3
+
+∑
+
+> j=1 3
+
+∑
+
+> i=1
+
+di xi,j, 1 ≤ Q, 
+
+> 3
+
+∑
+
+> j=1 3
+
+∑
+
+> i=1
+
+di xi,j, 2 ≤ Q, (20) 
+
+with soft penalty weight λcap or enforced as a hard feasibility filter. 
+
+21 Objective (diagonal). 
+
+Hobj =
+
+> 2
+
+∑
+
+> k=1
+
+[ ∑ 
+
+> i
+
+wdep →i xi, 1,k +
+
+> 2
+
+∑
+
+> j=1
+
+∑
+
+> i,i ′
+
+Wi,i ′ xi,j,k xi′,j +1 ,k + ∑
+
+> i
+
+wi→dep xi, 3,k 
+
+]
+
++
+
+> 2
+
+∑
+
+> j=1
+
+∑ 
+
+> k̸=k′
+
+∑
+
+> i,i ′
+
+(wi→dep + wdep →i′
+
+) xi,j,k xi′,j +1 ,k ′ .
+
+Index customers as i = 1 , 2, 3 for nodes 2, 3, 4 respectively. The pairwise customer distance matrix W ∈ R3×3 and depot legs are 
+
+W =
+
+
+
+0 30 .41 36 .40 30 .41 0 6.08 36 .40 6.08 0
+
+ ,d(dep → i) = 
+
+[
+
+25 .55 26 .02 30 .02 
+
+]
+
+, d (i → dep) = 
+
+[
+
+25 .55 26 .02 30 .02 
+
+]
+
+.
+
+Pick the feasible colored assignment “truck 1 takes customer 1 at position 1; truck 2 takes customers 2,3 at positions 2,3”. 
+
+Encoded bitstring. The assignment amounts to 
+
+j=1 : ( i=1 , k =1) , j=2 : ( i=2 , k =2) , j=3 : ( i=3 , k =2) 
+
+which can be encoded by the three one–hot blocks (one per position): pos 1 : [1 , 0, 0, 0, 0, 0] ,
+
+pos 2 : [0 , 0, 0, 0, 1, 0] ,
+
+pos 3 : [0 , 0, 0, 0, 0, 1] .
+
+Concatenating these 6-bit blocks (for n = 3 positions) gives the 18-bit string 
+
+100000 000010 000001 
+
+The per-truck slices (rows=positions t, cols=customers i) are: 
+
+M (1) =
+
+
+
+1 0 00 0 00 0 0
+
+ , M (2) =
+
+
+
+0 0 00 1 00 0 1
+
+ .
+
+Summing (and transposing) gives the permutation matrix 
+
+P =
+
+(
+
+M (1) + M (2) )⊤
+
+=
+
+
+
+1 0 00 1 00 0 1
+
+ ,
+
+which encodes the order “pos 1 7 → i=1 , pos 2 7 → i=2 , pos 3 7 → i=3 ”. 
+
+B.2 Example B: 5 locations 2 Vehicles 
+
+Similarly consider an example with 5 locationsand 2 vehicles ( ⇒ n = 4 customers and 
+
+K = 2 ). Blocks m = 4 . Local alphabet size nK = 4 · 2 = 8 . Total variables/qubits 
+
+n2K = 32 . With the same CAPACITY = 3 and di ≡ 1, then a single truck cannot legally serve all 4 customers (load 4 > 3). The capacity penalty (or a hard filter) therefore discourages “one truck does everything” assignments and pushes the solution toward a split (e.g. 2+2 or 3+1 ). 
+
+Variables/constraints. As above, now with i, j ∈ { 1, 2, 3, 4}, k ∈ { 1, 2}. The same two universal constraints in (18) make ∑ 
+
+> k
+
+xi,j,k a 4 × 4 permutation matrix and the third makes capacity ∑4
+
+> j=1
+
+∑4 
+
+> i=1
+
+di xi,j,k ≤ 3 for each k.
+
+22 Index customers as i = 1 , 2, 3, 4 for nodes 2, 3, 4, 5. The distance matrix and depot legs are 
+
+W =
+
+> 
+
+0 43 .01 37 .07 23 .09 43 .01 0 30 .41 59 .08 37 .07 30 .41 0 60 .01 23 .09 59 .08 60 .01 0 
+
+> 
+
+,d(dep → i) = 
+
+> [
+
+59 .03 53 .04 78 .10 61 .41 
+
+> ]
+
+, d (i → dep) = 
+
+> [
+
+59 .03 53 .04 78 .10 61 .41 
+
+> ]
+
+.
+
+Pick the feasible colored assignment with order pos 1 7 → i=3 , pos 2 7 → i=1 , pos 3 7 →
+
+i=4 , pos 4 7 → i=2 , and truck labels per position [2 , 2, 1, 1] (so truck 2 takes the first two, truck 1 the last two). i.e. customers i = 1 , . . . , 4 grouped by vehicle label k = 1 , 2, with the following assignment 
+
+j=1 : ( i=3 , k =2) , j=2 : ( i=1 , k =2) , j=3 : ( i=4 , k =1) , j=4 : ( i=2 , k =1) 
+
+is encoded by the following one–hot blocks: pos 1 : [0 , 0, 0, 0, 0, 0, 1, 0] ,
+
+pos 2 : [0 , 0, 0, 0, 1, 0, 0, 0] ,
+
+pos 3 : [0 , 0, 0, 1, 0, 0, 0, 0] ,
+
+pos 4 : [0 , 1, 0, 0, 0, 0, 0, 0] .
+
+This is equivalent to the 32–bit string 
+
+00000010 00001000 00010000 01000000 
+
+Each 8–bit segment corresponds to one column of the global assignment tensor M 3,whose slices M (1) and M (2) reconstruct the permutation matrices in the example above. The slices are 
+
+M (1) =
+
+> 
+
+0 0 0 00 0 0 00 0 0 10 1 0 0 
+
+> 
+
+, M (2) =
+
+> 
+
+0 0 1 01 0 0 00 0 0 00 0 0 0 
+
+> 
+
+.
+
+Hence 
+
+P =
+
+> (
+
+M (1) + M (2) )⊤
+
+=
+
+> 
+
+0 1 0 00 0 0 11 0 0 00 0 1 0 
+
+> 
+
+,
+
+which is a permutation matrix. Each column and each row sums to 1, and the per-vehicle slices M (k) are disjoint 0/1 partial permutation matrices whose sum, after a transpose, gives the customer ×position permutation matrix P .
+
+# C Mechanism behind the inherited Fejér success bound 
+
+For completeness, we briefly recall the analytic mechanism behind the dimension-free finite-depth and finite-shot success bound inherited from Ref. [7]. The discussion is given in the notation of the present paper and may be read as a reference model for the routing specialization. We work on the encoded one-hot manifold 
+
+HOH := ( H1)⊗m, H1 := span {| e1⟩ , . . . , |enloc ⟩} ,
+
+where m is the number of blocks and nloc is the local alphabet size. In the CVRP con-struction of the main text one has m = n and nloc = nK , while in the PDP construction 
+
+23 one has m = T and nloc = T K . The mixer is the block-local XY unitary 
+
+UM (β) := 
+
+> m
+
+⊗
+
+> b=1
+
+e−iβ ˜H(b) 
+
+> XY
+
+,
+
+and the initial state is the uniform one-hot product state 
+
+|s0⟩ := |sblk ⟩⊗m , |sblk ⟩ := 1
+
+√nloc 
+
+> nloc
+
+∑
+
+> j=1
+
+|ej ⟩ .
+
+The depth-p CE–QAOA state is 
+
+|ψp⟩ =
+
+( p∏
+
+> r=1
+
+UM (βr) UC (γr)
+
+)
+
+|s0⟩ , UC (γ) := e−iγH C , (21) 
+
+where HC is diagonal in the computational basis {| z⟩} z∈H OH , so that 
+
+HC |z⟩ = E(z) |z⟩ .
+
+The success theorem of Ref. [7] is formulated in a lattice-normalized phase picture. Accordingly, we assume that after a known global rescaling of HC , the relevant energies admit a phase representation on the circle with controlled resolution. Fix a base angle γ
+
+and define the wrapped phase 
+
+θ(z) := γE (z) (mod 2 π).
+
+Let Ω⋆ ⊆ H OH denote the set of optimal basis strings, and let θ⋆ be the common wrapped phase of the optimal energy level. The wrapped phase separation is 
+
+δ := min  
+
+> y / ∈Ω⋆
+
+dist T
+
+(θ(y), θ ⋆), (22) 
+
+where 
+
+dist T(ϕ, φ ) := min  
+
+> k∈Z
+
+|ϕ − φ + 2 πk | ∈ [0 , π ].
+
+The main theorem applies when δ > 0. As discussed in Ref. [7], this exact phase-gap assumption may be relaxed by averaging arguments when several near-optimal levels cluster in phase. The mechanism is most transparent in a dephased reference model. Let 
+
+T (ρ) := 
+
+∫ 2π
+
+> 0
+
+dϕ 
+
+2π e−iϕH C ρ e +iϕH C
+
+be the cost-basis dephasing channel. This channel removes coherences between distinct 
+
+HC eigenspaces and leaves only the diagonal occupation weights. We use it only as an analytic baseline that exposes a positive trigonometric filter. We do not claim that the resulting surrogate dynamics is identical to the fully coherent CE–QAOA circuit. After inserting T after each layer, the diagonal evolves by a classical Markov update. Writing v(r)(z) := ⟨z| ρr |z⟩ for the diagonal distribution after r layers, one finds 
+
+v(r)(z) = ∑
+
+> y∈H OH
+
+Mβr (z|y) v(r−1) (y), Mβ (z|y) := ∣∣⟨z| UM (β) |y⟩∣∣2.
+
+Each Mβ is unistochastic and hence doubly stochastic. Iterating from the initial diagonal 
+
+v(0) (z) = | ⟨ z|s0⟩ | 2
+
+gives the dephased mixer envelope 
+
+Wp(z; β) := [Mβp · · · Mβ1 v(0) ](z). (23) 
+
+This quantity depends only on the mixer schedule and the encoded initial state. It is nonnegative and normalized on HOH . To expose the cost-phase dependence, one introduces the normalized Dirichlet polynomial 
+
+Dp(HC ) := 1
+
+√p + 1 
+
+> p
+
+∑
+
+> r=0
+
+e−irγH C . (24) 
+
+24 On a computational-basis eigenstate |z⟩ this acts by multiplication with 
+
+1
+
+√p + 1 
+
+> p
+
+∑
+
+> r=0
+
+e−irθ (z).
+
+The corresponding positive spectral weight is the Fejér kernel 
+
+Fp
+
+(θ(z) − θ⋆) := 1
+
+p + 1 
+
+∣∣∣∣∣
+
+> p
+
+∑
+
+> r=0
+
+eir (θ(z)−θ⋆)
+
+∣∣∣∣∣
+
+> 2
+
+= 1
+
+p + 1 
+
+( sin ( (p+1)( θ(z)−θ⋆)2
+
+)
+
+sin ( θ(z)−θ⋆
+
+> 2
+
+))2
+
+. (25) 
+
+Thus Fp is a nonnegative trigonometric polynomial that peaks at the target phase and suppresses off-peak phases. The dephased reference distribution is obtained by applying the positive filter to a state whose diagonal is the envelope Wp(·; β). Equivalently, one may define it directly by the normalized factorized law 
+
+> ref
+
+Pr  
+
+> p
+
+[z] := Wp(z; β) Fp(θ(z) − θ⋆)
+
+∑ 
+
+> y∈H OH
+
+Wp(y; β) Fp(θ(y) − θ⋆) . (26) 
+
+This equation isolates the two ingredients that drive the inherited success bound. The envelope Wp captures how the mixer spreads mass across the encoded manifold, while the Fejér factor favors strings whose cost phase is close to the optimal phase. It is convenient to define the optimal-set envelope weight 
+
+Cβ := ∑
+
+> x∈Ω⋆
+
+Wp(x; β). (27) 
+
+Since Fp(0) = p + 1 , the total probability of the optimal set under the reference law is bounded below by a competition between the on-peak mass (p + 1) Cβ and the off-peak contribution of all nonoptimal strings. The relevant off-peak quantity is 
+
+Mp(δ) := max  
+
+> |ϑ|≥ δ
+
+Fp(ϑ). (28) 
+
+Using the standard Fejér estimate, one has 
+
+Mp(δ) ≤ 1(p + 1) sin 2(δ/ 2) . (29) 
+
+The mechanism summarized above leads directly to the inherited success bound. 
+
+Theorem 12 (Reference Fejér factorization and success bound) . Assume that the routing specialization admits the factorized reference law (26) , and assume a positive wrapped phase separation δ > 0 in the sense of (22) . Then the success probability of sampling an optimal basis string satisfies 
+
+q0 := ref 
+
+Pr  
+
+> p
+
+[Ω ⋆] = ∑
+
+> x∈Ω⋆
+> ref
+
+Pr  
+
+> p
+
+[x] ≥ (p + 1) Cβ
+
+(p + 1) Cβ + Mp(δ)(1 − Cβ ) . (30) 
+
+In particular, the lower bound is dimension-free. It depends only on the filter order p, the phase gap δ, and the optimal-set envelope weight Cβ .Proof. Summing (26) over x ∈ Ω⋆ and using Fp(0) = p + 1 gives 
+
+q0 = (p + 1) Cβ
+
+∑ 
+
+> y∈H OH
+
+Wp(y; β) Fp(θ(y) − θ⋆) .
+
+For every y / ∈ Ω⋆, the phase-gap assumption implies Fp(θ(y) − θ⋆) ≤ Mp(δ). Hence the denominator is at most 
+
+(p + 1) Cβ + Mp(δ) ∑
+
+> y / ∈Ω⋆
+
+Wp(y; β) = ( p + 1) Cβ + Mp(δ)(1 − Cβ ),
+
+which yields (30). 
+
+25 Equation (30) immediately yields the finite-depth and finite-shot corollaries used in the main text. If one requires q0 ≥ 1 − ε, a sufficient condition is 
+
+(p + 1) 2 ≥ 1 − εε · 1 − Cβ
+
+Cβ
+
+· csc 2(δ/ 2) .
+
+Thus the filter order needed to peak on the optimum is finite whenever the phase gap is positive. Likewise, introducing 
+
+A := ( p + 1) 2 sin 2(δ/ 2) , x := A C β ,
+
+one obtains 
+
+q0 ≥ x
+
+(1 − Cβ ) + x ≥ x
+
+1 + x ,
+
+and therefore the standard one-hit estimate 
+
+S ≥ 1
+
+q0
+
+ln 1
+
+ϵ ≤
+
+> (
+
+1 + 1
+
+x
+
+> )
+
+ln 1
+
+ϵ .
+
+Hence, once (p + 1) 2 sin 2(δ/ 2) Cβ is bounded below by an inverse polynomial, polynomially many shots suffice to recover an optimum with high confidence. Finally, we stress again that the dephased Fejér construction is used here as an analytic reference mechanism. Its role is to isolate a positive trigonometric filter on cost phases and make explicit how mixer spreading and phase isolation combine to produce a dimension-free optimality bound. The coherent circuit may further reshape this weight through interference, but the reference model already identifies the key instance-dependent parameters that govern success. 
+
+C.1 Simulation Details 
+
+The one-hot manifold is prepared by a multi-block encoder 
+
+multi_block_encoder(block_sz, m_blocks) , yielding the product start state 
+
+|s0⟩ = |sblk ⟩⊗n, where each block is the uniform one-hot superposition over the S = nK 
+
+symbols. For each instance we construct a QUBO for the global-position formulation using create_cvrp_qubo_global_positions . The QUBO includes: (i) the global each-customer-once constraint as a squared affine penalty, (ii) a capacity penalty term controlled by lam_cap , and (iii) the routing objective that couples consecutive positions on the global timeline and charges depot-close/depot-open terms at vehicle-switch boundaries as in Eq. (8) . We use fixed weights 
+
+Apen = 4 .0, Bobj = 1 .0, λcap = Apen ,
+
+so the diagonal cost is 
+
+HC = Hpen + Hobj ,
+
+and the corresponding Pauli operator is generated via build_pauli_from_qubo , using the standard Ising map x 7 → (1 − Z)/2. Although HC is diagonal in the computational basis, it contains extensive cross-block couplings, notably the assignment penalty and the adjacent-position routing terms, so the phase separator e−iγH C is entangling across blocks. 
+
+Mixer. We implement a tensor product of identical block-local XY mixers: 
+
+UM (β) = 
+
+> n⊗
+> j=1
+
+U (j) 
+
+> M
+
+(β), U (j) 
+
+> M
+
+(β) = e−iβ ˜H(j) 
+
+> XY
+
+.
+
+In code this is realized by appending xy_mixer_block(block_sz, β) to each contigu-ous register segment of length S = nK . This mixer preserves the one-hot subspace by construction , ensuring that the per-position one-hot constraint is satisfied throughout the evolution (ideal kernel setting). This is crucial for ensuring that the algorithm samples from the structured encoded space rather than from the full 2n2K bitstring space. 
+
+26 Ansatz depth and parameterization. All experiments use depth p = 1 :
+
+|ψ(γ, β )⟩ = UM (β) e−iγH C |s0⟩ .
+
+We build the circuit using QAOAAnsatz with initial_state=init_state and 
+
+mixer_operator=mixer , and we explicitly identify the γ and β parameters robustly by name-matching (“gamma”, “ γ”, “beta”, “ β”) rather than by index. 
+
+Grid search. For each instance, we perform a dense uniform grid search over (γ, β ):
+
+γ ∈ linspace(0 , π, S + 1) , β ∈ linspace(0 , π, S + 1) ,
+
+where S = nK is the block size. Thus, the grid has (S + 1) 2 points, scaling as O(( nK )2).This specific choice ties the angular resolution to the local alphabet size and matches the empirical “kernel resolution” used in our CE–QAOA studies. 
+
+Shot budget. At each grid point we sample with a shots budget 
+
+Sshots = ( nK )3.
+
+We report per grid point the fraction of feasible outputs whose observed frequency exceeds this baseline ( share_above_baseline ) as a diagnostic for encoded anticoncentration rel-ative to the uniform distribution on the encoded space. 
+
+Backend and simulation model. All circuits are executed using Qiskit Aer in MPS mode. This choice allows simulation of moderately sized circuits beyond exact statevector limits, while controlling numerical cost via truncation. The bond-dimension cap (128) and truncation thresholds (typically 10 −3) were chosen to balance runtime and numerical stability. We emphasize that these truncations are part of the simulator model and therefore the reported results reflect an MPS-approximated circuit execution. 
+
+Transpilation strategy: translator path with HLS disabled. To ensure consistent circuit synthesis and to avoid high-level synthesis heuristics that may introduce variability across runs, we force the translator translation method and disable HLS by setting an empty HLSConfig(op_types=[]) . We transpile into the fixed basis gate set: 
+
+{id , rz , sx , x, cx , measure , barrier },
+
+at optimization level 3. Importantly, we transpile the parameterized template circuit once 
+
+and then perform fast parameter binding inside the grid loop: 
+
+template_tr.assign_parameters({gamma:..., beta:...}) .
+
+This avoids repeated compilation overhead and ensures that all grid points correspond to the same compiled circuit topology with only rotation angles changed. 
+
+Sampling primitive and frequency reconstruction. We use BackendSampler for circuit execution. The sampler returns quasi-distributions over bitstrings. When raw shot-count dictionaries are unavailable, we convert these to frequency proxies by 
+
+ν(b) = p(b) Sshots ,
+
+and retain only outcomes with ν(b) > 0. We emphasize that ν(b) is then a weighted frequency proxy rather than an exact hardware count. All multiplicity-based diagnostics in this paper are computed from these frequency proxies. Because key formats can be integer-encoded or string-encoded depending on backend and settings, we normalize keys to fixed-width bitstrings via a helper ( _key_to_bitstr ) that removes spaces and applies zero-padding to width Q = n2K. See implementation in Ref. [10]. 
+
+27 Exact checker. For each feasible bitstring b, the post-processor evaluates its exact rout-ing objective 
+
+E(b) = ⟨b | Hobj | b⟩
+
+(or, if desired, the full diagonal score ⟨b | HC | b⟩). PHQC then returns the feasible sample of minimum score among all samples collected across the full grid G. Thus PHQC succeeds as soon as an optimal feasible bitstring is observed at least once. 
+
+Definition 13 (Optimal feasible set at a given instance) . Let 
+
+X ⋆ := {b ∈ { 0, 1}n2K : FeasibleGlobalPositions (b) = true , E(b) = E⋆},
+
+where 
+
+E⋆ = min {E(b) : FeasibleGlobalPositions (b) = true }.
+
+For each parameter pair (β, γ ), define the optimal feasible mass 
+
+p⋆(β, γ ) := Pr 
+
+> ψp(β,γ )
+
+[ b ∈ X ⋆ ].
+
+Lemma 14 (No-hit bound at a good grid point) . Assume there exists a parameter pair 
+
+(β♯, γ ♯) ∈ G such that 
+
+p♯⋆ := p⋆(β♯, γ ♯) > 0.
+
+If PHQC draws S independent samples at each grid point, then the probability of observing no optimal feasible bitstring at the good grid point satisfies 
+
+Pr 
+
+> [
+
+no hit at (β♯, γ ♯)
+
+> ]
+
+= (1 − p♯⋆)S ≤ e−p♯⋆S .
+
+Hence 
+
+S ≥ 
+
+> ⌈
+
+ln(1 /δ )
+
+p♯⋆
+
+> ⌉
+
+=⇒ Pr 
+
+> [
+
+at least one optimal feasible hit at (β♯, γ ♯)
+
+> ]
+
+≥ 1 − δ. 
+
+Proof. Let Xr ∼ Bernoulli( p♯⋆) indicate whether shot r at (β♯, γ ♯) lands in X ⋆. Then 
+
+N⋆ =
+
+> S∑
+> r=1
+
+Xr
+
+counts optimal feasible hits at that grid point. Therefore 
+
+Pr[ N⋆ = 0] = (1 − p♯⋆)S ≤ e−p♯⋆S ,
+
+which gives the claim. 
+
+Theorem 15 (Conditional exact-recovery guarantee for PHQC) . Assume the coarse grid 
+
+G contains a parameter pair (β♯, γ ♯) with optimal feasible mass p♯⋆ > 0. Run PHQC with S
+
+shots at each grid point and let the deterministic checker return the minimum-cost feasible bitstring over all samples. Then 
+
+S ≥ 
+
+> ⌈
+
+ln(1 /δ )
+
+p♯⋆
+
+> ⌉
+
+=⇒ Pr[ PHQC returns a globally optimal feasible bitstring ] ≥ 1 − δ. 
+
+In particular, if p♯⋆ ≥ n−k for some constant k > 0, then 
+
+S = O(nk log(1 /δ )),
+
+and if moreover |G| = poly( n), the full quantum-plus-classical pipeline has polynomial shot complexity and polynomial total runtime. Proof. Since PHQC samples every parameter pair in G, it samples the good grid point 
+
+(β♯, γ ♯). By Lemma 14, with the stated shot budget the probability of observing at least one bitstring in X ⋆ at that point is at least 1−δ. The deterministic checker filters infeasible outcomes and returns the minimum-cost feasible bitstring among all observed samples. Therefore, once any bitstring from X ⋆ appears, PHQC returns the optimal solution. 
+
+28 References 
+
+[1] Sebastian Feld et al. “A Hybrid Solution Method for the Capacitated Vehicle Routing Problem Using a Quantum Annealer”. In: arXiv preprint arXiv:1811.07403 (2018). 
+
+doi : 10.48550/arXiv.1811.07403. arXiv: 1811.07403 [quant-ph] . url : https:// arxiv.org/abs/1811.07403 .[2] L. Palackal et al. “Quantum-Assisted Solution Paths for the Capacitated Vehicle Routing Problem”. In: arXiv preprint arXiv:2304.09629 (2023). 
+
+doi : 10.48550/arXiv.2304.09629. arXiv: 2304 . 09629 [quant-ph] . url :
+
+https://arxiv.org/abs/2304.09629 .[3] Christopher D. B. Bentley et al. Quantum computing for transport optimization .2022. arXiv: 2206.07313 [quant-ph] . url : https://arxiv.org/abs/2206.07313 .[4] Ningyi Xie et al. “A Feasibility-Preserved Quantum Approximate Solver for the Capacitated Vehicle Routing Problem”. In: Quantum Information Processing 23 (2024), p. 291. doi : 10.1007/s11128-024-04497-5. [5] Chinonso Onah, Roman Firt, and Kristel Michielsen. Empirical Quantum Advantage in Constrained Optimization from Encoded Unitary Designs . 2026. arXiv: 2511 . 14296 [cs.ET] . url : https://arxiv.org/abs/2511.14296 .[6] Chinonso Onah and Kristel Michielsen. Fundamental Limitations of QAOA on Con-strained Problems and a Route to Exponential Enhancement . 2025. arXiv: 2511 . 17259 [quant-ph] . url : https://arxiv.org/abs/2511.17259 .[7] Chinonso Onah and Kristel Michielsen. Finite-Depth, Finite-Shot Guarantees for Constrained Quantum Optimization via Fejér Filtering . 2026. arXiv: 2603.01809 [quant-ph] . url : https://arxiv.org/abs/2603.01809 .[8] Chinonso Onah and Kristel Michielsen. Requirements for Quantum Advantage and Quantum Utility in the Capacitated Vehicle Routing Problem . 2025. doi :10.48550/arXiv.2509.11469. arXiv: 2509.11469 [quant-ph] .[9] Eneko Osaba and Erika Villar-Rodríguez. “QOPTLib: aQuantum-Computing-Oriented Benchmark for Combinatorial Optimisation Problems”. In: Proc. Quantum Tech . 2024 . 2024. [10] Chinonso Onah. Data and Implementation: Optimal, Qubit-Efficient Quantum Vehi-cle Routing via Colored Permutations . Zenodo, 2026. doi : 10.5281/zenodo.18798145. 
+
+url : https://doi.org/10.5281/zenodo.18798145 .[11] Utkarsh Azad et al. “Solving Vehicle Routing Problem Using Quantum Approximate Optimization Algorithm”. In: IEEE Transactions on Intelligent Transportation Sys-tems 24.7 (2023), pp. 7564–7573. doi : 10.1109/TITS.2022.3172241. [12] Talha Azfar et al. Quantum-Assisted Vehicle Routing: Realizing QAOA-Based Ap-proach on Gate-Based Quantum Computer . arXiv preprint. 2025. arXiv: 2505.01614 [quant-ph] .[13] David Fitzek et al. “Applying Quantum Approximate Optimization to the Hetero-geneous Vehicle Routing Problem”. In: Scientific Reports 14.1 (2024), p. 25415. doi :10.1038/s41598-024-76967-w. [14] Stuart Hadfield et al. “From the Quantum Approximate Optimization Algorithm to a Quantum Alternating Operator Ansatz”. In: Algorithms 12.2 (2019), p. 34. doi :10.3390/a12020034. 
+
+29 [15] Franz G. Fuchs and Ruben Pariente Bassa. “Constraint Preserving Mixers for the Quantum Approximate Optimization Algorithm”. In: Algorithms 15.6 (2022), p. 202. 
+
+doi : 10.3390/a15060202. [16] B. Tsvelikhovskiy, I. Safro, and Y. Alexeev. “Symmetries and Dimension Reduction in Quantum Approximate Optimization Algorithm”. Version 2. In: arXiv preprint arXiv:2309.13787 (2023). arXiv: 2309.13787 [quant-ph] . url : https://arxiv. org/abs/2309.13787 .[17] Gushu Li, Yufei Ding, and Yuan Xie. “On the Co-Design of Quantum Software and Hardware”. In: ICCAD ’21: IEEE/ACM International Conference on Computer-Aided Design . 2021. doi : 10.1145/3477206.3477464. [18] M. Ayrton et al. Qiskit: An Open-source Framework for Quantum Computing . Ver-sion 0.47. 2023. url : https://qiskit.org .[19] Guifré Vidal. “Efficient Classical Simulation of Slightly Entangled Quantum Computations”. In: Phys. Rev. Lett. 91.14 (2003), p. 147902. doi :10.1103/PhysRevLett.91.147902. [20] Gurobi Optimization, LLC. Gurobi Optimizer Reference Manual . 2026. url : https: //www.gurobi.com .[21] Artur Pessoa et al. “A Generic Exact Solver for Vehicle Routing and Related Problems”. In: Mathematical Programming 183.1–2 (2020), pp. 483–523. doi :10.1007/s10107-020-01523-z. [22] Thibaut Vidal et al. “A Unified Solution Framework for Multi-Attribute Vehicle Routing Problems”. In: European Journal of Operational Research 234.3 (2014), pp. 658–673. doi : 10.1016/j.ejor.2013.09.045. [23] DIMACS. 12th DIMACS Implementation Challenge: CVRP Track . https://dimacs .rutgers.edu/files/1815/9845/6740/CVRP_Competition_Rules.pdf . Accessed: 2026-04-04. 2021. [24] CVRPLIB. All Instances . https://galgos.inf.puc-rio.br/cvrplib/en/instan ces . Accessed: 2026-04-04. 2026. 
+
+30

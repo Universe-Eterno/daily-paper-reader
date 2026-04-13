@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.09001v1/fig-001.webp",
+      "caption": "Figure 1: Overview of HyMUSE. HyMUSE is a domain-agnostic method to accelerate MUS/MSS enumeration using Hypergraph Neural Networks (HGNNs). HyMUSE constructs a hypergraph whose vertices are constraints and whose hyperedges are MUSes and MCSes (only MUSes are illustrated in this figure). The HGNN-based agent takes the hypergraph of MUSes/MCSes enumerated until the current step and the subset of constraints to shrink/grow as input, and outputs a tentative MUS/MSS candidate. The candidate is then corrected to a valid MUS/MSS. The agent is trained via reinforcement learning with reward designed to minimize the number of calls to the satisfiability checking oracle required for the correction.",
+      "page": 2,
+      "index": 1,
+      "width": 1014,
+      "height": 296
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09001v1/fig-002.webp",
+      "caption": "Figure 2: Architecture of Hypergraph Neural Networks. The input is the MUS/MCS hypergraph and the subset of constraints to be shrunk/grown, shown as gray-colored nodes. The feature vectors of vertices are initialized with spectral embeddings based on the hypergraph Laplacian and updated by AllSetTransformer layers. Then, the feature vectors of constraints in the action candidate set are updated separately by two transformer decoders to output the policy and value.",
+      "page": 4,
+      "index": 2,
+      "width": 1014,
+      "height": 320
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09001v1/fig-003.webp",
+      "caption": "Table 2: The Number of MUSes/MSSes with and without the Agent and the Improvement Ratio on Different Datasets at 10k Checks. The number of MUSes/MSSes and the improvement ratio are averaged across instances in each dataset and shown with standard deviation.",
+      "page": 9,
+      "index": 3,
+      "width": 465,
+      "height": 280
+    }
+  ]
+}

@@ -1,0 +1,1222 @@
+Title: A column-generation approach for an electricity technician routing and scheduling problem with a lexicographic objective
+
+URL Source: https://arxiv.org/pdf/2604.05153v1
+
+Published Time: Wed, 08 Apr 2026 00:11:46 GMT
+
+Number of Pages: 28
+
+Markdown Content:
+A COLUMN-GENERATION APPROACH FOR AN ELECTRICITY TECHNICIAN ROUTING AND SCHEDULING PROBLEM WITH A LEXICOGRAPHIC OBJECTIVE 
+
+ELISE BANGERTER, DAVID SCHINDL, MERITXELL PACHECO PANEQUE, NOUR ELHOUDA TELLACHE, AND RODOLPHE GRISET 
+
+Abstract. Electric utility companies perform numerous technical interventions every day. Since it is generally not possible to complete all planned interventions within a single day, companies face two objectives: maximizing the total duration of completed interventions (primary objective) and minimizing the associated operational cost (secondary objective). In this paper, we introduce a multi-objective variant of the technician routing and scheduling problem in which both objectives are optimized in lexicographic order. We propose a compact mixed-integer linear formulation and an extended set-packing-based formulation. To handle the objectives within a single-objective framework, we consider weighted-sum reformulations that preserve lexicographic priorities as well as sequential reformulations that individually optimize each objective while maintaining the optimal value of higher-priority ones. For the extended formulation, we develop an exact column-generation-based algorithm, in which the pricing subproblems are solved via a labeling algorithm based on dynamic programming. As technician schedules are typically generated on a daily basis, the algorithm is designed to deliver high-quality solutions within short computation times (e.g., 5 minutes). Computational experiments on real-life instances provided by the French electric utility company show that the CG-based algorithm proves optimality on a larger number of small instances than the compact formulation and consistently outperforms it on larger instances. In particular, the sequential CG-based variant finds the best-known solutions on more instances and achieves lower mean gaps relative to the best solution found in each instance category. 
+
+1. Introduction 
+
+The operation and maintenance of electricity distribution networks involve numerous technical interventions performed daily. Electric utility companies aim to execute these interventions efficiently while minimizing the associated operational costs. The problem addressed in this paper arises in this context and originates from a technician routing and scheduling problem (TRSP) at Électricité de France (EDF), the French electric utility company. Specifically, we consider a crew of technicians and a set of interventions that might be performed in a given day. Technicians are pre-assigned into fixed teams that stay together in the same vehicle for the entire day. Each intervention has a time window and a set of required skills, and each team has an associated skill profile. The problem is to assign teams to interventions and dispatch them on routes that satisfy skill requirements, respect time windows, and comply with additional operational constraints such as a mandatory lunch break and workload limits. Since it is generally not possible to complete all interventions within a single day, minimizing total operational cost alone would not be a meaningful objective. Indeed, if the only goal were to minimize costs, and no constraints required any interventions to be performed, the optimal solution would be to perform none, resulting in zero cost. Unperformed interventions result in 
+
+Key words and phrases. Column generation; Lexicographic optimization; Technician routing and scheduling; Mixed-integer linear programming; Dynamic programming; Resource-constrained shortest path problems. 
+
+> 1
+> arXiv:2604.05153v1 [math.OC] 6 Apr 2026
+
+unmet contractual obligations or delayed service, so maximizing coverage is essential. Therefore, the problem features two objectives: the primary objective is to maximize the total duration of covered interventions, and the secondary objective is to minimize total operational cost, including personnel and distance-based travel expenses. Multi-objective optimization methods typically aim to explore trade-offs between conflicting objectives, often represented by the Pareto front. These methods are well-suited when objectives are considered equally important or when a balance between them is desired. In contrast, lexicographic optimization imposes a strict priority order among objectives. Rather than seeking compromise, the primary objective is optimized first, and secondary objectives are only considered when multiple solutions yield the same value for higher-priority objectives. This structure induces a total order over the solution space, meaning that the concept of a Pareto front does not apply. This problem can be seen as a variant of the TRSP, distinguished primarily by its lexicographic objective function. To the best of our knowledge, the TRSP with lexicographically-ordered objectives has not yet been addressed in the literature. It also incorporates operational constraints specific to EDF, particularly technician workload limitations to deal with unexpected events, and allows certain interventions, classified as long, to be interrupted for lunch breaks. In this paper, we propose two mathematical formulations for the problem: a compact formulation and a set-packing formulation. We consider two strategies to handle the lexicographic objective function within a single-objective framework: a weighted reformulation that enforces the lexicographic hierarchy of objectives, and a sequential reformulation in which objectives are optimized one at a time subject to preserving previously attained optimal values. For the set-packing formulation, we develop a column-generation (CG)–based algorithm that is adapted to both reformulations. While our approach includes heuristic components to guide the search, it remains an exact method based on CG. The proposed reformulations and CG-based algorithm variants are evaluated through an extensive computational study based on real operational data provided by EDF. The experiments assess both solution quality and computational efficiency under time constraints representative of practical settings, with a particular emphasis on short runtimes required for daily planning. The performance of the CG–based algorithm is compared with that of the compact formulation across a range of instance sizes, including standardized test sets and large real-life instances, allowing us to analyze scalability and robustness under realistic operational conditions. To sum up, the main contributions of this paper are threefold. First, we introduce a multi-objective variant of the TRSP with a strict lexicographic ordering of objectives, in which intervention coverage takes priority over operational cost. Second, we propose two mixed-integer linear programming (MILP) formulations (compact and set-packing) and develop two single-objective reformulations for each (weighted and sequential) that preserve the lexicographic hierarchy. Third, we design an exact CG-based algorithm for the set-packing formulation, which can also be applied heuristically for large instances under a restricted time budget. In addition, all proposed solution methodologies are evaluated on a set of instances derived from real-life operational data provided by EDF that have been standardized to enable meaningful computational comparisons. The remainder of the paper is organized as follows. Section 2 reviews the related literature. Section 3 formally defines the problem. Section 4 presents the compact and set-packing formulations. Sections 5 and 6 describe the proposed single-objective reformulations and the CG-based algorithm, respectively. Section 7 reports the computational experiments and discusses 
+
+> 2
+
+managerial insights derived from the obtained solutions. Finally, Section 8 concludes the paper and outlines directions for future work. 2. Literature review 
+
+The TRSP is a specific application within the broader class of workforce scheduling and routing problems (WSRP). WSRPs involve the scheduling and routing of skilled personnel to carry out tasks at different locations. Examples include home healthcare, where nurses visit patients to provide treatment; security services, where guards perform patrols across different sites; and technical field services, where technicians handle installations, maintenance, or repairs. We refer the reader to [1] for a review of WSRPs. The earliest work to our knowledge that addresses the TRSP is presented by [ 2], in which a set of tasks must be performed in a day by a team of engineers at British Telecom. Each task is defined by its location, duration, and temporal constraints, indicating whether it must be scheduled in the morning, afternoon, as the first or last task of the day, or at any time. Engineers are characterized by their base location, working hours (start and end times), overtime limits, and a skill level represented by a coefficient between 0 and 1, indicating the proportion of the task duration required based on their expertise. The objective is to schedule and route engineers such that all constraints are satisfied while minimizing the total operational cost. To address this problem, the authors propose a local search-based heuristic. A more general variant is studied in [ 3], where technicians are characterized by multiple skills, each with an associated proficiency level. Tasks require specific skills at or above certain minimum levels, and may be outsourced if no available technician meets the requirements. The authors consider two problem settings: one involving team formation, in which technicians are grouped into fixed teams that remain together throughout the day; and another without team formation, where each technician operates independently. The objective is to minimize the total cost, including both travel and outsourcing expenses. To solve the problem, the authors use an adaptive large neighborhood search (ALNS) algorithm. Pillac et al. [ 4] address a more constrained variant incorporating resource management into the problem. In their formulation, each technician is equipped with a set of tools and spare parts, while each task requires a specific subset of these items. Tools are considered as renewable resources, whereas spare parts are considered non-renewable. Technicians start their routes from home with an initial stock of resources and may replenish them during the day at a central depot. To tackle this setting, the authors propose a matheuristic approach that integrates a constructive heuristic, a parallel ALNS, and mathematical programming. Mathlouthi et al.[ 5, 6] consider a variant of the TRSP, referred to as the multi-attribute TRSP, which integrates resource management for spare and special parts, as well as multiple time windows for each task. The objective is to maximize total profit, defined as the revenue from completed tasks minus operational costs related to travel and technician overtime. The authors propose a MILP model in [ 5], and a branch-and-price algorithm in [ 6], where the master problem is formulated as a set packing model and the pricing subproblem as an elementary shortest path problem with resource constraints (ESPPRC). The pricing subproblem is solved using the algorithm proposed by [7], which is based on the Desrochers’ label correcting algorithm [8]. In [ 9], the authors investigate a multi-period, multi-depot variant of the TRSP, where the planning horizon extends over several days, and task time windows may also span multiple days. Technicians are allowed to start and end their routes either from their homes or from a central depot, with the possibility of differing start and end locations. Additionally, technician availability can vary across days. The objective is to minimize the total distance traveled. To 
+
+> 3
+
+solve the problem, the authors propose a branch-and-price algorithm, in which the pricing subproblem is modeled as an ESPPRC. They employ both exact and heuristic methods for solving the ESPPRC. The exact method adapts the dynamic programming algorithm of [ 7], which in turn builds on the work of [ 10 ]. In [ 11 ], the authors also address a multi-period TRSP, extending the problem to include daily team formation in addition to technician-task assignment and routing decisions. The objective is to minimize total operational costs, which include travel expenses, customer waiting times, and technician overtime. The authors propose a mixed-integer programming model and a branch-and-price algorithm, exploring two different decomposition strategies. The pricing subproblem is also formulated as an ESPPRC and solved using a dynamic programming approach similar to that of [7]. The authors in [ 12 ] address a variant of the TRSP that incorporates soft time windows. The objective is to minimize a total cost function that accounts for time-window violations, total travel time, and penalties for unserved tasks. To solve the problem, they propose a branch-and-price algorithm, in which the pricing subproblem is handled using constraint programming. In [ 13 ], the authors investigate an overnight variant of the TRSP, where technicians are allowed to perform multi-day tours, spending the night in one of the serviced communities before continuing to a new community the following day. The objective is to minimize the sum of the travel expenses, technician work-hour costs, penalties for community waiting time, and overtime costs based on delays in returning to the depot. To address this problem, they propose a metaheuristic based on the invasive weed optimization algorithm. The authors in [ 14 ] address the TRSP with the constraints related to the availability of spare parts and necessary tools, aiming to minimize the overall operational cost. To solve the problem, they develop an enhanced iterated local search algorithm that integrates local search operators, removal heuristics, a best insertion strategy, and an intensification/diversification mechanism based on an elite set of solutions. The dynamic variant of the TRSP is addressed by [ 15 ], where some tasks are known in advance while others arrive dynamically. The authors adopt a tactical planning approach that schedules the known tasks in a way that minimizes overall driving distance, while preserving flexibility to ensure short response times for dynamically arriving tasks. As discussed above, existing variants of the TRSP have been formulated with a single objective function. Since our problem involves a lexicographic objective function and is addressed using CG, we next review studies that apply CG to lexicographic optimization in different application domains. In [ 16 , 17 ], the authors address the preferential bidding system problem, which involves building crew schedules while maximizing their scores in strict order of seniority. Each crew member is assigned an objective function representing their score, which is then optimized lexicographically based on seniority. The authors explain that a weighting approach—where the problem is transformed into a single-objective function using weights—cannot be applied because the weights must increase exponentially with the number of crew members to preserve the lexicographic order. This results in excessively large weights that cannot be handled by any machine for realistic instances. Consequently, they conclude that a sequential approach is necessary. In this approach, the problem is first solved with the objective function of the most senior crew member, then it is solved with the objective function of the second most senior, without reducing the objective of the most senior crew member, and so on. Since solving the problem with integrality constraints at each iteration is computationally expensive, certain integrality conditions are relaxed, which may lead to time-consuming backtracking to ensure feasibility. In [ 18 ], the authors also apply a sequential approach to a bin-packing problem with five objective functions, optimized in lexicographic order. They develop a branch-and-price 
+
+> 4
+
+algorithm for each single-objective stage. In [ 19 ], the authors proposed a weighted approach for a variant of the minimum path cover problem with two objectives. The primary objective is to maximize the number of covered nodes, while the secondary objective is to cover this maximum number of nodes using a minimum number of node-disjoint feasible paths. The problem is solved using a branch-and-cut approach. More recently, [ 20 ] introduces a lexicographic CG approach that considers all objectives simultaneously when generating new columns. This approach, applied to the preferential bidding system, yields promising results compared to the sequential approach, especially in cases involving backtracking. It also avoids the numerical problems caused by the use of large weights. 3. Problem Description 
+
+We denote by I the set of technical interventions that may be performed on a given work day. Each intervention i has a duration di and a time window [si, e i], where si and ei represent the earliest start and latest completion times, respectively. An intervention is classified as long if 
+
+di ≥ 120 minutes and short otherwise. We introduce the binary indicator θi, which equals 1 if intervention i is long and 0 otherwise. To perform the interventions, technicians are grouped into teams, which may consist of a single technician, and each team is assigned a vehicle. For this reason,we use vehicle and team 
+
+interchangeably and denote the set of vehicles/teams by V. The subset Iv ⊆ I denotes the set of interventions that vehicle v ∈ V can perform, based on its technicians’ skills. Each vehicle v follows a route that begins and ends at its designated depot, denoted by 
+
+σv. However, not all vehicles need to operate on a given day; some teams may not work and their vehicles may remain at the depot. The set of all depots is defined as D = ⋃ 
+
+> v∈V
+
+{σv}.Consequently, the set of nodes (i.e., physical locations) in the network is given by N = I ∪ D ,while the nodes that vehicle v can visit are Nv = Iv ∪ { σv} ⊆ N . The network is fully connected with bidirectional arcs between all nodes i, j ∈ N ; ℓij denotes the distance between them and 
+
+tij the travel time, which satisfies the triangle inequality. The work day is divided into two halves—morning and afternoon—with a lunch break in between. Since all technicians take lunch at the same time and interventions cannot be scheduled during this period, the endpoint of the morning ( MD ) coincides exactly with the start of the afternoon. Interventions are non-preemptible, except for long interventions, which may span the lunch break (i.e., the lunch break is the only allowed interruption). Short interventions must be completed within a single half-day. Vehicles must return to their designated depots before the end of the afternoon (ED). As mentioned above, a work day encompasses both work and travel time. While the total duration of each day is globally bounded, additional constraints may be imposed on a set K
+
+of subintervals into which the work day is divided, in order to further limit the workload of a team within each subinterval. To model these constraints in a generic way, we treat subintervals as resources: qik ≥ 0 represents the amount of resource k (i.e., time within subinterval k)consumed by intervention i, and mvk denotes the capacity of vehicle v on resource k. Note that qik > 0 only when the time window of intervention i lies within subinterval k. These additional resource constraints were introduced by EDF to allow buffer adjustments within each interval—by reducing the capacities mvk —since the model does not explicitly account for real-world uncertainties in travel or intervention durations. The goal is to determine feasible vehicle routes that optimize, in strict lexicographic order: (1) the total duration of interventions performed during the day (to be maximized), and (2) vehicle-related costs, including personnel expenses and distance-based travel costs (to be minimized). 
+
+> 5
+
+The total personnel cost associated with vehicle v is denoted by gv, and the cost per unit of distance traveled (per kilometer) is represented by δ. A summary of the introduced notation is provided in Table 1. 
+
+Table 1. Summary of the notation introduced in the problem definition. 
+
+Notation Description 
+
+I Set of interventions 
+
+V Set of vehicles (teams of technicians) 
+
+Iv ⊆ I Set of interventions that can be done by vehicle v ∈ V Vi ⊆ V Set of vehicles that can do intervention i ∈ I D Set of vehicle depots 
+
+N Set of nodes ( N = I ∪ D )
+
+σv Depot associated with vehicle v ∈ V Nv ⊆ N Set of nodes that can be visited by vehicle v ∈ V (Nv = Iv ∪ { σv})
+
+K Set of intervals (not necessarily disjoint) of the work day 
+
+di Duration (in minutes) of intervention i ∈ I 
+
+si Earliest start time of intervention i ∈ I 
+
+ei Latest completion time of intervention i ∈ I 
+
+θi Indicator that is 1 if intervention i ∈ I is long (i.e., di ≥ 120 ) and 0 otherwise 
+
+ℓij Distance between i ∈ N and j ∈ N (in km) 
+
+tij Travel time between i ∈ N and j ∈ N (in minutes) MD End of the morning half of the work day ED End of the afternoon half of the work day 
+
+qik Time consumption of intervention i ∈ I on resource k ∈ K 
+
+mvk Capacity of vehicle v ∈ V and resource k ∈ K 
+
+gv Daily technician cost associated with vehicle v ∈ V (in km) 
+
+δ Cost per unit distance ( e/km) 4. Mathematical formulation 
+
+In this section, we introduce two mathematical formulations of our problem: a compact formulation (Section 4.1) and an extended formulation based on Dantzig–Wolfe decomposition (Section 4.2). 4.1. Compact Formulation. To formulate the problem as a compact MILP model, we define the following binary variables: 
+
+xijv =
+
+ß 1 if vehicle v goes from node i to node j, 
+
+0 otherwise, ∀i, j ∈ N v, v ∈ V , i ̸ = j, zi =
+
+ß 1 if intervention i starts in the afternoon, 
+
+0 otherwise, ∀i ∈ I : θi = 0 ,
+
+and the continuous variable: 
+
+ui ∈ R≥0 : start time of intervention i, ∀i ∈ I .
+
+Note that zi is defined only for short interventions (i.e., θi = 0 ), that must start and finish within the same half-day. 
+
+> 6
+
+The objective function consists of two components that must be considered in lexicographical order. The first objective function, to be maximized, is the total duration of interventions assigned across all vehicles: 
+
+f 1 
+
+> c
+
+= ∑
+
+> v∈V
+> ∑
+> i∈I v
+> ∑
+> j∈N v
+
+di · xijv . (1) The second objective function minimizes the operational cost, which includes both the travel costs between locations and the fixed costs of using vehicles: 
+
+f 2 
+
+> c
+
+= ∑
+
+> v∈V
+> ∑
+> i∈N v
+> ∑
+> j∈N v
+
+ℓij · δ · xijv + ∑
+
+> v∈V
+> ∑
+> i∈N v
+
+gv · xσv iv . (2) The compact MILP formulation can be written as follows. lexmax 
+
+Å f 1
+
+> c
+
+−f 2
+
+> c
+
+ã
+
+(3a) s.t. ∑ 
+
+> v∈V i
+> ∑
+> j∈N v\{ i}
+
+xijv ≤ 1 ∀i ∈ I (3b)   
+
+> ∑
+> j∈N v,j ̸=i
+
+(xijv − xjiv ) = 0 ∀v ∈ V , i ∈ N v (3c) 
+
+> ∑
+> j∈N v
+
+xσv jv ≤ 1 ∀v ∈ V (3d) 
+
+ui − ei + ( ei + di + tij ) · ∑
+
+> v∈V i∩V j
+
+xijv ≤ uj ∀i, j ∈ I , i ̸ = j (3e) 
+
+tσv i · xσv iv ≤ ui ∀v ∈ D , i ∈ I v (3f) 
+
+ui + di + tiσ v · xiσ v v ≤ ED ∀v ∈ V , i ∈ I v (3g) 
+
+si ≤ ui ∀i ∈ I (3h) 
+
+ui + di ≤ ei ∀i ∈ I (3i) 
+
+ui + di ≤ MD + ( ED − MD ) · zi ∀i ∈ I : θi = 0 (3j) 
+
+ui ≥ MD · zi ∀i ∈ I : θi = 0 (3k)  
+
+> ∑
+> i∈I v
+> ∑
+> j∈N v
+> j̸=i
+
+qik · xijv ≤ mvk ∀v ∈ V , k ∈ K (3l) 
+
+xijv ∈ { 0, 1} ∀v ∈ V , i, j ∈ N v, i ̸ = j (3m) 
+
+zi ∈ { 0, 1} ∀i ∈ I : θi = 0 (3n) 
+
+ui ∈ R≥0 ∀i ∈ I (3o) Objective (3a) implements the lexicographic optimization: the model first maximizes the total duration of completed interventions and, among all optimal solutions for this criterion, selects the one with minimum operational cost. Constraints (3b) ensure that each intervention is performed at most once. Constraints (3c) enforce route consistency for each vehicle by preserving the flow entering and leaving every node. Constraints (3d) require each vehicle to depart from its associated depot at most once. Constraints (3e) impose temporal feasibility: if intervention j
+
+follows intervention i on a vehicle’s route, then the start time of intervention j must be no earlier than the end of intervention i plus the corresponding travel time. Constraints (3f) define the earliest feasible start time of the first intervention assigned to a vehicle. Note that constraints (3e) and (3f) prevent subtours, as the start times of interventions are propagated through the precedence relations between them. Combined with the flow constraints (3c) , they 
+
+> 7
+
+further ensure that each vehicle must pass through its designated depot. In particular, because the depot does not appear in the temporal linking constraints (3e) , and every visited node must satisfy the flow-balance conditions in (3c) , the first and last interventions assigned to a vehicle must be connected to the depot. Constraints (3g) limit the total working and travel time to the duration of the work day (i.e., until ED ). Constraints (3h) and (3i) ensure compliance with the time window associated with each intervention. Constraints (3j) and (3k) enforce that zi = 1 if and only if a short intervention i begins in the afternoon. Finally, constraints (3l) require that, for each vehicle and each interval, the total amount of consumed resource does not exceed the available capacity. 4.2. Extended formulation. We also propose an extended formulation based on the well-known set-packing formulation often used in routing problems. In this formulation, variables representing trips between pairs of nodes are replaced by variables representing the entire routes. In our case, these route variables additionally encode the timing of interventions and an indicator for whether a given intervention is scheduled in the afternoon. These features are captured by the variables ui and zi from the compact MILP formulation, respectively. Formally, let Rv denote the set of all feasible routes that vehicle v can perform in a single day, taking into account location constraints, time windows, the lunch break and resource capacities. Each route r ∈ R v thus corresponds to a feasible assignment of variables x, u, and z that satisfy constraints (3c)–(3l). In the set-packing formulation, the original variables x, u, and z are replaced by a new set of binary variables {λrv | r ∈ R v, v ∈ V} , where λrv = 1 if and only if route r is selected for vehicle v in the final solution. The variables λ capture key information associated with the variables x, u, and z from the compact formulation. For a given route r and vehicle v, we precompute the following data: 
+
+• air = 1 if intervention i is included in route r, and 0 otherwise; 
+
+• Dr: the total duration, in minutes, of all interventions included in route r;
+
+• cr: the total cost associated with route r, including both travel and technician costs. The objective functions f 1 
+
+> c
+
+and f 2 
+
+> c
+
+can then be expressed in terms of the λ variables: 
+
+f 1 
+
+> e
+
+= ∑
+
+> v∈V
+> ∑
+> r∈R v
+
+Dr · λrv , (4a) 
+
+f 2 
+
+> e
+
+= ∑
+
+> v∈V
+> ∑
+> r∈R v
+
+cr · λrv . (4b) Using this reformulation, the model (3a)–(3o) can be expressed as: lexmax 
+
+Å f 1
+
+> e
+
+−f 2
+
+> e
+
+ã
+
+(5a) s.t. ∑
+
+> v∈V
+> ∑
+> r∈R v
+
+air λrv ≤ 1 ∀i ∈ I (5b) 
+
+> ∑
+> r∈R v
+
+λrv ≤ 1 ∀v ∈ V (5c) 
+
+λrv ∈ { 0, 1} ∀v ∈ V , r ∈ R v (5d) Formulation (5a)–(5d) involves an exponential number of route variables. Nevertheless, such formulations generally provide stronger linear relaxations that can be solved efficiently by dynamically generating route variables using a CG-based procedure, which is described in Section 6. 
+
+> 8
+
+5. Single-objective reformulations of the lexicographic TRSP 
+
+Classical approaches for solving multi-objective optimization problems typically transform them into a sequence of single-objective problems. A common technique is the weighted-sum method [ 21 ], which aggregates multiple objectives into a single scalar objective. Another common approach is the ϵ-constrained method [ 22 ], which optimizes one objective while enforcing bounds on the others (i.e., treating them as constraints). Lexicographic optimization, in contrast, treats objectives according to a strict hierarchical order. A lexicographically optimal solution dominates all others with respect to this predefined hierarchy. When classical techniques such as the weighted-sum method are applied in this context, the goal is not to explore trade-offs but to determine weights that enforce the hierarchy. In this section, we adapt two approaches to handle the lexicographic objective function of our TRSP. In Section 5.1, we detail how the weighted-sum method can be modified to respect lexicographic priorities through appropriate weight selection. In Section 5.2, we present a sequential approach inspired by the ϵ-constrained method, which optimizes objectives in priority order while preserving the optimal value of higher-priority objectives. 5.1. Weighted approach. In this approach, the objective function combines both components into a single term using a big-M constant as a weighting factor: max M · f 1 − f 2. (6) The value of M must ensure that maximizing the total amount of time dedicated to interventions is always prioritized over minimizing vehicle costs. As will be discussed in Section 5.2, M
+
+should be chosen as small as possible while still enforcing the required strict hierarchy between objectives. The value we employ is 
+
+M =
+
+ñ
+
+|V| · 
+
+
+
+ED − min  
+
+> i∈I
+
+di
+
+
+
+· max  
+
+> i,j ∈N ,i ̸=j
+
+ℓij 
+
+tij 
+
+· δ +
+
+Ç∑
+
+> v∈V
+
+gv − min  
+
+> v∈V
+
+gv
+
+åô 
+
+· 1gcd {di, ∀i ∈ I} + 1 . (7) For convenience, let I = |I| and V = |V| , and denote by M0 the expression inside the square brackets in (7) . We now argue that M0 provides an upper bound on the possible increase in vehicle costs associated with a one-unit increase in total intervention time. If the increase is from zero to one unit of intervention time, the bound is trivially valid, as only one vehicle is required. Otherwise, we may assume that at least one intervention is being performed and one vehicle is already in use in the incumbent solution. The first term of M0 corresponds to the worst-case additional operational cost: all V vehicles operate for the entire day while performing at least one intervention, each traveling along the most expensive street segment per time unit. The second term represents the maximum possible increment in personnel costs. Because intervention durations can only increase in multiples of gcd {di, ∀i ∈ I} ,and the objective multiplies the total intervention time by M , we may safely divide M0 by this 
+
+gcd , as shown in equation (7). Finally, we add 1 to this value to ensure strict lexicographic order between objectives. To illustrate that the upper bound M0 can in principle be attained, consider the following worst-case scenario. Let I = V , and assume that every intervention has duration di = 1 for all 
+
+i ∈ I , and that all vehicles have identical personnel cost gv = g. We assume that vehicle v = 1 
+
+is capable of performing any intervention, whereas each vehicle v ∈ { 2, . . . , V } can perform only intervention i = v. The geographical layout is such that tσii = tiσ i = ED −12 for all i ∈ I , while 
+
+tσ1i = tiσ 1 = 0 for all i ∈ { 2, . . . , I }; moreover, all ratios ℓij  
+
+> tij
+
+are identical. Consider solution A, in which vehicle 1 executes all interventions except i = 1 , yielding a total intervention duration 
+
+> 9
+
+of V − 1 and a vehicle cost of g. In contrast, solution B assigns each vehicle v to intervention 
+
+i = v, achieving a total intervention duration of V but incurring a total vehicle cost of M0 + g.Hence, switching from solution A to solution B increases the completed intervention duration by exactly one unit, while increasing vehicle-related costs by precisely M0.5.1.1. Compact Formulation. In the compact formulation, the weighted objective function (6) translates into the expression given in (8) . The first term rewards executed interventions in proportion to their durations, multiplied by the constant M , which enforces the strict priority of maximizing completed intervention time. The second term penalizes vehicle usage, capturing both travel-related operational costs and personnel costs. The constant M is computed from the input data and ensures that intervention coverage is prioritized over cost minimization. max ∑ 
+
+> v∈V
+> ∑
+> i∈I v
+> ∑
+> j∈N v
+> j̸=i
+
+M · di · xijv −
+
+Ö 
+
+> ∑
+> v∈V
+> ∑
+> i∈N v
+> ∑
+> j∈N v
+> j̸=i
+
+ℓij · δ · xijv + ∑
+
+> v∈V
+> ∑
+> i∈N v
+
+xσv iv · gv
+
+è
+
+(8) s.t. (3b) − (3o) 5.1.2. Extended Formulation. In the extended formulation, the weighted objective function (6) is expressed in terms of route variables, as shown in (9) . Each selected route r ∈ R v contributes Dr
+
+units of intervention time and incurs a routing cost cr. The term M ·Dr enforces the lexicographic priority of maximizing completed intervention time, while the second term aggregates all routing costs. As in the compact formulation, the constant M guarantees that intervention coverage dominates cost minimization. max ∑
+
+> v∈V
+> ∑
+> r∈R v
+
+M · Dr · λrv − ∑
+
+> v∈V
+> ∑
+> r∈R v
+
+cr · λrv (9) s.t. (5b) − (5d) 5.2. Sequential Approach. A weighted formulation allows us to express the problem as a MILP model with a single objective function, but it requires the use of a data-dependent weighting coefficient M . Since M must enforce strict lexicographic priority, it often becomes very large in practice, which may severely affect numerical performance. As is well known, such large coefficients can cause numerical instability in MILP solvers, leading to poor convergence, rounding errors, and loss of precision (see, e.g., [ 23 ]). These difficulties become even more pronounced in our extended formulation, where the problem is solved via a CG scheme. Similar issues have been documented in the literature. For example, [ 24 ] studies a pickup-and-delivery problem with time windows in which a very large fixed vehicle cost W (ensuring that minimizing the fleet size takes precedence over routing cost) leads to numerical instability and slow convergence within the CG process. To overcome these limitations, we propose a sequential optimization approach that avoids the use of big-M coefficients altogether. In this method, objectives are optimized one at a time according to their predefined priority. At each stage, the current objective is optimized while preserving the optimal values already achieved for all higher-priority objectives. 
+
+> 10
+
+5.2.1. Compact Formulation. In the first phase, the total duration of performed interventions is maximized: max f 1 
+
+> c
+
+= ∑ 
+
+> v∈V
+> ∑
+> i∈I v
+> ∑
+> j∈N v
+> j̸=i
+
+di · xijv (10) s.t. (3b) − (3o) Let d∗ 
+
+> c
+
+denote the optimal value of f 1 
+
+> c
+
+. In the second phase, the secondary objective minimizes the total operational cost while enforcing the primary objective’s optimal value: min f 2 
+
+> c
+
+= ∑
+
+> v∈V
+> ∑
+> i∈N v
+> ∑
+> j∈N v
+
+ℓij · δ · xijv + ∑
+
+> v∈V
+> ∑
+> i∈N v
+
+gv · xσv iv (11a) s.t. (3b) − (3o)  
+
+> ∑
+> v∈V
+> ∑
+> i∈I v
+> ∑
+> j∈N v
+> j̸=i
+
+di · xijv ≥ d∗ 
+
+> c
+
+(11b) Constraint (11b) ensures that the total duration of completed interventions remains at least d∗ 
+
+> c
+
+,thereby preserving the optimal value of the primary objective. 5.2.2. Extended Formulation. Similarly, in the first phase, the total duration of completed interventions is maximized using route-based variables: max f 1 
+
+> e
+
+= ∑
+
+> v∈V
+> ∑
+> r∈R v
+
+Dr · λrv (12) s.t. (5b) − (5d) Let d∗ 
+
+> e
+
+denote the optimal value of f 1 
+
+> e
+
+. In the second phase, the secondary objective minimizes the total cost of the selected routes while maintaining the primary objective’s optimal value: min f 2 
+
+> e
+
+= ∑
+
+> v∈V
+> ∑
+> r∈R v
+
+cr · λrv (13a) s.t. (5b) − (5d) 
+
+> ∑
+> v∈V
+> ∑
+> r∈R v
+
+Dr · λrv ≥ d∗ 
+
+> e
+
+(13b) Constraint (13b) plays the same role as its compact counterpart: it ensures that any reduction in total cost does not compromise the duration of interventions achieved in the first phase. 6. Column-generation-based algorithm 
+
+In Section 5, we introduced single-objective reformulations of the considered lexicographic TRSP variant, using both weighted and sequential approaches. The resulting compact formula-tions can be solved directly with (commercial) MILP solvers, whereas the extended formulations are typically addressed through methods based on CG [12], which we describe in this section. Let us denote the extended MILP formulation by P. CG solves its master problem (MP), i.e., the linear relaxation of P, without explicitly enumerating all variables λrv . The algorithm starts with a restricted subset R′ ⊆ ∪ v∈V Rv of variables (columns), which —by slight abuse of language—we simply refer to as routes (see section 4.2). The restricted master problem MP( R′)is then solved. Using the optimal dual solution, the algorithm searches for routes not yet in R′
+
+that have positive reduced cost (since we maximize). If at least one such route is found, it is added to R′ and the process is repeated; otherwise, MP has been solved to optimality. 
+
+> 11
+
+The computation of reduced costs relies on the optimal dual solution of MP( R′) and on the contribution of the route to the objective function. Identifying new routes with positive reduced cost constitutes the pricing subproblem (PS). Each PS is solved independently for a vehicle v to identify routes r with positive reduced cost ¯cr. We describe the PS and our solution method in more detail in Section 6.2. Once MP has been solved to optimality, we solve P( R′), i.e., the restriction of P to the current set of routes R′. Let u be the optimal objective value of MP and ℓ the optimal objective value of P( R′). It has been shown in [ 25 , 26 ], and was already used by [ 27 ] to solve to optimality a 49-city traveling salesman problem, that any column with reduced cost less than ℓ − u cannot belong to an optimal solution. Therefore, it is sufficient to generate only columns with reduced cost 
+
+¯cr ≥ ℓ − u to ensure optimality. If we add those columns to R′, then solving P (R′) is equivalent to solving P, i.e., the full extended formulation. The resulting procedure is summarized in Algorithm 1. 
+
+Algorithm 1 Exact CG-based algorithm  
+
+> 1:
+
+Initialize: R′ ← initial set of routes;  
+
+> 2:
+
+repeat  
+
+> 3:
+
+Solve MP( R′); ▷ Let the optimal value be u 
+
+> 4:
+
+For each vehicle v, solve the PS to generate routes r with ¯cr > 0 and add them to R′; 
+
+> 5:
+
+until No feasible route with ¯cr > 0 exists  
+
+> 6:
+
+Solve P( R′); ▷ Let the solution value be ℓ 
+
+> 7:
+
+For each vehicle v, solve the PS to generate all feasible routes with ¯cr ≥ ℓ − u and add them to R′; 
+
+> 8:
+
+Solve P( R′);  
+
+> 9:
+
+return Optimal solution of P (extended formulation). 6.1. Adaptations to the lexicographic extended formulation. In this section, we show how Algorithm 1 is adapted to the two single–objective formulations introduced in section 5. Specifically, we detail how the reduced costs and PS change under the weighted and the sequential approaches. 6.1.1. Weighted approach. In the weighted extended formulation, the two lexicographic objectives are linearly combined in a single expression. Hence, the problem can be solved in one run of Algorithm 1. The reduced cost for a route r ∈ R v:
+
+¯cr = M D r − cr − μv − ∑
+
+> i∈I
+
+air νi,
+
+where Dr and cr are respectively the duration and cost of route r, air is a binary indicator equal to 1 if intervention i is covered by route r, and 0 otherwise, and (μv, ν i) are respectively the optimal values of the dual variables associated with constraints (5c) –(5b) . This formulation ensures that route generation remains consistent with the weighted prioritization of objectives. 6.1.2. Sequential approach. In the sequential extended formulation, the two objectives are optimized in two successive executions of Algorithm 1. The first phase maximizes the total intervention duration, using the reduced cost 
+
+¯c1 
+
+> r
+
+= Dr − μ1 
+
+> v
+
+− ∑
+
+> i∈I
+
+air ν1 
+
+> i
+
+,
+
+> 12
+
+where μ1 
+
+> v
+
+and ν1 
+
+> i
+
+are the optimal values of the dual variables of the first-phase MP( R′). Routes with ¯c1 
+
+> r
+
+> 0 are iteratively generated until the first-phase MP( R′) is solved to optimality. The second phase minimizes the total routing cost while enforcing the previously attained intervention duration. The PS uses the reduced cost 
+
+¯c2 
+
+> r
+
+= cr − μ2 
+
+> v
+
+− ∑
+
+> i∈I
+
+air ν2 
+
+> i
+
+− Dr ρ, 
+
+where μ2 
+
+> v
+
+and ν2 
+
+> i
+
+are the optimal values of the dual variables of the second-phase MP( R′) and ρ
+
+is the optimal value of the dual variable associated with the minimum-duration constraint (13b) .6.2. Modeling and solving the pricing subproblems. We model the PS as an ESPPRC; see section 2 for references on this problem. For each vehicle v, we consider a complete directed graph Gv = ( Nv, Av), where Av contains all arcs whose endpoints lie in Nv. Each arc (i, j ) ∈ A v
+
+is associated with a travel time tij and with a cost chosen so that the total cost of any path from σv back to σv coincides with the reduced cost of the corresponding variable λrv (multiplied by -1 in the case of maximization). The ESPPRC then consists in finding, in Gv, a maximum-reduced-cost path that satisfies all operational constraints: compliance with time windows, respect for vehicle-capacity limits along the route, and the requirement that each intervention node in Iv ⊆ N v is visited at most once. We solve the ESPPRC using a labeling algorithm based on dynamic programming. This method incrementally constructs feasible paths and propagates associated labels, while relying on dominance rules to discard inferior labels and keep the search tractable. The full details of the algorithm are presented in the following subsections. For clarity, we present the algorithm for the maximization case, but the adaptation to minimization is straightforward. 6.2.1. Labeling. We use a label Lv,i to represent a partial path in the graph Gv that terminates at node i ∈ N v. Each label stores the following information: ¯c(Lv,i ), the reduced cost of the partial path; t(Lv,i ), the arrival time at node i; mvk (Lv,i ), the cumulative consumption of resource 
+
+k; U(Lv,i ) ⊆ N v, the set of nodes already included in the path; and P(Lv,i ) ⊆ I v, the set of interventions that remain eligible for extension. The objective of the labeling algorithm is to generate a set of feasible routes with positive reduced costs. The pseudocode of the labeling procedure is provided in algorithm 2. An initially empty list, 
+
+new_routes , gathers the feasible routes generated during execution. Two additional lists 
+
+unexpanded_paths and dominating_paths are introduced to keep track of the partial paths that have not yet been expanded and those that dominate others (see section 6.2.3), respectively. At initialization, a single path object is created–corresponding to the depot node 
+
+σv–and inserted into unexpanded_paths . This object includes the path identifier, the vehicle identifier ( v), the last node in the path ( i = σv), the reduced cost ( ¯c(Lv,i ), which is set to the negative sum of the fixed cost associated with vehicle v, i.e., gv and the optimal value of the dual variable μv), the arrival time ( t(Lv,i ), initialized to 0), the consumed-capacity variables ( mvk ,which are initialized to 0), the nodes visited in the path ( U(Lv,σ v )), the associated traveling cost (gv), the cumulative duration of performed interventions (as given by ∑  
+
+> j∈U (Lv,i ),j ̸=σv
+
+dj ), and the potential interventions that can still be performed ( P(Lv,i ) = Iv). The procedure iterates while nodes_to_visit is non-empty; this list initially contains only the depot node (so that the vehicle terminates its route there). Nodes in nodes_to_visit are sorted in increasing order of a cost–benefit ratio: the cost corresponds to the earliest completion time of the intervention, whereas the benefit reflects the increase in reduced cost resulting from its inclusion. At each iteration, the first node i in the list is selected. All partial paths ending at node i in unexpanded_paths are then sorted in decreasing order of their reduced cost, so 
+
+> 13
+
+that more promising paths are expanded first, which allows to reduce the number of paths to be explored. Each of these paths is then considered for extension to every reachable node j̸ = i.If the extension is feasible, the resulting label is added to unexpanded_paths , provided it is not dominated by an existing label (see Section 6.2.3). When an extension returns to the depot node σv, the corresponding complete route is evaluated and, if it has positive reduced cost, added to new_routes .The procedure terminates when all partial paths have been explored or when a user-defined number η of new routes has been generated. The resulting set of feasible routes with positive reduced cost is returned and added to R′ for the next iteration of Algorithm 1. 
+
+Algorithm 2 Labeling algorithm for vehicle v 
+
+> 1:
+
+function Find Positive Reduced Cost Paths (v) 
+
+> 2:
+
+Initialize: 
+
+¯c(Lv,σ v ) ← − (gv + μv)
+
+mvk ← 0, ∀kt(Lv,σ v ) ← 0
+
+new_routes ← ∅ 
+
+unexpanded_paths ← {} , dominating_paths ← {} 
+
+nodes_to_visit ← [σv] 
+
+> 3:
+
+repeat  
+
+> 4:
+
+i ← popfirst! (nodes_to_visit ) 
+
+> 5:
+
+Sort (unexpanded_paths [i], decreasing by ¯c) 
+
+> 6:
+
+Sort (nodes_to_visit , increasing by cost/benefit ratio)  
+
+> 7:
+
+for all Lv,i ∈ unexpanded_paths [i] do  
+
+> 8:
+
+Lv,j ← ExtendPath (Lv,i , j ∈ nodes_to_visit )
+
+▷ See Section 6.2.2  
+
+> 9:
+
+if Lv,j ̸ = null then  
+
+> 10:
+
+if IsDominated (Lv,j , dominating_paths ) = false then 
+
+▷ See Section 6.2.3  
+
+> 11:
+
+if j̸ = σv then  
+
+> 12:
+
+AddToDict (unexpanded_paths , next_node, Lv,j ) 
+
+> 13:
+
+AddIfAbsent (nodes_to_visit , j) 
+
+> 14:
+
+else  
+
+> 15:
+
+if ¯c(Lv,j ) > 0 then  
+
+> 16:
+
+new_routes ← new_routes ∪ { Lv,j } 
+
+> 17:
+
+if |new_routes | ≥ η then  
+
+> 18:
+
+return new_routes  
+
+> 19:
+
+unexpanded_paths [i] ← ∅  
+
+> 20:
+
+until nodes_to_visit = ∅ 
+
+> 21:
+
+return new_routes 
+
+6.2.2. Extension function. The extension function is a key component of the labeling algorithm, as it is responsible for the generation of feasible paths. When expanding Lv,i to Lv,j , the procedure considers two cases: j = σv or j ∈ I v. In the first case, the label Lv,σ v is considered feasible if the arrival time satisfies t(Lv,σ v ) ≤ ED . In the second case, we introduce the set 
+
+O(Lv,i ) of all interventions that are no longer feasible after reaching intervention j due to time-or capacity-related restrictions. A label Lv,j arriving at an intervention node j ∈ I v is feasible if 
+
+> 14
+
+t(Lv,j ) + dj ≤ ej (i.e., the intervention can be completed before its latest allowable end time), 
+
+mvk (Lv,j ) ≤ mvk ∀k ∈ K (i.e., the consumed capacity in each interval does not exceed the available capacity) and j / ∈ U (Lv,i ). Extended labels that do not meet these conditions are discarded. These extension rules are summarized in Table 2. 
+
+Table 2. Extension rules                                                   
+
+> j=σvj∈Iv
+> P(Lv,j ) = ∅P(Lv,j ) = P(Lv,i )\ O (Lv,i )
+> t(Lv,j ) = t(Lv,i ) + dj+tiσ vt(Lv,j ) =
+> ®max( MD , s j),if θi= 0 and MD −dj< t (Lv,i ) + di+tij ≤MD ,
+> max( t(Lv,i ) + di+tij , s j),otherwise.
+> mvk (Lv,j ) = mvk (Lv,i ),∀k∈Kmvk (Lv,j ) = mvk (Lv,i ) + qjk ,∀k∈K
+
+6.2.3. Domination. Dominance rules are essential for reducing the search space of the labeling algorithm by eliminating partial paths that cannot lead to an optimal or improving complete route. Dominance conditions (indexed by βs, s = 1 , . . . , 4) are used to compare two labels L1
+
+> v,j
+
+and L2 
+
+> v,j
+
+, which represent different paths of a given vehicle v reaching node j. A label L1 
+
+> v,j
+
+is said to dominate L2 
+
+> v,j
+
+if it is no worse in all considered criteria and strictly better in at least one of them. When a label is dominated, it can be safely discarded because extending it cannot lead to a better feasible route. Condition β1 requires that the reduced cost associated with L1 
+
+> v,j
+
+must be greater than or equal to the reduced cost associated with L2 
+
+> v,j
+
+. A label L1 
+
+> v,j
+
+is considered dominant with respect to condition β2 if the set of potential interventions that can still be visited by L2 
+
+> v,j
+
+is a subset of those that can still be visited by L1 
+
+> v,j
+
+. This means that label L1 
+
+> v,j
+
+has the potential to visit at least all nodes that L2 
+
+> v,j
+
+can visit, and potentially more. In condition β3, label L1 
+
+> v,j
+
+dominates label 
+
+L2 
+
+> v,j
+
+if L1 
+
+> v,j
+
+has an earlier or the same arrival time at node j with respect to L2 
+
+> v,j
+
+. Nevertheless, 
+
+L1 
+
+> v,j
+
+can still dominate L2 
+
+> v,j
+
+even with a later arrival time, provided that L2 
+
+> v,j
+
+cannot visit any further nodes. Finally, in terms of consumed capacities, condition β4 states that label L1
+
+> v,j
+
+dominates label L2 
+
+> v,j
+
+if it has a smaller or equal consumed capacity for all intervals k. However, if 
+
+L1 
+
+> v,j
+
+has a higher consumption for an interval, it can still dominate L2 
+
+> v,j
+
+if the additional capacity that L1 
+
+> v,j
+
+could consume for all remaining potential interventions does not exceed its remaining capacity, or if L2 
+
+> v,j
+
+has no remaining potential interventions. The dominance conditions are summarized in Table 3. 
+
+Table 3. Dominance conditions: L1 
+
+> v,j
+
+dominates L2 
+
+> v,j
+
+if the condition is satisfied 
+
+Dominance conditions 
+
+β1 ¯c(L1 
+
+> v,j
+
+) ≥ ¯c(L2 
+
+> v,j
+
+)
+
+β2 P(L2 
+
+> v,j
+
+) ⊆ P (L1 
+
+> v,j
+
+)
+
+β3 t(L1 
+
+> v,j
+
+) ≤ t(L2 
+
+> v,j
+
+) OR 
+
+t(L1 
+
+> v,j
+
+) > t (L2 
+
+> v,j
+
+) and P(L2 
+
+> v,j
+
+) = ∅
+
+β4 mvk (L1 
+
+> v,j
+
+) ≤ mvk (L2 
+
+> v,j
+
+) OR 
+
+mvk (L1 
+
+> v,j
+
+) > m vk (L2 
+
+> v,j
+
+) and ∑  
+
+> i∈P (L1
+> v,j )
+
+qik ≤ mvk − mvk (L1 
+
+> v,j
+
+) OR 
+
+mvk (L1 
+
+> v,j
+
+) > m vk (L2 
+
+> v,j
+
+) and ∑  
+
+> i∈P (L2
+> v,j )
+
+qik = 0 
+
+> 15
+
+6.2.4. Relaxation of dominance. Enforcing all the dominance conditions presented in Section 6.2.3 from the beginning might be computationally expensive, negatively affecting overall performance. To enhance computational efficiency, we propose a dominance relaxation strategy that gradually enforces the dominance conditions during the search process. The order in which they are enforced corresponds to their identifier βs. This strategy allows us to focus the search on the most promising regions of the solution space, thereby reducing computational time without compromising the quality of the generated routes. To implement this approach, we replace lines 1 to 5 in Algorithm 1 by Algorithm 3. At each iteration, the MP( R) is solved, while the PS generates new routes considering only a subset 
+
+{β1, . . . , β s} of dominance conditions. If no new route with a positive reduced cost is found (i.e., 
+
+Rnew = ∅), an additional dominance condition is activated ( s + 1 ). The process continues until all dominance rules are applied ( s = 4 ). 
+
+Algorithm 3 Dominance relaxation algorithm  
+
+> 1:
+
+s ← 1 ▷ Identifier of dominance conditions  
+
+> 2:
+
+R ← Initial set of routes  
+
+> 3:
+
+repeat  
+
+> 4:
+
+Solve MP( R) 
+
+> 5:
+
+Solve the PS applying the subset of dominance rules {β1, . . . , β s} 
+
+> 6:
+
+Rnew ← new routes with positive reduced cost  
+
+> 7:
+
+if Rnew ̸ = ∅ then  
+
+> 8:
+
+R ← R ∪ R new  
+
+> 9:
+
+else  
+
+> 10:
+
+s ← s + 1 ▷ Activate one additional dominance condition  
+
+> 11:
+
+until s > 4
+
+7. Computational results 
+
+This section reports computational experiments evaluating the performance of the solution methods introduced earlier on a set of realistic instances provided by EDF. Section 7.1 describes the available data and the procedure used to generate standardized instances from the raw EDF data, enabling a consistent evaluation of the methods. Section 7.2 analyzes the impact of relaxing the dominance conditions and identifies the most effective variant of the CG-based algorithm. Section 7.3 compares the resulting CG-based algorithm with the compact formulation solved by a commercial solver, considering both the weighted and sequential reformulations. Finally, Section 7.4 evaluates the performance of these four approaches on some of the largest real-life instances provided by EDF. Since electricity utility companies typically generate technician schedules on a daily basis, computational efficiency is a key requirement. Accordingly, we consider a short 5-minute time limit, reflecting real-time operational constraints. For completeness, we also report results under an extended overnight time budget of 8 hours, although the proposed CG-based algorithm is designed for short runtimes and may not substantially benefit from longer runtimes. All computational experiments were carried out on a laptop equipped with an 11th Gen Intel ®
+
+Core ™ i5-11500H processor (2.70 GHz, 6 cores) and 32 GB of RAM. The algorithms were implemented in Julia, and use Gurobi v12 as the commercial MILP solver. 7.1. Data. The number of daily interventions performed by EDF ranges from 77 to 252, while the number of vehicles varies between 20 and 48. From these data, we constructed a set of 
+
+> 16
+
+standardized test instances containing 20, 30, and 40 vehicles, with a fixed vehicle-to-intervention ratio of 1:5. To do so we first removed vehicles from the raw EDF instances to obtain the desired number. We then randomly removed interventions to precisely adjust the ratio to 1:5. For example, consider an original instance with 22 vehicles and 105 interventions. After removing two vehicles, the number of vehicles becomes 20, resulting in a ratio of 1:5.25. Subsequently, five interventions are removed to achieve the exact target ratio of 1:5. We then grouped the resulting instances into three categories according to their size: small (S; 100 interventions and 20 vehicles), medium (M; 150 interventions and 30 vehicles), and large (L; 200 interventions and 40 vehicles). We also generated extra-small instances (XS; 20 interventions and 4 vehicles), which are small enough to be solved to optimality and thus serve as benchmarks for evaluating solution quality. Table 4 summarizes the main characteristics of these standardized instance categories. Figure 1 illustrates the vehicle-to-intervention ratio for the 40 raw instances provided by EDF and for the standardized test instances, highlighting the diversity of instance sizes (blue diamonds), the XS, S, M, and L instance categories (red rectangles) and the fixed 1:5 ratio (orange line). In addition to these controlled categories, the algorithm is tested on five of the largest EDF instances. These instances represent the upper bound on the problem size observed in practice and serve to assess the scalability of the proposed approach under extreme operational conditions. Each instance identifier encodes two key characteristics: the number of interventions and the number of vehicles involved, following the format: Ix _V y, where x denotes the number of interventions and y the number of vehicles. For example, I243 _V 47 corresponds to an instance with 243 interventions and 47 vehicles. The number of interventions and number of vehicles of the five evaluated instances range between 233 and 252, and 33 and 47, respectively. 
+
+Table 4. Characteristics of the test instance categories. 
+
+Instance size XS S M L
+
+Number of interventions 20 100 150 200 Number of vehicles 4 20 30 40 Number test instances 20 20 15 57.2. Impact of the relaxation of dominance. We first analyze the impact of relaxing dominance conditions (algorithm 3) in the PS, which directly affects the size and diversity of the column pool explored by the CG-based algorithm. The comparison is conducted under a 5-minute time limit, evaluating the CG-based algorithm with both the weighted (CG W.) and sequential (CG S.) reformulations. For each instance category, table 5 reports the number of tested instances and the number of best-known solutions identified. The latter is expressed as a tuple (a, b ), where a is the number of best solutions obtained for the primary objective ( f 1) and b is the number of best solutions obtained for the secondary objective ( f 2) only when the best solution for the primary objective is obtained. We also report the mean gap relative to the best solution found within each instance category across all these four approaches. For the secondary objective, the mean gap is computed only when the best solution for the primary objective is available; otherwise, no value is reported (marked by –). Finally, the table also includes the average number of routes generated by the CG-based algorithm and the average number of iterations. 
+
+> 17
+
+0 50 100 150 200 250 300 
+
+0
+
+10 
+
+20 
+
+30 
+
+40 
+
+50 
+
+60   
+
+> NUMBER OF INTERVENTIONS
+> NUMBER OF VEHICLES
+> Raw Data Test Instances Linear (Ratio 1:5)
+
+Figure 1. Vehicle-to-intervention ratio of the raw and test (standardized) instances 
+
+Table 5. Impact of the relaxation of dominance conditions on the CG Weighted and CG Sequential approaches. 
+
+Inst. (#) Metric CG W. CG S. W/o Relax. W/ Relax. W/o Relax. W/ Relax. 
+
+Nb. of best solution (20, 11) (20, 15) (18, 11) (20, 17) 
+
+XS (20) Avg. best-gap (%) (0.00, 2.34) (0.00, 0.25) (2.14, 0.53) (0.00, 1.66) Avg. routes 1311 1480 1372 936 Avg. iters. 15 35 21 40 Nb. of best solution (0, 0) (20, 9) (1, 0) (20, 11) 
+
+S (20) Avg. best-gap (%) (24.54, –) (0.00, 1.74) (24.25, 31.38) (0.00, 2.18) Avg. routes 582 3690 558 3097 Avg. iters. 3 58 3 46 Nb. of best solution (0, 0) (9, 5) (0, 0) (13, 10) 
+
+M (15) Avg. best-gap (%) (43.00, –) (0.39, 1.21) (41.85, –) (0.25, 1.13) Avg. routes 359 6649 244 4269 Avg. iters. 1 57 1 37 Nb. of best solution (0, 0) (3, 3) (0, 0) (2, 2) 
+
+L (5) Avg. best-gap (%) (16.37, –) (0.22, 0.00) (15.71, –) (0.07, 0.00) Avg. routes 386 10650 246 5860 Avg. iters. 1 53 1 35 The results show that applying algorithm 3 generally improves performance across most instance categories, although the effect remains limited for the XS instances. In this case, the 
+
+> 18
+
+search space is small and this fact restricts the number of feasible paths in general, reducing the potential impact of dominance relaxation. Indeed, the mean best-gap of CG W. decreases from 
+
+2.34% to 0.25% , and the number of best solutions for the second objective increases from 11 to 
+
+15 , confirming a modest but consistent improvement. In contrast, the effect is mixed in the CG S. variant: the first-objective gap decreases (from 2.14% to 0.00% ), but the second-objective gap slightly increases (from 0.53% to 1.66% ). Nevertheless, the number of best solutions for both objectives still improves, from (18 , 11) to (20 , 17) .For the S instances, the benefits become much clearer. CG W. reduces the mean best-gap for the first objective from 24 .54% to 0.00% , and the number of best solutions increases from 
+
+(0 , 0) to (20 , 9) . A similar pattern is observed for the CG S.: the mean best-gaps improve from 
+
+(24 .25% , 31 .38%) to (0 .00% , 2.18%) , along with an increase in the number of best solutions from 
+
+(1 , 0) to (20 , 11) . The inferior performance observed when algorithm 3 is not applied can be attributed to the limited number of iterations and the restricted number of generated routes. The impact of the algorithm on the M and L instances becomes even more apparent. When all dominance conditions are enforced from the beginning, the CG algorithm rarely discards paths, leading to long lists of unexpanded paths and almost no progress. As a result, CG W. performs only one iteration on average, generating 359 and 386 routes for the M and L instances, respectively, and CG S. generates similarly few routes (244 and 246). With the relaxation mechanism activated, the number of iterations increases to 57 and 53 for CG W., and to 37 
+
+and 35 for CG S. (for M and L instances, respectively). The number of generated routes also increases by an order of magnitude, giving the MP( R′) substantially richer column sets. This intensified route generation directly translates into superior solution quality. The mean best-gap decreases substantially: for CG W., from 43 .00% to 0.39% on M instances and from 16 .37% to 
+
+0.22% on L instances; for CG S., from 41 .85% to 0.25% on M instances and from 15 .71% to 
+
+0.07% on L instances. Overall, relaxing the dominance conditions consistently improves the performance of both CG-based algorithm variants across all instance categories, allowing a more effective exploration of the solution space within the given time limit. Accordingly, this mechanism is retained in all subsequent experiments, as it provides the best trade-off between computational effort and solution quality. 7.3. Performance. Tables 6 and 7 summarize the results of the comparison between the two variants of the compact formulation (Compact W. and Compact S., for the weighted and sequential reformulations, respectively) and the extended formulation (CG W. and CG S.) across the standardized instance categories, for both considered time limits. For XS instances, all variants achieve the best solution on all 20 instances for the first objective, showing essentially equivalent performance. Differences emerge on the second objective: Compact W. performs slightly better, attaining the best value on 18 out of 20 instances, compared with 15, 12, and 14 instances for Compact S., CG W., and CG S., respectively. Its mean best-gap is 0.07%, versus 1.37%, 0.55%, and 1.96% for the other three methods. It is worth mentioning that on those instances, optimality was proved only in 5 cases, both for the Compact W. and Compact S. methods. This number increases to 8 for CG W. and to 10 for CG S. Note that none of the larger instances was solved to optimality. For S instances, the behavior changes significantly. The compact formulations exhibit clear limitations: Compact W. attains the best first-objective value on only 7 out of 20 instances and never achieves the best second-objective value, while Compact S. performs even worse, with just one instance reaching the best first-objective value and none for the second. Their mean best-gaps on the second objective are substantial, at 24.14% and 31.08%, respectively. In 
+
+> 19
+
+Table 6. Comparison of compact formulations and CG-based algorithm (ex-tended formulations) for the XS, S, M, and L instances (5-minute time limit). 
+
+Inst. (#) Metric Compact W. Compact S. CG W. CG S. XS (20) Nb. of best solution (20, 18) (20, 15) (20, 12) (20, 14) Avg. best-gap (%) (0.00, 0.07) (0.00, 1.37) (0.00, 0.55) (0.00, 1.96) 
+
+S (20) Nb. of best solution (7, 0) (1, 0) (20, 9) (20, 11) Avg. best-gap (%) (1.86, 24.14) (2.82, 31.08) (0.00, 1.74) (0.00, 2.18) 
+
+M (15) Nb. of best solution (0, 0) (0, 0) (9, 5) (13, 10) Avg. best-gap (%) (14.97, –) (16.94, –) (0.29, 1.21) (0.12, 1.13) 
+
+L (5) Nb. of best solution (0, 0) (0, 0) (3, 3) (2, 2) Avg. best-gap (%) (38.62, –) (78.13, –) (0.76, 0.00) (0.26, 0.00) contrast, both CG variants consistently attain the best first objective on all 20 instances and reach the best second objective on 9 (CG W.) and 11 (CG S.) instances, with mean best-gaps reduced to 1.74% and 2.18%. From S instances onward, CG clearly outperforms the compact formulations. The gap between the approaches widens considerably for M and L instances. For both sizes, the compact formulations fail to reach any best-known solution on either objective and exhibit large average best-gaps: 14 .97% and 16 .94% for Compact W. and Compact S. on M instances, and even more pronounced best-gaps of 38 .62% and 78 .13% on L instances. Due to the lexicographic structure, no meaningful values are reported for the second objective. In contrast, the CG-based algorithm variants remain effective across both categories. For M instances, CG W. attains the best first-objective value on 9 out of 15 instances and the best second-objective value on 5 of them, with mean best-gaps of 0.29% and 1.21% , while CG S. reaches 13 best first objective values and 10 best second-objective values, with best-gaps reduced to 0.12% and 1.13% .The advantage of CG becomes even more pronounced for L instances: CG W. finds the best solution for both objectives on 3 out of 5 instances with mean best-gaps of 0.76% and 0.00% ,and CG S. achieves similarly strong performance, with best-gaps of only 0.26% and 0.00% .
+
+Table 7. Comparison of compact formulations and CG-based algorithm (ex-tended formulations) for the XS, S, M, and L instances (8-hour time limit). 
+
+Inst. (#) Metric Compact W. Compact S. CG W. CG S. XS (20) Nb. of best solution (20, 18) (20, 16) (20, 13) (20, 11) Avg. best-gap (%) (0.00, <0.01) (0.00, 1.33) (0.00, 0.46) (0.00, 0.75) 
+
+S (20) Nb. of best solution (17, 0) (15, 0) (20, 12) (20, 8) Avg. best-gap (%) (0.16, 21.49) (0.14, 20.73) (0.00, 1.22) (0.00, 0.93) 
+
+M (15) Nb. of best solution (11, 0) (6, 0) (14, 4) (14, 11) Avg. best-gap (%) (0.48, 17.80) (0.66, 10.82) (0.03, 7.07) (0.11, 0.21) 
+
+L (5) Nb. of best solution (1, 0) (0, 0) (3, 2) (3, 3) Avg. best-gap (%) (0.82, 9.54) (2.60, –) (0.13, 6.39) (0.07, 0.00) 
+
+> 20
+
+With an extended 8-hour time limit, the compact formulations show a substantial improvement on the primary objective. For XS instances, all four methods now systematically achieve the best first-objective values. The approaches exhibit only small residual best-gaps on the second objective—ranging from less than 0.01% for Compact W. to 1.33% for Compact S.–indicating that, given sufficient time, all methods are essentially equivalent on this smallest instance category. With this additional solution time, both compact approaches could solve 8 instances to optimality, whereas this number increases to 12 for CG W but remains at 10 for CG S. On S instances, the compact formulations substantially improve on the first objective: Compact W. and Compact S. now find the best value on 17 and 15 instances, respectively, with mean best-gaps below 0.2% . However, they still do not attain any best solution for the second objective, and the mean best-gaps on it remain high ( 21 .49% and 20 .73% ). The CG variants continue to dominate in terms of lexicographic quality: both CG W. and CG S. reach the best first-objective value on all 20 instances, and they also achieve the best second-objective value on 12 and 8 instances, with mean best-gaps for the second objective around 1% . Thus, even with an extended time budget, CG remains preferable for jointly optimizing both objectives on S instances. For M and L instances, all methods improve compared with the 5-minute setting, but the compact and CG formulations continue to exhibit markedly different behaviors. On M instances, the compact formulations attain most of the best-known values for the primary objective. Compact W. and Compact S. attain the best first-objective value on 11 and 6 instances, with mean best-gaps of 0.48% and 0.66% , respectively. However, they still perform poorly on the second objective, with mean best-gaps of 17 .80% and 10 .82% , respectively. In contrast, CG W. and CG S. reach the best value on 14 of the 15 instances for the first objective, and CG S. also attains the best value on 11 instances for the second objective, with mean best-gaps reduced to 0.03% . A similar pattern is observed for L instances. Compact W. reaches the best value on only 1 of the 5 instances for the first objective (with a mean best-gap of 0.82% ) and still shows a large gap on the second objective ( 9.54% ), while Compact S. fails to attain the best solution on any instance and maintains a non-negligible mean best-gap on the first objective with undefined values on the second. By comparison, CG W. and CG S. each achieve the best value on three instances for the primary objective and the best value on two and three instances for the second objective, respectively. 7.4. Large real-life instances. We next evaluate the performance of the four methods on the five largest EDF instances introduced in Section 7.1. These experiments place particular emphasis on the 5-minute time limit, which reflects the tight computational requirements of operational planning. For completeness, we also report results obtained under an extended overnight time budget of 8 hours. Figures 2 and 3 present the corresponding values of the primary objective f 1.Under the 5-minute time limit (Figure 2), the compact formulations show clear limitations on these instances. Compact W. consistently produces lower values of f 1 than the CG-based methods, while Compact S. sometimes returns solutions of very limited quality. This behavior for Compact S. can be partly attributed to structural properties of the formulation. In particular, the formulation exhibits a high degree of symmetry, leading to a large number of equivalent solutions that are difficult to distinguish during the branch-and-bound process. This can slow down convergence and hinder the rapid identification of good feasible solutions. As a result, Compact S. appears less competitive under very short computation times on large instances. In contrast, both CG variants rapidly identify high-quality solutions: for all five instances, CG W. and CG S. deliver objective values that are clearly superior to those of the compact       
+
+> 21 I243_V47 I233_V42 I248_V33 I252_V43 I243_V44
+> 0
+> 2,000
+> 4,000
+> 6,000
+> 8,000
+> 10 ,000
+> Large EDF instances
+> Objective value  f 1
+> Compact W. Compact S.
+> CG W. CG S.
+
+Figure 2. Objective values f 1 obtained on the five largest EDF instances (5-minute time limit). formulations, and their respective values remain close across instances. This behavior can be compared to the results observed for the L instances in Table 6 and confirms that, under tight real-time constraints, the CG-based algorithm scales much more effectively than the compact formulation.     
+
+> I243_V47 I233_V42 I248_V33 I252_V43 I243_V44
+> 5,000
+> 6,000
+> 7,000
+> 8,000
+> 9,000
+> 10 ,000
+
+Large EDF instances   
+
+> Objective value  f 1
+> Compact W. Compact S.
+> CG W. CG S.
+
+Figure 3. Objective values f 1 obtained on the five largest EDF instances (8-hour time limit). The y-axis has been truncated to improve visibility of differences. 
+
+> 22
+
+When the time limit is extended to 8 hours (Figure 3; note that the scale of the objective value f 1 starts at 5000 for a clearer visualization of the differences for higher objective values), the relative advantage of the CG-based approaches becomes less pronounced compared with the 5-minute setting. The compact formulations, particularly the weighted variant, benefit more substantially from the additional runtime and are able to close a significant portion of the gap on the primary objective, with deviations remaining below 9% in all cases. Compact S. also improves but remains less competitive, with deviations typically ranging from 6% to 28% across the five instances. As a result, the performance differences between compact and CG-based methods are smaller than under strict operational constraints. This behavior is consistent with the design philosophy of the proposed CG-based algorithm, which was primarily developed and tuned for short computational horizons. Under such conditions, it rapidly generates high-quality columns and delivers strong feasible solutions. When longer runtimes are available, the compact formulations are given sufficient time to overcome their initial limitations, thereby reducing the observable performance gap. Nevertheless, both CG variants continue to provide good results on the considered instances: CG W. attains objective values within approximately 2% of the best solution on every instance, while CG S. reaches the best f 1 value on four of the five instances. Increasing the time limit from 5 minutes to 8 hours yields only marginal additional improvements for both CG W. and CG S. suggesting that most algorithmic gains are already achieved within short computation times. In some cases, different methods attain identical values for the primary objective, making the secondary objective relevant for comparison. This occurs for instance I243 _V 47 under the 8-hour time limit, where both Compact W. and CG S. reach the same best first-objective value 
+
+f 1 = 9099 (Figure 3). While Compact W. yields f 2 = 30 994 .5, CG S. achieves a lower cost value of f 2 = 30 261 .5, corresponding to an improvement of approximately 2.4% .In summary, the experiments on this set of real-life instances corroborate and extend the conclusions obtained from the standardized categories. Under a strict 5-minute time limit, the CG-based algorithm variants consistently produce high-quality solutions on the largest instances. When the computation time is increased to 8 hours, the relative advantage of CG progressively diminishes, as the compact formulations are able to further improve their solutions and reach objective values closer to the best-known ones. 7.5. Managerial Insights. This section presents managerial insights derived from the solutions obtained with the column generation approach based on the sequential reformulation (CG S.). This methodological choice is supported by the computational results reported in section 7.4, which indicate that CG S. consistently achieves the highest number of best solutions compared to the other approaches under the same computational time limits. The analysis is conducted on the raw EDF instances, and the objective is to interpret, in operational and managerial terms, what is gained by allowing longer computational times on large real-life instances. For each raw EDF instance, we compare two solutions: S5m, obtained under the short operational time limit of five minutes, and S8h, obtained under the extended overnight run of eight hours. All numerical results referenced below are reported in Table 8. The problem having a lexicographic objective function, the primary objective is to maximize the executed intervention time, while the secondary objective is to minimize total operational cost. Hence, from a managerial perspective, improvements in solution quality therefore correspond to (i) an increase in executed intervention time or, given equal primary objective values, (ii) a reduction in total operational cost. The reported difference is defined as ∆ = S8h − S5m.The observed differences between S5m and S8h fall into three distinct solution patterns: 
+
+> 23
+
+Table 8. Comparison of CG S. solutions after 5 minutes ( S5m) and 8 hours ( S8h)on raw EDF instances. 
+
+Instance Metric S5m S8h ∆ = S8h − S5m
+
+I243_V47 Executed intervention time (min) 9084 9099 +15 
+
+Total operational cost ( e) 33759 30261.5 −3497 .5
+
+I233_V42 Executed intervention time (min) 7986 7996 +10 
+
+Total operational cost ( e) 31704 25585 −6119 
+
+I248_V33 Executed intervention time (min) 8172 8370 +198 
+
+Total operational cost ( e) 27569 27655.5 +86 , 5
+
+I252_V43 Executed intervention time (min) 9540 9610 +70 
+
+Total operational cost ( e) 34952 35794 +842 
+
+I243_V44 Executed intervention time (min) 9306 9351 +45 
+
+Total operational cost ( e) 35623.5 34409.5 −1214 
+
+• The first pattern is illustrated by instance I248_V33, for which extended computation time enables the recovery of a substantial amount of additional intervention time at a marginal increase in cost. Compared with S5m, S8h achieves an additional 2.4% (198 minutes) of executed intervention time, while the total operational cost increases by 0.3% (86,5 e). This result suggests that, for certain instances, a short computational time limit may leave a non-negligible portion of feasible interventions unassigned. 
+
+• The second pattern concerns instances in which the increase in executed intervention time from S5m to S8h is comparatively small—typically between 0.1% and 1% —yet the reduction in total operational cost is substantial. This behavior is observed for instances I243_V47, I233_V42, and I243_V44, where cost reductions range from approximately 
+
+3% to more than 20% . In these cases, additional computational time mainly enables the algorithm to reorganize routes and team assignments, yielding significantly lower costs while maintaining nearly the same level of service coverage. 
+
+• The third pattern is exemplified by instance I252_V43, in which the algorithm achieves a marginal increase in executed intervention time (+0.73%) at the expense of a more substantial rise in total operational cost (+2.40%). Although the improvement in service time is limited, this outcome remains fully consistent with the lexicographic structure of the problem: any enhancement of the primary objective—maximizing executed intervention time—takes precedence over the secondary objective of cost minimization. Consequently, an increase in cost is accepted whenever it enables additional interventions to be completed. From a managerial perspective, this result highlights the importance of coherence between the stated strategic priorities and the implemented decisions. If maximizing service coverage is indeed the primary objective, then accepting a higher operational cost—even for a modest gain in executed intervention time—is consistent with the chosen decision framework. Collectively, these three solution patterns highlight the algorithm’s ability to reconfigure team allocations and routing decisions when additional computational time is available. They also indicate that, although the CG-based approach already performs strongly within five minutes, 
+
+> 24
+
+additional computational time can still yield non-negligible improvements on certain large instances, either in terms of increased intervention coverage or enhanced cost efficiency. 8. Conclusion and future work 
+
+In this paper, we study a multi-objective variant of the TRSP in which the objectives are optimized in lexicographic order. The problem incorporates operational constraints reflecting the daily technical interventions performed by EDF, the French electric utility company. We introduce both a compact and an extended MILP formulation, the latter relying on the set-packing formulation commonly used in routing problems. For each formulation, we derive weighted and sequential single-objective reformulations that preserve the lexicographic priority of the objectives. The extended reformulations are solved using an exact CG–based algorithm. The proposed methods are evaluated on a set of standardized instances generated from real EDF data, and their scalability and robustness are further assessed on the five largest real-life instances provided by EDF. A primary objective of this work was to design an approach capable of delivering high-quality solutions under tight operational constraints. Under the 5-minute time limit, the computational experiments presented in Section 7.3 show that, for the smallest instances (XS), all solution methods perform similarly on the primary objective, with differences emerging only on the secondary objective. Among the compact formulations, the weighted reformulation consistently outperforms the sequential one, a trend that also holds for larger instance categories. Indeed, the weighted reformulation attains the best first-objective value on more instances and exhibits lower average best-gaps. For the S, M, and L instance categories, the CG–based algorithm variants clearly outperform their compact counterparts. More precisely, the sequential reformulation proves more effective overall, as it consistently finds the best-known solutions on more instances and achieves lower mean best-gaps. When the time budget is extended to eight hours, the performance gap between the compact and CG-based approaches becomes less pronounced. As in the 5-minute setting, the compact weighted reformulation outperforms the sequential one across all instance categories. Nevertheless, both CG-based variants exhibit very similar performance levels, with the weighted reformulation yielding slightly better results for the XS and S instances and the sequential reformulation for the M and L ones. On the large real-life instances, the compact formulations are able to leverage the longer runtime to further improve their solutions, thereby reducing the observable advantage of CG. This outcome is consistent with the design of the proposed algorithm, which was primarily developed and tuned for short runtimes, rather than for sustained long-run convergence. The managerial analysis of the large real-life instances reveals that extending computation from 5 minutes to 8 hours can still generate non-negligible improvements on certain instances, both in terms of executed intervention time and operational cost. These findings suggest that, although the CG-based approach already captures most structural gains rapidly, additional optimization potential remains when longer computation times are available. This observation motivates future research aimed at improving the long-run performance of the CG-based algorithm. In extended runs, the number of generated columns increases substantially, which may complicate the resolution of the integer master problem and slow down convergence. Integrating advanced mechanisms—such as diving heuristics, tailored branching strategies, or interleaved column generation and integer re-optimization phases—could further improve solution quality when larger time budgets are available. An alternative to the single-objective reformulations considered in this paper is the development of a fully lexicographic CG approach inspired by [ 20 ]. As described in Section 2, the authors 
+
+> 25
+
+introduce an exact method for integer lexicographic linear programming problems. In this context, the continuous relaxation is formulated as a linear lexicographic programming problem, and the pricing subproblem is modeled as a resource-constrained longest path problem with lexicographic costs. The method is applied to the airline crew scheduling problem under a preferential bidding system and demonstrates competitive performance with state-of-the-art techniques on industrial instances ranging from 17 to 150 pilots (objectives). However, given that our problem involves only two objectives, the practical advantage of a fully lexicographic CG approach may be restricted compared with the single-objective reformulations considered here. Finally, an additional aspect concerns the treatment of heterogeneity and fairness in workload distribution across vehicles and technicians. From a managerial perspective, disparities in workload allocation may be undesirable, as they can compromise perceived fairness, schedule acceptability, and long-term operational efficiency. An interesting extension of this work would therefore be to incorporate fairness-related criteria into the optimization process, enabling decision-makers to explicitly balance efficiency and equity in the resulting schedules. 
+
+Acknowledgments 
+
+This research was supported by the Gaspard Monge Program for Optimization, Operations Research and their Interactions with Data Science (PGMO) of the Fondation Mathématique Jacques Hadamard (FMJH). The authors also gratefully acknowledge the OSIRIS Department at EDF for the valuable discussions conducted throughout the project and for providing the data used in this study. 
+
+References 
+
+[1] J. Arturo Castillo-Salazar, Dario Landa-Silva, and Rong Qu. Workforce scheduling and routing problems: literature survey and computational study. Annals of Operations Research ,239:39–67, 2016. [2] Edward Tsang and Chris Voudouris. Fast local search and guided local search and their application to british telecom’s workforce scheduling problem. Operations Research Letters ,20(3):119–127, 1997. [3] Attila A Kovacs, Sophie N Parragh, Karl F Doerner, and Richard F Hartl. Adaptive large neighborhood search for service technician routing and scheduling problems. Journal of scheduling , 15:579–600, 2012. [4] Victor Pillac, Christelle Gueret, and Andrés L Medaglia. A parallel matheuristic for the technician routing and scheduling problem. Optimization Letters , 7(7):1525–1535, 2013. [5] Ines Mathlouthi, Michel Gendreau, and Jean-Yves Potvin. Mixed integer linear programming for a multi-attribute technician routing and scheduling problem. INFOR: Information Systems and Operational Research , 56(1):33–49, 2018. [6] Ines Mathlouthi, Michel Gendreau, and Jean-Yves Potvin. Branch-and-price for a multi-attribute technician routing and scheduling problem. In Operations Research Forum ,volume 2, page 1. Springer, 2021. [7] Dominique Feillet, Pierre Dejax, Michel Gendreau, and Cyrille Gueguen. An exact algorithm for the elementary shortest path problem with resource constraints: Application to some vehicle routing problems. Networks: An International Journal , 44(3):216–229, 2004. [8] Martin Desrochers. An algorithm for the shortest path problem with resource constraints .Ecole des hautes études commerciales, Groupe d’études et de recherche en analyse des décisions, 1988. 
+
+> 26
+
+[9] Fabien Tricoire, Nathalie Bostel, Pierre Dejax, and Pierre Guez. Exact and hybrid methods for the multiperiod field service routing problem. Central European Journal of Operations Research , 21:359–377, 2013. [10] Martin Desrochers, Jacques Desrosiers, and Marius Solomon. A new optimization algorithm for the vehicle routing problem with time windows. Operations research , 40(2):342–354, 1992. [11] Emilio Zamorano and Raik Stolletz. Branch-and-price approaches for the multiperiod technician routing and scheduling problem. European Journal of Operational Research , 257 (1):55–68, 2017. [12] Cristián E Cortés, Michel Gendreau, Louis Martin Rousseau, Sebastián Souyris, and Andrés Weintraub. Branch-and-price and constraint programming for solving a real-life technician dispatching problem. European Journal of Operational Research , 238(1):300–312, 2014. [13] Ehsan Pourjavad and Eman Almehdawe. Optimization of the technician routing and scheduling problem for a telecommunication industry. Annals of Operations Research , 315 (1):371–395, 2022. [14] Ala-Eddine Yahiaoui, Sohaib Afifi, and Hamid Allaoui. Enhanced iterated local search for the technician routing and scheduling problem. Computers & Operations Research , 160: 106385, 2023. [15] Clara Chini Nielsen and David Pisinger. Tactical planning for dynamic technician routing and scheduling problems. Transportation Research Part E: Logistics and Transportation Review , 177:103225, 2023. [16] M. Gamache, F. Soumis, D. Villeneuve, J. Desrosiers, and É. Gélinas. The preferential bidding system at Air Canada. Transportation Science , 32(3):246–255, 1998. [17] A. Achour, M. Gamache, F. Soumis, and G. Desaulniers. An exact solution approach for the preferential bidding system problem in the airline industry. Transportation Science , 41 (3):354–365, 2007. [18] K. Heßler, S. Irnich, T. Kreiter, and U. Pferschy. Bin packing with lexicographic objectives for loading weight-and volume-constrained trucks in a direct-shipping system. OR Spectrum ,44:1–43, 2022. [19] Nour ElHouda Tellache and Roberto Baldacci. On a variant of the minimum path cover problem in acyclic digraphs: Computational complexity results and exact method. Networks ,86(3):325–357, 2025. [20] Nour ElHouda Tellache, Frédéric Meunier, and Axel Parmentier. Linear lexicographic optimization and preferential bidding system. Transportation Science , 58(3):597–613, 2024. [21] R Timothy Marler and Jasbir S Arora. The weighted sum method for multi-objective optimization: new insights. Structural and multidisciplinary optimization , 41(6):853–862, 2010. [22] Yacov Haimes. On a bicriterion formulation of the problems of integrated system identifica-tion and system optimization. IEEE transactions on systems, man, and cybernetics , (3): 296–297, 1971. [23] Marco Cococcioni and Lorenzo Fiaschi. The big-M method with the numerical infi-nite M. Optim Lett , 15(7):2455–2468, 2021. ISSN 1862-4472, 1862-4480. doi: 10.1007/ s11590-020-01644-6. URL https://link.springer.com/10.1007/s11590-020-01644-6 .Publisher: Springer Science and Business Media LLC. [24] Roberto Baldacci, Enrico Bartolini, and Aristide Mingozzi. An exact algorithm for the pickup and delivery problem with time windows. Operations research , 59(2):414–426, 2011. 
+
+> 27
+
+[25] George L. Nemhauser and Laurence A. Wolsey. Integer and Combinatorial Optimization .Wiley, 1988. ISBN 978-0-471-35943-2. [26] Harlan Crowder, Ellis L. Johnson, and Manfred Padberg. Solving large-scale zero-one linear programming problems. Operations Research , 31(5):803–834, 1983. doi: 10.1287/opre.31.5. 803. URL https://doi.org/10.1287/opre.31.5.803 .[27] George Dantzig, Ray Fulkerson, and Selmer Johnson. Solution of a large-scale traveling-salesman problem. Journal of the operations research society of America , 2(4):393–410, 1954. 
+
+E. Bangerter, Decision Support & Operations Research Group, Department of Informatics, University of Fribourg, Fribourg, Switzerland 
+
+Email address : elise.bangerter@unifr.ch 
+
+D. Schindl, University of Applied Sciences Western Switzerland, Geneva, Switzerland, Decision Support & Operations Research Group, Department of Informatics, University of Fribourg, Fribourg, Switzerland 
+
+Email address : david.schindl@hesge.ch 
+
+M. Pacheco Paneque, Decision Support & Operations Research Group, Department of Infor-matics, University of Fribourg, Fribourg, Switzerland 
+
+Email address : meritxell.pacheco@unifr.ch 
+
+N.E.H. Tellache, Decision Support & Operations Research Group, Department of Informatics, University of Fribourg, Fribourg, Switzerland 
+
+Email address : nourelhouda.tellache@unifr.ch 
+
+R. Griset, Hopia, Paris, 75009, France, Former Affiliation: EDF R&D, OSIRIS Department, Palaiseau, 91120, France 
+
+Email address : rodolphe.griset@hotmail.fr
