@@ -1,0 +1,593 @@
+Title: Quantum Graph Neural Networks for Double-Sided Reconfigurable Intelligent Surface Optimization
+
+URL Source: https://arxiv.org/pdf/2604.10453v1
+
+Published Time: Tue, 14 Apr 2026 01:00:57 GMT
+
+Number of Pages: 5
+
+Markdown Content:
+> IEEE WIRELESS COMMUNICATIONS LETTERS 1
+
+# Quantum Graph Neural Networks for Double-Sided Reconfigurable Intelligent Surface Optimization 
+
+Noha Hassan, SMIEEE, Xavier Fernando, SMIEEE, and Halim Yanikomeroglu, FIEEE 
+
+Abstract —As a key enabler for sixth-generation (6G) wire-less communications, reconfigurable intelligent surfaces (RISs) provide the flexibility to control signal strength. Nevertheless, optimizing hundreds of elements is computationally expensive. To overcome this challenge, we present a quantum framework (QGCN) to jointly optimize the physical and electromagnetic response of a double-sided RIS design that incorporates discrete phase shifts and inter-element coupling. The core contribution is the adaptive activation or deactivation of elements, allowing a virtual spacing mechanism using PIN diode switches. We then solve a multi-objective problem that maximizes the minimum user data rate subject to constraints on aperture length and mutual coupling between active elements. Experimental results on IBM Quantum’s 127-qubit ibm kyiv superconducting processor demonstrate that the proposed QGCN algorithm reduces both per-iteration computational complexity and memory require-ments compared to existing approaches. Also, the QGCN outper-forms classical graph neural networks (GNN) on an equivalent graph topology by an additional +0.38 bps/Hz. This advantage is increasing with increasing array sizes. 
+
+Index Terms —Reconfigurable intelligent surfaces, element spacing optimization, phase shift optimization, double-sided, switch-based virtual spacing, NISQ hardware validation. 
+
+I. I NTRODUCTION 
+
+# RECONFIGURABLE intelligent surfaces (RISs) are a leading enabler of sixth-generation (6G) systems, supporting hyper-reliable low-latency communication (HRLLC), mas-sive communication, and immersive communication [1]. RISs enable substantial gains in capacity, energy efficiency, and service quality. An RIS has electronically tunable reflectors that dynamically manage electromagnetic propagation through control of reflection coefficients and phase shifts [2]. To further boost the flexibility of the RIS design, we consider a double-sided structure with environment-based activation. The two planar sides of the RIS are independently activated or deactivated depending on propagation geometry, user (UE) distribution, and network traffic. This structure enables the RIS panel to dynamically switch its active reflecting surface to the dominant direction of communication, which could be forward, backward, or bidirectional. The design also reduces interference and power consumption while maintaining chan-nel controllability. Most existing works treat element spacing as constant and only optimize phase shifts [3]. This relaxation 
+
+This work has been submitted to the IEEE Wireless Communications Letters Journal for possible publication. Copyright may be transferred without notice, after which this version may no longer be accessible. N. Hassan and H. Yanikomeroglu are with the Department of Systems and Computer Engineering, Carleton University, Ottawa, ON, Canada (e-mail: noha.hassan@torontomu.ca; halim@sce.carleton.ca). X. Fernando is with the Department of Electrical, Computer, and Biomed-ical Engineering, Toronto Metropolitan University, Toronto, ON, Canada (e-mail: fernando@torontomu.ca). 
+
+overlooks the key performance impacts of element positioning on array-factor design, path-loss scaling, and inter-service interference. Also, the coherent combining of large-scale el-ements makes the received power a function of the complex superposition of element contributions, leading to highly non-convex objective spaces. The two-way propagation relates spa-tial placement to receiver signal quality in a nonlinear manner. To address these challenges, we propose a multi-objective framework that jointly optimizes RIS element spacing and phase shifts. In practical wireless communication systems, other sources of performance degradation, such as phase noise, quantization effects, and transceiver impairments, are also present, as discussed in [4]. These effects are also accounted for in the proposed model through discrete phase shifts, mutual coupling effects, and binary PIN-diode switching. Although an explicit hardware impairment model is beyond the scope of this work, the proposed formulation captures the dominant effects on RIS performance. Our contributions are (i) an end-to-end system model of spacing-dependent channels with mu-tual coupling and multi-service operation using varactor-based tunable elements; (ii) a multi-objective analytical formulation for phase-spacing joint optimization; (iii) the QGCN algorithm for large-scale RIS networks; (iv) a double-sided architecture for selective element activation; (v) element spacing variation is implemented using switch-based virtual spacing using PIN diode RF switches on a dense grid; and (vi) validation on noisy intermediate-scale quantum (NISQ) IBM quantum hardware. The remainder of this paper is organized as follows: Section II reviews related work. Section III is the system model. Section IV presents the algorithm description. Section Vprovides the results. Finally, Section VI concludes the paper. II. L ITERATURE REVIEW 
+
+Classical optimization algorithms have significant limitations of slow convergence and challenges to handle non-convex objective functions and constraints, and they relax phase discrete variables to continuous variables in large-scale RIS element optimization. Authors in [5] jointly optimize the number of reflecting elements at a reconfigurable intelligent surface and their phase shifts to maximize the system ca-pacity while accounting for channel estimation overhead and phase quantization errors. However, they focus on single-frequency scenarios, do not address mutual coupling effects between elements, and assume static channel state informa-tion (CSI) rather than dynamic user mobility. Gradient-based topology optimization techniques for RIS are applied in [6]. It addresses the binary decisions of element locations in an orderly fashion, providing an electromagnetic (EM)-guided  
+
+> arXiv:2604.10453v1 [eess.SY] 12 Apr 2026 IEEE WIRELESS COMMUNICATIONS LETTERS 2
+
+inverse design strategy. Computational complexity can be prohibitive, and scalability to massive arrays remains an open problem. The work in [7] considers mutual coupling effects and illustrates that optimally chosen subsets of elements can outperform full whole-form arrays. The paper provides some insight into effective element selection and energy-saving RIS design. More recently, double-sided RIS architectures have been proposed to increase the coverage and system flexibil-ity by working in both reflection and transmission modes. Novel designs focus on signal modeling, mode and phase optimizations under fixed element geometry. The study in [8] demonstrates the potential of double-sided RISs to improve spectral efficiency, but its design is based on a fixed inter-element spacing, centralized optimization, and continuous phase models under static configurations, while paying limited attention to online adaptability. Deep neural networks (DNNs) and graph neural networks (GNNs) have been used to learn phase shift mappings from CSI with reduced computational cost [9], [10]. Quantum optimization has also been proposed for wireless systems, but joint phase–spacing RIS optimization with hardware validation remains largely unexplored [11]. Three important gaps exist in the literature. First, the majority of previous works optimize phase shifts or surface topology alone, rather than jointly, particularly in double-sided RISs where front- and back-side interactions are closely related to each other. Second, traditional optimization techniques and gradient-based methods tend to be computationally infeasible due to the discrete, non-convex, and high-dimensional nature of joint spacing and phase optimization problems, especially with time-varying UE distributions. Most of the previous two-sided RIS works are based on static schemes and perfect CSI. This paper fills the gaps in literature by using a quantum graph neural network (QGNN) that: (i) jointly optimizes space and phase by dual-qubit encoding without continuous relaxation, (ii) handles non-convex discrete-continuous spaces by structured quantum graph representations, (iii) validates on IBM Quantum hardware (not just simulation), and (iv) supports online adaptation for dynamic double-sided RIS deployment. III. S YSTEM MODEL 
+
+A. Physical Model 
+
+The system model considers a wireless network consisting of M access points (APs) to support K UEs. Moreover, an adaptive double-sided RIS consisting of N passive reflector el-ements with activation-controlled effective inter-element spac-ing is included in the network. The above setup enables front or back reflective surface activation based on UE distribution, propagation conditions, or traffic demand. Each RIS element has a phase shift ϕn ∈ [0 , 2π) with the incoming signal. The cascaded channel reflects whether signals propagate via the front side, the back side, or both, depending on the relative positions of APs and UEs. The elements are arranged on a dense fixed grid with uniform minimum spacing dmin = λ/ 2,where λ is the operating wavelength. The position of element 
+
+n is pn = ( n − 1) dmin . Each element is equipped with a PIN diode switch that enables rapid activation ( an = 1 ) or deactivation ( an = 0 ). The system creates virtual spacing patterns by selectively activating a subset of elements without any physical movement of the substrate. The activation pattern vector a = [a1, a 2, . . . , a N ]T determines which elements contribute to the reflected signal, while deactivated elements (an = 0 ) effectively become transparent to the incident wave. 
+
+B. Signal and Channel Model 
+
+We adopt the Rician fading channel model, and the proposed framework is based on time-division duplexing (TDD) and channel reciprocity, where the uplink pilot transmission allows to estimate the cascaded AP–RIS–UE channel. The channel between AP m and RIS element n located at position pn is expressed as 
+
+hm,n (pn) = 
+
+r κκ + 1 hLoS 
+
+> m,n
+
+(pn) + 
+
+r 1
+
+κ + 1 hNLoS  
+
+> m,n
+
+(pn), (1) where κ denotes the Rician factor. The LoS depends on the element position and is expressed as hLoS 
+
+> m,n
+
+(pn) = 
+
+> λ
+> 4πr m,n
+
+e−j 2πλ rm,n ej 2πλ pn sin θm , where rm,n represents the dis-tance between AP transmit antenna m and RIS element n,and θm is the angle of departure. The non-line-of-sight (NLoS) component is characterized as a circularly symmetric complex Gaussian random variable, i.e., hNLoS  
+
+> m,n
+
+∼ CN (0 , 1) .Similarly, the RIS-to-UE channel is defined as 
+
+hn,k (pn) = 
+
+r κκ + 1 hLoS 
+
+> n,k
+
+(pn) + 
+
+r 1
+
+κ + 1 hNLoS  
+
+> n,k
+
+(pn), (2) where the LoS component is given by hLoS 
+
+> n,k
+
+(pn) = 
+
+> λ
+> 4πr n,k
+
+e−j 2πλ rn,k e−j 2πλ pn sin θk , with θk denoting the angle of arrival at UE k. The overall cascaded channel from AP m to UE k through the adaptive RIS is expressed as hm,k (Φ, a) = √βk hH
+
+> m
+
+(a)C(d(a)) R(Φ, a)hk(a), where 
+
+hm,k (Φ, a) ∈ C is a scalar channel coefficient, βk represents the composite large-scale path loss (AP →RIS and RIS →UE), and R(Φ, a) = diag {a1ejϕ 1 , . . . , a N ejϕ N } represents the diagonal reflection matrix, an ∈ { 0, 1} controls whether the 
+
+n-th element contributes to reflection, and ϕn ∈ [0 , 2π) is its phase shift, and the matrix C(d(a)) models the electro-magnetic mutual coupling among RIS elements. Assuming 
+
+C(d(a)) = IN + Cmutual (d(a)) , where IN is the identity ma-trix and Cmutual (d(a)) represents the mutual coupling effects determined by the element spacing. The AP-to-RIS channel vector is defined as hm(a) =[hm, 1(p1), . . . , h m,N (pN )] T ∈ CN ×1, where the positions 
+
+{pn} are fixed on the grid, while the activation pattern a
+
+determines the effective spacing between active elements. Similarly, hk(a) = [h1,k (p1), . . . , h N,k (pN )] T denotes the RIS-to-UE channel vector. The mutual coupling matrix is defined in the Appendix. Let the effective cascaded channel from all APs to all UEs be defined as G(Φ, a) = [hm,k (Φ, a)] k=1 ,...,K m=1 ,...,M ∈
+
+CM ×K , where each entry is given by hm,k (Φ, a) =√βk hH
+
+> m
+
+(a)C(d(a)) R(Φ, a)hk(a). The received signal at UE k is expressed in (3), where xi denotes the transmitted symbol intended for UE i with E[|xi|2] = 1, Pi is the transmit power allocated to UE i, and nk ∼ CN (0 , σ 2
+
+> k
+
+)
+
+represents additive white Gaussian noise. The instantaneous signal-to-interference-plus-noise ratio ( γk(Φ, a)) at UE k is IEEE WIRELESS COMMUNICATIONS LETTERS 3
+
+yk =
+
+> desired signal
+
+z }| {
+
+> M
+
+X
+
+> m=1
+
+hm,k (Φ, a)
+
+! pPk xk +
+
+> inter-user interference
+
+z }| {
+
+> K
+
+X
+
+> i=1
+> i̸=k
+> M
+
+X
+
+> m=1
+
+hm,i (Φ, a)
+
+! pPi xi +nk. (3) 
+
+γk(Φ, a) = Pk |PMm=1 hm,k (Φ,a)|2
+
+> PK
+> i=1
+> i̸=kPi
+
+|PMm=1 hm,i (Φ,a)|2+σ2
+
+> k
+
+, and the achievable rate of UE k is Rk(Φ, a) = log 2 (1 + γk(Φ, a)) .
+
+C. Practical Constraints and Overhead 
+
+A minimum activation constraint PNn=1 an ≥ Nmin is im-posed, where Nmin ensures that there are sufficient active elements for beam steering. The effective spacing between two successive active elements n and n + 1 is deff ,n =(index n+1 − index n) × dmin , where index n is the physical position of the n-th active element on the dense grid. This design couples the discrete binary activation decisions with the continuous phase optimization, creating a mixed-integer nonlinear optimization problem. When incident power hits predominantly one side, this surface alone is powered up, with the other in low-power standby. When UEs are spread on both sides, both surfaces run together to extend coverage and maximize reflection efficiency. The overhead of cascaded channel estimation pilots increases linearly with the number of active RIS elements, which is performed once in each coher-ence block. The practical deployment condition of feasibility is Tp + Topt + Tswitch < T c, where Tswitch is the latency for activation and phase reconfiguration, Tp is the pilot signal length, Topt is the optimization time, and Tc is the channel coherence. The above feasibility condition is based on the assumption of perfect CSI, which might not be the case in realistic scenarios. In the case of imperfect CSI, the CSI esti-mate adds an interference floor in the effective SINR, resulting in a reduction in the achievable rate. For delayed adaptation, the correlation between consecutive coherence blocks is given by ρ = J0(2 πf D Tc), which is 97% effective in the presence of the presumed mobility conditions. The RIS occupies a finite physical surface; therefore, the total aperture length imposes a constraint on the sum of inter-element spacings as  
+
+> N−1
+
+X
+
+> n=1
+
+deff ,n = 
+
+> N−1
+
+X
+
+> n=1
+
+(index n+1 − index n) dmin ≤ Dtotal , (4) where Dtotal denotes the maximum available aperture length. IV. A LGORITHM DESCRIPTION 
+
+An adaptive RIS can strengthen useful signal reflections and suppress unwanted ones by jointly tuning its phase shifts and the distance between elements. Since effective spacing is determined by activation vector a, we optimize over a instead of d. CSI acquisition in the double-sided RIS model is a two-step process. In the first phase, pilot signals are sent by APs, and each RIS estimates its dominant propagation direction according to the strength of the received signal. The activated surface(s) in the second step undergo full CSI estimation using TDD. UEs transmit uplink pilots, which the RIS reflects to APs. The AP estimates the cascaded channel hm,k (Φ, a) by comparing received signals with and without RIS reflection (using ON/OFF keying of the RIS). The joint phase–spacing optimization problem is represented as 
+
+max  
+
+> Φ,a
+
+min  
+
+> k∈{ 1,...,K }
+
+Rk(Φ, a) (5a) s.t. ϕn ∈ [0 , 2π), ∀n ∈ { 1, ..., N }, (5b) 
+
+an ∈ { 0, 1}, ∀n ∈ { 1, ..., N }, (5c) 
+
+> N
+
+X
+
+> n=1
+
+an ≥ Nmin , (5d)  
+
+> N−1
+
+X
+
+> n=1
+
+deff ,n ≤ Dtotal . (5e) The objective in (5a) is non-convex due to the min-max struc-ture and cascaded channel dependence hm,k (Φ, a), where R
+
+contains both discrete and continuous variables. The feasible set is non-convex due to constraint (5e). NP-hardness follows from reduction to the subset sum problem via constraint (5d). For classical gradient-based optimization, the complexity per iteration is O(N 2K) due to the Jacobian computation of 
+
+∇Φ,aRk(Φ, a). To mitigate the exponential growth of the search space with N , QGCN is used that jointly optimizes phase and geometry by using a quantum graph that encodes the RIS. Each element is encoded using dual qubits that represent its binary activation state an ∈ { 0, 1} and continuous phase state ϕn ∈ [0 , 2π). The RIS is modeled as a graph 
+
+G = (V, E, W) with vertices V , edges E, and weight matrix W. The vertex vn of the graph is defined by atwo-level encoding of a pair of qubits, |qan⟩ and |qϕn ⟩. The link weight between elements is wij = e−α|pi−pj |, where 
+
+(i, j ) ∈ E, which decreases as the distance between elements increases. The cost in every iteration is O(SL |E|), where 
+
+S = O(1 /ϵ 2) is the number of shots in each measurement to estimate expectation values with precision ϵ, and |E| = O(N )
+
+for the sparse graph topology. Each parameter requires two circuit evaluations, and the parameter shift rule is used, where 
+
+|θ| = 3L|Vb|. In subgraph partitioning, |Vb| ≤ threshold, and so |θ| does not depend on N . The total complexity of this algorithm is O(SLN ), as opposed to O(N 2K) for classical methods with memory O(N 2). To overcome the issue of practical scalability due to NISQ hardware limitations, we use graph partitioning to divide the large RIS arrays into subgraphs, each of which is associated with a tractable quantum circuit that may be executed using the available quantum hardware. Assuming that b is the subgraph block index, this approach ensures that the number of qubits required to perform this computation scales as 2|Vb| qubits per subgraph rather than the global requirement of 2N qubits. Subgraph solutions are then combined to obtain the global activation pattern a∗ and phase profile Φ∗, as described in Algorithm 1. Though this approach to divide and conquer introduces a mild approximation at the boundaries between subgraphs, the ablation results in Table II confirm that the full QGCN still maintains considerable benefits even in the noisy regime. To allow gradients to propagate through the discrete activation choices in quantum circuit training, we first measure the IEEE WIRELESS COMMUNICATIONS LETTERS 4
+
+activation qubits during the forward pass to obtain binary states 
+
+{an}, which define the resulting RIS configuration. Then, during backpropagation, we apply a version of the parameter-shift rule adapted for discrete variables, approximating the gradient with respect to each activation-controlling parame-ter θan as ∂L
+
+> ∂θ an
+
+≈ L
+
+ θan+ π
+
+> 2
+
+−L 
+
+ θan− π
+
+> 2
+
+ 
+
+> 2
+
+, where L is the loss function applied to the quantum circuit output as expressed in (8). To prevent degenerate solutions where all elements are deactivated, we impose a soft constraint in the loss function penalty terms as Lactivation = λ4 max 
+
+
+
+0, N min − PNtotal  
+
+> n=1
+
+an
+
+2
+
+,where λ4 is a penalty coefficient and Nmin is the minimum number of required active elements to maintain beam steering capability. Each pair of qubits starts in a uniform superposition 
+
+|qan⟩ = |1⟩, |qϕn ⟩ = |+⟩ = 1√2 (|0⟩ + |1⟩). We link phase and activation using entanglement as 
+
+|ψ0⟩ =
+
+> |Vb|
+
+Y
+
+> n=1
+
+CNOT (qan, q ϕn )
+
+> |Vb|
+
+O
+
+> n=1
+
+ |1⟩an ⊗ | +⟩ϕn
+
+ . (6) After encoding, the graph state is expressed as 
+
+|ψ0⟩ = Y
+
+> (i,j )∈E
+
+CNOT ϕij 
+
+> |Vb|
+
+Y
+
+> n=1
+
+CNOT (qan, q ϕn )
+
+> |Vb|
+
+O
+
+> n=1
+
+ |1⟩an ⊗ | +⟩ϕn
+
+ .
+
+(7) Neighboring elements interact by a controlled-phase operation weighted by distance as U (l) 
+
+> GC
+
+(θ(l), W) =
+
+Q 
+
+> (i,j )∈Eb
+
+CPhase ij 
+
+ wij θ(l)
+
+> ij
+
+. The controlled-phase gate acts only when both qubits corresponding to elements i and 
+
+j (edge endpoints) are in the excited state. After these interactions, the overall system moves from the previous state 
+
+|ψ(l−1) ⟩ to a new configuration as |ψ(l)⟩ = U (l) 
+
+> GC
+
+|ψ(l−1) ⟩,which now carries phase correlations that depend on spacing. To enable densely packed regions to adjust positions cooperatively rather than independently, each element updates its own spacing using a small rotation influenced by its neighbors’ average phase, which is expressed as U (l) 
+
+> S
+
+= Q 
+
+> i
+
+R(i,a )
+
+> y
+
+
+
+β(l)
+
+> i
+
+P 
+
+> j∈N (i)
+
+⟨Zϕj ⟩
+
+
+
+. Both phase and spacing qubits undergo parameterized rotations as 
+
+Ryz (αi, γ i) = Rz (γi)Ry (αi). Combining these rotations for all elements gives U (l) 
+
+> A
+
+= N
+
+> i
+
+h
+
+Ryz (α(l) 
+
+> i
+
+, γ (l) 
+
+> i
+
+) ⊗ Ry (β(l) 
+
+> i
+
+)
+
+i
+
+.The updated system state is |ψ(l)⟩ = U (l) 
+
+> A
+
+U (l) 
+
+> S
+
+U (l) 
+
+> GC
+
+|ψ(l−1) ⟩.Stacking several of these operations produces a deep adaptive circuit as |ψL⟩ = QLl=1 
+
+h
+
+U (l) 
+
+> A
+
+U (l) 
+
+> S
+
+U (l)
+
+> GC
+
+i
+
+|ψ0⟩, where coupling weights are refreshed after each layer to reflect the latest estimated positions defined as w(l+1)  
+
+> ij
+
+= e−α| ˆp(l)   
+
+> i−ˆp(l)
+> j|
+
+, and 
+
+ˆp(l) 
+
+> n
+
+= Pn−1 
+
+> k=1
+
+⟨a(l) 
+
+> k
+
+⟩dmin . At the end of the circuit, qubits are measured to obtain the physical quantities of interest as 
+
+an = measurement of qan, and ϕn = 2 π⟨Zϕn ⟩, which provides the final activation states and phase shifts. The summary of the algorithm is explained at Algorithm 1. V. S IMULATION RESULTS 
+
+We evaluated the performance of the proposed quantum op-timization algorithm using both simulation (PennyLane) and quantum hardware on IBM Quantum’s ibm kyiv backend (127-qubit superconducting quantum processor) with param-eters shown in Table I. This O(LN ) gate complexity with depth O(L|E|) enables NISQ implementation. Fig. 1 presents 
+
+Algorithm 1 QGCN Algorithm            
+
+> Require: G= ( V, E ),{hm,k },dmin ,Dtotal ,Nmin , L, T, η
+> Ensure: Φ∗,a∗,d∗
+> eff
+
+1: Partition G into subgraphs with |Vb| ≤ 40 
+
+2: for each Gb do 
+
+3: θb = {α(ℓ)         
+
+> n, β (ℓ)
+> n, γ (ℓ)
+> n};|qan⟩ ← | 1⟩,|qϕn⟩ ← | +⟩,∀n∈Vb
+
+4: for t = 1 to T do 
+
+5: |ψ⟩ ← CNOT (qan, q ϕn ) |ψ⟩, ∀n ∈ Vb
+
+6: for ℓ = 1 to L do 
+
+7: |ψ⟩ ← CPhase (wij ) |ψ⟩, ∀(i, j ) ∈ Eb
+
+8: for n ∈ Vb do 
+
+9: μn ← P  
+
+> j∈N (n)⟨Zϕj⟩
+
+10: |ψ⟩ ← Rz (γ(ℓ)      
+
+> n)Ry(α(ℓ)
+> n+β(ℓ)
+> nμn)|ψ⟩
+
+11: end for 
+
+12: end for 
+
+13: an ← measure (qan), ∀n ∈ Vb
+
+14: Evaluate {pn} and wij ← exp( −κ|pi − pj |), ∀(i, j ) ∈ Eb
+
+15: Compute gradients ∇θb and update θb
+
+16: end for 
+
+17: Save (a∗   
+
+> b,Φ∗
+> b)
+
+18: end for 
+
+19: Connect all subgraphs to get (a∗, Φ∗) and d∗
+
+> eff
+
+20: return Φ∗, a∗, d∗
+
+> eff
+
+Table I: Simulation Parameters                                        
+
+> Param. Val. Param. Val. Param. Val. Param. Val.
+> Carrier freq. 28 GHz Bandwidth 100 MHz Rician κ10 dB User vel. 3 m/s Doppler fD280 Hz Coherence 1.5 ms Pilot time 0.1 ms Opt. time 18.3 ms Symbol dur. 10 μsNoise pwr. -94 dBm RIS elem. 20–100 UEs ( K) 4–20 APs ( M)2–4 Path loss 2.2,3.8 Min. space λ/2 Layers L4Tx power 1 W Learn. rate 0.01 SNR 10 dB MC runs 50 Backend IBM Kyiv Qubits 127
+
+the validation results, combining quantum hardware execu-tion (Fig. 1(a)) and simulation with 50 Monte Carlo runs (Fig. 1(b-c)). We compare against continuous-phase, discrete-phase, random-phase, and fixed-spacing, as well as classical baselines, including gradient descent (GD), genetic algorithm (GA), particle swarm optimization (PSO), block coordinate descent (BCD), GNN, and DNN. As far as scalability is concerned, the subgraph partitioning strategy enables QGCN to process large arrays within the current hardware constraints. Fig. 1(a) shows that the quantum hardware implementation converges to 89% of noiseless simulation performance within 30 iterations, outpacing classical baselines. Fig. 1(b) provides a quantification of the incremental gain of the proposed QGCN algorithm over classical learning techniques. Classical GNN uses the same graph structure as QGCN, where the weights of the edges are the same. It uses a continuous relaxation of the binary activation variables. In Fig. 1(c), the minimum user rate increases almost linearly with N . The performance gain of QGCN over the classical GNN is +0.38 bps/Hz for N = 60. This gap is further widened for larger arrays as the discrete activation space grows exponentially. The gain is not only a result of the architecture; it is larger where continuous relaxation leads to a larger error. To evaluate the effect of every architectural component, we perform an ablation study using Qiskit Aer simulator with noise models set to IBM 
+
+ibm_marrakesh (Heron r2, 156 qubits), as depicted in Table II. The noise model includes single-qubit depolarizing error (0.1%), two-qubit depolarizing error (0.7%) applied to CX and CP gates, and symmetric readout bit-flip error (1.5%). The three settings are: (A) Full QGCN, (B) QGCN without virtual spacing (all elements enabled), and (C) QGCN without double-sided RIS (half of the elements disabled). Also, Table III summarizes the per-iteration complexity and memory requirements of QGCN against classical baselines. IEEE WIRELESS COMMUNICATIONS LETTERS 5
+
+L = − X
+
+> k
+
+wkRk(Φ, a) + λ1∥Φ∥2 
+
+> F
+
++ λ2I 
+
+> N−1
+
+X
+
+> n=1
+
+deff ,n (a) > D total 
+
+!
+
++λ3 max 0, N min −
+
+> N
+
+X
+
+> n=1
+
+an
+
+!2
+
+(8) 
+
+Figure 1: (a) Quantum hardware achieves 89% of noiseless simulation with faster convergence. (b) Scalability at 95% CI, simulated. (c) Minimum user rate, near-linear growth, simulated. Table II: Ablation results confirming virtual spacing benefits by increasing spatial diversity. N = 4, M = 2, K = 3, L = 2, SNR = 10 dB, 2048 shots, 5 Monte Carlo runs, 95% CI. 
+
+Configuration Min. Rate (bps/Hz) Degrad. Conv. Epoch 
+
+Full QGCN (baseline) 0.139 ± 0.122 — 13 ± 9
+
+w/o Virtual Spacing 0.104 ± 0.084 −25 .1% 13 ± 9
+
+w/o Double-Sided RIS 0.089 ± 0.009 −35 .9% 6 ± 7
+
+Table III: Complexity comp. : S = 2048 , L = 4 , ϵ = 0 .01)                            
+
+> .
+> Method Per-iter. Memory Noise Complexity Complexity Overhead
+> QGCN (proposed) O(S·L|E|)Implicit †2|θ|circuits Classical GNN O(N2K)O(N2)None BCD O(N3)O(N2)None DNN O(N2)O(N2)None
+> †Pairwise interactions encoded implicitly in quantum state; no explicit O(N2)storage required.
+
+VI. C ONCLUSION AND FUTURE WORK 
+
+As a critical technology to sculpting wireless propagation in next-generation networks, RISs have received growing atten-tion. In this paper, we tackled the scalability of double-sided RIS from two perspectives: algorithm and hardware design by introducing a switch-controlled virtual spacing architecture. The proposed algorithm achieves higher minimum UE rates and faster convergence. Beyond simulation, we validated the algorithm on an IBM Quantum processor, where the quantum implementation achieves 89% of noiseless simulation perfor-mance. Next-generation processors with more qubits and im-proved coherence are expected to support larger deployments. APPENDIX 
+
+For the coupling matrix C(d(a)) , reducing the inter-element spacing strengthens mutual coupling, thereby altering the effective reflection coefficients and distorting the intended beam pattern. The mutual coupling component is defined as [Cmutual (d(a))] ij =
+
+(0, i = j,    
+
+> sin( k0|pi−pj|)
+> k0|pi−pj|
+
+e−jk 0|pi−pj |, i̸ = j, 
+
+where pi and pj are the element positions and k0 is the wave number. As spacing decreases, the increased mutual coupling progressively distorts the effective reflection response and beamforming pattern. REFERENCES [1] International Telecommunication Union Radiocommunication Sector (ITU-R), “Future Technology Trends of Terrestrial International Mobile Telecommunications Systems Towards 2030 and Beyond,” International Telecommunication Union, Geneva, Switzerland, Report ITU-R M.2516-0, November 2022. [2] M. Iqbal et al. , “A Comprehensive Survey on Reconfigurable Intelligent Surfaces (RIS) and STAR-RIS for Next-Generation Wireless Networks,” 
+
+Discover Applied Sciences , vol. 7, no. 11, p. 1253, 2025. [3] H. Xiao et al. , “Fluid Reconfigurable Intelligent Surfaces: Joint On-Off Selection and Beamforming with Discrete Phase Shifts,” IEEE Wireless Communications Letters , vol. 14, no. 10, pp. 3124–3128, 2025. [4] Q. Li et al. , “Stacked Intelligent Metasurface-Based Transceiver Design for Near-Field Wideband Systems,” IEEE Transactions on Communica-tions , vol. 73, no. 9, pp. 8125–8139, 2025. [5] ——, “Low-Overhead Channel Estimation for RIS-Aided Multi-Cell Networks in the Presence of Phase Quantization Errors,” IEEE Trans-actions on Vehicular Technology , vol. 73, no. 5, pp. 6626–6641, 2023. [6] T. D. Karamanos, M. Fink, and F. Lemoult, “Topology Optimization for Microwave Control with Reconfigurable Intelligent Metasurfaces in Complex Media,” Physical Review Applied , vol. 21, no. 4, p. 044022, 2024. [7] F.-H. Tseng et al. , “Irregular Element Selection for Intelligent Reflecting Surface with Mutual Coupling,” in 2024 IEEE 99th Vehicular Technol-ogy Conference (VTC2024-Spring) , pp. 1–5. [8] C. Gao et al. , “A Dual-Sided STAR-RIS-Aided Wireless Powered In-dustrial IoT Network,” IEEE Wireless Communications Letters , vol. 15, pp. 960–964, 2025. [9] W. Shen, Z. Qin, and A. Nallanathan, “Deep Learning for Super-Resolution Channel Estimation in Reconfigurable Intelligent Surface Aided Systems,” IEEE Transactions on Communications , vol. 71, no. 3, pp. 1491–1503, 2023. [10] B.-J. Chen et al. , “Graph Neural Network-Based Joint Beamforming for Hybrid Relay and Reconfigurable Intelligent Surface Aided Multiuser Systems,” IEEE Wireless Communications Letters , vol. 12, no. 10, pp. 1811–1815, 2023. [11] M. Chehimi et al. , “Reconfigurable Intelligent Surface (RIS)-Assisted Entanglement Distribution in FSO Quantum Networks,” IEEE Transac-tions on Wireless Communications , vol. 24, no. 4, pp. 3132–3148, 2025.

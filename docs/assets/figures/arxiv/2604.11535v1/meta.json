@@ -1,0 +1,70 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.11535v1/fig-001.webp",
+      "caption": "Fig. 8. Excerpts from the propose skill. The hard gate enforces no-code contribution. Topology analysis guides experts toward strategic reductiongraph gaps. Pre-validation checks four quality dimensions before the issue enters the pipeline.",
+      "page": 6,
+      "index": 1,
+      "width": 529,
+      "height": 555
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11535v1/fig-002.webp",
+      "caption": "Fig. 9. Excerpts from the add-rule skill. The checklist encodes the mathematical knowledge every reduction requires. Reference implementations prevent convention drift. The paper entry ensures visual verifiability by human reviewers.",
+      "page": 6,
+      "index": 2,
+      "width": 529,
+      "height": 546
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11535v1/fig-003.webp",
+      "caption": "Fig. 12. The reduction graph as of April 2026. ILP (center node) is the most connected node: 129 of 190 problem types (68%) have a reduction path to it, granting solver access via HiGHS. 3-SAT anchors the other direction: 78 types are reachable from it, providing tested NP-hardness arguments. Only the 148 connected nodes are shown; 42 isolated types awaiting their first reduction are omitted.",
+      "page": 7,
+      "index": 3,
+      "width": 463,
+      "height": 594
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11535v1/fig-004.webp",
+      "caption": "Fig. 13. Growth of problem types and reduction rules over time, mined from git history. Dashed lines mark phase transitions. Phase 1 (weeks 0–7): manual development, porting rules from existing packages. Phase 2 (weeks 7–8.5): basic skills introduced. Phase 3 (weeks 8.5–13): full pipeline operational; both curves accelerate sharply.",
+      "page": 7,
+      "index": 4,
+      "width": 504,
+      "height": 298
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11535v1/fig-005.webp",
+      "caption": "Fig. 11. A representative agent profile used in agentic feature testing. The persona’s domain knowledge (logistics optimization) lets the agent judge whether reduction results are plausible without access to ground-truth labels.",
+      "page": 7,
+      "index": 5,
+      "width": 529,
+      "height": 420
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11535v1/fig-006.webp",
+      "caption": "Fig. 10. Canonical examples as a single source of truth. The contributor’s issue contributes worked instances with known solutions, which are extracted into the example database as builder functions. Every downstream artifact— JSON fixtures, the Typst PDF manual, and the pred create --example CLI mode—is generated from the same builders, so any drift from the issue surfaces as a visible mismatch. The Stage 6 verification step closes the loop: the contributor walks through the manual and CLI output and checks them against the original issue.",
+      "page": 7,
+      "index": 6,
+      "width": 379,
+      "height": 429
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11535v1/fig-007.webp",
+      "caption": "Fig. 14. Trait hierarchy and compile-time validation. The Problem trait defines a universal evaluation interface; ReduceTo<T> requires both forward and inverse maps; procedural macros validate overhead expressions and variant registrations at compile time.",
+      "page": 10,
+      "index": 7,
+      "width": 508,
+      "height": 446
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11535v1/fig-008.webp",
+      "caption": "Fig. 6. Delegation spectrum. Tasks are sorted from fully human (top) to fully automated (bottom). The gradient arrow and horizontal bars show the human– agent split for each work type. Harness engineering, strategic planning, and merge authorization remain fully human; mathematical verification and canonical examples are human-led with agent drafting; implementation, code review, and convention enforcement are delegated to agents.",
+      "page": 5,
+      "index": 8,
+      "width": 502,
+      "height": 260
+    }
+  ]
+}

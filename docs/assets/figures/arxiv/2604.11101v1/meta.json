@@ -1,0 +1,54 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.11101v1/fig-001.webp",
+      "caption": "Figure 3. Loss, average score and ratio of Hadamard matrices in a typical n = 140 run.",
+      "page": 7,
+      "index": 1,
+      "width": 874,
+      "height": 883
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11101v1/fig-002.webp",
+      "caption": "Figure 6. A typical n = 140 run with alternate Ansatz (5).",
+      "page": 10,
+      "index": 2,
+      "width": 864,
+      "height": 792
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11101v1/fig-003.webp",
+      "caption": "Figure 1. A GS type Hadamard matrix of order 244. Coloured entries are +1, black entries are −1.",
+      "page": 3,
+      "index": 3,
+      "width": 513,
+      "height": 513
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11101v1/fig-004.webp",
+      "caption": "Figure 2. Number of GS type Hadamard matrices for small n.",
+      "page": 3,
+      "index": 4,
+      "width": 958,
+      "height": 475
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11101v1/fig-005.webp",
+      "caption": "Figure 4. Loss, average score and ratio of Hadamard matrices in a typical n = 212 run.",
+      "page": 8,
+      "index": 5,
+      "width": 874,
+      "height": 883
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11101v1/fig-006.webp",
+      "caption": "Figure 5. Influence of stacking on ratio of produced Hadamard matrices and on computation time.",
+      "page": 9,
+      "index": 6,
+      "width": 835,
+      "height": 267
+    }
+  ]
+}
