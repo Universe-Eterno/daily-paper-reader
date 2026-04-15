@@ -1,0 +1,38 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.10953v1/fig-001.webp",
+      "caption": "Fig. 6. Illustrates the simulation scene for online three-dimensional bin packing.",
+      "page": 6,
+      "index": 1,
+      "width": 504,
+      "height": 308
+    },
+    {
+      "url": "assets/figures/arxiv/2604.10953v1/fig-002.webp",
+      "caption": "Fig. 8. Performance Comparison of Different Bin Packing Methods.",
+      "page": 7,
+      "index": 2,
+      "width": 509,
+      "height": 516
+    },
+    {
+      "url": "assets/figures/arxiv/2604.10953v1/fig-003.webp",
+      "caption": "Fig. 3. Online bin packing algorithm architecture diagram.",
+      "page": 4,
+      "index": 3,
+      "width": 527,
+      "height": 235
+    },
+    {
+      "url": "assets/figures/arxiv/2604.10953v1/fig-004.webp",
+      "caption": "Fig. 4. Diffusion probabilistic model.",
+      "page": 5,
+      "index": 4,
+      "width": 548,
+      "height": 313
+    }
+  ]
+}
