@@ -6,78 +6,79 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-15
-- 运行时间：2026-04-15 20:42:07 UTC
+- 最新运行日期：2026-04-16
+- 运行时间：2026-04-16 20:17:50 UTC
 - 运行状态：成功
 - 本次总论文数：19
 - 精读区：7
 - 速读区：12
 
 ### 今日简报（AI）
-今日精选19篇前沿成果，重点呈现LLM驱动的元认知启发式算法进化新范式。
-PyV
-- 详情：[/202604/15/README](/202604/15/README)
+今日精选 19 篇前沿论文，重点聚焦 LLM 驱动的启发式算法进化与复杂路径规划优化。
+PyVRP+ 与 BEAM 展现了 LLM 在元认知启发式搜索与双层内存自适应算法设计中的卓越潜力，双双斩获满分评价。
+建议关注 LLM 如何通过数学推理与自纠正机制，解决 GPU 线程映射及 RAG 可信度等实际工程难题。
+- 详情：[/202604/16/README](/202604/16/README)
 
 ### 精读区论文标签
-1. [PyVRP$^+$: LLM-Driven Metacognitive Heuristic Evolution for Hybrid Genetic Search in Vehicle Routing Problems](/202604/15/2604.07872v1-pyvrp-llm-driven-metacognitive-heuristic-evolution-for-hybrid-genetic-search-in-vehicle-routing-problems)  
+1. [PyVRP$^+$: LLM-Driven Metacognitive Heuristic Evolution for Hybrid Genetic Search in Vehicle Routing Problems](/202604/16/2604.07872v1-pyvrp-llm-driven-metacognitive-heuristic-evolution-for-hybrid-genetic-search-in-vehicle-routing-problems)  
    标签：评分：10.0/10、query:nco-llm
-   evidence：大模型驱动的元认知启发式演化，用于解决车辆路径问题
-2. [BEAM: Bi-level Memory-adaptive Algorithmic Evolution for LLM-Powered Heuristic Design](/202604/15/2604.12898v1-beam-bi-level-memory-adaptive-algorithmic-evolution-for-llm-powered-heuristic-design)  
+   evidence：大模型驱动的车辆路径问题元认知启发式演化
+2. [BEAM: Bi-level Memory-adaptive Algorithmic Evolution for LLM-Powered Heuristic Design](/202604/16/2604.12898v1-beam-bi-level-memory-adaptive-algorithmic-evolution-for-llm-powered-heuristic-design)  
    标签：评分：10.0/10、query:nco-llm
-   evidence：基于大语言模型的超启发式算法，用于自动启发式设计和算法演化
-3. [COSMO-Agent: Tool-Augmented Agent for Closed-loop Optimization,Simulation,and Modeling Orchestration](/202604/15/2604.05547v1-cosmo-agent-tool-augmented-agent-for-closed-loop-optimizationsimulationand-modeling-orchestration)  
+   evidence：大模型驱动的启发式设计和双层算法演化
+3. [Multi-Turn Reasoning LLMs for Task Offloading in Mobile Edge Computing](/202604/16/2604.07148v1-multi-turn-reasoning-llms-for-task-offloading-in-mobile-edge-computing)  
    标签：评分：9.0/10、query:nco-llm
-   evidence：基于大语言模型的闭环优化与仿真智能体
-4. [AgentGL: Towards Agentic Graph Learning with LLMs via Reinforcement Learning](/202604/15/2604.05846v1-agentgl-towards-agentic-graph-learning-with-llms-via-reinforcement-learning)  
+   evidence：利用大语言模型进行移动边缘计算中的任务卸载优化
+4. [DiffHLS: Differential Learning for High-Level Synthesis QoR Prediction with GNNs and LLM Code Embeddings](/202604/16/2604.09240v1-diffhls-differential-learning-for-high-level-synthesis-qor-prediction-with-gnns-and-llm-code-embeddings)  
    标签：评分：9.0/10、query:nco-llm
-   evidence：通过强化学习整合LLM与图学习
-5. [Diffusion Reinforcement Learning Based Online 3D Bin Packing Spatial Strategy Optimization](/202604/15/2604.10953v1-diffusion-reinforcement-learning-based-online-3d-bin-packing-spatial-strategy-optimization)  
-   标签：评分：9.0/10、query:nco
-   evidence：深度强化学习用于3D装箱优化问题
-6. [Problem Reductions at Scale: Agentic Integration of Computationally Hard Problems](/202604/15/2604.11535v1-problem-reductions-at-scale-agentic-integration-of-computationally-hard-problems)  
+   evidence：结合GNN和LLM嵌入进行高层综合优化
+5. [Modeling Co-Pilots for Text-to-Model Translation](/202604/16/2604.12955v1-modeling-co-pilots-for-text-to-model-translation)  
    标签：评分：9.0/10、query:nco-llm
-   evidence：解决NP难优化问题的智能体集成
-7. [Modeling Co-Pilots for Text-to-Model Translation](/202604/15/2604.12955v1-modeling-co-pilots-for-text-to-model-translation)  
-   标签：评分：9.0/10、query:nco-llm
-   evidence：大语言模型将组合问题转化为形式化模型
+   evidence：利用大模型将自然语言描述的组合问题转化为正式的优化模型
+6. [Reason in Chains, Learn in Trees: Self-Rectification and Grafting for Multi-turn Agent Policy Optimization](/202604/16/2604.07165v2-reason-in-chains-learn-in-trees-self-rectification-and-grafting-for-multi-turn-agent-policy-optimization)  
+   标签：评分：8.5/10、query:nco-llm
+   evidence：利用树结构纠正优化多步推理任务中的LLM智能体强化学习
+7. [Ising-based Test Optimization and Benchmarking](/202604/16/2604.10450v1-ising-based-test-optimization-and-benchmarking)  
+   标签：评分：8.0/10、query:nco
+   evidence：通过Ising模型和量子启发式机器解决组合优化问题
 
 ### 速读区论文标签
-1. [BOSCH: Black-Box Binary Optimization for Short-Context Attention-Head Selection in LLMs](/202604/15/2604.05942v1-bosch-black-box-binary-optimization-for-short-context-attention-head-selection-in-llms)  
+1. [SkillMOO: Multi-Objective Optimization of Agent Skills for Software Engineering](/202604/16/2604.09297v1-skillmoo-multi-objective-optimization-of-agent-skills-for-software-engineering)  
    标签：评分：8.0/10、query:nco-llm
-   evidence：将大模型注意力机制的二元优化问题建模为大邻域搜索
-2. [Multi-Turn Reasoning LLMs for Task Offloading in Mobile Edge Computing](/202604/15/2604.07148v1-multi-turn-reasoning-llms-for-task-offloading-in-mobile-edge-computing)  
+   evidence：利用LLM建议的编辑和NSGA-II演化技能包
+2. [Leveraging Mathematical Reasoning of LLMs for Efficient GPU Thread Mapping](/202604/16/2604.10387v2-leveraging-mathematical-reasoning-of-llms-for-efficient-gpu-thread-mapping)  
    标签：评分：8.0/10、query:nco-llm
-   evidence：大语言模型用于移动边缘计算中的任务卸载优化，并与深度强化学习进行对比
-3. [Fast Heterogeneous Serving: Scalable Mixed-Scale LLM Allocation for SLO-Constrained Inference](/202604/15/2604.07472v1-fast-heterogeneous-serving-scalable-mixed-scale-llm-allocation-for-slo-constrained-inference)  
+   evidence：利用语境学习推导GPU线程优化中的映射函数
+3. [Self-Correcting RAG: Enhancing Faithfulness via MMKP Context Selection and NLI-Guided MCTS](/202604/16/2604.10734v1-self-correcting-rag-enhancing-faithfulness-via-mmkp-context-selection-and-nli-guided-mcts)  
+   标签：评分：8.0/10、query:nco-llm
+   evidence：将RAG上下文选择重新表述为多维多选择背包问题（MMKP）进行优化。
+4. [Deep Learning for Sequential Decision Making under Uncertainty: Foundations, Frameworks, and Frontiers](/202604/16/2604.11507v1-deep-learning-for-sequential-decision-making-under-uncertainty-foundations-frameworks-and-frontiers)  
    标签：评分：8.0/10、query:nco
-   evidence：用于LLM分配优化的启发式算法和局部搜索
-4. [DiffHLS: Differential Learning for High-Level Synthesis QoR Prediction with GNNs and LLM Code Embeddings](/202604/15/2604.09240v1-diffhls-differential-learning-for-high-level-synthesis-qor-prediction-with-gnns-and-llm-code-embeddings)  
-   标签：评分：8.0/10、query:nco-llm
-   evidence：结合GNN和LLM嵌入进行高层综合优化预测
-5. [LUDOBENCH: Evaluating LLM Behavioural Decision-Making Through Spot-Based Board Game Scenarios in Ludo](/202604/15/2604.05681v1-ludobench-evaluating-llm-behavioural-decision-making-through-spot-based-board-game-scenarios-in-ludo)  
+   evidence：关于深度学习和强化学习用于序列决策和运筹学的教程
+5. [From LLM to Silicon: RL-Driven ASIC Architecture Exploration for On-Device AI Inference](/202604/16/2604.07526v1-from-llm-to-silicon-rl-driven-asic-architecture-exploration-for-on-device-ai-inference)  
    标签：评分：7.0/10、query:nco-llm
-   evidence：评估大语言模型在棋盘游戏场景中的战略推理与决策能力
-6. [Multi-objective Evolutionary Merging Enables Efficient Reasoning Models](/202604/15/2604.06465v1-multi-objective-evolutionary-merging-enables-efficient-reasoning-models)  
+   evidence：强化学习驱动的 ASIC 架构和工作负载划分优化
+6. [An Adaptive Antenna Impedance Matching Method via Deep Reinforcement Learning](/202604/16/2604.07736v1-an-adaptive-antenna-impedance-matching-method-via-deep-reinforcement-learning)  
+   标签：评分：7.0/10、query:nco
+   evidence：深度强化学习用于自适应天线阻抗匹配优化
+7. [Automating aggregation strategy selection in federated learning](/202604/16/2604.08056v1-automating-aggregation-strategy-selection-in-federated-learning)  
    标签：评分：7.0/10、query:nco-llm
-   evidence：利用进化合并将推理建模为多目标优化挑战
-7. [Select-then-Solve: Paradigm Routing as Inference-Time Optimization for LLM Agents](/202604/15/2604.06753v1-select-then-solve-paradigm-routing-as-inference-time-optimization-for-llm-agents)  
-   标签：评分：7.0/10、query:nco-llm
-   evidence：大模型智能体在推理阶段选择推理范式的优化方法
-8. [LASER: A Data-Centric Method for Low-Cost and Efficient SQL Rewriting based on SQL-GRPO](/202604/15/2604.06804v1-laser-a-data-centric-method-for-low-cost-and-efficient-sql-rewriting-based-on-sql-grpo)  
-   标签：评分：7.0/10、query:nco-llm
-   evidence：基于LLM的SQL重写用于数据库优化
-9. [Not All Turns Are Equally Hard: Adaptive Thinking Budgets For Efficient Multi-Turn Reasoning](/202604/15/2604.05164v2-not-all-turns-are-equally-hard-adaptive-thinking-budgets-for-efficient-multi-turn-reasoning)  
+   evidence：大语言模型推断合适策略，遗传搜索探索优化方案
+8. [Multi-Modal Learning meets Genetic Programming: Analyzing Alignment in Latent Space Optimization](/202604/16/2604.08324v1-multi-modal-learning-meets-genetic-programming-analyzing-alignment-in-latent-space-optimization)  
+   标签：评分：7.0/10、query:nco
+   evidence：将符号结构的组合搜索转化为连续潜空间优化。
+9. [Long-Horizon Plan Execution in Large Tool Spaces through Entropy-Guided Branching](/202604/16/2604.12126v1-long-horizon-plan-execution-in-large-tool-spaces-through-entropy-guided-branching)  
+   标签：评分：6.5/10、query:nco-llm
+   evidence：用于多步任务和探索巨大决策空间的LLM智能体
+10. [Multi-objective Evolutionary Merging Enables Efficient Reasoning Models](/202604/16/2604.06465v1-multi-objective-evolutionary-merging-enables-efficient-reasoning-models)  
    标签：评分：6.0/10、query:nco-llm
-   evidence：将LLM推理建模为顺序计算分配优化问题
-10. [EAGLE: Edge-Aware Graph Learning for Proactive Delivery Delay Prediction in Smart Logistics Networks](/202604/15/2604.05254v1-eagle-edge-aware-graph-learning-for-proactive-delivery-delay-prediction-in-smart-logistics-networks)  
+   evidence：用于推理中多目标优化的进化模型合并
+11. [Inference-Time Code Selection via Symbolic Equivalence Partitioning](/202604/16/2604.06485v1-inference-time-code-selection-via-symbolic-equivalence-partitioning)  
    标签：评分：6.0/10、query:nco
-   evidence：用于物流网络路由和延迟预测的混合深度学习
-11. [Next-Scale Generative Reranking: A Tree-based Generative Rerank Method at Meituan](/202604/15/2604.05314v1-next-scale-generative-reranking-a-tree-based-generative-rerank-method-at-meituan)  
-   标签：评分：6.0/10、query:nco
-   evidence：解决推荐系统中组合空间复杂性的生成式重排序方法
-12. [Reason Analogically via Cross-domain Prior Knowledge: An Empirical Study of Cross-domain Knowledge Transfer for In-Context Learning](/202604/15/2604.05396v1-reason-analogically-via-cross-domain-prior-knowledge-an-empirical-study-of-cross-domain-knowledge-transfer-for-in-context-learning)  
+   evidence：使用符号执行和SMT约束的推理时代码选择
+12. [Select-then-Solve: Paradigm Routing as Inference-Time Optimization for LLM Agents](/202604/16/2604.06753v1-select-then-solve-paradigm-routing-as-inference-time-optimization-for-llm-agents)  
    标签：评分：6.0/10、query:nco-llm
-   evidence：上下文学习的跨域知识迁移
+   evidence：大模型智能体推理范式的推理侧优化
 
 
 <div class="dpr-home-promo-card">

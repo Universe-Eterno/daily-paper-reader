@@ -1,0 +1,238 @@
+Title: Ising-based Test Optimization and Benchmarking
+
+URL Source: https://arxiv.org/pdf/2604.10450v1
+
+Published Time: Tue, 14 Apr 2026 01:00:45 GMT
+
+Number of Pages: 7
+
+Markdown Content:
+# Ising-based Test Optimization and Benchmarking ∗
+
+Yige Yang, Man Zhang, Tao Yue Beihang University 
+
+{yangyige, manzhang, yuetao }.buaa.edu.cn 
+
+Abstract 
+
+Test optimization contains test case selection and minimization, which is an important challenge in soft-ware testing and has been addressed with search-based approaches intensively in the past. Inspired by the recent advancement of using quantum optimization solutions for addressing test optimization problems, we looked into Coherent Ising Machines (CIM), which offer potential for solving combinatorial optimiza-tion problems, but have not yet been exploited in test optimization. Hence, in this paper, we present IsingTester, an open-source, Python-based command-line tool that provides an end-to-end pipeline for solving test optimization problems that are formulated as Ising models. With IsingTester, we reformu-late test selection and minimization as Ising spin configurations, encode multiple optimization strategies into Ising Hamiltonians, and implement solvers including CIM simulation and brute-force search. Given a user-provided dataset and solver configuration, IsingTester automatically performs problem encoding, op-timization, and spin decoding, returning selected test cases back to the user. Along with IsingTester, we also present the accompanying IsingBench for evaluating and comparing optimization techniques across Ising-based paradigms against baseline approaches. A screencast demonstrating the tool is available at: 
+
+https://github.com/WSE-Lab/IsingBench .
+
+Keywords : Test Optimization, Testing Tool, Ising Model, Coherent Ising Machine, Quantum Optimization. 
+
+# 1 Introduction 
+
+Non-trivial software projects routinely maintain test suites comprising hundreds and thousands of test cases that are accumulated over years of continuous development. While comprehensive test coverage is essential for software quality, the execution of an entire test suite is increasingly impractical due to time and computational resource limitations. This situation gives rise to test optimization problems, a family of combinatorial opti-mization challenges, which are typically categoried into Test Case Selection (TCS) and Test Case Minimization (TCM) problems. TCS aims to identify a subset of test cases that retains strong fault-detection capability or other effectiveness objectives while satisfying practical constraints such as execution time and available testing budget. TCM goes a step further, seeking to reduce the overall size of the test suite, while still preserving a satisfactory level of fault coverage or other effectiveness properties such as diversity. Both problems are NP-hard in a general context, and decades of research have produced various techniques to address them, including greedy heuristics-based approaches[8], clustering-based approaches[1], and search-based approaches[11, 6]. Inspired by the recent advancement of applying quantum optimization solutions (quantum annealing (QA), Quantum Approximate Optimization Algorithm (QAOA)) for addressing classical test optimization problems [9, 10], and a relative longer history of applying quantum-inspired solutions for addressing software engineer-ing optimization problems in general [12, 13], we focus on the potential of applying Coherent Ising Machines (CIM) in solving test optimization problems. This is also motivated by the obsevation that CIM has recently demonstrated promising scalability for solving combinatorial optimization problems by exploiting physical phe-nomena to escape local optima efficiently [4]. CIM natively solves problems formulated as Ising models [7]: energy-minimization problems over binary spin variables. However, we lack a framework that: 1) systematically bridges test optimization problem instances to Ising-model formulations, 2) supports multiple encoding strategies to accommodate heterogeneous project data, and 3) exposes both classical and quantum-inspired solvers through a single, accessible interface. As a result, researchers and practitioners who wish to leverage CIM or similar methods (e.g., QA and simulated annealers (SA) for test optimization face steep barriers: they must manually derive problem encodings, implement solver 
+
+> ∗This work is funded by the Fundamental Research Funds for the Central Universities and the National Science Foundation of China (No. 62502022).
+
+1
+
+> arXiv:2604.10450v1 [cs.SE] 12 Apr 2026
+
+interfaces, and interpret raw spin outputs. This is a process that is both technically intricate and highly error-prone. In this paper, we present IsingTester, a novel Python tool that addresses this gap by providing a unified, end-to-end pipeline for solving test optimization problems through the Ising model computational paradigm. IsingTester is, to the best of our knowledge, the very first tool to unify both TCS and TCM under a single Ising-based framework. The tool allows users to select from multiple encoding strategies—each tailored to different types of project data such as execution time and failure rate—and to choose from a set of solvers including CIM and SA[2]. Given a problem encoding and solver configuration, IsingTester automatically translates the test optimization instance into an Ising Hamiltonian, invokes the selected solver to minimize the energy landscape, decodes the resulting spin configuration, and returns the optimized set of test cases to the user. This pipeline abstracts away the mathematical and implementation complexity of Ising-model optimization, making quantum-inspired test optimization accessible to practitioners. We also present IsingBench, which is developed to evaluate and compare optimization techniques across Ising-based paradigms against baseline approaches, and release it at: https://github.com/WSE-Lab/IsingBench .
+
+Structure . Section 2 presents IsingTester, followed by the demonstration of its application (Section 3). In Section 4 we discuss the limitations of IsingTester and how it can be extended. We conclude the paper in Section 5. 
+
+# 2 IsingTester and IsingBench 
+
+Fig. 1 presents an overview of IsingTester and IsingBench. IsingTester is designed to solve test optimization problems using Ising models, while IsingBench is developed to evaluate and compare optimization techniques across Ising-based paradigms against baseline approaches. Together, these components provide a unified frame-work for solving software testing optimization problems, comparing different solutions, and analyzing their performance across various benchmarks. As shown in Fig. 1, the workflow begins with the user configurations of the problem, evaluation strategy, optimization algorithm, CIM configurations and analysis settings. The problem can be selected from the pre-defined benchmarks in Benchmark or defined by the user. Within the IsingTester module, the problem is first transformed into candidate solution representations using Solution Encoding . The encoded solutions are then evaluated in Evaluation using either existing or customized optimization strategies. Solutions represented as Ising spins are evaluated using an Ising Hamiltonian (highlighted in yellow), while classically encoded solutions are evaluated using objective functions (highlighted in orange). To solve the optimization problem, IsingTester integrates multiple predefined optimization solvers that iteratively improve candidate solutions based on eval-uation results (see Optimization ). These solvers include both Ising-based approaches (highlighted in yellow) and classical heuristic algorithms (highlighted in orange). The process generates intermediate results, such as intermediate solution instances and their corresponding evaluation values, as well as the final solution instances. These results are then passed to the Result Analysis module for further analysis, etc., computing energy or fitness values and generating visualizations (e.g., convergence curves). This module not only compares results produced by different optimization approaches within IsingTester, but also enables comparisons with results from the literature [9] when the same problem benchmarks are used. More details about the modules are presented in the rest of the section. Due to space limitations, we mainly focus on the Ising-based optimization. 
+
+2.1 Optimization Strategies (Evaluation) 
+
+The Evaluation module is a core component of IsingTester, responsible for assessing candidate solutions for a given problem. Depending on the selected solution encoding, this module supports two evaluation paradigms. When the problem is formulated as an Ising Hamiltonian, candidate solutions are represented as Ising spins, which are evaluated according to their energy values. The module evaluates classical candidate solutions using problem-specific objective functions. In addition, the module supports to decode Ising spin configurations into corresponding test case selections. The Ising model is formally represented as Equation 1 
+
+E(s) = − X
+
+> i
+
+hisi − 12
+
+X
+
+> i,j
+
+Jij sisj (1) where si ∈ {− 1, +1 } are spin variables, hi are linear coefficients, and Jij are quadratic coefficients. IsingTester currently implements three optimization strategies shown below. Two are from the literature, while the third is proposed in this work to demonstrate how our tool can be used to incorporate constraints in Ising-based optimization. 2solution instance     
+
+> (final result)
+> Result Analysis
+> [in: results r, results e]
+> Visualization
+> (e.g., convergence curve, performance comparison)
+> Metrics
+> (e.g., energy, fitness values)
+> Comparisions
+> (e.g., CIM vs GA)
+> solution instances
+> (intermediate results)
+> evaluated results
+> (intermediate results)
+
+Results results r
+
+> Benchmarks
+> Result Benchmarks
+> results e
+> (e.g., QAOA)
+> Problem Benchmarks
+> problem
+> (e.g., paintcontrol, gsdtst, iof/rol, custom)
+> user
+> Analyzed Results
+> results a
+> (e.g., json, png)
+
+IsingBench 
+
+IsingTester [in: problem]                     
+
+> evaluated result si solution instance si
+> Optimization [in: evaluated result]
+> Coherent Ising Machine (CIM) Solver Genetic Algorithm (GA)
+> Simulated Annealing (SA) Brute-Force Solver
+> Evaluation [in: solution instance]
+> WAO RWAO D
+> WAO R-Budget
+> Objective Fuctions
+> represented
+> by
+> Solution Encoding
+> Ising Spins
+> -1 -1 1-1 -1 11-1
+> Classicial Encoding
+> (e.g., Binary Vector)
+> 00100110Configurable Options
+> - problem
+> - evaluation - optimization - results e
+> - analysis
+> Outputs
+> - results r
+> - results a
+> 1: in
+> 1: out
+> 2: in
+> 2: in
+> 2: out
+
+Figure 1: Overview of IsingTester and IsingBench. 
+
+Weighted Attribute Optimization (Ratio-based) (WAO R) This strategy is from Wang et al.’s work on using QAOA for test optimization [9]. Each spin variable si represents the selection decision for test case i,where si = −1 and si = +1 denote selected and not selected. Each test case carries multiple attributes, each assigned a scalar weight and classified as either an effectiveness measure or a cost one. Optionally, minimization can be included as an additional cost term. The method is referred to as ratio-based because the fitness of each attribute is computed as the ratio of the weighted sum of selected test cases to the total sum across all test cases, as formulated in Equation 3. 
+
+f v = ω0(f0)2 + · · · + ωm−1(fm−1)2 (2) 
+
+fk(s) = 12 (1 + λk
+
+Pn−1
+
+i=0 cki si
+
+Pn−1
+
+i=0 cki
+
+), s i ∈ { +1 , −1} (3) where cki is the kth attribute of test case i, λk = −1 for cost attributes and λk = +1 for effectiveness attributes. Ising energy E(s) is defined as fitness value f v (s) in Equation 2. 
+
+Weighted Attribute Optimization (Deviation-based) (WAO D) Adopted from Wang et al.[10], this method shares the same input format and configuration as WAO R: each test case carries multiple user-weighted effectiveness and cost attributes, with optional minimization as an additional cost, but differs in its fitness function. The method is referred to as deviation-based because the fitness of each attribute measures the deviation of the selected subset from a theoretical optimum Lk, penalizing configurations that fall short of the ideal value, as formulated in Equation 4. 
+
+fk(s) = ( 
+
+n−1X
+
+i=0 
+
+cki ( 1 − si
+
+2 ) − Lk)2 (4) where Lk is the theoretical limit of attribute k, the sum of all values for effectiveness attributes, and 0 for cost attributes. As with WAO R, Ising energy E(s) is defined as the fitness value f v (s) in Equation 2. 
+
+Weighted Attribute Optimization with Budget Constraint (Ratio-based) (WAO R-Budget) This method extends WAO R by incorporating a user-defined budget constraint, which specifies the maximum pro-portion of test cases that should be selected (e.g., a budget of 10 indicates that 10% of the total test suite should be selected). This formulation demonstrates the capability of IsingTester to handle constrained optimization problems, where the budget requirement is handled differently depending on the solver type. For Ising solvers, the constraint is integrated directly into the Ising model as a penalty term. The full Ising model is given in Equation 5, where Hconstraint is defined in Equation 6 
+
+H = f v (s) + Hconstraint (5) 3Table 1: Configurable Parameters of the CIM Solver 
+
+Parameter Description Default 
+
+g2 Control each oscillator’s saturation behavior. 10 −3
+
+j Control the trade-off between feedback coupling strength and coupling-induced dissipation. 2
+
+β Control the strength of amplitude homogeneity correction across spins. 10 noise scale Control the magnitude of the stochastic noise term Wr .1.0steps Control the total evolution time of the CIM dynamics. 1000 ∆t Control the integration step size of the CIM dynamics simulation. 2 ∗ 10 −3
+
+Hconstraint = α
+
+> n−1
+
+X
+
+> i
+
+1 − si
+
+2 − B
+
+!2
+
+(6) where B is the target number of selected test cases derived from the user-provided budget percentage, and α is a penalty coefficient controlling the strictness of the constraint. For classical solvers, the budget requirement is instead provided as a separate constraint function, allowing the solvers to handle the objective and constraint independently according to their own optimization strategies. The fitness function follows Equation 2 and Equation 3, as defined in WAO R.
+
+2.2 Optimization Techniques (Optimization) 
+
+The Optimization module receives the Ising model or fitness function from the Evaluation module and applies a user-selected solver to seek better solutions. While IsingTester supports multiple optimization techniques, its primary focus is on the CIM solver, which simulates the physical dynamics of a network of optical parametric oscillators to fine low-energy states of the Ising Hamiltonian. In addition to CIM, IsingTester also provides classical baseline solvers, including a Brute-Force solver for exhaustive enumeration on small problem instances and classical heuristic algorithms such as Genetic Algorithms (GA) [5] and Simulated Annealing (SA) [2]. Each solver outputs candidate solutions represented by Solution Encoding module, which are subsequently evaluated by the Evaluation module. For Ising-based solvers, the solution is represented as a spin configuration, i.e., a vector of ±1 values over all spin variables. For classical solvers, the solution could be represented as a binary vector indicating the selection of test cases. The modular design of IsingTester ensures extensibility, allowing new solvers to be integrated by adhering to the common input and output interface. The CIM solver is the key optimization component in IsingTester. It is implemented as a software simulation of a measurement-feedback CIM following the Gaussian Approximated Positive-P (GAPP) model proposed by Inui et al. [4]. In this framework, each spin variable in the Ising model is represented by an optical parametric oscillator whose amplitude evolves according to nonlinear dynamical equations. Through iterative measurement and feedback processes, the coupled oscillator network naturally evolves toward low-energy configurations of the Ising Hamiltonian. During the simulation, the system dynamics iteratively update the oscillator amplitudes while incorporating coupling interactions derived from the Ising coefficients. As the evolution progresses, the oscillator states converge to stable configurations, and the signs of their amplitudes correspond to the final spin assignments of the optimization problem. This process searches for low-energy states of the Ising model, where minimizing the energy corresponds to obtaining better solutions to the optimization problem. To support experimentation, the CIM solver exposes several configurable parameters that control the be-havior of the dynamical system, as shown in Table 1. These parameters regulate the nonlinear saturation of oscillators, feedback coupling strength, amplitude stabilization, stochastic noise injection, and numerical integration settings for the simulation. 
+
+2.3 Benchmarks 
+
+To provide a platform for assessing Ising-based testing approaches and enabling comparisons with existing methods, IsingBench comprises two reference resources: (i) Problem Benchmarks , a collection of existing bench-4marks for evaluating testing optimization approaches (e.g., PaintControl and IOF/ROL 1, GSDTSR [3]), and (ii) Result Benchmarks , which contain reference results sourced from prior literature [9, 10]. Both resources can be aggregated and extended to incorporate new methods and additional datasets. Together, they enable users (especially researchers) to develop and evaluate new solvers with IsingTester and conduct experiments on IsingBench. As a result, IsingTester and IsingBench serve not only as a ready-to-use optimization tool but also as an extensible research platform supporting new problem formulations and solver backends contributed by the community. 
+
+2.4 Result Analysis 
+
+To facilitate the analysis of optimization processes, we implement module Result Analysis for examining opti-mization dynamics with raw results generated by IsingTester, i.e., results r. For instance, we provide convergence curves to show the evolution of fitness scores or spin amplitudes, enabling users to inspect convergence patterns and compare optimization dynamics across various solver configurations. In addition, the Result Analysis module supports benchmarking by providing performance comparison plots that summarize fitness scores across multiple runs using box plots, enabling comparison of performance of different solvers on a given dataset. The comparisons can be conducted among solvers integrated in IsingTester or against reference results (i.e., results e) from Result Benchmarks .
+
+# 3 Working with IsingTester and IsingBench 
+
+This section presents a step-by-step example showing how to use and extend IsingTester on IsingBench. See more detail in our repository: https://github.com/WSE-Lab/IsingBench .
+
+3.1 Using IsingTester and IsingBench 
+
+Preparation Solving testing optimization problems requires a dataset representing the problem, along with solution encoding, evaluation strategies, and optimization techniques. For TCS and TCM, IsingTester accepts a CSV file as input to encode the problem, where rows correspond to individual test cases and columns represent test case properties. An example input from the PaintControl benchmark is shown below. Each row represents measurable attributes, i.e., execution time ( time ) and failure rate ( rate ) of a test case. 
+
+> , time , rate 0 ,39050.0 ,0.13383838383838384 1 ,1000.0 ,0.09620253164556962 ...
+
+For integrated problems, solution encoding, evaluation strategies, and optimization techniques are prede-fined, allowing users to directly configure them in the next step. Regarding new problems, users need to provide the dataset together with corresponding solution encoding and evaluation strategies. 
+
+Execution To ease the use, IsingTester can be executed using either CLI flags or a YAML configuration file. An example of using the tool with CLI flags is shown below.                    
+
+> python ising_bench . py test \-- problem WAOr \-- library paintcontrol \-- problem - param \effectiveness =[ ’ rate ’] \cost =[ ’ time ’] \minimization = true \-- solver CIM \-- solver GA \-- save - path ./ results \-- convergence - curve \spins_amplitude \fitness_value
+
+In this example, the WAO R optimization strategy is applied to the PaintControl benchmark. The problem parameters specify rate as the effectiveness attribute and time as the cost attribute for the TCM problem (minimization=true ). ( CIM and GA ) are executed, with results stored in the ./results directory and conver-gence curves recorded for spin amplitudes and fitness values.  
+
+> 1See https://bitbucket.org/HelgeS/atcs-data/src/master/
+
+5Outputs Upon completion, IsingTester decodes the spin configuration and binary vector returned by each solver and outputs the TCS results together with their fitness scores as a JSON file. Fig. 2 is an example of the convergence curves produced by the CIM solver. Additional analysis results, such as performance comparison plots, are saved to the configured output directory, enabling direct visual comparison across solvers. More information can be found in the repository. 
+
+Figure 2: Spin amplitude trajectories produced by the CIM solver in one run (e.g., Batch 1). Each line is the trajectory of one Ising spin, and the y-axis shows the spin amplitude. 
+
+3.2 Extending IsingTester 
+
+IsingTester is designed to support extensibility in both problem formulations and solver implementations. 
+
+Customizing Problems A new problem can be formulated by extending the BaseProblem class and reg-istering it with the @register problem(name) annotation. The implementation must define three methods: 
+
+calc ising() converting the input data into an Ising model; fitness function() evaluating solution quality with respect to the optimization objective; and classical info() providing information required by classical solvers, including the number of bits, the optimization direction, and a constraint function. Once registered, the custom encoding is immediately accessible via configuration. 
+
+Customizing Solvers A new optimization technique can be integrated by inheriting from the BaseIsingSolver 
+
+or BaseClassicalSolver class and registering it with the @register solver(name) annotation. Method 
+
+run() must be implemented to perform solution encoding, for example by returning a spin configuration vector s ∈ {− 1, +1 }N or a binary solution vector. This plugin-style architecture makes IsingTester easily extensible, facilitating the integration of new solvers and problem-specific encoding strategies as they emerge. 
+
+# 4 Discussions 
+
+IsingTester and IsingBench serve as a foundation for researchers interested in quantum and quantum-inspired optimization, as they provide both baseline implementations and benchmarks for evaluating and comparing new approaches, which are also extensible. Despite the promising design, IsingTester and IsingBench have several limitations that should be acknowl-edged. First, IsingTester has not yet been thoroughly evaluated in terms of its applicability, usability, and scalability. For instance, large-scale empirical studies should be conducted on comprehensive benchmark suites or real-world industrial cases to evaluate IsingTester. Second, while the three optimization strategies (Sec-tion 2.1) integrated in IsingTester are grounded in established test optimization formulations, their effectiveness across diverse project types, scales, etc. has not yet been systematically evaluated. In future work, we plan to incorporate additional optimization strategies into IsingTester and conduct empirical studies to assess their effectiveness and to compare IsingTester with existing test optimization solutions. We also plan to conduct empirical studies to evaluate CIM’s performance alongside quantum devices. We believe it is important to in-vestigate, for a given software engineering optimization problem, which solver performs best in terms of solution quality, computational efficiency, and scalability. 6Along the way, we will also update IsingBench. Third, the current interaction model of IsingTester is command-line based, which may present a usability barrier for practitioners unfamiliar with CLI workflows and limit the tool’s accessibility to a broader engineering audience. In future work, IsingTester could be integrated with widely used CI/CD platforms, such as GitHub Actions, enabling its adoption in automated software engineering workflows. 
+
+# 5 Conclusion 
+
+This paper presents IsingTester and IsingBench, a Python-based command-line platform that bridges the gap between test optimization and quantum-inspired algorithms by providing a unified pipeline for solving test optimization problems formulated as Ising models. Though IsingTester and IsingBench are currently at the prototype stage, its architecture is designed to support extensibility, and its implementation in Python enhances accessibility for researchers and practitioners. 
+
+# References 
+
+[1] Carmen Coviello, Simone Romano, Giuseppe Scanniello, Alessandro Marchetto, Giuliano Antoniol, and Anna Corazza. 2018. Clustering support for inadequate test suite reduction. In 2018 IEEE 25th Interna-tional Conference on Software Analysis, Evolution and Reengineering (SANER) . IEEE, 95–105. [2] Daniel Delahaye, Supatcha Chaimatanan, and Marcel Mongeau. 2018. Simulated annealing: From basics to applications. In Handbook of metaheuristics . Springer, 1–35. [3] Sebastian Elbaum, Andrew Mclaughlin, and John Penix. 2014. The Google Dataset of Testing Results. 
+
+https://code.google.com/p/google-shared-dataset-of-test-suite-results .[4] Yoshitaka Inui, Mastiyage Don Sudeera Hasaranga Gunathilaka, Satoshi Kako, Toru Aonishi, and Yoshihisa Yamamoto. 2022. Control of amplitude homogeneity in coherent Ising machines with artificial Zeeman terms. Communications Physics 5, 1 (2022), 154. [5] Annu Lambora, Kunal Gupta, and Kriti Chopra. 2019. Genetic algorithm-A literature review. In 2019 international conference on machine learning, big data, cloud and parallel computing (COMITCon) . IEEE, 380–384. [6] Chengjie Lu, Huihui Zhang, Tao Yue, and Shaukat Ali. 2021. Search-based selection and prioritization of test scenarios for autonomous driving systems. In International Symposium on Search Based Software Engineering . Springer, 41–55. [7] Andrew Lucas. 2014. Ising formulations of many NP problems. Frontiers in physics 2 (2014), 74887. [8] Breno Miranda and Antonia Bertolino. 2017. Scope-aided test prioritization, selection and minimization for software reuse. Journal of Systems and Software 131 (2017), 528–549. [9] Xinyi Wang, Shaukat Ali, Tao Yue, and Paolo Arcaini. 2024. Quantum approximate optimization algorithm for test case optimization. IEEE Transactions on Software Engineering 50, 12 (2024), 3249–3264. [10] Xinyi Wang, Asmar Muqeet, Tao Yue, Shaukat Ali, and Paolo Arcaini. 2024. Test case minimization with quantum annealers. ACM Transactions on Software Engineering and Methodology 34, 1 (2024), 1–24. [11] Man Zhang, Shaukat Ali, and Tao Yue. 2019. Uncertainty-wise test case generation and minimization for cyber-physical systems. Journal of Systems and Software 153 (2019), 1–21. [12] Man Zhang, Yuechen Li, Tao Yue, and Kai-Yuan Cai. 2025. Empirical Studies on Quantum Optimization for Software Engineering: A Systematic Analysis. arXiv preprint arXiv:2510.27113 (2025). [13] Man Zhang, Yuechen Li, Tao Yue, and Kai-Yuan Cai. 2025. Quantum optimization for software engineering: a survey. arXiv preprint arXiv:2506.16878 (2025). 7
