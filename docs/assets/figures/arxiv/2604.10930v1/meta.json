@@ -1,0 +1,54 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.10930v1/fig-001.webp",
+      "caption": "Figure 5: Mean and standard deviation of the offline error for DCC-MKP instances with a fixed item-to-knapsack ratio n/m = 10 and increasing problem sizes (n,m) ∈ {(100, 10), (300, 30), (500, 50)}. Results are reported under dynamic capacity changes ν ∈ {20, 50, 100} for strongly correlated and uncorrelated instances with η = 0.2.",
+      "page": 10,
+      "index": 1,
+      "width": 964,
+      "height": 383
+    },
+    {
+      "url": "assets/figures/arxiv/2604.10930v1/fig-002.webp",
+      "caption": "Figure 6: Mean and standard deviation of the offline error for FK4 DCC-MKP instances with item-to-knapsack ratios n/m ∈ {2, 3, 4, 5, 6, 10}. Results are shown under dynamic capacity changes ν ∈ {20, 50, 100} for strongly correlated and uncorrelated instances with η = 0.2.",
+      "page": 10,
+      "index": 2,
+      "width": 940,
+      "height": 735
+    },
+    {
+      "url": "assets/figures/arxiv/2604.10930v1/fig-003.webp",
+      "caption": "Figure 1: Mean and standard deviation of the best obtained profits for CC-MKP instances with a fixed number of items (n = 300) and varying numbers of knapsacks (m ∈ {150, 50, 30}). Results are shown for variance levels v ∈ {v1, v2} across different confidence levels α.",
+      "page": 8,
+      "index": 3,
+      "width": 686,
+      "height": 375
+    },
+    {
+      "url": "assets/figures/arxiv/2604.10930v1/fig-004.webp",
+      "caption": "Figure 2: Mean and standard deviation of the best obtained profits for CC-MKP instances with a fixed item-to-knapsack ratio n/m = 10 and increasing problem sizes (n,m) ∈ {(100, 10), (300, 30), (500, 50)}. Results are presented for variance levels v ∈ {v1, v2} across different confidence levels α.",
+      "page": 8,
+      "index": 4,
+      "width": 686,
+      "height": 375
+    },
+    {
+      "url": "assets/figures/arxiv/2604.10930v1/fig-005.webp",
+      "caption": "Figure 3: Mean and standard deviation of the best obtained profits for FK4 CC-MKP instances with varying itemto-knapsack ratios n/m ∈ {2, 3, 4, 5, 6, 10}. Results are shown for variance levels v ∈ {v1, v2} and four confidence levels α.",
+      "page": 8,
+      "index": 5,
+      "width": 979,
+      "height": 271
+    },
+    {
+      "url": "assets/figures/arxiv/2604.10930v1/fig-006.webp",
+      "caption": "Figure 4: Mean and standard deviation of the offline error for DCC-MKP instances with a fixed number of items (n = 300) and varying numbers of knapsacks (m ∈ {150, 50, 30}), under dynamic capacity changes with frequencies ν ∈ {20, 50, 100}. Results are presented for strongly correlated and uncorrelated instances with change magnitude η = 0.2.",
+      "page": 9,
+      "index": 6,
+      "width": 964,
+      "height": 383
+    }
+  ]
+}

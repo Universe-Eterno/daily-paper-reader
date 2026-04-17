@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.08712v1/fig-001.webp",
+      "caption": "Figure 1: An overview of our model space reasoning as search in feedback space pipeline for planning domain generation from natural language descriptions.",
+      "page": 4,
+      "index": 1,
+      "width": 826,
+      "height": 242
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08712v1/fig-002.webp",
+      "caption": "Figure 2: HDE score averaged across all domains for each model and feedback pipeline. Error bars indicade 95% confidence intervals over trials, i.e., 95% of trials scored within the error bars.",
+      "page": 7,
+      "index": 2,
+      "width": 822,
+      "height": 346
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08712v1/fig-003.webp",
+      "caption": "Table 1: HDE results in percentages across all domains and models, averaged over twenty trials varying model seed and description class, reported with standard error on the mean. # perfect 20 is the number of perfect HDE scores of our 20 trials, i.e the count of HDE scores = 100%. The “Aggregate” row is an average for Average HDE columns and Sum for # perfect 20 Columns. Columns from left to right: Model name; Domain name; N: No feedback; LR: Landmark feedback with random single feedback; LS: Landmark feedback with search; VR: Plan validation feedback with random single feedback; VS: Plan validation feedback with search; LVR: Landmark and plan validation feedback with random single feedback; LVS: Landmark and plan validation feedback with search; Average: HDE averages across all feedback types and the total number of perfects for that domain across all feedback types. Bold values indicate the best average performing feedback type for each domain and model combination.",
+      "page": 9,
+      "index": 3,
+      "width": 822,
+      "height": 688
+    }
+  ]
+}

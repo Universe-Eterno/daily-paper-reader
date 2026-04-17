@@ -1,0 +1,134 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.13371v1/fig-001.webp",
+      "caption": "Figure 35: Success Score Matrix showing normalized mean pass rates per task–model pair.",
+      "page": 38,
+      "index": 1,
+      "width": 932,
+      "height": 469
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13371v1/fig-002.webp",
+      "caption": "Table 1: Context window size and total parameter count of evaluated models.",
+      "page": 7,
+      "index": 2,
+      "width": 1014,
+      "height": 245
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13371v1/fig-003.webp",
+      "caption": "Figure 27: Rubik’s Cube performance across permutation-complexity levels.",
+      "page": 34,
+      "index": 3,
+      "width": 932,
+      "height": 189
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13371v1/fig-004.webp",
+      "caption": "Table 7: Cross-model regularities observed across evaluated LRMs. Convergent patterns across tasks and regimes suggest shared structural constraints rather than model-specific idiosyncrasies.",
+      "page": 42,
+      "index": 4,
+      "width": 868,
+      "height": 456
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13371v1/fig-005.webp",
+      "caption": "Figure 24: Performance trajectories on the Checker Jumping puzzle.",
+      "page": 33,
+      "index": 5,
+      "width": 932,
+      "height": 189
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13371v1/fig-006.webp",
+      "caption": "Figure 25: Graph Coloring pass/fail/collapse profiles across complexity levels.",
+      "page": 33,
+      "index": 6,
+      "width": 932,
+      "height": 217
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13371v1/fig-007.webp",
+      "caption": "Figure 22: LLM outcomes on the Water Jug task across increasing difficulty.",
+      "page": 33,
+      "index": 7,
+      "width": 932,
+      "height": 216
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13371v1/fig-008.webp",
+      "caption": "Figure 26: LLM performance on River Crossing under escalating multi-agent constraints.",
+      "page": 33,
+      "index": 8,
+      "width": 932,
+      "height": 189
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13371v1/fig-009.webp",
+      "caption": "Figure 23: Model robustness on Boolean SAT across clause-complexity levels.",
+      "page": 33,
+      "index": 9,
+      "width": 932,
+      "height": 190
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13371v1/fig-010.webp",
+      "caption": "Figure 28: Sudoku performance, illustrating extreme sensitivity to symbolic-consistency violations.",
+      "page": 35,
+      "index": 10,
+      "width": 640,
+      "height": 263
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13371v1/fig-011.webp",
+      "caption": "Table 3: Rubik’s Cube validator pipeline (deterministic simulation).",
+      "page": 28,
+      "index": 11,
+      "width": 479,
+      "height": 317
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13371v1/fig-012.webp",
+      "caption": "Figure 21: LLM task performance across Tower of Hanoi complexity levels.",
+      "page": 32,
+      "index": 12,
+      "width": 932,
+      "height": 251
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13371v1/fig-013.webp",
+      "caption": "Table 5: Core mechanisms of reasoning failure in LRMs, identified through validator-grounded analysis across tasks.",
+      "page": 41,
+      "index": 13,
+      "width": 856,
+      "height": 486
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13371v1/fig-014.webp",
+      "caption": "Table 6: Structural factors governing reasoning scalability and collapse thresholds across tasks.",
+      "page": 41,
+      "index": 14,
+      "width": 856,
+      "height": 435
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13371v1/fig-015.webp",
+      "caption": "Figure 33: Global Failure Mode Map across tasks and difficulty levels. Outcomes are encoded as: 1 = pass, 0 = fail, and −1 = collapse.",
+      "page": 37,
+      "index": 15,
+      "width": 932,
+      "height": 402
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13371v1/fig-016.webp",
+      "caption": "Figure 34: Global mean-performance heatmap aggregating pass rates across all models and tasks. Higher values indicate stronger and more consistent reasoning ability.",
+      "page": 37,
+      "index": 16,
+      "width": 882,
+      "height": 456
+    }
+  ]
+}
