@@ -1,0 +1,2865 @@
+Title: How Transformers Learn to Plan via Multi-Token Prediction
+
+URL Source: https://arxiv.org/pdf/2604.11912v1
+
+Published Time: Wed, 15 Apr 2026 00:04:10 GMT
+
+Number of Pages: 31
+
+Markdown Content:
+# How Transformers Learn to Plan via Multi-Token Prediction 
+
+Jianhao Huang 1, ∗ Zhanpeng Zhou 2, ∗ Renqiu Xia 2 Baharan Mirzasoleiman 1
+
+Weijie Su 3 Wei Huang 4,5,† 1University of California, Los Angeles 2Shanghai Jiao Tong University 
+
+> 3
+
+University of Pennsylvania 4RIKEN Center for Advanced Intelligence Project 
+
+> 5
+
+The Institute of Statistical Mathematics 
+
+## Abstract 
+
+While next-token prediction (NTP) has been the standard objective for training language models, it often struggles to capture global structure in reasoning tasks. Multi-token prediction (MTP) has recently emerged as a promising alternative, yet its underlying mechanisms remain poorly understood. In this paper, we study how MTP facilitates reasoning, with a focus on planning. Empirically, we show that MTP consistently outper-forms NTP on both synthetic graph path-finding tasks and more realistic reasoning benchmarks, such as Countdown and boolean satisfiability prob-lems. Theoretically, we analyze a simplified two-layer Transformer on a star graph task. We prove that MTP induces a two-stage reverse reasoning 
+
+process: the model first attends to the end node and then reconstructs the path by tracing intermediate nodes backward. This behavior arises from a gradient decoupling property of MTP, which provides a cleaner training signal compared to NTP. Ultimately, our results highlight how multi-token objectives inherently bias optimization toward robust and interpretable reasoning circuits. 
+
+## 1 Introduction 
+
+Recently, large language models (LLMs) have demonstrated a range of emerging abilities as they scale, with reasoning becoming one of the most critical capabilities (Ke et al., 2025). Reasoning enables language models to go beyond simple knowledge retrieval, allowing them to actively process and infer solutions to new problems. Despite these advances, how such reasoning abilities emerge in language models remain poorly understood. Recent theoretical advances focused on the role of chain-of-thought (Feng et al., 2023; Kim & Suzuki, 2025; Huang et al., 2025) and architecture design (Gatmiry et al., 2024; Saunshi et al., 2025) in enabling reasoning. However, a more fundamental factor may lie in the modeling paradigm itself, particularly the training objective that underlies language model training. Next-token prediction (NTP) with teacher forcing has long been the standard objective for training language models, where models are optimized to produce the next token given all preceding ground-truth context tokens. Yet, it is limited in capturing long-term dependencies (Qi et al., 2020) and prone to overfitting to local patterns (Bachmann & Nagarajan, 2024). To address these limitations, multi-token prediction (MTP) (Gloeckle et al., 2024) has recently been proposed. Instead of predicting only the next token, it predicts multiple future tokens in parallel. MTP substantially improves performance on math and code benchmarks that require complex reasoning, and has been widely adopted in leading models such as DeepSeek-V3 (Liu et al., 2024). Understanding how MTP leads to such improvements is crucial for uncovering the mechanisms underlying the reasoning capabilities of modern language models. 
+
+> ∗
+
+Equal contribution. Email: jhhuang2025@cs.ucla.edu, zzp1012@sjtu.edu.cn 
+
+> †
+
+Correspondence to: wei.huang.vr@riken.jp 
+
+> arXiv:2604.11912v1 [cs.LG] 13 Apr 2026
+
+How Transformers Learn to Plan via Multi-Token Prediction  
+
+> (a) (b)
+
+Figure 1: Overview of the MTP architecture and its advantage in reasoning tasks. (a) The MTP architecture. Building upon Gloeckle et al. (2024), our MTP employs a shared backbone with multiple independent output heads to predict several future tokens simultaneously. (b) Illustration of Star Graph and Binary Tree. In standard forward planning, early steps can be difficult due to a large search space. MTP facilitates “reverse reasoning” by looking ahead to the goal ( G), transforming complex forward searches into easy backward steps. In this work, we study how MTP facilitates reasoning in language models, with a focus on planning 1, which requires considering future steps before generating the current output. Among MTP variants, we adopt the formulation of Gloeckle et al. (2024), which predicts multiple future tokens using parallel heads. Note that our primary focus is on the reasoning performance rather than inference efficiency. Though the model is trained to predict multiple tokens, it generates only a single token at each step using the first head during inference. We begin with empirical observations on synthetic graph path-finding tasks, which are widely regarded as a standard abstraction for studying reasoning (Kim et al., 2025; Ye et al., 2025). Given the graph structure and start/end nodes, the model is required to generate the full path. We find that MTP consistently outperforms NTP on these tasks. We first study the star graph (see Figure 1b), a directed graph in which multiple paths originate from the start node, with one leading to the target. In a star graph, only the first step requires a non-trivial decision. Thus, under NTP with teacher forcing, the model tends to follow edges based on previously revealed nodes in the prefix, a phenomenon known as the Clever Hans cheat (Bachmann & Nagarajan, 2024). To remove this shortcut, we introduce a more complex task, the binary tree , in which decisions must be made at every step. Notably, MTP continues to outperform NTP, indicating that its advantage cannot be explained solely by disabling the Clever Hans cheat. We evaluate on more realistic tasks, including Countdown (Gandhi et al., 2024) and boolean satisfiability problems, where MTP still succeeds. We next delve deeper into the underlying mechanisms behind the success of MTP on plan-ning tasks, with a focus on the star graph. For simplicity, we study a two-layer disentangled Transformer (Friedman et al., 2023) on the 2-path 3-node star graph. Our theory reveals a two-stage reverse reasoning process in models trained with MTP: the model first attends to the end node, then retrieves intermediate nodes by following edges that point to it. Intuitively, solving the star graph is easier when starting from the end node, which extends to the binary tree task. Importantly, MTP modifies only the training objective, while the inference process remains the same as NTP, indicating that reverse reasoning arises from optimization differences. Under NTP, learning signals from different layers are entangled, making it difficult for the model to discover the patterns needed for planning. In contrast, MTP provides an isolated training signal, allowing the first layer to attend to the end node and the second layer to recover the intermediate node through simple edge matching. 
+
+Technical novelty. We are the first to formally analyze the convergence dynamics of MTP and establish its difference from NTP, extending beyond prior results (Zhong et al., 2025). The key is the gradient decoupling property of the MTP head, which provides an isolated 
+
+> 1Reasoning refers to the ability to perform logical or compositional inference, whereas planning is a specific form of reasoning that requires anticipating future steps and computing a global solution before generating outputs.
+
+2How Transformers Learn to Plan via Multi-Token Prediction training signal to the first layer. This property enables the emergence of reverse reasoning 
+
+mechanism. Our technique might have independent interest to learning theory. 
+
+## 2 Related Work 
+
+Understanding of MTP. Despite the empirical success of MTP, a rigorous theoretical un-derstanding of its underlying mechanisms remains unclear. Recent work (Zhong et al., 2025) studied how MTP enhances planning on synthetic tasks. However, its analysis is largely qualitative and does not provide a formal comparison with NTP. Moreover, its theoretical setup considers a simplified shared-head variant of MTP, rather than the stan-dard independent-head architecture introduced by Gloeckle et al. (2024). In contrast , our work provides a theoretical comparison between NTP and MTP under the more general independent-head architecture. We mathematically unpack how the gradient decoupling property of MTP naturally induces a two-stage reverse reasoning process on the star graph, providing a theoretical explanation for its empirical advantage over NTP. For an extended discussion of related work on MTP, we refer to Section A. 
+
+Theories of Transformers. Extensive theoretical studies have been conducted to charac-terize the mechanisms of Transformer architectures, covering aspects such as in-context learning (Zhang et al., 2024; Chen et al., 2024b; Wei et al., 2026), chain of thought (Kim & Suzuki, 2025; Huang et al., 2025; Wen et al., 2025), induction head (Nichani et al., 2024; Chen et al., 2024a), benign overfitting (Jiang et al., 2024; Magen et al., 2024), and atten-tion sink (Guo et al., 2025). Within this landscape, disentangled transformers (Friedman et al., 2023; Nichani et al., 2024; Chen et al., 2024a; Wei et al., 2026) have gained significant attention, as they decouple the intertwined features in the residual stream to facilitate a more tractable analytical framework. Following this paradigm, we adopt a disentangled Transformer as the structural foundation for our study. 
+
+## 3 Preliminaries 
+
+Notation and Basic Setups. We use [N] = {1, . . . , N} to denote the vertex set and {ei}Ni=1
+
+for the standard basis of RN . For a sequence of length T, we write x1: T = ( x1, . . . , xT ) and use [·, :] to denote a row slice of a matrix. The softmax function σ : Rk → Rk is defined by σ(v)i = exp (vi)/ ∑j exp  vj
+
+, applied row-wise. For a softmax distribution s, we write 
+
+J(s) := diag (s) − ss ⊤ for its Jacobian. We use IT for the T × T identity matrix and L ∈ RT×T
+
+for the strictly lower shift matrix with Li,i−1 = 1 and zero elsewhere. 
+
+Training Objectives. Let x1: T = ( x1, . . . , xT ) be an input sequence. The standard NTP objective minimizes the negative log-likelihood of each token given its full causal prefix: 
+
+LNTP (θ) = − 1
+
+T
+
+> T
+
+# ∑
+
+> t=1
+
+log pθ (xt | x1: t−1) . (1) MTP with lookahead k instead predicts the next k tokens in parallel from the same prefix, averaging the cross-entropy over all k heads: 
+
+L(k)
+
+> MTP
+
+(θ) = − 1
+
+T
+
+> T
+
+# ∑
+
+> t=1
+
+1
+
+k
+
+> k
+
+# ∑
+
+> m=1
+
+log pθ,m (xt+m | x1: t) , (2) where pθ,m denotes the m-th prediction head. In both objectives, training uses teacher forcing: the ground-truth prefix x1: t is supplied as context regardless of the model’s own predictions. Note that NTP is a special case of MTP with k = 1. 
+
+Architectural Design. We adopt a parallel architecture (Gloeckle et al., 2024) as illustrated in Figure 1a, which utilizes a shared transformer backbone capped with multiple independent linear output heads for simultaneous MTP. This contrasts with the sequential structure employed by DeepSeek-V3 (Liu et al., 2024). Our choice is motivated by the goal of decon-structing the underlying mechanisms of MTP rather than maximizing absolute performance. By prioritizing a streamlined architecture, we ensure better theoretical tractability while still effectively capturing the empirical advantages of MTP over standard NTP. 3How Transformers Learn to Plan via Multi-Token Prediction 
+
+Main Experimental Setups. Across all experiments, models are trained using the MTP objective with the architecture described above. However, to evaluate the core reasoning and generative capabilities acquired during training, all models are evaluated using standard NTP inference. For statistical reliability, all results are averaged over 3 independent runs for each data point. Details of the experimental configurations are provided in Section E.1. 
+
+## 4 Planning Emerges with Multi-Token Prediction 
+
+In this section, we provide empirical evidence that MTP enables the planning abilities in Transformers. On complex planning tasks, including star graph (Bachmann & Nagara-jan, 2024), countdown (Gandhi et al., 2024), and boolean satisfiability, MTP consistently outperforms NTP across a wide range of model and data scales. 
+
+Star Graph: NTP Fails, but MTP Succeeds. We begin with one of the simplest planning tasks, the star graph. A star graph is a directed graph with vstart as the central node and at least two paths originating from it. One of these paths leads to the target node vend .Given the graph and the start/end nodes, the goal is to find the path from vstart to vend . See Figure 1b for an example. In this task, the model cannot fully rely on previously generated tokens to determine the next token; instead, it must combine information across multiple path segments to infer reachability. Bachmann & Nagarajan (2024) showed that NTP fails on the star graph task. We replicate this finding and further evaluate MTP on the same task. As shown in Figure 2a-b, we train Transformers with MTP on star graphs with two paths, each of five nodes. Specifically, we compare MTPs with different lookahead steps k; when 
+
+k = 1, MTP naturally reduces to NTP. Following Kaplan et al. (2020); Hoffmann et al. (2022), we evaluate MTP and NTP under both data-scaling and parameter-scaling setups. In Figure 2a, as the training data size increases, the path-finding accuracy of models trained with MTP ( k ≥ 2) surpasses that of NTP. Surprisingly, even k = 2, which predicts only one additional future token beyond NTP, achieves 100% accuracy when trained on 0.5 Msamples, whereas NTP remains at 50% accuracy across different training data sizes. Similar trends are observed under parameter scaling in Figure 2b. These findings indicate the potential of MTP for planning tasks over NTP. 
+
+Binary Tree: No Clever Hans Cheat, yet MTP Still Wins. Bachmann & Nagarajan (2024) attributed the failure of NTP on star graph tasks to the Clever Hans Cheat phenomenon. This phenomenon arises from teacher-forced training, where the model is given the prefix of the ground-truth answer while predicting the next token. The model may exploit trivial correlations between previously revealed answer tokens and the next token, instead of solving the underlying task. In the star graph task, when predicting node vi, the model already sees previous node vi−1 as input. Since every intermediate node has only one outgoing edge, the model can simply follow the edge from vi−1 to predict vi. Consequently, the model fits the training data but never learns the true path-planning mechanism. Bachmann & Nagarajan (2024) further introduced teacherless training to eliminate the Clever Hans Cheat by replacing the ground-truth prefix with dummy tokens. The model must pre-dict multiple future tokens without relying on previously revealed answers. Conceptually, this teacherless objective is closely related to modern MTP. Then, a natural question arises: 
+
+Does MTP enable better planning simply by bypassing the cheating mechanism? 
+
+To answer this question, we introduce a new task, the binary tree problem, which extends the two-path star graph design. See Figure 1b as an illustration. In the star graph, only the start node branches into two paths, whereas the binary tree branches at every intermediate node. Thus, each prediction along the correct path cannot rely on previously revealed nodes, preventing the same cheating as in the star graph. Now we evaluate MTP and NTP on the binary tree tasks. As before, we adopt both data-scaling and parameter-scaling setups. In Figure 2c-d, models trained with MTP still outperform those trained with NTP in most settings, especially when data or model capacity is limited. Unlike the star graph experiments, the performance of NTP improves as the data size or model size increases. It is clear that, without the Clever Hans cheat, NTP begins 4How Transformers Learn to Plan via Multi-Token Prediction 
+
+(a) Star graph: accuracy vs. data 0.034 0.068 0.125 0.25 0.5  
+
+> Number of Data (M)
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> Test Accuracy (%)
+> NTP
+> 2-MTP
+> 3-MTP
+> 4-MTP
+> 5-MTP
+
+(b) Star graph: accuracy vs. params 0.4 1.33 3.16 6.17 10.65 
+
+> Number of Parameters (M)
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> Test Accuracy (%)
+> NTP
+> 2-MTP
+> 3-MTP
+> 4-MTP
+> 5-MTP
+
+(c) Binary tree: accuracy vs. data 0.034 0.068 0.125 0.25 0.5  
+
+> Number of Data (M)
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> Test Accuracy (%)
+> NTP
+> 2-MTP
+> 3-MTP
+> 4-MTP
+> 5-MTP
+
+(d) Binary tree: accuracy vs. params 0.4 1.33 3.16 6.17 10.65 
+
+> Number of Parameters (M)
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> Test Accuracy (%)
+> NTP
+> 2-MTP
+> 3-MTP
+> 4-MTP
+> 5-MTP
+
+Figure 2: Path-finding accuracy of MTP versus NTP under varying data and parameter scales. (a, b) 2-path 5-node star graph: test accuracy as a function of training data size (16M model) and parameter size (0.5M data). (c, d) 5-node binary tree: test accuracy as a function of data size (16M model) and parameter size (1M data). Error bars represent 90% confidence intervals calculated from three independent replicates ( n = 3). Notably, while NTP stagnates at 50% accuracy on star graph, it begins to learn and scale on binary trees. Across both topologies, MTP consistently demonstrates superior planning abilities. to learn planning, while MTP still demonstrates stronger planning ability. We conclude that MTP facilitates planning not merely by bypassing the cheating mechanism; deeper mechanisms are involved, which we discuss further in Section 5. 
+
+More Planning Tasks: Countdown and SAT. To further validate planning abilities of MTP, we consider two more realistic planning tasks: Countdown and Boolean satisfiability (SAT). Both tasks require computing the full solution internally before generating the first token, thereby demanding extensive planning over a large number of combinations. See Section B for illustrations of these tasks. 
+
+Countdown. Countdown is a generalized version of the Game of 24. The goal is to use the given numbers and arithmetic operations to reach a target number. Yao et al. (2023) showed even frontier models such as GPT-4 struggle with Countdown problems. 
+
+SAT. SAT is a classic problem in computer science and was proven to be NP-complete (Cook, 1971). The goal is to find a Boolean assignment to variables that satisfies all clauses of a given propositional formula. 
+
+TASK NTP 2-MTP 3-MTP 4-MTP 5-MTP 6-MTP 7-MTP Countdown 60.27 60.36 63.20 62.09 62.75 63.17 64.93 3-SAT 10.40 28.17 69.50 63.10 82.83 82.00 87.47 
+
+Table 1: Test accuracy of models trained with NTP versus MTP configurations on Count-down and 3-SAT tasks. Models trained with MTP achieve consistently higher test accuracy than the NTP baseline across both tasks. 5How Transformers Learn to Plan via Multi-Token Prediction In Table 1, we present the performance of models trained with MTP and NTP on these two tasks. Evidently, models trained with MTP achieve consistently higher test accuracy than those trained with NTP. In summary, we highlight two key findings. First, MTP outperforms NTP on star graph tasks, not merely by disabling the Clever Hans Cheat; deeper mechanisms are involved. Second, MTP consistently enables better planning in Transformers across both graph path-finding and more realistic tasks. 
+
+## 5 Mechanisms of Planning under MTP: Reverse Reasoning 
+
+We have seen that MTP significantly improves planning in language models. In this section, we investigate the underlying mechanisms of this improvement through a theoretical analysis of a two-layer disentangled Transformer on the star graph task. Going beyond disabling the Clever Hans cheat, we show that MTP induces a reverse reasoning process. All proofs in this section are deferred to Appendices C and D. 
+
+5.1 Problem Setup and Model 
+
+We focus on the 2-path, 3-node star graph with N = T = 10. Given the serialized graph and a query pair (uend , ustar ), the model must predict the path (ustar , v, uend ) autoregressively. The critical challenge is predicting the intermediate node v: this requires determining which path from ustar reaches uend , a decision demanding genuine planning. 
+
+Input encoding. Let {ei}Ni=1 be the standard basis of RN . Given an ordered edge list 
+
+E = {(u1, v1), . . . , (uM, vM)} and the query pair (uend , ustar ). The node identities are 
+
+g2i−1 = ui, g2i = vi (i = 1, . . . , M), g2M+1 = uend , g2M+2 = ustar .The content embeddings zt = egt are therefore 
+
+z2i−1 = eui , z2i = evi (i = 1, . . . , M), z2M+1 = euend , z2M+2 = eustar .The full tokens are xt = ( zt; et) ∈ RN+T . Each edge is encoded as two consecutive tokens; the last two tokens are uend then ustar . Placing uend before ustar ensures that uend is visible in the prompt when the model predicts v, matching the autoregressive generation order. We write tctx end for the position of uend in the context edge list, tctx  
+
+> v
+
+= tctx end − 1 for the position of v,and tprompt end = T − 1 for uend in the prompt. 
+
+Training objective. We apply MTP with lookahead k = 2, targeting y(1) = v and y(2) = uend .Let Z = [ z1, . . . , zT ]⊤ be the MTP context matrix and Z′ = [ z1, . . . , zT−1, ey(1) ]⊤ the AR context (replacing zT with ey(1) ). The loss combines deep-head NTP terms with a shallow MTP head: 
+
+L(G) = − 12
+
+"
+
+12
+
+
+
+log f1(Z)ey(1)
+
+| {z }
+
+> L1a
+
++ log f1(Z′)ey(2)
+
+| {z }
+
+> L1b
+
+
+
++ log f2(Z)ey(2)
+
+| {z }
+
+> L2
+
+#
+
+. (3) 
+
+Empirical motivation. We train two-layer disentangled transformers (one head per layer) comparing NTP and 2-MTP on this task. To isolate a minimal structure, we zero out cross-block entries in the query-key matrices and restrict each output head to read from a single content block—choices directly motivated by the learned weight structure (Figure 3). This minimal model preserves the core phenomenon: NTP fails while MTP succeeds. Under MTP, the model exhibits a clear reverse reasoning pattern: Layer 1 attends sharply to uend 
+
+when predicting v (Figure 3g), whereas NTP shows no such structure (Figure 3c). We refer to Section E.2 for the detailed setup and verify in Appendix E.3 that this reverse reasoning mechanism generalizes to a standard 8-layer 8-head Transformer on 5-path 5-node star graphs with qualitatively identical attention patterns. 
+
+The disentangled Transformer. To enable rigorous analysis, we adopt a simplified but expressive abstraction of causal attention and the Transformer. Following Zhang et al. (2024); 6How Transformers Learn to Plan via Multi-Token Prediction 
+
+(a) NTP W(1)Token  
+
+> Token
+> Position
+> Position
+
+(b) NTP W(2)Token       
+
+> Token  Position
+> Position
+> Token Position
+> Token Position
+> Input X(0)
+> Input  X(0)
+> attn( X(0) ;W(1) )
+> attn( X(0) ; W(1) )
+> Input X(0)
+> Input  X(0)
+> attn( X(0) ;W(1) )
+> attn( X(0) ; W(1) )
+
+(c) NTP attn (1)Token  
+
+> Token
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+
+(d) NTP attn (2)Token 
+
+> Token
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+
+(e) MTP W(1)Token  
+
+> Token
+> Position
+> Position
+
+(f) MTP W(2)Token       
+
+> Token  Position
+> Position
+> Token Position
+> Token Position
+> Input X(0)
+> Input  X(0)
+> attn( X(0) ;W(1) )
+> attn( X(0) ; W(1) )
+> Input X(0)
+> Input  X(0)
+> attn( X(0) ;W(1) )
+> attn( X(0) ; W(1) )
+
+(g) MTP attn (1)Token  
+
+> Token
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+
+(h) MTP attn (2)Token 
+
+> Token
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+
+(i) NTP/MTP Heatmap of V0Token 
+
+> Token
+
+Position Token Position Token Position Token Position 
+
+Input X(0) attn( X(0) ; W(1) ) attn( X(1) ; W(2) )
+
+> Output
+
+Input X(0) attn( X(0) ; W(1) ) attn( X(1) ; W(2) )
+
+> Output
+
+(j) MTP Heatmap of V1Token 
+
+> Token
+
+Position Token Position Token Position Token Position 
+
+Input X(0) attn( X(0) ; W(1) ) attn( X(1) ; W(2) )
+
+> Output
+
+Input X(0) attn( X(0) ; W(1) ) attn( X(1) ; W(2) )
+
+> Output
+
+Figure 3: Mechanism comparison between the minimal structures of NTP and 2-MTP on the star graph task. (a–d) Query-key weights ( W(1), W(2)) and attention patterns ( attn (1),attn (2)) for NTP. (e–h) Corresponding weights and attention patterns for 2-MTP. Atten-tion heatmaps are computed on a sequence with input graph [3, 7, 6, 0, 7, 2, 3, 6, 0, 3 ] and target [3, 6, 0 ]. When predicting the difficult intermediate node, MTP (g) exhibits a clear predecessor-pointing pattern consistent with the reverse reasoning circuit (Theorem 1): Layer 1 attends sharply to the end node, whereas NTP (c) shows no such structure. (i) The output projection V0 for NTP (identical in MTP) activates exclusively on the content block of the Layer 2 output. (j) The MTP-specific projection V1 activates on the content block of the Layer 1 output. These block-sparse structures motivate the reduced model in Section 5.1. Nichani et al. (2024); Huang et al. (2025), we merge the key and query matrices into a single matrix W.
+
+Definition 1 (Causal self-attention head) . For W ∈ Rd×d, define 
+
+attn (X; W) := softmax (MASK (XWX ⊤)) X,
+
+where MASK (M)i,j = Mi,j for i ≥ j and −∞ otherwise. 
+
+Definition 2 (Disentangled Transformer) . Let L be the depth, d0 = N + T , and dℓ = 2 dℓ−1.Let g1: T = ( g1, . . . , gT ) denote the sequence of node identities. The input embeds each token as xt =(egt ; et) ∈ Rd0 , stacking one-hot content and position vectors. Then define X(0) = [ x1, . . . , xT ]⊤.
+
+7How Transformers Learn to Plan via Multi-Token Prediction 
+
+The attention weights decompose block-diagonally: W(ℓ) = W(ℓ) 
+
+> 0
+
+00 W(ℓ)
+
+> 1
+
+!
+
+, W(ℓ) 
+
+> 0
+
+∈ RN×N , W(ℓ) 
+
+> 1
+
+∈ RT×T, (4) 
+
+separating content matching ( W(ℓ) 
+
+> 0
+
+) from positional bias ( W(ℓ) 
+
+> 1
+
+). The model iterates X(ℓ) =[X(ℓ−1), attn (X(ℓ−1); W(ℓ))] with final output f θ (g1: T ) = X(L)V. 
+
+This decoupling yields a clean factorization of attention logits into content and positional terms (Lemma 1), enabling the gradient analysis in Sections 5.2–5.3. Two independent heads 
+
+V0, V1 ∈ Rd2×N read from X(2). Guided by the empirical observation that V0 and V1 each activate on a single content block (Figures 3i–j), we fix them to these block-selector forms; this preserves the NTP-fails/MTP-succeeds phenomenon, confirming that the mechanism resides in the attention weights. 
+
+Lemma 1 (Forward pass) . Let Z = [ z1, . . . , zT ]⊤ with zt = egt denoting the content-only submatrix of the full input. Define A[ℓ] := Z W (ℓ) 
+
+> 0
+
+Z⊤ + W(ℓ) 
+
+> 1
+
+, S[0] := IT , S[ℓ] := softmax   MASK (S[ℓ−1] A[ℓ]).
+
+Then the output logits at the last position are f 1(Z) = S[2][−1,: ]S[1] Z and f 2(Z) = S[1][−1,: ] Z. 
+
+5.2 The Reverse Reasoning Circuit 
+
+We now characterize the attention configurations where the MTP loss achieves a stationary point. Rather than searching the full parameter space, we identify conditions on the softmax attention distributions S[1] and S[2] that simultaneously zero out all gradient terms. 
+
+Theorem 1. The model achieves a stationary point for both the shallow loss L2 and the deep loss L1
+
+if the attention distributions satisfy the following two conditions: 1. Predecessor Pointing (Layer 1): Layer 1 attends to the immediate predecessor at both the query position and the target context position: S [1] 
+
+> T,:
+
+= e⊤ 
+
+> T−1
+
+and (S[1])tctx end ,: = e⊤ 
+
+> tctx
+> v
+
+.2. Content Matching (Layer 2, Last Row): Layer 2 identifies the context position where uend 
+
+appears as part of an edge: S [2] 
+
+> T,:
+
+= e⊤
+
+> tctx end
+
+.
+
+Note that a stationary point here means vanishing gradient, not necessarily zero loss. In particular, the AR component L1b incurs nonzero error at this configuration, but its gradient is exponentially small (see Corollary 2 in Appendix D.1). This circuit is highly minimal. It relies strictly on intra-edge backward attention : forward attention within edges ( v → uend ) is neither required nor utilized. Moreover, only two rows of S[1] are constrained (the query row and tctx end ); all other context rows are free, which is reflected in the sub-diagonal pattern being sharp at these two rows but diffuse elsewhere (Figure 3g). Having established the stationary manifold in terms of attention conditions, we now exhibit an explicit weight configuration that realizes it. 
+
+Corollary 1 (Constructive Existence of the Reverse Reasoning Circuit) . Let γ > 0 be suffi-ciently large, and let L ∈ RT×T be the strictly lower shift matrix ( Li,i−1 = 1, zero elsewhere). The following weight configuration satisfies both conditions of Theorem 1: 
+
+• Layer 1 (Predecessor Shift): W(1) 
+
+> 0
+
+= 0, W(1) 
+
+> 1
+
+= γ L. 
+
+• Layer 2 (Content Matching): W(2) 
+
+> 0
+
+= γ I , (W(2) 
+
+> 1
+
+)T−1, T−1 = −γ (all other entries of W(2)
+
+> 1
+
+are zero). Under this configuration, the loss and gradient norm satisfy L = O(e−γ) and ∥∇ θ L∥ = O(e−γ).
+
+8How Transformers Learn to Plan via Multi-Token Prediction Corollary 1 reveals a fundamental tension. The disentangled transformer possesses the representational capacity to solve the task perfectly—the reverse reasoning circuit lies within its hypothesis class. However, as we show in Section 5.3, pure NTP fails to discover this configuration from zero initialization. The failure is not one of expressivity but of 
+
+optimization : NTP’s gradient dynamics actively steer the model away from the predecessor pointer (Theorem 3), while MTP provides a clean two-phase gradient path that converges to this exact solution (Theorem 2). Comparing Figures 3c–d with 3g–h on the running example confirms this: MTP recovers the predecessor-pointing pattern in Layer 1 and sharp content matching in Layer 2, while NTP develops neither despite identical model capacity. 
+
+5.3 Why MTP Finds It and NTP Cannot 
+
+The reverse reasoning circuit exists within the model’s hypothesis class (Corollary 1), yet whether gradient-based optimization discovers it depends critically on the training objective. The key mechanism is a gradient decoupling property: the shallow loss L2 routes gradients exclusively through Layer 1, entirely bypassing the uninitialized Layer 2. This enables a clean two-phase learning process under MTP, which we now formalize. 
+
+Theorem 2 (Cascaded Convergence to the Reverse Reasoning Circuit) . Phase I: Consider the MTP loss L2 under gradient flow. Assume the content weight is fixed at W(1) 
+
+> 0
+
+= 0, that W(1)
+
+> 1
+
+has RoPE (Toeplitz) structure Wi,j = w(i − j), where w : Z → R is a scalar function of the offset. Consequently, S[1] 
+
+> t,:
+
+→ e⊤ 
+
+> t−1
+
+for all t ≥ 2, i.e., Layer 1 converges to the universal predecessor pointer S[1] → L . Phase II: With W(1) 
+
+> 1
+
+frozen at γL . Then optimize L1a over (W(2) 
+
+> 0
+
+, W(2) 
+
+> 1
+
+) from the zero initialization through gradient flow. Then, W(2) 
+
+> 0
+
+→ γ′ I + B , where γ′ → +∞ and B is off-diagonal with finite negative entries Bd,u < 0 for d̸ = u ; (W(2) 
+
+> 1
+
+)T−1, T−1 → − ∞; all other entries of W(2)
+
+> 1
+
+remain at 0; and S [2] 
+
+> T,:
+
+→ e⊤
+
+> tctx end
+
+.
+
+The two-phase structure is a direct consequence of MTP’s gradient decoupling: Phase I uses 
+
+L2, which bypasses Layer 2 entirely, to solve a pure positional learning problem for Layer 1. Phase II then benefits from a fully converged Layer 1, reducing the combinatorial task (jointly learn position + content matching) to a clean contrastive problem over content alone. Under pure NTP, this cascade cannot form—Layer 1 receives gradient only through the uninitialized Layer 2, leading to the misdirected gradient of Theorem 3. 
+
+Theorem 3 (Misdirected Gradient under Pure NTP) . Consider the same setup as Phase I of Theorem 2: two-layer Disentangled Transformer, star graph task with T = 10 , W(1) 
+
+> 0
+
+= 0 fixed, W(1)
+
+> 1
+
+with Toeplitz structure w = 0 at initialization, W(2) 
+
+> 0
+
+= W(2) 
+
+> 1
+
+= 0. Optimize the pure NTP deep loss. Then gradient descent decreases w(1) (predecessor) and increases w(k) for k ≥ 2 (context): pure NTP actively repels the predecessor pointer and diffuses attention across context, structurally preventing formation of the reverse reasoning circuit. 
+
+The intuition is straightforward. Under pure NTP with an uninitialized Layer 2, Layer 2 contributes a uniform 1 
+
+> T
+
+weight to every position. The deep head’s prediction is therefore an average over all rows of S[1], not just the query row. The target y(1) = v appears somewhere in the context but never at the predecessor position T − 1 (which encodes uend ̸ = v). So the NTP gradient tells Layer 1: “attend to the context where the target might be”—exactly the opposite of the predecessor pointer that the 2-hop circuit requires. The shallow MTP loss avoids this entirely because it targets y(2) = uend , which always resides at T − 1. 
+
+## 6 Conclusion 
+
+In summary, we show that the reasoning capabilities enabled by MTP arise from its impact on optimization dynamics. While prior work has established MTP’s empirical advantages, our study strengthens these findings and, more importantly, formalizes the underlying mechanisms. By avoiding the entangled training signals of standard NTP, MTP leverages 9How Transformers Learn to Plan via Multi-Token Prediction 
+
+gradient decoupling to foster global planning abilities. We show that this training paradigm biases the network toward discovering interpretable algorithms, particularly a reverse reasoning process on graph path-finding tasks. Beyond validating these mechanisms across algorithmic and logic-based benchmarks, our work bridges a critical gap in understanding how training objectives shape model reasoning, providing a foundation for designing training paradigms for advanced reasoning. 
+
+Limitations and future work. Our theory focuses on a two-layer disentangled Transformer with a star graph task and lookahead k = 2. Extending to deeper architectures, general graph topologies, finite-time convergence rates, and sequential MTP variants (Liu et al., 2024) remains open. 
+
+## Acknowledgments 
+
+BM is supported in part by the NSF CAREER Award 2146492, NSF-Simons AI Institute for Cosmic Origins (CosmicAI), and NSF AI Institute for Foundations of Machine Learning (IFML). WH is supported by JSPS KAKENHI (24K20848) and JST BOOST (JPMJBY24G6). 
+
+## References 
+
+Kwangjun Ahn, Alex Lamb, and John Langford. Efficient joint prediction of multiple future tokens. arXiv preprint arXiv:2503.21801 , 2025. Gregor Bachmann and Vaishnavh Nagarajan. The pitfalls of next-token prediction. In 
+
+International Conference on Machine Learning , pp. 2296–2318. PMLR, 2024. Aaron Blakeman, Aaron Grattafiori, Aarti Basant, Abhibha Gupta, Abhinav Khattar, Adi Renduchintala, Aditya Vavre, Akanksha Shukla, Akhiad Bercovich, Aleksander Ficek, et al. Nvidia nemotron 3: Efficient and open intelligence. arXiv preprint arXiv:2512.20856 ,2025. Siyu Chen, Heejune Sheen, Tianhao Wang, and Zhuoran Yang. Unveiling induction heads: Provable training dynamics and feature learning in transformers. Advances in Neural Information Processing Systems , 37:66479–66567, 2024a. Siyu Chen, Heejune Sheen, Tianhao Wang, and Zhuoran Yang. Training dynamics of multi-head softmax attention for in-context learning: Emergence, convergence, and optimality (extended abstract). In Shipra Agrawal and Aaron Roth (eds.), Proceedings of Thirty Seventh Conference on Learning Theory , volume 247 of Proceedings of Machine Learning Research , pp. 4573–4573. PMLR, 30 Jun–03 Jul 2024b. URL https://proceedings.mlr.press/v247/ siyu24a.html .Stephen A. Cook. The complexity of theorem-proving procedures. In Proceedings of the Third Annual ACM Symposium on Theory of Computing , STOC ’71, pp. 151–158, New York, NY, USA, 1971. Association for Computing Machinery. ISBN 9781450374644. doi: 10.1145/800157.805047. URL https://doi.org/10.1145/800157.805047 .Guhao Feng, Bohang Zhang, Yuntian Gu, Haotian Ye, Di He, and Liwei Wang. To-wards revealing the mystery behind chain of thought: A theoretical perspective. In A. Oh, T. Naumann, A. Globerson, K. Saenko, M. Hardt, and S. Levine (eds.), Ad-vances in Neural Information Processing Systems , volume 36, pp. 70757–70798. Curran Associates, Inc., 2023. URL https://proceedings.neurips.cc/paper files/paper/2023/ file/dfc310e81992d2e4cedc09ac47eff13e-Paper-Conference.pdf .Dan Friedman, Alexander Wettig, and Danqi Chen. Learning transformer programs. Ad-vances in Neural Information Processing Systems , 36:49044–49067, 2023. Kanishk Gandhi, Denise H J Lee, Gabriel Grand, Muxin Liu, Winson Cheng, Archit Sharma, and Noah Goodman. Stream of search (sos): Learning to search in language. In First Con-ference on Language Modeling , 2024. URL https://openreview.net/forum?id=2cop2jmQVL .10 How Transformers Learn to Plan via Multi-Token Prediction Khashayar Gatmiry, Nikunj Saunshi, Sashank J. Reddi, Stefanie Jegelka, and Sanjiv Kumar. Can looped transformers learn to implement multi-step gradient descent for in-context learning? In Forty-first International Conference on Machine Learning , 2024. URL https: //openreview.net/forum?id=o8AaRKbP9K .Anastasios Gerontopoulos, Spyros Gidaris, and Nikos Komodakis. Multi-token prediction needs registers. In The Thirty-ninth Annual Conference on Neural Information Processing Systems , 2025. URL https://openreview.net/forum?id=WDdBhcwzGe .Fabian Gloeckle, Badr Youbi Idrissi, Baptiste Roziere, David Lopez-Paz, and Gabriel Syn-naeve. Better & faster large language models via multi-token prediction. In International Conference on Machine Learning , pp. 15706–15734. PMLR, 2024. Tianyu Guo, Druv Pai, Yu Bai, Jiantao Jiao, Michael I. Jordan, and Song Mei. Active-dormant attention heads: Mechanistically demystifying extreme-token phenomena in LLMs. In The Second Conference on Parsimony and Learning (Recent Spotlight Track) , 2025. URL https://openreview.net/forum?id=Zx6WUbE9J7 .Jordan Hoffmann, Sebastian Borgeaud, Arthur Mensch, Elena Buchatskaya, Trevor Cai, Eliza Rutherford, Diego de Las Casas, Lisa Anne Hendricks, Johannes Welbl, Aidan Clark, et al. Training compute-optimal large language models. arXiv preprint arXiv:2203.15556 ,2022. Jianhao Huang, Zixuan Wang, and Jason D. Lee. Transformers learn to implement multi-step gradient descent with chain of thought. In The Thirteenth International Conference on Learning Representations , 2025. URL https://openreview.net/forum?id=r3DF5sOo5B .Jiarui Jiang, Wei Huang, Miao Zhang, Taiji Suzuki, and Liqiang Nie. Unveil benign over-fitting for transformer in vision: Training dynamics, convergence, and generalization. 
+
+Advances in Neural Information Processing Systems , 37:135464–135625, 2024. Jared Kaplan, Sam McCandlish, Tom Henighan, Tom B. Brown, Benjamin Chess, Rewon Child, Scott Gray, Alec Radford, Jeffrey Wu, and Dario Amodei. Scaling laws for neural language models. arXiv preprint arXiv:2001.08361 , 2020. Zixuan Ke, Fangkai Jiao, Yifei Ming, Xuan-Phi Nguyen, Austin Xu, Do Xuan Long, Minzhi Li, Chengwei Qin, PeiFeng Wang, silvio savarese, Caiming Xiong, and Shafiq Joty. A survey of frontiers in LLM reasoning: Inference scaling, learning to reason, and agentic systems. Transactions on Machine Learning Research , 2025. ISSN 2835-8856. URL https: //openreview.net/forum?id=SlsZZ25InC . Survey Certification. Juno Kim and Taiji Suzuki. Transformers provably solve parity efficiently with chain of thought. In The Thirteenth International Conference on Learning Representations , 2025. URL 
+
+https://openreview.net/forum?id=n2NidsYDop .Juno Kim, Denny Wu, Jason D. Lee, and Taiji Suzuki. Metastable dynamics of chain-of-thought reasoning: Provable benefits of search, RL and distillation. In Forty-second International Conference on Machine Learning , 2025. URL https://openreview.net/forum? id=2HJcVtuovs .Aixin Liu, Bei Feng, Bing Xue, Bingxuan Wang, Bochao Wu, Chengda Lu, Chenggang Zhao, Chengqi Deng, Chenyu Zhang, Chong Ruan, et al. Deepseek-v3 technical report. arXiv preprint arXiv:2412.19437 , 2024. Xiaohao Liu, Xiaobo Xia, Weixiang Zhao, Manyi Zhang, Xianzhi Yu, Xiu Su, Shuo Yang, See-Kiong Ng, and Tat-Seng Chua. L-MTP: Leap multi-token prediction beyond adjacent context for large language models. In The Thirty-ninth Annual Conference on Neural Infor-mation Processing Systems , 2025. URL https://openreview.net/forum?id=0VDmWjW456 .Ilya Loshchilov and Frank Hutter. Decoupled weight decay regularization. In International Conference on Learning Representations , 2019. URL https://openreview.net/forum?id= Bkg6RiCqY7 .11 How Transformers Learn to Plan via Multi-Token Prediction Roey Magen, Shuning Shang, Zhiwei Xu, Spencer Frei, Wei Hu, and Gal Vardi. Benign overfitting in single-head attention. arXiv preprint arXiv:2410.07746 , 2024. Divyat Mahajan, Sachin Goyal, Badr Youbi Idrissi, Mohammad Pezeshki, Ioannis Mitliagkas, David Lopez-Paz, and Kartik Ahuja. Beyond multi-token prediction: Pretraining LLMs with future summaries. In The Fourteenth International Conference on Learning Representa-tions , 2026. URL https://openreview.net/forum?id=aeYIFVn4vb .Eshaan Nichani, Alex Damian, and Jason D. Lee. How transformers learn causal structure with gradient descent. In Forty-first International Conference on Machine Learning , 2024. URL https://openreview.net/forum?id=jNM4imlHZv .Weizhen Qi, Yu Yan, Yeyun Gong, Dayiheng Liu, Nan Duan, Jiusheng Chen, Ruofei Zhang, and Ming Zhou. Prophetnet: Predicting future n-gram for sequence-to-sequence pre-training. In Findings of the Association for Computational Linguistics: EMNLP 2020 , pp. 2401–2410, 2020. Qwen Team. Qwen3-next: Towards ultimate training & inference effi-ciency. https://qwen.ai/blog?from=research.latest-advancements-list&id= 4074cca80393150c248e508aa62983f9cb7d27cd& , Sep 2025. Accessed: 2026-03-11. Mohammad Samragh, Arnav Kundu, David Harrison, Kumari Nishu, Devang Naik, Minsik Cho, and Mehrdad Farajtabar. Your llm knows the future: Uncovering its multi-token prediction potential. arXiv preprint arXiv:2507.11851 , 2025. Nikunj Saunshi, Nishanth Dikkala, Zhiyuan Li, Sanjiv Kumar, and Sashank J. Reddi. Rea-soning with latent thoughts: On the power of looped transformers. In The Thirteenth International Conference on Learning Representations , 2025. URL https://openreview.net/ forum?id=din0lGfZFd .Yuhao Wang, Heyang Liu, Ziyang Cheng, Ronghua Wu, Qunshan Gu, Yanfeng Wang, and Yu Wang. Vocalnet: Speech llms with multi-token prediction for faster and high-quality generation. In Proceedings of the 2025 Conference on Empirical Methods in Natural Language Processing , pp. 19595–19612, 2025. Jianzhe Wei, Siyu Chen, Jianliang He, and Zhuoran Yang. How transformers learn causal structures in-context: Explainable mechanism meets theoretical guarantee. In 
+
+The Fourteenth International Conference on Learning Representations , 2026. URL https: //openreview.net/forum?id=bpF8zgSt41 .Kaiyue Wen, Huaqing Zhang, Hongzhou Lin, and Jingzhao Zhang. From sparse depen-dence to sparse attention: Unveiling how chain-of-thought enhances transformer sample efficiency. In The Thirteenth International Conference on Learning Representations , 2025. URL 
+
+https://openreview.net/forum?id=AmEgWDhmTr .Justus Will, Felix Draxler, Farrin Marouf Sofian, Theofanis Karaletsos, Sameer Singh, and Stephan Mandt. Parallel token generation for language models. In The Fourteenth Interna-tional Conference on Learning Representations , 2026. URL https://openreview.net/forum? id=AGJomYSrUG .Bangjun Xiao, Bingquan Xia, Bo Yang, Bofei Gao, Bowen Shen, Chen Zhang, Chenhong He, Chiheng Lou, Fuli Luo, Gang Wang, et al. Mimo-v2-flash technical report. arXiv preprint arXiv:2601.02780 , 2026. Shunyu Yao, Dian Yu, Jeffrey Zhao, Izhak Shafran, Tom Griffiths, Yuan Cao, and Karthik Narasimhan. Tree of thoughts: Deliberate problem solving with large language mod-els. In A. Oh, T. Naumann, A. Globerson, K. Saenko, M. Hardt, and S. Levine (eds.), 
+
+Advances in Neural Information Processing Systems , volume 36, pp. 11809–11822. Curran Associates, Inc., 2023. URL https://proceedings.neurips.cc/paper files/paper/2023/ file/271db9922b8d1f4dd7aaef84ed5ac703-Paper-Conference.pdf .12 How Transformers Learn to Plan via Multi-Token Prediction Jiacheng Ye, Jiahui Gao, Shansan Gong, Lin Zheng, Xin Jiang, Zhenguo Li, and Lingpeng Kong. Beyond autoregression: Discrete diffusion for complex reasoning and planning. In The Thirteenth International Conference on Learning Representations , 2025. URL https: //openreview.net/forum?id=NRYgUzSPZz .Ruiqi Zhang, Spencer Frei, and Peter L Bartlett. Trained transformers learn linear models in-context. Journal of Machine Learning Research , 25(49):1–55, 2024. Qimin Zhong, Hao Liao, Siwei Wang, Mingyang Zhou, Xiaoqun Wu, Rui Mao, and Wei Chen. Understanding and enhancing the planning capability of language models via multi-token prediction. arXiv preprint arXiv:2509.23186 , 2025. 13 How Transformers Learn to Plan via Multi-Token Prediction 
+
+## Contents 
+
+1 Introduction 12 Related Work 33 Preliminaries 34 Planning Emerges with Multi-Token Prediction 45 Mechanisms of Planning under MTP: Reverse Reasoning 6
+
+5.1 Problem Setup and Model . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 65.2 The Reverse Reasoning Circuit . . . . . . . . . . . . . . . . . . . . . . . . . . 85.3 Why MTP Finds It and NTP Cannot . . . . . . . . . . . . . . . . . . . . . . . 9
+
+6 Conclusion 9A Additional Related Work of MTP 14 B Illustrations of Planning Tasks 15 
+
+B.1 Countdown . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16 B.2 SAT . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16 
+
+C Technical Preliminaries 16 
+
+C.1 Forward-Pass Factorisation . . . . . . . . . . . . . . . . . . . . . . . . . . . . 17 C.2 Gradient Structure of the Deep Head . . . . . . . . . . . . . . . . . . . . . . . 18 C.3 Gradient Decoupling of the Shallow MTP Head . . . . . . . . . . . . . . . . 21 
+
+D Complete Proof of Theorems 22 
+
+D.1 The Reverse Reasoning Circuit . . . . . . . . . . . . . . . . . . . . . . . . . . 22 D.2 Why MTP Finds It and NTP Cannot . . . . . . . . . . . . . . . . . . . . . . . 25 
+
+E Additional Experiments Details 29 
+
+E.1 Experimental Setup for Section 4 . . . . . . . . . . . . . . . . . . . . . . . . . 29 E.2 Experimental Setup for Section 5 . . . . . . . . . . . . . . . . . . . . . . . . . 29 E.3 Empirical Validation on the Full Standard Architecture . . . . . . . . . . . . 29 
+
+## A Additional Related Work of MTP 
+
+Foundations and Large-scale Integration. The standard NTP paradigm has driven the recent success of LLMs, yet it inherently suffers from limitations regarding planning. Early efforts to mitigate these pitfalls include ProphetNet (Qi et al., 2020), which proposed pre-dicting future n-grams for sequence-to-sequence pre-training. Building on this, subsequent research identified the planning deficits of NTP and introduced teacherless, MTP style objectives (Bachmann & Nagarajan, 2024). This trajectory culminated in Gloeckle et al. 14 How Transformers Learn to Plan via Multi-Token Prediction  
+
+> (a) Countdown (b) SAT
+
+Figure 4: Structural representations of reasoning tasks. (a) Countdown: An expres-sion tree showing the hierarchical computation to reach the target 19 using the numbers 
+
+{11, 14, 40, 97 }. The internal nodes represent arithmetic operators, and the root node repre-sents the final result. (b) SAT: A bipartite factor graph representing a Boolean Satisfiability problem (¬x1) ∧ (x1 ∨ ¬ x2) ∧ (x1 ∨ x2 ∨ x3). Nodes {x1, x2, x3} denote variables, and nodes 
+
+{c1, c2, c3} denote logical clauses. Solid lines represent positive literals, while dashed lines indicate negated literals. (2024), which formalized modern MTP frameworks and demonstrated that predicting mul-tiple future tokens simultaneously can yield models that are both better at reasoning and significantly faster during inference. Following its initial success, MTP has seen widespread adoption in state-of-the-art industry models to enhance both generation speed and performance. Technical reports for leading models such as DeepSeek-V3 (Liu et al., 2024), Qwen3-Next (Qwen Team, 2025), Nemotron 3 (Blakeman et al., 2025) and MiMo-V2-Flash (Xiao et al., 2026) highlight MTP as a core component of their training pipelines. Furthermore, the applicability of MTP has recently extended beyond text, showing significant promise in multi-modal architectures (Wang et al., 2025). 
+
+Post-training Adaptation. While industrial models integrate MTP during the compute-intensive pre-training phase, an emerging line of research focuses on post-training adapta-tion. Specifically, several recent works (Liu et al., 2025; Gerontopoulos et al., 2025; Samragh et al., 2025) utilize fine-tuning strategies to efficiently transform standard NTP models into MTP models. 
+
+Future Prediction. Beyond standard MTP, a parallel line of research re-examines the fundamental modeling objective by shifting from point-wise prediction to holistic future modeling. At the sequence level, Mahajan et al. (2026) bypass discrete tokens entirely by pre-training models to predict high-level summaries. For finer-grained dependencies, Joint Token Prediction (JTP) (Ahn et al., 2025) and Parallel Token Prediction (PTP) (Will et al., 2026) move beyond independent token generation; while JTP enforces future-state compression via a representation bottleneck, PTP explicitly captures simultaneous token dependencies through latent variable modeling. 
+
+## B Illustrations of Planning Tasks 
+
+In this section, we provide visual examples and formal definitions of the Countdown and SAT tasks used in our experiments. These tasks are designed to evaluate the model’s ability to perform long-range planning and structural reasoning. 15 How Transformers Learn to Plan via Multi-Token Prediction 
+
+B.1 Countdown 
+
+Countdown is a mathematical planning puzzle where the model is given a set of source numbers and a target value. The goal is to construct a valid arithmetic expression using basic operators (+ , −, ×, / ) to reach the target. As illustrated in Figure 4a, the task can be represented as an expression tree. To solve this, a model cannot simply generate numbers greedily. It must internally plan the hierarchical structure of the computation as a single incorrect move would immediately render the target mathematically unreachable. For instance, to reach the target 19 from {11, 14, 40, 97 }, the model must lock in the nested structure (−)/(−) before outputting the first token. This ensures the very first operation is a committed step toward a globally valid solution. 
+
+B.2 SAT 
+
+The SAT task requires finding a truth assignment {0, 1 } that satisfies all clauses of a proposi-tional formula in Conjunctive Normal Form (CNF). As shown in Figure 4b, the task is represented as a bipartite factor graph where variables and clauses are interconnected. Within this structure, a single variable often appears in conflicting forms (e.g., x and ¬x) across multiple clauses, meaning any local assignment immediately propagates constraints throughout the entire network. Consequently, an initial choice that satisfies one local clause may preclude any valid assignment for the remaining variables, rendering the entire formula unsatisfiable. The model must therefore internally resolve these interconnected dependencies to ensure that the very first assignment remains compatible with a globally valid configuration. 
+
+## C Technical Preliminaries 
+
+This appendix contains all lemma proofs, reorganised into three groups that mirror the logical structure of the argument. 
+
+Notation summary. For convenience, we collect the key symbols used throughout the appendix. After the block-diagonal factorisation in Lemma 1, the full input X(0) no longer appears; all subsequent analysis is expressed in terms of the content matrix Z.      
+
+> Symbol Definition Space Introduced
+> gtNode identity at position t
+
+[N] Definition 2  
+
+> xt
+
+= ( egt ; et) Full token (content + position) RN+T Definition 2  
+
+> zt
+
+= egt Content embedding at position t RN Lemma 1  
+
+> X(0)
+
+= [ x1, . . . , xT ]⊤ Full input matrix (Lemma 1 proof only) RT×(N+T) Definition 2  
+
+> Z
+
+= [ z1, . . . , zT ]⊤ Content matrix RT×N Lemma 1   
+
+> Z′AR content context ( zT
+
+→ ey(1) ) RT×N Equation 3   
+
+> W(ℓ)
+> 0Content weight, layer
+
+ℓ RN×N Equation 4   
+
+> W(ℓ)
+> 1Positional weight, layer
+
+ℓ RT×T Equation 4  
+
+> A[ℓ]
+
+= ZW (ℓ)  
+
+> 0Z⊤
+
++ W(ℓ)  
+
+> 1Attention logit matrix, layer
+
+ℓ RT×T Lemma 1   
+
+> S[ℓ]Attention distribution, layer
+
+ℓ; S[0] = IT RT×T Lemma 1 
+
+> J
+
+(s) = diag (s) − ss ⊤ Softmax Jacobian RT×T  
+
+> LStrictly lower shift matrix ( Li,i−1
+
+= 1) RT×T 
+
+> et
+
+∈ RT Positional one-hot (selects row t) RT 
+
+> egt
+
+∈ RN Content one-hot (selects node gt) RN
+
+We follow the notation of Lemma 1 (main text): layers are 1-indexed, so Layer 1 has weight matrices (W(1) 
+
+> 0
+
+, W(1) 
+
+> 1
+
+) and produces attention distribution S[1], while Layer 2 has 16 How Transformers Learn to Plan via Multi-Token Prediction 
+
+(W(2) 
+
+> 0
+
+, W(2) 
+
+> 1
+
+) and produces S[2]. The initialisation S[0] := IT is not a layer but the identity prior to any attention. Throughout, we write J(s) := diag (s) − ss ⊤ for the Jacobian of the softmax evaluated at a distribution s, L ∈ RT×T for the strictly lower shift matrix with 
+
+Li,i−1 = 1, and IT for the T × T identity. • Section C.1 establishes the forward-pass factorisation that underlies all subsequent gradient calculations (Lemma 1). • Section C.2 derives the gradient structure of the deep head L1, which couples both layers (Lemmas 2 and 3). • Section C.3 derives the gradient structure of the shallow MTP head L2 and proves the gradient decoupling property that is the key mechanism of MTP (Lemmas 4 and 5). 
+
+C.1 Forward-Pass Factorisation 
+
+Proof of Lemma 1. We specialize Definition 2 to L = 2 layers with one head per layer and unpack the disentangled structure. By Definition 2, the input at position t is 
+
+xt =
+
+zt
+
+et
+
+
+
+∈ Rd0 , d0 = N + T,where zt = egt ∈ RN is the one-hot content embedding and et ∈ RT is the one-hot positional embedding. Stack these as X(0) = [ x1, . . . , xT ]⊤ ∈ RT×d0 .
+
+Layer 1 attention logits. The disentangled assumption (Definition 2) means the attention weight matrix decomposes into content and positional blocks with no cross-terms: 
+
+W(ℓ) =
+
+"
+
+W(ℓ) 
+
+> 0
+
+00 W(ℓ)
+
+> 1
+
+#
+
+, W(ℓ) 
+
+> 0
+
+∈ RN×N , W(ℓ) 
+
+> 1
+
+∈ RT×T.The (i, j)-entry of the raw attention logit matrix is therefore 
+
+ X(0)W(1) X(0)⊤ 
+
+> i,j
+
+= x⊤ 
+
+> i
+
+W(1) xj = z⊤ 
+
+> i
+
+W(1) 
+
+> 0
+
+zj + e⊤ 
+
+> i
+
+W(1) 
+
+> 1
+
+ej.The first term contributes (ZW (ℓ) 
+
+> 0
+
+Z⊤)i,j (content matching) and the second contributes 
+
+(W(ℓ) 
+
+> 1
+
+)i,j (positional bias, since e⊤ 
+
+> i
+
+W(1) 
+
+> 1
+
+ej selects entry (i, j)). Hence 
+
+A[1] := X(0)W(1) X(0)⊤ = Z W (1) 
+
+> 0
+
+Z⊤ + W(1) 
+
+> 1
+
+∈ RT×T.Applying the causal mask and row-wise softmax: 
+
+S[1] := σ MASK (A[1]) ∈ RT×T.The Layer 1 attention output (Definition 1) is attn (X(0); W(1)) = S[1] X(0) ∈ RT×d0 . Its content part at position t is  S[1] X(0) 
+
+> t, 1: N
+
+= S[1] 
+
+> t,:
+
+Z ∈ R1×N . (5) The shallow (1-hop) prediction head reads the Layer 0 attention output at the last position T
+
+and projects onto the node vocabulary [N]. By equation 5: 
+
+f2(Z) = S[1] 
+
+> T,:
+
+Z ∈ R1×N .
+
+Layer 2 attention logits. By Definition 2, X(1) = X(0), S[1] X(0) ∈ RT×2d0 . Under the disentangled architecture, Layer 2’s attention query at position i is derived from the Layer 1 attention output (S[1] X(0))i, while the keys remain the original input tokens xj.2
+
+> 2
+
+This is the defining property of the disentangled transformer: each layer’s query reads from the previous attention output, while the keys are always the original input tokens. This avoids the quadratic blowup from the concatenated representation and yields the clean recursive formula below. 
+
+17 How Transformers Learn to Plan via Multi-Token Prediction The Layer 2 attention logit at (i, j) is then 
+
+ S[1] X(0)⊤ 
+
+> i
+
+W(2) xj.Applying the disentangled block-diagonal decomposition of W(2):
+
+ S[1] X(0)⊤ 
+
+> i
+
+W(2) xj =  S[1] 
+
+> i,:
+
+Z W(2) 
+
+> 0
+
+zj +  S[1]
+
+> i,:
+
+ W(2) 
+
+> 1
+
+ej.In full matrix form, the content term gives S[1] Z W (2) 
+
+> 0
+
+Z⊤ and the positional term gives 
+
+S[1] W(2) 
+
+> 1
+
+. Combining: Layer 2 logit matrix = S[1] Z W (2) 
+
+> 0
+
+Z⊤ + W(2)
+
+> 1
+
+ = S[1] A[1].Applying the causal mask and row-wise softmax: 
+
+S[2] := σ MASK (S[1] A[2]) ∈ RT×T,which confirms the recursive formula S[ℓ] = σ MASK (S[ℓ−1] A[ℓ]) with initial condition 
+
+S[0] = IT .The deep (2-hop) head reads from Layer 2’s attention output at the last position. Layer 2 aggregates the Layer 1 attention outputs weighted by S[2], so the content part at position T
+
+is 
+
+S[2]
+
+> T,:
+
+ S[1] Z = S[2] 
+
+> T,:
+
+S[1] Z ∈ R1×N .Hence: 
+
+f1(Z) = S[2] 
+
+> T,:
+
+S[1] Z ∈ R1×N .Substituting definitions, we can verify the expanded expression. For the last row T, all positions j ≤ T are visible under the causal mask, so the mask is vacuous for row T of 
+
+S[1] A[2]:
+
+S[2] 
+
+> T,:
+
+= σ S[1] 
+
+> T,:
+
+A[2]
+
+= σ
+
+
+
+σ z⊤ 
+
+> T
+
+W(1) 
+
+> 0
+
+Z⊤ + W(1) 
+
+> 1
+
+[T, : ]| {z }
+
+> S[1]
+> T,:
+
+·  Z W (2) 
+
+> 0
+
+Z⊤ + W(2)
+
+> 1
+
+
+
+,and therefore 
+
+f1(Z) = σ
+
+
+
+σ z⊤ 
+
+> T
+
+W(1) 
+
+> 0
+
+Z⊤ + W(1) 
+
+> 1
+
+[T, : ]  Z W (2) 
+
+> 0
+
+Z⊤ + W(2)
+
+> 1
+
+
+
+σ MASK (Z W (1) 
+
+> 0
+
+Z⊤ + W(1) 
+
+> 1
+
+)Z,matching the stated expression. 
+
+C.2 Gradient Structure of the Deep Head 
+
+The deep loss L1 = − log f1(Z) · ey(1) passes gradients through both Layer 1 and Layer 2. Lemma 2 identifies the three back-propagation paths; Lemma 3 makes these explicit for each parameter matrix. 
+
+Lemma 2. Let L1(Z) = − log 
+
+
+
+f1(Z) · ey(1)
+
+
+
+be the loss for the deep head evaluated on context Z ∈ { Z, Z′}. Let S [1], A[2], S[2] be the forward activations for Z. Then: 
+
+dL1(Z) = − 1
+
+f1(Z) · ey(1)
+
+·
+
+
+
+S[1][−1,: ]dA[2] J(S[2][−1,: ])S[1]
+
+Ze y(1)
+
+− 1
+
+f1(Z) · ey(1)
+
+·
+
+
+
+dS[1][−1,: ] A[2] J(S[2][−1,: ])S[1]
+
+Ze y(1)
+
+− 1
+
+f1(Z) · ey(1)
+
+·
+
+
+
+S[2][−1,: ]dS[1]
+
+Ze y(1) .18 How Transformers Learn to Plan via Multi-Token Prediction 
+
+Proof of Lemma 2. We apply the chain rule to L1(Z) = − log   f1(Z) · ey(1)
+
+ in following steps. Outer log derivative. dL1 = − 1
+
+f1(Z) · ey(1)
+
+d  f1(Z) · ey(1)
+
+.Expand f1. Substituting f1(Z) = S[2][−1,: ] S[1] Z from Lemma 1: d  f1(Z) · ey(1)
+
+ = d
+
+
+
+S[2][−1,: ] S[1] Z e y(1)
+
+
+
+.Product rule over the two attention layers. S[2][−1,: ] and S[1] are both functions of the parame-ters, so: d
+
+
+
+S[2][−1,: ] S[1] Z e y(1)
+
+
+
+=  dS[2][−1,: ]
+
+ S[1] Z e y(1) + S[2][−1,: ]
+
+ dS[1] Z e y(1) .The second term is path (iii) directly. For the first term, we further expand d S[1][−1,: ] using the softmax Jacobian. By the recursive formula S[2] = σ(MASK (S[1] A[2])) , the last-row logit vector is ℓ[2] :=
+
+S[1][−1,: ] A[2] (the causal mask is vacuous for the last row). Its differential is dℓ[2] = S[1][−1,: ] dA[2] + dS[1][−1,: ] A[2].Applying the softmax Jacobian J(S[2][−1,: ]):dS[2][−1,: ] = dℓ[2] J S[2][−1,: ]
+
+ =
+
+
+
+S[1][−1,: ] dA[2] + dS[1][−1,: ] A[2]
+
+J S[2][−1,: ]
+
+.Substituting back and grouping by differential: d  f1 · ey(1)
+
+ = S[1][−1,: ] dA[2] J(S[2][−1,: ]) S[1] Z e y(1)
+
+| {z }
+
+> path (i)
+
++ dS[1][−1,: ] A[2] J(S[2][−1,: ]) S[1] Z e y(1)
+
+| {z }
+
+> path (ii)
+
++ S[2][−1,: ] dS[1] Z e y(1)
+
+| {z }
+
+> path (iii)
+
+.Dividing by − f1(Z) · ey(1) yields the stated expression. The three terms correspond to distinct backpropagation paths through the two-layer net-work. 
+
+Lemma 3. Explicit gradients for L1(Z) w.r.t. all four parameter matrices. 
+
+∂L1(Z)
+
+∂W(1)
+
+> 0
+
+= Z⊤
+
+ ∂L1
+
+∂A[1]
+
+
+
+Z. ∂L1(Z)
+
+∂W(1)
+
+> 1
+
+=
+
+ ∂L1
+
+∂A[1]
+
+
+
+.
+
+where ∂L1 
+
+> ∂A[1]
+
+= M ⊙
+
+h
+
+S[1] ⊙
+
+ ∂L1 
+
+> ∂S[1]
+
+− ∂L1 
+
+> ∂S[1]
+
+⊙ S[1]11 ⊤i 
+
+∈ RT×T is the loss gradient w.r.t. the Layer 1 logit matrix. 
+
+∂L1(Z)
+
+∂W(2)
+
+> 0
+
+= − 1
+
+f1(Z) · ey(1)
+
+· Z⊤ J S[2][−1,: ]
+
+S[1] Ze y(1) S[1][−1,: ] Z.
+
+∂L1(Z)
+
+∂W(2)
+
+> 1
+
+= − 1
+
+f1(Z) · ey(1)
+
+· J S[2][−1,: ]
+
+S[1] Ze y(1) S[1][−1,: ].19 How Transformers Learn to Plan via Multi-Token Prediction 
+
+Proof of Lemma 3. We derive each gradient by applying the chain rule through A[ℓ] =
+
+Z W (ℓ) 
+
+> 0
+
+Z⊤ + W(ℓ) 
+
+> 1
+
+.
+
+Layer 1 parameters. Since A[1] = Z W (1) 
+
+> 0
+
+Z⊤ + W(1) 
+
+> 1
+
+, we have d A[1] = Z dW(1) 
+
+> 0
+
+Z⊤ + dW(1) 
+
+> 1
+
+.By the chain rule and the trace identity tr (G Z dW Z ⊤) = tr (Z⊤ G Z dW):
+
+∂L1
+
+∂W(1)
+
+> 0
+
+= Z⊤ ∂L1
+
+∂A[1] Z, ∂L1
+
+∂W(1)
+
+> 1
+
+= ∂L1
+
+∂A[1] .There are two paths into S[1]
+
+∂L1
+
+∂S[1] = − 1
+
+f1 · ey(1)
+
+·
+
+h
+
+(S[2][−1,: ])⊤(Ze y(1) )⊤ + A[2] J(S[2][−1,: ])S[1] Ze y(1) e⊤
+
+> T
+
+i
+
+,For each row r with mask Mr = diag (mr ), then 
+
+∂L1
+
+∂A[1][r,: ]
+
+= ∂L1
+
+∂S[1][r,: ]
+
+J(s1(r)) Mr.Then the matrix format is 
+
+∂L1
+
+∂A[1] = M ⊙
+
+
+
+S[1] ⊙
+
+ ∂L1
+
+∂S[1] − ∂L1
+
+∂S[1] ⊙ S[1]11 ⊤
+
+ 
+
+.
+
+Layer 2 parameters. Only path (i) of Lemma 3 involves A[2] (paths (ii) and (iii) are indepen-dent of Layer 2 parameters). The relevant differential term is: 
+
+− 1
+
+f1 · ey(1)
+
+S[1][−1,: ] dA[2] J S[2][−1,: ]
+
+ S[1] Z e y(1)
+
+| {z }   
+
+> =:r∈RT×1
+
+. (6) 
+
+Gradient w.r.t. W (2) 
+
+> 0
+
+. Substituting d A[2] = Z dW(2) 
+
+> 0
+
+Z⊤ into equation 6: 
+
+− 1
+
+f1 · ey(1)
+
+S[1][−1,: ] Z
+
+| {z }
+
+> 1×N
+
+dW(2) 
+
+> 0
+
+Z⊤r|{z} 
+
+> N×1
+
+.This is a scalar of the form c⊤ dW d with c = Z⊤(S[1][−1,: ])⊤ and d = Z⊤r. Applying the trace identity c⊤ dW d = tr (d c ⊤ dW):
+
+∂L1
+
+∂W(2)
+
+> 0
+
+= − 1
+
+f1 · ey(1)
+
+d c ⊤ = − 1
+
+f1 · ey(1)
+
+Z⊤r S [1][−1,: ] Z
+
+= − 1
+
+f1 · ey(1)
+
+Z⊤ J S[2][−1,: ]
+
+ S[1] Z e y(1) S[1][−1,: ] Z.
+
+Gradient w.r.t. W (2) 
+
+> 1
+
+. Substituting d A[2] = dW(2) 
+
+> 1
+
+into equation 6: 
+
+− 1
+
+f1 · ey(1)
+
+S[1][−1,: ]
+
+| {z } 
+
+> 1×T
+
+dW(2) 
+
+> 1
+
+r|{z} 
+
+> T×1
+
+.Again of the form c⊤ dW d with c = ( S[1][−1,: ])⊤ and d = r. By the same trace identity: 
+
+∂L1
+
+∂W(2)
+
+> 1
+
+= − 1
+
+f1 · ey(1)
+
+d c ⊤ = − 1
+
+f1 · ey(1)
+
+r S [1][−1,: ] = − 1
+
+f1 · ey(1)
+
+J S[2][−1,: ]
+
+ S[1] Z e y(1) S[1][−1,: ].20 How Transformers Learn to Plan via Multi-Token Prediction 
+
+C.3 Gradient Decoupling of the Shallow MTP Head 
+
+The shallow MTP loss L2 is the key ingredient distinguishing MTP from NTP. Lemma 4 establishes the central gradient decoupling property: L2 routes gradients exclusively through Layer 1, entirely bypassing Layer 2. This provides a clean training signal for Layer 1 that does not depend on the (potentially uninitialised) Layer 2 weights—the mechanism enabling Phase I of Theorem 2. Lemma 5 makes this explicit per parameter matrix. 
+
+Lemma 4. The gradient for the shallow head loss L2 = − log 
+
+
+
+f2(Z) · ey(2)
+
+
+
+is: 
+
+dL2 = − 1
+
+f2 · ey(2)
+
+·
+
+
+
+z⊤ 
+
+> T
+
+dW(1) 
+
+> 0
+
+Z⊤ + dW(1) 
+
+> 1
+
+[−1, : ]
+
+
+
+J(S[1][−1,: ])Ze y(2) .
+
+Proof of Lemma 4. We apply the chain rule to L2 = − log 
+
+
+
+f2 · ey(2)
+
+
+
+.Outer derivative: dL2 = − 1
+
+f2 · ey(2)
+
+d  f2(Z) · ey(2)
+
+.Expand f2: By Lemma 1, f2(Z) = S[1][−1,: ] Z, so d  f2(Z) · ey(2)
+
+ = d S[1][−1,: ]
+
+ Z e y(2) .Note that Z is a fixed input matrix (not a function of parameters), so only S[1][−1,: ] contributes a differential. Softmax Jacobian. S[1][−1,: ] = σ(A[1][−1,: ]) where A[1][−1,: ] is the last-row logit vector (the causal mask is vacuous for the last row). Therefore: dS[1][−1,: ] = dA[1][−1,: ] J S[1][−1,: ]
+
+.Expand d A[1][−1,: ]. From A[1] = Z W (1) 
+
+> 0
+
+Z⊤ + W(1) 
+
+> 1
+
+, the last row is A[1][−1,: ] = z⊤ 
+
+> T
+
+W(1) 
+
+> 0
+
+Z⊤ +
+
+W(1) 
+
+> 1
+
+[T, : ]. Differentiating with respect to the parameters: dA[1][−1,: ] = z⊤ 
+
+> T
+
+dW(1) 
+
+> 0
+
+Z⊤ + dW(1) 
+
+> 1
+
+[T, : ].This involves only (W(1) 
+
+> 0
+
+, W(1) 
+
+> 1
+
+), confirming that L2 is independent of Layer 2. Therefore dL2 = − 1
+
+f2(Z) · ey(2)
+
+ z⊤ 
+
+> T
+
+dW(1) 
+
+> 0
+
+Z⊤ + dW(1) 
+
+> 1
+
+[T, : ] J S[1][−1,: ]
+
+ Z e y(2) .Note that d L2 involves only the Layer 1 parameters (W(1) 
+
+> 0
+
+, W(1) 
+
+> 1
+
+) and is entirely independent of Layer 2 . This is the central mechanism of MTP: the shallow head provides a direct, uncontaminated gradient signal to Layer 1 that does not need to backpropagate through the (potentially uninitialized or poorly conditioned) Layer 2 weights. 
+
+Lemma 5. Explicit gradients for L2 w.r.t. all two parameter matrices. 
+
+∂L2
+
+∂W(1)
+
+> 0
+
+= − 1
+
+f2 · ey(2)
+
+· zT e⊤ 
+
+> y(2)
+
+Z⊤ J S[1][−1,: ]
+
+ Z.
+
+∂L2
+
+∂W(1)
+
+> 1
+
+= − 1
+
+f2 · ey(2)
+
+· eT e⊤ 
+
+> y(2)
+
+Z⊤ J S[1][−1,: ]
+
+.21 How Transformers Learn to Plan via Multi-Token Prediction 
+
+Proof of Lemma 5. We route the differential from Lemma 4 through A[1] = Z W (1) 
+
+> 0
+
+Z⊤ + W(1) 
+
+> 1
+
+.Step 1: Intermediate gradient ∂L2/∂A[1]. Since only row T of A[1] affects the loss. Applying the softmax chain rule: 
+
+∂L2
+
+∂A[1]
+
+> T,:
+
+= − 1
+
+f2 · ey(2)
+
+e⊤ 
+
+> y(2)
+
+Z⊤ J S[1][−1,: ]
+
+ ∈ R1×T,and ∂L2
+
+> ∂A[1]
+> r,:
+
+= 0 for r̸ = T. In matrix form: 
+
+∂L2
+
+∂A[1] = − 1
+
+f2 · ey(2)
+
+eT e⊤ 
+
+> y(2)
+
+Z⊤ J S[1][−1,: ]
+
+ ∈ RT×T. (7) Step 2: Gradient w.r.t. W(1) 
+
+> 1
+
+. Since A[1] = Z W (1) 
+
+> 0
+
+Z⊤ + W(1) 
+
+> 1
+
+, the Jacobian ∂A[1] 
+
+> ij
+
+/∂(W(1) 
+
+> 1
+
+)ij =
+
+1, so: ∂L2
+
+∂W(1)
+
+> 1
+
+= ∂L2
+
+∂A[1] = − 1
+
+f2 · ey(2)
+
+eT e⊤ 
+
+> y(2)
+
+Z⊤ J S[1][−1,: ]
+
+.This is nonzero only in row T, since the prefactor eT zeroes all other rows. Step 3: Gradient w.r.t. W(1) 
+
+> 0
+
+. Using the standard identity for bilinear forms ( A = Z W Z ⊤
+
+implies ∂ f /∂W = Z⊤ (∂ f /∂A) Z): 
+
+∂L2
+
+∂W(1)
+
+> 0
+
+= Z⊤ ∂L2
+
+∂A[1] Z = − 1
+
+f2 · ey(2)
+
+Z⊤eT
+
+| {z } 
+
+> =zT
+
+e⊤ 
+
+> y(2)
+
+Z⊤ J S[1][−1,: ]
+
+ Z.Together, Lemmas 3 and 5 provide the complete gradient landscape. 
+
+## D Complete Proof of Theorems 
+
+D.1 The Reverse Reasoning Circuit 
+
+Proof of Theorem 1. By the chain rule, the gradient passing through any softmax distribution s
+
+is premultiplied by its Jacobian J(s) = diag (s) − s s ⊤. When s is a saturated one-hot vector 
+
+ek, the Jacobian evaluates to the zero matrix: J(ek) = 0. We show that every active gradient chain passes through at least one such zero Jacobian. By Lemma 5, ∇W(1) L2 routes through J(S[1]
+
+> T,:
+
+). Under Condition 1, S[1] 
+
+> T,:
+
+= e⊤ 
+
+> T−1
+
+is one-hot, so 
+
+J(S[1]
+
+> T,:
+
+) = 0. Therefore ∇W(1) L2 = 0. By Lemma 3, both ∂L1/∂W(2) 
+
+> 0
+
+and ∂L1/∂W(2) 
+
+> 1
+
+contain the factor J(S[2]
+
+> T,:
+
+). Under Condition 2, 
+
+S[2] 
+
+> T,:
+
+= e⊤
+
+> tctx end
+
+is one-hot, so J = 0. Therefore ∇W(2) L1 = 0. By Lemma 3, the gradient ∇W(1) L1 receives contributions from three paths: • Attention path (i) and query path (ii): Both are gated by J(S[2]
+
+> T,:
+
+), which vanishes under Condition 2 (same argument as case 2). Both paths are completely severed. • Value path (iii): The error signal is S[2] 
+
+> T,:
+
+dS[1] Z e y(1) . Under Condition 2, S[2] 
+
+> T,:
+
+= e⊤
+
+> tctx end
+
+,which selects only row tctx end of d S[1]. To reach the parameters W(1), this signal must pass through the row-wise softmax Jacobian J (S[1])tctx end , : 
+
+. Under Condition 1, 
+
+(S[1])tctx end , : = e⊤ 
+
+> tctx
+> v
+
+is one-hot, so this Jacobian is also zero. The value path is severed. 22 How Transformers Learn to Plan via Multi-Token Prediction All three paths vanish, yielding ∇W(1) L1 = 0. Since Layer 2 selects only row tctx end via the one-hot S[2]
+
+> T,:
+
+, all other context rows r̸ = tctx end of S[1]
+
+receive zero error signal from L1. Combined with the vanishing of ∇W(1) L1 (which only involves row T), these rows are gradient-free and therefore unconstrained at the stationary manifold. 
+
+Proof of Corollary 1. We trace the forward pass under the proposed weight configuration for finite γ > 0 and show that every quantity deviates from its ideal (saturated) value by at most O(e−γ).
+
+Layer 1: Universal predecessor pointer. With W(1) 
+
+> 0
+
+= 0, the content term vanishes and the logit matrix reduces to A[1] = W(1) 
+
+> 1
+
+= γ L. Under the causal mask, for each row t > 1 the entry at position t − 1 has logit γ while all other visible entries have logit 0. The softmax therefore gives 
+
+S[1] 
+
+> t,t−1
+
+= eγ
+
+eγ + ( t − 1) = 1 − t − 1
+
+eγ + ( t − 1) , S[1] 
+
+> t,j
+
+= 1
+
+eγ + ( t − 1) (j̸ = t − 1). (8) Since t ≤ T is fixed, every off-diagonal entry is O(e−γ) uniformly, so 
+
+S[1] 
+
+> t,:
+
+= e⊤ 
+
+> t−1
+
++ O(T e −γ), ∀ t > 1. In particular, this approximately satisfies both parts of Condition 1: • Row T attends to T − 1: S[1] 
+
+> T,:
+
+= e⊤ 
+
+> T−1
+
++ O(T e −γ).• Row tctx end attends to tctx end − 1 = tctx  
+
+> v
+
+: S[1] 
+
+> tctx end ,:
+
+= e⊤ 
+
+> tctx
+> v
+
++ O(T e −γ).
+
+Layer 2: Content matching with self-mask. By equation 8, the Layer 1 attention output at the query position T is 
+
+(S[1] Z)T = S[1] 
+
+> T,:
+
+Z =  1 − O(T e −γ) euend + O(T e −γ).Hence the effective content query for Layer 2 is euend + O(e−γ).With W(2) 
+
+> 0
+
+= γ I, the content logit from this query to key position j is 
+
+ euend + O(e−γ)⊤(γ I) zj = γ δ [zj =euend ] + O(γ e−γ).In the input sequence, uend appears at exactly two positions: the context position tctx end and the prompt position T − 1. The positional mask (W(2) 
+
+> 1
+
+)T−1, T−1 = −γ reduces the total logit at the prompt self-match 
+
+j = T − 1 from γ + O(γ e−γ) to O(γ e−γ), while the logit at j = tctx end remains γ + O(γ e−γ).All other positions have logit O(γ e−γ). Therefore the Layer 2 softmax at row T satisfies 
+
+S[2] 
+
+> T,tctx end
+
+= 1 − O(T e −γ), S[2] 
+
+> T,j
+
+= O(e−γ) (j̸ = tctx end ),which approximately satisfies Condition 2. 
+
+Deep-head output and loss bound. Composing both layers via Lemma 1: 
+
+f1(Z) · ey(1) = S[2] 
+
+> T,:
+
+S[1] Z e y(1)
+
+=  1 − O(T e −γ)   S[1] Z
+
+> tctx end
+
+· ey(1) + O(T e −γ)=  1 − O(T e −γ)   e⊤ 
+
+> tctx
+> v
+
+Z e y(1) + O(T e −γ) + O(T e −γ).23 How Transformers Learn to Plan via Multi-Token Prediction Since e⊤ 
+
+> tctx
+> v
+
+Z e y(1) = ztctx  
+
+> v
+
+· ey(1) = ev · ev = 1, we obtain 
+
+f1(Z) · ey(1) = 1 − O(T2 e−γ).Therefore, since T = 10 is fixed, 
+
+L1a = − log   f1(Z) · ey(1)
+
+ = − log  1 − O(e−γ) = O(e−γ).An identical argument applied to L2 = − log 
+
+
+
+f2(Z) · ey(2)
+
+
+
+yields L2 = O(e−γ). Hence 
+
+L = O(e−γ).Every gradient chain in ∇θ L passes through at least one row-wise softmax Jacobian J(s) = 
+
+diag (s) − s s ⊤. Under the above weight configuration, each such s is O(e−γ)-close to a one-hot vector ek, so 
+
+∥J(s)∥ = ∥J(ek + O(e−γ)) ∥ = O(e−γ),since J(ek) = 0 and the Jacobian is Lipschitz in its argument. All remaining factors in the gradient expressions (Lemmas 3 and 5) are bounded by polynomial functions of γ and T.Therefore 
+
+∥∇ θ L∥ = O(e−γ).
+
+Corollary 2 (Forward Collapse of the AR Head) . Under the same weight configuration as Corollary 1, the deep head evaluated on the AR context Z ′ outputs: f1(Z′) = e⊤
+
+> y(1)
+
+ instead of its target e ⊤
+
+> y(2)
+
+.
+
+That is, the AR component of the MTP loss incurs nonzero error (L1b > 0), yet produces a vanishingly small gradient: ∥∇ θ L1b∥ = O(e−γ).Proof of Collapse 2. Recall that Z′ differs from Z only at the last position: z′ 
+
+> T
+
+= ey(1) (i.e. ev)instead of eustar .Since Layer 1 uses pure positional bias ( W(1) 
+
+> 0
+
+= 0), the attention logits A[1] = W(1) 
+
+> 1
+
+= γ L
+
+are content-independent. Replacing zT does not change any entry of A[1], so the Layer 1 attention distribution on Z′ coincides with that on Z:
+
+S′ [1] 
+
+> T,:
+
+= S[1] 
+
+> T,:
+
+= e⊤ 
+
+> T−1
+
++ O(T e −γ).In particular, Layer 1 still retrieves the token at position T − 1 as the effective query for Layer 2. Since z′ 
+
+> T−1
+
+= zT−1 = euend (position T − 1 is unchanged), Layer 2 receives the same query euend .The prefix of Z′ (positions 1, . . . , T − 1) is identical to that of Z, so all context keys are unchanged. The Layer 2 logits and attention distribution therefore remain the same: S′ [2] 
+
+> T,:
+
+=
+
+S[2]
+
+> T,:
+
+. Composing both layers exactly as in the proof of Corollary 1: 
+
+f1(Z′) = S′ [2] 
+
+> T,:
+
+S′ [1] Z′ = e⊤ 
+
+> tctx
+> v
+
+Z′ + O(e−γ) = e⊤ 
+
+> v
+
++ O(e−γ) = e⊤ 
+
+> y(1)
+
++ O(e−γ).The AR target is y(2) = uend ̸ = v = y(1), so 
+
+f1(Z′) · ey(2) = O(e−γ) =⇒ L1b = − log   f1(Z′) · ey(2)
+
+ = γ + O(1) > 0. However, every gradient chain in ∇θ L1b passes through at least one softmax Jacobian J(s)
+
+where s is O(e−γ)-close to a one-hot vector. As established in the proof of Corollary 1, each such Jacobian satisfies ∥J(s)∥ = O(e−γ), so 
+
+∥∇ θ L1b∥ = O(e−γ).The error is effectively trapped: the loss is Θ(γ), but the gradient is exponentially small. 24 How Transformers Learn to Plan via Multi-Token Prediction 
+
+D.2 Why MTP Finds It and NTP Cannot 
+
+Proof of Theorem 2. By Lemma 4, 
+
+∇W(1)
+
+> 1
+
+L2 = − 1
+
+f2 · ey(2)
+
+eT e⊤ 
+
+> y(2)
+
+Z⊤ J(S[1]
+
+> T,:
+
+),and this gradient is entirely independent of W(2) 
+
+> 0
+
+and W(2) 
+
+> 1
+
+. Since only L2 is used in Phase 1, the Layer 1 weights exert no influence on the dynamics, regardless of their frozen values. Under the Toeplitz constraint Wi,j = w(i − j), all positions at the same offset k share the weight w(k). Under random graph labeling, the expected gradient on w(k) depends only on the offset k, so the Toeplitz structure is preserved exactly throughout Phase 1 (it is not merely approximately maintained). 
+
+L2 targets y(2) = uend , which is always at position T − 1 = 9. With T = 10, the normalization is sp + 8sc + sq = 1. Let sp be the softmax weight of the predecessor (offset k = 1), sc the weight of each of the 8 context offsets k ∈ { 2, . . . , 9 }, and sq the self-weight. The target indicator satisfies u9 = 1, u10 = 0, and E[ut] = 18 for context positions t ≤ 8. The gradient flow equations for the Toeplitz weights are: ˙wp = −sp + sp
+
+sp + sc
+
+, (9) ˙wc = −sc + 18 · sc
+
+sp + sc
+
+. (10) The first term in each equation arises from the softmax normalization Jacobian; the second term is the expected reward signal (the predecessor always hosts the target; each of the 8 context offsets hosts it with probability 18 ). Let x = sp/sc ≥ 1. Subtracting equation 10 from equation 9: ˙∆ = −sc(x − 1) + x − 18
+
+x + 1 .Using the normalization bound sc < 1 
+
+> x+8
+
+(since sq > 0, with T − 2 = 8): ˙∆ > − x − 1
+
+x + 8 + x − 18
+
+x + 1 .Cross-multiplying (both denominators positive) and expanding, positivity is equivalent to 
+
+
+
+x − 18
+
+
+
+(x + 8) − (x − 1)( x + 1) = x
+
+
+
+8 − 18
+
+| {z }   
+
+> =63 8>0
+
+= 63 x
+
+8 > 0for all x > 0. Hence ˙ ∆ > 0 globally and unconditionally for T = 10. Note that at initialization x = 1 (i.e. w = 0), the gap derivative evaluates concretely to ˙∆ x=1 = T − 32(T − 2) T=10 
+
+= 716 > 0, confirming that the predecessor pointer begins to emerge immediately from the zero initial-ization. Since ˙∆ > 0 uniformly, w(1) − w(k) → +∞ for all k ≥ 2. Under the causal mask, row t of 
+
+A[1] = W(1) 
+
+> 1
+
+has a unique maximum at position t − 1 (offset 1) as γ := w(1) → ∞. Therefore: 
+
+S[1] 
+
+> t,:
+
+→ e⊤ 
+
+> t−1
+
+∀ t ≥ 2. 25 How Transformers Learn to Plan via Multi-Token Prediction With T = 10 this gives in particular: S[1] 
+
+> 10,:
+
+= e⊤ 
+
+> 9
+
+(Condition 1) and S[1] 
+
+> tctx end ,:
+
+= e⊤ 
+
+> tctx
+> v
+
+for tctx end ∈{2, . . . , 8 } (Condition 1). With W(1) 
+
+> 1
+
+= γL (γ → ∞) frozen, we have S[1] 
+
+> t,:
+
+= e⊤ 
+
+> t−1
+
+for all t ≥ 2. With T = 10, the effective Layer 1 query at the last position is 
+
+(S[1] Z)10 = S[1] 
+
+> 10,:
+
+Z = e⊤ 
+
+> 9
+
+Z = z9 = euend .The self-distractor (prompt position encoding uend ) is always at position T − 1 = 9. The positional self-mask entry to be learned is therefore (W(2) 
+
+> 1
+
+)9,9 .Since S[1] = L is frozen, the deep head output becomes f1 = S[2]
+
+> T,:
+
+(LZ ), where (LZ )j = zj−1.The target y(1) = v satisfies zj−1 = ev iff j = tctx  
+
+> v
+
++ 1 = tctx end . Hence: 
+
+L1a = − log S[2]
+
+> T,tctx end
+
+,a standard 1-hop contrastive problem over the Layer 2 attention distribution. By gradient structure (from Lemma 3). 
+
+∇W(2)
+
+> 0
+
+L1a = − 1
+
+f1 · ey(1)
+
+Z⊤ J(S[2]
+
+> T,:
+
+) etctx end e⊤ 
+
+> uend
+
+, (11) 
+
+∇W(2)
+
+> 1
+
+L1a = − 1
+
+f1 · ey(1)
+
+J(S[2]
+
+> T,:
+
+) etctx end e⊤
+
+> T−1
+
+. (12) Both are rank-1 outer products. Equation 11 modifies only row uend of W(2) 
+
+> 0
+
+; Equation 12 modifies only row T − 1 of W(2) 
+
+> 1
+
+. Starting from W(2) 
+
+> 0
+
+= 0 and W(2) 
+
+> 1
+
+= 0, all other columns remain identically zero throughout Phase 2. This establishes Conclusion (i). The logit from position 10 to position j in Layer 1 is: 
+
+ℓj = e⊤ 
+
+> uend
+
+W(2) 
+
+> 0
+
+zj
+
+| {z }
+
+> content
+
++ ( W(2) 
+
+> 1
+
+)9, j
+
+| {z }
+
+> positional
+
+.The positional term indexes row 9 of W(2) 
+
+> 1
+
+(not row 10), because S[1] 
+
+> 10,:
+
+= e⊤ 
+
+> 9
+
+shifts the effective query row by one. In particular, the self-mask entry is (W(2) 
+
+> 1
+
+)9,9 .For a position k such that zk̸ = euend (a content distractor), the logit gap gradient is: ˙∆k = ˙ℓtctx end − ˙ℓk ≥ (1 − sj∗ − sself ) + sk ≥ 2sk > 0, where j∗ = tctx end and the bound uses 1 − sj∗ − sself ≥ ∑k′ sk′ ≥ sk from the normalization constraint. Thus all content distractor gaps diverge. Position k = 9 ( = T − 1) encodes z9 = euend (same node as the query). Content updates to W(2) 
+
+> 0
+
+cancel for this position (query equals key). The gap is governed entirely by the positional bias (W(2) 
+
+> 1
+
+)9,9 :˙ℓj∗ = ( 1 − sj∗ − sself ) + ( 1 − sj∗ ), ˙ℓself = ( 1 − sj∗ − sself ) − sself .˙∆self = ˙ℓj∗ − ˙ℓself = 1 − sj∗ + sself > 0. This drives (W(2) 
+
+> 1
+
+)9,9 → − ∞, establishing Conclusion (ii). From equation 11, the update to entry (i, uend ) of W(2) 
+
+> 0
+
+is ˙
+
+(W(2) 
+
+> 0
+
+)i,uend = stctx end 
+
+μ
+
+ δi,uend − (Z⊤s)uend 
+
+.26 How Transformers Learn to Plan via Multi-Token Prediction The diagonal entry (i = uend ) receives a positive update of sj∗ (1−sj∗ ) 
+
+> μ
+
+> 0 and diverges to +∞. For off-diagonal entries i̸ = uend : as W(2) 
+
+> 0
+
+uend , uend → +∞, the attention weight on non-uend content positions vanishes, (Z⊤s)i → 0. Therefore R ∞ 
+
+> 0
+
+| ˙
+
+(W(2) 
+
+> 0
+
+)i,uend | dt < ∞,and off-diagonal entries converge to a finite negative value Bi,uend < 0. By graph-labeling symmetry, the same argument holds for every column, giving W(2) 
+
+> 0
+
+→ γ′ I + B with Bii = 0and Bij < 0 for i̸ = j. This establishes Conclusion (ii). 
+
+Proof of Theorem 3. The full derivative of μ = 1 
+
+> T
+
+∑Tr=1(S[1])r,: u with respect to w(k) is ob-tained by differentiating each row: 
+
+∂μ ∂w(k) = 1
+
+T
+
+> T
+
+# ∑
+
+> r=k+1
+
+∂(S[1])r,: u
+
+∂w(k) .(Rows r ≤ k have no position at offset k within their visible window and contribute zero.) At w ≡ 0, row r has uniform attention sr = 1 
+
+> r
+
+1 over positions 1, . . . , r. The Jacobian of softmax at sr is J(sr ) = 1 
+
+> r
+
+I − 1 
+
+> r2
+
+11 ⊤. Since ∂A[1] 
+
+> r,:
+> ∂w(k)
+
+= e⊤ 
+
+> r−k
+
+(only entry j = r − k is affected), the chain rule gives: 
+
+∂(S[1])r,: u
+
+∂w(k) = ( J(sr ) er−k)⊤ u = 1
+
+r ur−k − 1
+
+r
+
+> r
+
+# ∑
+
+> j=1
+
+uj
+
+!
+
+. (13) We take expectation over random graph labeling. Rows r ≤ T − 2 = 8. For these rows, r − k ≤ T − 3 ≤ T − 2, so E[ur−k] = 1 
+
+> T−2
+
+for all k ≥ 1. Also: 
+
+E
+
+"
+
+1
+
+r
+
+> r
+
+# ∑
+
+> j=1
+
+uj
+
+#
+
+= 1
+
+r · rT − 2 = 1
+
+T − 2 .Therefore E
+
+h 1
+
+> r
+
+ ur−k − 1 
+
+> r
+
+∑rj=1 uj
+
+i
+
+= 0. Every row r ≤ T − 2 contributes exactly zero in expectation. This is the symmetric regime: the target is equally likely at every context position, so no offset is favoured. Row r = T − 1 = 9. Here ∑T−1 
+
+> j=1
+
+E[uj] = 1 (since E[uT−1] = 0 and E[uT ] = 0, all probability mass is on positions 1, . . . , T − 2). For all offsets k ≥ 1: r − k = T − 1 − k ≤ T − 2, so 
+
+E[uT−1−k] = 1 
+
+> T−2
+
+. Equation equation 13 gives: 
+
+E
+
+" ∂(S[1])T−1,: u
+
+∂w(k)
+
+#
+
+= 1
+
+T − 1
+
+ 1
+
+T − 2 − 1
+
+T − 1
+
+
+
+= 1
+
+(T − 1)2(T − 2) > 0for all k ≥ 1. Row T − 1 contributes the same positive term for every offset. Row r = T = 10. Here ∑Tj=1 E[uj] = 1. Two sub-cases: • k = 1 (predecessor offset): r − k = T − 1, so E[uT−1] = 0 (position T − 1 encodes 
+
+uend ̸ = v). Equation equation 13 gives: 1
+
+T
+
+
+
+0 − 1
+
+T
+
+
+
+= − 1
+
+T2 < 0. • k ≥ 2 (context offsets): r − k = T − k ≤ T − 2, so E[uT−k] = 1 
+
+> T−2
+
+. Equation equa-tion 13 gives: 1
+
+T
+
+ 1
+
+T − 2 − 1
+
+T
+
+
+
+= 2
+
+T2(T − 2) > 0. 27 How Transformers Learn to Plan via Multi-Token Prediction Combining all three row regimes, the full expected gradient of μ is: 
+
+E
+
+ ∂μ ∂w(1)
+
+
+
+= 1
+
+T
+
+ 0|{z}  
+
+> rows r≤T−2
+
++ 1
+
+(T − 1)2(T − 2)
+
+| {z } 
+
+> row T−1
+
+− 1
+
+T2
+
+|{z}  
+
+> row T
+
+ , (14) 
+
+E
+
+ ∂μ ∂w(k)
+
+
+
+= 1
+
+T
+
+ 0|{z}  
+
+> rows r≤T−2
+
++ 1
+
+(T − 1)2(T − 2)
+
+| {z } 
+
+> row T−1
+
++ 2
+
+T2(T − 2)
+
+| {z } 
+
+> row T
+
+ > 0, k ≥ 2. (15) From Equation 14, the predecessor gradient has negative sign iff (T − 1)2(T − 2) > T2.Expanding: 
+
+(T − 1)2(T − 2) − T2 = T3 − 5T2 + 5T + 2. For T = 10: T3 − 5T2 + 5T − 2 > 0. Therefore (T − 1)2(T − 2) > T2, giving: 
+
+E
+
+ ∂μ ∂w(1)
+
+
+
+= 1
+
+T
+
+ 1
+
+(T − 1)2(T − 2) − 1
+
+T2
+
+
+
+< 0. From L1 = − log μ and the chain rule: 
+
+E
+
+ ∂L1
+
+∂w(k)
+
+
+
+= − 1
+
+μ0
+
+E
+
+ ∂μ ∂w(k)
+
+
+
+.Substituting equation 14 and equation 15: 
+
+E
+
+ ∂L1
+
+∂w(1)
+
+
+
+= 1
+
+Tμ0
+
+ 1
+
+T2 − 1
+
+(T − 1)2(T − 2)
+
+
+
+> 0, 
+
+E
+
+ ∂L1
+
+∂w(k)
+
+
+
+= − 1
+
+Tμ0
+
+ 1
+
+(T − 1)2(T − 2) + 2
+
+T2(T − 2)
+
+
+
+< 0, k ≥ 2. At T = 10: T − 1 = 9, T − 2 = 8, (T − 1)2(T − 2) = 81 × 8 = 648. 
+
+E
+
+ ∂L0
+
+∂w(1)
+
+
+
+= 110 μ0
+
+ 1100 − 1648 
+
+
+
+= 110 μ0
+
+· 648 − 100 64800 = 548 648,000 μ0
+
+> 0. 
+
+E
+
+ ∂L0
+
+∂w(k)
+
+
+
+= − 110 μ0
+
+ 1648 + 2800 
+
+
+
+= − 110 μ0
+
+· 800 + 2 × 648 648 × 800 = − 2096 5,184,000 μ0
+
+< 0. Gradient descent therefore: • Decreases w(1): the predecessor weight is actively suppressed .• Increases w(k) for k ≥ 2: attention is diffused toward context positions. This is precisely the opposite of the predecessor pointer w(1) → +∞, w(k) → − ∞ for k ≥ 2required by the stationary manifold of Theorem 1. 28 How Transformers Learn to Plan via Multi-Token Prediction 
+
+## E Additional Experiments Details 
+
+E.1 Experimental Setup for Section 4 
+
+In this section, we detail the experimental configurations for our standard multi-layer transformer models. All models are trained using the AdamW optimizer (Loshchilov & Hutter, 2019) with a weight decay of 0. 
+
+Graph. We conduct scaling experiments on 2-path 5-node star graphs and 5-node binary trees. To isolate the scaling effect of interest, when scaling one dimension (e.g., model capacity), we ensure the complementary dimension (e.g., dataset size) is sufficient to achieve performance saturation. Models are trained for 100 epochs with a batch size of 256 and a learning rate of 1 × 10 −4.
+
+Remark 1. For a fixed graph structure (e.g., the binary tree in Figure 1b), the set of possible problem instances is finite. With sufficient data (e.g., 0.5 M samples) and large models (e.g., 10.65 Mparameters), NTP might memorize all possible problems and achieve perfect test performance. In this regime, the test set no longer reflects truly unseen problems. Thus, comparing MTP and NTP is more meaningful under limited data or model capacity, where memorization is unlikely and planning must be learned. 
+
+Countdown. For the countdown task, we utilize a 4-level arithmetic setting featuring an 85M parameter model and a dataset of 1M samples. All numerical inputs and intermediate results are constrained to be less than 100. Training is performed for 100 epochs with a batch size of 1024 and a learning rate of 1 × 10 −4. Given that the model typically reaches peak performance early in the training process, we report the best performance achieved. 
+
+3-SAT. In the 3-SAT task, we focus on solving Boolean formulas featuring 7 variables and 45 clauses. We train a 5.3M parameter model on 50k samples for 300 epochs, using a batch size of 512 and a learning rate of 1 × 10 −3. We report the model’s final performance at the conclusion of training. 
+
+E.2 Experimental Setup for Section 5 
+
+In this section, we detail the experimental setup for our 2-layer disentangled transformer models trained on 2-path 3-node star graphs. All models are trained using the AdamW optimizer with a batch size of 512 and a learning rate of 5 × 10 −4 on 1M generated examples for 300 epochs. 
+
+E.3 Empirical Validation on the Full Standard Architecture 
+
+In the main paper, our theoretical analysis relied on a disentangled mechanism and further mathematical simplifications to achieve tractability. In this section, we relax these structural assumptions and empirically evaluate whether our core findings generalize to a standard, full Transformer architecture. 
+
+Experimental Setup. We instantiate a standard 8-layer 8-head Transformer model with 25M parameters. The model is trained on a 5-path 5-node star graph dataset consisting of 1M training examples. We train the model for 40 epochs using a batch size of 1024 and a learning rate of 1 × 10 −4. An example of the data format is provided below: Data Example 74,64 | 3,36 | 49,63 | 40,16 | 31,73 | 73,18 | 51,22 | 49,46 | 38,19 | 13,27 | 46,40 | 49,74 |
+
+63,31 | 65,13 | 64,3 | 49,61 | 19,51 | 61,65 | 49,38 | 16,41 / 49,18 = 49,63,31,73,18 To understand the internal mechanisms driving the model’s performance, we extract the attention maps specifically during the generation of the “difficult” token. The visualizations presented in this section are obtained by averaging the attention weights across 8 attention heads and 544 test examples. 29 How Transformers Learn to Plan via Multi-Token Prediction 
+
+(a) Layer 1 Attention Token  
+
+> Token
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+
+(b) Layer 2 Attention Token  
+
+> Token
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+
+(c) Layer 3 Attention Token  
+
+> Token
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+
+(d) Layer 4 Attention Token 
+
+> Token
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+
+(e) Layer 5 Attention Token  
+
+> Token
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+
+(f) Layer 6 Attention Token  
+
+> Token
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+
+(g) Layer 7 Attention Token  
+
+> Token
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+
+(h) Layer 8 Attention Token 
+
+> Token
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+
+Figure 5: Attention heatmaps for the model trained with the standard NTP objective. The NTP model exhibits severe overfitting, achieving a training accuracy of 97% while the test accuracy only reaches 20%. Furthermore, the visualization demonstrates that the model primarily attends to the start node, specifically in Layers 7 and 8. 
+
+Attention Analysis. We compare the standard NTP against 3-MTP. The results reveal a stark contrast in both generalization capability and internal attention routing. As shown in Figure 5, the model trained with standard NTP suffers from severe overfitting. While it achieves 97% training accuracy, the test accuracy only reaches 20%. Analyzing the attention heatmaps, we observe that the NTP model primarily attends to the start node ,specifically in Layers 7 and 8. In contrast, Figure 6 illustrates the behavior of the model trained with 3-MTP. This model achieves perfect generalization, reaching 100% accuracy on both the training and test sets. Crucially, the attention mechanism operates entirely differently: rather than attending to the start node, the 3-MTP model identifies and heavily attends to the end node , predominantly in Layers 3 and 4. These empirical results perfectly corroborate our theoretical findings. The observed struc-tural shift in attention—specifically, prioritizing the end node in Layers 3 and 4—confirms that the MTP objective successfully induces a reverse reasoning mechanism, which is the key driver of the perfect generalization. 30 How Transformers Learn to Plan via Multi-Token Prediction 
+
+(a) Layer 1 Attention Token  
+
+> Token
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+
+(b) Layer 2 Attention Token  
+
+> Token
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+
+(c) Layer 3 Attention Token  
+
+> Token
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+
+(d) Layer 4 Attention Token 
+
+> Token
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+
+(e) Layer 5 Attention Token  
+
+> Token
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+
+(f) Layer 6 Attention Token  
+
+> Token
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+
+(g) Layer 7 Attention Token  
+
+> Token
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+
+(h) Layer 8 Attention Token 
+
+> Token
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+
+Figure 6: Attention heatmaps for the model trained with the 3-MTP objective. In contrast to the NTP model, the 3-MTP model achieves perfect generalization with 100% accuracy on both the training and test sets. Notably, the visualization highlights that the 3-MTP model primarily attends to the end node, predominantly in Layers 3 and 4. 31

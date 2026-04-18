@@ -1,0 +1,118 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.15306v1/fig-001.webp",
+      "caption": "Figure 15: Valid-path rates across length groups. Although absolute performance improves, the same length-scaling failure persists.",
+      "page": 25,
+      "index": 1,
+      "width": 416,
+      "height": 329
+    },
+    {
+      "url": "assets/figures/arxiv/2604.15306v1/fig-002.webp",
+      "caption": "Figure 16: Length scaling for RL under extended training for 20 epochs (1 epoch ≈ 400 steps).",
+      "page": 25,
+      "index": 2,
+      "width": 416,
+      "height": 335
+    },
+    {
+      "url": "assets/figures/arxiv/2604.15306v1/fig-003.webp",
+      "caption": "Figure 9: Shortest-path lengths distribution under varying coverage ratios (fixed diversity). The distributions remain stable across settings, indicating that coverage does not alter distance exposure.",
+      "page": 21,
+      "index": 3,
+      "width": 826,
+      "height": 571
+    },
+    {
+      "url": "assets/figures/arxiv/2604.15306v1/fig-004.webp",
+      "caption": "Figure 17: Representative failure cases (SFT) for the (10, 20) length group.",
+      "page": 30,
+      "index": 4,
+      "width": 582,
+      "height": 942
+    },
+    {
+      "url": "assets/figures/arxiv/2604.15306v1/fig-005.webp",
+      "caption": "Figure 11: Spatial transfer success rate (SR) measured on the disjoint maps as the node pair composition diversity level increases. Each curve corresponds to a fixed coverage ratio.",
+      "page": 22,
+      "index": 5,
+      "width": 404,
+      "height": 319
+    },
+    {
+      "url": "assets/figures/arxiv/2604.15306v1/fig-006.webp",
+      "caption": "Figure 10: Spatial transfer success rate (SR) measured on the disjoint maps as the nodes coverage ratio in question in the training map increases. Each curve corresponds to a fixed diversity level.",
+      "page": 22,
+      "index": 6,
+      "width": 412,
+      "height": 321
+    },
+    {
+      "url": "assets/figures/arxiv/2604.15306v1/fig-007.webp",
+      "caption": "Figure 20: Representative failure cases (GRPO) for the (40, 50) length group.",
+      "page": 33,
+      "index": 7,
+      "width": 582,
+      "height": 724
+    },
+    {
+      "url": "assets/figures/arxiv/2604.15306v1/fig-008.webp",
+      "caption": "Figure 13: Spatial transfer success and length scaling failure.",
+      "page": 23,
+      "index": 8,
+      "width": 414,
+      "height": 290
+    },
+    {
+      "url": "assets/figures/arxiv/2604.15306v1/fig-009.webp",
+      "caption": "Figure 19: Representative failure cases (SFT) for the (40, 50) length group.",
+      "page": 32,
+      "index": 9,
+      "width": 498,
+      "height": 1258
+    },
+    {
+      "url": "assets/figures/arxiv/2604.15306v1/fig-010.webp",
+      "caption": "Table 5: Performance of different data regimes across three MathQA categories.",
+      "page": 27,
+      "index": 10,
+      "width": 770,
+      "height": 421
+    },
+    {
+      "url": "assets/figures/arxiv/2604.15306v1/fig-011.webp",
+      "caption": "Figure 14: Length scaling performance of the best spatial-transfer model under different data budgets. All evaluations are conducted on holdout nodes within the training map (i.e., without spatial transfer). Despite variation in budgets, success rate (SR) consistently deteriorates as path length exceeds the training regime, showing that length scaling fails universally.",
+      "page": 24,
+      "index": 11,
+      "width": 416,
+      "height": 334
+    },
+    {
+      "url": "assets/figures/arxiv/2604.15306v1/fig-012.webp",
+      "caption": "Figure 6: Length scaling under extended training (1 epoch ≈ 400 steps). Left: SFT improves at first but quickly overfits with more epochs. Right: RL (GRPO) remains stable across epochs but never exceeds the best SFT bound (dashed line).",
+      "page": 9,
+      "index": 12,
+      "width": 829,
+      "height": 331
+    },
+    {
+      "url": "assets/figures/arxiv/2604.15306v1/fig-013.webp",
+      "caption": "Figure 18: Representative failure cases (GRPO) for the (10, 20) length group.",
+      "page": 31,
+      "index": 13,
+      "width": 582,
+      "height": 829
+    },
+    {
+      "url": "assets/figures/arxiv/2604.15306v1/fig-014.webp",
+      "caption": "Figure 8: Loss distributions of the pretrained and fine-tuned models on test (i.e. unseen) shortest paths. The distributions are completely disjoint, indicating that pretraining alone does not prepare the model with shortest-path generation capabilities.",
+      "page": 20,
+      "index": 14,
+      "width": 416,
+      "height": 293
+    }
+  ]
+}

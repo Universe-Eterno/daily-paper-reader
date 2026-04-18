@@ -1,0 +1,62 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.11912v1/fig-001.webp",
+      "caption": "Figure 4: Structural representations of reasoning tasks. (a) Countdown: An expression tree showing the hierarchical computation to reach the target 19 using the numbers {11, 14, 40, 97}. The internal nodes represent arithmetic operators, and the root node represents the final result. (b) SAT: A bipartite factor graph representing a Boolean Satisfiability problem (¬x1)∧ (x1 ∨ ¬x2)∧ (x1 ∨ x2 ∨ x3). Nodes {x1, x2, x3} denote variables, and nodes {c1, c2, c3} denote logical clauses. Solid lines represent positive literals, while dashed lines indicate negated literals.",
+      "page": 15,
+      "index": 1,
+      "width": 826,
+      "height": 320
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11912v1/fig-002.webp",
+      "caption": "Figure 5: Attention heatmaps for the model trained with the standard NTP objective. The NTP model exhibits severe overfitting, achieving a training accuracy of 97% while the test accuracy only reaches 20%. Furthermore, the visualization demonstrates that the model primarily attends to the start node, specifically in Layers 7 and 8.",
+      "page": 30,
+      "index": 2,
+      "width": 820,
+      "height": 404
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11912v1/fig-003.webp",
+      "caption": "Figure 1: Overview of the MTP architecture and its advantage in reasoning tasks. (a) The MTP architecture. Building upon Gloeckle et al. (2024), our MTP employs a shared backbone with multiple independent output heads to predict several future tokens simultaneously. (b) Illustration of Star Graph and Binary Tree. In standard forward planning, early steps can be difficult due to a large search space. MTP facilitates “reverse reasoning” by looking ahead to the goal (G), transforming complex forward searches into easy backward steps.",
+      "page": 2,
+      "index": 3,
+      "width": 826,
+      "height": 284
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11912v1/fig-004.webp",
+      "caption": "Figure 3: Mechanism comparison between the minimal structures of NTP and 2-MTP on the star graph task. (a–d) Query-key weights (W(1), W(2)) and attention patterns (attn(1), attn(2)) for NTP. (e–h) Corresponding weights and attention patterns for 2-MTP. Attention heatmaps are computed on a sequence with input graph [3, 7, 6, 0, 7, 2, 3, 6, 0, 3] and target [3, 6, 0]. When predicting the difficult intermediate node, MTP (g) exhibits a clear predecessor-pointing pattern consistent with the reverse reasoning circuit (Theorem 1): Layer 1 attends sharply to the end node, whereas NTP (c) shows no such structure. (i) The output projection V0 for NTP (identical in MTP) activates exclusively on the content block of the Layer 2 output. (j) The MTP-specific projection V1 activates on the content block of the Layer 1 output. These block-sparse structures motivate the reduced model in Section 5.1.",
+      "page": 7,
+      "index": 4,
+      "width": 820,
+      "height": 808
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11912v1/fig-005.webp",
+      "caption": "Figure 6: Attention heatmaps for the model trained with the 3-MTP objective. In contrast to the NTP model, the 3-MTP model achieves perfect generalization with 100% accuracy on both the training and test sets. Notably, the visualization highlights that the 3-MTP model primarily attends to the end node, predominantly in Layers 3 and 4.",
+      "page": 31,
+      "index": 5,
+      "width": 820,
+      "height": 405
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11912v1/fig-006.webp",
+      "caption": "Table 1: Test accuracy of models trained with NTP versus MTP configurations on Countdown and 3-SAT tasks. Models trained with MTP achieve consistently higher test accuracy than the NTP baseline across both tasks.",
+      "page": 5,
+      "index": 6,
+      "width": 831,
+      "height": 211
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11912v1/fig-007.webp",
+      "caption": "Figure 2: Path-finding accuracy of MTP versus NTP under varying data and parameter scales. (a, b) 2-path 5-node star graph: test accuracy as a function of training data size (16M model) and parameter size (0.5M data). (c, d) 5-node binary tree: test accuracy as a function of data size (16M model) and parameter size (1M data). Error bars represent 90% confidence intervals calculated from three independent replicates (n = 3). Notably, while NTP stagnates at 50% accuracy on star graph, it begins to learn and scale on binary trees. Across both topologies, MTP consistently demonstrates superior planning abilities.",
+      "page": 5,
+      "index": 7,
+      "width": 818,
+      "height": 485
+    }
+  ]
+}

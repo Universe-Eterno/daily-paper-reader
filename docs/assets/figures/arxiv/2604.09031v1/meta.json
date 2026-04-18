@@ -1,0 +1,110 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.09031v1/fig-001.webp",
+      "caption": "Table 1: Score components for scenario prioritization.",
+      "page": 6,
+      "index": 1,
+      "width": 608,
+      "height": 317
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09031v1/fig-002.webp",
+      "caption": "Figure 7: Distribution of learned feature weights across instances. Feature reference in Table 1. Box plots show the median (line), interquartile range (box), whiskers extending to 1.5× the interquartile range, and the mean (white diamond); points beyond whiskers are outliers.",
+      "page": 15,
+      "index": 2,
+      "width": 635,
+      "height": 362
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09031v1/fig-003.webp",
+      "caption": "Figure 1: Basic Branch-and-Benders-cut framework.",
+      "page": 2,
+      "index": 3,
+      "width": 934,
+      "height": 198
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09031v1/fig-004.webp",
+      "caption": "Table 2: Stopping criteria for partial subproblem solving and naming convention. One or more can be imposed, and a Benders iteration stops subproblem solving when any criterion is met. Stabilization rounds solve all subproblems to prevent selection bias and provide additional training data.",
+      "page": 7,
+      "index": 4,
+      "width": 669,
+      "height": 214
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09031v1/fig-005.webp",
+      "caption": "Table 5: Time and count breakdown for ML-train method across instances that completed within the time limit (n = 86). Unrequired subproblems are those that do not yield cuts in iterations where other subproblems do. Cut Generation shows subproblems that yielded cuts. Feasibility Proving shows subproblems in cut-free iterations (required to verify feasibility). Other includes ML scoring and callback overhead.",
+      "page": 14,
+      "index": 5,
+      "width": 611,
+      "height": 210
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09031v1/fig-006.webp",
+      "caption": "Figure 5: Distribution of minimum parameter values required to capture all cuts per iteration during ML training, with reference lines showing tested configuration values. Box plots show the median (orange line), interquartile range (box), whiskers extending to 1.5× the interquartile range, and the mean (white diamond); points beyond whiskers are outliers.",
+      "page": 14,
+      "index": 6,
+      "width": 932,
+      "height": 184
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09031v1/fig-007.webp",
+      "caption": "Figure 6: Cut yield evolution across iterations for full enumeration, showing the fraction of examined subproblems that yield cuts. Patterns decline from 10–40% early on to 0–10% near convergence.",
+      "page": 14,
+      "index": 7,
+      "width": 585,
+      "height": 307
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09031v1/fig-008.webp",
+      "caption": "Table 8: Primal-dual integral values (billions, ∫ T 0 (primal(t) − dual(t))dt, cost·seconds). Lower is better. Bold: better than Standard. Wilcoxon test (one-sided). Significance: * p < 0.05, ** p < 0.01, *** p < 0.001. Summary statistics (bottom right) are computed over both columns.",
+      "page": 18,
+      "index": 8,
+      "width": 681,
+      "height": 962
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09031v1/fig-009.webp",
+      "caption": "Table 7: Solve times (seconds) for all instances. Timeouts: optimality gaps in brackets. Bold: methods faster than Standard (if Standard solved), or methods that solved (if Standard did not). Daggers (†): all methods optimal. Sum/Mean/Sh. Geom. Mean†: over instances solved by all. Wilcoxon test (one-sided): solved use time; unsolved use time-limit+gap%. Significance: * p < 0.05, ** p < 0.01, *** p < 0.001. Summary statistics (bottom right) are computed over both columns.",
+      "page": 17,
+      "index": 9,
+      "width": 729,
+      "height": 1019
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09031v1/fig-010.webp",
+      "caption": "Figure 4: Performance profile on all n = 91 instances solved by at least one method. The performance factor τ on the x-axis is the ratio of a method’s runtime to the best method’s runtime on each instance; ρ(τ) on the y-axis is the fraction of instances where the method is within factor τ of the best. Random selection performs worse than standard Benders, regression-based methods achieve modest gains.",
+      "page": 9,
+      "index": 10,
+      "width": 687,
+      "height": 293
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09031v1/fig-011.webp",
+      "caption": "Figure 3: Time breakdown across n = 108 instances. Master time (black), cut-generating subproblems (blue), and feasibility-proving subproblems in cut-free iterations (grey) represent necessary computation; unrequired subproblems (orange) represent wasted computation.",
+      "page": 9,
+      "index": 11,
+      "width": 915,
+      "height": 211
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09031v1/fig-012.webp",
+      "caption": "Figure 8: Distribution of hit quality (cuts found / subproblems examined) across methods. Higher values indicate more efficient subproblem selection. Box plots show the median (line), interquartile range (box), whiskers extending to 1.5× the interquartile range, and the mean (white diamond); points beyond whiskers are outliers.",
+      "page": 16,
+      "index": 12,
+      "width": 634,
+      "height": 393
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09031v1/fig-013.webp",
+      "caption": "Figure 9: Performance profile based on adjusted subproblem time, which deducts the necessary subproblem time (oracle baseline) from each method’s total subproblem time.",
+      "page": 16,
+      "index": 13,
+      "width": 641,
+      "height": 237
+    }
+  ]
+}

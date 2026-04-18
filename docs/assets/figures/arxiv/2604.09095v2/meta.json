@@ -1,0 +1,86 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.09095v2/fig-001.webp",
+      "caption": "Figure 5: Heatmaps of mean (top), median (middle), and 90th percentile (bottom) relERT under LPO over numbers of views 𝑘 and resolutions 𝑟 .",
+      "page": 11,
+      "index": 1,
+      "width": 502,
+      "height": 750
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09095v2/fig-002.webp",
+      "caption": "Figure 7: Selection distributions and pick frequencies (GeoPAS vs. VBS) under LIO, Random, and LPO.",
+      "page": 15,
+      "index": 2,
+      "width": 1054,
+      "height": 1186
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09095v2/fig-003.webp",
+      "caption": "Table 1: Results in relERT across evaluation protocols. GeoPAS cells (F. group, 𝑑) are shaded by the fraction of the VBS-SBS gap closed, with closure ∈ [0, 1] mapped to a grayscale in [0, 50%] where darker is better. Non-improving cells are unshaded and denoted †.",
+      "page": 7,
+      "index": 3,
+      "width": 1002,
+      "height": 825
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09095v2/fig-004.webp",
+      "caption": "Table 4: Component-wise ablation of feature conditioning, selection metric, slice-scale sampling, and regression target. Bold numbers indicate improvements over GeoPAS.",
+      "page": 10,
+      "index": 4,
+      "width": 1032,
+      "height": 458
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09095v2/fig-005.webp",
+      "caption": "Figure 6: Twenty sampled, normalised slices (value channel) of resolution 8 × 8 for each of the 24 BBOB functions.",
+      "page": 14,
+      "index": 5,
+      "width": 1036,
+      "height": 1242
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09095v2/fig-006.webp",
+      "caption": "Figure 1: Illustration of multi-scale geometric probing. Oriented square slices with varying relative side length ℓ are sampled in the normalised domain [0, 1]3 (centre) and evaluated for (𝑓 , 𝑑, 𝑖) = (17, 3, 1) after mapping back to the original problem domain. For each slice, the resulting normalised value map 𝑋 and validity mask 𝑀 are shown at resolution 32 × 32 without interpolation. As ℓ increases, the sampled restrictions reveal different geometric regimes, from smooth local trends to finer oscillatory structure, while larger slices increasingly incur boundary truncation. The associated statistics Δ (range) and 𝑞 (IQR), computed from valid pre-normalised values, are retained for later conditioning.",
+      "page": 3,
+      "index": 6,
+      "width": 944,
+      "height": 454
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09095v2/fig-007.webp",
+      "caption": "Figure 2: Overview of the GeoPAS visual encoder. Each sampled slice contributes a value map 𝑋𝑖 , validity mask𝑀𝑖 , and side statistics (ℓ𝑖 ,Δ𝑖 , 𝑞𝑖 ). The value map is processed by a shared visual encoder Φenc, while the mask is propagated through a parallel downsampling path and used in masked spatial attention pooling to produce a slice embedding 𝑧𝑖 . After concatenation with an embedding of the log-transformed side statistics, the conditioned slice features 𝑧𝑖 are aggregated by slice attentional pooling, and a low-capacity embedding of log𝑑 is appended to form the final instance representation 𝑍 .",
+      "page": 4,
+      "index": 7,
+      "width": 942,
+      "height": 457
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09095v2/fig-008.webp",
+      "caption": "Figure 9: Heatmaps of mean (top), median (middle), and 90th percentile (bottom) relERT over number of views 𝑘 and resolution 𝑟 across protocols.",
+      "page": 17,
+      "index": 8,
+      "width": 990,
+      "height": 1203
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09095v2/fig-009.webp",
+      "caption": "Figure 4: Selection frequencies of GeoPAS vs. VBS under LPO on (left) all datapoints, (middle) datapoints from SBS-nonimproving cells, and (right) GeoPAS tail datapoints. In each plot, the algorithms are ordered descendingly by VBS selection frequency.",
+      "page": 9,
+      "index": 9,
+      "width": 1054,
+      "height": 494
+    },
+    {
+      "url": "assets/figures/arxiv/2604.09095v2/fig-010.webp",
+      "caption": "Figure 8: Survival curves P(relERT > 𝑡) for GeoPAS and SBS under LIO, Random, and LPO.",
+      "page": 16,
+      "index": 10,
+      "width": 1052,
+      "height": 832
+    }
+  ]
+}

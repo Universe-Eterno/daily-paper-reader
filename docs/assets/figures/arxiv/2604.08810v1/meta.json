@@ -1,0 +1,86 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.08810v1/fig-001.webp",
+      "caption": "Figure 1. Benchmark and dataset evolution across graph ML and EDA, highlighting R2G’s unique position at their intersection as a stage-aware, multi-view circuit-graph benchmark suite.",
+      "page": 1,
+      "index": 1,
+      "width": 487,
+      "height": 268
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08810v1/fig-002.webp",
+      "caption": "Table 12. Routing Task Hyperparameters for Different Graph Views",
+      "page": 15,
+      "index": 2,
+      "width": 496,
+      "height": 313
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08810v1/fig-003.webp",
+      "caption": "Table 4. Routing results across views (b–f) and splits. Lower MAE/RMSE is better; higher R2 is better.",
+      "page": 7,
+      "index": 3,
+      "width": 1036,
+      "height": 233
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08810v1/fig-004.webp",
+      "caption": "Table 3. Placement results across views (b–f) and splits. Lower MAE/RMSE is better; higher R2 is better.",
+      "page": 7,
+      "index": 4,
+      "width": 1036,
+      "height": 234
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08810v1/fig-005.webp",
+      "caption": "Table 1. Design corpus statistics including circuit sizes and corresponding graph scale (#Nodes and #Edges under view (b)) for representative open-source IP cores.",
+      "page": 3,
+      "index": 5,
+      "width": 492,
+      "height": 898
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08810v1/fig-006.webp",
+      "caption": "Figure 2. OpenROAD RTL-to-GDSII post-end flow including floorplanning, placement (global and detailed), clock-tree synthesis, routing (global and detailed), and signoff. R2G focuses on placement and routing, while earlier stages provide constraints and contextual information.",
+      "page": 3,
+      "index": 6,
+      "width": 492,
+      "height": 283
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08810v1/fig-007.webp",
+      "caption": "Table 10. Comparison of graph statistics across graph views and design categories.",
+      "page": 13,
+      "index": 7,
+      "width": 1036,
+      "height": 627
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08810v1/fig-008.webp",
+      "caption": "Figure 3. Original circuit schematic (a) and five complementary circuit graph views (b–f) used in R2G: (b) all-elements-as-nodes, (c) pins-as-edges, (d) nets-as-edges, (e) net–gate incidence edges, (f) net edges without pin nodes. These views support placement and routing analyses under different supervision granularities.",
+      "page": 4,
+      "index": 8,
+      "width": 1026,
+      "height": 479
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08810v1/fig-009.webp",
+      "caption": "Table 9. Overview of existing graph datasets. Tasks include Classification (C), Regression (R), and Link prediction (L).",
+      "page": 12,
+      "index": 9,
+      "width": 492,
+      "height": 286
+    },
+    {
+      "url": "assets/figures/arxiv/2604.08810v1/fig-010.webp",
+      "caption": "Table 2. Definitions of features/labels for circuit components in terms of views.",
+      "page": 5,
+      "index": 10,
+      "width": 494,
+      "height": 481
+    }
+  ]
+}

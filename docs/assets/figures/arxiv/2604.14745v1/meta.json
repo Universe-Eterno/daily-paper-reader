@@ -1,0 +1,86 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.14745v1/fig-001.webp",
+      "caption": "Figure 1: Summary of Mann-Whitney U test outcomes for the partial time-window expansion setting across Tasks T2–T5 and both benchmark instances.",
+      "page": 6,
+      "index": 1,
+      "width": 702,
+      "height": 325
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14745v1/fig-002.webp",
+      "caption": "Figure 2: Mean feasibility success rate for the partial time-window expansion setting.",
+      "page": 6,
+      "index": 2,
+      "width": 698,
+      "height": 321
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14745v1/fig-003.webp",
+      "caption": "Table 3: Results for the Partial Time-Window Expansion Setting (VNS)",
+      "page": 11,
+      "index": 3,
+      "width": 781,
+      "height": 1319
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14745v1/fig-004.webp",
+      "caption": "Table 1: Results under the Partial Time-Window Expansion Setting.",
+      "page": 7,
+      "index": 4,
+      "width": 764,
+      "height": 1331
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14745v1/fig-005.webp",
+      "caption": "Figure 4: Mean feasibility success rate for the swap-additive time-window setting.",
+      "page": 10,
+      "index": 5,
+      "width": 698,
+      "height": 320
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14745v1/fig-006.webp",
+      "caption": "Table 6: Results for the Swap-Additive Time-Window Setting (LKH-3)",
+      "page": 14,
+      "index": 6,
+      "width": 781,
+      "height": 1292
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14745v1/fig-007.webp",
+      "caption": "Table 5: Results for the Swap-Additive Time-Window Setting (VNS)",
+      "page": 13,
+      "index": 7,
+      "width": 781,
+      "height": 1319
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14745v1/fig-008.webp",
+      "caption": "Figure 3: Summary of Mann-Whitney U test outcomes for the swap-additive time-window setting across Tasks T2–T5 and both benchmark instances.",
+      "page": 8,
+      "index": 8,
+      "width": 702,
+      "height": 325
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14745v1/fig-009.webp",
+      "caption": "Table 4: Results for the Partial Time-Window Expansion Setting (LKH-3)",
+      "page": 12,
+      "index": 9,
+      "width": 781,
+      "height": 1309
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14745v1/fig-010.webp",
+      "caption": "Table 2: Results under the Swap-Additive Time-Window Setting.",
+      "page": 9,
+      "index": 10,
+      "width": 786,
+      "height": 1327
+    }
+  ]
+}
