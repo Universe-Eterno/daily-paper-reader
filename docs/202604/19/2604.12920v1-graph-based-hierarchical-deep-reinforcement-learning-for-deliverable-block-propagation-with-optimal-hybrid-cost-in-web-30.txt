@@ -1,0 +1,1731 @@
+Title: Graph-based Hierarchical Deep Reinforcement Learning for Deliverable Block Propagation with Optimal Hybrid Cost in Web 3.0
+
+URL Source: https://arxiv.org/pdf/2604.12920v1
+
+Published Time: Wed, 15 Apr 2026 01:25:02 GMT
+
+Number of Pages: 14
+
+Markdown Content:
+> 1
+
+# Graph-based Hierarchical Deep Reinforcement Learning for Deliverable Block Propagation with Optimal Hybrid Cost in Web 3.0 
+
+Shi Chen, Jinbo Wen, Jiawen Kang, Senior Member, IEEE , Tenghui Huang, Maomao Zhang, Tao Zhang, Member, IEEE , and Dong In Kim, Life Fellow, IEEE 
+
+Abstract —Web 3.0 is envisioned as a decentralized paradigm, where blockchain serves as a core technology for transparent and tamper-proof data management. Among various blockchain architectures, consortium blockchains have emerged as the preferred platform for enterprise-grade Web 3.0. For consortium blockchains, newly generated blocks are generally propagated to all consensus nodes for validation through the gossip protocol. However, gossip-based propagation may introduce substantial mes-sage redundancy and tail latency. Moreover, the consensus nodes exhibit heterogeneous availability patterns, and existing block propagation schemes often overlook such temporal constraints. Therefore, the joint optimization of propagation timeliness and delivery coverage remains an open problem. In this paper, we propose a deliverable block propagation optimization framework for consortium blockchain-enabled Web 3.0. We first propose a delivery-aware timeliness metric called Age of Validated Block (AoVB), which excludes block receptions occurring outside the availability window of each consensus node, thereby measuring only actionable synchronization latency. This metric is unified with the block arrival rate into a hybrid cost objective that balances timeliness against delivery. To solve this complex optimization problem, we propose a Graph-based Hierarchical Deep Reinforcement Learning (GHDRL) method, which comprises a graph isomorphism network-based assignment module and a graph attention network-based propagation module. The two modules are optimized jointly under a two-stage training strategy. Numerical results show that GHDRL consistently outperforms all compared schemes across network scales from 50 to 500 peers and cluster counts K ∈ { 5, 10 }, achieving up to 19 .2% lower hybrid cost than the best-performing neural baseline at N = 200 .Moreover, the model generalizes from 100 -peer training instances to 500 -peer deployments without retraining. 
+
+Index Terms —Web 3.0, block propagation optimization, AoVB, GHDRL, graph neural networks. 
+
+I. I NTRODUCTION 
+
+Web 3.0 is envisioned as a decentralized paradigm, which enables users to independently control their identities, data, and digital assets without relying on centralized intermediaries [1]. 
+
+S. Chen, J. Kang, and T. Huang are with the School of Automation, Guangdong University of Technology, Guangzhou 510006, China (e-mails: chenshi@mails.gdut.edu.cn, kavinkang@gdut.edu.cn, 3123000938@mail2.gdut.edu.cn). J. Wen is with the Department of Computer Science, City University of Hong Kong, Hong Kong (e-mail: jinbo1608@163.com). M. Zhang is with the School of Physics and Electronic Engineering, Fuyang Normal University, Fuyang 236037, China (e-mail: zhangmaohi@163.com). T. Zhang is with the School of Cyberspace Science and Technology, Beijing Jiaotong University, Beijing 100044, China (e-mail: taozh@bjtu.edu.cn). D. I. Kim is with the Department of Electrical and Computer Engineering, Sungkyunkwan University, Suwon 16419, South Korea (e-mail: dikim@skku.ac.kr). 
+
+Corresponding author: Jiawen Kang. 
+
+As a core enabling technology for transparent and tamper-proof data management, blockchain has driven the rapid adoption of Web 3.0 decentralized applications [1]–[4], such as decentralized finance and real-world asset tokenization. These applications impose stringent requirements on the timeliness and reliability of the underlying infrastructure. Consortium blockchains have emerged as the preferred architecture for enterprise-grade Web 3.0, as their permissioned governance mechanisms effectively coordinate decentralization with regula-tory compliance [5]. In consortium blockchains, transactions are sequenced into blocks by the ordering service [6]. Subsequently, the newly generated blocks are propagated to all consensus nodes for validation via the gossip protocol [7]. However, as the consortium blockchain deployment expands to hundreds of geographically distributed Internet of Things nodes, the efficiency of gossip-based block propagation among consensus nodes has become a critical performance bottle-neck [7], [8]. For instance, the flooding nature of the gossip protocol generates substantial message redundancy and severe tail latency [9], which directly degrades block propagation efficiency. Although significant efforts have been conducted to block propagation optimization in public blockchains [10]–[12], these schemes are fundamentally predicated on the assumptions of permissionless participation and always-on node availability, rendering them inapplicable to consortium settings where nodes exhibit intermittent availability. Several challenges still hinder the implementation of efficient and reliable block propagation in consortium blockchains:  
+
+> •
+
+Challenge I. Complexity of Propagation Modeling under Node Availability Heterogeneity: In consortium blockchains, nodes affiliated with diverse organizations exhibit heterogeneous and time-varying availability pat-terns [13], distinguishing them from the homogeneous, always-on nodes typical of public blockchains. This avail-ability heterogeneity introduces substantial complexity into block propagation modeling, as it necessitates the simultaneous characterization of both block propagation timeliness and delivery coverage. These two objectives are inherently coupled [14], and their interaction creates a dual-objective optimization landscape that existing timeliness metrics do not capture [12], [15].  
+
+> •
+
+Challenge II. Difficulty of Coupled Combinatorial Op-timization: As consortium blockchain deployments scale to hundreds of nodes across multiple organizations and ge-
+
+> arXiv:2604.12920v1 [cs.NI] 14 Apr 2026 2
+
+ographic regions, the block propagation optimization prob-lem naturally couples two NP-hard combinatorial subprob-lems, namely peer-to-cluster assignment and intra-cluster sequential path planning, whose interdependence renders the joint optimization computationally intractable [16]. Although neural combinatorial optimization methods have shown promise for common routing optimization prob-lems [17], existing approaches face significant scalability limitations when applied to this coupled problem structure. Monolithic neural encoder-decoder architectures struggle with prohibitive computational overhead at practical net-work scales, while decomposition-based strategies sacrifice the joint optimality of partitioning quality and routing efficiency [12], [14], [18]. To address the above challenges, we propose a deliverable block propagation optimization framework for consortium blockchain-enabled Web 3.0. Within this framework, we first propose an Age of Validated Block (AoVB) metric as a delivery-aware refinement of Age of Information (AoI). Unlike standard AoI, AoVB excludes block receptions that fall outside the availability window of each peer, thereby quantifying only actionable synchronization delay. We further unify AoVB with the Block Arrival Rate (BAR) into a single hybrid cost objective that balances propagation timeliness against delivery coverage. To jointly optimize propagation efficiency and delivery reliability under node availability constraints, we decouple the global optimization into two tightly coordinated subproblems [14], namely peer-to-cluster assignment and intra-cluster path planning, and propose a Graph-based Hierarchi-cal Deep Reinforcement Learning (GHDRL) method, which consists of two end-to-end learnable modules, i.e, a Graph Iso-morphism Network (GIN)-based peer assignment module with cluster-dedicated Multi-Head Attention (MHA) for partitioning, and a Graph Attention Network (GAT)-based propagation module equipped with a feasibility pruning mechanism that enforces availability constraints without modifying the neural network architecture. The two modules are jointly optimized through a two-stage training strategy [14]. Our contributions are summarized as follows:  
+
+> •
+
+Availability-Aware Block Freshness Metric: We pro-pose a delivery-aware timeliness metric called AoVB to evaluate block freshness in consortium blockchain-enabled Web 3.0. We derive the per-hop delay model under structured sequential propagation specific to consortium blockchains, where the inter-arrival process and queueing semantics differ fundamentally from those of public blockchains [12]. The AoVB metric incorporates a per-node validity indicator to accumulate per-hop propagation delay exclusively at peers for which reception falls within their availability windows, thereby quantifying only actionable synchronization latency. (for Challenge I)  
+
+> •
+
+Hybrid Cost Objective for Deliverable Block Prop-agation: We further integrate AoVB with the BAR, which measures the fraction of peers that successfully receive the block during their operational periods, into a hybrid cost objective that balances propagation timeliness against delivery coverage. This formulation addresses the inherent conflict between latency minimization and coverage maximization under node availability constraints. 
+
+To the best of our knowledge, this is the first work to jointly capture propagation timeliness and delivery coverage for block propagation in consortium blockchains.  
+
+> •
+
+Graph-based Hierarchical Deep Reinforcement Learn-ing Method: We propose the GHDRL method to decou-ple the joint optimization problem into peer-to-cluster assignment and intra-cluster sequential path planning. The GHDRL method integrates a GIN-based encoder that produces expressive graph-level representations for cluster partitioning through cluster-dedicated MHA, with a GAT-based autoregressive decoder that constructs availability-aware propagation paths through a feasibility pruning mechanism. This pruning mechanism enforces availability constraints without modifying the neural network archi-tecture. We further adopt a two-stage training strategy to isolate propagation learning from the non-stationary cluster configurations, ensuring stable co-optimization of both modules. (for Challenge II) The rest of this paper proceeds as follows. Section II surveys the related literature. Section III describes the proposed framework. Section IV presents the optimization problem for deliverable block propagation. Section V presents the GHDRL method for solving the formulated problem. In Section VI, we describe the training procedure of the GHDRL method. Section VII reports the numerical results. Finally, Section VIII concludes this paper. II. R ELATED WORK 
+
+A. Blockchain-enabled Web 3.0 
+
+Recent research has explored blockchain-enabled Web 3.0 from various perspectives [4], [6], [12]. For instance, the authors in [2] provided a systematic review of decentralized finance protocols built on public blockchain platforms. In [3], the au-thors investigated the architecture and fundamental technologies of Web 3.0. Consortium blockchains have attracted particular research attention for enterprise-grade Web 3.0 deployments [5]. Specifically, the authors in [6] designed Hyperledger Fabric, which is a permissioned blockchain platform that organizes nodes into distinct organizations managed by a Membership Ser-vice Provider (MSP), enabling fine-grained access control and identity management across institutional boundaries. In [19], the authors provided a systematic survey of blockchain theories and architectures, highlighting the governance advantages of consor-tium blockchains in balancing decentralization with enterprise-grade performance and trust requirements. As consortium blockchain deployments scale to hundreds of nodes distributed across multiple organizations and geographic regions [8], the efficiency and reliability of inter-node communication, particu-larly block propagation efficiency, have become increasingly critical to the overall system performance [7]. However, most existing studies on blockchain-enabled Web 3.0 focus on public blockchain scenarios, in which nodes operate continuously under homogeneous conditions [12], [15], overlooking the organizational heterogeneity and intermittent node availability that characterize consortium deployments [13]. As a result, the 3
+
+challenges of block propagation optimization in consortium blockchains remain inadequately addressed. 
+
+B. Block Propagation Optimization 
+
+Block propagation is a performance-critical process in blockchain systems, whose efficiency directly affects trans-action confirmation latency and ledger consistency [7], [15]. However, the stochastic nature of the gossip protocol generates substantial message redundancy and tail latency [9], motivating extensive optimization research [7]–[9]. For instance, the authors in [9] designed an accelerated gossip protocol with incentive mechanisms to encourage cooperative forwarding among peers. In [7], the authors provided a comprehensive survey of broadcast protocols in blockchain networks, cate-gorizing existing approaches by their communication patterns and scalability characteristics. However, these protocol-level optimizations are inherently static in their design, as they are typically tailored to fixed network assumptions, which fail to accommodate the dynamic and heterogeneous patterns of node participation prevalent in consortium blockchains. Beyond protocol-level improvements, quantifying block propagation efficiency requires appropriate timeliness metrics. AoI [15] has emerged as a well-established timeliness metric in status-update systems, quantifying the elapsed time since the latest received update was created at the source [15]. Motivated by the effectiveness of AoI, the authors in [12] introduced the Age of Block (AoB) metric, which represents each relay hop on a sequential propagation path as an M/M/1 queue governed by a first-come-first-served policy. Building upon AoB, they further developed a GAT-based block propagation optimization method to minimize total propagation delay in public blockchains. However, most existing works on block propagation fail to account for the time-varying availability of nodes throughout the propagation process. Moreover, no existing metric jointly captures propagation timeliness and delivery coverage under a unified optimization objective. 
+
+C. GNNs for Combinatorial Optimization 
+
+For routing optimization, attention-based encoder-decoder architectures have emerged as a dominant framework [17]. Subsequent studies have further extended this framework to address more complex problem variants [14], [20], [21]. For instance, the authors in [20] proposed a dual-aspect collaborative transformer to learn improvement heuristics for routing problems. By explicitly modeling the relational structure among nodes, Graph Neural Networks (GNNs) have further strengthened the representational capability of neural combinatorial solvers [22], [23]. In particular, since they can learn adaptive edge weights through attention mechanisms, GATs [24] have been widely adopted for routing problems. For instance, the authors in [23] proposed a residual edge-graph attention network to address combinatorial optimization. In [25], the authors introduced graph gated talking-heads attention networks for the TSP. From a theoretical perspective, GIN [22] has been shown to be as powerful as the Weisfeiler-Lehman graph isomorphism test in distinguishing graph structures [26], Block   
+
+> Leader Peer
+> Extract the peer network
+> Record transactions
+> Evaluate timeliness and coverage
+> Consortium Blockchain
+> Propagation Module
+> Assignment Module
+> Assign
+> Refine assignment strategy
+> GHDRL Method
+> Block propagation
+> optimization
+> Optimize
+> propagation policy
+> Assig nmentModule
+> Hybrid Cost
+> Age of Validated Block Block Arrival Rate
+> Unify propagation timeliness with delivery coverage
+> Web 3.0
+
+Fig. 1: The deliverable block propagation optimization framework for consortium blockchain-enabled Web 3.0, where the GHDRL method serves as the core intelligent module that partitions peers into clusters and optimizes intra-cluster propagation paths, guided by a hybrid cost objective unifying the AoVB with the BAR. 
+
+making it particularly suitable for tasks that require expressive graph-level representations, such as cluster assignment tasks. However, few works have been conducted on jointly optimiz-ing cluster assignment and intra-cluster routing under temporal availability constraints. On one hand, monolithic encoder-decoder architectures incur high attention complexity, leading to performance degradation for problems beyond moderate scales [12]. On the other hand, while divide-and-conquer strategies [14], [27] can alleviate this bottleneck, existing imple-mentations typically decouple the assignment and routing stages heuristically, thereby sacrificing end-to-end co-optimization of partitioning quality and routing efficiency [18]. In light of the above research gaps, we propose the GHDRL method for deliverable block propagation in consortium blockchains. III. F RAMEWORK DESIGN 
+
+A. Framework Overview 
+
+As illustrated in Fig. 1, the proposed deliverable block propagation optimization framework employs a two-layer architecture, composed of an application layer and a blockchain layer. The application layer encompasses diverse Web 3.0 decentralized applications, such as decentralized autonomous organizations, non-fungible tokens, and real-world asset to-kenization [3], [4]. These application-level transactions are recorded on the blockchain layer. The blockchain layer supports the operation of upper-layer applications through consortium blockchains with diverse or-ganizational structures. Within this layer, prospective members (i.e., permissioned peers) register with certificate authorities by submitting their spatio-temporal profiles [6]. Subsequently, a designated leader peer is elected through the consensus protocol to coordinate transaction ordering and block proposal. Upon block generation, the leader peer collects spatial-temporal information of the peer network and employs the GHDRL method to obtain an optimal block propagation strategy. 4
+
+B. Structured Propagation Protocol 
+
+In the proposed framework, we design a structured block propagation protocol that leverages the organizational decom-posability inherent to consortium blockchain networks [6]. Specifically, upon block generation, the elected leader peer partitions the remaining non-leader peers into multiple dis-joint clusters based on their spatial-temporal attributes. This decomposition serves two primary purposes: (i) reducing the computational complexity of global optimization by exploiting its separable structure [27], thereby decoupling the joint optimization problem into peer-to-cluster assignment and intra-cluster sequential path planning; and (ii) enabling parallel intra-cluster propagation, thereby reducing end-to-end latency. The leader peer initially propagates the block to a designated entry node within each cluster, after which intra-cluster propagation proceeds independently along optimized sequential paths. In this protocol, the cluster count K determines the number of initial transmissions from the leader peer, one per cluster, which is analogous to the push fan-out parameter in gossip-based block dissemination [8]. We set K ∈ { 5, 10 }, consistent with the typical fan-out configurations in practical blockchain deployments. For example, Hyperledger Fabric employs a default push fan-out of 3 [6], and Bitcoin maintains 8 outbound relay connections [28]. Our work focuses on designing propa-gation paths that ensure block delivery to all peers within their specified availability windows, thereby jointly optimizing block propagation timeliness and delivery coverage. Furthermore, the security of the proposed protocol is guaranteed by the permissioned governance mechanism inherent to consortium blockchains, where all peers are authenticated, and all messages are cryptographically signed [8], [9]. IV. P ROBLEM FORMULATION FOR DELIVERABLE BLOCK 
+
+PROPAGATION 
+
+In this section, we first introduce the BAR to quantify delivery coverage under node availability constraints. Then, we propose the AoVB metric to characterize block propagation timeliness. Finally, we unify BAR and AoVB into a hybrid cost objective that balances timeliness with coverage. In this paper, we consider a consortium blockchain network N = {1, . . . , N }
+
+consisting of N peer nodes, with a single leader node ℓ elected by the MSP. The block propagation process at each hop is modeled as an M/M/1 queuing system governed by a first-come-first-served policy [12]. 
+
+A. Block Arrival Rate 
+
+The frequent joining and departure of peers in distributed networks introduce inherent uncertainty into the system, complicating consensus maintenance and authentication [29]. Since each peer is reachable only during a limited operational period [13], we formalize this intermittent connectivity by associating every non-leader peer i ∈ N with an availability window [τ si , τ ei ]. During this window period, each node can successfully receive and validate new blocks. Let ti denote the time instant at which peer i completes block reception and validation. The validity indicator of peer i is expressed as 
+
+vi =
+
+(
+
+1, if ti ∈ [τ si , τ ei ],
+
+0, otherwise . (1) To quantify delivery coverage, we introduce the BAR, which measures the proportion of peers that successfully receive the block within their availability windows. For a propagation path 
+
+πk = ( π1, . . . , π mk ) containing mk peers in cluster k, we denote n+ 
+
+> k
+
+= Pmk 
+
+> i=1
+
+vi as the number of successful receptions within cluster k. Thus, the overall BAR is expressed as 
+
+η = 1
+
+K
+
+> K
+
+X
+
+> k=1
+
+n+
+
+> k
+
+mk
+
+. (2) However, a fundamental trade-off exists between maxi-mizing delivery coverage and minimizing propagation delay. For example, a latency-optimal strategy preferentially routes through geographically proximate peers while bypassing those with nearly expired availability windows. Such a routing strategy improves delay performance but sacrifices coverage. Conversely, a coverage-prioritizing strategy detours to tempo-rally constrained peers, which increases cumulative delay [8]. Therefore, effectively balancing these two objectives is critical for achieving both efficient and reliable block propagation in consortium blockchains. 
+
+B. Age of Validated Block 
+
+AoI [15] is a well-established timeliness metric in status-update systems, but it treats all reception equally, without distinguishing whether a delivery falls within the availability window of receivers. AoB [12], as the blockchain-specific AoI variant, inherits this availability-agnostic limitation. To this end, we propose the AoVB, which is a delivery-aware refinement that accounts only for receptions falling within the availability window of each peer, thereby penalizing only actionable propagation delay. In the structured propagation protocol, newly generated blocks produced by the designated ordering component are forwarded directly along intra-cluster sequential paths without the inv/getdata handshake of public blockchains [12]. Let the inter-block production interval be denoted by Xi ∼ Exp( λ),where λ represents the block generation rate. The per-hop delivery time Di = ti − ti−1 measures the elapsed duration between successive block receptions, given by [12] 
+
+Di = Qi + Li, (3) where Qi = ( Di−1 − Xi)+ is the queueing delay arising when consecutive blocks contend for the same forwarding link, Li is the link transmission time, and ti−1 denotes the block reception time at the preceding peer along the propagation path. The transmission time is modeled as Li ∼ Exp(1 /γ i), where γi
+
+denotes the mean one-hop transmission delay from peer (i−1) 
+
+to peer i.Following the distance-based channel model in [23], γi
+
+is determined by the Shannon capacity between two peers [12], [30], which is given by 
+
+γi = Bblock 
+
+b log 2
+
+
+
+1 + ρs c0 d −εi−1, i  
+
+> N0b
+
+ , (4) 5
+
+where Bblock is the block size, b is the channel bandwidth, 
+
+ρs is the transmit power, c0 is the path-loss constant, ε is the path-loss exponent, N0 is the noise power spectral density, and 
+
+d −εi−1,i is the Euclidean distance between consecutive peers, which is expressed as [23] 
+
+di−1, i = ∥xloc  
+
+> i−1
+
+− xloc  
+
+> i
+
+∥2, (5) where xloc  
+
+> i
+
+denotes the location coordinates of peer i, which is recorded in the spatio-temporal profiles submitted upon registration. Thus, the average AoB at hop i is given by [12] 
+
+∆i = γi + 1
+
+λ + λ2γ3
+
+> i
+
+1 − λγ i
+
+, (6) where λ2γ3 
+
+> i
+> 1−λγ i
+
+represents the queueing penalty incurred when successive blocks contend for the same transmission link. Based on the per-hop AoB in (6) , we now incorporate the validity indicator to restrict timeliness accounting to actionable deliveries. Thus, the single-hop AoVB from peer i to peer i+1 
+
+is expressed as 
+
+Ai→i+1 = vi+1 ∆i+1 , (7) where vi+1 is the validity indicator from (1) . When peer i +1 falls outside its availability window, vi+1 = 0 eliminates the corresponding latency contribution. In this way, AoVB measures only actionable propagation delay, i.e., delay incurred in successfully synchronizing the ledger of a reachable peer. To characterize the end-to-end timeliness of an entire cluster, we aggregate the single-hop AoVB over all consecutive peers along the propagation path. For a propagation path πk =(u1, . . . , u mk ) within cluster k, the cumulative AoVB is 
+
+Ak = 
+
+> mk−1
+
+X
+
+> i=1
+
+vi+1 ∆i+1 . (8) The cumulative AoVB in (8) is coupled through the sequential nature of propagation, namely the completion time at node πt
+
+satisfies tπt = tπ1 + Pt−1 
+
+> j=1
+
+Dj , where tπt denotes the block reception time at the t-th peer along path πk and tπ1 denotes the block arrival time at the source node of the propagation path. Thus, the validity indicator at each node depends on the cumulative system times of all upstream hops, given by 
+
+vπt =
+
+(
+
+1, if τ sπt ≤ tπ1 + Pt−1 
+
+> j=1
+
+Dj ≤ τ eπt ,
+
+0, otherwise , (9) where τ eπt is the corresponding availability window deadline. 
+
+C. Optimization Objective 
+
+To ensure that validated block receptions along each prop-agation path achieve high timeliness, i.e., peers synchronize the latest ledger state as promptly as possible, the optimization objective is to minimize the cumulative AoVB Ak for each cluster. To simultaneously guarantee that the block is delivered to as many peers as possible within their availability windows, i.e., achieving high delivery coverage as required by the deliverable propagation criterion, the optimization objective is also to maximize the per-cluster BAR ηk. However, these two objectives are inherently conflicting. A latency-optimal strategy preferentially routes through geographically proximate peers while bypassing those whose availability windows are nearing expiration [14], thereby sacrificing coverage. Conversely, a coverage-prioritizing strategy inflates cumulative delay through detours to temporally constrained peers. Therefore, we formulate a per-cluster hybrid cost that unifies the cumulative AoVB and the per-cluster BAR, given by 
+
+Jk = Ak + ρ · (1 − ηk), (10) where ηk is the per-cluster BAR from (2) and the penalty coefficient ρ > 0 governs the trade-off between propagation timeliness and delivery coverage. It is worth noting that a sufficiently large ρ prevents the trivial solution of minimizing latency by simply skipping hard-to-reach peers [14]. By substituting (6) and (8) into (10) , the explicit form is given by 
+
+Jk = 
+
+> mk−1
+
+X
+
+> i=1
+
+
+
+vi+1 
+
+
+
+γi+1 + 1
+
+λ + λ2γ3
+
+> i+1
+
+1 − λγ i+1 
+
+ 
+
++ ρ
+
+
+
+1 − n+
+
+> k
+
+mk
+
+
+
+.
+
+(11) In (11), the first term accumulates the per-hop propagation delay exclusively over peers that successfully receive the block within their availability windows (i.e., vi+1 = 1 ), thereby capturing the timeliness cost of actionable deliveries, while the second term imposes a coverage penalty proportional to the fraction of peers that fail to receive the block during their operational periods. Hence, the overall hybrid cost across K
+
+clusters is given by 
+
+¯J = 1
+
+K
+
+> K
+
+X
+
+> k=1
+
+Jk. (12) Let the leader peer ℓ divide the remaining N −1 peers 
+
+P = N \ { ℓ} into K disjoint clusters {C k(a)}Kk=1 via an assignment mapping a : P → {1, . . . , K }, where each intra-cluster propagation path πk = ( π1, . . . , π mk ) forms a Hamiltonian path on Ck(a). Finally, the joint optimization problem is formulated as 
+
+min   
+
+> a, {πk}Kk=1
+
+
+
+¯J = 1
+
+K
+
+> K
+
+X
+
+> k=1
+
+Jk(πk, Ck(a)) 
+
+
+
+s.t. τ sπt ≤ tπt ≤ τ eπt ,
+
+(13) where the constraint in (13) ensures that every peer along the propagation path receives the block before its availability win-dow expires. Problem (13) couples two NP-hard combinatorial subproblems, i.e., cluster partitioning and intra-cluster path planning, whose interdependence precludes straightforward decomposition. Given that conventional optimization methods struggle to efficiently solve such coupled NP-hard problems, we propose the GHDRL to solve Problem (13). V. GHDRL M ETHOD FOR DELIVERABLE BLOCK 
+
+PROPAGATION OPTIMIZATION 
+
+A. Peer Assignment Module 
+
+We first design a peer assignment module to partition (N −1) 
+
+non-leader peers into K clusters based on their spatial and temporal attributes. To enable end-to-end learning, we cast this module as a single-step Markov decision process [14]. In 6Cluster 1 
+
+> Cluster 2
+> Cluster k
+> …
+> …
+> 3-Layer GIN
+> Layer 1
+> Layer 2
+> Layer 3
+> Input I
+> Peers Embeddings
+> Graph Pooling
+> :
+> ·
+> +
+> …
+> Single-Heed Attention
+> 2. Multi-Head Attention Cluster Embedding 1. Graph-based Representation 3. Centralized Allocation Layer
+
+Propagation Module   
+
+> Sampling
+> …
+> …
+> Assignment
+> Probabilities
+> …
+> …
+> …
+> High Med Low
+> 4. GAT Encoder
+> 6. Feasibility Pruning
+> 5. GAT Decoder
+> ?…
+> Unacceptable peer
+
+Assignment Module 
+
+Fig. 2: Architecture of the proposed GHDRL method, comprising an assignment module with a GIN encoder, cluster-dedicated MHA, and a centralized allocation layer for peer-to-cluster partitioning, and a propagation module with a GAT-based encoder-decoder for autoregressive path construction and a feasibility pruning mechanism for enforcing availability window constraints. 
+
+consortium blockchain networks, the positions and operational states of peer nodes are inherently dynamic, continuously evolving in response to changing network conditions. To capture this stochastic nature, we define a probability distribution p(I)
+
+over the space of all possible network configurations, where each instance I ∼ p(I) represents a specific realization of the network topology at a given time. Given a consortium blockchain node distribution instance I
+
+sampled from the distribution p(I), we represent the current state sI as a fully connected graph GI = ( VI , EI ) [31], where the node set VI is defined as 
+
+VI = P ∪ { ℓ}, (14) where P = {p1, p 2, . . . , p N −1} denotes the set of ordinary peers, and ℓ represents the leader peer. The edge set is EI =
+
+{(u, v ) | ∀ u, v ∈ V I }, where each edge (u, v ) is associated with the communication latency between nodes u and v. We define the action asI as the assignment of each node to one of the K clusters. To establish the connection between the two modules, the reward function is expressed as 
+
+R(asI , s I ) = − 1
+
+K
+
+> K
+
+X
+
+> k=1
+
+Jk, (15) which represents the negative average hybrid cost fed back from the block propagation module. This design enables the peer assignment module to learn cluster configurations that facilitate efficient intra-cluster propagation. We parameterize the policy πθA (asI |sI ) with trainable parameters θA. As illustrated in the upper part of Fig. 2, we design the policy network with three key components: graph-based state representation, MHA for cluster embedding, and a centralized allocation layer. Each component is as follows: 
+
+1) Graph-based representation: To obtain expressive node representations that capture both local neighborhood struc-tures and global graph properties, we adopt the GIN [22], which has been theoretically shown to be as powerful as the Weisfeiler-Lehman graph isomorphism test in distinguishing graph structures [26]. Given the input graph GI , we stack L
+
+GIN layers to progressively refine the node embeddings. The node embedding update rule at layer l is expressed as 
+
+S(l) 
+
+> v
+
+= MLP (l)
+
+(1 + ϵ(l)) · S(l−1)  
+
+> v
+
++ X 
+
+> u∈N (v)
+
+S(l−1) 
+
+> u
+
+
+
+, (16) where S(l) 
+
+> v
+
+∈ Rdh denotes the embedding of node v at layer 
+
+l, N (v) represents the set of neighboring nodes of v, ϵ(l) is a learnable parameter that adjusts the weight of the central node’s self-information, and MLP (l)(·) is a multi-layer perceptron that introduces non-linear transformation capacity. After L layers of message passing, the GIN produces the final node embeddings: the leader embedding S(L) 
+
+> ℓ
+
+and (N −1) 
+
+peer embeddings {S(L) 
+
+> pi
+
+}N −1 
+
+> i=1
+
+. To obtain a holistic graph-level representation that summarizes the global network state, we apply an attentive graph pooling mechanism [32] over the peer node embeddings. Specifically, the attention score for each peer node is given by 
+
+epi = W⊤ 
+
+> 2
+
+· tanh 
+
+
+
+W1S(L) 
+
+> pi
+
++ b1
+
+
+
+, (17) where W1 ∈ Rdh×dh , b1 ∈ Rdh , and W2 ∈ Rdh are learnable parameters. The normalized attention scores are obtained as 
+
+αpi = exp( epi )
+
+PN −1 
+
+> j=1
+
+exp( epj ) . (18) Based on the normalized attention scores, we aggregate all peer embeddings into a single vector that summarizes the global network state. The graph-level representation SG is given by 
+
+SG = 
+
+> N−1
+
+X
+
+> i=1
+
+αpi · S(L) 
+
+> pi
+
+. (19) 7
+
+This weighted aggregation ensures that structurally important peers, which receive higher attention scores, contribute more prominently to the global representation. To provide the subsequent cluster embedding module with comprehensive contextual information that encompasses both the global network state and the perspective of the leader, the context embedding is obtained as 
+
+Sc = [ SG ∥ S(L) 
+
+> ℓ
+
+], Sc ∈ R2dh , (20) where [·∥· ] denotes the concatenation operation. Incorporating the leader embedding alongside the global graph summary provides the downstream modules with both a macro-level view of network connectivity and the local perspective of the propagation source. The context embedding Sc, together with the (N − 1) peer embeddings {S(L) 
+
+> pi
+
+}N −1 
+
+> i=1
+
+, are subsequently fed into the MHA mechanism for cluster embedding. 
+
+2) MHA for cluster embedding: To generate differentiated cluster representations for assigning the (N − 1) peer nodes into K clusters, we propose an MHA mechanism where each attention head is dedicated to one specific cluster [33]. Independent parameterization enables each head to develop spe-cialized attention patterns tailored to cluster-specific spatial and temporal characteristics, preventing collapse into homogeneous representations. For the k-th attention head corresponding to cluster k, we compute the query vector from the context embedding Sc and key-value pairs from the peer embeddings {S(L) 
+
+> pi
+
+}N −1 
+
+> i=1
+
+:
+
+q(k) = W(k) 
+
+> Q
+
+Sc, k(k) 
+
+> i
+
+= W(k) 
+
+> K
+
+S(L) 
+
+> pi
+
+, v(k) 
+
+> i
+
+= W(k) 
+
+> V
+
+S(L) 
+
+> pi
+
+, (21) where W(k) 
+
+> Q
+
+, W(k) 
+
+> K
+
+, W(k) 
+
+> V
+
+∈ Rdk ×dh are the cluster-specific projection matrices, and dk = dh/K denotes the dimension of each head. After projecting the context and peer embeddings into the cluster-specific subspace, we measure the relevance of each peer to the corresponding cluster via scaled dot-product attention. The attention score between the context and each peer node is obtained as [33] 
+
+β(k) 
+
+> i
+
+=exp 
+
+
+
+(q(k))⊤k(k) 
+
+> i
+
+/√dk
+
+PN −1 
+
+> j=1
+
+exp 
+
+
+
+(q(k))⊤k(k) 
+
+> j
+
+/√dk
+
+ . (22) Based on the attention scores, we compute the cluster embed-ding Sk for cluster k as a weighted aggregation of the peer value vectors, which is given by 
+
+Sk = 
+
+> N−1
+
+X
+
+> i=1
+
+β(k) 
+
+> i
+
+· v(k) 
+
+> i
+
+. (23) This process yields K cluster embeddings {Sk}Kk=1 , each encoding the aggregated information of peer nodes relevant to its corresponding cluster. The independent parameterization of each attention head ensures that the K embeddings capture distinct spatial-temporal patterns, thereby providing the subse-quent allocation layer with differentiated representations for assignment decisions. 
+
+3) Centralized allocation layer: Based on the cluster embed-dings {Sk}Kk=1 and peer embeddings {S(L) 
+
+> pi
+
+}N −1 
+
+> i=1
+
+, we design a centralized allocation layer to perform the final cluster assignment. Following the assignment policy design in neural combinatorial optimization [14], we adopt a single-head self-attention structure to model the centralized allocation policy, which computes the assignment probability β(k) 
+
+> i
+
+for assigning peer pi to cluster k.We employ a sequential assignment strategy. At each step, the peer with the highest attention score is assigned to a cluster and then masked from subsequent selections. This process continues until all (N − 1) peers are assigned to one of the 
+
+K clusters, yielding K disjoint cluster subsets {C k}Kk=1 . We then train the policy πθA (asI |sI ) using the RL algorithm [17] by maximizing 
+
+EI∼ p(I)
+
+ X
+
+> asI
+
+(R(asI , s I ) − b(I)) πθA (asI |sI )
+
+
+
+, (24) where b(I) is a baseline function introduced for variance reduction following [17]. The resulting cluster assignments are then passed to the block propagation module for intra-cluster path optimization. 
+
+B. Block Propagation Module 
+
+Once the peer assignment module partitions nodes into K
+
+clusters, we decompose Problem (13) into K independent intra-cluster subproblems. For each cluster k, our block propagation module determines the optimal path πk = ( π1, . . . , π mk ) that minimizes the hybrid cost Jk, where π1 denotes the designated source node and πt̸ = πt′ for all t̸ = t′.As shown in the lower portion of Fig. 2, given that GATs effectively capture inter-node relationships via attention mechanisms, we design the propagation module using a GAT-based encoder–decoder architecture [12]. The encoder extracts structural features from the cluster subgraph, while the decoder generates the propagation path autoregressively. We also design a feasibility-pruning mechanism to ensure that the generated path satisfies all availability-window constraints. 
+
+1) Encoder architecture: The encoder extracts structural features of each intra-cluster subgraph and produces expressive node-level and graph-level representations for the subsequent decoder. The encoder comprises three components: (i) an input representation that constructs the cluster subgraph and extracts peer features, (ii) an initial embedding layer that projects raw features into a high-dimensional hidden space, and (iii) a stack of L graph attention layers that progressively refine node embeddings through MHA, Batch Normalization (BN), and FF sublayers. Specifically,  
+
+> •
+
+Input representation. For each cluster k output by the peer assignment module, we construct its corresponding membership view Gk = ( Vk, Ek), represented as a fully connected graph with a node set Vk = {1, . . . , m k}
+
+and an edge set Ek. For each node i, we construct a feature vector xi = ( xi, y i, τ si , τ ei ) ∈ Rdx containing location coordinates (xi, y i) and availability window 
+
+[τ si , τ ei ], where dx = 4 .8 
+
+> •
+
+Initial embedding layer. We map the raw node features to a dh-dimensional hidden space through a learnable linear projection [12], which is given by 
+
+S(0)  
+
+> i
+
+= Wxxi + bx, (25) where Wx ∈ Rdh×dx and bx ∈ Rdh , with dh = 128 . 
+
+> •
+
+Graph attention layer. After obtaining the initial em-beddings {S(0)  
+
+> i
+
+}mk
+
+> i=1
+
+, we update them through L stacked GAT layers. Each layer comprises three sublayers: an MHA sublayer, a BN sublayer, and a Feed-Forward (FF) sublayer, connected via residual connections [12]. For the 
+
+h-th attention head ( h ∈ { 1, . . . , H }), the query, key, and value vectors are given by 
+
+q(l) 
+
+> ih
+
+= WQh S(l−1)  
+
+> i
+
+, k(l) 
+
+> ih
+
+= WKh S(l−1)  
+
+> i
+
+, v(l) 
+
+> ih
+
+= WVh S(l−1)  
+
+> i
+
+,
+
+(26) where WQh , WKh ∈ Rdk ×dh and WVh ∈ Rdv ×dh , with 
+
+dk = dv = dh/H . To enforce the topological structure of the cluster subgraph, we restrict the attention compu-tation to pairs of nodes that are directly connected. The compatibility score between nodes i and j is given by [23] 
+
+u(l) 
+
+> ijh
+
+=
+
+
+
+(q(l) 
+
+> ih
+
+)⊤k(l)
+
+> jh
+
+√dk
+
+, if i is adjacent to j, 
+
+−∞ , otherwise .
+
+(27) By setting the compatibility of non-adjacent nodes to −∞ ,we effectively prevent block propagation between discon-nected nodes. The attention weights are then obtained as 
+
+a(l) 
+
+> ijh
+
+= exp( u(l)
+
+> ijh
+
+)
+
+Pmk 
+
+> j′=1
+
+exp( u(l)
+
+> ij ′h
+
+) . (28) After computing the attention weights across all H heads independently, we concatenate their weighted outputs through learned projection matrices WOh . The MHA output is expressed as [17] 
+
+MHA (l) 
+
+> i
+
+=
+
+> H
+
+X
+
+> h=1
+
+WOh
+
+
+
+> mk
+
+X
+
+> j=1
+
+a(l)
+
+> ijh
+
+v(l)
+
+> jh
+
+ . (29) The complete GAT layer combines the three sublayers through residual connections with BN [12], which is expressed as 
+
+ˆS(l) 
+
+> i
+
+= BN (l) 
+
+S(l−1)  
+
+> i
+
++ MHA (l)
+
+> i
+
+
+
+, (30) 
+
+S(l) 
+
+> i
+
+= BN (l) ˆS(l) 
+
+> i
+
++ FF (l)(ˆS(l) 
+
+> i
+
+)
+
+
+
+, (31) where FF (l)(·) = Wf 2ReLU( Wf 1(·) + bf 1) + bf 2.Finally, the encoder outputs the node embeddings {S(L) 
+
+> i
+
+}mk
+
+> i=1
+
+together with a global graph embedding, which is given by [17] 
+
+¯SGk = 1
+
+mkmkX
+
+> i=1
+
+S(L) 
+
+> i
+
+. (32) Both outputs are subsequently consumed by the decoder to construct the intra-cluster propagation path. 
+
+2) Decoder architecture: We design the decoder to generate the propagation path in an autoregressive manner. At each decoding step t, the current node selects the next propagation target from its neighbors and appends it to the path sequence. To represent the current decoding state, we construct a con-text vector ct that captures both global structural information and local path history. According to [17], the context vector is expressed as 
+
+ct =
+
+
+
+[¯SGk , p1, p2], if t = 1 ,
+
+[¯SGk , p2, S(L) 
+
+> π1
+
+], if t = 2 ,
+
+[¯SGk , S(L) 
+
+> πt−2
+
+, S(L) 
+
+> πt−1
+
+], if t > 2,
+
+(33) where p1, p2 ∈ Rdh are learnable placeholders. We incorporate the graph embedding ¯SGk to enable the decoder to exploit global structural information. When t > 2, we replace the place-holders with the embeddings of the two previously selected nodes, thereby enabling AoVB-aware sequential decisions. The query, key, and value vectors are given by [17] 
+
+q(d) 
+
+> t
+
+= WQct, ki = WK S(L) 
+
+> i
+
+, vi = WV S(L) 
+
+> i
+
+. (34) To prevent repeated selection of nodes that have already received the block, we apply a masking operation to their compatibility scores, which are denoted as 
+
+˜ut,j =
+
+
+
+C · tanh (q(d) 
+
+> t
+
+)⊤kj
+
+√dk
+
+!
+
+, if j̸ = πt′ , ∀t′ < t, 
+
+−∞ , otherwise ,
+
+(35) where C represents a clipping constant to stabilize training [33]. Finally, the selection probability is obtained as 
+
+pθP (πt = i | G k, π 1: t−1) = exp(˜ ut,i )
+
+Pmk 
+
+> j=1
+
+exp(˜ ut,j ) . (36) 
+
+3) Feasibility pruning: Due to availability window con-straints, the initial path πk = ( π1, . . . , π mk ) generated by the decoder may contain nodes whose deadlines expire before block reception. We apply a feasibility pruning mechanism that maps the decoder output to a guaranteed feasible solution 
+
+π∗ 
+
+> k
+
+[27], separating hard constraint satisfaction from the learn-ing problem without modifying the core network architecture. The cumulative arrival time at the t-th node along the path is denoted as 
+
+Γt =
+
+> t−1
+
+X
+
+> i=1
+
+γπi,π i+1 , t ∈ [2 , m k], (37) with Γ1 = 0 for the source node, where γπi,π i+1 is the mean one-hop transmission delay from (4) . A node πt is feasible if and only if Γt ≤ τ eπt , i.e., the block arrives before the availability window deadline of that peer. The pruning proceeds sequentially. Let p index the last retained node, initialized as p = 1 . For each subsequent node 
+
+πt, we compute the updated arrival time Γ′ 
+
+> t
+
+= Γ ′ 
+
+> p
+
++γπp,π t from the last retained node πp. If Γ′ 
+
+> t
+
+≤ τ eπt , node πt is retained and 
+
+p ← t; otherwise, πt is removed and Γ′ remains unchanged. Let F ⊆ { 1, . . . , m k} collect the indices of all retained nodes. The feasible path is given by 
+
+π∗ 
+
+> k
+
+= ( πt)t∈F . (38) 9
+
+VI. M ODULE TRAINING OF GHDRL 
+
+A. Two-Stage Training Strategy 
+
+Problem (13) involves two coupled decisions: partitioning N
+
+peer nodes into K clusters and determining the propagation path 
+
+πk within each cluster. Joint optimization via a single policy gradient estimator is impractical because the two modules operate over fundamentally different action spaces, leading to dynamically varying cluster sizes that render the propagation subproblems non-stationary during training [14], [17]. For any fixed assignment a, the per-cluster propagation cost J (πk|G k(a)) depends solely on the topology and node attributes of Gk(a), independent of the assignment mechanism that produced it. Hence, the nested formulation is expressed as 
+
+min 
+
+> a
+
+1
+
+K
+
+> K
+
+X
+
+> k=1
+
+min 
+
+> πk
+
+J (πk | G k(a)) , (39) where the inner propagation subproblems can be solved independently once a is fixed. Therefore, we adopt a two-stage training strategy [23]. In Stage 1, the propagation module is trained on fixed-size subproblems sampled from representative distributions, yielding a generalizable path optimization policy with parameters θ∗ 
+
+> P
+
+. In Stage 2, the propagation parameters are frozen at θ∗ 
+
+> P
+
+, and the assignment module is trained with the average hybrid cost ¯J as the learning signal. This isolation ensures training stability by preventing the non-stationary cluster configurations from interfering with propagation learn-ing [14], while preserving architectural modularity that allows substitution of alternative path planners without retraining. 
+
+B. Propagation Module Training (Stage 1) 
+
+The propagation module is trained in Stage 1 using policy gradient methods. Given a subgraph Gk, the propagation policy 
+
+pθP autoregressively constructs a candidate path πk, which is then processed by the feasibility pruning mechanism to obtain a feasible path π∗ 
+
+> k
+
+= ϕ(πk). The training objective minimizes the expected hybrid cost of the feasible path, given by 
+
+L(θP |G k) = EpθP (πk |G k )
+
+J  ϕ(πk)|G k
+
+ . (40) We optimize the loss via the RL algorithm [17] with a rollout baseline b(Gk) for variance reduction, which is expressed as 
+
+∇L (θP |G k) = E
+
+h J (π∗ 
+
+> k
+
+|G k) − b(Gk)∇ log pθP (πk|G k)
+
+i
+
+.
+
+(41) Note that the cost is evaluated on the pruned path ϕ(πk) while the gradient is computed with respect to the original path 
+
+πk. This formulation remains unbiased by the score function property of the RL estimator and is standard practice for handling hard constraints via deterministic post-processing [27]. The baseline is computed by greedy decoding under a separate set of parameters θbl  
+
+> P
+
+, updated via the conservative strategy of [17]. At each epoch boundary, θbl  
+
+> P
+
+← θP is executed only if a one-sided paired t-test at significance level 
+
+α = 5% confirms improvement. The training procedure of the propagation module is given in Algorithm 1. The computational complexity of Algorithm 1 is analyzed below. Specifically, the GAT encoder consists of L attention layers, each computing 
+
+Algorithm 1: Propagation Module Training (Stage 1) 
+
+Input: Training set S, batch size BP , number of epochs E, and the significance level α
+
+Output: Trained parameters θ∗ 
+
+> P
+> 1
+
+Initialize θP , θbl  
+
+> P
+
+← θP ; 
+
+> 2
+
+for epoch = 1 , . . . , E do  
+
+> 3
+
+for each batch of BP instances from S do  
+
+> 4
+
+for i = 1 , . . . , B P do  
+
+> 5
+
+Sample a candidate path: 
+
+π(i) 
+
+> k
+
+← SampleRollout( G(i) 
+
+> k
+
+, p θP ); 
+
+> 6
+
+Greedy baseline path: 
+
+π(i),bl  
+
+> k
+
+← GreedyRollout( G(i) 
+
+> k
+
+, p θbl  
+
+> P
+
+); 
+
+> 7
+
+Apply pruning and evaluate cost: 
+
+J (i) ← J  ϕ(π(i) 
+
+> k
+
+), G(i)
+
+> k
+
+; 
+
+> 8
+
+J (i),bl ← J  ϕ(π(i),bl  
+
+> k
+
+), G(i)
+
+> k
+
+; 
+
+> 9
+
+Estimate the policy gradient through (41);  
+
+> 10
+
+Update parameters: θP ← Adam( θP , ∇L ); 
+
+> 11
+
+if OneSidedPairedTTest( pθP , p θbl  
+
+> P
+
+) < α then  
+
+> 12
+
+θbl  
+
+> P
+
+← θP ; 
+
+> 13
+
+θ∗ 
+
+> P
+
+← θbl  
+
+> P
+
+; 
+
+> 14
+
+return θ∗ 
+
+> P
+
+;pairwise attention scores over mk nodes with hidden dimension 
+
+dh, yielding per-layer complexity O(m2
+
+> k
+
+dh). The autoregressive decoder generates a path of at most mk steps, with each step requiring O(mkdh) for attention computation. Therefore, the computational complexity of Algorithm 1 can be expressed as 
+
+O(Lm 2
+
+> k
+
+dh).
+
+C. Assignment Module Training (Stage 2) 
+
+With the propagation parameters frozen at θ∗ 
+
+> P
+
+from Stage 1, the assignment module is trained to optimize the cluster partition. The training objective minimizes the expected average hybrid cost across all clusters, which is expressed as 
+
+L(θA|I ) = EpθA (asI |sI )
+
+"
+
+1
+
+K
+
+> K
+
+X
+
+> k=1
+
+J (π∗ 
+
+> k
+
+|G k)
+
+#
+
+, (42) where θA denotes the assignment module parameters, I is the input instance, and J (π∗ 
+
+> k
+
+| G k) is computed by the frozen propagation module. Similarly, we adopt RL with a rollout baseline b(I) for variance reduction. The policy gradient is given by 
+
+∇L (θA|I ) = E
+
+h 1
+
+K
+
+> K
+
+X
+
+> k=1
+
+J (π∗ 
+
+> k
+
+|G k) − b(I)
+
+
+
+· ∇ log pθA (asI |sI )
+
+i
+
+,
+
+(43) with the same conservative baseline update rule. During Stage 2, the frozen propagation module employs greedy decoding, which selects the highest-probability node at each autoregressive step, to deterministically evaluate each candidate cluster, ensuring that the cost feedback Jk is a deterministic function of the assignment action a alone. Training instances are dynamically 10 
+
+Algorithm 2: Assignment Module Training (Stage 2) 
+
+Input: Instance generator D, batch size BA, number of epochs E′, frozen parameters θ∗ 
+
+> P
+
+, and the significance level α
+
+Output: Trained parameters θ∗ 
+
+> A
+> 1
+
+Initialize θA, θbl  
+
+> A
+
+← θA; 
+
+> 2
+
+for epoch = 1 , . . . , E ′ do  
+
+> 3
+
+for each batch of BA instances from D do  
+
+> 4
+
+for j = 1 , . . . , B A do  
+
+> 5
+
+Sample assignment: 
+
+a(j) ← AssignmentPolicy( I(j), p θA ); 
+
+> 6
+
+Baseline assignment: 
+
+a(j),bl ← AssignmentPolicy( I(j), p θbl  
+
+> A
+
+); 
+
+> 7
+
+Partition peers into K clusters:  
+
+> 8
+
+{G (j) 
+
+> k
+
+}Kk=1 from a(j); 
+
+> 9
+
+{G (j),bl  
+
+> k
+
+}Kk=1 from a(j),bl ; 
+
+> 10
+
+for k = 1 , . . . , K do  
+
+> 11
+
+Evaluate cluster k with frozen θ∗ 
+
+> P
+
+: 
+
+> 12
+
+π(j) 
+
+> k
+
+← GreedyRollout( G(j) 
+
+> k
+
+, p θ∗ 
+
+> P
+
+); 
+
+> 13
+
+J (j) 
+
+> k
+
+← J  ϕ(π(j) 
+
+> k
+
+), G(j)
+
+> k
+
+; 
+
+> 14
+
+π(j),bl  
+
+> k
+
+← GreedyRollout( G(j),bl  
+
+> k
+
+, p θ∗ 
+
+> P
+
+); 
+
+> 15
+
+J (j),bl  
+
+> k
+
+← J  ϕ(π(j),bl  
+
+> k
+
+), G(j),bl 
+
+> k
+
+; 
+
+> 16
+
+Compute the average hybrid cost:  
+
+> 17
+
+¯J (j) ← 1
+
+> K
+
+PKk=1 J (j) 
+
+> k
+
+;
+
+¯J (j),bl ← 1
+
+> K
+
+PKk=1 J (j),bl  
+
+> k
+
+; 
+
+> 18
+
+Estimate the policy gradient through (43);  
+
+> 19
+
+Update parameters: θA ← Adam( θA, ∇L ); 
+
+> 20
+
+if OneSidedPairedTTest( pθA , p θbl  
+
+> A
+
+) < α then  
+
+> 21
+
+θbl  
+
+> A
+
+← θA; 
+
+> 22
+
+θ∗ 
+
+> A
+
+← θbl  
+
+> A
+
+; 
+
+> 23
+
+return θ∗
+
+> A
+
+;generated to ensure diversity, enabling generalization to unseen network configurations. The training procedure of the assignment module is given in Algorithm 2. For its computational complexity, the GIN encoder in the assignment module processes the full graph with N nodes over L′ layers, leading to O(L′N 2dh) [22], and the MHA mechanism for cluster embedding causes O(K2dh) [33]. Thus, the computational complexity of Algorithm 2 is O(L′N 2dh +
+
+K2dh). Combining Algorithms 1 and 2, for K clusters with an average size ¯m = N/K , the overall computational complexity of the GHDRL method is O(( L′+L/K )N 2dh+N 3dh/K 2). In comparison, a monolithic approach that optimizes propagation over all N nodes without decomposition incurs O(N 3dh)
+
+due to the quadratic self-attention cost at each of the N
+
+autoregressive decoding steps [33]. Our decomposition can reduce the dominant cubic term by a factor of K2. While larger 
+
+K reduces per-cluster subproblem complexity, it proportionally increases the number of initial transmissions from the leader peer. Furthermore, since the K propagation subproblems are independent, parallel execution reduces the complexity of wall-clock propagation to O(N 3dh/K 3).VII. N UMERICAL RESULTS 
+
+A. Experimental Setup 
+
+Following the common settings in DRL for combinatorial optimization, we randomly generate membership view instances of varying scales [17]. Specifically, we select the number of nodes N from {50 , 100 } for training and basic testing, and from 
+
+{150 , 200 , 300 , 500 } for evaluating generalization capability. The number of clusters K is set to 5 and 10 following the fan-out analysis in Section III-B , where K = 5 represents a more challenging scenario due to a heavier load per cluster. Node locations follow a uniform distribution (xi, y i) ∈ U [0 , 1] 2 [34]. The availability windows are configured as τ si ∼ U [0 , 3] with 
+
+τ ei = τ si + 3 [14]. The leader peer ℓ is fixed at (0 .5, 0.5) with availability window [0 , 10] . For the communication model, we set the block size to Bblock = 1 MB , the transmit power of peers to ρs = 23 dBm , and the noise power density to N0 =
+
+−174 dBm /Hz [1], [35], [36]. We set the path-loss coefficient to ε = 3 .38 and the unit channel gain to c0 = −30 dB , while the channel bandwidth between adjacent miners is selected from the set 180 kHz , 22 MHz , 100 MHz [12], [37]. We fix all hyperparameters after tuning on instances with N = 50 
+
+and K ∈ { 5, 10 }. The parameters θ are initialized uniformly within (−1/√dh, 1/√dh) [17], where dh = 128 .For the propagation module, training is conducted over 100 
+
+epochs using dynamically generated data, with 3000 batches of 512 instances processed per epoch. The encoder employs a 3-layer GAT [24] with H = 8 attention heads and FF dimension dF = 512 , following the standard multi-head attention configuration [17], [33]. For the assignment module, we train for 500 iterations with 128 dynamically generated instances per iteration, using a 3-layer GIN with ϵ(l) = 0 [22] whose Multi-Layer Perceptron (MLP) contains 2 hidden layers of dimension 32 . The penalty coefficient is set to ρ = 1000 
+
+to ensure sufficiently high delivery coverage. Both modules use the Adam optimizer with a learning rate 10 −4. During inference, we train on 100 -node instances and directly apply the model to all larger scales ( N ≥ 100 ) without retraining, following the common generalization protocol [17], [34]. For 
+
+N = 50 , we use the model trained on 50 -node instances. The entire set of experiments is performed using an NVIDIA GeForce RTX 3080Ti. 
+
+B. Comparison Results 
+
+We compare our GHDRL method against four baseline schemes: i) Random , which randomly selects neighbors for block propagation without any optimization strategy; ii) Greedy ,which always selects the nearest neighbor, representing distance-based optimization; iii) GAT [12], which is an attention-based GNN model, processing the entire network via O(N 2) self-attention without decomposition; iv) Cross Attention-based Transformer (CAT) [27], which employs a lightweight cross-attention mechanism that propagates node embeddings through a fixed number of representative nodes, achieving O(N ) linear complexity for large-scale routing. Figure 3 shows the performance comparison among different baselines under varying network scales and cluster counts. From Fig. 3a, we observe that at small scales ( N ∈ { 50 , 100 }), our 11 50,5 50,10 100,5 100,10               
+
+> Number of Peers (N), Number of Clusters (K)
+> 0
+> 100
+> 200
+> 300
+> 400
+> 500
+> 600
+> Hybrid Cost
+> Ours
+> Greedy
+> CAT
+> Random
+> GAT
+> (a) Small-scale instances ( N∈ { 50 ,100 }). 150,5 150,10 200,5 200,10
+> Number of Peers (N), Number of Clusters (K)
+> 0
+> 200
+> 400
+> 600
+> 800
+> Hybrid Cost
+> Ours
+> Greedy
+> CAT
+> Random
+> GAT (b) Medium-scale instances ( N∈ { 150 ,200 }). 300,5 300,10 500,5 500,10
+> Number of Peers (N), Number of Clusters (K)
+> 0
+> 200
+> 400
+> 600
+> 800
+> 1000
+> Hybrid Cost
+> Ours
+> Greedy
+> CAT
+> Random
+> GAT (c) Large-scale instances ( N∈ { 300 ,500 }).
+
+Fig. 3: Performance comparison among different methods under varying network scales ( N ∈ { 50 , 100 , 150 , 200 , 300 , 500 }, K ∈ { 5, 10 }). 
+
+method and the GAT baseline both significantly outperform the Random and Greedy schemes. Specifically, when N = 50 and 
+
+K = 5 , the proposed method achieves ¯J = 35 .56 , representing an 87 .6% reduction compared with that of the Random scheme and an 85 .6% reduction compared with that of the Greedy scheme. The GAT baseline achieves comparable performance, as both methods leverage attention-based architectures that are effective for small-scale routing optimization. In Fig. 3b, the GAT baseline degrades significantly. For example, at 
+
+N = 150 , K = 5 , its hybrid cost reaches 618 .26 , which is 
+
+503 .4% higher than that of our method. The reason is that GATs process the entire network without decomposition, leading to high attention complexity that hampers optimization on larger instances. In contrast, our hierarchical decomposition reduces the effective problem size, enabling the propagation module to maintain its effectiveness as the network scale grows. Specifically, at N = 200 and K = 5 , our method achieves a hybrid cost of 150 .84 , which is 19 .2% lower than that of CAT (186 .75 ), the strongest neural baseline at this scale. In Fig. 3c, we observe that the GAT baseline continues to degrade, with a hybrid cost of 774 .56 at N = 300 , K = 5 , which is comparable to those of the Random and Greedy schemes. While the CAT scheme narrows the gap at larger scales, its improvement mainly stems from linear complexity that partially alleviates the scalability bottleneck. However, CAT still lacks an explicit decomposition mechanism and sequentially constructs all paths on the full network, limiting its ability to exploit cluster-level spatial structure. Our method consistently maintains the lowest hybrid cost across all configurations. Moreover, our method demonstrates strong generalization capability. This scalability advantage stems from the GIN-based assignment module, which learns transferable graph representations that capture structural patterns independent of absolute network scale. 
+
+C. Propagation Trajectory Visualization 
+
+Figure 4 presents the block propagation trajectories pro-duced by our method across four representative configurations (N ∈ { 100 , 200 }, K ∈ { 5, 10 }), where the star denotes the leader peer ℓ, colored paths represent intra-cluster propagation trajectories, the red path indicates the longest trajectory, and yellow nodes mark peers that cannot be reached within their availability windows. Across all four configurations, our method covers the vast majority of nodes, with only a handful of yellow-marked nodes in peripheral regions indicating delivery failure. The remaining nodes are organized into geographically coherent clusters, with spatially proximate nodes grouped together. Comparing Fig. 4a ( K = 5 ) with Fig. 4b ( K = 10 ), increasing 
+
+K yields finer-grained partitions with tighter intra-cluster proximity, reducing propagation distances dij and contributing to lower per-cluster AoVB. Moreover, even as the node density doubles from N = 100 to N = 200 , the cluster structure remains spatially organized without fragmentation. These behaviors stem from the feasibility pruning mechanism, which proactively removes temporally infeasible nodes to maintain a high BAR, while the GIN-based assignment module [18] clusters nodes with similar spatial-temporal characteristics to minimize aggregate hybrid cost. 
+
+D. Ablation Studies 
+
+To assess the necessity of each component in our GHDRL method, we carry out comprehensive ablation studies across two dimensions: the assignment module, which partitions nodes into clusters, and the propagation module, which determines intra-cluster routing. 
+
+1) Assignment module ablation: We first examine the necessity of the assignment module , which compares the complete method against a baseline that employs only the propagation module. Specifically, the baseline is trained and tested on fixed-size instances of ⌈N/K ⌉ nodes, corresponding to the nominal cluster size, whereas our complete method dynamically partitions nodes into clusters of varying sizes via the assignment module. From Fig. 5a, we see that the complete method consistently outperforms the propagation-only baseline, and the performance gap widens as the network scale increases. Specifically, at N = 50 , the improvement is moderate. At N = 200 , K = 5 , our method achieves 
+
+¯J = 151 .34 , representing a 73 .7% reduction relative to the baseline. When the scale further increases to N = 500 , a 
+
+42 .5% reduction is observed. This increasingly pronounced advantage arises because the assignment module clusters nodes with similar spatial and temporal characteristics, effectively reducing the difficulty of each intra-cluster routing task, which is a benefit that grows with network scale as the diversity of node configurations increases. We then examine the necessity of the MHA. Specifically, we compare our MHA design, where each cluster is assigned 12 0.0 0.2 0.4 0.6 0.8 1.0 
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+
+(a) N =100 , K =5 .0.0 0.2 0.4 0.6 0.8 1.0  
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+
+(b) N =100 , K =10 .0.0 0.2 0.4 0.6 0.8 1.0  
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+
+(c) N =200 , K =5 .0.0 0.2 0.4 0.6 0.8 1.0  
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+
+(d) N =200 , K =10 .
+
+Fig. 4: Block propagation trajectories under varying network scales ( N ∈ { 100 , 200 }) and cluster counts ( K ∈ { 5, 10 }). 50 100 150 200 300 500 
+
+> Different Network Scales
+> 0
+> 200
+> 400
+> 600
+> 800
+> Hybrid Cost
+> Peers Assigned, K = 10
+> Peers Assigned, K = 5
+> Peers Unassigned, K = 10
+> Peers Unassigned, K = 5
+
+(a) Necessity of the assignment module. 50 100 150 200 300 500  
+
+> Different Network Scales
+> 0
+> 200
+> 400
+> 600
+> 800
+> 1000
+> Hybrid Cost
+> MHA, K = 5
+> MHA, K = 5
+> SHA, K = 10
+> SHA, K = 10
+
+(b) Necessity of the MHA. 
+
+Fig. 5: Ablation studies on the two core designs, evaluated by the hybrid cost across varying network scales ( N ∈ { 50 , 100 , 150 , 200 , 300 , 500 })and cluster counts ( K ∈ { 5, 10 }). 
+
+an independent attention head, against a Single-Head Attention (SHA) baseline, where all clusters share the same attention parameters. From Fig. 5b, we observe that the MHA design con-sistently outperforms the SHA baseline by a substantial margin. At N = 50 , K = 5 , the MHA approach achieves ¯J = 35 .62 
+
+compared with 261 .48 for the SHA approach, corresponding to an 86 .4% reduction. This advantage persists across all scales. The reason is that shared parameters cannot simultaneously capture the distinct characteristics of heterogeneous clusters, causing the assignment policy to degenerate into approximately random allocation [18], whereas independent heads develop specialized representations tailored to the spatial and temporal characteristics of each cluster. Given that both the assignment module and the MHA design are essential, we further investigate the superiority of the GIN-based encoder. We compare our GIN-based encoder against two alternatives: (i) SWEEP , which is a classical heuristic that partitions nodes by polar angle, and (ii) MLP , which replaces the GIN encoder with a 3-layer MLP while keeping other components unchanged. Table I presents the detailed comparison. We see that a consistent pattern emerges across all configurations: SWEEP achieves the lowest AoVB A but suffers from severely degraded BAR η, resulting in the highest hybrid cost despite the lowest nominal latency. This indicates that SWEEP cannot exploit the provided spatial and temporal information to form satisfactory clusters, since it assigns nodes solely according to geometric proximity and ignores the availability window constraints [τ si , τ ei ]. In addition, relative to MLP, our GIN-based approach is able to learn a more effective assignment policy from heterogeneous raw features, thereby achieving a lower hybrid cost in most configurations. For example, at N = 100 , K = 5 , our method achieves 
+
+¯J = 68 .93 , compared with 86 .60 for MLP, representing a 
+
+20 .4% improvement. We note that at N = 200 , K = 10 , MLP achieves a lower hybrid cost owing to its higher BAR. With fine-grained clustering, each cluster contains only about 20 
+
+nodes, which is simple enough for even a topology-agnostic encoder. However, as the scale grows, the ability of the GIN-based encoder to capture relational structures becomes decisive, enabling it to regain its lead at N = 500 .
+
+2) Propagation module ablation: We turn to the propagation module ablation and evaluate the contribution of the feasibility pruning mechanism for handling the availability window constraints. We compare the complete method against a variant without pruning (denoted as No-FP). In the No-FP setting, when a node rejects the block due to a timeout, the sender simply proceeds to the next planned node without proactively removing infeasible nodes from the propagation sequence. Table II shows that at small scales ( N ≤ 100 ), the pruning mechanism has a negligible effect as most nodes are reachable within their availability windows. However, at N = 500 and 
+
+K = 5 , the No-FP variant suffers a catastrophic degradation in 13 0 100 200 300 400 500 
+
+> Iteration Epochs
+> 20
+> 30
+> 40
+> 50
+> 60
+> 70
+> Overall AoVB  N = 50, K = 5
+> N = 50, K = 10
+> N = 100, K = 5
+> N = 100, K = 10
+
+(a) Overall AoVB A.0 100 200 300 400 500  
+
+> Iteration Epochs
+> 0.6
+> 0.7
+> 0.8
+> 0.9
+> 1.0
+> Overall Arrival Rate
+> N = 50, K = 5
+> N = 50, K = 10
+> N = 100, K = 5
+> N = 100, K = 10
+
+(b) Overall BAR η.0 100 200 300 400 500  
+
+> Iteration Epochs
+> 0
+> 200
+> 400
+> 600
+> Hybrid Cost
+> N = 50, K = 5
+> N = 50, K = 10
+> N = 100, K = 5
+> N = 100, K = 10
+
+(c) hybrid cost ¯J .
+
+Fig. 6: Training curves under varying network scales and cluster counts ( N ∈ { 50 , 100 }, K ∈ { 5, 10 }). TABLE I: Comparison of assignment strategies across different network scales, evaluated by AoVB ( A), BAR ( η), and hybrid cost ( ¯J ) (averaged over K clusters). 
+
+Sizes Methods K = 5 K = 10 
+
+A ↓ η ↑ ¯J ↓ A ↓ η ↑ ¯J ↓ 
+
+N = 50 
+
+MLP 35 .54 100.00% 35.54 19 .15 100.00% 19 .15 
+
+SWEEP 33.99 94 .44% 89 .59 19 .14 98 .95% 29 .64 
+
+Ours 35 .56 100.00% 35 .56 19.13 100.00% 19.13 
+
+N = 100 
+
+MLP 66 .60 98 .00% 86 .60 35 .51 99 .81% 37 .41 
+
+SWEEP 53.16 76 .17% 291 .46 35.04 96 .23% 72 .74 
+
+Ours 67 .73 99.88% 68.93 35 .55 100.00% 35.55 
+
+N = 200 
+
+MLP 122 .24 93 .00% 192 .24 67 .58 98.89% 78.68 
+
+SWEEP 82.45 60 .18% 480 .65 52.34 74 .42% 308 .14 
+
+Ours 127 .64 97.68% 150.84 65 .92 96 .72% 98 .72 
+
+N = 500 
+
+MLP 212 .98 66 .74% 545 .58 130 .51 79 .33% 337 .21 
+
+SWEEP 83.35 24 .60% 837 .35 90.28 54 .20% 548 .28 
+
+Ours 238 .39 75.39% 484.49 133 .91 82.11% 312.81 
+
+TABLE II: Ablation study on the feasibility pruning mechanism, evaluated by AoVB ( A), BAR ( η), and hybrid cost ( ¯J ) (averaged over K clusters). 
+
+Size Method K = 5 K = 10 
+
+A ↓ η ↑ ¯J ↓ A ↓ η ↑ ¯J ↓ 
+
+N = 50 Ours 35.56 100.00% 35.56 19.13 100.00% 19.13 
+
+No-FP 35.56 100.00% 35.56 19.13 100.00% 19.13 
+
+N = 100 Ours 67.73 99.88% 68.93 35.55 100.00% 35.55 
+
+No-FP 67.73 99 .87% 69 .08 35.55 100.00% 35.55 
+
+N = 200 Ours 127 .64 97.68% 150.84 65 .92 96.72% 98.72 
+
+No-FP 126.01 96 .07% 165 .36 65.49 95 .64% 109 .04 
+
+N = 500 Ours 238 .39 75.39% 484.49 133 .91 82.11% 312.81 
+
+No-FP 152.37 45 .11% 701 .29 112.03 66 .11% 450 .96 
+
+BAR, resulting in a 44 .8% increase in hybrid cost. Although No-FP achieves lower AoVB, this merely reflects shorter nominal paths from skipped nodes rather than genuine efficiency gains. The reason is that without proactive pruning, timeout-induced rejections cascade along πk, and each skipped node extends the remaining path and increases the likelihood of subsequent timeouts. Our feasibility pruning mechanism prevents this cascade by removing temporally infeasible nodes before propagation begins. 
+
+E. Training Stability 
+
+Figure 6 presents the training dynamics of AoVB A,BAR η, and the hybrid cost ¯J across four configurations (N ∈ { 50 , 100 }, K ∈ { 5, 10 }). All configurations achieve rapid convergence, with the most significant cost reduction occurring within the first 50 epochs. Configurations with larger K converge faster and to lower cost values, which is expected since larger K yields smaller per-cluster subproblems that are inherently easier to optimize. All curves exhibit smooth, oscillation-free trajectories after the initial descent phase, confirming the effectiveness of the conservative baseline update strategy in Section VI, namely the one-sided paired 
+
+t-test prevents premature baseline updates that could destabilize training [17]. The consistent convergence patterns across 
+
+N = 50 and N = 100 further indicate that our training procedure is robust to problem scale. VIII. C ONCLUSION 
+
+In this paper, we have developed a deliverable block propagation optimization framework designed for consortium blockchain-enabled Web 3.0. Specifically, we have proposed the AoVB metric to evaluate block freshness in consortium blockchains and unified it with BAR into a hybrid cost objective for deliverable block propagation. To jointly optimize propa-gation timeliness and delivery coverage, we have developed the GHDRL method, which consists of a GIN-based peer assignment module and a GAT-based propagation module. Finally, we have conducted extensive experiments, and nu-merical results demonstrate that the proposed GHDRL method outperforms both classical heuristics and neural baselines, and generalizes to problem scales up to 5× larger than the training configuration. For future work, we will extend incorporating channel fading effects into the hybrid cost model. Additionally, extending the routing optimization framework to dynamic and heterogeneous decentralized networks (e.g., vehicular networks) with stringent latency and security requirements remains a promising direction. 14 
+
+REFERENCES [1] J. Wen, J. Kang, Z. Xiong, H. Du, Z. Yang, D. Niyato, M. Shen, Y. Jiao, and Y. Zhang, “Optimal AoI-based block propagation and incentive mechanism for blockchain networks in Web 3.0,” IEEE Transactions on Cognitive Communications and Networking , vol. 11, no. 4, pp. 2568– 2583, 2025. [2] S. Werner, D. Perez, L. Gudgeon, A. Klages-Mundt, D. Harz, and W. Knottenbelt, “SoK: Decentralized finance (DeFi),” in Proceedings of the 4th ACM Conference on Advances in Financial Technologies , 2022, pp. 30–46. [3] B. Cao, S. Xiao, L. Shi, T. Wang, J. Chen, J. Wang, X. Ling, H. Xu, S. Zhang, and E. Liu, “Web 3.0: A survey on the architectures, enabling technologies, applications, and challenges,” IEEE Communications Surveys & Tutorials , vol. 28, pp. 841–881, 2026. [4] W. Liu, B. Cao, and M. Peng, “Web3 technologies: Challenges and opportunities,” IEEE Network , vol. 38, no. 3, pp. 187–193, May 2024. [5] M. Shen, Z. Tan, D. Niyato, Y. Liu, J. Kang, Z. Xiong, L. Zhu, W. Wang, and X. S. Shen, “Artificial intelligence for Web 3.0: A comprehensive survey,” ACM Computing Surveys , vol. 56, no. 10, pp. 247:1–247:39, May 2024. [6] E. Androulaki, A. Barger, V. Bortnikov, C. Cachin, K. Christidis, A. De Caro, D. Enyeart, C. Ferris, G. Laventman, Y. Manevich, S. Muralidharan, C. Murthy, B. Nguyen, M. Sethi, G. Singh, K. Smith, A. Sorniotti, C. Stathakopoulou, M. Vukoli´ c, S. W. Cocco, and J. Yellick, “Hyperledger fabric: A distributed operating system for permissioned blockchains,” in Proceedings of the 13th EuroSys Conference , 2018, pp. 1–15. [7] Y. Lai, Y. Liu, H. Luo, G. Sun, C. Chi, and H. Yu, “Accelerating block and transaction propagation: A survey on broadcast protocols in blockchain networks,” IEEE Transactions on Network Science and Engineering ,vol. 12, no. 6, pp. 4380–4402, Nov. 2025. [8] N. Berendea, H. Mercier, E. Onica, and E. Riviere, “Fair and efficient gossip in hyperledger fabric,” in IEEE 40th International Conference on Distributed Computing Systems (ICDCS) , Nov. 2020, pp. 190–200. [9] P. Chen, Z. Li, X. Ling, and J. Wang, “Accelerated gossip protocol for incentivizing block propagation,” in IEEE International Conference on Communications Workshops (ICC Workshops) , May 2023, pp. 170–175. [10] E. Rohrer and F. Tschorsch, “Kadcast-NG: A structured broadcast proto-col for blockchain networks,” IEEE/ACM Transactions on Networking ,vol. 31, no. 6, pp. 3269–3283, Dec. 2023. [11] M. Zhou, Y. Han, L. Zeng, P. Li, F. Long, D. Zhou, I. Beschastnikh, and M. Wu, “MERCURY: Fast transaction broadcast in high performance blockchain systems,” in IEEE Conference on Computer Communications (INFOCOM) , 2023, pp. 1–10. [12] J. Liao, J. Wen, J. Kang, C. Yi, Y. Zhang, Y. Jiao, D. Niyato, D. I. Kim, and S. Xie, “Graph attention network-based block propagation with optimal AoB and reputation in Web 3.0,” IEEE Transactions on Cognitive Communications and Networking , vol. 10, no. 6, pp. 2427–2441, Dec. 2024. [13] T. Neudecker and H. Hartenstein, “Network layer aspects of permission-less blockchains,” IEEE Communications Surveys & Tutorials , vol. 21, no. 1, pp. 838–857, 2019. [14] R. Zhang, C. Zhang, Z. Cao, W. Song, P. S. Tan, J. Zhang, B. Wen, and J. Dauwels, “Learning to solve multiple-TSP with time window and rejections via deep reinforcement learning,” IEEE Transactions on Intelligent Transportation Systems , vol. 24, no. 1, pp. 1325–1336, Jan. 2023. [15] R. D. Yates, Y. Sun, D. R. Brown, S. K. Kaul, E. Modiano, and S. Ulukus, “Age of information: An introduction and survey,” IEEE Journal on Selected Areas in Communications , vol. 39, no. 5, pp. 1183–1210, May 2021. [16] N. Mazyavkina, S. Sviridov, S. Ivanov, and E. Burnaev, “Reinforcement learning for combinatorial optimization: A survey,” Computers &Operations Research , vol. 134, p. 105400, Oct. 2021. [17] W. Kool, H. van Hoof, and M. Welling, “Attention, learn to solve routing problems!” arXiv preprint arXiv:1803.08475 , 2018. [18] Y. Wu, W. Song, Z. Cao, J. Zhang, and A. Lim, “Learning improvement heuristics for solving routing problems,” IEEE Transactions on Neural Networks and Learning Systems , vol. 33, no. 9, pp. 5057–5069, Sep. 2022. [19] H. Huang, W. Kong, S. Zhou, Z. Zheng, and S. Guo, “A survey of state-of-the-art on blockchains: Theories, modelings, and tools,” ACM Computing Surveys , vol. 54, no. 2, pp. 44:1–44:42, 2021. [20] Y. Ma, J. Li, Z. Cao, W. Song, L. Zhang, Z. Chen, and J. Tang, “Learning to iteratively solve routing problems with dual-aspect collaborative transformer,” in Advances in Neural Information Processing Systems ,vol. 34, 2021, pp. 11 096–11 107. [21] M. Nazari, A. Oroojlooy, L. V. Snyder, and M. Takáˇ c, “Reinforcement learning for solving the vehicle routing problem,” in Advances in Neural Information Processing Systems , vol. 31, 2018, pp. 9861–9871. [22] K. Xu, W. Hu, J. Leskovec, and S. Jegelka, “How powerful are graph neural networks?” in International Conference on Learning Representations (ICLR) , 2019. [23] K. Lei, P. Guo, Y. Wang, X. Wu, and W. Zhao, “Solve routing problems with a residual edge-graph attention neural network,” Neurocomputing ,vol. 508, pp. 79–98, Oct. 2022. [24] P. Veliˇ ckovi´ c, G. Cucurull, A. Casanova, A. Romero, P. Liò, and Y. Bengio, “Graph attention networks,” in International Conference on Learning Representations (ICLR) , 2018. [25] S. Guo, Y. Xiao, and L. Niu, “GGTAN: Graph gated talking-heads attention networks for traveling salesman problem,” in IEEE/WIC/ACM International Joint Conference on Web Intelligence and Intelligent Agent Technology (WI-IAT) , 2020, pp. 676–681. [26] G. Corso, H. Stark, S. Jegelka, T. Jaakkola, and R. Barzilay, “Graph neural networks,” Nature Reviews Methods Primers , vol. 4, no. 1, p. 17, Mar. 2024. [27] F. Luo, X. Lin, Y. Wu, Z. Wang, T. Xialiang, M. Yuan, and Q. Zhang, “Boosting neural combinatorial optimization for large-scale vehicle routing problems,” in International Conference on Learning Representations (ICLR) , Oct. 2024. [28] C. Decker and R. Wattenhofer, “Information propagation in the Bitcoin network,” in IEEE 13th International Conference on Peer-to-Peer Computing (P2P) , Sep. 2013, pp. 1–10. [29] H.-N. Dai, Z. Zheng, and Y. Zhang, “Blockchain for Internet of Things: A survey,” IEEE Internet of Things Journal , vol. 6, no. 5, pp. 8076–8094, 2019. [30] S. Bi and Y. J. Zhang, “Computation rate maximization for wireless powered mobile-edge computing with binary computation offloading,” 
+
+IEEE Transactions on Wireless Communications , vol. 17, no. 6, pp. 4177–4190, 2018. [31] J. Kang, J. Wen, D. Ye, B. Lai, T. Wu, Z. Xiong, J. Nie, D. Niyato, Y. Zhang, and S. Xie, “Blockchain-empowered federated learning for healthcare metaverses: User-centric incentive mechanism with optimal data freshness,” IEEE Transactions on Cognitive Communications and Networking , vol. 10, no. 1, pp. 348–362, 2024. [32] Y. Wang, W. Hou, N. Sheng, Z. Zhao, J. Liu, L. Huang, and J. Wang, “Graph pooling in graph neural networks: Methods and their applications in omics studies,” Artificial Intelligence Review , vol. 57, no. 11, p. 294, Sep. 2024. [33] A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones, A. N. Gomez, Ł. Kaiser, and I. Polosukhin, “Attention is all you need,” in Advances in Neural Information Processing Systems , vol. 30, 2017. [34] Y.-D. Kwon, J. Choo, B. Kim, I. Yoon, Y. Gwon, and S. Min, “POMO: Policy optimization with multiple optima for reinforcement learning,” in 
+
+Advances in Neural Information Processing Systems , vol. 33, 2020, pp. 21 188–21 198. [35] M. H. C. n. Garcia, A. Molina-Galan, M. Boban, J. Gozalvez, B. Coll-Perales, T. ¸Sahin, and A. Kousaridas, “A tutorial on 5G NR V2X communications,” IEEE Communications Surveys & Tutorials , vol. 23, no. 3, pp. 1972–2026, 2021. [36] Z. Su, W. Feng, J. Tang, Z. Chen, Y. Fu, N. Zhao, and K.-K. Wong, “Energy-efficiency optimization for D2D communications underlaying uav-assisted industrial IoT networks with swipt,” IEEE Internet of Things Journal , vol. 10, no. 3, pp. 1990–2002, 2023. [37] J. Kang, J. Liao, R. Gao, J. Wen, H. Huang, M. Zhang, C. Yi, T. Zhang, D. Niyato, and Z. Zheng, “Efficient and trustworthy block propagation for blockchain-enabled mobile embodied AI networks: A graph resfusion approach,” IEEE Transactions on Mobile Computing , vol. 24, no. 12, pp. 12 756–12 770, 2025. [38] L. Chen, K. Xiong, Y. Qin, H. Yu, S. Leng, and C. Yuen, “Stacked intelligent metasurfaces-aided evtol delay sensitive communications,” 
+
+arXiv preprint arXiv:2507.06632 , 2025.

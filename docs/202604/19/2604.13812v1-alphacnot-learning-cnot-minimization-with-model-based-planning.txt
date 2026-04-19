@@ -1,0 +1,571 @@
+Title: AlphaCNOT: Learning CNOT Minimization with Model-Based Planning
+
+URL Source: https://arxiv.org/pdf/2604.13812v1
+
+Published Time: Thu, 16 Apr 2026 01:05:59 GMT
+
+Number of Pages: 22
+
+Markdown Content:
+# AlphaCNOT: Learning CNOT Minimization with Model-Based Planning 
+
+JACOPO COSSIO, University of Udine, Italy 
+
+DANIELE LIZZIO BOSCO, University of Udine & University “Federico II” of Naples, Italy 
+
+RICCARDO ROMANELLO, University of Udine, Italy 
+
+GIUSEPPE SERRA, University of Udine, Italy 
+
+CARLA PIAZZA, University of Udine, Italy Quantum circuit optimization is a central task in Quantum Computing, as current Noisy Intermediate Scale Quantum devices suffer from error propagation that often scales with the number of operations. Among quantum operations, the CNOT gate is of fundamental importance, being the only 2-qubit gate in the universal Clifford+T set. The problem of CNOT gates minimization has been addressed by heuristic algorithms such as the well-known Patel-Markov-Hayes (PMH) for linear reversible synthesis (i.e., CNOT minimization with no topological constraints), and more recently by Reinforcement Learning (RL) based strategies in the more complex case of topology-aware synthesis , where each CNOT can act on a subset of all qubits pairs. In this work we introduce AlphaCNOT, a RL framework based on Monte Carlo Tree Search (MCTS) that address effectively the CNOT minimization problem by modeling it as a planning problem. In contrast to other RL-based solution, our method is model-based , i.e. it can leverage lookahead search to evaluate future trajectories, thus finding more efficient sequences of CNOTs. Our method achieves a reduction of up to 32% in CNOT gate count compared to PMH baseline on linear reversible synthesis, while in the constraint version we report a consistent gate count reduction on a variety of topologies with up to 8 qubits, with respect to state-of-the-art RL-based solutions. Our results suggest the combination of RL with search-based strategies can be applied to different circuit optimization tasks, such as Clifford minimization, thus fostering the transition toward the “quantum utility” era. CCS Concepts: • Theory of computation → Quantum computation theory ; • Computing methodologies 
+
+→ Reinforcement learning ; • Mathematics of computing → Discrete optimization .Additional Key Words and Phrases: Quantum Computing, CNOT gate, Reinforcement Learning 
+
+1 Introduction 
+
+Nowadays, significant progress has been observed in quantum computing algorithms, providing interesting applications for several problem classes, including quantum simulation [ 1, 15 , 27 ], optimization [13], and number-theoretic tasks [17, 39]. The physical realization of these algorithms requires the definition of abstract circuits, that need to be compiled into native gate sets [ 18 ]. Due to the hardware characteristics of actual quantum devices, this process introduces several constraints and limitations, including low coherence time and limited qubit connectivity. Given these hardware limitations, optimizing this compilation process to minimize gate count and circuit depth is a critical requirement for successful execution on current Noisy Intermediate-Scale Quantum (NISQ) hardware [ 33 ], characterized by a limited number of qubits and a high susceptibility to errors. The CNOT gates (Controlled-NOT) are the primary source of qubit interaction in the Clifford+T set, since they are the only available two-qubit gates. At the same time, CNOTs are significantly more prone to error than single-qubit gates [ 7 ]. Therefore, a key point to address is the CNOT 
+
+Authors’ Contact Information: Jacopo Cossio, cossio.jacopo@spes.uniud.it, University of Udine, Udine, Italy; Daniele Lizzio Bosco, lizziobosco.daniele@spes.uniud.it, University of Udine & University “Federico II” of Naples, Udine & Naples, Italy; Riccardo Romanello, riccardo.romanello@uniud.it, University of Udine, Udine, Italy; Giuseppe Serra, giuseppe.serra@uniud. it, University of Udine, Udine, Italy; Carla Piazza, carla.piazza@uniud.it, University of Udine, Udine, Italy.  
+
+> arXiv:2604.13812v1 [cs.AI] 15 Apr 2026 2Cossio et al. p
+> v
+> 1,2
+> 1,3
+> 4,3
+> …
+> 1,3
+> 2,4
+> 4,1
+> CNOT 1:
+> CNOT 2:
+> CNOT 3:
+> 4,1
+> 2,4
+> 1,3
+
+BA
+
+C D E    
+
+> Fig. 1. AlphaCNOT Framework. A: The target circuit is encoded into its parity matrix. B: The system dynamics are modeled as a tree, where nodes corresponds to different circuits obtainable from the starting parity matrix, based on the values and policies of each node estimated by a pair of Neural Networks (C). D: Eventually, a suitable path from the root node to the identity matrix is identified. E: The CNOT sequence corresponding to the selected path is reversed to produce the optimized circuit.
+
+minimization problem , which aims to synthesize a target sequence of CNOTs into an equivalent formulation with the fewest possible gates. To achieve these syntheses, two different approaches based on the underlying hardware structure have been developed. The first one is the unconstrained optimization, also called Linear Reversible Synthesis [30 ], where every qubit is connected to the other ones and thus all operations are permitted. On the other hand, the second version is the constrained optimization or Topology-Aware Synthesis 
+
+[24 ], where qubit interactions are limited to the ones of a given quantum device. In this latter case we generally expect longer syntheses due to the limited topology. Traditional solutions to CNOT minimization rely on matrix decomposition heuristics, such as Gaussian Elimination or the Patel-Markov-Hayes (PMH) algorithm [ 10 , 30 , 37 ]. While computa-tionally efficient, these methods are inherently greedy, i.e. they always opt for the maximum local cost reduction and frequently fail to converge to the global optimum. More recently, Reinforcement Learning (RL) methods have been applied to this domain, often outperforming traditional heuristics, both in the linear reversible synthesis [ 35 ] and in the topology-aware setting [ 24 ]. However, these approaches rely on model-free algorithms, such as Proximal Policy Optimization [ 38 ] (PPO). These algorithms learn directly from the interactions with the environment and do not exploit an explicit representation of the system dynamics. While these approaches learn which CNOT gate to apply at each step following a predefined policy, they only explore a single path at a time, lacking the ability to explicitly plan a synthesis strategy that improves overall solution quality. Essentially, a model-free agent is comparable to a navigator without a map: it finds the most promising immediate move, but it cannot foresee if this local decision will ultimately result in a dead end or an inefficient path. AlphaCNOT: Learning CNOT Minimization with Model-Based Planning 3
+
+To overcome these limitations, we tackle the problem using a tree-based search strategy, which efficiently explores multiple candidate paths and selects the most promising one. We develop 
+
+AlphaCNOT , sketched in Figure 1, a model-based RL approach which relies on AlphaZero, first introduced in [ 40 , 41 ] to solve complex two-players games, like go, chess and shogi. The tree structure, central for our method, encapsulates structural information of the problem that facilitates the search for optimal solutions. In order to increase the expressivity of our reinforcement learning algorithm we introduce a mixed reward function, which transitions from an initial stage of heuristic-based feedback to a non-informed reward phase. Our agent addresses the CNOT minimization problem as a planning task by combining a deep neural network with Monte Carlo Tree Search (MCTS) [9] Differently to previous optimization approaches, our method can be applied to both the uncon-strained linear reversible synthesis and the topology-constrained variant. Our results demonstrate that AlphaCNOT reduces gate counts by up to 32% compared to the well-known PMH algorithm [ 30 ]and consistently outperforms previous model-free RL baselines [ 35 ] and other heuristic algorithms [ 10 , 37 ] on Linear Reversible Synthesis. On the more complex task of topology-aware synthesis, we evaluate different topologies (i.e., connectivity maps) with up to 8 quits, obtaining again consistent advantages over other methods [24]. To support reproducibility and further research on this topic, we release our source code and pre-trained models 1. In our framework, we address the computational cost typically associated with MCTS by providing a highly parallelized implementation based on JAX [6]. The paper is organized as follows. In Section 2 we formalize both the unconstrained and con-strained CNOT minimization problems. In Section 3 we present some related works. Our method is described in Section 4. In Section 5 we discuss experimental settings and results. Section 6 closes the paper with final considerations and further works. 
+
+2 The CNOT minimization problems 2.1 CNOT Circuits 
+
+The Controlled-NOT ( CNOT ) gate is a fundamental two-qubit operation in quantum computing. Given a control qubit |𝑖 ⟩ and a target qubit | 𝑗 ⟩, the effect of CNOT (𝑖, 𝑗 ) is flipping the target qubit’s value when the control qubit is |1⟩, i.e. the value of | 𝑗 ⟩ after applying CNOT (𝑖, 𝑗 ) is |𝑖 ⊕ 𝑗 ⟩. Its associated unitary, in a 2-qubit setting, is the following 
+
+CNOT =
+
+©«
+
+1 0 0 00 1 0 00 0 0 10 0 1 0
+
+ª®®®®¬
+
+. (1) Given a CNOT (𝑖, 𝑗 ) gate in a 𝑛 qubits system, its associated elementary parity matrix 𝐸 𝑖,𝑗 is defined as 
+
+𝐸 𝑖 𝑗 = 𝐼 𝑛 +  𝛿 𝑘𝑖 𝛿 𝑙 𝑗 
+
+  
+
+> 1≤𝑘,𝑙 ≤𝑛
+
+, (2) i.e., the identity matrix with an additional 1 at position ( 𝑗, 𝑖 ). Given a Boolean linear reversible circuit 
+
+𝐶 , i.e., a quantum circuit composed solely of CNOT gates, C = (CNOT 1, CNOT 2, . . . , CNOT 𝑚 ), we can construct its parity matrix 𝑀 𝐶 by multiplying the elementary parity matrices 𝐸 𝑘 associated with each gate. Specifically, if the gates are applied in the order 𝑘 = 1, . . . , ℎ , the resulting parity matrix is given by 𝑀 𝐶 = 𝐸 ℎ𝐸 ℎ−1 . . . 𝐸 1, where each product is computed over the field F2, i.e., the field over {0, 1}. 
+
+> 1https://github.com/Jaccos01/AlphaCNOT 4Cossio et al.
+
+Note that the parity matrix 𝑀 of a linear reversible circuit, hereafter called a CNOT circuit, can be also defined as the only Boolean matrix satisfying 
+
+𝑦 𝑖 =
+
+> 𝑛
+
+Ê
+
+> 𝑗 =1
+
+𝑀 𝑖 𝑗 𝑥 𝑗 , (3) where 𝑦 𝑖 is the output value of the 𝑖 -th wire of the circuit, while 𝑥 𝑗 is the input value of the 𝑗 -th wire. An example of a CNOT circuit with the corresponding parity matrix is provided in Figure 2. 
+
+C :
+
+𝑥 1 𝑥 2
+
+𝑥 2 𝑥 1 ⊕ 𝑥 3 ⊕ 𝑥 6
+
+𝑥 3 𝑥 3
+
+𝑥 4 𝑥 3 ⊕ 𝑥 4
+
+𝑥 5 𝑥 5 ⊕ 𝑥 6
+
+𝑥 6 𝑥 2 ⊕ 𝑥 3 ⊕ 𝑥 6
+
+𝑀 C =
+
+©«
+
+0 1 0 0 0 01 0 1 0 0 10 0 1 0 0 00 0 1 1 0 00 0 0 0 1 10 1 1 0 0 1
+
+ª®®®®®®®®®¬   
+
+> Fig. 2. Parity matrix 𝑀 Cof a given circuit C.
+
+On the other hand, any invertible Boolean matrix 𝑀 ∈ 𝐺𝐿 (𝑛, F2) can be synthesized into a linear reversible circuit composed solely of CNOT gates. 
+
+Property 1. Given a CNOT circuit C and its corresponding parity matrix 𝑀 𝐶 , performing a CNOT 
+
+with control 𝑖 and target 𝑗 on C is equivalent of applying a XOR operation between rows 𝑖 and 𝑗 
+
+on the 𝑗 -th row on the parity matrix 𝑀 , i.e., 𝑅 𝑗 ← 𝑅 𝑗 ⊕ 𝑅 𝑖 .It is important to emphasize that the mapping between representations of CNOT circuits and parity matrices is not injective. Different sequences of CNOT gates can represent the same quantum circuit, in which case we call them equivalent as they result in the same quantum operation, and in the same parity matrix 𝑀 . Figure 3 shows two equivalent representations of the same circuit, 
+
+C1 :
+
+𝑥 1 𝑥 1
+
+𝑥 2 𝑥 1 ⊕ 𝑥 2 ⊕ 𝑥 3
+
+𝑥 3 𝑥 2
+
+C2 :
+
+𝑥 1 𝑥 1
+
+𝑥 2 𝑥 1 ⊕ 𝑥 2 ⊕ 𝑥 3
+
+𝑥 3 𝑥 2   
+
+> Fig. 3. Two equivalent circuits C1and C2.
+
+both of them associated with the parity matrix 
+
+𝑀 = ©«
+
+1 0 01 1 10 1 0
+
+ª®®¬
+
+.
+
+Since each CNOT circuit 𝐶 can be mapped to a parity matrix 𝑀 𝐶 , and any CNOT circuit can be expressed as a concatenation 𝐶 = 𝐶 1 · · · 𝐶 𝑛 with 𝑀 𝐶 = 𝑀 𝑛 · · · 𝑀 1 for the corresponding parity matrices 𝑀 𝑖 , in what follows we will use the circuit and its parity matrix interchangeably whenever no ambiguity arises. AlphaCNOT: Learning CNOT Minimization with Model-Based Planning 5
+
+2.2 CNOT Minimization on NISQ Hardware 
+
+On current and near future Noisy Intermediate Scale Quantum [ 33 ] (NISQ) hardware, two-qubit gates introduce many challenges, as they are usually more error-prone compared to single qubit gates [33]. This motivates the introduction of the following problem: 
+
+Problem 1 ( CNOT Minimization). Given a CNOT circuit 𝐶 on 𝑛 qubits, find a decomposition 
+
+𝐶 = 𝐶 1 . . . 𝐶 𝑘 , where each 𝐶 𝑖 is a CNOT gate, of minimal length 𝑘 .
+
+As a consequence of Property 1, Problem 1 is equivalent to finding the shortest sequence of XOR 
+
+operations between rows that reduces 𝑀 𝐶 to the identity matrix. This problem is conjectured to be in the class NP-hard [ 20 ], since no polynomial-time solutions are known for finding the absolute minimum 𝑘 . Theoretically, it has been shown that Θ(𝑛 2/log 𝑛 ) CNOT gates are required in the worst case [ 30 ]. Consequently, Problem 1 has been addressed by various heuristics, which provide polynomial-time syntheses without aiming at reaching the exact minimum for every instance. The most important ones, including Patel-Markov-Hayes (PMH) Algorithm [ 30 ], AECM and MCG [ 37 ], and GreedyGE [10], are discussed in the following section. Note that Problem 1 is meaningful as long as the considered hardware exhibits full connectivity (i.e., each qubit can directly interact with all other qubits). In many quantum computing paradigms, including superconducting quantum devices [ 4, 21 ], the hardware connectivity is restricted, i.e., not all qubits pair can interact directly. More in detail, to each hardware is associated a topology ,corresponding to the set of pairs of qubits that can interact. In this regard, the operation CNOT (𝑖, 𝑗 )
+
+can be executed natively only when the pair (𝑖, 𝑗 ) belongs to the topology of the device. When this is not the case, interaction typically requires a SWAP operation, which consumes three CNOT 
+
+gates. This motivates the following problem variant. 
+
+Problem 2 (Topology Aware CNOT Minimization). Given a CNOT circuit 𝐶 and a topology T
+
+on 𝑛 qubits, find a decomposition 𝐶 = 𝐶 1 . . . 𝐶 𝑘 of minimal length 𝑘 , where each 𝐶 𝑖 is a CNOT gate between a pair of qubits in T .
+
+This variant introduces additional constraints, making many heuristics developed for Problem 2 (e.g., PMH) not applicable. Also this problem is conjectured to be NP-complete. It was proved the NP-completeness for a variant allowing additional ancilla qubits [ 2 ]. Thus, we cannot rely on exact methods and must instead use alternative greedy solvers as the input dimensions increase. 
+
+3 Related work 
+
+The problem of minimizing CNOT gates has been addressed in the literature with different method-ologies, including exact methods [ 28 , 32 ] and heuristic algorithms [ 10 , 30 , 37 ]. More recently, Reinforcement-Learning (RL) based solutions have been proposed [ 24 , 35 ], due to the ability of RL model to explore efficiently complex solution spaces. These three methodologies are discussed respectively in Sections 3.1, 3.2 and 3.3. 
+
+3.1 Exact Methods 
+
+With exact methods, we refer to approaches that model the problem through a logical encoding to find optimal solutions. A first approach to model CNOT -minimization in the linear reversible circuit setting (i.e., Problem 1) is given in [ 28 ]. In this work, the authors develop an algorithm based on the Boolean Satisfia-bility [ 8 ] (SAT) problem, where each variable is modeled with a boolean value, to minimize the 
+
+CNOT count in gates composed by CNOT and T gates. By representing the circuit through phase polynomials , they build a decision problem to determine whether a circuit with exactly 𝑘 CNOT 
+
+gates exists for a given initial representation. Starting with a given 𝑘 0, if the solver determines the 6 Cossio et al. 
+
+problem as unsatisfiable, the bound 𝑘 is increased. Eventually, the SAT solver finds the minimum 
+
+CNOT count required to implement the target transformation, providing exact optimal solutions. Similarly, in [ 32 ], the authors propose an Answer Set Programming [ 14 ] (ASP) encoding to address exactly Problem 1. In this work, the task is modeled as finding a sequence of CNOT 𝑖 𝑗 to map the initial parity matrix 𝑀 C into the identity matrix 𝐼 𝑛 . At the end of the process, they reverse the order of the sequence found to construct 𝑀 C starting from the identity. These approaches are always guaranteed to obtain the minimal CNOT count. On the other hand, due to their exponential time complexity they do not scale (e.g., in [ 32 ] it is shown that the method does not find a solution in reasonable time for more than 7 qubits). 
+
+3.2 Greedy and heuristic algorithms 
+
+Heuristic algorithms provide quick and scalable solutions, at the cost of optimality. The first heuristic algorithm to address linear reversible circuit synthesis is the Patel-Markov-Hayes (PMH) algorithm [ 30 ]. In this influential work, the authors introduce a variant of classical Gaussian reduction for synthesizing CNOT circuits. The core idea of their algorithm consists of grouping together 𝑚 < 𝑛 
+
+columns and work separately on every section, eliminating duplicate sub-rows and thus reducing the matrix to an upper triangular matrix. Overall, the total number 𝐶 (𝑛 ) of CNOT required, while depending on the choice of 𝑚 , can be upper bounded by 𝑛 2/ 𝛼 log 2 (𝑛 ), for a given 𝛼 ∈ ( 0, 1).After the introduction of PMH, two other heuristic algorithms have been proposed in [ 37 ]: the Alternating Elimination with Cost Minimization method (AECM) and the Multiple CNOT 
+
+Gate method (MCG). Compared to PMH, both AECM and MCG can reduce rows or columns in a nondeterministic fashion, providing a major cost reduction in terms of number of CNOT used. These two algorithms have been shown to perform better than PMH under certain conditions (e.g., number of qubits 𝑛 ). However, they are expected to perform worse than PMH for high number of qubits (i.e., 𝑛 ≥ 64 ). A more recent hybrid approach is represented by the GreedyGE algorithm introduced in [ 10 ]. The parity matrix 𝑀 C of a CNOT circuit C is first decomposed into the product of two triangular matrices, 𝐿 and 𝑈 , through the LU factorization. This allows the algorithm to restrict the search space and apply a greedy row-reduction strategy to 𝐿 and 𝑈 independently. This algorithm was developed to overcome the limitations of both standard Gaussian Elimination —that often gives sub-optimal solutions—and purely greedy search methods, which suffer from poor scalability. 
+
+3.3 Reinforcement Learning 
+
+An alternative approach to tackle the CNOT minimization problem involves the application of Reinforcement Learning (RL) [ 42 , 43 ] models. RL is a branch of Artificial Intelligence, based on an autonomous agent which learns how to make sequences of decisions through interaction with the environment. Every action the agent performs is evaluated by a reward function, reporting a positive or negative response to the agent. The goal of the agent is to reach a final state, starting from an initial one, maximizing the total reward throughout the process. Recently, RL has been proposed for many tasks related to quantum circuit synthesis [ 23 , 26 , 29 ,34, 36, 44], due to the ability of RL to outperform many heuristic algorithms. With regards to CNOT minimization, the first work addressing the topology-aware synthesis (i.e., Problem 2) is [ 24 ]. In this work, the authors consider the problem of circuit synthesis as a 
+
+sequential decision process : at every time step 𝑡 , a chosen CNOT gate 𝑔 𝑡 is applied to the current operator 𝑂 𝑡 resulting in another invertible operator 𝑂 𝑡 +1. Starting from the initial matrix 𝑂 0, the process is iteratively repeated for a given number of steps 𝑇 until the identity operator 𝑂 𝑇 = 𝐼 
+
+is obtained. They exploit curriculum learning [ 5], a strategy in which the agent is asked to solve AlphaCNOT: Learning CNOT Minimization with Model-Based Planning 7
+
+iteratively more complex tasks, and a sparse reward function (i.e., the agent is rewarded only when it reaches the target state) to enhance the agent training. With regard to Problem 2, they show that their proposed agent, based on Proximal Policy Optimization [ 38 ] (PPO), obtain better results than a PMH variant for topology-aware synthesis (i.e., PMH on the unconstrained setting, followed by SABRE [ 45 ] for routing) on a large selection of topologies. More recently, in [ 35 ] the authors address the unconstrained version by employing a PPO agent trained on a fixed dimension ( 𝑛 = 8 qubits), and then evaluate on tasks of different sizes. In particular, to solve instances of smaller sizes 𝑚 < 𝑛 they embed the matrix representation in one of size 𝑛 . For higher dimensions, they first apply a PMH-based reduction to “fix” the first 𝑚 − 𝑛 
+
+columns, and then employ the RL agent to solve the remaining 𝑛 × 𝑛 submatrix. In contrast to [ 24 ], the authors implement an informed reward function based on the Hamming distance. By combining this approach with a curriculum learning where the agent observes “easier” instances before addressing more general, complex ones, they obtain a consistent reduction compared to PMH. Despite their promising results, the approaches implemented in [ 24 ] and [ 35 ] are not optimal, as the problem of CNOT minimization is an instance of a planning problem, over which model-free RL agents can struggle. To address this limitation, in this work we explore a different approach using a model-based RL framework based on Monte Carlo Tree Search. 
+
+4 AlphaCNOT : Learning CNOT Minimization 
+
+Among various reinforcement learning techniques, methods such as Proximality Policy Optimiza-tion [ 38 ] (PPO) are referred to as model-free , since they learn only through interactions with the environment without constructing an explicit model of its dynamics. These methods operate by analyzing sequences of state–action–reward transitions and updating the policy parameters through gradient-based optimization. Since they do not rely on a model of the environment, they are particularly suitable for problems where the system dynamics are unknown (like “CartPole” [3 ]) or difficult to model (like robot simulations) [ 25 ]. On the other hand, model-based algorithms build a model of the environment, which is then used to simulate possible scenarios for future actions [ 42 ]. In complex combinatorial spaces, such as the space of CNOT circuits (i.e, the set of invertible Boolean matrices), their ability to explore efficiently and in a structured way allows them to achieve better and more scalable results. Our framework, shown in Figure 1, is organized as follows. First, the initial circuit is converted to its parity matrix (A) which is embedded in the tree-shaped network (B). Within the search tree, each node corresponds to a specific matrix, while each (directed) edge represents a CNOT gate application that transforms one matrix into another. The exploration criterion is based on the values and policies provided by the corresponding neural networks (C), which evaluate each matrix of the tree. At the end of the process, the chosen path defines a sequence of CNOT moves (D) that define a new equivalent circuit (E). 
+
+4.1 Problem modeling 
+
+The search space of our problem, represented by the set of invertible Boolean matrices, is explored through a tree-based approach. Fixed a problem dimension 𝑛 (corresponding to the number of qubits), a target CNOT circuit C represented by its parity matrix 𝑀 C ∈ M 𝑛 (F2), and possibly a topology T , we aim to find a composition of CNOTs equivalent to C. To this aim, we build a tree in the following way: 8 Cossio et al. 
+
+• The root node represents the target invertible matrix 𝑀 C ;
+
+• Each node 𝑁 is labeled a non-identity matrix 𝑀 and it has a child for each possible CNOT ℎ
+
+in T (in the unconstrained setting, we can suppose T to be the fully-connected graph). The child node is labeled by the matrix obtained by applying CNOT ℎ to 𝑀 ;
+
+• The terminal nodes (i.e., the leaves) are labeled by the identity 𝐼 𝑛 .As described in Section 2, each CNOT ℎ is defined by a control qubit 𝑖 ℎ and target qubit 𝑗 ℎ .Therefore, in the unconstrained setting, each node 𝑁 has Θ(𝑛 2) children. Note that a path from 
+
+𝑀 C to 𝐼 𝑛 describes a sequence of CNOTs CNOT 1, . . . , CNOT 𝑘 , such that (𝐸 1 . . . 𝐸 𝑘 )𝑀 𝐶 = 𝐼 𝑛 , where each 𝐸 𝑖 is the elementary parity matrix corresponding to CNOT 𝑖 , as described in Section 2. For this reason, CNOT 𝑘 . . . CNOT 1 is a decomposition of the target circuit C. In other words, the shortest path from 𝑀 C to 𝐼 𝑛 is a solution of the CNOT minimization problem. See Figure 4 (left-most panel) for a representation of the selection of a suitable path through the search tree. 
+
+4.2 The AlphaCNOT Framework 1, 2 1, 3     
+
+> 4, 1 3, 4
+> 1, 3 1, 4
+> 3, 4
+> Selection 1, 2 1, 3
+> 4, 1 3, 4
+> 1, 3 1, 4
+> 3, 4
+> 4, 3
+> Expansion 1, 2 1, 3
+> 4, 1 3, 4
+> 1, 3 1, 4
+> 3, 4
+> 4, 3
+> Simulation
+> Simulation 1, 2 1, 3
+> 4, 1 3, 4
+> 1, 3 1, 4
+> 3, 4
+> 4, 3
+> Backpropagation
+
+Fig. 4. Four-panel visualization of MCTS paradigm. Selection: starting from the root node, which represents the parity matrix of the initial circuit, a path is selected following the UCT formula. Expansion: whenever a non-terminal leaf is reached the tree is expanded with a new node. Simulation: following the value and policy networks, a thorough rollout is played from the newly expanded node. Backpropagation: all the values and policies are backward updated from the terminal state to the root. 
+
+The model-based method introduced in this paper, AlphaCNOT , adopts a paradigm that integrates deep learning with stochastic search via Monte Carlo Tree Search (MCTS) [ 9]. The latter is a heuristic search algorithm that incrementally builds a search tree via Monte Carlo rollouts, so as to approximate action-value functions. Since the exploration tree becomes exponentially large as training proceeds, Monte Carlo Tree Search addresses this challenge by expanding branches of the tree that promisingly lead to higher expected returns. The MCTS paradigm is composed of four main phases: (1) Selection: starting from the the initial matrix 𝑀 𝐶 , the tree is visited by iteratively choosing 
+
+CNOTs application according to a selection policy (e.g., Upper Confidence Bound for Trees, UCT [ 22 ]) until a leaf node is reached. This policy balances exploration of less-visited nodes and exploitation of nodes with high estimated value; (2) Expansion: if the selected node is non terminal and has unvisited actions, the tree is expanded by applying a new CNOT move, de facto introducing a new child node. A node is terminal either if it is labeled by the identity matrix or it satisfies some other properties described in the environment (e.g., depending on the height of the node). Whenever a terminal node is reached, the iteration goes directly to the Backpropagation step; AlphaCNOT: Learning CNOT Minimization with Model-Based Planning 9
+
+(3) Simulation: from the newly expanded node, a rollout (or playout) is performed by simu-lating a sequence of CNOTs according to a policy until a terminal node is reached and the outcome (or reward) can be calculated; (4) Backpropagation: the result of the simulation is propagated back through the selected path, updating the parameters (visit counts and value estimates) of all nodes encountered during the selection phase. A representation of the four steps is provided in Figure 4. The training process in MCTS proceeds iteratively through a loop of steps 1 − 4. Each iteration starts at the node representing the initial matrix, and follows a selection policy to visit the tree by choosing actions following the tree policy. This descend continues until a leaf node is reached, corresponding either to an unexpanded state or to a terminal state. If the selected node is non-terminal and not fully expanded, the expansion phase comes into play: the tree is extended by adding one or more child nodes corresponding to previously unvisited actions. From the newly expanded node, a rollout is then performed by simulating a sequence of actions according to a given default policy straight to a terminal node. Once the outcome of the simulation is available, the algorithm performs the backpropagation phase, during which the obtained reward is propagated backward along the path from the expanded node to the root. During this process, each visited node updates its visit counts and value estimations, which will be used to guide future selections. This cycle is repeated either a fixed number of iterations or until a predefined time limit. Since a complete exploration of the graph is computationally infeasible, the general algorithm is enriched with two neural networks, called policy network ( 𝑝 ) and value network ( 𝑣 ). The policy network determines a prior probability distribution over the applicable CNOT gates, providing, at each step, a statistical guide that prioritizes gates more likely to lead to the target identity matrix. The value network, on the other hand, provides a continuous estimation of the state’s quality: it informs the algorithm about the potential outcome of a specific branch, without the need for exhaustive and expensive rollouts. 
+
+4.3 Policy and Value Networks 
+
+Both networks share a common architecture based on a Residual MLP (9 layers with 256 neurons each). Our choice is completely arbitrary, even though the framework allows for any neural architecture depending on the task complexity. More in details, each binary matrix 𝑀 is initially flattened into a vector and then mapped to the first hidden layer through a linear transformation. We implemented skip connections every two layers, for a total of three skip connections throughout the net. These residual blocks facilitate the training process both by mitigating the vanishing gradient problem, and by allowing the network to propagate information across layers without losing the structural features of the input matrix. The policy head outputs a probability distribution 𝑝 over the possible CNOT actions, e.g., 𝑛 (𝑛 − 1) in the general all-to-all topology. Conversely, the value head outputs a single number 𝑣 , representing the expected return of the current matrix configuration, i.e., how far is the state from a leaf. 
+
+4.4 Reward Function Design 
+
+When modeling environment’s reward function, it is important to note that the most RL algorithms struggle when the reward space is sparse , e.g., when most episodes have no positive reward. For this reason, a simple reward of the form Reward 𝑆 (𝑀 𝑡 ) =
+
+(
+
+0 if 𝑀 𝑡 ≠ 𝐼 
+
+1 otherwise, (4) 10 Cossio et al. 
+
+despite being natural for this problem, would hinder the learning process, as a non-trained model would have no chance to solve any initial episode, leading to constant reward. A possible solution to this limitation is the use of curriculum learning [ 5 ]. However, it requires to define a distribution of easy and hard instances, introducing additional complexity. To address this limitation, we used an informed reward : in particular, we reward each step 𝑡 
+
+based on the hamming distance Hamming (𝑀 𝑡 , 𝐼 ). In this way we are able to "suggest" a possible direction to the agent to reach the identity matrix, solving the episode. The risk of this approach lies on the consideration that, in the worst-case scenario, the agent can learn a greedy solution, hindering any performance gain compared to heuristics such as GreedyGE. However, since a model trained the informed reward is able to correctly solve the environment (i.e., finding a path to the identity matrix), we combined the informed reward approach with an additional training phase with the simple reward described in Eq. 4, encouraging the agent to choose the right synthesis that minimizes the total number of gates, without focusing exclusively on reducing the overall Hamming distance of the intermediate states. From now on, we denote this combination of informed and non-informed reward as mixed reward . This was proven to be fundamental for achieving superior performance compared the informed reward, as illustrated by the green curve over the purple one in Figure 5. 
+
+5 Experimental Results 
+
+We evaluate our proposed model AlphaCNOT on both linear reversible circuits (Problem 1) and topology aware synthesis (Problem 2). The shared experimental design for both tasks is detailed in Section 5.1. Subsequently, we report and discuss the specific findings for all-to-all and constrained topologies in Sections 5.2 and 5.3, respectively. 
+
+5.1 Experimental Design 
+
+Note that we use the same experimental setting for both cases. In particular, our model is composed of 9 layers with 256 units for both policy and value networks, for a total of up to 1.1M parameters. For the unconstrained problem we use both the informed and mixed rewards as described in Section 4.4. In the mixed setting, we use half of the steps for the informed reward, and half for the simple, uninformed one. For the topology dependent setting, we use only the mixed reward. In particular, we use 80% of the steps for the informed reward, and the remaining for the uninformed. The number of time steps 𝑡 varies between the two settings: in case of all-to-all connectivity we fixed it to 500 k, whereas under topological constraints 750 𝑛 k, where 𝑛 is the number of qubits (i.e., the matrix size). Note that, as shown in Figure 6, in most cases a much smaller amount of steps is required to correctly solve the environment (i.e., the model is able to synthesize the target matrix). For both cases, each matrix is generated on-the-fly by starting from the identity and randomly choosing 𝑛 2 “moves” (i.e., the application of a CNOT ). As each matrix can be obtained (in principle) with at most 𝑂 
+
+ 𝑛 2 
+
+> log 2(𝑛 )
+
+
+
+CNOTs [ 30 ], our process ensure a fair sampling over the space of possible matrices. For the unconstrained case, the action space consists of each ordered pair of qubits (corresponding to each possible CNOT (𝑖, 𝑗 )). In the constrained case, the agent is restricted to use CNOTs according to the considered topology. Finally, the observation space consists of the set of boolean matrices of size 𝑛 × 𝑛 , corresponding to the space of possible parity matrices as described in Section 2.1. All experiments were conducted on a workstation equipped with an NVIDIA GeForce RTX 3090 GPU (24 GB VRAM) and an Intel Xeon W-2123 CPU (4 cores, 8 threads @ 3.60 GHz) with AVX-512 support, supported by 32 GB of DDR4 RAM. We used Python 3.11.14 and JAX [ 6 ] (jaxlib v0.8.1) for AlphaCNOT: Learning CNOT Minimization with Model-Based Planning 11 
+
+both training and validation. More in detail, we make use of the mctx library [ 11 ] for the JAX-native implementation of the Monte Carlo Tree Search. 
+
+5.2 CNOT Synthesis 
+
+To assess our method AlphaCNOT , we test the agent on number of qubits 𝑛 ∈ { 4, 5, 6, 7, 8}. We compare the average number of CNOTs obtained by our method with the results from PMH [ 30 ](implemented on Qiskit [19 ]), AECM [ 37 ], GreedyGE [ 10 ], and the PPO-based with Gaussian Striping solution proposed in [ 35 ], denoted as RL-GS, where the agent is evaluated 100 times for each problem instance to select the best result. Figure 5 presents the comparative analysis of informed and mixed reward settings. It is clear in all five cases that the adoption of the mixed reward (green curve) leads to a significant reduction in mean synthesis length compared to the fully informed one (purple curve). To further evaluate  
+
+> Fig. 5. Performance gain of mixed reward over the informed one in the unconstrained setting. After the reward switch, set at 50% of the total time steps, in all five cases the mean synthesis length diminishes when adopting the mixed reward (green curve) over the fully informed one (purple curve). 12 Cossio et al.
+
+these results, we benchmark our dimension-based RL agents, denoted as “ AlphaCNOT (inf.)” and “AlphaCNOT (mix.)”, against State-Of-The-Art heuristic methods. As RL is inherently non-deterministic, for each instance we evaluate the model 100 times (denoted as “ AlphaCNOT 100 ”), similarly to what is done in [ 35 ] and [ 24 ]. For completeness we report also the results for the model sampled once. Finally, for smaller values of 𝑛 we present the optimal solution, found by the ASP model of [ 32 ]. Note that computing the optimal values for higher 𝑛 was unfeasible under a reasonable timeout threshold of one hour per circuit. The complete performance metrics are reported in Table 1. Problem Size ( 𝑛 )Approach 4 5 6 7 8PMH [30] 6.98 11.07 16.40 22.62 30.58 AECM [37] 6.61 10.58 15.34 21.08 27.51 GreedyGE [10] 7.94 12.34 17.49 23.40 29.81 RL-GS 100 [35] 7.19 11.84 16.20 22.61 28.02 
+
+AlphaCNOT (inf.) 5.38 8.55 12.39 17.85 25.81 
+
+AlphaCNOT (mix.) 5.32 8.31 11.98 17.45 23.64 
+
+AlphaCNOT 100 (inf.) 5.37 8.29 11.44 15.72 21.03 
+
+AlphaCNOT 100 (mix.) 5.32 8.16 11.10 15.41 20.87 
+
+Optimal 5.28 8.01 10.64 - -       
+
+> Table 1. Average CNOT count over a set of 100 random instances. PMH results are obtained from the Qiskit library [ 19 ]. AECM and GreedyGE are obtained by custom implementation of the algorithms. The RL-GS results are reported from the corresponding paper [35]. Best results for each problem size 𝑛 are highlighted in bold. Optimal CNOT count is computed with ASP [14], when computationally feasible.
+
+We can observe that our RL approach addresses efficiently the task, as even when used in a one-shot fashion, our method performs better than all the other algorithms. We also notice that in the one-shot experiments, the mixed algorithm, AlphaCNOT (mix.), outperforms the informed one AlphaCNOT (inf.). However, this advantage becomes subtle when considering the 100-shot experiments. Finally, we observe that the advantages of AlphaCNOT increases with the problem dimension: from a 21 .97% CNOT gate reduction (compared to PMH) with 𝑛 = 4, we obtain 32 .23% 
+
+in the 𝑛 = 8 setting. 
+
+5.3 Topology constrained 
+
+To illustrate the learning dynamics of our approach, we first analyze the training metrics for a representative topology-constrained instance. Figure 6 shows, from top to bottom, the total episode reward, the success rate, and the mean synthesis length for the “6-T” case. We now evaluate our method in the topology constrained case, following the experimental setting provided in [ 24 ]. In particular, we evaluate AlphaCNOT on selected configurations of realistic hardware topologies for up to 8 qubits, derived from the following templates: Linear (L), Y-form, T-form, H-form, and F-form (see Figure 11 in Appendix 6 for further details). We compare our results with the ones based on curriculum learning provided in [ 24 ], denoted as RL-CL. In addition, AlphaCNOT: Learning CNOT Minimization with Model-Based Planning 13 
+
+> Fig. 6. Training Dynamics of “6-T” model. The green upper graph exhibits the total episode reward, while the blue central and purple lower curve describe the success rate and mean synthesis lengths, respectively. The reward switch, set at 80% of the total environment steps, is highlighted by a red dashed line in the small figures aside each panel.
+
+we evaluate as a non RL-based solution PMH combined with SABRE [ 45 ] (where the PMH approach is first applied to the unconstrained setting and SABRE routing is performed afterwards), and with the optimal solution found with ASP on up to 6 qubits. The resulting performance metrics are summarized in Table 2. In addition, we provide a comparison of the final CNOT count normalized over the PMH+SABRE baseline in Figure 7. Notably, AlphaCNOT performance metrics in the 100-shot validation for 𝑛 =
+
+4, 5, 6 are nearly optimal, confirming the efficiency of our method. Note that in all but the 7-Y topology, our method in one-shot fashion performs better than RL-CL with 100-shots. Lastly, we provide the validation time of AlphaCNOT and RL-CL [24] in Appendix 6, Figure 9. 
+
+5.3.1 Mixed over Informed Rewards. To better showcase the advantage of using the mixed reward, we compute the average CNOT reduction over the informed reward. Figure 8 shows the performance 14 Cossio et al.                                                                                                         
+
+> 1-Shot 100-Shot Model Optimal [31] PMH RL-CL 1[24] AlphaCNOT 1(mix.) RL-CL 100 [24] AlphaCNOT 100 (mix.) 4-L 8.96 15.6 10.2 8.97 10.0 8.97
+> 4-Y 7.37 12.9 8.3 7.37 8.1 7.37
+> 5-L 15.18 29.9 17.2 15.46 16.1 15.24
+> 5-T 13.00 24.8 14.8 13.23 13.9 13.03
+> 6-L 23.33 53.3 27.1 24.54 25.4 23.44
+> 6-T 20.50 45.8 23.9 21.47 22.5 20.66
+> 6-Y 19.76 44.4 23.1 20.95 21.6 19.89
+> 7-L -84.3 40.1 37.48 37.5 34.67
+> 7-T -76.2 36.7 33.36 34.3 31.01
+> 7-Y -67.9 34.4 31.54 31.0 28.55
+> 8-H -104.2 48.9 42.40 45.0 38.70
+> 8-F -116.3 52.2 46.35 47.6 42.03
+> 8-T1 -123.5 54.1 49.18 49.5 44.82
+> 8-T2 -106.3 50.6 43.21 45.4 39.19
+> Table 2. Average CNOT count over 100 instances with topology constraints. Optimal CNOT counts are com-puted with ASP [ 31 ]. PMH results are implemented from qiskit library by first using PMH for unconstrained decomposition followed by SABRE routing, consistent with what reported in [ 24 ]. RL-CL (Reinforcement Learning with Curriculum Learning) results are taken from [ 24 ]. AlphaCNOT performance data, both 1-shot and 100-shot, refers to the mixed-reward variant.
+
+gain (in %) obtained by AlphaCNOT (mix.) when switching from the Hamming-based reward to the non-informed one, typically ranging from 9% to 15% on average. Note that all models were able to converge to a success rate of 100%, with the exception of 8-T1 (see Figure 10 in Appendix for additional information). In this case, the reported CNOT Reduction is computed only on the solved instances. 
+
+5.3.2 Ablation study. In this section, we provide a comprehensive ablation study of AlphaCNOT . We investigate how the model’s performance scales with respect to the architectural complexity of the policy and value networks. More in detail, we vary the complexity and expressivity of the networks in terms of hidden units per layer, namely 32, 64, 128, and 256. To provide an estimation of the performance, we train for limited steps (specifically, 75 𝑛𝑘 where 𝑛 is the number of qubits) in mixed setting (80% informed reward and 20% non-informed reward) for the topologies “4-L”, “4-Y”, “5-L”, “5-T”, “6-L” and“6-Y”. The results, summarized in Table 3, exhibit the primary metric of interest, i.e., the mean synthesis length achieved at the end of training. With the only exception of “6-L”, which fails to converge, the other models achieve a 100% success rate in all settings. However, a clear trend emerges: as the network complexity increases, the average length decreases, obtaining more efficient solutions. This behavior confirms that the choice of 256 hidden units for the 9 intermediate layers of the net represents a reasonable trade-off to obtain high-quality solutions at affordable architecture complexity. AlphaCNOT: Learning CNOT Minimization with Model-Based Planning 15 4-L 4-Y 5-L 5-T 6-L 6-T 6-Y       
+
+> 35
+> 40
+> 45
+> 50
+> 55
+> 60
+> 65
+> 70
+> 75
+> Normalized CNOT Count %
+> 7-L 7-T 7-Y 8-H 8-F 8-T1 8-T2
+> 25
+> 30
+> 35
+> 40
+> 45
+> 50
+> 55
+> 60
+> 65
+> Normalized CNOT Count %
+
+Normalized CNOT Count     
+
+> RL-CL (1 Shot) RL-CL (100 Shots) AlphaCNOT (1 Shot) AlphaCNOT (100 Shots) Optimal
+
+Fig. 7. Normalized gate count in the topological setting. Values represent the percentage of operations used by RL-CL [ 24 ] (red) and AlphaCNOT (blue) with respect to the PMH+Sabre baseline (100%). When computationally feasible, the optimal values are provided in green for reference. Lower values indicate higher optimization efficiency. 
+
+Mean Synthesis Length Hidden Size. 4-L 4-Y 5-L 5-T 6-L 6-Y 32 9.10 7.71 16.30 14.05 – 22.98 64 9.14 7.67 16.06 13.70 26.46 22.13 128 9.04 7.61 15.92 13.65 25.41 21.51 256 8.94 7.59 15.53 13.37 24.89 20.97 
+
+Table 3. Ablation study across different configuration scales and topologies. Results are expressed in terms of average synthesis length at the end of the training phase. The rows indicate the number of hidden units per layer in the policy and value functions. While the smallest configuration was unable to solve any instance of 6-L, each other model was able to correctly synthesize all the 100 instances provided. 16 Cossio et al. 4-L 4-Y 5-L 5-T 6-L 6-T 6-Y               
+
+> CNOT Reduction (%)
+> 11.7% 9.3% 11.2% 10.5% 12.5% 12.9% 10.8%
+> 7-L 7-T 7-Y 8-H 8-F 8-T1 8-T2
+> Topology
+> CNOT Reduction (%)
+> 14.4% 12.8% 9.1% 13.9% 15.7% 23.4% 13.5%
+
+Performance Gain of Mixed Reward over Informed Baseline 
+
+Fig. 8. Performance gain of mixed reward AlphaCNOT over Informed Baseline. The table reports the length reduction (in %) obtained when switching from the Hamming-based reward to the non-informed setting. 
+
+6 Conclusion 
+
+As we steadily progress toward the so-called “quantum utility” [ 12 , 16 ] phase of quantum computing, in which quantum technology will become a practical and reliable tool for research and industry, quantum resource optimization will be a central issue to address. In this regard, we addressed the CNOT minimization problem as a prime example of circuit optimization. By combining Reinforcement Learning with MCTS strategies, our model AlphaCNOT obtained a substantial reduction in terms of CNOT gates per circuit, compared to both heuristic methods (such as PMH [ 30 ], AECM [ 37 ], and GreedyGE [ 10 ]) and other PPO-based approaches (like [ 35 ]and [ 24 ]). These promising performances encourage the use of model-based RL algorithms when dealing with challenging problems with high dimensional search space, in which the complete exploration is computationally infeasible. It is interesting to note that, despite our model being precisely designed for finding syntheses of circuits composed solely of CNOT gates, the idea of addressing circuit synthesis with RL models based on AlphaZero [ 40 ] is quite general, and could easily applied to other problems of quantum optimization that are representable as planning tasks. In particular, one future direction that is worth exploring is the minimization of Clifford circuits (i.e. circuits composed by gates in the set 
+
+{CNOT , 𝐻, 𝑆 }), as similarly to linear reversible circuits, they allow for a compact representation. In conclusion, our results suggest that Reinforcement Learning will become a central instrument for quantum optimization, with circuit synthesis representing one of its main challenges. These improvements could be a first turning point to the transition toward quantum utility in the near future, where quantum devices will play a crucial role in addressing classes of problems that exceed the capabilities of classical computers. 
+
+Acknowledgments 
+
+Jacopo Cossio is supported by FSE/FVG PhD Grant on “Computer Science and Artificial Intelligence” (CUP G23C25000620008). AlphaCNOT: Learning CNOT Minimization with Model-Based Planning 17 
+
+This work has been partially supported by INdAM-GNCS project Algebra lineare quantistica, state preparation e compilazione di circuiti quantistici (CUP E53C25002010001) and by the regional project QUASAR-FVG Calcolo e simulazione quantistica: sviluppo, applicazioni e ricerca in Friuli Venezia Giulia (CUP G23C25001510002). 
+
+References 
+
+[1] Daniel S. Abrams and Seth Lloyd. 1999. Quantum Algorithm Providing Exponential Speed Increase for Finding Eigenvalues and Eigenvectors. Physical Review Letters 83 (1999), 5162–5165. [2] Matthew Amy, Parsiad Azimzadeh, and Michele Mosca. 2018. On the controlled-NOT complexity of controlled-NOT–phase circuits. Quantum Science and Technology 4 (2018), 015002. [3] Charles W. Anderson Andrew G. Barto, Richard S. Sutton. 1983. Neuronlike adaptive elements that can solve difficult learning control problems. IEEE Transactions on Systems, Man, and Cybernetics SMC 13 (1983), 834–846. [4] Frank Arute, Kunal Arya, Ryan Babbush, Dave Bacon, Joseph C Bardin, Rami Barends, Rupak Biswas, Sergio Boixo, Fernando GSL Brandao, David A Buell, et al . 2019. Quantum supremacy using a programmable superconducting processor. Nature 574 (2019), 505–510. [5] Yoshua Bengio, Jérôme Louradour, Ronan Collobert, and Jason Weston. 2009. Curriculum learning. In Proceedings of the 26th annual international conference on machine learning .[6] James Bradbury, Roy Frostig, Peter Hawkins, Matthew James Johnson, Chris Leary, Dougal Maclaurin, George Necula, Adam Paszke, Jake VanderPlas, Skye Wanderman-Milne, and Qiao Zhang. 2018. JAX: composable transformations of Python+NumPy programs .[7] Colin D Bruzewicz, John Chiaverini, Robert McConnell, and Jeremy M Sage. 2019. Trapped-ion quantum computing: Progress and challenges. Applied physics reviews 6 (2019). [8] Stephen A. Cook. 1971. The complexity of theorem-proving procedures. In Proceedings of the third annual ACM symposium on Theory of computing .[9] Rémi Coulom. 2007. Efficient Selectivity and Backup Operators in Monte-Carlo Tree Search. In Computers and Games: 5th International Conference, CG 2006, Turin, Italy, May 29-31, 2006. Revised Papers .[10] Timothée Goubault de Brugière, Marc Baboulin, Benoît Valiron, Simon Martiel, and Cyril Allouche. 2021. Gaussian elimination versus greedy methods for the synthesis of linear reversible circuits. ACM Transactions on Quantum Computing 2 (2021), 1–26. [11] DeepMind, Igor Babuschkin, Kate Baumli, Alison Bell, Surya Bhupatiraju, Jake Bruce, Peter Buchlovsky, David Budden, Trevor Cai, Aidan Clark, Ivo Danihelka, Antoine Dedieu, Claudio Fantacci, Jonathan Godwin, Chris Jones, Ross Hemsley, Tom Hennigan, Matteo Hessel, Shaobo Hou, Steven Kapturowski, Thomas Keck, Iurii Kemaev, Michael King, Markus Kunesch, Lena Martens, Hamza Merzic, Vladimir Mikulik, Tamara Norman, George Papamakarios, John Quan, Roman Ring, Francisco Ruiz, Alvaro Sanchez, Laurent Sartran, Rosalia Schneider, Eren Sezener, Stephen Spencer, Srivatsan Srinivasan, Miloš Stanojević, Wojciech Stokowiec, Luyu Wang, Guangyao Zhou, and Fabio Viola. 2020. The DeepMind JAX Ecosystem . http://github.com/deepmind [12] Jens Eisert and John Preskill. 2025. Mind the gaps: The fraught road to quantum advantage. arXiv:2510.19928 [quant-ph] https://arxiv.org/abs/2510.19928 [13] Edward Farhi, Jeffrey Goldstone, and Sam Gutmann. 2014. A Quantum Approximate Optimization Algorithm. arXiv:1411.4028 [quant-ph] https://arxiv.org/abs/1411.4028 [14] Martin Gebser, Roland Kaminski, Benjamin Kaufmann, and Torsten Schaub. 2013. Answer Set Solving in Practice .Springer International Publishing. [15] Harper R. Grimsley, Sophia E. Economou, Edwin Barnes, and Nicholas J. Mayhall. 2019. An adaptive variational algorithm for exact molecular simulations on a quantum computer. Nature Communications 10 (2019), 3007. [16] Nils Herrmann, Daanish Arya, Marcus W. Doherty, Angus Mingare, Jason C. Pillay, Florian Preis, and Stefan Prestel. 2023. Quantum utility – definition and assessment of a practical quantum advantage . In 2023 IEEE International Conference on Quantum Software (QSW) .[17] Minki Hhan, Takashi Yamakawa, and Aaram Yun. 2024. Quantum Complexity for Discrete Logarithms and Related Problems. In Advances in Cryptology – CRYPTO 2024 .[18] Toshinari Itoko, Rudy Raymond, Takashi Imamichi, and Atsushi Matsuo. 2020. Optimization of quantum circuit mapping using gate transformation and commutation. Integration 70 (2020), 43–50. [19] Ali Javadi-Abhari, Matthew Treinish, Kevin Krsulich, Christopher J. Wood, Jake Lishman, Julien Gacon, Simon Martiel, Paul D. Nation, Lev S. Bishop, Andrew W. Cross, Blake R. Johnson, and Jay M. Gambetta. 2024. Quantum computing with Qiskit. arXiv:2405.08810 [quant-ph] [20] Jiaqing Jiang, Xiaoming Sun, Shang-Hua Teng, Bujiao Wu, Kewen Wu, and Jialin Zhang. 2020. Optimal Space-Depth Trade-Off of CNOT Circuits in Quantum Logic Synthesis . 213–229. 18 Cossio et al. 
+
+[21] Petar Jurcevic, Ali Javadi-Abhari, Lev S Bishop, Isaac Lauer, Daniela F Bogorin, Markus Brink, Lauren Capelluto, Oktay Günlük, Toshinari Itoko, Naoki Kanazawa, Abhinav Kandala, George A Keefe, Kevin Krsulich, William Landers, Eric P Lewandowski, Douglas T McClure, Giacomo Nannicini, Adinath Narasgond, Hasan M Nayfeh, Emily Pritchett, Mary Beth Rothwell, Srikanth Srinivasan, Neereja Sundaresan, Cindy Wang, Ken X Wei, Christopher J Wood, Jeng-Bang Yau, Eric J Zhang, Oliver E Dial, Jerry M Chow, and Jay M Gambetta. 2021. Demonstration of quantum volume 64 on a superconducting quantum computing system. Quantum Science and Technology 6 (2021), 025020. [22] Levente Kocsis and Csaba Szepesvári. 2006. Bandit Based Monte-Carlo Planning. In Machine Learning: ECML 2006, 17th European Conference on Machine Learning .[23] David Kremer, Ali Javadi-Abhari, and Priyanka Mukhopadhyay. 2025. Optimizing the non-Clifford-count in unitary synthesis using Reinforcement Learning. arXiv:2509.21709 [quant-ph] [24] David Kremer, Victor Villar, Hanhee Paik, Ivan Duran, Ismael Faro, and Juan Cruz-Benito. 2024. Practical and efficient quantum circuit synthesis and transpiling with reinforcement learning. arXiv:2405.13196 (2024). [25] Sergey Levine, Peter Pastor, Alex Krizhevsky, Julian Ibarz, and Deirdre Quillen. 2018. Learning hand-eye coordination for robotic grasping with deep learning and large-scale data collection. The International Journal of Robotics Research 
+
+37 (2018), 421–436. [26] Daniele Lizzio Bosco, Lukasz Cincio, Giuseppe Serra, and M. Cerezo. 2026. Quantum Circuit Pre-Synthesis: Learning Local Edits to Reduce 𝑇 -count. arXiv:2601.19738 [quant-ph] [27] Seth Lloyd. 1996. Universal Quantum Simulators. Science 273 (1996), 1073–1078. [28] Giulia Meuli, Mathias Soeken, and Giovanni Micheli. 2018. SAT-based CNOT, T Quantum Circuit Synthesis: 10th International Conference, RC 2018, Leicester, UK, September 12-14, 2018, Proceedings . 175–188. [29] Kouhei Nakaji, Jonathan Wurtz, Haozhe Huang, Luis Mantilla Calderón, Karthik Panicker, Elica Kyoseva, and Alán Aspuru-Guzik. 2025. Quantum circuits as a game: A reinforcement learning agent for quantum compilation and its application to reconfigurable neutral atom arrays. arXiv:2506.05536 [quant-ph] [30] Ketan N. Patel, Igor L. Markov, and John P. Hayes. 2003. Efficient Synthesis of Linear Reversible Circuits. Quantum Information and Computation 8 (2003), 282–294. [31] Carla Piazza and Riccardo Romanello. 2023. Synthesis of CNOT minimal quantum circuits with topological constraints through ASP. In Proceedings of the International Workshop on AI for Quantum and Quantum for AI (AIQxQIA 2023) (CEUR Workshop Proceedings) .[32] Carla Piazza, Riccardo Romanello, and Robert Wille. 2023. An ASP Approach for the Synthesis of CNOT Mini-mal Quantum Circuits. In Proceedings of the 38th Italian Conference on Computational Logic, 2023 (CEUR Workshop Proceedings) .[33] John Preskill. 2018. Quantum Computing in the NISQ era and beyond. Quantum 2 (2018), 79. [34] Jordi Riu, Jan Nogué, Gerard Vilaplana, Artur Garcia-Saez, and Marta P. Estarellas. 2025. Reinforcement Learning Based Quantum Circuit Optimization via ZX-Calculus. Quantum 9 (2025), 1758. [35] Riccardo Romanello, Daniele Lizzio Bosco, Jacopo Cossio, Dusan Sutulovic, Giuseppe Serra, Carla Piazza, and Paolo Burelli. 2025. CNOT Minimal Circuit Synthesis: A Reinforcement Learning Approach. In 2025 IEEE International Conference on Quantum Artificial Intelligence (QAI) .[36] Francisco J. R. Ruiz, Tuomas Laakkonen, Johannes Bausch, Matej Balog, Mohammadamin Barekatain, Francisco J. H. Heras, Alexander Novikov, Nathan Fitzpatrick, Bernardino Romera-Paredes, John van de Wetering, Alhussein Fawzi, Konstantinos Meichanetzidis, and Pushmeet Kohli. 2025. Quantum Circuit Optimization with AlphaTensor. Nature Machine Intelligence 7 (2025), 374–385. [37] Ben Schaeffer and Marek Perkowski. 2014. A Cost Minimization Approach to Synthesis of Linear Reversible Circuits. arXiv:1407.0070 [cs.ET] [38] John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Radford, and Oleg Klimov. 2017. Proximal Policy Optimization Algorithms. arXiv:1707.06347 [39] Peter W. Shor. 1994. Algorithms for quantum computation: discrete logarithms and factoring. In Proceedings 35th Annual Symposium on Foundations of Computer Science .[40] David Silver, Thomas Hubert, Julian Schrittwieser, Ioannis Antonoglou, Matthew Lai, Arthur Guez, Marc Lanctot, Laurent Sifre, Dharshan Kumaran, Thore Graepel, et al. 2017. Mastering chess and shogi by self-play with a general reinforcement learning algorithm. arXiv:1712.01815 (2017). [41] David Silver, Julian Schrittwieser, Karen Simonyan, Ioannis Antonoglou, Aja Huang, Arthur Guez, Thomas Hubert, Lucas Baker, Matthew Lai, Adrian Bolton, et al . 2017. Mastering the game of go without human knowledge. Nature 
+
+550 (2017), 354–359. [42] Richard S. Sutton, Andrew G. Barto, et al. 1998. Reinforcement learning: An introduction . Vol. 1. [43] Richard S. Sutton, David McAllester, Satinder Singh, and Yishay Mansour. 1999. Policy gradient methods for reinforce-ment learning with function approximation. Advances in neural information processing systems 12 (1999). AlphaCNOT: Learning CNOT Minimization with Model-Based Planning 19 
+
+[44] Z. T. Wang, Qiuhao Chen, Yuxuan Du, Z. H. Yang, Xiaoxia Cai, Kaixuan Huang, Jingning Zhang, Kai Xu, Jun Du, Yinan Li, Yuling Jiao, Xingyao Wu, Wu Liu, Xiliang Lu, Huikai Xu, Yirong Jin, Ruixia Wang, Haifeng Yu, and S. P. Zhao. 2024. Quantum Compiling with Reinforcement Learning on a Superconducting Processor. arXiv:2406.12195 [quant-ph] [45] Henry Zou, Matthew Treinish, Kevin Hartman, Alexander Ivrii, and Jake Lishman. 2024. LightSABRE: A lightweight and enhanced SABRE algorithm. arXiv:2409.08368 (2024). 20 Cossio et al. 
+
+# Appendices 
+
+This section provides supplementary materials, metrics and experimental results that support our algorithm, AlphaCNOT . The content is organized as follows: Appendix A presents a detailed time complexity and performance analysis of the methods employed in the topological setting; Appendix B reports additional insights and metrics regarding the training performance of the topological case “8-T1”; finally, Appendix C describes the topological structures adopted in our study. 
+
+A Inference Time Analysis 
+
+Figure 9 reports the inference times for RL-CL (as reported in [ 24 ]) and AlphaCNOT on Problem 2. We also report the time required to find the optimal solution with ASP (in particular, times for up to 6 qubits are computed on our machine, while the time for 7 qubit is estimated via an exponential regression, leading to an underestimation of the real required time). We note that AlphaCNOT requires more time compared to what is reported for RL-CL. Despite the difference in hardware playing a relevant role in this discrepancy, it is important to note that tree-based search is, in general, computationally complex. However, even when used in a 100-shots fashion, our model required less than 2 minutes per circuit, with small differences between different topologies and qubit counts. On the other hand, optimal solutions for 6 qubits required up to 30 minutes. A conservative estimation suggests that for 7 qubits, ASP would require at least 2 hours per circuit. 4-L 5-L 6-L 7-L              
+
+> Topology
+> 10 −4
+> 10 −2
+> 10 0
+> 10 2
+> 10 4
+> Time (s)
+> L Topology
+> 4-Y 5-L 6-Y 7-Y
+> Topology
+> Y Topology
+> 4-Y 5-T 6-T 7-T
+> Topology
+> T Topology
+> 8-F 8-H 8-T1 8-T2
+> Topology
+> Size 8 Topologies
+> Optimal RL-CL AlphaCNOT RL-CL (100 shots) AlphaCNOT (100 shots)
+
+Fig. 9. Inference time evaluation across all tested topologies. Results for RL-CL are reported from [ 24 ]. The time for the optimal solution in ASP is computed for topologies up to 6 qubits. For 7 qubits is estimated via regression represent a clear underestimate. Values with empty marks (e.g. 5-L in the second plot with Y topologies) are selected between topologies with highest similarity (see Figure 11). 
+
+B Additional Training Process Analysis 
+
+Figure 10 reports three panels showing the training metrics of the AlphaCNOT models across the “6-Y”, “7-L”, and “8-T1” topologies. After the reward switch, set at 80% of the total time steps, the total episode reward improves without compromising the success rate. In fact, in all cases the model succeeded in reaching a 100% success rate within the initial informed phase, except for the “8-T1” topology, which is particularly challenging. In this scenario, the mixed reward is fundamental in order to achieve a complete understanding of the problem’s dynamics, enabling the model to achieve a 100% success rate and effectively reducing the mean synthesis length by a significant 23%. AlphaCNOT: Learning CNOT Minimization with Model-Based Planning 21 
+
+(a) 6-Y topology (b) 7-L topology (c) 8-T1 topology Fig. 10. Training Dynamics of “6-Y”, “7-L”, and “8-T1” models shown as three parallel panels. Each panel uses the same placeholder image. The green upper graph represents the total episode reward, while the blue central and purple lower curve describe the success rate and mean synthesis lengths, respectively. The red dashed line highlights the reward switch set at 80% of total time steps. 
+
+C Topological Structures 
+
+In this final section, we present the topologies used in the comparative analysis with the RL-CL method [ 24 ]. The nodes of the graphs represent the physical qubits, while the edges denote the connectivity constraints of the specific hardware architecture. In all evaluated cases, the graphs are considered undirected, i.e., any connection (𝑖, 𝑗 ) permits the execution of both CNOT 𝑖 𝑗 and 
+
+CNOT 𝑗𝑖 operations without distinction. 22 Cossio et al. 0
+
+> 1
+> 2
+> 3
+
+(a) 4-L 0 
+
+> 1
+> 2
+> 3
+
+(b) 4-Y 0 
+
+> 1
+> 2
+> 3
+> 4
+
+(c) 5-L 0  
+
+> 1
+> 2
+> 34
+
+(d) 5-T 0
+
+> 1
+> 2
+> 3
+> 4
+> 5
+
+(e) 6-L 0 
+
+> 1
+> 2
+> 3
+> 4
+> 5
+
+(f) 6-Y 0 
+
+> 1
+> 2
+> 3
+> 4
+> 5
+> 6
+
+(g) 7-L 01 
+
+> 2
+> 3
+> 4
+> 5
+> 6
+
+(h) 7-T 0
+
+> 1
+> 2
+> 3
+> 4
+> 5
+> 6
+
+(i) 7-Y 0 
+
+> 1
+> 2
+> 3
+> 4
+> 5
+> 6
+> 7
+
+(j) 8-H 0 
+
+> 1
+> 2
+> 3
+> 4
+> 5
+> 6
+> 7
+
+(k) 8-F 0 
+
+> 12
+> 3
+> 4
+> 5
+> 6
+> 7
+
+(l) 8-T1 0
+
+> 1
+> 2
+> 3
+> 4
+> 5
+> 6
+> 7
+
+(m) 8-T2 Fig. 11. Complete set of the fourteen hardware topologies considered in the study, spanning configurations from four to eight qubits. The nomenclature is based on the shape and is consistent with what is provided in [24].

@@ -1,0 +1,102 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.13812v1/fig-001.webp",
+      "caption": "Fig. 5. Performance gain of mixed reward over the informed one in the unconstrained setting. After the reward switch, set at 50% of the total time steps, in all five cases the mean synthesis length diminishes when adopting the mixed reward (green curve) over the fully informed one (purple curve).",
+      "page": 11,
+      "index": 1,
+      "width": 414,
+      "height": 766
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13812v1/fig-002.webp",
+      "caption": "Fig. 7. Normalized gate count in the topological setting. Values represent the percentage of operations used by RL-CL [24] (red) and AlphaCNOT (blue) with respect to the PMH+Sabre baseline (100%). When computationally feasible, the optimal values are provided in green for reference. Lower values indicate higher optimization efficiency.",
+      "page": 15,
+      "index": 2,
+      "width": 786,
+      "height": 629
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13812v1/fig-003.webp",
+      "caption": "Fig. 10. Training Dynamics of “6-Y”, “7-L”, and “8-T1” models shown as three parallel panels. Each panel uses the same placeholder image. The green upper graph represents the total episode reward, while the blue central and purple lower curve describe the success rate and mean synthesis lengths, respectively. The red dashed line highlights the reward switch set at 80% of total time steps.",
+      "page": 21,
+      "index": 3,
+      "width": 827,
+      "height": 443
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13812v1/fig-004.webp",
+      "caption": "Fig. 1. AlphaCNOT Framework. A: The target circuit is encoded into its parity matrix. B: The system dynamics are modeled as a tree, where nodes corresponds to different circuits obtainable from the starting parity matrix, based on the values and policies of each node estimated by a pair of Neural Networks (C). D: Eventually, a suitable path from the root node to the identity matrix is identified. E: The CNOT sequence corresponding to the selected path is reversed to produce the optimized circuit.",
+      "page": 2,
+      "index": 4,
+      "width": 699,
+      "height": 450
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13812v1/fig-005.webp",
+      "caption": "Fig. 11. Complete set of the fourteen hardware topologies considered in the study, spanning configurations from four to eight qubits. The nomenclature is based on the shape and is consistent with what is provided in [24].",
+      "page": 22,
+      "index": 5,
+      "width": 806,
+      "height": 766
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13812v1/fig-006.webp",
+      "caption": "Table 2. Average CNOT count over 100 instances with topology constraints. Optimal CNOT counts are computed with ASP [31]. PMH results are implemented from qiskit library by first using PMH for unconstrained decomposition followed by SABRE routing, consistent with what reported in [24]. RL-CL (Reinforcement Learning with Curriculum Learning) results are taken from [24]. AlphaCNOT performance data, both 1-shot and 100-shot, refers to the mixed-reward variant.",
+      "page": 14,
+      "index": 6,
+      "width": 823,
+      "height": 473
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13812v1/fig-007.webp",
+      "caption": "Fig. 6. Training Dynamics of “6-T” model. The green upper graph exhibits the total episode reward, while the blue central and purple lower curve describe the success rate and mean synthesis lengths, respectively. The reward switch, set at 80% of the total environment steps, is highlighted by a red dashed line in the small figures aside each panel.",
+      "page": 13,
+      "index": 7,
+      "width": 498,
+      "height": 745
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13812v1/fig-008.webp",
+      "caption": "Fig. 4. Four-panel visualization of MCTS paradigm. Selection: starting from the root node, which represents the parity matrix of the initial circuit, a path is selected following the UCT formula. Expansion: whenever a non-terminal leaf is reached the tree is expanded with a new node. Simulation: following the value and policy networks, a thorough rollout is played from the newly expanded node. Backpropagation: all the values and policies are backward updated from the terminal state to the root.",
+      "page": 8,
+      "index": 8,
+      "width": 819,
+      "height": 235
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13812v1/fig-009.webp",
+      "caption": "Fig. 2. Parity matrix𝑀C of a given circuit C.",
+      "page": 4,
+      "index": 9,
+      "width": 790,
+      "height": 198
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13812v1/fig-010.webp",
+      "caption": "Table 1. Average CNOT count over a set of 100 random instances. PMH results are obtained from the Qiskit library [19]. AECM and GreedyGE are obtained by custom implementation of the algorithms. The RL-GS results are reported from the corresponding paper [35]. Best results for each problem size 𝑛 are highlighted in bold. Optimal CNOT count is computed with ASP [14], when computationally feasible.",
+      "page": 12,
+      "index": 10,
+      "width": 652,
+      "height": 444
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13812v1/fig-011.webp",
+      "caption": "Fig. 9. Inference time evaluation across all tested topologies. Results for RL-CL are reported from [24]. The time for the optimal solution in ASP is computed for topologies up to 6 qubits. For 7 qubits is estimated via regression represent a clear underestimate. Values with empty marks (e.g. 5-L in the second plot with Y topologies) are selected between topologies with highest similarity (see Figure 11).",
+      "page": 20,
+      "index": 11,
+      "width": 815,
+      "height": 225
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13812v1/fig-012.webp",
+      "caption": "Fig. 8. Performance gain of mixed reward AlphaCNOT over Informed Baseline. The table reports the length reduction (in %) obtained when switching from the Hamming-based reward to the non-informed setting.",
+      "page": 16,
+      "index": 12,
+      "width": 484,
+      "height": 390
+    }
+  ]
+}

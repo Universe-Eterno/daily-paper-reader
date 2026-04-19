@@ -1,0 +1,54 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.12920v1/fig-001.webp",
+      "caption": "Fig. 3: Performance comparison among different methods under varying network scales (N ∈ {50, 100, 150, 200, 300, 500}, K ∈ {5, 10}).",
+      "page": 11,
+      "index": 1,
+      "width": 1066,
+      "height": 274
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12920v1/fig-002.webp",
+      "caption": "TABLE I: Comparison of assignment strategies across different network scales, evaluated by AoVB (A), BAR (η), and hybrid cost (J̄ ) (averaged over K clusters).",
+      "page": 13,
+      "index": 2,
+      "width": 524,
+      "height": 378
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12920v1/fig-003.webp",
+      "caption": "Fig. 6: Training curves under varying network scales and cluster counts (N ∈ {50, 100}, K ∈ {5, 10}).",
+      "page": 13,
+      "index": 3,
+      "width": 1057,
+      "height": 270
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12920v1/fig-004.webp",
+      "caption": "TABLE II: Ablation study on the feasibility pruning mechanism, evaluated by AoVB (A), BAR (η), and hybrid cost (J̄ ) (averaged over K clusters).",
+      "page": 13,
+      "index": 4,
+      "width": 520,
+      "height": 290
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12920v1/fig-005.webp",
+      "caption": "Fig. 4: Block propagation trajectories under varying network scales (N ∈ {100, 200}) and cluster counts (K ∈ {5, 10}).",
+      "page": 12,
+      "index": 5,
+      "width": 1062,
+      "height": 277
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12920v1/fig-006.webp",
+      "caption": "Fig. 5: Ablation studies on the two core designs, evaluated by the hybrid cost across varying network scales (N ∈ {50, 100, 150, 200, 300, 500}) and cluster counts (K ∈ {5, 10}).",
+      "page": 12,
+      "index": 6,
+      "width": 925,
+      "height": 334
+    }
+  ]
+}
