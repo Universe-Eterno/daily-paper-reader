@@ -1,0 +1,86 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.10952v1/fig-001.webp",
+      "caption": "Table 1: Performance across in-domain and out-of-domain datasets for PHI-3 on MATHINSTRUCT, batch size ∣B∣ = 128 and total budget k = 64. For completeness and a fair evaluation, results are reported under two configurations for all baselines: source-wise(left of “/”) and batch-wise (right of “/”). UniPROT consistently beats baselines in both configurations.",
+      "page": 7,
+      "index": 1,
+      "width": 998,
+      "height": 195
+    },
+    {
+      "url": "assets/figures/arxiv/2604.10952v1/fig-002.webp",
+      "caption": "Figure 4: Validation perplexity dynamics on PHI-3, ZEPHYR-3B and PHI-2 during training vs top 3 best-performing baselines on MATHINSTRUCT. UniPROT-PS consistently outperforms other baselines.",
+      "page": 7,
+      "index": 2,
+      "width": 773,
+      "height": 210
+    },
+    {
+      "url": "assets/figures/arxiv/2604.10952v1/fig-003.webp",
+      "caption": "Figure 3: Minority Class Accuracy Analysis:On CIFAR10-LT and synthetic MNIST, UniPROT outperforms k-medoids on minority classes. (Top Left): Average minority-class accuracy vs. prototype count. (Bottom Left): CIFAR10 minority class-wise accuracy (avg. over 3 runs). (Top Right): MNIST with Induced Skew: (i) classes 0 and 5 both at 5% each (other classes at 90%), and (ii) classes 0 and 7 both at 3% each (other classes at 94%). (Bottom Right): UniPROT on average out-performs k-medoids across different skew variations for minority classes.",
+      "page": 7,
+      "index": 3,
+      "width": 1012,
+      "height": 580
+    },
+    {
+      "url": "assets/figures/arxiv/2604.10952v1/fig-004.webp",
+      "caption": "Figure 7: Approximate vs. actual marginal gain as a function of the entropic regularization parameter λ. Increasing λ reduces the approximation error, with the marginal gain ratio converging to 1 and exhibiting low variance for larger λ values.",
+      "page": 22,
+      "index": 4,
+      "width": 1002,
+      "height": 297
+    },
+    {
+      "url": "assets/figures/arxiv/2604.10952v1/fig-005.webp",
+      "caption": "Figure 1: k-medoids (4) consistently learn skewed weights for prototypes on CIFAR10. The plot shows ranked weights of prototypes, averaged over 5 runs.",
+      "page": 3,
+      "index": 5,
+      "width": 413,
+      "height": 291
+    },
+    {
+      "url": "assets/figures/arxiv/2604.10952v1/fig-006.webp",
+      "caption": "Table 6: Per-batch performance across in-domain and out-of-domain datasets for PHI-3 on MATHINSTRUCT, batch size ∣B∣ = 128 and total budget k = 64. We compare FT, GradNorm, COLM, GREATS, and UniPROT (Ours).",
+      "page": 23,
+      "index": 6,
+      "width": 914,
+      "height": 196
+    },
+    {
+      "url": "assets/figures/arxiv/2604.10952v1/fig-007.webp",
+      "caption": "Table 7: Top: Per-batch performance of FT, GradNorm, COLM, GREATS, and UniPROT on MATHINSTRUCT with ∣B∣ = 128, k = 64. Bottom: Validation perplexity when ∣B∣ = 128, subset ratio 50%, and prototype selection is batch-wise.",
+      "page": 23,
+      "index": 7,
+      "width": 505,
+      "height": 390
+    },
+    {
+      "url": "assets/figures/arxiv/2604.10952v1/fig-008.webp",
+      "caption": "Figure 9: Zephyr-3b Validation perplexity when bs=128 and subset ratio 25% and prototype selection is batch wise.",
+      "page": 23,
+      "index": 8,
+      "width": 506,
+      "height": 391
+    },
+    {
+      "url": "assets/figures/arxiv/2604.10952v1/fig-009.webp",
+      "caption": "Table 8: Performance across in-domain and out-of-domain datasets for ZEPHYR-3B on MATHINSTRUCT, batch size ∣B∣ = 128 and total budget k = 32. Results are reported under two configurations for all baselines: source-wise (left of “/”) and batch-wise (right of “/”).",
+      "page": 24,
+      "index": 9,
+      "width": 998,
+      "height": 211
+    },
+    {
+      "url": "assets/figures/arxiv/2604.10952v1/fig-010.webp",
+      "caption": "Table 9: Performance across in-domain and out-of-domain datasets for PHI-2 on MATHINSTRUCT, batch size ∣B∣ = 128 and total budget k = 32. Results are reported under two configurations for all baselines: source-wise (left of “/”) and batchwise (right of “/”).",
+      "page": 24,
+      "index": 10,
+      "width": 998,
+      "height": 210
+    }
+  ]
+}

@@ -1,0 +1,118 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.11188v1/fig-001.webp",
+      "caption": "Figure 6: Comparison between simple prompts and more complex prompts (using the Qwen series prompt templates as an example).",
+      "page": 15,
+      "index": 1,
+      "width": 477,
+      "height": 504
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11188v1/fig-002.webp",
+      "caption": "Figure 9: Prompt for the Proposer.",
+      "page": 21,
+      "index": 2,
+      "width": 950,
+      "height": 1021
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11188v1/fig-003.webp",
+      "caption": "Table 4: Isolating Problem Quality. By standardizing response generation for all datasets, we observe consistent gains under both SFT and IDPO. This confirms that the superiority of MathAgent stems from the inherent logical quality of the synthesized problems, independent of response-level variance.",
+      "page": 7,
+      "index": 3,
+      "width": 447,
+      "height": 298
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11188v1/fig-004.webp",
+      "caption": "Figure 11: Prompt for the Moderator",
+      "page": 22,
+      "index": 4,
+      "width": 950,
+      "height": 609
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11188v1/fig-005.webp",
+      "caption": "Figure 10: Prompt for the Critic.",
+      "page": 22,
+      "index": 5,
+      "width": 950,
+      "height": 664
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11188v1/fig-006.webp",
+      "caption": "Figure 1: The MathAgent Framework. The framework consists of two decoupled phases: (1) Meta-Level Structural Evolution, where a tri-agent Legislator system (Proposer, Critic, and Moderator) iteratively optimizes a Constraint Graph G based on Style Tokens S; and (2) Base-Level Semantic Instantiation, where the Executor grounds the optimized structural blueprint into natural language problems Q and reasoning chains A.",
+      "page": 3,
+      "index": 6,
+      "width": 939,
+      "height": 375
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11188v1/fig-007.webp",
+      "caption": "Figure 12: Prompt for the Question Synthesizer.",
+      "page": 23,
+      "index": 7,
+      "width": 950,
+      "height": 637
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11188v1/fig-008.webp",
+      "caption": "Figure 4: t-SNE Visualization of Knowledge Points. The extensive coverage of the dark blue points (representing our method) demonstrates the significant diversity of the generated mathematical problems.",
+      "page": 8,
+      "index": 8,
+      "width": 458,
+      "height": 337
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11188v1/fig-009.webp",
+      "caption": "Figure 3: Intra-dataset Similarity Distribution. The bars represent frequency counts, while the curves denote Kernel Density Estimation (KDE). The results demonstrate that our method exhibits lower intra-similarity, indicating superior dataset diversity.",
+      "page": 8,
+      "index": 9,
+      "width": 458,
+      "height": 346
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11188v1/fig-010.webp",
+      "caption": "Figure 13: Prompts for Evaluating Mathematical Problem Quality and Difficulty.",
+      "page": 24,
+      "index": 10,
+      "width": 950,
+      "height": 1396
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11188v1/fig-011.webp",
+      "caption": "Figure 8: Case Study.",
+      "page": 20,
+      "index": 11,
+      "width": 950,
+      "height": 1379
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11188v1/fig-012.webp",
+      "caption": "Table 1: Main Results. Model performance comparison on eight mathematical benchmarks (scores in %). Our synthesized dataset outperforms existing open-source baselines (LIMO and s1K) for SFT across multiple models.",
+      "page": 5,
+      "index": 12,
+      "width": 939,
+      "height": 1026
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11188v1/fig-013.webp",
+      "caption": "Table 7: Training Hyperparameters for Different Models. Note that \"×8\" in the batch size column denotes the total batch size calculated as per-device batch size × number of devices (8).",
+      "page": 16,
+      "index": 13,
+      "width": 431,
+      "height": 304
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11188v1/fig-014.webp",
+      "caption": "Figure 7: Average Maximum Similarity Between Training and Test Datasets: A lower similarity score indicates a reduced likelihood of data leakage. This figure demonstrates that our synthetic data does not carry a higher risk of data leakage compared to LIMO and s1K.",
+      "page": 16,
+      "index": 14,
+      "width": 950,
+      "height": 269
+    }
+  ]
+}

@@ -1,0 +1,1241 @@
+Title: UniPROT: Uniform Prototype Selection via Partial Optimal Transport with Submodular Guarantees
+
+URL Source: https://arxiv.org/pdf/2604.10952v1
+
+Published Time: Tue, 14 Apr 2026 02:03:07 GMT
+
+Number of Pages: 25
+
+Markdown Content:
+# Uniform Prototype Selection via Partial Optimal Transport with Submodular Guarantees 
+
+Prateek Chanda 1*† Prayas Agrawal 3* Karthik S. Gurumoorthy 4
+
+Ganesh Ramakrishnan 1,2 Bamdev Mishra 5 Pratik Jawanpuria 2 
+
+> 1
+
+Department of Computer Science and Engineering, Indian Institute of Technology Bombay  
+
+> 2
+
+Centre for Machine Intelligence and Data Science, Indian Institute of Technology Bombay  
+
+> 3
+
+Microsoft Research India 4 Walmart Global Tech, India 5 Microsoft India 
+
+## Abstract 
+
+Selecting prototypical examples from a source distribution to represent a target data distribu-tion is a fundamental problem in machine learn-ing. Existing subset selection methods often rely on implicit importance scores, which can be skewed towards majority classes and lead to low-quality prototypes for minority classes. We present UniPROT , a novel subset selection framework that minimizes the optimal transport (OT) distance between a uniformly weighted prototypical distribution and the target distribu-tion. While intuitive, this formulation leads to a cardinality-constrained maximization of a super-additive objective, which is generally intractable to approximate efficiently. To address this, we propose a principled reformulation of the OT marginal constraints, yielding a partial optimal transport-based submodular objective. We prove that this reformulation enables a greedy algo-rithm with a (1 − 1/e) approximation guarantee relative to the original super-additive maximiza-tion problem. Empirically, we showcase that en-forcing uniform prototype weights in UniPROT consistently improves minority-class represen-tation in imbalanced classification benchmarks without compromising majority-class accuracy. In both finetuning and pretraining regimes for large language models under domain imbalance, UniPROT enforces uniform source contributions, yielding robust performance gains. Our results establish UniPROT as a scalable, theoretically 
+
+> *
+
+Equal contribution. 
+
+> †
+
+Correspondence to: prateekch@cse.iitb.ac.in .Proceedings of the 29 th International Conference on Artificial Intelligence and Statistics (AISTATS) 2026, Tangier, Morocco. PMLR: Volume 300. Copyright 2026 by the author(s). 
+
+grounded solution for uniform-weighted proto-type selection. Our code is publicly available at GitHub 1
+
+## 1 Introduction 
+
+Prototype selection is a fundamental problem in repre-sentation learning. The goal is to identify a subset of representative elements from a source set or distribution that faithfully summarizes a given target set or distribu-tion. In cases where the source and target sets coincide, the problem reduces to the well-known medoids selection task. Prototypical examples have proven useful in a va-riety of applications, including domain understanding via summarization (Schlegel et al., 2017; Chen et al., 2019), identifying anomalies (Kawano et al., 2022), positive-unlabeled learning (Dhurandhar and Gurumoorthy, 2020; Riaz et al., 2023), and efficient training of deep models (Mirzasoleiman et al., 2020a; Killamsetty et al., 2021a; Kothawade et al., 2021; Zheng et al., 2023; Liu et al., 2024; Tan et al., 2025). Recent prototype selection algorithms usually select a pro-totypical set of size k whose underlying distribution is clos-est to the target distribution, as measured by a chosen di-vergence or distance metric between probability distribu-tions. Prior works (Kim et al., 2016; Gurumoorthy et al., 2019, 2021) have explored metrics such as maximum mean discrepancy (MMD) and optimal transport (OT) distance (Wasserstein distance) to quantify their closeness. Interest-ingly, classical problems like submodular facility location (Lin and Bilmes, 2011; Krause and Golovin, 2014) or k-medoids problems may be viewed as special cases of OT based prototype selection. Submodular optimization has been widely adopted in this context due to its favorable ap-proximation guarantees and scalability. Prototype selection algorithms often yield a weighted sub-set of representative instances, where the weights reflect the 
+
+> 1
+
+Code: https://github.com/efficiency-learning/UniPROT 
+
+> arXiv:2604.10952v1 [cs.LG] 13 Apr 2026 Uniform Prototype Selection via Partial Optimal Transport with Submodular Guarantees
+
+relative importance of each exemplar and are typically in-ferred implicitly during the selection process. However, for interpretability, uniform weighting is generally preferred, as disproportionate emphasis can bias human perception (Solso et al., 2017). This issue is particularly pronounced in long tailed class distributions, where minority classes may receive lower-weighted prototypes, leading to unfair or under-representative selections. Therefore, it is bene-ficial to design methods that promote equal importance among selected prototypes. This ensures balanced and in-terpretable representation, particularly in long-tailed set-tings. In this work, we focus on the problem of selecting a uni-formly weighted prototypical set which is closest to the target set under the optimal transport metric. We begin by showing that popular formulations such as submod-ular facility location and k-medoids inherently produce weighted prototype sets when viewed through the lens of OT. Motivated by this observation, we propose a novel subset selection problem aimed at identifying an equally weighted prototypical set. Although intuitively appealing, the proposed formulation corresponds to a monotone, non-negative, super-additive maximization problem, which is not directly amenable to greedy optimization. To address this challenge, we design a tight, monotone, non-negative, 
+
+submodular surrogate objective that approximates the orig-inal super-additive problem. This reformulation enables the use of greedy algorithms with strong approximation guar-antees. Furthermore, we prove that the same theoretical guarantees hold for the original super-additive maximiza-tion problem, thereby validating the effectiveness of our approach. Our main contributions are summarized as follows: • We formalize uniform prototype selection as a super-additive maximization problem under the cardinality constraint of selecting k prototypical examples from a source set and introduce a submodular reformulation with provable guarantees. • We show that the proposed problem corresponds to a monotone, non-negative, super-additive maximiza-tion problem under cardinality constraint. To the best of our knowledge, efficient algorithms with provable guarantees are not known for this class. • We prove that our submodular reformulation is equiv-alent to the original super-additive problem with car-dinality constraint k, using which we establish a (1 −
+
+1/e) approximation guarantee for the latter. We also develop an efficient greedy algorithm whose compu-tational cost is comparable to that of solving the sub-modular k-medoids problem. • We demonstrate the utility of selecting uniformly weighted prototypical set in applications such as long tailed image classification and high quality mini-batch selection for large language model (LLM) training. Our proposed method, UniPROT , outperforms exist-ing prototype selection methods across various bench-mark datasets both in terms of solution quality and computational efficiency. 
+
+## 2 Preliminaries 
+
+Let S ∶= {xi}mi=1 and T ∶= {yj }nj=1 be the source and the target datasets, respectively, where xi ∈ X and yj ∈ Y.The corresponding source and target empirical distributions may be written as μ = ∑mi=1 μiδxi and ν = ∑nj=1 νj δyj
+
+where μi and νj denote the mass associated with xi and 
+
+yj , respectively, and δz denote the Dirac measure centered at z. If μ and ν are probability distributions, μ ∈ ∆m and 
+
+ν ∈ ∆n where ∆m ∶= {z ∈ Rm 
+
+> +
+
+∣ z⊺1 = 1} and 1 de-note the vector of ones of appropriate size. For z ∈ Rm 
+
+> +
+
+, let 
+
+supp (z) = {i ∈ [m] ∣ zi > 0}. For any subset P ⊆ S, let IP
+
+be the set of indices corresponding to the points x ∈ P, i.e. 
+
+IP = {i ∶ xi ∈ P}. Let Z (IP , ∶) denote the sub-matrix of 
+
+Z containing rows corresponding to the indices in IP , and when IP = {i} is a singleton set, we represent the i-th row the matrix Z as Z(i, ∶). Lastly, let [m] = {1, 2, . . . , m } for 
+
+m ∈ N.
+
+Optimal Transport (OT) problem (Kantorovich, 1942; Peyr´ e et al., 2019) seeks a transport plan γ that minimizes the total cost of moving mass from a source distribution μ
+
+to a target distribution ν:
+
+OT min (μ, ν) = min  
+
+> γ∈Γ(μ,ν)
+
+⟨C, γ⟩ , (1) where μ ∈ ∆m, ν ∈ ∆n, Γ(μ, ν) = {γ ∈ Rm×n 
+
+> +
+
+∣ γ1 =
+
+μ, γ⊺1 = ν} is the set of admissible couplings and C ∈
+
+Rm×n denote a cost matrix induced by a ground cost func-tion c ∶ X × Y → R+ ∶ (x, y) ↦ c(x, y) such that 
+
+Cij = c(xi, yj ). Hence, Cij is the cost of transport a unit mass from xi to yj . When c is a distance (e.g., ℓ1 or ℓ2 dis-tance), OT cost induces the Wasserstein distance between the probability distributions μ and ν. In doing so, OT lifts the geometry from the underlying sample space to the space of probability measures, enabling a rich geometric frame-work for comparing distributions. Let S ∈ Rm×n 
+
+> +
+
+be a similarity matrix defined via Sij =
+
+β − Cij , where the constant β > max ij Cij ensures non-negativity of S. Then, the following maximization prob-lem is equivalent to (1) as they have the same optimal solu-tion(s): 
+
+OT (μ, ν) = max  
+
+> γ∈Γ(μ,ν)
+
+⟨S, γ⟩ = β − OT min (μ, ν). (2) 
+
+Partial Optimal Transport (POT) generalizes classical OT by allowing only a subset of the source and/or target mass to be matched (Benamou et al., 2015; Chapel et al., Chanda et al. 
+
+2020; Nguyen et al., 2024). A commonly studied vari-ant is the semi-relaxed formulation, suited for unbalanced settings where the target distribution may contain excess mass. Using similarity matrix S, it can be expressed as: 
+
+POT (μ, ν) = max  
+
+> γ∈Γ≤(μ,ν)
+
+⟨S, γ⟩ ( = βμ⊺1 − min  
+
+> γ∈Γ≤(μ,ν)
+
+⟨C, γ⟩) ,
+
+(3) where Γ≤(μ, ν) = {γ ∈ Rm×n ∣ γ ≥ 0, γ1 = μ, γ⊺1 ≤
+
+ν}. It should be noted that POT (μ, ν) = OT (μ, ν) when 
+
+μ⊺1 = ν⊺1, i.e., the source and the target distributions have equal mass. 
+
+Submodularity is a characteristic of set functions that capture diminishing returns: for any sets A ⊆ B ⊆ V
+
+and element u ∉ B, a set function F is submodular if 
+
+F (A ∪ {u}) − F (A) ≥ F (B ∪ {u}) − F (B). The term 
+
+F (u ∣ A) ∶= F (A ∪ {u}) − F (A) denotes the marginal gain of adding u to A. A function is monotone if F (A) ≤
+
+F (B) whenever A ⊆ B. We provide an alternative def-inition of submodularity in Section B. For maximizing a non-negative monotone submodular function under a car-dinality constraint, i.e., max S⊆V, ∣S∣≤k F (S), the greedy al-gorithm achieves a (1 − 1/e) approximation to the optimal value (Nemhauser et al., 1978). In the next section 3, we leverage POT to construct a tractable submodular surrogate of the uniform prototype se-lection problem. 
+
+## 3 Proposed Approach 
+
+Problem setup: Given a source set S and a target set T , let 
+
+P be a candidate prototypical set P ⊆ S such that ∣P∣ ≤ k.The empirical distribution corresponding to set P may be expressed as μP = ∑mi=1(μP )iδxi , where μP ∈ ∆m and 
+
+(μP )i = 0 ∀xi ∉ P. Our aim is to find the best prototypical set P∗ such that • all element of P∗ have equal mass (importance) in the corresponding distribution μP∗ = ∑mi=1(μP∗ )iδxi ,i.e., (μP∗ )i = 1/∣ P∗∣ ∀xi ∈ P∗, and • μP∗ is closest to the underlying target distribution ν
+
+under the optimal transport (OT) distance metric. We note that popular submodular subset selection problems such as facility location or exemplar based clustering ( k-medoids) may be viewed as selecting prototypes using the OT metric. In our setup, their optimization objective may be written as 
+
+max  
+
+> P⊆S,∣P∣≤k
+
+l(P),
+
+where l(P) ∶= max   
+
+> γ∈Rm×n
+> +,γ⊺1=ν,supp (γ1)⊆P
+
+⟨S, γ⟩ (4) and ν ∈ ∆n is the given target set distribution, usually set as ν = 1/n. As the objective l(P) may also be written as 
+
+l(P) = max μ∈∆m,supp (μ)⊆P OT (μ, ν), solving (4) implic-itly involves learning the underlying distribution of P.
+
+Figure 1: k-medoids (4) consistently learn skewed weights for prototypes on CIFAR10. The plot shows ranked weights of pro-totypes, averaged over 5 runs. 
+
+In particular, if ˆP is a solution of (4) with the correspond-ing γ ˆP such that l( ˆP) = ⟨S, γ ˆP ⟩, then μ ˆP = γ ˆP 1. If the learned μ ˆP is skewed, it implies that some prototypes have higher mass (importance) than the others. Empirically, this is commonly observed as shown in Figure 1. When one aims to understand the target set T via the prototyp-ical set ˆP obtained via (4), ˆP and μ ˆP together provide a representation of T . However, weighted prototypes are hard to interpret, especially for human-in-the-loop scenar-ios. Skewed prototypical distributions also imply that pro-totypes receiving low weights contribute less towards the overall objective (4) and may be less influential exemplars. The minority classes often suffer in such cases as they typi-cally receive low weights. Hence, uniformly weighted pro-totype selection algorithms are desired for fair, unbiased representation and better understanding of datasets. 
+
+3.1 Uniform Prototype Selection via Optimal Transport 
+
+We propose to alleviate the issue of learning unequally weighted exemplars by enforcing the prototypical distri-bution to be uniform in the objective. Thus, the proposed uniformly weighted prototype selection problem is as fol-lows: 
+
+max   
+
+> P⊆S,∣P∣≤k
+
+g(P) s.t. g(P) = max   
+
+> γ∈Γ(1P/∣ P∣,1/n)
+
+⟨S, γ⟩ .
+
+(5) Here, g(P) denotes the OT objective with uniform marginals μP = 1P /∣ P∣ and ν = 1/n. Here, 1P ∈ {0, 1}m
+
+represents the set P, i.e., (1P )i = 1 if xi ∈ P, else 0. It should be noted that in the prototypical distribution μP cor-responding to P, all the exemplars x ∈ P are given equal mass in (5). This implies that all the selected exemplars are equally important. We also note that the total mass assigned to the set S ∖ P is 1 − μ⊺ 
+
+> P
+
+1 = 0. Empirically, the target set distribution is usually considered uniform ν = 1/n, but our analysis directly extends to non-uniform target set distri-butions as well. In order to analyze the properties of the Uniform Prototype Selection via Partial Optimal Transport with Submodular Guarantees 
+
+objective in (5), we consider the following proxy problem: 
+
+max  
+
+> P⊆S,∣P∣≤k
+
+h(P) ∶= ∣P∣g(P),
+
+where h(P) = OT (μP = 1P , ν = ∣P∣1/n).
+
+(6) We observe that for a given P, if γ∗ 
+
+> g
+
+is an optimal solution for computing g(P) in (5), then γ∗ 
+
+> h
+
+= ∣P∣γ∗ 
+
+> g
+
+is an opti-mal solution for computing h(P) in (6) (and vice-versa). Hence, we focus on Problem (6) in the next lemma. 
+
+Lemma 1. The set function h(P) ∶ 2∣S∣ → R+, defined in (6), satisfies the following properties: 1. Non-negativity: h(P) ≥ 0 ∀P ⊆ S.2. Monotonicity: h(P2) ≥ h(P1) ∀P1 ⊆ P2 ⊆ S.3. Super-additivity over disjoint sets: h(P1 ∪ P2) ≥
+
+h(P1) + h(P2) ∀P1 ∩ P2 = ϕ.
+
+The proof of the above result is provided in Appendix B. 
+
+Remark 1. Super-additivity is conceptually aligned with increasing returns (supermodularity), just as sub-additivity relates to diminishing returns (submodularity). Hence, maximizing a monotone, non-negative, super-additive function via the greedy algorithm and obtaining approxi-mation guarantees is challenging. To address this, we pro-pose a tight, non-negative, monotone submodular reformu-lation of Problem (6) in the next section. 
+
+3.2 Submodular Reformulation of (6) 
+
+We propose the following partial optimal transport (POT) based reformulation of Problem (6): 
+
+max   
+
+> P⊆S,∣P∣≤k
+
+f (P),
+
+where f (P) ∶= POT (μP = 1P , ν = k1/n)
+
+= max   
+
+> γ∈Γ≤(1P,k 1/n)
+
+⟨S, γ⟩ .
+
+(7) We note that computing f (P) in (7) is a semi-relaxed op-timal transport problem in which the source marginal is tight (μP = 1P ) but the target side marginal constraint is relaxed (ν ≤ k1/n). In contrast, computing h(P) in (6) is an OT problem. By relaxing the target side con-straint in (7), it is easy to see that f (P) ≥ h(P), ∀P with 
+
+∣P∣ ≤ k. We also note that for the sets P with cardinality k,
+
+f (P) = OT (μP = 1P , ν = ∣P∣1/n) = h(P). Our proposed reformulation allows Problem (7) to have certain desirable properties as summarized in our next result. 
+
+Lemma 2. The optimization problem defined in (7) is a non-negative, monotone, submodular maximization prob-lem subject to cardinality constraint k.
+
+Lemma 2 implies that the classical greedy solution pro-vides the (1 − 1/e) approximation guarantee for (7). The following lemma proves that Problem (7) is a tight re-formulation of Problem (6) and hence we may equivalently solve the relaxed (7) instead of (6), for selecting uniformly weighted prototypes. 
+
+Lemma 3. Let P∗ of cardinality k be an optimal solution of (6). Then P∗ is also an optimal solution of (7), and vice-versa. 
+
+The above analysis ensures that the same approximation guarantee holds for for the super-additive maximization problem (6) as stated below. 
+
+Lemma 4. Let ˆP be the classical greedy solution of (7) with ∣ ˆP∣ = k. Let OPT = h(P∗), where P∗ is an optimal solution of (6). Then, h( ˆP) ≥ (1 − 1/e)OPT .
+
+The proof of the above results for Lemmas 2,3,4 are pro-vided in Appendix B. 
+
+3.3 Computationally efficient approximate greedy algorithm for (7) 
+
+The classical greedy algorithm (Nemhauser et al., 1978) for (7) begins with the empty set P0 = ∅. At iteration 
+
+i + 1, it selects an element x∗ with highest marginal gain, i.e., x∗ = arg max x∈S∖Pi f (x∣Pi), and updates Pi+1 =
+
+Pi ∪{x∗}. For computing the marginal gains of all elements in S ∖Pi, (m−i) POT problems (3) need to be solved in the 
+
+(i+1)-th classical greedy iteration. While this number may be reduced using lazy (stochastic) greedy (Minoux, 1978; Mirzasoleiman et al., 2015), the per-iteration cost remains high for large k. Hence, we propose a computationally ef-ficient approximate marginal gain estimator for (7). In this regard, for a given P ⊂ S such that ∣P∣ < k, let 
+
+xj ∈ S ∖ P. For notational convenience, let P′ = P ∪ {xj }
+
+and let γP = arg max γ∈Γ≤(1P ,k 1/n) ⟨S, γ⟩. We denote by 
+
+ˆγP′ a feasible POT coupling between the sets P′ and T
+
+such that ˆγP′ (IP , ∶) = γP (IP , ∶) and ˆγP′ (j, ∶) = v⊺,where v ∈ Rn 
+
+> +
+
+is a variable. We next construct an estimator of f (P′) as ˆf (P′) = max ˆγP′ ∈Γ≤(1P′ ,k 1/n) ⟨S, ˆγP′ ⟩, which is essentially a constrained optimization over v. Our ap-proximate marginal gain function for (7) is as follows: 
+
+ˆf (xj ∣ P) = ˆf (P′) − f (P)
+
+= max     
+
+> v∈Rn
+> +v⊺1=1v≤kn1−γ⊺
+> P1
+
+⟨S(j, ∶), v⊺⟩ (8) For a given γP , Problem (8) has a closed form expression which involves sorting the vector S(j, ∶), i.e., O(n log n)
+
+computation. The following result quantifies the approxi-mation guarantee corresponding to the greedy solution ob-tained using the proposed approximate marginal gain (8). 
+
+Lemma 5. Let αj, min denote 1 
+
+> ⌊n/k⌋
+
+times the sum of the 
+
+⌊n/k⌋ smallest entries of the vector S(j, ∶), and let αj, max 
+
+denote 1 
+
+> ⌊n/k⌋
+
+times the sum of the ⌊n/k⌋ largest entries of 
+
+S(j, ∶). Define α = min j∈[m] 
+
+> αj, min
+> αj, max
+
+. Let ˆP be the solu-tion returned by the greedy algorithm for (7), where the proposed approximate marginal gain function (8) is used in each iteration and ∣ ˆP∣ = k. Then, f ( ˆP) = h( ˆP) ≥
+
+(1 − e−α) OPT , where OPT = f (P∗) = h(P∗) and P∗
+
+is an optimal solution to (7) with ∣P∗∣ = k.Chanda et al. 
+
+Algorithm 1 : UniPROT 
+
+Input: Similarity matrix S between S and T , number of prototypes required k, entropic regularization parameter λ
+
+Output: Uniformly weighted prototypical set Pk ⊆ S of T
+
+1. P0 ← ∅
+
+2. for i = 1 to k do 3. γ∗ 
+
+> Pi
+
+← arg max γ∈Γ≤(1Pi ,k 1n/n) ⟨S, γ⟩ − λ ⟨γ, ln γ⟩
+
+4. x∗ ← arg max 
+
+> x∈S∖Pi
+
+ˆf (x ∣ Pi) (Eq. (8)) 
+
+5. Pi+1 ← Pi ∪ {x∗}
+
+6. end for 7. return Pk
+
+• Steps 2–5 are iteratively executed until the car-dinality constraint k is satisfied. • Step 3 At each iteration, it updates the transport plan γ∗ 
+
+> Pi
+
+and selects the element x∗ that maxi-mizes the approximate marginal gain defined in Eq. (8). • Step 4 selects the element x∗ that maximizes the approximate marginal gain ˆf (⋅) across the candidate search space S ∖ Pi. ( Note : For larger search space i.e. where ∣S∣ is large enough, we consider a Stochastic-Greedy version instead of a Naive Greedy approach where the candidate search space is considered as R ⊆ S ∖ Pi with 
+
+nk −1 log (1/ϵ) elements which are selected uni-formly at random. 
+
+The proof of the above result is provided in Appendix B. The key idea in the proof methodology is to lower bound the proposed approximate marginal gain (8) as a fraction of the true marginal gain f (xj ∣ P).We observe that the proposed approximate marginal gain-based greedy algorithm yields theoretical guarantees for (6) that are equivalent to those established for the maximiza-tion of an α-weakly submodular function (Das and Kempe, 2018a; Elenberg et al., 2018). 
+
+## 4 Algorithm Details 
+
+Here, we present our algorithm for UniPROT (Alg. 1). At each iteration, we first compute a partial optimal transport plan for the current set and then use it to evaluate the ap-proximate marginal gain ˆf (⋅) over the remaining candi-dates, selecting the best next prototype. To solve the partial optimal transport subproblem in Step 3, we use Bregman iterations (Benamou et al., 2015). 
+
+Computation Cost. Overall, finding the (approximate) next best element x∗ requires solving a single POT problem of dimension (i + 1) × n along with O(( m − i)n log n) ad-ditional computations. The POT problem can be efficiently solved in O(i ⋅ n) using the Bregman-Dykstra iterations (Benamou et al., 2015) or the Sinkhorn algorithm (Cu-turi, 2013; Chapel et al., 2020) by adding a small entropic regularization in (3). Hence, the computational cost of the proposed UniPROT algorithm for selecting k uniformly weighted prototypes is O(kmn log n). This cost can be re-duced to O(kmn ) by utilizing an additional m×n memory to store the sorted rows of S, which is a one-time prepro-cessing step of O(mn log n) computations. Consequently, our algorithm selects equally important prototypes with an overall computational cost that closely matches that of the classical greedy algorithm for solving (4). We term our ap-proach UniPROT .
+
+Figure 2: Exact marginal gain versus the proposed approx-imate marginal gain (8) on MNIST. 
+
+Comparing Approximate vs Exact Marginal gain: We evaluate the effectiveness of the proposed computation-ally efficient approximate marginal gain (8). For this, we compare the objective value f (P) under the two next el-ement selection settings: (a) exact marginal gain, x∗ =
+
+arg max x∈S∖P f (x∣P), and (b) approximate marginal gain (8), x∗ = arg max x∈S∖P ˆf (x∣P).In Figure 2, we plot the objective values and the ratio of approximate marginal gain and exact marginal gain across greedy iterations. We observe that, across itera-tions, the two objectives are very close and the ratio 
+
+ˆf (x∗ 
+
+> i
+
+∣Pi)/ f (x∗ 
+
+> i
+
+∣Pi) is close to its maximum value 1. This implies that the proposed approximate marginal gain (8) of (7) is a good computationally efficient alternative to exact marginal gain. We provide additional results on how differ-ent choices of entropic regularization as part of our imple-mentation affects this approximation gap in Appendix E.1. 
+
+## 5 Experimental Evaluation 
+
+We now empirically validate the utility of UniPROT based uniform weighted prototype selection in various domains. Uniform Prototype Selection via Partial Optimal Transport with Submodular Guarantees 
+
+5.1 Long Tailed Image Classification 
+
+We assess the effectiveness of the representative samples selected by the weighted prototype selection method (4) and our proposed uniformly weighted variant, UniPROT ,by evaluating the performance of the corresponding nearest prototype classifiers (Bien and Tibshirani, 2011; Kim et al., 2016; Gurumoorthy et al., 2021) in imbalanced multiclass classification setting. 
+
+Experimental Setup. Let S and T denote source and tar-get datasets, respectively, such that S ∩ T = ∅. Source set 
+
+S has same number of samples from all classes while the target set T exhibit a skewed class distribution. A skewed target set distribution simulate real-world scenarios involv-ing non-trivial marginal shifts. The label information is not available during the prototype selection phase, i.e. , proto-type selection is completely unsupervised. Let P ⊆ S be a candidate prototypical set intended to model the target dataset T . After the set P is obtained, class labels of pro-totypical examples are now made available. We next pa-rameterize a 1-nearest neighbor (1-NN) classifier with the prototypes in P (see Appendix D.5) and using it to classify the data points in T . Overall, the performance of the 1-NN classifier parameterized with P is an indicator of how rep-resentative P is of the target T (Bien and Tibshirani, 2011; Gurumoorthy et al., 2021). 
+
+Datasets. We consider the MNIST dataset and long-tailed versions of CIFAR-LT (Krizhevsky et al., 2009) datasets. The latter was obtained using the long-tail experimental setup of (Menon et al., 2021). For MNIST , we obtain a skewed target set distribution by ensuring that two (ran-domly) chosen class constitute k% (each) of ∣T ∣ and the remaining (100 − 2k)% is spread uniformly over the other classes. Additional datasets are provided in Appendix E. 
+
+Results. In Figure 3, we observe that the proposed 
+
+UniPROT improves the minority class performance over 
+
+k-medoids (4) which selects weighted prototypes (Guru-moorthy et al., 2021). It should be noted that the learned weights of the latter were not employed during the infer-ence stage as it deteriorates the performance. 
+
+5.2 High quality Mini-Batch Selection for LLM training 
+
+Training LLMs with large mini-batches is known to accel-erate convergence and improve model performance. How-ever, this approach is often impractical due to the sub-stantial memory overheads. A common workaround is to select representative samples from a mini-batch that ap-proximate the gradient of larger batches (Mirzasoleiman et al., 2020a; Yang et al., 2023). Existing work (Killam-setty et al., 2021a,b; Wang et al., 2024; Nguyen et al., 2025) rely on facility location or k-medoids based subset selection (4) to identify small high-quality mini-batches for LLM training. As discussed previously, these subsets ap-proaches implicitly learn weighted representation. As the LLM training data is usually a highly imbalanced mixture of sources, weighted subset selection (4) may choose more representative prototypes with higher weights for larger sources and low-quality prototypes with low weights for smaller sources. However, this leads to misrepresentation of smaller sources and an eventual suboptimal performance of the training LLMs. To overcome this difficultly, we em-ploy our uniformly weighted subset selection approach, 
+
+UniPROT , in this problem setting and illustrate its suit-ability. 
+
+Problem Setting. Consider a dataset V = {V1 ∪ ⋯ ∪ Vp ∪
+
+Vp+1 ∪ ⋯ ∪ VQ}, with Q sources, where the first p sources correspond to minority sources and the remaining are ma-jority sources. At iteration t, we have a (random) batch Bt
+
+which would typically have instances from all the sources. The aim is to select a highly representative subset of Bt.One can perform this subset selection source-wise (Nguyen et al., 2025), i.e., independently select kq instances from 
+
+Btq = Bt ∩Vq ∀q where the budget kq is such that ∑q kq = k.Alternatively, one can directly select k prototypes from Bt.
+
+Gradient based Representation for Subset Selection. In order to select a subset of batch Bt, we require a feature rep-resentation of the data points which is relevant to the sub-set selection problem. Recent works (Mirzasoleiman et al., 2020b; Killamsetty et al., 2021a; Wang et al., 2024) have demonstrated the utility of the gradients as feature repre-sentation of the data points. Hence, during model train-ing at iteration t, the similarity (or cost) matrix may be computed using the gradients of the data points in Bt (and also validation data points in case of (Wang et al., 2024)). However, as the dimensionality of gradients in LLMs is very large, employing exact gradients for subset selec-tion problem may become impractical especially with high mini-batch size or low-resource hardware. Hence, (Nguyen et al., 2025) employed computationally efficient zeroth-order gradient approximation methods for constructing the similarity matrix for the subset selection problem. Over-all, let the (gradient-based) representation of data points 
+
+xi, xj ∈ Bt be gt(xi) and gt(xj ), respectively, in the t-th iteration. Then, we employ the similarity matrix S(i, j ) =
+
+⟨gt(xi), gt(xj )⟩ in (7) for our method UniPROT . On the other hand, (Nguyen et al., 2025) observed better results with ℓ1 distance based similarity matrix, i.e., S(i, j ) =
+
+c − ∥gt(xi) − gt(xj )∥ 1, where c is a large constant which ensures the similarity matrix has positive entries. We also note that as (Wang et al., 2024) requires a validation dataset 
+
+Ut, it computes both ⟨gt(xi), gt(xj )⟩ ∀xi, xj ∈ Bt and 
+
+⟨gt(xi), gt(xval )⟩ ∀xi ∈ Bt, xval ∈ Ut.
+
+UniPROT -PS (Per Source) . Given each batch consists of samples drawn from multiple sources, the objective here is to perform prototype selection at a per-source level. In particular, (Nguyen et al., 2025) ensures that samples be-longing to minority sources are also preserved in the final selection, while prototype selection is done only for major-Chanda et al. 
+
+(a) CIFAR10-LT (b) MNIST (Synthetic-LT) 
+
+Figure 3: Minority Class Accuracy Analysis :On CIFAR10-LT and synthetic MNIST, UniPROT outperforms k-medoids on minority classes. ( Top Left ): Average minority-class accuracy vs. prototype count. ( Bottom Left ): CIFAR10 minority class-wise accuracy (avg. over 3 runs). ( Top Right ): MNIST with Induced Skew: (i) classes 0 and 5 both at 5% each (other classes at 90%), and (ii) classes 0 and 7 both at 3% each (other classes at 94%). ( Bottom Right ): UniPROT on average out-performs k-medoids across different skew variations for minority classes. Table 1: Performance across in-domain and out-of-domain datasets for PHI -3 on MATH INSTRUCT , batch size ∣B∣ = 128 
+
+and total budget k = 64 . For completeness and a fair evaluation , results are reported under two configurations for all base-lines: source-wise (left of “/”) and batch-wise (right of “/”). UniPROT consistently beats baselines in both configurations. 
+
+Method In-domain Out-of-domain Avg-All GSM8K MATH NumGLUE Avg SVAMP Mathematics SimulEq Avg 
+
+FT 76.72 36.54 62.57 58.61 85.10 33.30 62.78 60.39 59.50 MaxLoss 70.64 / 69.44 32.05 / 30.02 57.80 / 58.90 53.50 / 52.79 80.60 / 79.20 31.45 / 30.06 57.19 / 55.82 56.41 / 55.03 54.96 / 53.91 GradNorm 76.04 / 75.40 36.10 / 35.03 64.01 / 64.10 58.72 / 58.18 85.30 / 84.17 38.00 / 36.50 61.84 / 65.70 61.71 / 62.12 60.22 / 60.15 SBERT 73.20 / 72.80 35.54 / 35.06 60.26 / 57.60 56.33 / 55.15 79.31 / 77.90 34.05 / 34.00 61.70 / 58.90 58.35 / 56.93 57.34 / 56.04 COLM 76.80 / 76.36 37.28 / 36.42 64.11 / 64.10 59.40 / 58.96 85.10 / 85.30 38.00 / 37.40 62.25 / 63.60 61.78 / 62.10 60.59 / 60.53 GREATS 76.72 / 77.80 37.84 / 37.28 67.46 / 64.40 60.67 / 59.83 86.10 / 85.00 35.60 / 38.19 62.06 / 61.92 61.25 / 61.64 60.96 / 60.73 
+
+UniPROT (Ours) 79.07 / 78.16 38.40 / 37.76 68.80 / 66.02 62.09 / 60.65 86.20 / 85.70 36.90 / 37.20 66.73 / 68.28 63.28 / 63.73 62.68 / 62.19 
+
+> 0
+> 200
+> 400
+> 600
+> 800
+> 1,000
+> 1,200
+> 1,400
+> 1,600
+> 1,800
+> 2,000
+> 2,200
+> 0.35
+> 0.4
+> 0.45
+> 0.5
+> 0.55
+> 0.6
+> 0.65
+> 0.7
+> Steps
+> Log-Perplexity
+> Phi-3
+> GREATS
+> UniPROT -PS
+> CoLM
+> 0
+> 200
+> 400
+> 600
+> 800
+> 1,000
+> 1,200
+> 1,400
+> 1,600
+> 1,800
+> 2,000
+> 2,200
+> 0.6
+> 0.8 1
+> 1.2
+> 1.4
+> 1.6
+> 1.8 2
+> 2.2
+> Steps
+> Log-Perplexity
+> Zephyr-3b
+> GREATS
+> UniPROT -PS
+> CoLM
+> 0
+> 100
+> 200
+> 300
+> 400
+> 500
+> 600
+> 700
+> 800
+> 900
+> 1,000
+> 1,100
+> 0.6
+> 0.7
+> 0.8
+> 0.9
+> 1
+> 1.1
+> 1.2
+> 1.3
+> 1.4
+> Steps
+> Log-Perplexity
+> Phi-2
+> GREATS
+> UniPROT -PS
+> CoLM
+
+Figure 4: Validation perplexity dynamics on P HI -3, Z EPHYR -3 B and P HI -2 during training vs top 3 best-performing baselines on MATH INSTRUCT . UniPROT -PS consistently outperforms other baselines. Uniform Prototype Selection via Partial Optimal Transport with Submodular Guarantees             
+
+> 0500 1,000 1,500 2,000
+> 1
+> 1.5
+> 2
+> Steps
+> Log-Perplexity  Subset ratio 50%
+> GREATS
+> UniPROT -PS
+> CoLM
+> 0500 1,000 1,500 2,000
+> 0.5
+> 1
+> 1.5
+> 2
+> Steps
+> Log-Perplexity  Subset ratio 25%
+> GREATS
+> UniPROT -PS
+> CoLM
+> 0500 1,000 1,500 2,000
+> 1
+> 1.5
+> Steps
+> Log-Perplexity  Subset ratio 12.5%
+> GREATS
+> UniPROT -PS
+> CoLM
+
+Table 2: Variation with λ (entropic regularization).              
+
+> λ(Entropic Reg.) GSM-8k NumGlue Svamp
+> 0.1 47.76 37.5 52.9 0.05 48.36 36.1 54 0.01 49.40 36.7 54.5
+
+Figure 5: Validation log-pplx with changing prototype percentage (left) and ablation table (right) on Z EPHYR -3 B.ity sources, thus preventing less representation of minority sources in the final selected subset. We consider UniPROT 
+
+at each source level per batch with each source having some cardinality constraint. The POT problem can then be for-mulated as f (Pq ) ∶= max    
+
+> γ∈Γ≤(1Pq,k q1/n)
+
+⟨Sq , γ⟩ where Pq in-dicates the prototypes per q-th data source to be selected and kq indicates the cardinality per source and nq indicates the total size of the samples per source in the batch Bt (i.e., 
+
+nq = ∣Btq ∣). Hence, the selected subset would be ⋃q=1 Pq .Here, we define S ∈ R∣Btq ∣×∣Btq ∣ where both the source and target are same S = T = Btq (qth data source in the batch). 
+
+UniPROT -PB (Per Batch) . Beyond per-source prototype selection, we also consider the joint selection of prototypes across the entire batch, i.e., over all samples aggregated from multiple sources. This broader perspective is partic-ularly beneficial, as UniPROT mitigates the risk of sys-tematically down-weighting minority sources, a bias that methods such as k-medoids or Facility Location cluster-ing may inadvertently introduce as we observe in Figure 3. Here, the similarity matrix S ∈ R∣Bt∣×∣Bt∣ is formed in all samples within the entire batch. 
+
+Models and Training details. We evaluate on P HI -2 (2.7B) (Javaheripi et al., 2023), P HI -3(3.8B) (Li et al., 2023), and Z EPHYR (3B) (Tunstall et al., 2023). For fine-tuning, we employ LoRA with rank 128 , α = 512 , and dropout 0.05 . Following (Nguyen et al., 2025), the LoRA are applied to all attention matrices (QKV PROJ ) and two fully connected layers for the P HI models; for Z EPHYR ,adapters are applied to all attention matrices (QKVO 
+
+> PROJ
+
+). All experiments are conducted on 3×A6000 GPUs. 
+
+Baselines. We compare UniPROT against (i) standard fine-tuning (FT), (ii) recent mini-batch selection approaches such as GREATS (Wang et al., 2024) and COLM (Nguyen et al., 2025), and (iii) one-shot selection strategies such as Grad Norm (GN) (Katharopoulos and Fleuret, 2018) and MaxLoss (Shalev-Shwartz and Wexler, 2016), adapted to mini-batch selection setting. For completeness and a fair evaluation , we include baseline results under both source-wise ( PS ) and batch-wise ( PB ) settings, whenever rele-vant. These are defined analogously to UniPROT -PS and 
+
+UniPROT -PB. For the Full-Finetuning ( FT ) baseline, the model is trained as usual without any prototype selection. We note that (Nguyen et al., 2025) employs k-medoids for subset selection and demonstrate source-wise selection be-ing better than batch-wise selection. On the other hand, (Wang et al., 2024) assumes access to a validation set and their subset selection criterion could be viewed as optimiz-ing maximum mean discrepancy between the prototypical set (a subset of Bt) and the validation set (with gradient based features and linear kernels). For a fair comparison, we simply assume random subset of training set as ”valida-tion anchors” for (Wang et al., 2024). 
+
+Finetuning Datasets. We train on the M ATH INSTRUCT 
+
+dataset (Yue et al., 2023), which consists of 260K instruc-tion tuning samples curated from 14 highly imbalanced data sources. In addition, on the S UPER GLUE benchmark (Wang et al., 2019) for the following classification tasks 
+
+SST-2 , CB , and MultiRC . We note that S UPER GLUE does not have source information. 
+
+Evaluation datasets. Following (Yue et al., 2023), we evaluate the finetuned models on both in-domain and out-of-domain benchmarks. The in-domain set comprises GSM8K (Cobbe et al., 2021), MATH (Hendrycks et al., 2021), and NumGLUE (Mishra et al., 2022), whereas the out-of-domain set includes SVAMP (Patel et al., 2021), Mathematics (Davies et al., 2021), and SimulEq (Koncel-Kedziorski et al., 2016). 
+
+5.3 Evaluation Results and Discussion Finetuning Experiments: We train all models for 2048 steps with batch size of 128 and prototype-ratio as 50% (thus effective batch size k=64), except for Full-Finetuning (FT ). The Full-Finetuning baselines train on the whole input-batch as is standard. Table 3 presents the results on batch selection where we train all baselines using batch selection for a fair comparison and UniPROT performs well in full-batch selection. Table 9 shows the results of source-wise finetuning on M ATH INSTRUCT . We do source selection on all baselines for fair comparision. The table indicates that UniPROT is significantly better than other baselines in both the in-domain and out-of-domain settings. 
+
+Source unavailable datasets: In some benchmarks, such as S UPER GLUE, source annotations are not pro-vided, making source-wise selection infeasible. This setting is common in practice, where fine-tuning data may arrive without clear domain tags. To test robustness, we evaluate on SST2, MultiRC, and CB under this Chanda et al. 
+
+Table 3: Comparison of performance of batch-wise selec-tion across baselines for PHI -3 in SUPER GLUE (Wang et al., 2019).                             
+
+> Method SST2 MultiRC CB Avg
+> FT 93.91 86.05 92.72 90.89 GradNorm 87.94 57.54 69.10 71.53 SBERT 90.10 82.11 87.27 86.49 CoLM 94.72 82.99 93.05 90.25 GREATS 94.81 88.42 93.12 92.12
+> UniPROT -PB (Ours) 94.65 88.03 94.54 92.41
+
+source-agnostic regime. Since ground-truth sources are unavailable, UniPROT -PS is omitted and all baselines are compared via batch selection for fairness. We train for 512 steps, batch-size 32 and selection ratio of 25%, except for FT where we train on whole batch. As shown in Table 3, 
+
+UniPROT still outperforms alternatives, indicating strong performance without source information. 
+
+Pretraining Experiments To test the effectiveness of 
+
+UniPROT , we conduct pretraining experiments with Open-WebText on LLaMA-3 500M and 60M models for 20k steps. All baselines are trained in batch-wise (PB) mode. We defer the details to Appendix C.6. Figure 6 indicates that 
+
+UniPROT outperforms all baselines including Full-batch pretraining both at large and small scale models.                     
+
+> 00.20.40.60.811.21.41.61.82
+> ⋅10 4
+> 3.6
+> 3.7
+> 3.8
+> 3.9
+> 4
+> 4.1
+> 4.2
+> 4.3
+> 4.4
+> 4.5
+> Steps
+> Log-Perplexity
+> LLaMA-3 500M model
+> GREATS
+> UniPROT -PB
+> CoLM
+> Full-batch
+> 00.20.40.60.811.21.41.61.82
+> ⋅10 4
+> 3.9
+> 4
+> 4.1
+> 4.2
+> 4.3
+> 4.4
+> 4.5
+> 4.6
+> 4.7
+> Steps
+> Log-Perplexity
+> LLaMA-3 60M model
+> GREATS
+> UniPROT -PB
+> CoLM
+> Full-batch
+
+Figure 6: Perplexity dynamics on Pretraining LL AMA-3 500M and 60M for 20k steps. 
+
+Effect of number of selected prototypes . We finetune ZEPYR -3 B on MATH INSTRUCT for 2048 steps while varying the selection ratio r ∈ 50% , 25% , 12 .5% . Fig-ure 5 reports the validation perplexity. We observe that 
+
+UniPROT remains consistently stable across all ratios. In contrast, C OLM degrades noticeably as r decreases, while GREATS shows a smaller but still measurable rise. Over-all, UniPROT exhibits the lowest sensitivity to prototype budget, indicating stronger robustness. 
+
+Effect of regularization on downstream performance .We ablate the entropic regularization coefficient in the par-tial optimal transport objective by finetuning P HI -3 on MATH INSTRUCT and evaluating downstream on GSM8K, NumGLUE and Svamp. We finetune for 128 steps and 20 OT iterations.(Table 2). With λ = 0.1, performance is con-sistently lower, while reducing to λ = 0.01 yields clear gains on both tasks. This trend aligns with prior observa-tions (Cuturi, 2013), where smaller regularization improves transport fidelity and leads to better downstream accuracy. 
+
+## 6 Conclusion 
+
+We proposed UniPROT , a scalable and theoretically grounded framework for selecting k uniformly weighted prototypes that summarize a target distribution via opti-mal transport. This leads to a super-additive maximization problem under cardinality constraints, for which we intro-duced a novel submodular reformulation with a provably tight equivalence at k, enabling a greedy algorithm with a 
+
+(1 − 1/e) approximation guarantee. UniPROT consistently improves minority-class representation in imbalanced clas-sification tasks and enhances mini-batch quality for train-ing large language models, outperforming existing meth-ods in both accuracy and efficiency. By imposing uniform weights, UniPROT mitigates bias toward majority classes, and supporting equitable learning. 
+
+## 7 Acknowledgements 
+
+PC acknowledges the Microsoft Research India PhD Award and Prime Minister Research Fellowship to support this re-search work. GR thanks Bank of Baroda Chair Professor-ship. PJ acknowledges the support of Anusandhan National Research Foundation under ARG-MATRICS program and IIT Bombay seed grant. 
+
+## References 
+
+Adam, K. D. B. J. et al. (2014). A method for stochastic optimization. arXiv preprint arXiv:1412.6980 , 1412(6). Agueh, M. and Carlier, G. (2011). Barycenters in the wasserstein space. SIAM Journal on Mathematical Anal-ysis , 43(2):904–924. Benamou, J.-D., Carlier, G., Cuturi, M., Nenna, L., and Peyr´ e, G. (2015). Iterative bregman projections for reg-ularized transportation problems. SIAM Journal on Sci-entific Computing , 37(2):A1111–A1138. Bien, J. and Tibshirani, R. (2011). Prototype selection for interpretable classification. Bradbury, J., Frostig, R., Hawkins, P., Johnson, M. J., Leary, C., Maclaurin, D., Necula, G., Paszke, A., Van-derPlas, J., Wanderman-Milne, S., and Zhang, Q. (2018). JAX: composable transformations of Python+NumPy programs. Chapel, L., Alaya, M. Z., and Gasso, G. (2020). Partial optimal tranport with applications on positive-unlabeled learning. In NeurIPS .Chen, C., Li, O., Tao, D., Barnett, A., Rudin, C., and Su, J. K. (2019). This looks like that: deep learning for in-terpretable image recognition. Advances in neural infor-mation processing systems , 32. Cobbe, K., Kosaraju, V., Bavarian, M., Chen, M., Jun, H., Kaiser, L., Plappert, M., Tworek, J., Hilton, J., Nakano, Uniform Prototype Selection via Partial Optimal Transport with Submodular Guarantees 
+
+R., et al. (2021). Training verifiers to solve math word problems. arXiv preprint arXiv:2110.14168 .Cuturi, M. (2013). Lightspeed computation of optimal transportation distances. Advances in Neural Informa-tion Processing Systems , 26(2):2292–2300. Cuturi, M. and Doucet, A. (2014). Fast computation of wasserstein barycenters. In International conference on machine learning , pages 685–693. PMLR. Das, A. and Kempe, D. (2018a). Approximate submodular-ity and its applications: Subset selection, sparse approx-imation and dictionary selection. Journal of Machine Learning Research , 19(3):1–34. Das, A. and Kempe, D. (2018b). Approximate submodular-ity and its applications: Subset selection, sparse approx-imation and dictionary selection. Journal of Machine Learning Research , 19(3):1–34. Davies, A., Veliˇ ckovi´ c, P., Buesing, L., Blackwell, S., Zheng, D., Tomaˇ sev, N., Tanburn, R., Battaglia, P., Blun-dell, C., Juh´ asz, A., Lackenby, M., Williamson, G., Has-sabis, D., and Kohli, P. (2021). Advancing mathe-matics by guiding human intuition with AI. Nature ,600(7887):70–74. Dhurandhar, A. and Gurumoorthy, K. S. (2020). Classifier invariant approach to learn from positive-unlabeled data. In IEEE ICDM .Elenberg, E. R., Khanna, R., Dimakis, A. G., and Negah-ban, S. (2018). Restricted strong convexity implies weak submodularity. Annals of Statistics , 46(6B):3539–3568. Gurumoorthy, K. S., Dhurandhar, A., Cecchi, G., and Ag-garwal, C. (2019). Efficient data representation by se-lecting prototypes with importance weights. In IEEE ICDM .Gurumoorthy, K. S., Jawanpuria, P., and Mishra, B. (2021). Spot: A framework for selection of prototypes using op-timal transport. In ECML PKDD .Hendrycks, D., Burns, C., Kadavath, S., Arora, A., Basart, S., Tang, E., Song, D., and Steinhardt, J. (2021). Measur-ing mathematical problem solving with the math dataset. 
+
+arXiv preprint arXiv:2103.03874 .Ho, N., Nguyen, X., Yurochkin, M., Bui, H. H., Huynh, V., and Phung, D. (2017). Multilevel clustering via wasser-stein means. In International conference on machine learning , pages 1501–1509. PMLR. Hong, F., Lyu, Y., Yao, J., Zhang, Y., Tsang, I., and Wang, Y. (2024). Diversified batch selection for training accel-eration. In International Conference on Machine Learn-ing , pages 18648–18667. PMLR. Hu, E. J., Shen, Y., Wallis, P., Allen-Zhu, Z., Li, Y., Wang, S., Wang, L., Chen, W., et al. (2022). Lora: Low-rank adaptation of large language models. ICLR , 1(2):3. Javaheripi, M., Bubeck, S., Abdin, M., Aneja, J., Bubeck, S., Mendes, C. C. T., Chen, W., Del Giorno, A., Eldan, R., Gopi, S., et al. (2023). Phi-2: The surprising power of small language models. Microsoft Research Blog .Kantorovich, L. (1942). On the transfer of masses (in rus-sian). Doklady Akademii Nauk , 37(2):227–229. Katharopoulos, A. and Fleuret, F. (2018). Not all samples are created equal: Deep learning with importance sam-pling. In International conference on machine learning ,pages 2525–2534. PMLR. Kawano, K., Koide, S., and Otaki, K. (2022). Partial Wasserstein covering. In AAAI .Killamsetty, K., Durga, S., Ramakrishnan, G., De, A., and Iyer, R. (2021a). Grad-match: Gradient matching based data subset selection for efficient deep model training. In 
+
+International Conference on Machine Learning , pages 5464–5474. PMLR. Killamsetty, K., Sivasubramanian, D., Ramakrishnan, G., and Iyer, R. (2021b). Glister: Generalization based data subset selection for efficient and robust learning. In 
+
+Proceedings of the AAAI conference on artificial intel-ligence , volume 35, pages 8110–8118. Kim, B., Khanna, R., and Koyejo, O. O. (2016). Exam-ples are not enough, learn to criticize! criticism for inter-pretability. In NeurIPS .Koncel-Kedziorski, R., Roy, S., Amini, A., Kushman, N., and Hajishirzi, H. (2016). Mawps: A math word problem repository. In Proceedings of the 2016 conference of the north american chapter of the association for computa-tional linguistics: human language technologies , pages 1152–1157. Kothawade, S., Kaushal, V., Ramakrishnan, G., Bilmes, J. A., and Iyer, R. K. (2021). Submodular mutual in-formation for targeted data subset selection. CoRR ,abs/2105.00043. Krause, A. and Golovin, D. (2014). Submodular function maximization. Tractability , 3(71-104):3. Krizhevsky, A., Hinton, G., et al. (2009). Learning multiple layers of features from tiny images. Li, Y., Bubeck, S., Eldan, R., Del Giorno, A., Gu-nasekar, S., and Lee, Y. T. (2023). Textbooks are all you need ii: phi-1.5 technical report. arXiv preprint arXiv:2309.05463 .Lin, H. and Bilmes, J. (2011). A class of submodular func-tions for document summarization. In Proceedings of the 49th Annual Meeting of the Association for Compu-tational Linguistics: Human Language Technologies .Liu, H., Li, Y., Xing, T., Wang, P., Dalal, V., Li, L., He, J., and Wang, H. (2025). Dataset distillation via the wasser-stein metric. In Proceedings of the IEEE/CVF Inter-national Conference on Computer Vision , pages 1205– 1215. Chanda et al. 
+
+Liu, Z., Karbasi, A., and Rekatsinas, T. (2024). Tsds: Data selection for task-specific model finetuning. Advances in Neural Information Processing Systems , 37:10117– 10147. Menon, A. K., Rawat, A. S., Reddi, S., Kim, S., and Kumar, S. (2021). A statistical perspective on distillation. In 
+
+International Conference on Machine Learning , pages 7632–7642. PMLR. Minoux, M. (1978). Accelerated greedy algorithms for maximizing submodular set functions. In Optimization Techniques .Mirzasoleiman, B., Badanidiyuru, A., Karbasi, A., Vondr´ ak, J., and Krause, A. (2015). Lazier than lazy greedy. In Proceedings of the AAAI Conference on Artificial Intelligence , volume 29. Mirzasoleiman, B., Bilmes, J., and Leskovec, J. (2020a). Coresets for data-efficient training of machine learning models. In International Conference on Machine Learn-ing .Mirzasoleiman, B., Cao, K., and Leskovec, J. (2020b). Coresets for robust training of deep neural networks against noisy labels. Advances in Neural Information Processing Systems , 33:11465–11477. Mishra, S., Mitra, A., Varshney, N., Sachdeva, B., Clark, P., Baral, C., and Kalyan, A. (2022). Numglue: A suite of fundamental yet challenging mathematical reasoning tasks. arXiv preprint arXiv:2204.05660 .Nemhauser, G. L., Wolsey, L. A., and Fisher, M. L. (1978). An analysis of approximations for maximizing sub-modular set functions—i. Mathematical programming ,14:265–294. Nguyen, A. D., Nguyen, T. D., Nguyen, Q. M., Nguyen, H. H., Nguyen, L. M., and Toh, K.-C. (2024). On partial optimal transport: Revising the infeasibility of sinkhorn and efficient gradient methods. In AAAI .Nguyen, D., Yang, W., Anand, R., Yang, Y., and Mirza-soleiman, B. (2025). Mini-batch coresets for memory-efficient language model training on data mixtures. In 
+
+International Conference on Learning Representations .Nguyen, T., Novak, R., Xiao, L., and Lee, J. (2021). Dataset distillation with infinitely wide convolutional networks. Advances in Neural Information Processing Systems , 34:5186–5198. Patel, A., Bhattamishra, S., and Goyal, N. (2021). Are nlp models really able to solve simple math word problems? 
+
+arXiv preprint arXiv:2103.07191 .Peyr´ e, G., Cuturi, M., et al. (2019). Computational optimal transport: With applications to data science. Foundations and Trends® in Machine Learning , 11(5-6):355–607. Radford, A., Wu, J., Child, R., Luan, D., Amodei, D., Sutskever, I., et al. (2019). Language models are un-supervised multitask learners. OpenAI blog , 1(8):9. Reimers, N. and Gurevych, I. (2019). Sentence-bert: Sen-tence embeddings using siamese bert-networks. arXiv preprint arXiv:1908.10084 .Riaz, B., Karahan, Y., and Brockmeier, A. J. (2023). Partial optimal transport for support subset selection. Transac-tions on Machine Learning Research .Schlegel, M., Pan, Y., Chen, J., and White, M. (2017). Adapting kernel representations online using submodu-lar maximization. In Proceedings of the 34th Interna-tional Conference on Machine Learning .Shalev-Shwartz, S. and Wexler, Y. (2016). Minimizing the maximal loss: How and why. In International Confer-ence on Machine Learning , pages 793–801. PMLR. Solso, R. L., MacLin, O. H., and MacLin, M. K. (2017). 
+
+Cognitive Psychology . Pearson Education. Tan, H., Wu, S., Huang, W., Zhao, S., and QI, X. (2025). Data pruning by information maximization. In The Thir-teenth International Conference on Learning Represen-tations .Tunstall, L., Beeching, E., Lambert, N., Rajani, N., Rasul, K., Belkada, Y., Huang, S., Von Werra, L., Fourrier, C., Habib, N., et al. (2023). Zephyr: Direct distillation of lm alignment. arXiv preprint arXiv:2310.16944 .Wang, A., Pruksachatkun, Y., Nangia, N., Singh, A., Michael, J., Hill, F., Levy, O., and Bowman, S. (2019). Superglue: A stickier benchmark for general-purpose language understanding systems. Advances in neural in-formation processing systems , 32. Wang, J., Dai, T., Zhang, B., Yu, S., Lim, E. G., and Xiao, J. (2025). Pot: Prototypical optimal transport for weakly supervised semantic segmentation. In Proceedings of the Computer Vision and Pattern Recognition Conference ,pages 15055–15064. Wang, J. T., Wu, T., Song, D., Mittal, P., and Jia, R. (2024). Greats: Online selection of high-quality data for llm training in every iteration. Advances in Neural Infor-mation Processing Systems , 37:131197–131223. Yang, Y., Kang, H., and Mirzasoleiman, B. (2023). To-wards sustainable learning: coresets for data-efficient deep learning. In International Conference on Machine Learning .Yue, X., Qu, X., Zhang, G., Fu, Y., Huang, W., Sun, H., Su, Y., and Chen, W. (2023). Mammoth: Building math gen-eralist models through hybrid instruction tuning. arXiv preprint arXiv:2309.05653 .Zhang, G., Zhang, H., Wang, Y., Li, R., Tan, H., and Liang, J. (2024). Hyperspherical multi-prototype with optimal transport for event argument extraction. In Proceedings of the 62nd Annual Meeting of the Association for Com-putational Linguistics (Volume 1: Long Papers) , pages 9271–9284. Uniform Prototype Selection via Partial Optimal Transport with Submodular Guarantees 
+
+Zhao, B., Mopuri, K. R., and Bilen, H. (2021). Dataset condensation with gradient matching. In ICLR .Zheng, H., Liu, R., Lai, F., and Prakash, A. (2023). Coverage-centric coreset selection for high pruning rates. In The Eleventh International Conference on Learning Representations .
+
+## Checklist 
+
+The checklist follows the references. For each question, choose your answer from the three possible options: Yes, No, Not Applicable. You are encouraged to include a justi-fication to your answer, either by referencing the appropri-ate section of your paper or providing a brief inline descrip-tion (1-2 sentences). Please do not modify the questions. Note that the Checklist section does not count towards the page limit. Not including the checklist in the first submis-sion won’t result in desk rejection, although in such case we will ask you to upload it during the author response period and include it in camera ready (if accepted). 
+
+In your paper, please delete this instructions block and only keep the Checklist section heading above along with the questions/answers below. 
+
+1. For all models and algorithms presented, check if you include: (a) A clear description of the mathematical setting, assumptions, algorithm, and/or model. [Yes] (b) An analysis of the properties and complexity (time, space, sample size) of any algorithm. [Yes] (c) (Optional) Anonymized source code, with spec-ification of all dependencies, including external libraries. [Yes] 2. For any theoretical claim, check if you include: (a) Statements of the full set of assumptions of all theoretical results. [Yes] (b) Complete proofs of all theoretical results. [Yes] (c) Clear explanations of any assumptions. [Yes] 3. For all figures and tables that present empirical results, check if you include: (a) The code, data, and instructions needed to repro-duce the main experimental results (either in the supplemental material or as a URL). [Yes] (b) All the training details (e.g., data splits, hyperpa-rameters, how they were chosen). [Yes] (c) A clear definition of the specific measure or statistics and error bars (e.g., with respect to the random seed after running experiments multiple times). [Yes] (d) A description of the computing infrastructure used. (e.g., type of GPUs, internal cluster, or cloud provider). [Yes] 4. If you are using existing assets (e.g., code, data, mod-els) or curating/releasing new assets, check if you in-clude: Chanda et al. 
+
+(a) Citations of the creator If your work uses existing assets. [Yes] (b) The license information of the assets, if applica-ble. [Not Applicable] (c) New assets either in the supplemental material or as a URL, if applicable. [Not Applicable] (d) Information about consent from data provider-s/curators. [Not Applicable] (e) Discussion of sensible content if applicable, e.g., personally identifiable information or offensive content. [Not Applicable] 5. If you used crowdsourcing or conducted research with human subjects, check if you include: (a) The full text of instructions given to participants and screenshots. [Not Applicable] (b) Descriptions of potential participant risks, with links to Institutional Review Board (IRB) ap-provals if applicable. [Not Applicable] (c) The estimated hourly wage paid to participants and the total amount spent on participant com-pensation. [Not Applicable] Uniform Prototype Selection via Partial Optimal Transport with Submodular Guarantees 
+
+## Supplementary Material: Uniform Prototype Selection via Partial Optimal Transport with Submodular Guarantees Contents 
+
+Appendices 14 A Organization of Appendix 15 B Theoretical Results 15 C Implementation Details 18 
+
+C.1 Hardware and License . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 18 C.2 Algorithm Implementation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 18 C.3 Finetuning experiments . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 18 C.4 Details of baselines . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 18 C.5 Calculation of gradient features . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 20 C.6 Pretraining Experiments . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 20 
+
+D Experimental Setup Details 20 
+
+D.1 Model Details . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 20 D.2 Datasets . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 21 D.3 Training Details . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 21 D.4 Evaluation Datasets and Metrics . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 21 D.5 Evaluation Setup . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 21 
+
+E Additional Experimental Results 21 
+
+E.1 Additional Ablations on Entropic Regularization . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 21 E.2 Additional Results on UniPROT -PB . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 22 E.3 Additional Results on Zephyr-3B . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 22 E.4 Additional Results on P HI -2 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 24 
+
+F Additional Related Works 24 G Broader Impact 25 H Code 25 Chanda et al. 
+
+## Supplementary Material: Uniform Prototype Selection via Partial Optimal Transport with Submodular Guarantees A Organization of Appendix 
+
+The Appendix is structured as follows. Section B summarizes the main theoretical results. Section 4 presents the detailed description of the proposed algorithm. Sections C and D outline the implementation aspects and the specifics of the exper-imental setup, respectively. Finally, Section G discusses the broader impact of our work, and Section H provides a link to the publicly available codebase. 
+
+## B Theoretical Results 
+
+Submodularity Ratio The notion of submodularity ratio is given by approximate submodularity in (Das and Kempe, 2018b). For a monotone function f the submodularity ratio w.r.t a set S and a parameter k ≥ 0 as 
+
+αL,K (f ) = min   
+
+> S⊆L, A⊆L
+> ∣A∣≤K, A∩S=∅
+
+∑u∈A f (S ∪ {u}) − f (S)
+
+f (S ∪ A) − f (S) , with 00 ∶= 1.f is submodular if and only if αL,K (f ) ≥ 1. If the ratio 
+
+α ∶= ∑u∈A f (S ∪ {u}) − f (S)
+
+f (S ∪ A) − f (S)
+
+is strictly positive but not necessarily greater than 1, then f is said to be α-weakly submodular. 
+
+Lemma 1. The set function h(P) ∶ 2∣S∣ → R+, defined in (6), satisfies the following properties: 1. Non-negativity: h(P) ≥ 0 ∀P ⊆ S.2. Monotonicity: h(P2) ≥ h(P1) ∀P1 ⊆ P2 ⊆ S.3. Super-additivity over disjoint sets: h(P1 ∪ P2) ≥ h(P1) + h(P2) ∀P1 ∩ P2 = ϕ.Proof. We prove each property in turn (refer to the definition of h(P) in (6)). 
+
+1. Non-negativity. The non-negativity follows from the definition of h(⋅) in (6) namely, h(P) ∶= max   
+
+> γ∈Γ(1P,∣P∣1/n)
+
+⟨S, γ⟩,where the similarity matrix S is a non-negative matrix and the transport plan is enforced to non-negative. 
+
+2. Monotonicity. Consider a subset P1 and define a set P2 = P1 ∪ {xi} for any xi ∉ P1. To prove monotonicity of h(.),it is sufficient to show that h(P2) ≥ h(P1). To this end, let γP1 be the argmax for h(P1) and consider the sub-matrix 
+
+γP1 (IP1 , ∶) which is the restriction of the optimal solution to the points in P1. We note that γP1 (i, ∶) = 0; xi ∉ P1. We construct a feasible transport plan ˆγ for the set P2 as: 
+
+ˆγ (IP2 , ∶) = [γP1 (IP1 , ∶)⊺ , 1
+
+n ]
+
+> ⊺
+
+,
+
+and ˆγ(j, ∶) = 0 for xj ∉ P2. Let ˆh (P2; ˆ γ) indicate the function value evaluated at the feasible transport plan ˆγ for the set 
+
+P2. We then have 
+
+h (P2) ≥ ˆh (P2; ˆ γ) = ⟨S (IP2 , ∶) , ˆγ (IP2 , ∶)⟩ 
+
+= ⟨S (IP1 , ∶) , γP1 (IP1 , ∶)⟩ + ⟨S(i, ∶), 1
+
+n ⟩
+
+= h(P1) + ⟨S(i, ∶), 1
+
+n ⟩
+
+≥ h(P1)(Since S(i, ∶) ≥ 0.) (9) Uniform Prototype Selection via Partial Optimal Transport with Submodular Guarantees 
+
+3. Super-additivity over disjoint sets. Consider two disjoint sets P1 and P2. Let γP1 (IP1 , ∶) and γP2 (IP2 , ∶) represent the sub-matrices of the respective optimal solutions to the points in P1 and P2. For the disjoint union set P = P1 ∪ P2, we construct a feasible transport plan ˆγ as: 
+
+ˆγ (IP , ∶) = [γP1 (IP1 , ∶)⊺ , γP2 (IP2 , ∶)⊺]⊺ ,
+
+and ˆγ(j, ∶) = 0 for xj ∉ P. Evaluating the function ˆh (P; ˆ γ) at the feasible solution, we get 
+
+h (P) ≥ ˆh (P; ˆ γ) = ⟨S (IP , ∶) , ˆγ (IP , ∶)⟩ 
+
+= ⟨S (IP1 , ∶) , γP1 (IP1 , ∶)⟩ + ⟨S (IP2 , ∶) , γP2 (IP2 , ∶)⟩ 
+
+= h(P1) + h(P2).
+
+(10) 
+
+Lemma 2. The optimization problem defined in (7) is a non-negative, monotone, submodular maximization problem subject to cardinality constraint k.Proof. We derive all the three properties below. 
+
+1. Non-negativity: f (P) ≥ 0 ∀P ⊆ S. The proof follows along similar lines of the non-negativity proof in Lemma 1. 
+
+2. Monotonicity: f (P2) ≥ f (P1) ∀P1 ⊆ P2 ⊆ S. Akin to the monotonicity proof in Lemma 1, for a super-set P2 =
+
+P1 ∪ {xi}; xi ∉ P1, we can construct a feasible transport ˆγ using the optimal solution γP1 as: 
+
+ˆγ (IP2 , ∶) = [γP1 (IP1 , ∶)⊺ , v
+
+∥v∥1
+
+]
+
+> ⊺
+
+,
+
+where v = k1/n − γ⊺ 
+
+> P1
+
+1 ≥ 0. Following similar lines to the argument in Lemma 1, we obtain the monotonicity result. 
+
+3. Submodularity: To prove submodularity of function f (P) in (7), we first note the following result (Kawano et al., 2022, Lemma 2). 
+
+Lemma 6. [(Kawano et al., 2022, Lemma 2)] Let l, m, n be positive integers. Given a positive valued m × n matrix S > 0,the following set function ψ ∶ 2m → R+ is a submodular function: 
+
+ψ(P) = max   
+
+> γ∈Γ≤(1P/l, 1n/n)
+
+⟨S, γ⟩ , (11) 
+
+where as defined earlier, Γ≤(μ, ν) = {γ ∈ Rm×n ∣ γ ≥ 0, γ1 = μ, γ⊺1 ≤ ν} and 1n is a n × 1 vector of 1.
+
+We observe that for l = k, (11) is equivalent to the proposed function f (⋅) defined in (7) as follows: • For a given P, let γ1 be an optimal solution for (11). Then, γ2 = kγ1 is an optimal coupling for computing f (P)
+
+in (7). Similarly, if γ2 be an optimal solution for computing f (P) in (7), then γ1 = γ2/k is an optimal solution for computing f (P) in (11). • Hence, for a given P, f (P) = kψ (P)
+
+Due to the above, ∀A, B ⊆ S
+
+ψ(A ∪ B) + ψ(A ∩ B) ≤ ψ(A) + ψ(B) ⇒ f (A ∪ B) + f (A ∩ B) ≤ f (A) + f (B),
+
+which proves that f is a submodular function. 
+
+Lemma 3. Let P∗ of cardinality k be an optimal solution of (6). Then P∗ is also an optimal solution of (7), and vice-versa. Proof. Recall that for any set P of cardinality k, f (P) = h(P). Due the monotonicity properties in Lemmas 1 and 2, we can restrict the feasible region in problems (6) and (7) only across sets of cardinality k where they are equivalent, and have the same optimal solution. Chanda et al. 
+
+Lemma 4. Let ˆP be the classical greedy solution of (7) with ∣ ˆP∣ = k. Let OPT = h(P∗), where P∗ is an optimal solution of (6). Then, h( ˆP) ≥ (1 − 1/e)OPT .Proof. Recall that for any set P with ∣P∣ ≤ k, f (P) ≥ h(P). As ∣ ˆP∣ = k, we have the equality f ( ˆP) = h ( ˆP). Applying the classical greedy approximation theorem in (Nemhauser et al., 1978), we get h ( ˆP) = f ( ˆP) ≥ (1 − 1/e) f (P∗) ≥
+
+(1 − 1/e) OP T .
+
+Lemma 5. Let αj, min denote 1 
+
+> ⌊n/k⌋
+
+times the sum of the ⌊n/k⌋ smallest entries of the vector S(j, ∶), and let αj, max denote  
+
+> 1
+> ⌊n/k⌋
+
+times the sum of the ⌊n/k⌋ largest entries of S(j, ∶). Define α = min j∈[m] 
+
+> αj, min
+> αj, max
+
+. Let ˆP be the solution returned by the greedy algorithm for (7), where the proposed approximate marginal gain function (8) is used in each iteration and ∣ ˆP∣ = k.Then, f ( ˆP) = h( ˆP) ≥ (1 − e−α) OPT , where OPT = f (P∗) = h(P∗) and P∗ is an optimal solution to (7) with ∣P∗∣ = k.Proof. At the iteration i + 1, let x∗ = arg max 
+
+> x∈S∖Pi
+
+ˆf (x∣Pi) be the point that maximizes the approximate marginal gain function (8), which is used to update the solution to Pi+1 = Pi ∪ {x∗}. Then, 
+
+f (x∗∣Pi) ≥ ˆf (x∗∣Pi) ≥ 1
+
+k ∑
+
+> xl∈P∗∖Pi
+
+[ ˆf (xl∣Pi)] (12) Further, for any xl ∉ Pi let P = Pi ∪ {xl}. We derive the inequality 
+
+f (xl∣Pi) = f (P) − f (Pi) = ⟨S (IP , ∶) , γP (IP , ∶)⟩ − ⟨S (IPi , ∶) , γPi (IPi , ∶)⟩ 
+
+≤ ⟨S (IP , ∶) , γP (IP , ∶)⟩ − ⟨S (IPi , ∶) , γP (IPi , ∶)⟩ 
+
+= ⟨S(l, ∶), γP (l, ∶)⟩ 
+
+≤ αl, max .
+
+The inequality in the second line follows from the fact that γPi is the arg max for the set Pi in (7) and γP (IPi , ∶) —appended with 0 for other rows— is one of the feasible solution. Likewise, ˆf (xl∣Pi) ≥ αl, min . Hence, 
+
+ˆf (xl∣Pi) ≥ αl, min 
+
+αl, max 
+
+f (xl∣Pi) . (13) Pugging the inequality (13) in (12) we have 
+
+f (x∗∣Pi) ≥ 1
+
+k ∑
+
+> xl∈P∗∖Pi
+
+[ αl, min 
+
+αl, max 
+
+f (xl∣Pi)] ≥ αk ∑
+
+> xl∈P∗∖Pi
+
+[f (xl∣Pi)] . (14) Leveraging the submodular and monotonic properties of the function f (⋅) from Lemma 2, we obtain the inequalities 
+
+∑
+
+> xl∈P∗∖Pi
+
+f (xl∣Pi) ≥ f (Pi ∪ (P∗ ∖ Pi)) − f (Pi) ≥ f (P∗) − f (Pi) . (15) Noting that f (x∗∣Pi) = [f (P∗) − f (Pi)] − [f (P∗) − f (Pi+1)] , and using (15) in (14) gives the recurrence relation 
+
+f (P∗) − f (Pi+1) ≤ (1 − αk ) [ f (P∗) − f (Pi)] ,
+
+frow which it follows that 
+
+f (P∗) − f ( ˆP) ≤ (1 − αk )
+
+> k
+
+[f (P∗) − f (∅)] .
+
+As f (∅) = 0, we get the desired result namely, 
+
+f ( ˆP) ≥ (1 − (1 − αk )
+
+> k
+
+) f (P∗) ≥ (1 − e−α) OPT .Uniform Prototype Selection via Partial Optimal Transport with Submodular Guarantees 
+
+## C Implementation Details 
+
+C.1 Hardware and License 
+
+All models are implemented in Python 3.10 using PyTorch 2.3.0 . Image and language training are performed on servers with Intel(R) Xeon(R) Gold 6226R CPUs (2.90GHz) and three NVIDIA RTX A6000 GPUs. For language model pretraining, we use JAX (Bradbury et al., 2018) (v0.7.2) on the same GPU infrastructure. 
+
+C.2 Algorithm Implementation Implementation of POT Objective : To solve the entropic-regularized partial optimal transport (OT) problem, we rely on the Python Optimal Transport (POT) library 2 . Specifically, we use the function 
+
+ot.partial.entropicwasserstein 3,which implements the entropic-regularized variant of partial OT. This formulation allows for transporting only a fraction of the total mass between the source and target distributions along with the enforcement of inequality on the marginals. In our implementation, the cost matrix C is constructed using pairwise distances between features of the source and target prototypes, which could be Euclidean or cosine distances depending on the application. The frac-tion of transported mass τ and the entropic regularization λ are treated as hyperparameters. The function 
+
+ot.partial.entropic wasserstein efficiently returns both the optimal transport plan and the associated par-tial OT cost, which we use as the objective function f (⋅) in downstream optimization or prototype selection procedures. A typical usage in Python is as follows: 
+
+import ot # mu: source weights # nu: target weights # C: cost matrix # tau: fraction of transported mass # lambda: entropy regularization T, cost = ot.partial.entropic_wasserstein( mu, nu, C, tau=tau, reg=lambda )
+
+The default maximum iterations parameter for this function is set adaptively along with a stopping threshold of 1e − 6.Table 4: Source Size vs Maximum Iterations. 
+
+Source Set Size Max Iterations 
+
+64-200 100 500-1000 1000 1000-4000 2000 5000 4000 
+
+C.3 Finetuning experiments 
+
+We adapt the codebase of (Nguyen et al., 2025) for all our finetuning experiments. We use Adam (Adam et al., 2014) with learning rate of 1e-5, gradient accumulation steps of 64 with batch size 1. We directly use raw LoRA gradients for constructing similarity matrices for CoLM, GREATS, UniPROT . For GREATS (Wang et al., 2024) we randomly sample few random points from train-set as anchors at every train step. For SBERT (Reimers and Gurevych, 2019), we use B ERT -
+
+> BASE
+
+-UNCASED as the embedding model, and construct similarity matrix from the embeddings instead of gradients. 
+
+C.4 Details of baselines GREATS (Wang et al., 2024). GREATS formulates online batch selection as optimizing a set utility that measures the single-step reduction in validation loss under a gradient-descent update. Let wt be the current parameters, Bt a candidate 
+
+> 2https://pythonot.github.io/.
+> 3https://pythonot.github.io/gen modules/ot.partial.html#ot.partial.entropic partial wasserstein. Chanda et al.
+
+batch, and S ⊆ Bt a subset of size k. The ideal utility at iteration t is 
+
+U(t)(S; z(val )) ∶= ℓ(θt, z(val )) − ℓ(θt − ηt ∑
+
+> z∈S
+
+∇ℓ(θt, z), z(val )) ,
+
+and selection solves arg max S⊆Bt, ∣S∣=k U(t)(S; z(val )). Since exact evaluation is intractable, GREATS applies a lower-order Taylor approximation of the validation loss around θt to obtain a closed-form surrogate for the marginal gain of adding a training point z:
+
+U (t)(z ∣ S) ≈ ηt g(z)⊺g(z(val )) − η2 
+
+> t
+
+g(z)⊺H(z(val )) g(z∗),
+
+where g(⋅) = ∇ℓ(θt, ⋅), H(⋅) is the Hessian of the validation loss, and z∗ denotes the current aggregate. In practice, H is approximated (e.g., H ≈ I), yielding a gradient inner-product scoring with a correction term. A greedy procedure iteratively adds the point with largest approximate marginal gain until k points are selected. To avoid materializing per-example model-sized gradients, GREATS computes all required gradient inner-products in a single backpropagation via a “ghost inner-product” reparameterization that expresses layerwise gradient inner-products using already-available activations and output gradients, and merges selection with the update without extra passes. 
+
+CoLM (Nguyen et al., 2025). CoLM casts mini-batch construction as coreset selection in gradient space for memory-efficient fine-tuning. CoLM first addresses imbalance by including all examples from “small” sources (those with insuffi-cient sample count in the large batch), while selecting representatives (medoids) from each “big” source. To align selection with Adam, per-example gradients are normalized by the optimizer’s exponential-moving-average statistics, yielding nor-malized directions proportional to mt/( ϵ + √vt). To reduce dimensionality and denoise, CoLM estimates the gradient of the last V -projection parameters (e.g., LoRA V ) using a zeroth-order SPSA estimator with two perturbed forward passes and precached penultimate activations, then sparsifies by keeping the coordinates with largest normalized magnitudes. Within each big source, a greedy medoid selection is performed in the projected, sparsified, Adam-normalized gradient space so that the aggregated coreset gradient approximates that of the full large batch; the final mini-batch is the union of all small-source examples and the selected big-source medoids. 
+
+SBERT (Reimers and Gurevych, 2019). SBERT modifies BERT into siamese/triplet architectures with shared weights that encode each sentence independently. A fixed-size embedding u ∈ Rd is obtained via a pooling operation over token representations (commonly mean pooling). Training uses sentence-pair supervision: (i) a classification objective on NLI pairs, where a classifier consumes a concatenation of functions of the two embeddings (e.g., [u; v; ∣u − v∣] ) to predict the label; (ii) a regression objective for semantic textual similarity, where the cosine of (u, v ) is regressed to a gold score via MSE; and (iii) optionally, triplet loss max {0, cos (ua, u n) − cos (ua, u p) + γ} for anchor–positive–negative tuples. At inference, sentence embeddings are compared with cosine or dot-product for retrieval and clustering. 
+
+GradNorm (Katharopoulos and Fleuret, 2018). Given a large batch B, compute per-example gradient features and rank by norm. For parameters θ and loss ℓi = ℓ(fθ (xi), y i), define raw gradient gi = ∇θ ℓi. To align with Adam, each coordinate is normalized as 
+
+˜gi = mt
+
+√vt + ϵ ⊙ gi
+
+where (mt, vt) are the exponential moving averages of first and second moments. Instead of ℓ2 distance, GradNorm computes similarity in this normalized gradient space using cosine: 
+
+sij = ⟨ ˜gi, ˜gj ⟩∥ ˜gi∥2 ∥ ˜gj ∥2
+
+.
+
+Each example is scored by its (smoothed) gradient norm ∥ ˜gi∥2, and the top-k are selected. This yields a subset whose update direction emphasizes examples with largest effective gradient magnitude under the optimizer’s scaling. 
+
+MaxLoss (Shalev-Shwartz and Wexler, 2016). Each example i ∈ B is scored by its instantaneous loss si = ℓ(fθ (xi), y i)
+
+The k highest-loss items are selected to form the training subset. This “hard-example” criterion requires only forward passes and captures points where the current model performs worst. Optionally, per-example losses can be combined with Adam-smoothed gradient norms to provide importance weights during optimization. Uniform Prototype Selection via Partial Optimal Transport with Submodular Guarantees 
+
+C.5 Calculation of gradient features 
+
+Let zi denote an example, ℓ(θ; zi) the training loss, and let W(L) 
+
+> V, LoRA
+
+be the parameter tensor of the last transformer block’s value projection adapted by LoRA. 4 We flatten W(L) 
+
+> V, LoRA
+
+to a vector v ∈ Rdvp . At iteration t and current parameters θt, we compute per-example gradients as 
+
+gvp  
+
+> i,t
+
+∶= ∇v ℓ(θt; zi) ∈ Rdvp ,
+
+where the gradients are restricted to the LoRA-adapted last V -projection. Unlike the zeroth-order MeZO estimator used in (Nguyen et al., 2025), these gradients are obtained directly by backpropagation. 
+
+Adam-aligned normalization. To align with the update rule of Adam, we normalize each per-example gradient using the optimizer’s moment statistics. Let mt, v t ∈ Rdvp denote the first and second moment accumulators, 
+
+mt = β1mt−1 + (1 − β1) ¯gt, vt = β2vt−1 + (1 − β2) ¯g2 
+
+> t
+
+, (16) with β1, β 2 ∈ (0, 1), ϵ > 0, and ¯gt the average gradient over the current pool. The normalized gradient feature for an example zi is then 
+
+ϕi,t ∶= gvp 
+
+> i,t
+
+ϵ + √vt
+
+∈ Rdvp , (17) where the division is elementwise. These features are stored and subsequently used in similarity computations. 
+
+C.6 Pretraining Experiments 
+
+We implement the pretraining setup using JAX (Bradbury et al., 2018), primarily due to its just-in-time (JIT) compilation framework and empirical 2−3× training speedups over PyTorch . For the base architecture, we pretrain a LL AMA-3 model consisting of approximately 500 M parameters on the OpenWebText corpus 5 (Radford et al., 2019). The training is carried out for 20 k training steps with an effective batch size of 64 sequences, each of length 512 . Optimization is performed using the Adam algorithm with a fixed learning rate of 1 × 10 −4, without auxiliary learning rate schedules. For all methods involving prototype-based subset selection, we begin with a candidate batch of 128 sequences and se-lect 50% prototypes, resulting in an effective batch size of 64 sequences used for parameter updates. Subset selection is performed on a per-batch basis, without leveraging history across iterations. In the case of UniPROT , the underlying optimal transport (OT) problem is solved using 20 Sinkhorn iterations with entropic regularization strength set to 1 × 10 −2. The similarity (cost) matrices are constructed directly from the last-layer gradients of the model, and no additional low-pass filtering, smoothing, or adaptive reweighting is applied. Throughout, cosine similarity is used as the base kernel to define pairwise affinities. The dataset is partitioned into a 95% training split and a 5% validation split. 
+
+## D Experimental Setup Details 
+
+D.1 Model Details PHI -2 (2.7B). PHI -2 is a 2.7B parameter model trained with an emphasis on mathematical and logical reasoning, derived from curated synthetic corpora and filtered web data. It supports a context length of 2,048 tokens. In our fine-tuning setup, we apply LoRA adapters (rank 128, α = 512 , dropout 0.05) to all attention projection matrices (QKV) and the two feed-forward layers. 
+
+PHI -3 family. We experiment primarily with the 3.8B variant (P HI -3 M INI ), though the broader family also includes 7B and 14B models. The P HI -3 series continues the focus on compact models optimized for reasoning tasks, with avail-able context lengths of 4K and 128K tokens depending on variant. Similar to P HI -2, we apply LoRA adapters to QKV projections and feed-forward layers during fine-tuning. 
+
+STABLE LM Z EPHYR 3B. STABLE LM Z EPHYR 3B is a 3B parameter instruction-tuned model designed as a general-purpose assistant, without a specific emphasis on mathematical reasoning. It supports input sequences up to 4K tokens. For LoRA fine-tuning, we insert adapters into all attention projection matrices (QKVO). 
+
+> 4“Last” refers to the topmost transformer block in the forward stack.
+> 5https://huggingface.co/datasets/Skylion007/openwebtext Chanda et al.
+
+D.2 Datasets 
+
+For image settings we do on MNIST, CIFAR10, CIFAR100 as well as synthetic distributions. For the mathematical reasoning experiments, we fine-tune on the MATH INSTRUCT dataset (Yue et al., 2023), which contains roughly 260K instruction–response pairs. The data is aggregated from 14 open-source mathematics corpora, covering diverse subfields and spanning a broad range of difficulty levels. The composition of MathInstruct is highly imbalanced—the largest constituent source is nearly 300 times larger than the smallest—and the detailed distribution across sources is provided in Figure 4a of the Appendix. Prior work has shown that fine-tuning on MathInstruct leads to state-of-the-art results on multiple standardized mathematical reasoning benchmarks. For classification experiments, we additionally use three datasets from the S UPER GLUE benchmark (Wang et al., 2019): SST-2, CB, and MultiRC. For CB, we retain the complete training set of 250 labeled examples. For SST-2 and MultiRC, we randomly subsample 3K examples each for training. 
+
+D.3 Training Details 
+
+Following the configuration in Yue et al. (2023), we employ a learning rate of 2 × 10 −5 with a cosine decay scheduler. The learning rate is linearly warmed up from 0 to 2 × 10 −5 during the first 3% of training steps and subsequently decays to 0 following a cosine schedule. We fix the maximum sequence length to 512 tokens. Unless otherwise stated, all experiments on M ATH INSTRUCT are trained for the equivalent of 1K gradient update steps. To enable larger effective batch sizes, we use gradient accumulation with an accumulation factor of 8. For parameter-efficient fine-tuning, we adopt LoRA (Hu et al., 2022) with rank 128, scaling parameter α = 512 , and a dropout rate of 0.05. On P HI models, LoRA adapters are applied to all attention projection matrices (QKV) as well as the two feed-forward layers. On Z EPHYR , we apply LoRA to all attention projections (QKVO). All experiments are conducted on 3 NVIDIA A6000 GPUs, and each configuration is repeated three times to account for variance in training. 
+
+D.4 Evaluation Datasets and Metrics 
+
+Following Yue et al. (2023), we evaluate our models on a diverse suite of mathematical reasoning benchmarks spanning both in-domain and out-of-domain distributions. 
+
+In-domain benchmarks. The in-domain evaluation covers three widely used datasets: GSM8K (), MATH ( ?), and NUM GLUE (Mishra et al., 2022). GSM8K focuses on grade-school arithmetic word problems, MATH contains high-school competition-style problems across 29 mathematical domains, and N UM GLUE extends natural language under-standing tasks with quantitative reasoning components. 
+
+Out-of-domain benchmarks. To test generalization beyond the training distribution, we additionally include SVAMP, the M ATHEMATICS dataset, and S IMUL EQ. These datasets emphasize robustness across algebraic manipulations, probabil-ity and statistics, number theory, and systems of equations, while also incorporating instances requiring multi-step logical reasoning and commonsense knowledge. 
+
+D.5 Evaluation Setup 1NN Classifier Setup Let X and Y denote the source and target datasets, respectively, with potentially differing class distributions, and let P ⊆ X be a candidate representative set for the target dataset Y. The quality of P is assessed using a 1-nearest neighbour (1-NN) classifier parameterized by the elements of P. Each instance y ∈ Y is assigned the label of its nearest prototype in P, where the ground-truth class labels of the elements in P are assumed to be available during this evaluation. The resulting classification accuracy serves as the evaluation metric for comparing prototype selection algorithms. 
+
+LLM-Finetuning: All questions are posed in an open-ended format. We adopt the standard exact match metric, where a prediction is considered correct only if it exactly matches the gold reference solution. Evaluation is conducted under the 
+
+0-shot setting with a maximum decoding context length of 2048 tokens. We use the Program-of-Thought (PoT) prompting strategy as the default, and fall back to Chain-of-Thought (CoT) prompting when PoT is not applicable, following Yue et al. (2023). 
+
+## E Additional Experimental Results 
+
+E.1 Additional Ablations on Entropic Regularization 
+
+To examine the influence of the entropic regularization parameter on the approximation error associated with the com-putation of the approximate marginal gain in Eq. (8), we conduct an ablation study under a controlled synthetic setting Uniform Prototype Selection via Partial Optimal Transport with Submodular Guarantees 
+
+derived from the CIFAR dataset. Specifically, we uniformly sample 2000 training instances from CIFAR and treat them identically as both the source and target sets, denoted by S and T , respectively. As illustrated in Fig. 7, increasing the value of λ progressively reduces the approximation error toward zero, with the ratio between the approximate and exact marginal gains converging to unity and exhibiting low variance. 
+
+(a) Entropic Reg. ( λ = 0.01 ) (b) Entropic Reg. ( λ = 0.02 ) (c) Entropic Reg. ( λ = 0.05 ) (d) Entropic Reg. ( λ = 0.1)
+
+Figure 7: Approximate vs. actual marginal gain as a function of the entropic regularization parameter λ. Increasing λ
+
+reduces the approximation error, with the marginal gain ratio converging to 1 and exhibiting low variance for larger λ
+
+values. 
+
+E.2 Additional Results on UniPROT -PB Experiments on batch size=256 for UniPROT -PB 
+
+We experiment with UniPROT -PB batch size of 256 for selection instead of source-wise prototype selection. We fine-tune P HI -3 for 2048 steps (selection batch size 256) with prototype percentage 0.25, resulting in an effective batch size of 32. Table 5 shows that UniPROT continues to be effective even in the full-batch setting. We compare against GREATS, GradNorm, and CoLM under the same train-ing budget and report validation log-perplexity trajectories over optimization steps. Figure 8 shows that CoLM’s validation perplexity degrades as batch size increases, while UniPROT -PB remains stable and continues to improve per-plexity throughout training. We report additional results on UniPROT -PB on MATH INSTRUCT dataset. 
+
+0 1,000 2,000 
+
+0.4
+
+0.6
+
+0.8
+
+Steps   
+
+> Log-Perplexity
+> GREATS UniPROT -PB
+> CoLM GradNorm
+
+Figure 8: Validation perplexity when batch size=256 and prototype ratio is 25%. 
+
+Experiments on full-batch prototype selection 
+
+For this variant, we experiment full-batch selection instead of source wise prototype selection. We finetune P HI -3 for 2048 steps, selection batch size of 128, with prototype percentage as 0.5, resulting in a effective batch of 64. Table 5 shows that 
+
+UniPROT continues to be effective even in full batch setting. Table 5: Comparison of UniPROT -PB performance for ∣B∣ = 256 , following Yue et al. (2023) on MATH INSTRUCT dataset. 
+
+Method Avg In-domain Out-of-domain GSM8K MATH NumGLUE SVAMP Mathematics SimulEq 
+
+COLM (Nguyen et al., 2025) 59 .86 74 .13 36 .70 63 .14 86 .50 36 .40 62 .30 
+
+GREATS (Wang et al., 2024) 60 .79 78 .62 37 .90 63 .90 85 .50 36 .90 61 .90 
+
+UniPROT -PB (Ours) 61.34 78 .20 37 .60 66 .03 84 .90 37 .70 63 .60 
+
+E.3 Additional Results on Zephyr-3B 
+
+Here, we report additional results on Z EPHYR -3B on M ATH INSTRUCT Dataset. Chanda et al. 
+
+Table 6: Per-batch performance across in-domain and out-of-domain datasets for P HI -3 on MATH INSTRUCT , batch size 
+
+∣B∣ = 128 and total budget k = 64 . We compare FT, GradNorm, COLM, GREATS, and UniPROT (Ours).                                                         
+
+> Method In-domain Out-of-domain Avg-All GSM8K MATH NumGLUE Avg SVAMP Mathematics SimulEq Avg
+> FT (bs=64) 76.72 36.54 62.57 58.61 85.10 33.30 62.78 60.39 59.50 GradNorm 75.40 35.03 64.10 58.18 84.17 36.50 65.70 62.12 60.15 COLM 76.36 36.42 64.10 58.96 85.30 37.40 63.60 62.10 60.53 GREATS 77.80 37.28 64.40 59.83 85.00 38.00 62.06 61.69 60.76
+> UniPROT (Ours) 78.16 37.76 66.02 60.65 85.70 37.20 68.28 63.73 62.19
+> −200  0
+> 200
+> 400
+> 600
+> 800
+> 1,000
+> 1,200
+> 1,400
+> 1,600
+> 1,800
+> 2,000
+> 2,200
+> 0.3
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+
+Steps 
+
+> Log-Perplexity
+
+GREATS 
+
+UniPROT -PB 
+
+CoLM 
+
+GradNorm 
+
+FT 
+
+Table 7: Top: Per-batch performance of FT, GradNorm, COLM, GREATS, and UniPROT on M ATH INSTRUCT with ∣B∣ =
+
+128 , k = 64 . Bottom: Validation perplexity when ∣B∣ = 128 , subset ratio 50%, and prototype selection is batch-wise. 
+
+> −200  0
+> 200
+> 400
+> 600
+> 800
+> 1,000
+> 1,200
+> 1,400
+> 1,600
+> 1,800
+> 2,000
+> 2,200
+> 0.6
+> 0.8 1
+> 1.2
+> 1.4
+> 1.6
+> 1.8 2
+
+Steps 
+
+> Log-Perplexity
+
+GREATS 
+
+UniPROT 
+
+CoLM 
+
+Figure 9: Zephyr-3b Validation perplexity when bs=128 and subset ratio 25% and prototype selection is batch wise. Uniform Prototype Selection via Partial Optimal Transport with Submodular Guarantees 
+
+Table 8: Performance across in-domain and out-of-domain datasets for Z EPHYR -3B on MATH INSTRUCT , batch size 
+
+∣B∣ = 128 and total budget k = 32 . Results are reported under two configurations for all baselines: source-wise (left of “/”) and batch-wise (right of “/”).                                                                               
+
+> Method In-domain Out-of-domain Avg-All GSM8K MATH NumGLUE Avg SVAMP Mathematics SimulEq Avg
+> FT 52.08 16.14 40.10 36.11 54.70 15.60 22.20 30.83 33.47 GradNorm 52.3 / 49.8 16.5 / 15.7 40.0 / 39.9 35.70 53.5 / 53.1 15.5 / 15.4 22.5 / 22.7 30.45 33.07 SBERT 51.3 / 21.7 14.6 / 14.01 41.6 / 27.44 28.44 56.3 / 34.5 16.2 / 13.6 21.98 / 13.8 26.06 27.25 COLM 50.6 / 49.88 21.42 / 17.4 40.15 / 39.9 36.56 55.8 /54.1 16.7 / 15.4 22.17 / 21.01 30.86 33.71 GREATS 52.8 / 50.6 19.01 / 15.9 40.8 / 38.8 36.32 54.5 / 54.6 17.1 / 13.9 21.98 / 21.78 30.64 33.48
+> UniPROT (Ours) 54.4 /54.89 20.4 / 19.6 41.3 /40.4 38.50 54.3 / 54.1 16.5 / 15.5 24.7 /22.95 31.34 34.92
+
+E.4 Additional Results on P HI -2 
+
+Here, we report additional results on P HI -2 on M ATH INSTRUCT Dataset. Table 9: Performance across in-domain and out-of-domain datasets for P HI -2 on MATH INSTRUCT , batch size ∣B∣ = 128 
+
+and total budget k = 32 . Results are reported under two configurations for all baselines: source-wise (left of “/”) and batch-wise (right of “/”).                                                                             
+
+> Method In-domain Out-of-domain Avg-All GSM8K MATH NumGLUE Avg SVAMP Mathematics SimulEq Avg
+> FT 59.28 14.80 47.88 40.65 62.80 19.40 36.70 39.63 40.14 GradNorm 58.6 / 60.3 15.1 / 14.6 51.3 / 50.6 41.75 61 / 59 20.2 / 20.4 40.6 / 38.13 39.89 40.82 SBERT 58.4 / 45.5 12.43 / 9.83 52.01 / 48.4 37.76 61 / 64.2 18.1 / 16.6 36.5 / 33.8 38.37 38.06 COLM 57.01 / 58.8 14.86 / 14.6 51.05 / 50.8 41.19 60 / 63.9 18.9 / 19.8 32.4 / 31.9 37.82 39.50 GREATS 59.5 / 58.4 15.4 / 15.6 51.2 / 54.1 42.37 61.3 / 61.5 21.1 / 20.7 37.35 / 35.01 39.49 40.93
+> UniPROT (Ours) 60.6 / 58.8 16.8 /16.7 51.61 / 51.7 42.70 61 / 62 20.9 / 19.8 41.4 /35.6 40.12 41.41
+
+Table 10: Comparison of P HI -2 per-source selection performance across in-domain and out-of-domain datasets, following Yue et al. (2023) on MATH INSTRUCT dataset, batch size ∣B∣ = 256 and total budget k = 32 .
+
+Method Avg In-domain Out-of-domain GSM8K MATH NumGLUE SVAMP Mathematics SimulEq 
+
+COLM-PS (Nguyen et al., 2025) 43 .14 61 .03 26 .67 52 .65 60 .45 21 .04 37 .00 
+
+GREATS-PS (Wang et al., 2024) 43 .73 61 .92 27 .21 52 .40 62 .00 20 .80 38 .03 
+
+UniPROT -PS (Ours) 44.66 62 .40 27 .63 53 .97 64 .72 20 .30 38 .91 
+
+## F Additional Related Works 
+
+OT for representation matching without selection. Wang et al. (2025) employ optimal transport (OT) to align class activation map (CAM) clusters with corresponding class prototypes. However, their use of OT is limited to distribution matching between pixel-level feature distributions and pre-defined cluster prototypes, rather than for subset or prototype selection. In particular, the prototypes are constructed as averages of pixel features assigned to each cluster (cf. Eq. (2) in Wang et al., 2025), and are not selected from a candidate pool under any combinatorial or cardinality constraint. Thus, no subset selection or prototype selection problem is formulated or solved in their framework. Zhang et al. (2024) also leverage OT to compute token-to-prototype assignments by matching representations to their cor-responding ground-truth prototypes. Unlike subset selection approaches, their formulation retains the full set of prototypes during optimization and uses entropy-regularized OT to obtain soft assignments . As a result, their method does not impose any sparsity, selection, or cardinality constraints on the set of active prototypes. Consequently, OT serves purely as an assignment mechanism rather than a tool for selecting a representative subset. Chanda et al. 
+
+OT in coreset selection and dataset condensation. OT has also been explored in coreset selection and dataset conden-sation settings, where the goal is to construct a compact dataset that approximates the full data distribution. For example, Wasserstein-based coreset construction and dataset distillation methods (Zhao et al., 2021; Nguyen et al., 2021; Liu et al., 2025) leverage OT distances to measure distributional fidelity between synthetic and real data. However, these approaches typically learn synthetic samples or optimize continuous representations, rather than selecting a subset from a given discrete pool. As a result, they differ fundamentally from subset selection problems with combinatorial constraints. 
+
+OT barycenters and prototype learning. Another related direction involves OT barycenters, where prototypes are ob-tained as Wasserstein means of distributions (Cuturi and Doucet, 2014; Agueh and Carlier, 2011). These methods compute representative prototypes in a continuous space by averaging distributions under OT geometry. While effective for sum-marization, they do not select prototypes from an existing dataset and thus bypass the combinatorial nature of subset selection. Similarly, OT-based clustering methods rely on iterative refinement of centroids rather than discrete selection from a candidate set (Ho et al., 2017). In contrast to the above works, our formulation uses partial optimal transport POT as a selection principle , where the objective explicitly optimizes over a constrained subset of prototypes under uniform weighting and cardinality restrictions. This leads to a fundamentally different regime in which OT directly governs subset selection, rather than serving solely as a matching or assignment operator. 
+
+Distinction to (Hong et al., 2024) (Hong et al., 2024) study mini-batch selection for efficient training of deep networks by selecting a subset of points from a given batch that maximizes group-wise orthogonalized representativeness. This objective is fundamentally different from our optimal transport (OT) formulation, which seeks to minimize the discrepancy between a prototypical distribution and a target distribution. In particular, their method operates within a single batch and does not incorporate any notion of a separate target set. Consequently, it is not directly applicable to settings where one aims to select a subset P ⊆ S (from a source set S) such that it matches a target set T .Algorithmically, their DivBS procedure performs greedy selection by iteratively choosing samples that maximize projec-tion onto the current residual. This results in a weighted expansion of the full gradient, where each selected sample is assigned an importance coefficient based on its marginal contribution. Crucially, these coefficients are non-uniform : early selections capture dominant components (e.g., the mean), while subsequent selections explain diminishing residuals. Al-though the final mini-batch is treated uniformly during backpropagation (via averaging), the selection mechanism itself is inherently non-uniform and does not enforce equal importance among selected samples. 
+
+Our approach (UniPROT). In contrast, our method explicitly incorporates a uniform weight constraint into the opti-mization objective. We select prototypes by solving a constrained OT problem that minimizes the transport cost to the target distribution under the requirement that each prototype carries equal mass. This leads to a fundamentally different selection principle that ensures equal-importance representation while aligning the selected subset with the target distribution. 
+
+## G Broader Impact 
+
+This work develops a principled framework for prototype selection that aims to improve fairness and robustness in set-tings with distributional imbalance. By explicitly enforcing uniform weighting, UniPROT can reduce systematic under-representation of minority classes, which has positive implications for equitable model performance across demographic or domain groups. At the same time, more efficient subset selection methods could also be leveraged to accelerate training of harmful or biased systems if applied without safeguards. We believe that open discussion of both the benefits and limita-tions of prototype selection methods is important to ensure they are deployed responsibly, and that continued transparency in this line of work will help maximize positive societal impact. 
+
+## H Code 
+
+We release our code on GitHub.

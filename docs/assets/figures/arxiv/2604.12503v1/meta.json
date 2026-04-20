@@ -1,0 +1,54 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.12503v1/fig-001.webp",
+      "caption": "Figure 1: An example of multi-hop reasoning over an incomplete knowledge graph. Existing methods (middle) solely rely on explicit edges and fail to perform multi-hop reasoning under graph incompleteness (e.g. missing edges). Our method (bottom) overcomes this limitation by exploiting implicit relations in the graph structure.",
+      "page": 1,
+      "index": 1,
+      "width": 446,
+      "height": 312
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12503v1/fig-002.webp",
+      "caption": "Table 1: Performance comparison on four KBQA datasets. Results marked with ‘*’ are taken directly from the corresponding original papers. Bold numbers indicate the best performance, while underlined numbers denote the second-best (Hits@1).",
+      "page": 6,
+      "index": 2,
+      "width": 687,
+      "height": 233
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12503v1/fig-003.webp",
+      "caption": "Table 2: Ablation study of the graph-based soft prompting.",
+      "page": 7,
+      "index": 3,
+      "width": 721,
+      "height": 246
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12503v1/fig-004.webp",
+      "caption": "Table 3: Performance Comparison with Different LLMselect Settings.",
+      "page": 8,
+      "index": 4,
+      "width": 746,
+      "height": 212
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12503v1/fig-005.webp",
+      "caption": "Figure 2: Overview of the proposed framework and its running process. The upper part describes the method: GraSP is used to construct structure-aware soft prompts from the sub knowledge graph, which are first processed by a compact LLM to select relevant entities and relations, and then refined by a more powerful LLM with substantially more parameters to generate high-quality answers. The lower part demonstrates an example illustrating how our framework links Knews to Cyprus and subsequently treats Cyprus as the topic entity to derive the final answer.",
+      "page": 4,
+      "index": 5,
+      "width": 937,
+      "height": 454
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12503v1/fig-006.webp",
+      "caption": "Table 7: Performance comparison of different select LLMs.",
+      "page": 12,
+      "index": 6,
+      "width": 633,
+      "height": 325
+    }
+  ]
+}
