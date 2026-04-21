@@ -1,0 +1,1856 @@
+Title: Decision-Aware Predictions for Right-Hand Side Parameters in Linear Programs
+
+URL Source: https://arxiv.org/pdf/2604.11533v1
+
+Published Time: Tue, 14 Apr 2026 02:24:18 GMT
+
+Number of Pages: 22
+
+Markdown Content:
+# Decision-Aware Predictions for Right-Hand Side Parameters in Linear Programs 
+
+## Jackson Forner ∗
+
+## , Miju Ahn †
+
+## , and Harsha Gangammanavar ‡
+
+## Department of Operations Research and Engineering Management, Southern Methodist University, Dallas TX First submission: November 30, 2025 
+
+Abstract 
+
+This paper studies an integrated learning and optimization problem in which a prediction model estimates the right-hand-side parameters of a linear program (LP) using a contextual vector. Con-sidering that such a prediction alters the feasible region of the LP, we aim to estimate the constraint set to contain the optimal solution of the underlying LP, given by the true right-hand side param-eters. We propose formulations for training a prediction model by minimizing the decision error while accounting for feasibility, measured by a collection of historical primal and dual solutions. Our analysis identifies conditions under which a resulting predicted feasible region contains the true solution, and whether the latter solution achieves optimality for the predicted problem. To solve the alternative training problems, we employ existing LP and nonconvex programming solution meth-ods. We conduct numerical experiments on a synthetic LP and a network optimization problem. Our results indicate that the proposed methods effectively implement the desired feasibility, compared to standard regression models. 
+
+Keywords: Linear programming; Integrated learning and optimization; Predict-then-optimize; Decision-aware learning 
+
+# 1 Introduction 
+
+In this paper, we consider a contextual linear programming (C-LP) problem of the following form: min 
+
+> x
+
+⟨c, x⟩ | Ax ≥ b(ξ), x ≥ 0 . (1) We seek an optimal solution to an instance of the above problem in the feasible region X (˜b) := {x ≥
+
+0 | Ax ≥ ˜b} ⊆ Rn that is parametrized by a deterministic cost coefficient c ∈ Rn, a deterministic constraint matrix A ∈ Rm×n, and a realization b(•) ∈ Rm of a stochastic right-hand side ˜b. The stochastic right-hand side is correlated with a context, or a feature, vector that we denote by ˜ξ ∈ Rd.In other words, a joint probability distribution links the context vector to the problem’s right-hand-side parameter. We consider a setting where we only observe a realization ξ of the feature ˜ξ before the decision epoch and must determine a decision using a prediction ˆb(ξ) of the right-hand side vector. In this paper, we study different approaches to make such predictions. To handle the contextual problems, of which (1) is a particular form, integrated learning and opti-mization (ILO) is a particularly compelling approach. In this approach, models are trained to predict 
+
+> ∗jforner@smu.edu
+> †mijua@smu.edu
+> ‡harsha@smu.edu
+
+1
+
+> arXiv:2604.11533v1 [math.OC] 13 Apr 2026
+
+Forner, Ahn, Gangammanavar Decision-Aware Right-Hand Side Predictions uncertain optimization parameters in a way that minimizes the error in the decisions made based on those predictions, rather than the error in the parameter predictions themselves. To the best of our knowledge, the earliest work on integrated learning and optimization is by [1], who considered a time-series problem in portfolio selection. More recently, [5] considered linear programs with uncertain cost vectors and proposed novel loss functions for predicting these parameters, directly incorporating the op-timization problem’s structure into the learning process. Their approach created a new “smart-predict-then-optimize” (SPO) framework that has since led to other similar works in recent years. For example, [9] considered mixed-integer linear programs with uncertain parameters in the objective and constraints, and trained a neural network to estimate these values using a post-hoc regret loss function similar to that of [5]. [7] also applied a regret-type loss function to estimate right-hand side parameters, which are in the second stage of a two-stage stochastic program. We refer interested readers to the work of [16] for a more comprehensive review of ILO and, more broadly, contextual optimization. It is worth noting that most works on contextual optimization assume the constraints to be deterministic and, therefore, do not apply to (1), where the constraints have stochastic right-hand sides. Our work extends the ILO framework to parameters in the constraints of optimization problems. In this regard, the main contribution of this paper is twofold. 1. Errors in predicting constraint parameters may render the optimization problem infeasible. To address this, we present four different training problems that explicitly account for loss/decision errors, measured in terms of feasibility and suboptimality. These models use a training dataset comprising true or historical data, context vectors, right-hand-side vectors, and optimal solutions. The models differ in how they utilize the data. We identify the conditions under which we can recover the true optimal solutions as feasible or optimal solutions of the optimization problem with predicted parameters. We also present solution methods to solve the alternative training problems. 2. We validate the proposed training problems through numerical experiments conducted on a syn-thetic LP and a network optimization problem. We compare the feasibility and suboptimality metrics attained by predictors obtained using the alternate training problems, and also benchmark them against standard training approaches that do not account for decision errors. Our results indicate that our proposed models are able to leverage decision data to achieve high feasibility in terms of containing the true optimal solution when we explicitly enforce such constraints in the learning process, and that the feasibility of such models increases as we train on more data. The benchmark models, on the other hand, do not leverage decision data and attain very low feasibility. We also observe a trade-off between feasibility and suboptimality in our proposed models, namely, models that attain a higher feasibility perform worse in terms of suboptimality, and vice versa. The remainder of the paper is structured as follows: in §2, we present a framework identifying various goals for the problem of right-hand side parameter predictions in LPs. We then propose a set of novel learning problems aimed at achieving these goals and identify suitable algorithms to solve them. In §3, we present numerical experiments using a synthetic and a network optimization problem that demonstrate the predictive utility of our proposed learning problems in terms of relevant decision metrics. We present all of the proofs and additional details in the Appendix. 
+
+Notations 
+
+Let [ N ] := {1, . . . , N }. We define a collection of vectors as ( xi) := ( x1, . . . , xN ). For a matrix A ∈ Rm×n,we denote its j-th row as a vector aj ∈ Rn.
+
+# 2 The Framework 
+
+We consider a setting where the goal is to identify an optimal solution to the C-LP problem (1) using only an observation of the context vector ξ. We denote the optimal primal-dual solution pair of (1) with an arbitrary right-hand side vector b by ( x⋆, y⋆), and the associated optimal objective function value 2Forner, Ahn, Gangammanavar Decision-Aware Right-Hand Side Predictions by v⋆. Notice that the optimal solutions and the values are functions of the right-hand side, but we suppress the explicit notation (e.g., x⋆(b)) for notational convenience. To model this decision-making setting, we define a probability space (Ξ × B , F, P), where Ξ ⊂ Rd is a compact set, B ⊆ Rm, F is a 
+
+σ-algebra over Ξ × B , and P is a joint probability distribution over Ξ × B . For each ξ ∈ Ξ, we assume that the optimal cost v⋆ induced by the corresponding right-hand side vector b is finite; that is, the problem instance corresponding to any observation of the context vector ˜ξ is feasible and has a finite optimal cost. In our setting, we consider a collection of independent observations of the context and the right-hand side vectors, i.e., DN := {(ξi, bi)}i∈[N ] from Ξ × B . These observations are either based on historical data or are generated using a simulation process. For any observation, we instantiate (1) with 
+
+bi as the right-hand side of the constraints and solve it to optimality. We denote the resulting optimal primal-dual solution pair by ( x⋆i , y⋆i ), and the associated optimal value as v⋆i . Using this optimal solution data, we denote a decision-induced dataset by D⋆N := {(ξi, bi, x⋆i , y⋆i )}i∈[N ].We consider a class P of predictors of the right-hand side vector p : Ξ → B . We denote ˆb := p(ξ)as the predicted right-hand side vector corresponding to context vector ξ. We can use the prediction ˆb
+
+to instantiate the C-LP problem (1) to obtain the “predicted problem.” We denote the optimal primal-dual solution pair obtained by solving the predicted problem by (ˆ x, ˆy) and the corresponding optimal objective function value ˆ v, assuming they exist. We denote by ℓ(·, ·) a loss function that measures, upon observation of the true right-hand vector, the error incurred when we use a prediction ˆb in lieu of the true right-hand side b. As is customary in machine learning, we utilize Dn (or D⋆N ) as the training data to identify the prediction model p⋆ ∈ P by solving the empirical risk minimization (ERM) problem: min 
+
+> p∈P
+
+ 1
+
+N
+
+X 
+
+> i∈[N]
+
+ℓ(p(ξi), bi)
+
+
+
+. (2) To evaluate the quality of the model p⋆ obtained from solving (2), we utilize a validation dataset as 
+
+V := {(ξvi , bvi )}. We denote the optimal primal-dual solution pair obtained by solving the predicted problem with p⋆(ξvi ) by (ˆ xi, ˆyi) and the corresponding optimal objective function value ˆ vi. In this paper, we focus on the class of linear prediction models P = {p | ∃ W ∈ Rm×d s.t. p(ξ) = W ξ , ∀ξ ∈ Ξ},in which case the ERM problem (2) reduces to an optimization over prediction matrix W .To design an appropriate loss function, we consider the following set that captures the primal and dual feasible solutions of the predicted problem: 
+
+bS(ξ; p) := 
+
+
+
+(x, y) Ax ≥ p(ξ), x ≥ 0,
+
+A⊤y ≤ c, y ≥ 0
+
+
+
+. (3) In the above, y ∈ Rm is the dual variable, an element of the LP dual feasible region given by Y := {y ≥
+
+0 | A⊤y ≤ c}. We denote by bS⋆(ξ; p) a refinement of the above set to include the first-order optimality conditions of the predicted problem. That is, 
+
+bS⋆(ξ; p) := {(x, y) ∈ S(ξ; p) | ⟨ c, x⟩ = ⟨p(ξ), y⟩} . (4) In our setting, when we observe a new context vector ξ, we predict the right-hand side as ˆb = p(ξ)and instantiate the C-LP (1). We anticipate that the optimal primal or dual solution of the true C-LP corresponding to the unobserved right-hand side b at least resides in the feasible region of the predicted problem; that is, there exists y ∈ Y such that ( x⋆, y) ∈ bS(ξ; p), or there exists x ∈ X (b)such that ( x, y⋆) ∈ bS(ξ; p). Better yet, we may hope for ( x⋆, y⋆) ∈ bS(ξ; p). The best case outcome is that ( x⋆, y⋆) ∈ bS⋆(ξ; p), implying that the true optimal solution pair is also optimal for the predicted problem. 
+
+## 2.1 Different Approaches to Train a Predictor 
+
+Our ability to realize the minimal or optimistic expectations depends on how well we learn the model 
+
+p ∈ P . For this task, we present a suite of training problems that utilize the decision-induced dataset 
+
+D⋆N (referring to the literature, we may describe these learning problems as being decision-aware). In all our training problems, we aim to minimize a metric that can be interpreted as the duality gap, where the constraints capture our expectations identified in the definition of sets bS(ξ; p) and bS⋆(ξ; p). 3Forner, Ahn, Gangammanavar Decision-Aware Right-Hand Side Predictions The first training problem in this suite directly targets the optimistic goal of ( x⋆, y⋆) ∈ bS⋆(ξ; p). Following (4), we state this optimistic decision-aware learning (DAL) problem as min 
+
+> p∈P
+
+ 1
+
+N
+
+X 
+
+> i∈[N]
+
+(⟨c, x⋆i ⟩ − ⟨ p(ξi), y⋆i ⟩) Ax ⋆i ≥ p(ξi) ∀i ∈ [N ]
+
+
+
+. (5) Notice that since ( x⋆i , y⋆i ) are optimal solution pairs to the true problem, they satisfy x⋆i , y⋆i ≥ 0 and 
+
+A⊤y⋆i ≤ c. The additional constraint in (5) ensures the feasibility of x⋆ to the predicted problem. Notice that each summand in the above problem is nonnegative since the pair x⋆i and y⋆i are feasible to the predicted primal and dual problems, respectively. Moreover, this problem can be reformulated as an LP problem if the model p is a linear model, and if its optimal value is zero, then it implies that (x⋆i , y⋆i ) ∈ bS⋆(ξi; p) for all i ∈ [N ]. However, such an outcome may be unlikely. Alternatively, if our goal is to at least recover the true primal optimal solutions from the predicted problems, then we can consider a primal-DAL training problem stated as min 
+
+> p∈P ,(yi)
+
+ 1
+
+N
+
+X 
+
+> i∈[N]
+
+(⟨c, x⋆i ⟩ − ⟨ p(ξi), yi⟩) Ax ⋆i ≥ p(ξi), A⊤yi ≤ c, yi ≥ 0 ∀i ∈ [N ]
+
+
+
+. (6) Here, we insist that the true primal solutions reside in the primal feasible region of their corresponding predicted problem. In addition to the model p, we also determine the dual variables yi, which are required to satisfy the dual feasibility condition for each i ∈ [N ]. Since the dual feasibility requirements are imposed for every data point separately in (6), it is possible that the above optimization problem chooses a weak model that satisfies Ax ⋆i ≥ p(ξ) and still achieves a near-zero objective. To address this issue, we present a slight revision to the above problem: min 
+
+> p∈P ,(yi)
+
+ 1
+
+N
+
+X 
+
+> i∈[N]
+
+(⟨c, x⋆i ⟩ − ⟨ p(ξi), yi⟩) Ax ⋆i ≥ p(ξi) ≥ bi, A⊤yi ≤ c, yi ≥ 0 ∀i ∈ [N ]
+
+
+
+. (7) Using the fact that Ax ⋆i ≥ bi, here we impose an additional restriction on the model as p(ξi) ≥ bi.If our goal is to recover the true dual solutions from the predicted problem, then we pose the following dual-DAL training problem: min 
+
+> p∈P ,(xi)
+
+ 1
+
+N
+
+X 
+
+> i∈[N]
+
+(⟨c, xi⟩ − ⟨ p(ξi), y⋆i ⟩) Ax i ≥ p(ξi), xi ≥ 0 ∀i ∈ [N ]
+
+
+
+. (8) Notice that the above problem has a trivial solution, rendering it useless. 
+
+## 2.2 A Discussion on Recovering (x⋆, y⋆)
+
+Consider an arbitrary pair ( ξ, b) and associated ( x⋆, y⋆). We are interested in whether p(ξ) = ˆb yields a feasible region that recovers the pair of optimal solutions, i.e., ( x⋆, y⋆) ∈ bS(ξ; p). It is not difficult to verify that if the model underpredicts, that is, b ≥ ˆb, then we have such a recovery. However, if the model overpredicts an index that belongs to a subset of indices, such an inclusion relationship does not hold. Proposition 2.1 formally states these observations. For this purpose, we define the following sets of indices: 
+
+J =(x⋆) := {j ∈ [m] | ⟨ aj , x⋆⟩ = bj } and J +(y⋆) := {j ∈ [m] | y⋆j > 0}.
+
+Among the two sets, we have J +(y⋆) ⊆ J =(x⋆) due to the complementary slackness condition of a linear program. For more meaningful analysis, we assume y⋆̸ = 0, i.e., J +(y⋆)̸ = ∅.
+
+Proposition 2.1. Consider an arbitrary quadruple (ξ, b, x⋆, y⋆). Let p(ξ) = ˆb. The following holds: (i) If b ≥ ˆb, then (x⋆, y⋆) ∈ bS(ξ; p).
+
+4Forner, Ahn, Gangammanavar Decision-Aware Right-Hand Side Predictions 
+
+(ii) If ∃ j′ ∈ J =(x⋆) such that bj′ < ˆbj′ , then (x⋆, y⋆) /∈ bS(ξ; p).
+
+The proofs of all the results shown in this paper are presented in Appendix §A. We note that the contrapositive of the second statement of Proposition 2.1 also serves as a necessary condition for (x⋆, y⋆) ∈ bS(ξ; p). In other words, J =(x⋆) is the smallest index set for which the overprediction of a component bj yields ( x⋆, y⋆) /∈ bS(ξ; p). In fact, overprediction in [ m] \ J =(x⋆) is admissible. For example, consider the LP min x≥0{x1 + x2 | x1 ≥ 1, −x1 ≥ − 2, x 2 ≥ 1, −x2 ≥ − 2}. The unique optimal solution is x⋆ = (1 , 1) and J =(x⋆) = {1, 3}. Suppose we make the prediction ˆb = (0 .5, −1.5, 0.5, −2.5) of the true right-hand side vector b = (1 , −2, 1, −2). Then we overpredicted the second component, i.e., ˆb2 > b2, yet one can easily verify that Ax ⋆ ≥ ˆb, thus ( x⋆, y⋆) ∈ bS(ξ; p). Although underprediction of b guarantees ( x⋆, y⋆) to reside in the predicted feasible region, enforcing 
+
+p to have such a property may lead to a loose estimate of ˆb. Instead, our proposed optimistic and primal-DAL models (5), (6), and (7) incorporate a relaxed condition, Ax ⋆ ≥ p(ξ), to ensure ( x⋆, y⋆) ∈ bS(ξ; p). Under this requirement, we identify the conditions for ( x⋆, y⋆) to achieve optimality of the predicted problem. These results are stated in Proposition 2.2 and Corollary 2.3. 
+
+Proposition 2.2. Consider an arbitrary quadruple (ξ, b, x⋆, y⋆) and let p(ξ) = ˆb. Suppose (x⋆, y⋆) ∈
+
+bS(ξ; p). We have (x⋆, y⋆) ∈ bS⋆(ξ; p) if and only if bj = ˆbj for all j ∈ J +(y⋆).
+
+Corollary 2.3. Consider an arbitrary quadruple (ξ, b, x⋆, y⋆) and p(ξ) = ˆb. If Ax ⋆ ≥ ˆb ≥ b then 
+
+(x⋆, y⋆) ∈ bS⋆(ξ; p).
+
+## 2.3 Training Problems 
+
+Hereafter, we focus on the class of linear predictors and present the training problems. Let us consider 
+
+p(ξ) = ¯W ξ + ¯ z where ¯W is a matrix of unknown weights and ¯ z is the intercept of the model. This model can be equivalently written as p(ξ) = W ξ where W is obtained by appending ¯ z to ¯W , i.e., 
+
+W = [¯ z | ¯W ], and the scalar 1 is appended to the input ξ. For notational convenience, we assume the intercept is implicitly handled by W ∈ Rm×d. Additionally, in practice, b may consist of both unknown and determined components. In that case, it is desirable to only estimate the unknown components. While this reduces the dimension of prediction, we retain p(ξ) = W ξ for simplicity, as this model accommodates such a partial prediction of b by some algebraic manipulations. When we aim to train a W using the dataset D⋆N , most of the approaches proposed in § 2.1 are high-dimensional problems. For example, in (6), there are ( md + mN ) variables in the problem while only N observations are available. Motivated by the high-dimensional statistical learning literature, where the number of unknowns exceeds the number of available data points, we employ functions that are designed to promote sparsity, such as the L1 norm proposed by [18]. This leads us to the following training problem: min  
+
+> W,(yi)
+
+
+
+F ( W , (yi) ) Ax ⋆i ≥ W ξ i, A⊤yi ≤ c, yi ≥ 0 ∀i ∈ [N ]
+
+
+
+, (9) where the objective function is defined as 
+
+F ( W , (yi) ) = 1
+
+N
+
+X 
+
+> i∈[N]
+
+(⟨c, x⋆i ⟩ − ⟨ W ξ i, yi⟩) + λ r (W ) + γ ϕ (W ).
+
+Here, r(•) is a sparsity-inducing regularizer and ϕ(•) measures the penalty of violating additional con-straints, e.g., ϕ(W ) := P 
+
+> i∈[N]
+
+P 
+
+> j∈[m]
+
+max {0, b ij − ⟨ wj , ξi⟩} . We assume both r and ϕ are convex functions, therefore, F is a biconvex function, i.e., F ( •, (yi) ) is convex in W for a fixed ( yi), and 
+
+F ( W , • ) is convex in ( yi) for a fixed W . Lastly, both λ and γ are nonnegative weighting parameters. We note that the constraints of (9) are separable in each variable. Since the dual feasible region 
+
+Y = {y ≥ 0 | A⊤y ≤ c} is nonempty (this follows from an earlier assumption that for each ξ ∈ Ξ, the optimal cost v⋆ of the C-LP (1) is finite), we analyze the feasibility of the problem by investigating the first constraint. Proposition 2.4 identifies conditions that guarantee a nonempty feasible set of (9). 5Forner, Ahn, Gangammanavar Decision-Aware Right-Hand Side Predictions 
+
+Proposition 2.4. Given A and D⋆N , consider a set W := {W ∈ Rm×d Ax ⋆i ≥ W ξ i, ∀i ∈ [N ]}. The set W is nonempty if one of the following conditions hold: (i) There exists ˜k ∈ [d] such that ξi˜k > 0 for all i ∈ [N ];(ii) There exists ˜k ∈ [d] such that ξi˜k < 0 for all i ∈ [N ];(iii) For every k ∈ [d], either ξik ≥ 0 for all i ∈ [N ], or ξik ≤ 0 for all i ∈ [N ]. Furthermore, 
+
+ξi̸ = 0 ∀i ∈ [N ].
+
+2.3.1 Alternate Convex Search 
+
+To solve (9), we apply a simple approach of iteratively solving for one variable while fixing the other. This approach, referred to as an alternate approach, was proposed by [19] to minimize a bivariate function subject to separable constraints. Algorithm 1 presents details of the alternate approach applied to our problem. 
+
+Algorithm 1 Alternate Convex Search  
+
+> 1:
+
+Parameters: λ, γ > 0;  
+
+> 2:
+
+Initialize W t, ( yi)t, and t = 0;  
+
+> 3:
+
+while termination criteria are not satisfied do  
+
+> 4:
+
+Given ( yi)t, update 
+
+W t+1 ∈ arg min 
+
+> W
+
+
+
+1
+
+N
+
+X 
+
+> i∈[N]
+
+(⟨c, x⋆i ⟩ − ⟨ W ξ i, yti⟩) + λ r (W ) + γ ϕ (W ) Ax ⋆i ≥ W ξ i, ∀i ∈ [N ]
+
+ ;(10)  
+
+> 5:
+
+Given W t+1 , update (yi)t+1 ∈ arg min 
+
+> (yi)
+
+
+
+1
+
+N
+
+X 
+
+> i∈[N]
+
+(⟨c, x⋆i ⟩ − ⟨ W t+1 ξi, yi⟩) A⊤yi ≤ c, yi ≥ 0 ∀i ∈ [N ]
+
+ ; (11)  
+
+> 6:
+
+t ← t + 1;  
+
+> 7:
+
+end while  
+
+> 8:
+
+return ( cW , (byi)) = ( W t, (yi)t)The convergence of the alternate approach has been shown in the literature. [19] introduced a stationary solution suitable for bivariate minimization problems, called the partial optimal solution. The convergence property for the case of a biconvex program was formally stated in [8], identifying conditions under which the method yields a partial optimal solution. For a special case of a bilinear program, [10] showed that a similar iterative scheme to the alternate approach, shown in [10, Algorithm 1], generates a Karush–Kuhn–Tucker (KKT) point, provided that the constraint sets are bounded. We state the convergence properties of Algorithm 1 in Theorem 2.5. 
+
+Theorem 2.5. Consider problem (9) . Assume that F is bounded below, and both r and ϕ are convex functions. If the constraints W = { W Ax ⋆i ≥ W ξ i, ∀i ∈ [N ] } and Y = { (yi) A⊤yi ≤ c, yi ≥
+
+0, ∀i ∈ [N ] } are bounded, then the sequence {W t, (yi)t}∞ 
+
+> t=1
+
+generated by Algorithm 1 satisfies (i) The sequence {F (W t, (yi)t)}∞ 
+
+> t=1
+
+is monotonically non-increasing; (ii) Every accumulation point of {F (W t, (yi)t)}∞ 
+
+> t=1
+
+is a partial optimal solution, i.e., an accumulation point (W ∗, (yi)∗) satisfies 
+
+F (W ∗, (yi)∗) ≤ F (W , (yi)∗) ∀ W ∈ W and F (W ∗, (yi)∗) ≤ F (W ∗, (yi)) ∀ (yi) ∈ Y;
+
+(iii) Furthermore, if r(•) and ϕ(•) are differentiable, a partial optimal solution of (9) is equivalent to a KKT point of (9) .
+
+6Forner, Ahn, Gangammanavar Decision-Aware Right-Hand Side Predictions We note that an alternative approach to solving (9) is to write the objective function as a difference-of-convex (DC) function and apply an algorithm designed for minimizing DC functions. A function f (x)is called a DC function if there exist two convex functions g(x) and h(x) such that f (x) = g(x) − h(x). For a DC function, identifying convex functions g(·) and h(·) may not always be possible; however, it turns out that by applying some algebraic work, we obtain a DC representation of (9). We present an explicit DC form of the objective in (9) in Appendix §B. Consequently, a numerical method minimizing a DC program, e.g., DC Algorithm in [15, 17], can be applied to compute a KKT point of (9), as shown in [11, 13]. 
+
+# 3 Numerical Experiments 
+
+In this section, we report the results of numerical experiments evaluating the performance of the proposed DAL prediction models. For these experiments, we set the hypothesis class to linear prediction models i.e., 
+
+P = {p | ∃ W ∈ Rm×d s.t. p(ξ) = W ξ , ∀ξ ∈ Ξ}. We conducted experiments on instances of synthetically generated C-LP problems and a network optimization problem. All experiments were conducted on a Windows 11 desktop with an Intel i7-10700 (16 threads) and 64 GB RAM. For all instances of the two problems, we solve the optimistic-DAL problem (5), the primal-DAL problem (9), and the dual-DAL problem (8). We solve two variants of the primal-DAL problem both with a L1 regularizer; the first does not include the constraint violation penalty obtained by setting γ = 0 in (9) and the second is a penalized version with γ̸ = 0 and ϕ(W ) := P 
+
+> i∈[N]
+
+P 
+
+> j∈[m]
+
+max {0, b ij −⟨ wj , ξi⟩} .We benchmark the DAL problems against learning approaches that do not explicitly consider downstream decisions to predict the relationship between the context and the right-hand-side vectors. We utilize as benchmarks a linear regression (LR) model, a lasso regression model [18], and a random forests (RF) regression model [4] with 100 trees and ⌈ d 
+
+> 3
+
+⌉ features at each split. The exact form of the DAL problems, as well as the linear/lasso regression problems, are provided in Appendix §C for the synthetic experiment and in Appendix §E for the network optimization experiment. We solve the primal-DAL problem using the alternate convex search (Algorithm 1). This problem can be solved by using a commercial solver, and its DC representation can be tackled using the convex-concave procedure (Algorithm 2), shown in Appendix §B. We compare the alternative approaches whose details we present in Appendix §C. Our numerical comparison revealed that Algorithm 1 is more efficient in solving this problem; hence, we use this solution method from here on out. We solve the optimistic and dual-DAL problems, which are both LPs, using Gurobi 12.0.1. We use the SciKit-Learn package [14] to implement regression-based prediction models. Recall that the alternative DAL problems aim to minimally recover the true optimal solution as a feasible solution to the predicted problem and optimistically recover it as the optimal solution of the predicted problem. In light of this goal, we evaluate and compare the alternative training problems using the following metrics for a prediction outcome p(ξ): Feasibility: χ{Ax ⋆ ≥ p(ξ)} Optimality gap: ⟨c, x⋆⟩ − ⟨ p(ξ), y⋆⟩
+
+Here, χ{·} is an indicator function that takes the value 1 if the input is true and 0 otherwise. If we only meet the minimal requirement, then we may not be able to recover the true optimal solution by optimizing the predicted problem. In fact, the optimal solution to the predicted problem (ˆ x) may not even be feasible for the true problem. In this case, we may project ˆ x to the true feasible region X (b) or the set of true optimal solutions X ⋆(b). We denote such a solution by ˜ xi ∈ arg min x≥0{|| x− ˆxi|| 22 |Ax ≥ bi}.We use the projection distance, denoted by Π X = || ˆxi − ˜xi|| 2, and the distance of the projected solution to the true optimal solution, denoted by Π X ⋆ = || ˜xi − x⋆i || 2, to compare solutions from alternative DAL problems. 
+
+## 3.1 Synthetic Data Experiment 
+
+All instances of the sythetically generated C-LP problem (1) have five decision variables ( n = 5), seven constraints ( m = 7), and three contextual features ( d = 3). We vary the training dataset size N ∈
+
+7Forner, Ahn, Gangammanavar Decision-Aware Right-Hand Side Predictions                                    
+
+> NOptimistic-DAL Primal-DAL Primal-DAL (w/ penalty) Dual-DAL LR Lasso RF 250 91.89 94.10 94.31 26.40 14.75 16.47 20.34 500 95.79 96.71 96.87 30.62 14.87 16.16 18.67 750 97.38 97.95 97.89 28.71 14.89 16.26 18.36 1000 98.07 98.38 98.32 28.86 15.09 16.21 18.08
+
+Table 1: Percentage of true solutions x⋆i in the validation dataset which are in the predicted feasible regions. 
+
+{250 , 500 , 750 , 1000 } and conduct 50 replications, where each replication involves a C-LP instance with independently generated cost vector c and constraint matrix A, ground truth matrix W ⋆, and validation set V of size |V| = 250. Note that we remove datapoints ( ξi, bi) (resp. (ξvi , bvi )) for which the C-LP (1) does not have a finite optimal cost, and thus we might train (resp. validate) on less than N (resp. 250) data points. We fix the largest training dataset size N = 1000 and perform hyperparameter tuning separately for each experiment replication. For more details regarding the data-generation process and hyperparameter tuning, we refer the reader to Appendix §C. In Table 1, we report the results regarding the feasibility metric for the prediction models. We present these results as the percentage of the validation dataset where the true optimal solution x⋆i
+
+resides in the feasible region of the predicted problem associated with the right-hand side generated using a specific training model. In the companion Figure 1, we show the number of predicted constraints satisfied by the true solutions x⋆i on one replication of the experiment with N = 250. The results indicate that the optimistic and primal-DAL problems recover a very high percentage ( > 90%) of the true solutions x⋆i in their feasible regions. This is due to the fact that their models explicitly contain constraints Ax ⋆i ≥ W ξ i for all i ∈ [N ]. The inclusion of the penalty term does not aid the solution quality with respect to the overall percentage, as evident from the third and fourth columns. With the feasibility percentage ranging as high as 30 .62%, the performance of the dual-DAL model deteriorates relative to the former two models, while still outperforming the regression models, which have very low true solution recovery percentages of around 15 − 20%. Moreover, as the size of the training dataset increases, the feasibility percentage also improves in most cases. From these results, we can conclude that including the effect of downstream decision-making in the learning process, as we do through constraints and objectives in the training optimization model, improves the feasibility metric. Since the regression models perform relatively poorly on the feasibility metric (see Table 1), which concerns our minimal goal for the prediction task, we focus on the proposed DAL models in the remainder of the section. 
+
+Figure 1: Number of predicted constraints satisfied by the true solutions x⋆i
+
+8Forner, Ahn, Gangammanavar Decision-Aware Right-Hand Side Predictions                     
+
+> NOptimistic-DAL Primal-DAL Primal-DAL (w/ penalty) Dual-DAL 250 43.66 (91.89%) 48.98 (94.10%) 45.70 (94.31%) 6.10 (26.40%) 500 62.78 (95.79%) 71.19 (96.71%) 71.36 (96.87%) 5.96 (30.62%) 750 79.52 (97.38%) 88.43 (97.95%) 87.50 (97.89%) 6.35 (28.71%) 1000 91.61 (98.07%) 100.29 (98.38%) 96.84 (98.32%) 8.49 (28.86%)
+
+Table 2: Optimality gap of the true pair ( x⋆i , y⋆i ) relative to the predicted problem.                     
+
+> NOptimistic-DAL Primal-DAL Primal-DAL (w/ penalty) Dual-DAL 250 (3.73, 0.16, 99.84%) (3.53, 0.19, 99.92%) (3.81, 0.14, 99.92%) (1.15, 0.04, 99.71%) 500 (5.22, 0.35, 99.90%) (5.05, 0.39, 99.92%) (5.33, 0.33, 99.94%) (1.12, 0.03, 99.85%) 750 (5.76, 0.56, 99.97%) (5.89, 0.58, 99.96%) (5.87, 0.54, 99.96%) (1.17, 0.03, 99.88%) 1000 (6.35, 0.75, 99.94%) (6.54, 0.73, 99.96%) (6.47, 0.71, 99.96%) (1.10, 0.03, 99.90%)
+
+Table 3: Projection-distances (Π X , Π X ⋆ , percentage feasibility) Table 2 shows the median optimality gap of the predicted problem over all datapoints i ∈ [N ]such that x⋆i is in the predicted feasible region (the associated feasibility percentages from Table 1 are provided in parentheses). It is worthwhile to note that as the size of the training dataset ( N ) increases, the performance of the models that explicitly maintain feasibility across all data points (viz., optimistic-and primal-DAL in columns 2–4) deteriorates significantly with respect to the optimality-gap metric. While the percentage of feasible points is lower in dual-DAL, the solution pair ( x⋆i , y⋆i ) exhibits a lower optimality gap for the predicted problem. While the DAL models reliably recover the true optimal solution in the predicted feasible region, as indicated by the results in Table 1, we do not have a suitable approach to identify the true optimal solution x⋆i . In our final experiment, we investigate using the optimal solution to the predicted problem, ˆx, as a proxy for the true optimal solution. Table 3 displays the median projection distances Π X and Π X ⋆
+
+along with the percentage of points used in the computation of each of these metrics. The percentage is taken over all validation data points and demonstrates how often a prediction p(ξ) yields a feasible and bounded C-LP (1), i.e., when we recover a solution ˆ x. We observe that the solution ˆ x is seldom feasible to the true problem. When they have a finite optimal cost, the predicted problems associated with dual-DAL generate solutions that are closest to the true feasible region and to optimal solutions. It is also worth noticing that as the size of the training set N increases, the predicted optimal solution obtained either from the optimistic- or primal-DAL models lies further away from the true feasible region. 
+
+## 3.2 Network Optimization Problem 
+
+We consider a minimum-cost network flow problem involving a set of source, transhipment, and destina-tion nodes. In addition to the shipment costs, to ensure that the optimization problem remains feasible with variations in parameters, we introduce a penalty cost for unmet demand at the destination nodes. In this problem, demand is uncertain and depends on a context vector comprising local average daily temperature, day of the week, and month. The optimization problem contains 75 decision variables and 24 constraints. Of the constraints, five have right-hand side components that correspond to the contextual vector. We refer the reader to Appendix §E for a detailed presentation of the optimization model, contextual features, and hyperparameter tuning.                  
+
+> Metric Optimistic-DAL Primal-DAL Primal-DAL (w/ penalty) D-DAL Optimality Gap 138.51 139.73 140.58 515.93 ΠX6959.42 6967.04 6978.27 4972.49 ΠX⋆21728.62 21735.02 21747.07 25550.33
+
+Table 4: Performance of DAL models on the network optimization problem (26) 9Forner, Ahn, Gangammanavar Decision-Aware Right-Hand Side Predictions For our experiments on the network optimization problem, we utilize a real-world dataset to draw independent samples for each replication. We use approximately 75% of the sampled data for training and the remaining 25% for validation. Our experiments reveal that the predicted feasible region obtained using the optimistic-DAL, primal-DAL, and penalized primal-DAL models contains the true optimal solution in 84 .35%, 84 .25%, and 84 .31% of the validation instances, respectively. Compared to the synthetic problem, the feasibility metric was much lower at 0 .80% for dual-DAL. Finally, the linear, lasso, and random-forest regression models have feasibility metric values of 13 .69%, 13 .69%, and 11 .72%, respectively. The median number of predicted constraints that a true solution x⋆i satisfies is five (out of the possible five) for the optimistic and primal-DAL models, and only two out of five for all other models. These results provide further evidence of the value of decision-aware prediction models. Table 4 shows the results pertaining to the optimality gap and projection distances for the network optimization problem. As in the synthetic problem, the performance of the optimistic- and primal-DAL models is similar. However, unlike the synthetic problem, the dual-DAL model performs relatively worse on the optimality gap and projection distance metrics, as seen in the last column of the table. This behavior, along with the low value of the feasibility metric, is attributed to setting the hyperparameter 
+
+α = 2 rather than tuning it. 
+
+# 4 Conclusions 
+
+In this paper, we propose alternative formulations for training a model to predict the right-hand side of an LP using a correlated contextual vector. Using observed primal and dual optimal solutions of the LP, our formulations aim to increase the feasibility of the predicted problem with respect to the true optimal solution while minimizing its duality gap. We analyze properties of the training problems, identify conditions under which the resulting prediction model recovers the mentioned feasibility and optimality, and present suitable solution methods to solve each problem. The proposed methods are validated through numerical experiments on synthetic and network optimization problems. The results show that the prediction models trained using the proposed formulation achieve much higher feasibility, compared to standard regression approaches, for the unseen (validation) dataset. The results also indicate that as the number of training data points increases, the feasibility of the model enhances at the cost of the optimality gap. 
+
+# References 
+
+[1] Yoshua Bengio. Using a financial training criterion rather than a prediction criterion. International journal of neural systems , 8(04):433–443, 1997. [2] Christopher M Bishop and Nasser M Nasrabadi. Pattern recognition and machine learning , volume 4. Springer, 2006. [3] Stephen Boyd and Lieven Vandenberghe. Convex optimization . Cambridge university press, 2004. [4] Leo Breiman. Random forests. Machine learning , 45:5–32, 2001. [5] Adam N Elmachtoub and Paul Grigas. Smart “predict, then optimize”. Management Science ,68(1):9–26, 2022. [6] Jeff Erickson. County/city driving distance dataset: Driving distances for each county centroid to the nearest large city in the contiguous united states, 2014. Accessed: Novemver 4, 2025. [7] Alexander S Estes and Jean-Philippe P Richard. Smart predict-then-optimize for two-stage linear programs with side information. INFORMS Journal on Optimization , 5(3):295–320, 2023. [8] Jochen Gorski, Frank Pfeuffer, and Kathrin Klamroth. Biconvex sets and optimization with biconvex functions: a survey and extensions. Mathematical methods of operations research , 66(3):373–407, 2007. 10 Forner, Ahn, Gangammanavar Decision-Aware Right-Hand Side Predictions [9] Xinyi Hu, Jasper Lee, and Jimmy Lee. Two-stage predict+ optimize for milps with unknown parameters in constraints. Advances in Neural Information Processing Systems , 36:14247–14272, 2023. [10] Hiroshi Konno. A cutting plane algorithm for solving bilinear programs. Math. Program. , 11(1):14– 27, December 1976. [11] Hoai An Le Thi, Van Ngai Huynh, and Tao Pham Dinh. Dc programming and dca for general dc programs. In Tien van Do, Hoai An Le Thi, and Ngoc Thanh Nguyen, editors, Advanced Com-putational Methods for Knowledge Engineering , pages 15–35, Cham, 2014. Springer International Publishing. [12] Thomas Lipp and Stephen Boyd. Variations and extension of the convex–concave procedure. Opti-mization and Engineering , 17:263–287, 2016. [13] Jong-Shi Pang, Meisam Razaviyayn, and Alberth Alvarado. Computing b-stationary points of nonsmooth dc programs. Mathematics of Operations Research , 42(1):95–118, 2017. [14] Fabian Pedregosa, Ga¨ el Varoquaux, Alexandre Gramfort, Vincent Michel, Bertrand Thirion, Olivier Grisel, Mathieu Blondel, Peter Prettenhofer, Ron Weiss, Vincent Dubourg, et al. Scikit-learn: Machine learning in python. the Journal of machine Learning research , 12:2825–2830, 2011. [15] Tao Pham Dinh and Hoai An Le Thi. Convex analysis approach to D.C. programming: Theory, algorithms and applications. ACTA Mathematica Vietnamica , 22(1):289–355, 1997. [16] Utsav Sadana, Abhilash Chenreddy, Erick Delage, Alexandre Forel, Emma Frejinger, and Thibaut Vidal. A survey of contextual optimization methods for decision-making under uncertainty. European Journal of Operational Research , 2024. [17] Bharath K. Sriperumbudur and Gert R. G. Lanckriet. A proof of convergence of the concave-convex procedure using zangwill’s theory. Neural Computation , 24(6):1391–1407, 2012. [18] Robert Tibshirani. Regression shrinkage and selection via the lasso. Journal of the Royal Statistical Society Series B: Statistical Methodology , 58(1):267–288, 1996. [19] Richard E Wendell and Arthur P Hurter Jr. Minimization of a non-separable objective function subject to disjoint constraints. Operations Research , 24(4):643–657, 1976. [20] Alan L Yuille and Anand Rangarajan. The concave-convex procedure. Neural computation ,15(4):915–936, 2003. 
+
+# Appendix A: Proofs of the Results 
+
+This section includes the proofs of all the results that appear in the paper. 
+
+Proof of Proposition 2.1: (i) Observe that b ≥ ˆb implies {x ≥ 0 | Ax ≥ b} ⊆ { x ≥ 0 | Ax ≥ ˆb}.Therefore, we must have ( x⋆, y⋆) ∈ bS(ξ; p). ( ii ) Since j′ ∈ J =(x⋆), we have ⟨aj′ , x⋆⟩ = bj′ < ˆbj′ . This completes the proof. 
+
+Proof of Proposition 2.2: ( = ⇒ ) Since bS⋆(ξ; p) ⊆ bS(ξ; p) and by part ( ii ) of Proposition (2.1), we have ˆbj ≤ bj for all j ∈ J +(y⋆) ⊆ J =(x⋆). Moreover, 
+
+⟨ˆb, y⋆⟩ = ⟨c, x⋆⟩ = ⟨b, y⋆⟩,
+
+where the last equality follows by strong duality of ( x⋆, y⋆). Hence, P 
+
+> j∈J +(y⋆)
+
+(ˆbj − bj )y⋆j = 0, implying that ˆbj = bj for all j ∈ J +(y⋆). ( ⇐= ) Applying the definition of J +(y⋆) to the condition of the proposition yields 
+
+⟨ˆb, y⋆⟩ = X 
+
+> j∈J +(y⋆)
+
+ˆbj y⋆j = X 
+
+> j∈J +(y⋆)
+
+bj y⋆j = ⟨b, y⋆⟩ = ⟨c, x⋆⟩,
+
+11 Forner, Ahn, Gangammanavar Decision-Aware Right-Hand Side Predictions where the last equality is followed by the strong duality of ( x⋆, y⋆). Therefore, ( x⋆, y⋆) ∈ bS⋆(ξ; p). 
+
+Proof of Corollary 2.3: By definition, ⟨aj , x⋆⟩ = bj for all j ∈ J =(x⋆), which also holds for all j ∈J +(y⋆). Applying the condition of corollary yields bj = ˆbj for any j ∈ J +(y⋆). By Proposition 2.2, we have ( x⋆, y⋆) ∈ bS⋆(ξ; p). 
+
+Proof of Proposition 2.4: Consider an arbitrary j ∈ [m]. Let us denote the j-th component of Ax ⋆i as 
+
+θij . The corresponding j-th constraint of Ax ⋆i ≥ W ξ i, ∀i ∈ [N ], can be viewed as an intersection of hyperplanes ∩i∈[N ]{w ∈ Rd θij ≥ ⟨ w, ξi⟩} .To show ( i), we construct a feasible ˜ w ∈ Rd by setting ˜wk =
+
+
+
+min  
+
+> i′∈[N], j ′∈[m]
+
+ θi′j′
+
+ξi′k
+
+
+
+, if k = ˜k
+
+0, otherwise. (12) With strict positivity of ξi˜k, the above then yields, 
+
+⟨ ˜w, ξi⟩ = min  
+
+> i′∈[N], j ′∈[m]
+
+ θi′j′
+
+ξi′ ˜k
+
+
+
+ξi˜k ≤
+
+min  
+
+> i′∈[N],j ′∈[m]
+
+{ θi′j′ }
+
+ξi˜k
+
+ξi˜k ≤ θij for any i ∈ [N ].
+
+By applying (12) to every row of W , we show that W is nonempty. The proof for part ( ii ) is identical except that we assign max  
+
+> i′∈[N], j ′∈[m]
+
+ θi′j′
+
+ξi′k
+
+
+
+to ˜ wk if k = ˜k, and 0 otherwise. To show ( iii ), define K+ := {k ∈ [d] | ξik ≥ 0, ∀i ∈ [N ]} and K− := {k ∈ [d] | ξik ≤ 0, ∀i ∈ [N ]} such that K+ ∩ K − = ∅. Let σi := 
+
+ P
+
+> k∈K +
+
+ξik − P
+
+> k∈K −
+
+ξik 
+
+
+
+> 0. Construct ˜ w such that, ˜wk =
+
+
+
+min  
+
+> i′∈[N], j ′∈[m]
+
+ θi′j′
+
+σi′
+
+
+
+, if k ∈ K +
+
+− min  
+
+> i′∈[N], j ′∈[m]
+
+ θi′j′
+
+σi′
+
+
+
+, if k ∈ K −.
+
+Consequently, we have 
+
+⟨ ˜w, ξi⟩ = X
+
+> k∈K +
+
+˜wk ξik + X
+
+> k∈K −
+
+˜wk ξik 
+
+= X
+
+> k∈K +
+
+min  
+
+> i′∈[N], j ′∈[m]
+
+ θi′j′
+
+σi′
+
+
+
+ξik + X
+
+> k∈K −
+
+min  
+
+> i′∈[N], j ′∈[m]
+
+ θi′j′
+
+σi′
+
+
+
+| ξik |≤ min   
+
+> i′∈[N], j ′∈[m]
+
+{ θi′j′ } 1
+
+σi
+
+ X
+
+> k∈K +
+
+ξik + X
+
+> k∈K −
+
+| ξik |
+
+| {z } 
+
+> =σi
+
+
+
+≤ θij , for any i ∈ [N ]. This concludes the proof. We will prove Theorem 2.5 using a biconvex program with separable constraints: min 
+
+> x,y
+
+
+
+f (x, y) x ∈ X, y ∈ Y
+
+
+
+, (13) where f : X × Y → R is a biconvex function. We assume X := {x | gi(x) ≤ 0, ∀i ∈ I} for some index set I, where gi are differentiable and that Y := {y | hj (y) ≤ 0, ∀j ∈ J } for some index set J , where hj
+
+are differentiable. A partial optimal solution of the problem is defined below. 12 Forner, Ahn, Gangammanavar Decision-Aware Right-Hand Side Predictions 
+
+Definition A.1. A point ( x∗, y∗) is a partial optimal solution of (13) if it satisfies 
+
+f (x∗, y∗) ≤ f (x, y∗) ∀x ∈ X and f (x∗, y∗) ≤ f (x∗, y) ∀y ∈ Y. 
+
+Suppose we apply Alternate Convex Search (ACS) in [8] to solve the problem. The steps of ACS are described below. Given t = 0 and an initial ( xt, yt), sequentially update 
+
+xt+1 ∈ arg min 
+
+> x
+
+
+
+f (x, yt) x ∈ X
+
+
+
+, (14) 
+
+yt+1 ∈ arg min 
+
+> y
+
+
+
+f (xt+1 , y) y ∈ Y
+
+
+
+, (15) and t ← t + 1 until the stopping criteria are satisfied. If f is a biconvex function that is bounded below, and X and Y are compact sets, then (i) The sequence {f (xt, yt)}∞ 
+
+> t=1
+
+is monotonically non-increasing; (ii ) Every accumulation point of {(xt, yt)}∞ 
+
+> t=1
+
+is a partial optimal solution. (iii ) Furthermore, if f is differentiable, a partial optimal solution of (13) is a KKT point of (13). 
+
+Proof of Theorem 2.5: (i) It is not difficult to see that f (xt, yt) ≥ f (xt+1 , yt+1 ) for all t by the optimality of (14) and (15). (ii ) By Bolzano-Weierstrass theorem, {(xt, yt)}∞ 
+
+> t=1
+
+has a convergent subsequence, denoted by (xtj , ytj ) → (x∗, y∗) as tj → ∞ . For any tj , we have f (xtj +1 , ytj +1 ) ≤ f (x, ytj ) for all x ∈ X
+
+and f (xtj +1 , ytj +1 ) ≤ f (xtj , y) for all y ∈ Y by (14) and (15). By part ( i) and taking the limit, the former inequality yields f (x∗, y∗) = lim   
+
+> tj→∞
+
+f (xtj , ytj ) = lim   
+
+> tj→∞
+
+f (xtj +1 , ytj +1 ) ≤ f (x, y∗) for all x ∈ X.Likewise, f (x∗, y∗) ≤ f (x∗, y) for all y ∈ Y , which shows ( x∗, y∗) is a partial optimal solution. (iii ) Let ( x∗, y∗) be a partial optimum of (13), i.e., f (x∗, y∗) = min x{f (x, y∗) | gi(x) ≤ 0, ∀i ∈ I} 
+
+and f (x∗, y∗) = min y {f (x∗, y) | hj (y) ≤ 0, ∀j ∈ J } . The point x∗ is a global minimizer for the former optimization problem, hence it is a KKT point for this problem [3]. Thus, there is some λ∗ ∈ R|I|  
+
+> +
+
+such that gi(x∗) ≤ 0 and λ∗ 
+
+> i
+
+gi(x∗) = 0 for all i ∈ I , and ∇xf (x∗, y∗) + P 
+
+> i∈I
+
+λ∗ 
+
+> i
+
+∇xgi(x∗) = 0. Using the same logic, we have that there is some μ∗ ∈ R|J |  
+
+> +
+
+such that hj (y∗) ≤ 0 and μ∗ 
+
+> j
+
+hj (y∗) = 0 for all j ∈ J ,and ∇y f (x∗, y∗) + P 
+
+> j∈J
+
+μ∗ 
+
+> j
+
+∇y hj (y∗) = 0. The union of the primal feasibility conditions for the x and 
+
+y-subproblems is the same as the primal feasibility KKT condition for a point ( x∗, y∗) in the original separable biconvex program (13) (this is also true for the dual feasibility as well as the complementary slackness conditions). That is, the primal/dual feasibility conditions as well as the complementary slackness condition hold for the point ( x∗, y∗) in (13) with dual vectors ( λ∗, μ∗). Since 
+
+∇xf (x∗, y∗) + X
+
+> i∈I
+
+λ∗ 
+
+> i
+
+∇xgi(x∗) = 0 and ∇y f (x∗, y∗) + X
+
+> j∈J
+
+μ∗ 
+
+> j
+
+∇y hj (y∗) = 0 .
+
+then 
+
+∇f (x∗, y∗) + X
+
+> i∈I
+
+λ∗ 
+
+> i
+
+∇gi(x∗) + X
+
+> j∈J
+
+μ∗ 
+
+> i
+
+∇hj (y∗) = 0 .
+
+This concludes the proof. 13 Forner, Ahn, Gangammanavar Decision-Aware Right-Hand Side Predictions 
+
+# Appendix B: A Difference-of-convex Representation of (9) 
+
+By applying some algebraic techniques, we identify a DC representation of the problem (9). Observe that for each i ∈ [N ], 
+
+⟨W ξ i, yi⟩ = X
+
+> j∈[m]
+
+(W ξ i)j yij 
+
+= X
+
+> j∈[m]
+
+⟨wj , ξi⟩yij 
+
+= X
+
+> j∈[m]
+
+X
+
+> k∈[d]
+
+ξik Wjk yij 
+
+= X
+
+> j∈[m]
+
+X
+
+> k∈[d]
+
+ξik 
+
+ 12 (Wjk + yij )2 − 12 (W 2 
+
+> jk
+
++ y2 
+
+> ij
+
+)
+
+
+
+.
+
+Then the objective function in (9) can be written as 1
+
+N
+
+X 
+
+> i∈[N]
+
+(⟨c, x⋆i ⟩ − ⟨ W ξ i, yi⟩) + λ r (W ) + γ f (W )= 1
+
+N
+
+X 
+
+> i∈[N]
+
+⟨c, x⋆i ⟩ − X
+
+> j∈[m]
+
+X
+
+> k∈[d]
+
+ξik 
+
+ 12 (Wjk + yij )2 − 12 (W 2 
+
+> jk
+
++ y2 
+
+> ij
+
+)
+
+ + λ r (W ) + γ f (W )
+
+= 1
+
+N
+
+X 
+
+> i∈[N]
+
+⟨c, x⋆i ⟩ + 12
+
+X
+
+> j∈[m]
+
+ X
+
+> k∈K+(i)
+
+ξik (W 2 
+
+> jk
+
++ y2 
+
+> ij
+
+) − X
+
+> k∈K−(i)
+
+ξik (Wjk + yij )2
+
+ + λ r (W ) + γ f (W )
+
+| {z } 
+
+> F1(W,(yi))
+
+− 12N
+
+X 
+
+> i∈[N]
+
+X
+
+> j∈[m]
+
+ X
+
+> k∈K+(i)
+
+ξik (Wjk + yij )2 − X
+
+> k∈K−(i)
+
+ξik 
+
+ W 2 
+
+> jk
+
++ y2
+
+> ij
+
+| {z } 
+
+> F2(W,(yi))
+
+,
+
+where K−(i) := {k ∈ [d] | ξik < 0} and K+(i) := {k ∈ [d] | ξik > 0}. This shows that F1 and F2 are convex functions. We can solve problem (9) with this DC representation F1 −F2 of the objective function using the Convex-Concave Procedure (CCP) of [20]. The basic idea is that at each iteration, we solve a convexified version of problem (9) consisting of F1 and the first order approximation of the function F2.This requires the computation of the gradient ∇F2. It is easy to see that 
+
+∇Wjk F2 = 1
+
+N
+
+X 
+
+> i∈[N]
+
+(ξik (Wjk + yij )) (16) if k ∈ K+(i) and 
+
+∇Wjk F2 = − 1
+
+N
+
+X 
+
+> i∈[N]
+
+ξik Wjk (17) if k ∈ K−(i). Alternatively, 
+
+∇yij F2 = 1
+
+N
+
+yij 
+
+X
+
+> k∈[d]
+
+|ξik | + X
+
+> k∈K+(i)
+
+ξik Wjk 
+
+ . (18) To write the algorithm, we perform a change of variables u = (vec( W ), y1, . . . , yN ), where vec( •) denotes the vectorization operator, and denote by ul1:l2 the subvector ( ul1 , . . . , u l2 ). Following [12, Algorithm 1.1], we present Algorithm 2. 14 Forner, Ahn, Gangammanavar Decision-Aware Right-Hand Side Predictions 
+
+Algorithm 2 Convex-Concave Procedure  
+
+> 1:
+
+Parameters: λ, γ > 0;  
+
+> 2:
+
+Initialize W t, ( yi)t, and t = 0;  
+
+> 3:
+
+while termination criteria are not satisfied do  
+
+> 4:
+
+Solve the convexified subproblem min  
+
+> u
+
+F1(u) −  F2(ut) + ⟨∇ F2(ut), u − ut⟩
+
+s.t. ⟨aj , x⋆i ⟩ ≥ ⟨ uj:j+d, ξi⟩, ∀i ∈ [N ], ∀j ∈ [m],
+
+A⊤u(d+i−1) m+1:( d+i)m ≤ c, ∀i ∈ [N ],
+
+u(d+i−1) m+1:( d+i)m ≥ 0, ∀i ∈ [N ]. (19)  
+
+> 5:
+
+t ← t + 1;  
+
+> 6:
+
+end while  
+
+> 7:
+
+return ( cW , (ˆ yi)) = ( W t, (yi)t)
+
+# Appendix C: Details and Additional Results for Synthetic Data Experiment 
+
+Data generation : We generate a cost vector c ∈ Rn and a constraint matrix A ∈ Rm×n with components 
+
+cl, Ajl 
+
+> i.i.d.
+
+∼ U[−10 , 10] , l ∈ [n], j ∈ [m]. We generate a ground truth linear model W ⋆ ∈ Rm×d with components W ⋆jk 
+
+> i.i.d.
+
+∼ Bernoulli(0 .5) , j ∈ [m], k ∈ [d], as in [5]. We generate ξi ∈ Rd wtih components 
+
+ξik 
+
+> i.i.d.
+
+∼ U[−10 , 10] , i ∈ [N ], k ∈ [d], and update ξi1 ← ξi1 + 10 .1 to ensure feasibility of the optimistic and primal-DAL problems. Finally, we compute bij = 1√d ⟨w⋆j , ξi⟩+ϵij , i ∈ [N ], j ∈ [m], where ϵij 
+
+> i.i.d.
+
+∼ N (0 , 1). 
+
+Comparison methods : We solve the optimistic-DAL problem (5) under the hypothesis class of linear models, i.e., min 
+
+> W
+
+ 1
+
+N
+
+X 
+
+> i∈[N]
+
+(⟨c, x⋆i ⟩ − ⟨ W ξ i, y⋆i ⟩) Ax ⋆i ≥ W ξ i ∀i ∈ [N ]
+
+
+
+. (20) We solve the primal-DAL problem (9) using the convex regularizer r(W ) := P
+
+> j∈[m]
+
+P 
+
+> k∈[d]
+
+|Wjk | and the convex penalty function ϕ(W ) := P 
+
+> i∈[N]
+
+P 
+
+> j∈[m]
+
+max {0, b ij − ⟨ wj , ξi⟩} , which penalizes violation of the overpredictive constraints W ξ i ≥ bi. Note that the convex functions r(•) and ϕ(•) that we choose are a digression from Theorem 2.5 as they are nondifferentiable. We present an approximation of the dual-DAL problem (8) by applying the method presented in [5], which introduced a loss function to train a predictor for the case ˆ c := p(ξ), i.e., the contextual vector is linked to the cost vector of C-LP (1). We apply the derivation given in the reference to the dual of (1) and obtain the following problem: min  
+
+> W,(xi)
+
+ 1
+
+N
+
+X 
+
+> i∈[N]
+
+(⟨c, xi⟩ − ⟨ αW ξ i − bi, y⋆i ⟩) Ax i ≥ αW ξ i − bi, xi ≥ 0 ∀i ∈ [N ]
+
+
+
+, (21) where α ≥ 0 is a given parameter (see Appendix §D for full details of the derivation). Setting bi =(α − 1) W ξ i, the problem (21) recovers (8). Regarding the DUL models, we solve the linear regression problem min  
+
+> W∈Rm×d
+
+|| XW ⊤ − B|| 2 
+
+> F
+
+, (22) where X =
+
+
+
+ξ⊤
+
+> 1
+
+...
+
+ξ⊤
+
+> N
+
+ ∈ RN ×d, B =
+
+
+
+b⊤
+
+> 1
+
+...
+
+b⊤
+
+> N
+
+ ∈ RN ×m, and || · || F denotes the Frobenius norm. We solve the lasso regression problem min  
+
+> W∈Rm×d
+
+|| XW ⊤ − B|| 2 
+
+> F
+
++ αlasso 
+
+X
+
+> j∈[m]
+
+X
+
+> k∈[d]
+
+|Wjk |, (23) 15 Forner, Ahn, Gangammanavar Decision-Aware Right-Hand Side Predictions where X and B are as above and αlasso ≥ 0 is a hyperparameter. 
+
+Sensitivity Analysis : We perform a sensitivity analysis for the primal-DAL problem (9) and the dual-DAL problem (21) as we vary their hyperparameters ( λ, γ ) and α, respectively. Throughout, we set 
+
+N = 1000 and display the results of 50 replications. To start, we set γ = 0 for the primal-DAL problem (9). Figure 2 shows the number of zero components in the solution cW obtained from of Algorithm 1 as the regularization parameter λ varies (recall that cW
+
+has 15 components for the synthetic experiments). Obviously, as λ increases, so do the number of zero 
+
+Figure 2: Sparsity of the solution cW from of Algorithm 1. components in the model cW . We also observe the affect of the regularization parameter λ on the average in-sample optimality gap 1
+
+> N
+
+P 
+
+> i∈[N]
+
+(⟨c, x⋆i ⟩−⟨ cW ξ i, ˆyi⟩) as well as the value r( cW ) = P
+
+> j∈[m]
+
+P 
+
+> k∈[d]
+
+|cWjk |
+
+using the solution ( cW , (ˆ yi)) obtained from Algorithm 1. The results are shown in Figure 3, where each datapoint is a median. For λ ∈ [10 −12 , 10 0], we see that both the regularization level and the average in-sample optimality gap decreases, suggesting that regularization is effective in improving model quality. As λ increases further, we see that the average in-sample optimality gap increases and plateaus, and 
+
+Figure 3: Component function values in primal-DAL problem (9) evaluated using the solution of Algo-rithm 1. 16 Forner, Ahn, Gangammanavar Decision-Aware Right-Hand Side Predictions               
+
+> (a) 1
+> N
+> P
+> i∈[N](⟨c,x⋆i⟩ − ⟨ cW ξ i,ˆyi⟩)(b) r(cW)(c) ϕ(cW)
+
+Figure 4: Affect of ( λ, γ ) on the component function values of primal-DAL problem (9). there is minimal impact on the regularization level r( cW ). We also investigate the affect of jointly varying ( λ, γ ) in the primal-DAL problem (9) on the average in-sample optimality gap 1
+
+> N
+
+P 
+
+> i∈[N]
+
+(⟨c, x⋆i ⟩−⟨ cW ξ i, ˆyi⟩), the value r( cW ) = P
+
+> j∈[m]
+
+P 
+
+> k∈[d]
+
+|cWjk |, and the value ϕ( cW ) = P 
+
+> i∈[N]
+
+P 
+
+> j∈[m]
+
+max {0, b ij − ⟨ wj , ξi⟩} of the penalty function using the solution ( cW , (ˆ yi)) obtained from Algorithm 1. We plot the median of each of these values in Figure 4. Regardless of the choice of ( λ, γ ), we see that the dominating term is the penalty function ϕ. One interesting observation is that for a fixed regularization parameter λ ∈ { 10 0, 10 3, 10 6, 10 9}, the average in-sample optimality gap (part (a)) goes down as the penalty parameter γ increases. This seems to coincide with Corollary 2.3, as the constraints Ax ⋆i ≥ W ξ i are enforced in (9) and the constraints W ξ i ≥ bi are penalized when violated through the function ϕ.Finally, we observe the affect of varying the parameter α on the solution ( cW , (ˆ xi)) of the dual-DAL problem (21). We compute the optimal value ˆf (α) := 1
+
+> N
+
+P 
+
+> i∈[N]
+
+(⟨c, ˆxi⟩ − ⟨ α cW ξ i − bi, y⋆i ⟩) of (21) as well as the average in-sample optimality gap ˆˆf := 1
+
+> N
+
+P  
+
+> i∈[N]
+
+|⟨ c, x⋆i ⟩ − ⟨ cW ξ i, y⋆i ⟩| . Note that the latter value requires absolute values on the summands as the differences ⟨c, x⋆i ⟩ − ⟨ cW ξ i, y⋆i ⟩ may be negative. We plot the median of these values in Figure 5. 
+
+Figure 5: Affect of α on the solution ( cW , (ˆ xi)) of the dual-DAL problem (21) We see that the optimal value of (21) is the same regardless of α. However, the average in-sample optimality gap ˆˆf := 1
+
+> N
+
+P  
+
+> i∈[N]
+
+|⟨ c, x⋆i ⟩ − ⟨ cW ξ i, y⋆i ⟩| is large for small values of α, achieves a minimum at 
+
+α = 2, and then slowly increases and tapers off as α increases. 17 Forner, Ahn, Gangammanavar Decision-Aware Right-Hand Side Predictions 
+
+Solution Method Comparison in Solving Primal-DAL Problem (9): We compare the performance of various solution methods in solving problem (9). We use Algorithms 1 and 2, each with an upper limit of 100 iterations and the function value decrease condition obj t−obj t+1  
+
+> obj t
+
+< 0.01 as the termination criterion, where “obj” denotes the objective function value and the superscript is the iteration number. We also use Gurobi’s nonconvex solver, which solves problem (9) as a mixed integer program. We limit Gurobi to 1 hour of solve time. We fix the training dataset size at N = 1000. Table 5 shows the median objective function value and runtime of the various solution methods.                    
+
+> (λ, γ ) = (10 −3,0) (λ, γ ) = (10 −3,10 −3)Solution Method Obj. Value Time (s) Obj. Value Time (s) Algorithm 1 36.84 17.39 104.38 127.08 Algorithm 2 48.75 1313.09 150.68 2467.63 Gurobi 35.11 3605.12 104.38 3626.60
+
+Table 5: Comparison of solution methods in solving primal-DAL problem (9). Algorithm 1 and Gurobi achieve roughly the same objective function value, however Algorithm 1 is 1-2 orders of magnitude faster. Algorithm 2 performs the worst in terms of the objective function value, and its runtime is somewhere between that of the other two solution methods. 
+
+Hyperparameter Tuning : In the absence of additional constraints on the model W , we tune the primal-DAL problem (9) with candidates ( λ, γ ) ∈ { 10 −12 , 10 −9, 10 −6, 10 −3, 10 0, 10 3} × { 0} using the feasibility metric χ{Ax ⋆i ≥ W ξ } (higher is better). In the presence of the additional constraints W ξ i ≥
+
+bi, ∀i ∈ [N ], we tune (9) using the same metric and candidates ( λ, γ ) ∈ { 10 −12 , 10 −6, 10 0, 10 6}2. We tune the hyperparameter α in the dual-DAL problem (21) using candidate values α ∈ { 0.5, 1, 1.5, 2, 2.5, 3}.Lastly, we tune αlasso in the lasso regression problem using sum of squared prediction errors as the metric (lower is better) with candidate values {1, 3, 5, 7}.
+
+Additional Results : Table 6 shows the median training time of the different solution methods as the training dataset size N increases. The DUL models typically solve within 1 second, which is similar to                                            
+
+> NOptimistic-DAL Primal-DAL Primal-DAL (w/ penalty) Dual-DAL LR Lasso RF 250 0.09 1.86 8.66 0.35 <0.01 <0.01 0.17 500 0.17 3.80 18.81 0.86 <0.01 <0.01 0.22 750 0.27 5.89 29.44 1.04 <0.01 <0.01 0.25 1000 0.37 8.63 39.74 1.34 <0.01 <0.01 0.30
+
+Table 6: Training time of different learning problems (in seconds) the optimistic and dual-DAL problems (which are both LPs). The nonconvex primal-DAL problem takes slightly longer to solve, but is still generally within 1 minute. 
+
+# Appendix D: Deriving Problem (21) 
+
+Consider the C-LP (1) with feasible region X (b), where b ∈ B is arbitrary. Recall that the dual feasible region is Y := {y ≥ 0 | A⊤y ≤ c}. Denote the set of dual optimal solutions corresponding to b as 
+
+Y⋆(b) := arg max y≥0{⟨ b, y⟩ | A⊤y ≤ c} and the corresponding optimal cost as v⋆(b), i.e., v⋆(b) = 
+
+⟨b, y⋆(b)⟩ for any y⋆(b) ∈ Y ⋆(b); unlike before, here we explicitly show the dependence on b for clarity of the derivation. 
+
+Definition D.1 (RSPO loss) . Given b and a prediction ˆb, the right-hand side smart predict-then-optimize (RSPO) loss function ℓy⋆
+
+> RSPO
+
+(ˆb, b) with respect to y⋆ is defined as ℓy⋆
+
+> RSPO
+
+(ˆb, b) := v⋆(b) − ⟨ b, y⋆(ˆb)⟩.A notable drawback of this definition is the dependence on the optimization oracle y⋆. We consider a variant of the RSPO loss which takes the worst-case solution among vectors y ∈ Y ⋆(ˆb). 18 Forner, Ahn, Gangammanavar Decision-Aware Right-Hand Side Predictions 
+
+Definition D.2 (Unambiguous RSPO loss) . Given b and a prediction ˆb, the unambiguous RSPO loss function ℓRSPO (ˆb, b) is defined as ℓRSPO (ˆb, b) := v⋆(b) − min y∈Y ⋆(ˆb)⟨b, y⟩.For a fixed right-hand-side vector b, the RSPO loss may may not be continuous in ˆb because y⋆(ˆb)(and the set Y⋆(ˆb)) may not be continuous in ˆb. Similar to [5], we will derive a tractable surrogate loss function for ℓRSP O (·, ·). To that end, consider a parameter α ≥ 0 and note that 
+
+ℓRSP O (ˆb, b) = v⋆(b) − min 
+
+> y∈Y ⋆(ˆb)
+
+{⟨ b, y⟩ − ⟨ αˆb, y⟩} − αv ⋆(ˆb)which follows from the fact that v⋆(ˆb) = ⟨ˆb, y⟩ for all y ∈ Y ⋆(ˆb). We can replace the constraint y ∈ Y ⋆(ˆb)with y ∈ Y to obtain an upper bound. Since this is true for any α ≥ 0, it follows that 
+
+ℓRSP O (ˆb, b) ≤ inf 
+
+> α≥0
+
+
+
+v⋆(b) − min  
+
+> y∈Y
+
+{⟨ b, y⟩ − ⟨ αˆb, y⟩} − αv ⋆(ˆb)
+
+
+
+= v⋆(b) + inf 
+
+> α≥0
+
+
+
+max  
+
+> y∈Y
+
+{⟨ αˆb, y⟩ − ⟨ b, y⟩} − αv ⋆(ˆb)
+
+
+
+. (24) In fact, inequality (24) can be shown to be an equality using duality theory, and the optimal value of α tends to ∞.
+
+Proposition D.1. Given b and a prediction ˆb, the function α 7 → max y∈Y {⟨ αˆb, y⟩ − ⟨ b, y⟩} − αv ⋆(ˆb)
+
+is monotone decreasing on R, and the RSPO loss may be represented as ℓRSP O (ˆb, b) = v⋆(b) + lim α→∞ 
+
+n
+
+max y∈Y {⟨ αˆb, y⟩ − ⟨ b, y⟩} − αv ⋆(ˆb)
+
+o
+
+.Proof of Proposition D.1: See the proof of Proposition 2 in [5]. Using an arbitrary hypothesis class P of prediction functions, the loss function ℓRSP O as given in Proposition D.1, and a dataset DN = {(ξi, bi)}i∈[N ] of observations sampled independently from B × Ξ, we have that min 
+
+> p∈P
+
+1
+
+N
+
+> N
+
+X
+
+> i=1
+
+ℓRSP O (p(ξi), bi)= min 
+
+> p∈P
+
+1
+
+N
+
+> N
+
+X
+
+> i=1
+
+"
+
+v⋆(bi) + lim 
+
+> αi→∞
+
+
+
+max  
+
+> y∈Y
+
+{⟨ αip(ξi), y⟩ − ⟨ bi, y⟩} − αiv⋆(p(ξi)) 
+
+ #
+
+= min 
+
+> p∈P
+
+1
+
+N
+
+> N
+
+X
+
+> i=1
+
+"
+
+v⋆(bi) + lim 
+
+> αi→∞
+
+
+
+max  
+
+> y∈Y
+
+{⟨ αip(ξi), y⟩ − ⟨ bi, y⟩} − ⟨ αip(ξi), y⋆(αip(ξi)) ⟩
+
+ #
+
+= min 
+
+> p∈P
+
+1
+
+N lim 
+
+> α→∞
+> N
+
+X
+
+> i=1
+
+"
+
+v⋆(bi) + max  
+
+> y∈Y
+
+{⟨ αp (ξi), y⟩ − ⟨ bi, y⟩} − ⟨ αp (ξi), y⋆(αp (ξi)) ⟩
+
+#
+
+≤ min 
+
+> p∈P
+
+1
+
+N
+
+> N
+
+X
+
+> i=1
+
+"
+
+v⋆(bi) + max  
+
+> y∈Y
+
+{⟨ α′p(ξi), y⟩ − ⟨ bi, y⟩} − ⟨ α′p(ξi), y⋆(α′p(ξi)) ⟩
+
+#
+
+≤ min 
+
+> p∈P
+
+1
+
+N
+
+> N
+
+X
+
+> i=1
+
+"
+
+v⋆(bi) + max  
+
+> y∈Y
+
+{⟨ α′p(ξi), y⟩ − ⟨ bi, y⟩} − ⟨ α′p(ξi), y⋆(bi)⟩
+
+#
+
+. (25) where α′ ≥ 0 is arbitrary. Note that the first equality holds by Proposition D.1; the second equality holds since for any positive scalar α, αv ⋆(b) = v⋆(αb) = ( αb)⊤y⋆(αb); the third equality holds since all 
+
+αi tend towards ∞; the first inequality holds from inequality (24) with α′ ≥ 0; and the second inequality holds since y⋆(bi) is feasible to problem the dual problem with the cost vector α′p(ξi). We now arrive at the definition of the RSPO+ loss function, which is exactly the summand in (25). 19 Forner, Ahn, Gangammanavar Decision-Aware Right-Hand Side Predictions 
+
+Definition D.3 (RSPO+ loss) . Given b and a prediction ˆb, the RSPO+ loss function ℓα
+
+> RSPO+
+
+(ˆb, b)is defined as ℓα
+
+> RSPO+
+
+(ˆb, b) := v⋆(b) + max y∈Y 
+
+n
+
+⟨αˆb, y⟩ − ⟨ b, y⟩
+
+o
+
+− ⟨ αˆb, y⋆(b)⟩ where α ≥ 0 is an input parameter. To finish with the derivation, we see by linear programming strong duality that 
+
+ℓαRSP O +(W ξ i, bi) = max  
+
+> y∈Y
+
+{⟨ αW ξ i − bi, y⟩} − ⟨ αW ξ i − bi, y⋆(bi)⟩
+
+= min 
+
+> xi≥0
+
+{⟨ c, xi⟩ | Ax i ≥ αW ξ i − bi} − ⟨ αW ξ i − bi, y⋆(bi)⟩.
+
+Hence, the empirical risk minimization problem min W 1
+
+> N
+
+P  
+
+> i∈[N]
+
+ℓαRSP O +(W ξ i, bi) can be written as min  
+
+> W,(xi)
+
+1
+
+N
+
+> N
+
+X
+
+> i=1
+
+(⟨c, xi⟩ − ⟨ αW ξ i − bi, y⋆(bi)⟩)s.t. Ax i ≥ αW ξ i − bi, ∀i ∈ [N ],
+
+xi ≥ 0, ∀i ∈ [N ].
+
+# Appendix E: Details of Network Optimization Experiment 
+
+Network Optimization Problem : We consider a network optimization problem defined by the following: a set F of factories, a set H of warehouses, and a set S of stores. Units of some arbitrary good must travel from factories to warehouses, and then to the stores, where demand is realized. We assume that there is an edge in the network between each factory/warehouse as well as each warehouse/store. We denote by c1 
+
+> f h
+
+the unit shipping cost from factory f to warehouse h, and c2 
+
+> hs
+
+the unit shipping cost from warehouse h to store s. We allow for demand to be met at a store s from an external supplier, at a unit cost of β > max f ∈F ,h ∈H c1 
+
+> f h
+
++ max h∈H ,s ∈S c2
+
+> hs
+
+. We assume that there is a capacity of M units of the good which may be processed at each warehouse. Lastly, we denote by ˜ds the uncertain demand for the good at store s. We define decision variables x1 
+
+> f h
+
+as the number of units to ship from factory f
+
+to warehouse h, x2 
+
+> hs
+
+as the number of units to ship from warehouse h to store s, and x3 
+
+> s
+
+as the number of units to purchase from an external source to send to store s. Using this data, we write the network optimization problem as min 
+
+> x1,x2,x3
+
+X 
+
+> f∈F
+
+X
+
+> h∈H
+
+c1
+
+> f h
+
+x1 
+
+> f h
+
++ X
+
+> h∈H
+
+X
+
+> s∈S
+
+c2
+
+> hs
+
+x2 
+
+> hs
+
++ β X
+
+> s∈S
+
+x3 
+
+> s
+
+(26a) s.t. X 
+
+> f∈F
+
+x1 
+
+> f h
+
+= X
+
+> s∈S
+
+x2
+
+> hs
+
+, ∀h ∈ H , (26b) 
+
+X 
+
+> f∈F
+
+x1 
+
+> f h
+
+≤ M, ∀h ∈ H , (26c) 
+
+x3 
+
+> s
+
+≤ 12
+
+X
+
+> h∈H
+
+x2
+
+> hs
+
+, ∀s ∈ S , (26d) 
+
+X
+
+> h∈H
+
+x2 
+
+> hs
+
++ x3 
+
+> s
+
+≥ ˜ds, ∀s ∈ S , (26e) 
+
+x1, x2, x3 ≥ 0. (26f) The objective is to minimize total cost, i.e., distribution costs along the network and costs incurred from an external supplier. Constraint (26b) is a flow balance constraint at the warehouses, whereas constraint (26c) is a capacity constraint at the warehouses. Constraint (26d) sets an upper bound on the number of units that can be purchased from an external supplier. Lastly, constraint (26e) ensures that the uncertain demand is satisfied at each store. Regarding the optimization problem data, we consider a contrived example with |F| = 5 factories at locations that are centrally located in the United States: Des Moines, Iowa; Kansas City, Missouri; 20 Forner, Ahn, Gangammanavar Decision-Aware Right-Hand Side Predictions Denver, Colorado; Wichita, Kansas; and St. Louis, Missouri. We consider |H| = 7 warehouses in the following cities: Portland, Oregan; Salt Lake City, Utah; Phoenix, Arizona; Charlotte, North Carolina; Atlanta, Georgia; Cincinnati, Ohio; and Chicago, Illinois. Lastly, we consider |S| = 5 stores in larger metropolitan areas: Dallas, Texas; Los Angeles, California; New York, New York; Orlando, Florida; and Seattle, Washington. Hence the network optimization problem (26) has a total of 75 variables and 24 constraints. We compute the values c1 and c2 using the distance between the respective cities. Namely, we obtain the distance in kilometers using the dataset provided in [6] and divide by 1000. We set the parameter β = 10. Lastly, we set the capacity parameter M according to a real-world historical dataset. 
+
+Context Data : Based on the historical sales data of a company and their distribution network, we synthetically generate a larger network to include major cities in the United States, described in detail above. For the contextual features, we use average daily temperature from each city where a store is located, the day of the week, and the month. Because of the sparsity of the weekend data, we only consider Monday through Friday. We convert the categorical “day of the week” and “month” features are to numeric features by one-hot encoding [2]. The result is a context vector ξi ∈ R21 , where the first feature is unity for an intercept term, the next 5 features are the average temperature in each of the 5 cities corresponding to the store locations, the next 11 features correspond to the month, and the last 4 correspond to the day of the week. Associated with this is a vector bi ∈ R5, i.e., one sales/demand observation for each city. We note that the linear model W ∈ R5×21 .
+
+Learning Problems : Because of the structure of the network optimization problem and the context data, we must slightly modify the learning problems. To do this, we define the submatrix A= of the constraint matrix A generated by problem (26) corresponding to the equality constraints, and similarly for A≤ and A≥. We also consider the associated subvectors b=, b≤, and ˜b≥, and their respective dual vectors y=, y≤, and y≥. Observe that we are only predicting components for the uncertain subvector ˜b≥. Additionally, we want to enforce some of the components of the model W to be equal to 0. Take for example the component W13 . This component corresponds to the prediction of demand in store #1 since it is in the first row of W . However, the inner product ⟨w1, ξ⟩ contains the term W13 ξ3, where 
+
+ξ3 corresponds to a realization of the average daily temperature corresponding to store #2 (recall that the first component of ξ is unity). That is, we do not want temperature data from one store to affect the prediction of demand in another store. We let W0 := {(j, k ) ∈ [5] × [6] \ { 1} | k̸ = j + 1 } be the set of indices for which the correpsponding component of W is set to 0. These indices correspond to the off-diagonal elements of the 5 × 5 submatrix corresponding to the temperature features, and is directly to the right of the first column of W (the intercept column). We update the optimistic-DAL problem (20) as min 
+
+> W
+
+
+
+⟨c, x⋆i ⟩ − 
+
+
+
+⟨b= 
+
+> i
+
+, (y= 
+
+> i
+
+)⋆⟩ + ⟨b≤ 
+
+> i
+
+, (y≤ 
+
+> i
+
+)⋆⟩ + ⟨W ξ i, (y≥ 
+
+> i
+
+)⋆⟩
+
+ 
+
+s.t. A≥x⋆i ≥ W ξ i, ∀i ∈ [N ],Wjk = 0 , ∀(j, k ) ∈ W 0. (27) We update the primal-DAL problem (9) as min   
+
+> W,(yi)
+
+F ( W , (yi) ) s.t. A≥x⋆i ≥ W ξ i, ∀i ∈ [N ],
+
+(A=)⊤y= 
+
+> i
+
++ ( A≤)⊤y≤ 
+
+> i
+
++ ( A≥)⊤y≥ 
+
+> i
+
+≤ c, ∀i ∈ [N ]
+
+y≤ ≤ 0,
+
+y≥ ≥ 0,Wjk = 0 , ∀(j, k ) ∈ W 0. (28) where the objective function is defined as 
+
+F ( W , (yi) ) = 1
+
+N
+
+X 
+
+> i∈[N]
+
+
+
+⟨c, x⋆i ⟩ − 
+
+
+
+⟨b= 
+
+> i
+
+, y= 
+
+> i
+
+⟩ + ⟨b≤ 
+
+> i
+
+, y≤ 
+
+> i
+
+⟩ + ⟨W ξ i, y≥ 
+
+> i
+
+⟩
+
+ 
+
++ λ r (W ) + γ ϕ (W ).
+
+21 Forner, Ahn, Gangammanavar Decision-Aware Right-Hand Side Predictions The dual-DAL problem (21) becomes min  
+
+> W,(xi)
+
+1
+
+N
+
+X 
+
+> i∈[N]
+
+
+
+⟨c, xi⟩ − 
+
+
+
+⟨b= 
+
+> i
+
+, (y= 
+
+> i
+
+)⋆⟩ + ⟨b≤ 
+
+> i
+
+, (y≤ 
+
+> i
+
+)⋆⟩ + ⟨αW ξ i − bi, (y≥ 
+
+> i
+
+)⋆⟩
+
+ 
+
+s.t. A≥xi ≥ αW ξ i − b≥ 
+
+> i
+
+, ∀i ∈ [N ],
+
+A=xi = ( α − 1) b= 
+
+> i
+
+, ∀i ∈ [N ],
+
+A≤xi ≤ (α − 1) b≤ 
+
+> i
+
+, ∀i ∈ [N ],
+
+xi ≥ 0, ∀i ∈ [N ],Wjk = 0 , ∀(j, k ) ∈ W 0. (29) We see that problem (29) perturbs the right-hand side values corresponding to the constraints for which we are not generating predictions ( b= 
+
+> i
+
+and b≤ 
+
+> i
+
+). Hence the only choice for that makes sense is α = 2. Regarding the DUL models, we solve the linear regression problem min  
+
+> W∈R5×21
+
+|| XW ⊤ − B|| 2
+
+> F
+
+s.t. Wjk = 0 , ∀(j, k ) ∈ W 0. (30) where X =
+
+
+
+ξ⊤
+
+> 1
+
+...
+
+ξ⊤
+
+> N
+
+ ∈ RN ×21 , B =
+
+
+
+b⊤
+
+> 1
+
+...
+
+b⊤
+
+> N
+
+ ∈ RN ×5, and N is the number of training datapoints. We also solve the lasso regression problem min  
+
+> W∈R5×21
+
+|| XW ⊤ − B|| 2 
+
+> F
+
++ αlasso 
+
+X
+
+> j∈[m]
+
+X
+
+> k∈[d]
+
+|Wjk |
+
+s.t. Wjk = 0 , ∀(j, k ) ∈ W 0. (31) 
+
+Hyperparameter Tuning : For the primal-DAL problem, we do not tune with the feasibility metric 
+
+χ{A≥x⋆i ≥ W ξ i} as was done in the synthetic experiment in §3.1. This is because the zero matrix 
+
+W ≡ 0 is feasible to the constraints A≥x⋆i ≥ W ξ i in the network flow problem (26) and we want to discourage this problem from producing such a model. Instead, we utilize the predicted optimality gap metric ⟨c, x⋆i ⟩ − ⟨ p(ξvi ), y⋆i ⟩ (lower is better), which we compute only for datapoints such that A≥x⋆i ≥
+
+W ξ i. In the absence of additional constraints on the model W , we tune with candidates ( λ, γ ) ∈{10 −12 , 10 −9, 10 −6, 10 −3, 10 0, 10 3}×{ 0} and in the presence of the additional constraints W ξ i ≥ b≥ 
+
+> i
+
+, ∀i ∈
+
+[N ], we tune with candidates ( λ, γ ) ∈ { 10 −12 , 10 −6, 10 0, 10 6}2. Unlike the synthetic data experiments, we set α = 2 in the dual-DAL problem instead of tuning this parameter. The reason for this is because the network optimization problem we are considering contains constraints whose right-hand side value we are not predicting (see earlier in Appendix §E for more details). Finally, we tune αlasso in the lasso regression problem using the sum of square prediction errors as the metric, with candidate values {1, 3, 5, 7}.22

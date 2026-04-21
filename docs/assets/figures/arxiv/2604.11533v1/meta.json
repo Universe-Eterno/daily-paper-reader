@@ -1,0 +1,46 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.11533v1/fig-001.webp",
+      "caption": "Figure 1: Number of predicted constraints satisfied by the true solutions x⋆ i",
+      "page": 8,
+      "index": 1,
+      "width": 767,
+      "height": 473
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11533v1/fig-002.webp",
+      "caption": "Figure 4: Affect of (λ, γ) on the component function values of primal-DAL problem (9).",
+      "page": 17,
+      "index": 2,
+      "width": 943,
+      "height": 287
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11533v1/fig-003.webp",
+      "caption": "Figure 5: Affect of α on the solution (Ŵ , (x̂i)) of the dual-DAL problem (21)",
+      "page": 17,
+      "index": 3,
+      "width": 541,
+      "height": 425
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11533v1/fig-004.webp",
+      "caption": "Figure 2: Sparsity of the solution Ŵ from of Algorithm 1.",
+      "page": 16,
+      "index": 4,
+      "width": 746,
+      "height": 446
+    },
+    {
+      "url": "assets/figures/arxiv/2604.11533v1/fig-005.webp",
+      "caption": "Figure 3: Component function values in primal-DAL problem (9) evaluated using the solution of Algorithm 1.",
+      "page": 16,
+      "index": 5,
+      "width": 548,
+      "height": 427
+    }
+  ]
+}
