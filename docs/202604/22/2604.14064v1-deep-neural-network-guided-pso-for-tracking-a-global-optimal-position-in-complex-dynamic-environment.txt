@@ -1,0 +1,866 @@
+Title: Deep Neural Network-guided PSO for Tracking a Global Optimal Position in Complex Dynamic Environment
+
+URL Source: https://arxiv.org/pdf/2604.14064v1
+
+Published Time: Thu, 16 Apr 2026 01:12:17 GMT
+
+Number of Pages: 10
+
+Markdown Content:
+# Deep Neural Network-guided PSO for Tracking a Global Optimal Position in Complex Dynamic Environment 
+
+# Stephen Raharja 
+
+stephen.r@fuji.waseda.jp Waseda University Shinjuku City, Tokyo, Japan 
+
+# Toshiharu Sugawara 
+
+sugawara@waseda.jp Waseda University Shinjuku City, Tokyo, Japan 
+
+## Abstract 
+
+We propose novel particle swarm optimization (PSO) variants in-corporated with deep neural networks (DNNs) for particles to pur-sue globally optimal positions in dynamic environments. PSO is a heuristic approach for solving complex optimization problems. However, canonical PSO and its variants struggle to adapt efficiently to dynamic environments, in which the global optimum moves over time, and to track them accurately. Many PSO algorithms improve convergence by increasing the swarm size beyond potential optima, which are global/local optima but are not identified until they are discovered. Additionally, in dynamic environments, several meth-ods use multiple sub-population and re-diversification mechanisms to address outdated memory and local optima entrapment. To track the global optimum in dynamic environments with smaller swarm sizes, the DNNs in our methods determine particle movement by learning environmental characteristics and adapting dynamics to pursue moving optimal positions. This enables particles to adapt to environmental changes and predict the moving optima. We propose two variants: a swarm with a centralized network and distributed networks for all particles. Our experimental results show that both variants can track moving potential optima with lower cumulative tracking error than those of several recent PSO-based algorithms, with fewer particles than potential optima. 
+
+## Keywords 
+
+Swarm Intelligence, Particle Swarm Optimization, Neural Networks, Dynamic Optimization Problem 
+
+## 1 Introduction 
+
+Climate-related disasters have increased over the past two decades due to intensifying global warming [ 29 ]. The growing concentration of the population in urban areas has heightened the complexity of disaster response. As urbanization has increased the population density in cities and suburban sprawl, potential disaster impacts have multiplied [ 8 , 10 ]. With urbanization projected to grow in the coming decades [ 28 ], more efficient and adaptive search-and-rescue (SAR) strategies are needed. Recent technological progress has enabled the development of self-driving intelligent tools, such as autonomous unmanned aerial vehicles (UAVs) and drones, for multiple uses across indus-tries [ 20 ]. The cost of drone hardware continues to decline, while the power consumption and production cost of modern processors have decreased [ 19 ], enabling better computational capabilities in drones. The convergence of affordability, mobility, and compu-tational power renders drone-based distributed sensing systems increasingly practical for large-scale SAR frameworks. In post-disaster scenarios, survivors often migrate collectively towards important locations, such as community centers, hospitals, or pre-designated evacuation sites [ 1]. However, even with drones strate-gically pre-positioned in high-density urban regions, anticipating where survivors will gather and how these clusters evolve remains a challenge. The migration patterns of survivors can be simulated to pre-dict disasters [ 27 ]; therefore, they can be modeled as a dynamic optimization problem (DOP), where survivor clusters move in the environment over time. Because the main objective of SAR agen-cies is to save the most lives by discovering areas with the most survivors [ 7 ], this study aimed to identify and track areas with the highest survivor concentration in a limited geographical region within a city, town, or village. Other optimization problems, such as job scheduling [ 22 ] and vehicle routing [ 12 ], can also be modeled as DOPs with the objective of identifying and tracking a single global optimum. Several studies have proposed PSO-based algorithms for solving DOPs [ 26 , 32 , 33 ]. However, these PSO algorithms assume that the environment changes at intervals rather than continuously, such as in the generalized moving peaks benchmark [31 ]. Furthermore, PSO algorithms require a particle population larger than the number of potential optima, which cannot be identified as local or global until they are discovered by the swarm. Therefore, we propose a PSO-based method for DOPs, where drones are modeled as particles that identify and track the global optimal position over time. Unlike conventional PSO algorithms, which assume periodic changes with abundant swarm members, our method is designed for dynamic environments with fewer particles than potential optima in continuously changing environments. First, the problem is formalized by reviewing SAR scenarios. Next, the proposed method, neural network-guided PSO (NNGPSO), is described. NNGPSO leverages deep neural networks (DNNs) to guide particle movement, enhancing tracking of regions with the highest estimated survivor density over time. The method was experimentally evaluated and compared across multiple dynamic scenarios. Compared with canonical particle swarm optimization (PSO) and recent PSO-based techniques[ 26 , 32 ], NNGPSO tracks moving global optima more effectively, even with fewer particles in dynamic optimization problems (DOPs). These results suggest that NNGPSO can improve drone-assisted SAR operations when the number of drones is smaller than the number of potential survivor clusters, as the DNN can efficiently guide particles (drones) toward promising areas. 
+
+## 2 Related Work 
+
+Canonical PSO [ 13 ] is a population-based stochastic optimization method inspired by swarming creatures, such as bee colonies and 
+
+> arXiv:2604.14064v1 [cs.NE] 15 Apr 2026 Stephen Raharja and Toshiharu Sugawara
+
+bird flocks. A swarm of particles explores the search space by updat-ing the positions based on their experience and shared information. PSO algorithms and their variants are popular because of their sim-plicity, low computational cost, and flexibility in tackling nonlinear, multi-modal, multi-issue, and high-dimensional optimization prob-lems. This foundation has led to the development of many PSO variants incorporating adaptive parameters, hybridization with other metaheuristics, and multiple interacting swarms [ 24 ]. How-ever, most conventional PSO algorithms are designed for static environments and are unsuitable for DOPs in gradually changing environments. Meanwhile, difficulties in solving DOPs limit the usability of conventional PSO-based algorithms. One issue is outdated memory, where previously optimal solutions guide the swarm after the fitness landscape shifts, causing the search to focus on obsolete areas. The convergence of the swarm around prior optima leads to diversity loss, reducing the exploratory capacity. Consequently, the swarm cannot discover new promising areas, hampering its adaptability to dynamic environments [31]. Various techniques have been developed to address the difficul-ties in dynamic environments. For outdated memory, one technique forces the swarm to explore regions different from the current con-verged positions, allowing it to refresh the outdated memory and explore new regions. Particle re-diversification can be achieved by adjusting positions using random perturbation [ 33 ], re-initializing particles in new regions [ 32 ], or replacing converged particles with new ones [26]. The loss of diversity in swarms is a challenge in dynamic en-vironments. Some algorithms [ 26 , 32 , 33 ] use re-diversification to re-initialize particles in new positions to allow the rediscovery of explored or new regions. Another technique involves distancing particles and sub-swarms to promote exploration by spreading them wider. Particles can be distanced using a repulsion force [ 2 ], but this may prevent convergence owing to strong repulsion. Some al-gorithms [ 26 , 32 ] employ a convergence threshold radius to replace worse sub-swarms with new ones in different regions. Some algorithms employ explicit environmental change detec-tion to improve adaptation [ 32 ]. Explicit change detection enables granular control of triggering mechanisms, such as particle re-diversification, potentially allowing quicker shifts from exploiting optimal positions to exploring when the environment changes. However, our experiment showed that detecting changes often negatively impacts convergence when the environment changes too frequently, preventing the swarm from exploiting the optimal positions. Nevertheless, most experiments evaluating PSO-based algorithms in static or dynamic environments use more particles than the poten-tial optima to allow reliable swarm convergence, with convergence improving with a larger swarm size [ 23 ]. However, a smaller swarm can perform as well as a larger one without changing other parame-ters [ 15 ]. Because the number of potential optima is likely unknown beforehand, we used the worst-case assumption that the swarm size is smaller than the potential optima count. Our method is designed for dynamic environments without assuming the frequency of en-vironmental changes or number of optimal points. Specifically, it is a method for reliably exploring a changing dynamic environment           
+
+> (a) 𝑔 (𝑡 )close to the ℎ1
+> (b) 𝑔 (𝑡 )between ℎ1and ℎ2
+
+Figure 1: Example of 𝑔 (𝑡 ) location relative to peaks ℎ1, ℎ 2.
+
+with more potential optimal points than particles, without explicit change detection. 
+
+## 3 Preliminaries 3.1 Environment Model and Problem Description 
+
+Inspired by the characteristics of estimated search areas of hu-man presence in post-disaster situations, we model the environ-ment 𝐸 , a finite square-shaped two-dimensional bounded vector space in R × R centered at (0, 0), where each dimension is bounded by [− 𝐸 𝑏𝑜𝑢𝑛𝑑 , 𝐸 𝑏𝑜𝑢𝑛𝑑 ]. Areas of potential survivors are abstracted into areas of potential solutions, represented as a set of peaks 
+
+𝐻 = {ℎ1, . . . , ℎ 𝑙 } (⊂ 𝐸 ). Moreover, socially and infrastructurally significant locations where survivors move are abstracted into final destinations for solutions, represented as a set of centers 
+
+𝐶 = {𝑐 1, . . . , 𝑐 𝑚 } (⊂ 𝐸 ). To mimic the unpredictability in post-disaster environments, the initial positions of peaks ℎ ∈ 𝐻 and centers 𝑐 ∈ 𝐶 are random points in 𝐸 , and each center 𝑐 ∈ 𝐶 is randomly assigned to a peak 
+
+ℎ ∈ 𝐻 . We assume that centers 𝐶 remain static, while ℎ ∈ 𝐻 may move linearly towards its assigned center 𝑐 with speed vector 𝝐 
+
+at each discrete time 𝑡 , representing converging areas of potential solutions into final destinations. Destinations 𝑐 prevent peaks from diverging beyond the environment bounds, as a random walk in finite time leads to an unpredictable result [30]. A peak ℎ𝑖 ∈ 𝐻 denotes the location and influence area of a solution represented as a bivariate Gaussian distribution (𝝁 , 𝝈 ),where the mean 𝝁 𝑖 = (𝜇 1,𝑖 , 𝜇 2,𝑖 ) denotes the location, and 𝝈 𝑖 =
+
+(𝜎 1,𝑖 , 𝜎 2,𝑖 , 𝜌 𝑖 ) is the tuple of standard deviations (SDs) 𝜎 1 and 𝜎 2 in two axioms representing the peak’s influence area, with correlation 
+
+𝜌 𝑖 . For each peak ℎ𝑖 , the peak movement at time 𝑡 is defined as 
+
+𝝁 𝑖 (𝑡 + 1) = 𝝁 𝑖 (𝑡 ) + 𝝐 𝑖 (𝑡 ), and 𝝈 𝑖 remains constant. The corresponding utility function util (𝒙 , 𝑡 ) quantifies the cumu-lative probability density function of all peaks 𝐻 at the coordinate Deep Neural Network-guided PSO for Tracking a Global Optimal Position in Complex Dynamic Environment 
+
+𝒙 = (𝑥 1, 𝑥 2) at time 𝑡 , representing the strength of the solution at a specific coordinate in the environment 𝐸 at state 𝑡 . Formally, it is defined as 
+
+util (𝒙 , 𝑡 ) = 
+
+> |𝐻 |
+
+∑︁ 
+
+> 𝑖 =1
+
+12𝜋𝜎 1,𝑖 𝜎 2,𝑖 
+
+exp − 12
+
+" 𝑥 1 − 𝜇 1,𝑖 
+
+𝜎 1,𝑖 
+
+2
+
++
+
+ 𝑥 2 − 𝜇 2,𝑖 
+
+𝜎 2,𝑖 
+
+2 # ! 
+
+,
+
+where 𝜌 𝑖 = 0 is assumed, indicating independence between the two spatial dimensions. We define the global optimal position at time 𝑡 as 
+
+𝒈 (𝑡 ) = argmax 𝒙 ∈𝐸 util (𝒙 , 𝑡 )
+
+because the utility value at 𝑥 may differ between discrete times in a changing environment. Notably, util (𝑥, 𝑡 ) changes as peaks 
+
+𝐻 moves at every time 𝑡 , and it is possible that util (𝑥, 𝑡 ) follows an increasing or decreasing trend. In other words, util (𝑥, 𝑡 − 1) ≶
+
+util (𝑥, 𝑡 ).Our problem aims to track 𝒈 (𝑡 ) at each time 𝑡 . As our assumed environment is sufficiently small that each peak ℎ can be within another peak’s area of influence, the global optimal 𝒈 (𝑡 ) might be near one peak (Fig. 1a) or between two peaks (Fig. 1b). In the SAR context, the former indicates a smaller survivor group merging into a larger one, whereas the latter represents two equal-sized groups merging. Thus, our experiment aimed to minimize the cumulative tracking error value between the actual and detected global optimal at 𝑡 .
+
+## 3.2 Canonical Particle Swarm Optimization 
+
+Let P = {𝑝 1, . . . , 𝑝 𝑛 } be a set of 𝑛 particles (where 𝑛 is a positive integer). The velocity of particle 𝑖 ∈ P in vector space is updated by combining three components: inertia (previous velocity), cognitive learning (attraction towards its personal local best position), and social learning (attraction towards the global best position). For-mally, the velocity 𝒗 𝑖 (𝑡 ) and position 𝒙 𝑖 (𝑡 ) of 𝑖 at time 𝑡 are updated formulas as follows: 
+
+𝒙 𝑖 (𝑡 + 1) =𝒙 𝑖 (𝑡 ) + 𝒗 𝑖 (𝑡 + 1) + 𝑤 · 𝒗 𝑖 (𝑡 ) and (1) 
+
+𝒗 𝑖 (𝑡 + 1) =𝑐 1𝑟 1 (𝑦 𝑖 (𝑡 ) − 𝒙 𝑖 (𝑡 )) + 𝑐 2𝑟 2 (𝒈 (𝑡 ) − 𝒙 𝑖 (𝑡 )) , (2) where 𝑤 is the velocity weight, 𝑐 1 > 0 and 𝑐 2 > 0 are acceleration coefficients, 𝑟 1 and 𝑟 2 are random numbers between 0 and 1, 𝑦 𝑖 (𝑡 )
+
+is the personal best position of particle 𝑖 , and 𝒈 (𝑡 ) is the global best position found by the swarm. Using these formulas, each particle balances exploration and exploitation. The inertia term maintains momentum, the cognitive term enables local search around suc-cessful positions, and the social term drives convergence towards the best-known global solutions [4]. 
+
+## 3.3 Deep Neural Networks 
+
+A DNN is a machine learning method with multiple network lay-ers for nonlinear transformations. Each layer extracts higher-level features from raw input data, allowing DNNs to capture complex hierarchical relationships that are difficult to represent using tra-ditional methods [ 9 ]. DNNs are powerful because of their uni-versal approximation properties. Under suitable conditions, they can approximate various nonlinear functions with arbitrary pre-cision [ 5, 16 ]. This expressive power has led to state-of-the-art 
+
+Figure 2: Visualization of particle 𝑝 𝑖 in NNGPSO with two example observation points 
+
+performance across domains, including computer vision and rein-forcement learning [14, 17]. In our context, DNNs offer a flexible framework for capturing complex patterns in dynamic environments, thereby enhancing the convergence performance of the proposed methods [ 21 ]. This is valuable in our modeled problem, where the particle count is smaller than the number of potential optima, unlike typical PSO configurations, where the swarm size exceeds the optima by a large margin. 
+
+## 4 Proposed Methods 4.1 Implementing DNN for PSO 
+
+4.1.1 Constructing Network Input I ( 𝑡 ). To track the global opti-mum in a dynamic environment where the particle count is smaller than the number of potential optima, we employ a DNN to estimate the next position 𝑥 (𝑡 + 1) of each particle. The input data are a set of normalized coordinates and utility values from a particle in NNGPSO, defined as I ( 𝑡 ).To construct the normalized input set I ( 𝑡 ), each particle 𝑝 𝑖 is associated with an observation point 𝑄 𝑖 = {𝑞 𝑖, 1, 𝑞 𝑖, 2, . . . , 𝑞 𝑖,𝑛 }. Each point 𝑞 𝑖,𝑗 ∈ 𝑄 𝑖 is defined as the intersection between an observation ring of radius ˆ𝑟 𝑖,𝑗 = 𝑚 𝑖 · 𝑟 𝑖,𝑗 and the direction 𝜃 𝑖,𝑗 . Formally, 
+
+𝑄 𝑖 = { ˆ𝑟 𝑖,𝑗 ∩ 𝜃 𝑖,𝑗 | 𝑟 𝑖,𝑗 ∈ 𝒓 𝑖 , 𝜃 𝑖,𝑗 ∈ 𝜽 𝑖 }, (3) where 𝑚 𝑖 is a scalar multiplier applied to the base radius 𝑟 𝑖,𝑗 ∈ 𝒓 𝑖 ,and direction 𝜃 𝑖,𝑗 is chosen from predefined directions 𝜽 𝑖 .Figure 2 shows the top view of a particle in NNGPSO including two example observation points, 𝑞 𝑖, 0 = 𝜃 𝑖, 0 ∩ 𝑟 𝑖, 0 and 𝑞 𝑖, 18 = 𝜃 𝑖, 2 ∩
+
+𝑟 𝑖, 2. Each particle ∀𝑝 𝑖 ∈ P has multiple surrounding observation points. The position of each observation point and the utility value 
+
+𝑢𝑡𝑖𝑙 (𝑞 𝑖, ∗, 𝑡 ) are fed to the DNN as input data. The current position 𝒙 𝑖 and observation points 𝑄 𝑖 are flattened into one-dimensional vectors using the mapping function Φ(·) . For each coordinate, the spatial position components are concatenated with the utility value Φ(𝑥 ) = [𝑥 ′
+
+> 1
+
+, 𝑥 ′
+
+> 2
+
+, util (𝑥, 𝑡 )] , where the coor-dinates are normalized to [− 1, 1] by dividing by the environment boundary size 𝑥 ′ 
+
+> 𝑛
+
+= 𝑥 𝑛  
+
+> 𝐸 bound
+
+for 𝑛 = 1, 2, where 𝒙 = (𝑥 1, 𝑥 2). The Stephen Raharja and Toshiharu Sugawara 
+
+complete input set for the network at time 𝑡 created by particle 𝑖 is then defined as 
+
+I𝑖 (𝑡 ) = Φ(𝒙 𝑖 ) ∪ 
+
+Ø
+
+> 𝑗
+
+Φ(𝑞 𝑖,𝑗 ), (4) which combines the particle position and local observations into a flattened, normalized representation for DNN input. We do not incorporate the local or global best positions into the network input I ( 𝑡 ). In dynamic environments, such information can be misleading, as these positions may be outdated and hinder convergence performance [ 3]. In our experiments, omitting both the local and global best positions from the network input improved the tracking accuracy and convergence stability. 
+
+4.1.2 Calculating the Next Position. Using the network input data 
+
+I ( 𝑡 ), the next position 𝒙 (𝑡 + 1) for each particle can be calculated using feedforward neural networks. Specifically, 
+
+ˆ𝒙 (𝑡 + 1) = DNN  I ( 𝑡 ), (5) 
+
+𝒙 (𝑡 + 1) = 𝐸 bound · ˆ𝒙 (𝑡 + 1), (6) where I ( 𝑡 ) denotes the input features provided to the network at 𝑡 .Our implementation of the DNN outputs a normalized coordinate 
+
+ˆ𝒙 (𝑡 + 1) bounded within [− 1, 1]. The actual next position 𝒙 (𝑡 + 1)
+
+is obtained by scaling this normalized coordinate by 𝐸 bound and restoring it to the coordinate space of the environment. 
+
+4.1.3 Observation Ring Radius Multiplier (𝑚 𝑖 ). Each particle 𝑝 𝑖 
+
+has a radius multiplier 𝑚 𝑖 that controls its observation rings with multiple radii (Fig. 2). The radius multiplier enables the particles to balance exploration and exploitation. When a particle fails to improve the utility, the multiplier expands its observation area for broader exploration; however, after improvement, it contracts the area to focus on promising regions. The multiplier, initialized as 𝑚 𝑖 = 1, serves as a scaling factor 𝑚 fac 
+
+to adjust its value dynamically. A change counter 𝛾 𝑖 prevents the radii from becoming excessively large, which would cause sparse or small observations and limit particle exploration. The scaling factor 𝑚 fac ∈ ( 0, 1) affects particle performance; larger values cause drastic radius changes that risk missing global optima, whereas smaller values make particles too slow to react to changes. If a particle moves to a position with a higher utility value 
+
+util (𝒙 𝑖 (𝑡 ), 𝑡 ) < util (𝒙 𝑖 (𝑡 + 1), 𝑡 + 1), the observation radius is de-creased by the scaling factor: 
+
+𝑚 𝑖 ← 𝑚 𝑖 · 𝑚 fac , 𝛾 𝑖 ← 𝛾 𝑖 − 1 (7) Otherwise, if the move results in a lower utility value, 
+
+𝑚 𝑖 ← 𝑚 𝑖 
+
+𝑚 fac 
+
+, 𝛾 𝑖 ← 𝛾 𝑖 + 1 (8) To maintain exploration-exploitation stability, 𝛾 𝑖 is bounded within 
+
+[𝛾 min , 𝛾 max ]. When 𝛾 𝑖 = 𝛾 max , the particle is stagnant and cannot explore effectively. The particle then undergoes re-randomization, as described in Section 4.1.4. 
+
+4.1.4 Re-randomization. When a particle 𝑝 𝑖 becomes stagnant, its position 𝒙 𝑖 (𝑡 ) is re-randomized to escape the local optimum and explore other regions. Because the environment is dynamic, the stored global best position 𝒈 (𝑡 ) may become outdated. Dur-ing re-randomization, the particle tests if 𝒈 (𝑡 ) remains unchanged 
+
+Algorithm 1 Re-randomization (𝑝 𝑖 ) 
+
+> 1:
+
+// For particle 𝑖 ∈ P ; 𝑏 ∈ { 0, 1} selected randomly  
+
+> 2:
+
+if 𝑏 = 1 // with probability 0.5 then  
+
+> 3:
+
+𝒙 𝑖 (𝑡 + 1) ← 𝒈 (𝑡 ) 
+
+> 4:
+
+if util (𝒈 (𝑡 ), 𝑡 − 1) ≠ util (𝒈 (𝑡 ), 𝑡 ) then  
+
+> 5:
+
+Update util (𝒈 (𝑡 ), 𝑡 ); 
+
+> 6:
+
+end if  
+
+> 7:
+
+else  
+
+> 8:
+
+𝒙 𝑖 (𝑡 + 1) ∼ U  [− 𝐸 bound , 𝐸 bound ] 
+
+> 9:
+
+end if  
+
+> 10:
+
+Update util (𝒙 (𝑡 + 1), 𝑡 ); 
+
+> 11:
+
+Update 𝑄 𝑖 (𝑡 ) using Eq. 3;  
+
+> 12:
+
+𝑚 𝑖 ← 1, 𝛾 𝑖 ← 0 // Reset ring multiplier and counter from the previous state. If the utility value of 𝒈 (𝑡 ) at the cur-rent state util (𝒈 (𝑡 ), 𝑡 ) has changed compared to the previous state 
+
+util (𝒈 (𝑡 ), 𝑡 − 1), the particle updates the stored util (𝒈 (𝑡 ), 𝑡 ). A ran-dom Boolean determines whether the particle moves to the current global best position or a random coordinate. After re-randomization, the particle updates the new position utility value. The observation point set 𝑄 𝑖 is recomputed, and both the ring multiplier 𝑚 𝑖 and counter 𝛾 𝑖 are reset. The re-randomization algorithm for particle 𝑝 𝑖 is defined in Algorithm 1, where U denotes a uniform distribution. 
+
+4.1.5 Deep Neural Network Structure. Each predictive network is implemented as a fully connected multi-layer perceptron (MLP). The input and hidden layers use a rectified linear unit (ReLU) activation function, whereas the output layer uses hyperbolic tangent ( tanh )activation to produce a normalized next-coordinate prediction ˆ𝒙 (𝑡 +
+
+1) ∈ [− 1, 1]. This ensures that the predicted coordinates remain within the normalized environmental bounds. To enhance the convergence stability with ReLU activation, the network weights use He initialization [ 11 ], whereas the biases are set to zero. The input layer size is |I ( 𝑡 )| , and the output layer di-mensions match the two-dimensional coordinate space. The hidden architecture comprises three fully connected layers, each containing 16 neurons. For angular and radial features 𝜽 𝑖 and 𝒓 𝑖 in our experi-ment, this MLP configuration yields the lowest average tracking error 𝜇 E𝑖 ± 𝜎 E𝑖 across environmental groups. 
+
+## 4.2 Pre-training of Networks 
+
+Before running the full experiments on our proposed method, we pre-trained each network in a simplified version of the target dy-namic environment. We found that pre-training improves conver-gence performance and stability by allowing the network to learn general spatial and temporal patterns prior to online adaptation. For pre-training, we generate environments using the parameters listed in Table 1 with several changes. Each network is trained independently, and no pre-training environment is reused across networks to prevent overfitting to specific environmental dynamics. During pre-training, each particle is simulated from 𝑡 = 1 to 𝑡 max ,constructing the network input set I ( 𝑡 ) (Algorithm 4) and updating positions via Algorithms 5 and 6, with the expected coordinate 𝒂 (𝑡 )
+
+used as the target label for pre-training. Deep Neural Network-guided PSO for Tracking a Global Optimal Position in Complex Dynamic Environment 
+
+Algorithm 2 Algorithm Overview  
+
+> 1:
+
+𝐺 ← [] ; // Global best history  
+
+> 2:
+
+// Initialize swarms  
+
+> 3:
+
+for ∀𝑝 𝑖 ∈ P do  
+
+> 4:
+
+𝒙 𝑖 ← U (− 𝐸 𝑏𝑜𝑢𝑛𝑑 , 𝐸 𝑏𝑜𝑢𝑛𝑑 ); // Randomly initialize position  
+
+> 5:
+
+Calculate util (𝒙 𝑖 , 𝑡 ); 
+
+> 6:
+
+Update 𝑄 𝑖 using Eq. 3;  
+
+> 7:
+
+if DNNPSO then  
+
+> 8:
+
+𝐷 𝑖 (𝑡 ) ← [] ; // Received training data  
+
+> 9:
+
+end if  
+
+> 10:
+
+end for  
+
+> 11:
+
+Load pre-trained model(s);  
+
+> 12:
+
+while 𝑡 < 𝑡 𝑚𝑎𝑥 // Until terminal condition is reached do  
+
+> 13:
+
+Execute Function updateSwarm() ; 
+
+> 14:
+
+𝐺 ← 𝐺 ∪ 𝒈 (𝑡 ); // Append global best to history  
+
+> 15:
+
+∀ℎ𝑖,𝑗,𝑘 ∈ 𝐻 𝑖 𝑗 , ℎ 𝑖,𝑗,𝑘 ← ℎ𝑖,𝑗,𝑘 + 𝝐 𝑖,𝑗,𝑘 (𝑡 ); // Move peaks  
+
+> 16:
+
+𝑡 ← 𝑡 + 1; // Progress time  
+
+> 17:
+
+end while  
+
+> 18:
+
+Return 𝐺 ;As shown on Fig. 1, the position of 𝒂 (𝑡 ) cannot be predicted relative to any peak ℎ𝑖 . Therefore, 𝒂 (𝑡 ) is obtained by treating each state of the environment as static environment. For each state at 
+
+𝑡 , we identified 𝒂 (𝑡 ) by using canonical PSO with swarm size five times larger than the peak numbers in the environment ( |𝑝 | =
+
+5 · | 𝐻 𝑖,𝑗 |) and iterated until the global best position 𝒈 (𝑡 ) shows no improvement for five consecutive steps, and repeated for 3 times to minimize the probability of misidentifying 𝒂 (𝑡 ). For this process, we used velocity weight 𝑤 = 0.1 and coefficients 𝑐 1 = 𝑐 2 = 2.The expected coordinates 𝒂 (𝑡 ) are normalized to ˆ𝑎 (𝑡 ) and paired with the network inputs I ( 𝑡 ) to form the training dataset. The dataset is randomly sampled into mini-batches of size 𝜏 size for a stable gradient estimation during optimization. The network is trained using the mean squared error (MSE) loss function and optimized using AdaGrad [ 6]. MSE loss was chosen because it provides a differentiable measure of the Euclidean de-viation between the predicted and expected coordinates, directly aligning with the minimization of the positional error. Its quadratic form penalizes larger deviations more heavily, thereby encouraging precision in dynamic environments. The AdaGrad optimizer was chosen for its ability to adapt each parameter’s learning rate individually, enabling faster convergence with sparse or unevenly scaled gradients. To improve convergence stability, a cosine annealing learning rate scheduler was employed, which reduced the rate smoothly and helped the model escape shal-low local minima during the later stages of training. A warm-up phase was introduced, where the learning rate increased linearly from 𝛼 start to 𝛼 warm during the first batch before following a cosine decay to 𝛼 final . This warm-up strategy mitigates training instabil-ity during initialization by preventing abrupt updates before the optimizer’s adaptive statistics are established. Each network was trained for 𝜏 epoch epochs using (I ( 𝑡 ), ˆ𝑎 (𝑡 )) .The pre-training process was repeated three times with different random particle positions to enhance generalization. 
+
+Algorithm 3 CNNPSO updateSwarm()  
+
+> 1:
+
+for ∀𝑝 𝑖 ∈ P do  
+
+> 2:
+
+Update 𝑄 𝑖 using Eq. 3;  
+
+> 3:
+
+Generate I𝑖 (𝑡 ) using Eq. 4;  
+
+> 4:
+
+Update 𝒙 𝑖 (𝑡 + 1) using Eq. 5 and Eqn. 6;  
+
+> 5:
+
+if util (𝒙 𝑖 (𝑡 + 1), 𝑡 ) > util (𝒙 𝑖 (𝑡 ), 𝑡 ) then  
+
+> 6:
+
+Update 𝑚 𝑖 and 𝛾 𝑖 using Eq. 7  
+
+> 7:
+
+Train network with I𝑖 (𝑡 ) and ˆ𝑥 𝑖 (𝑡 + 1) with 𝜏 𝑐  
+
+> epoch
+
+epoch;  
+
+> 8:
+
+else if util (𝒙 𝑖 (𝑡 + 1), 𝑡 ) < util (𝒙 𝑖 (𝑡 ), 𝑡 ) then  
+
+> 9:
+
+Update 𝑚 𝑖 and 𝛾 𝑖 using Eq. 8;  
+
+> 10:
+
+end if  
+
+> 11:
+
+if 𝛾 𝑖 = 𝛾 𝑚𝑎𝑥 then  
+
+> 12:
+
+Re-randomize 𝑝 𝑖 using Alg. 1;  
+
+> 13:
+
+end if  
+
+> 14:
+
+if util (𝒈 (𝑡 ), 𝑡 ) < util (𝒙 𝑖 (𝑡 + 1), 𝑡 ) then  
+
+> 15:
+
+𝒈 (𝑡 ) ← 𝒙 𝑖 (𝑡 + 1); // Update global best  
+
+> 16:
+
+end if  
+
+> 17:
+
+end for 
+
+## 4.3 Neural-Network-Guided PSO (NNGPSO) 
+
+We introduce two variants of the NNGPSO algorithm with identi-cal particle configurations, as shown in Fig. 2. Both variants train networks upon successful exploration to adapt the swarms to the environment, thereby improving the convergence performance. The differences between the variants are the neural network scope across the swarm and the information propagation method used. Swarm initialization begins by generating particles. Each particle is assigned a random position within the environment bounds, followed by the computation of its observation points 𝑄 𝑖 . For the distributed NNGPSO (DNNPSO), as described below, an array 𝐷 𝑖 
+
+is initialized to record the network training data propagated from other particles at each time 𝑡 (Line 7). At time 𝑡 , the swarm is updated (Line 13) using Algorithm 3 or Algorithm 4, depending on the variant. The current global best position 𝒈 (𝑡 ) is added to the history list, and each peak ℎ𝑖,𝑗,𝑘 moves towards its assigned center 𝑐 𝑖,𝑗,𝑘 with a random velocity 𝝐 𝑖,𝑗,𝑘 (𝑡 ).When 𝑡 = 𝑡 max , the global best history 𝐺 is used to compute the cumulative tracking error, as defined in Eq. (10). 
+
+4.3.1 Centralized Neural Network-guided PSO (CNNPSO). The first variant uses a single neural network that is shared by all the swarm particles. Unlike in canonical PSO, the particles communicate in-directly through the shared neural network. For every successful exploration, the particles train the shared neural network using information that improves their positions. As shown in Algorithm 3, at time 𝑡 , the swarm updates the observation point locations 𝑄 𝑖 of particle ∀𝑖 ∈ P before calculating the next position 𝒙 𝑖 (𝑡 + 1). After the particles move to their next positions, they adjust the ring multipliers, 𝑚 𝑖 . If next positions have better utility values, particles train the central network using input set I𝑖 (𝑡 ) for ∀𝑖 and normalized next position ˆ𝒙 𝑖 (𝑡 + 1) as the label at epoch 𝜏 𝑐  
+
+> epoch
+
+(𝜏 𝑐  
+
+> epoch
+
+> 0). When a particle reaches the ring adjustment counter limit 𝛾 𝑖 = 𝛾 𝑚𝑎𝑥 , it is randomly re-initialized. Finally, the global best position is updated. Stephen Raharja and Toshiharu Sugawara 
+
+Algorithm 4 DNNPSO updateSwarm()  
+
+> 1:
+
+for ∀𝑝 𝑖 ∈ P do  
+
+> 2:
+
+Update 𝑄 𝑖 using Eq. 3;  
+
+> 3:
+
+Generate I𝑖 (𝑡 ) using Eq. 4;  
+
+> 4:
+
+Update 𝒙 𝑖 (𝑡 + 1) using Eqs. 5 and 6;  
+
+> 5:
+
+if util (𝒙 𝑖 (𝑡 + 1), 𝑡 ) > util (𝒙 𝑖 (𝑡 ), 𝑡 ) then  
+
+> 6:
+
+Update 𝑚 𝑖 and 𝛾 𝑖 using Eq. 7;  
+
+> 7:
+
+// Propagate information  
+
+> 8:
+
+for ∀𝑝 𝑗 ∈ P , 𝑖 ≠ 𝑗 do  
+
+> 9:
+
+𝐷 𝑗 (𝑡 ) ← 𝐷 𝑗 (𝑡 ) ∪ {  I𝑖 (𝑡 ), ˆ𝑥 𝑖 (𝑡 + 1), 𝑡 ′  } ∪ 𝐷 𝑖 (𝑡 − 1); 
+
+> 10:
+
+end for  
+
+> 11:
+
+else if util (𝒙 𝑖 (𝑡 + 1), 𝑡 ) < util (𝒙 𝑖 (𝑡 ), 𝑡 ) then  
+
+> 12:
+
+Update 𝑚 𝑖 and 𝛾 𝑖 using Eq. 8;  
+
+> 13:
+
+end if  
+
+> 14:
+
+if 𝛾 𝑖 = 𝛾 𝑚𝑎𝑥 then  
+
+> 15:
+
+Re-randomize 𝑝 𝑖 using Alg. 1;  
+
+> 16:
+
+end if  
+
+> 17:
+
+if util (𝒈 (𝑡 ), 𝑡 ) < util (𝒙 𝑖 (𝑡 + 1), 𝑡 ) then  
+
+> 18:
+
+𝒈 (𝑡 ) ← 𝒙 𝑖 (𝑡 + 1); // Update global best  
+
+> 19:
+
+end if  
+
+> 20:
+
+end for  
+
+> 21:
+
+// Train networks  
+
+> 22:
+
+for ∀𝑝 𝑖 ∈ P do  
+
+> 23:
+
+for ∀𝑑 𝑗 ∈ 𝐷 𝑖 (𝑡 ), 𝑑 𝑗 = {  I𝑖 (𝑡 ), ˆ𝑥 𝑖 (𝑡 + 1), 𝑡 ′  }, 𝑖 ≠ 𝑗 do  
+
+> 24:
+
+if 𝜿 = 𝜏 𝑑  
+
+> epoch
+
+− ( 𝑡 − 𝑡 ′), 𝜿 > 0 then  
+
+> 25:
+
+Train network using 𝑑 𝑗 with 𝜿 epoch;  
+
+> 26:
+
+end if  
+
+> 27:
+
+end for  
+
+> 28:
+
+end for 
+
+4.3.2 Distributed Neural Network-guided PSO (DNNPSO). The sec-ond algorithm is a decentralized version of DNNPSO, where each particle has its own neural network. Because particles are initialized randomly, with networks trained independently and the training data coming from other particles, a particle would not be too spe-cialized in its vicinity owing to overtraining using self-generated data. The DNNPSO algorithm shown in Algorithm 4 is similar to CN-NPSO (Algorithm 3), with the main difference being the learning network structures. Upon successful exploration, the particle prop-agates the network input set I𝑖 (𝑡 ), normalized output ˆ𝒙 𝑖 (𝑡 + 1), and current time step 𝑡 ′ (Line 8). The data received from the previous time step 𝐷 𝑖 (𝑡 − 1) are included, as the particle can improve its position from the training data received from other particles at time step 𝑡 − 1.After the particles move to their next positions, they train net-works using the recorded training data in 𝐷 𝑖 (𝑡 ). Unlike CNNPSO, the training epoch in DNNPSO is determined by the timestep in each tuple 𝑑 𝑗 . The epoch would be 𝜏 𝑑  
+
+> epoch
+
+if data are received in the current time step 𝑡 ′ = 𝑡 , whereas it would be 𝜏 𝑑  
+
+> epoch
+
+− 1 if received in the previous time step. This varying epoch trains the networks less on the old training data. Because particles may receive data generated by themselves through other particles, training data from the same particle from the previous time step are skipped to prevent over-training. 
+
+Table 1: List of experimental parameters 
+
+Symbol Description Value 
+
+𝐸 bound 𝐸 bounds for each dimension 10 
+
+𝐸 factor Sampling area factor for 𝐸 0.8
+
+𝐸 count Number of environments per E𝑖 5
+
+𝐸 run Number of experiments per 𝐸 3
+
+𝜎 min Lower bound of 𝜎 for 𝐻 0.25 
+
+𝜎 max Upper bound of 𝜎 for 𝐻 1
+
+𝑡 max Maximum experiment time 20 , 000 
+
+𝜔 Peak movement speed factor 20 , 000 
+
+## 5 Experimental Setup 5.1 Environment Setting 
+
+We define a collection of environment groups, denoted by E𝑖 , where all environments in the group share the same environment param-eters. Each group E𝑖 contains multiple environments 𝐸 𝑖,𝑗 , such that 𝐸 𝑖,𝑗 ∈ E 𝑖 represents the 𝑗 th environment in the 𝑖 th group. An environment 𝐸 𝑖,𝑗 consists of two sets: a set of peaks 𝐻 𝑖,𝑗 =
+
+{ℎ𝑖,𝑗, 1, ℎ 𝑖,𝑗, 2, . . . } and a set of centers 𝐶 𝑖,𝑗 = {𝑐 𝑖,𝑗, 1, 𝑐 𝑖,𝑗, 2, . . . }.All environments share spatial boundaries defined by a square search space with dimensions having bounds [− 𝐸 bound , 𝐸 bound ],whereas peak and center initial positions are sampled within a smaller area [− 𝐸 ′
+
+> bound
+
+, 𝐸 ′
+
+> bound
+
+], where 𝐸 ′ 
+
+> bound
+
+= 𝐸 factor · 𝐸 bound . Con-straining the initialization to a smaller region helps maintain swarm diversity during early iterations, which enhances the exploration performance [25]. Each peak ℎ𝑖,𝑗,𝑘 is generated as a bivariate Gaussian distribution with a mean and SD of 
+
+𝜇 ∼ U (− 𝐸 ′
+
+> bound
+
+, 𝐸 ′ 
+
+> bound
+
+), 𝜎 ∼ U ( 𝜎 min , 𝜎 max ),
+
+by assuming dimensional independence (i.e., 𝜌 = 0). To ensure smoother utility landscapes, we imposed bounds 𝜎 min and 𝜎 max 
+
+on the SD to prevent peaks from becoming too concentrated and dominating utility values while ensuring that the peak has a non-negligible effect on util (𝒙 , 𝑡 ).Each center 𝑐 𝑖,𝑗,𝑘 is placed randomly in the environment accord-ing to 𝑐 𝜇 ∼ U   − 𝐸 ′
+
+> bound
+
+, 𝐸 ′ 
+
+> bound
+
+), and peak ℎ𝑖,𝑗,𝑘 moves linearly towards its assigned center 𝑐 with a random velocity drawn from 
+
+𝝐 𝑖,𝑗,𝑘 (𝑡 ) ∼ U 
+
+
+
+0, || 𝑐 − ℎ𝑖,𝑗,𝑘 (0)|| 2
+
+𝜔 
+
+
+
+, (9) until it reaches its destination. To maintain a dynamic environment, we set 𝜔 = 𝑡 max , preventing peaks 𝐻 𝑖,𝑗 from moving so slowly that the landscape becomes quasi-static or so quickly that all peaks reach their centers and the environment changes. For each environment group E𝑖 , we generated 𝐸 count environments, and each environment 
+
+𝐸 𝑖,𝑗 was evaluated through 𝐸 run runs with the swarm population reinitialized randomly before each run for statistical robustness. 
+
+## 5.2 Measurement Method 
+
+To evaluate the effectiveness of the proposed and comparison meth-ods in tracking the global optimum, we measured the cumulative Euclidean distance between the true global optimum 𝒂 (𝑡 ) and the position identified by the swarm 𝒈 (𝑡 ) during experimental runs Deep Neural Network-guided PSO for Tracking a Global Optimal Position in Complex Dynamic Environment 
+
+Table 2: Parameter settings for each environment group E𝑖 .
+
+Env. group ( E𝑖 ) No. of peaks ( |𝐻 |) No. of centers ( |𝐶 |)
+
+E1 100 50 
+
+E2 200 100 
+
+E3 200 200 
+
+E4 500 100 in environment 𝐸 𝑖,𝑗 . The details of finding 𝒂 (𝑡 ) are provided in Section 4.2. Formally, the tracking error for a single run is defined as 
+
+err (𝐸 𝑘 𝑖,𝑗 ) =
+
+> 𝑡 max
+
+∑︁ 
+
+> 𝑡 =1
+
+𝜆 (𝑡 ) · || 𝒈 (𝑡 ) − 𝒂 (𝑡 )|| 2, (10) where 𝒈 (𝑡 ) denotes the global optimum position detected by the swarm, and 𝒂 (𝑡 ) denotes the actual global optimum position in the environment at time 𝑡 . The weighting factor 𝜆 (𝑡 ) at timestep 𝑡 is given by 
+
+𝜆 (𝑡 ) =
+
+(
+
+1, if util (𝒈 (𝑡 ), 𝑡 ) ≤ util (𝒂 (𝑡 ), 𝑡 ),
+
+1.5, otherwise. The additional penalty ( 𝜆 = 1.5) increases the error when the swarm fails to recognize a decrease in the true global optimum reward value, indicating convergence around an outdated region, whereas the actual optimum has shifted elsewhere. For each environment 𝐸 𝑖,𝑗 , the mean and SD of tracking error across 𝑘 max > 0 experimental runs are computed as 
+
+𝜇 𝐸 𝑖,𝑗 = 1
+
+𝐸 run 
+
+> 𝐸 run
+
+∑︁ 
+
+> 𝑘 =1
+
+err (𝐸 𝑘 𝑖,𝑗 ), (11) 
+
+𝜎 𝐸 𝑖,𝑗 =
+
+vut 1
+
+𝐸 run 
+
+> 𝐸 run
+
+∑︁ 
+
+> 𝑘 =1
+
+ err (𝐸 𝑘 𝑖,𝑗 ) − 𝜇 𝐸 𝑖,𝑗 
+
+2. (12) We then aggregate the results for all environments within each environment group E𝑖 as 
+
+𝜇 E𝑖 = 1
+
+𝐸 count 
+
+> 𝐸 count
+
+∑︁ 
+
+> 𝑗 =1
+
+𝜇 𝐸 𝑖,𝑗 , (13) 
+
+𝜎 E𝑖 =
+
+vut 1
+
+𝐸 count 
+
+> 𝐸 count
+
+∑︁ 
+
+> 𝑗 =1
+
+ (𝜎 𝐸 𝑖,𝑗 )2 + ( 𝜇 𝐸 𝑖,𝑗 − 𝜇 E𝑖 )2 . (14) Finally, the tracking performance of each algorithm in the envi-ronment group E𝑖 is reported as 𝜇 E𝑖 ± 𝜎 E𝑖 , showing the average tracking error and variability across the experiments. Lower error values indicate a better global optimum position tracking. 
+
+## 5.3 Comparison Algorithms 
+
+We compared our method with canonical PSO and two recent PSO variants [ 26 , 32 ] that incorporate speciation and subswarm mecha-nisms for dynamic optimization as baseline methods. For PSPSO and SPSO, we used hyperparameters recommended by their authors, except for species or subswarm size and count, which were adjusted to ensure equivalent total observations to our proposed methods. Because our method uses |P | = 5 particles with 1 + | 𝑄 | = 33 
+
+Table 3: Parameter settings for NNGPSO variants. 
+
+Parameter Value 
+
+𝑚 fac 0.8 
+
+𝛾 min -10 
+
+𝛾 max 10 
+
+𝜽 𝑖 0, 𝜋  
+
+> 4
+
+, 𝜋  
+
+> 2
+
+, 3𝜋  
+
+> 4
+
+, 𝜋, 5𝜋  
+
+> 4
+
+, 3𝜋  
+
+> 2
+
+, or 7𝜋 
+
+> 4
+
+𝒓 𝑖 0.5, 1.0, 1.5, or 2.0
+
+𝜏 𝑐  
+
+> epoch
+
+1
+
+𝜏 𝑑  
+
+> epoch
+
+2observation points per particle (165 in total), all the comparison algorithms were configured with matching particle distributions to ensure fairness. The parameters for both NNGPSO variants are listed in Table 3. For network pre-training, we used the algorithm parameters (Ta-ble 1) with peaks |𝐻 | ∈ { 25 , 50 }, centers |𝐶 | ∈ { 5, 10 }, 𝑡 max = 10 , 000 ,batch size 𝜏 size = 64 , 𝜏 epoch = 5 epochs, starting learning rate 
+
+𝛼 start = 0, warmed up learning rate 𝛼 warm = 10 −3, and final learning rate 𝛼 final = 10 −5.
+
+5.3.1 Canonical PSO. We include the canonical PSO algorithm, as described in Section 3.2. The cognitive and social coefficients were set to 𝑐 1 = 𝑐 2 = 2, and velocity weight was set to 𝑤 = 0.1.To ensure consistency with our proposed methods, we conducted experiments using particle counts of |𝑝 | ∈ { 5, 165 }.
+
+5.3.2 Perturbation and Speciation-based PSO. The perturbation and speciation-based PSO (PSPSO) [ 26 ] is a multi-swarm PSO for dy-namic environments that operates without change detectors. The population is split into independent subpopulations via speciation to track multiple regions in parallel. PSPSO performs standard PSO updates within the active subpopulations. To prevent stagnation, it removes the subpopulation with the worst local best position when the two merge within a threshold. The converted subpopulations are then deactivated. Diversity is maintained by perturbing the par-ticles in a random subpopulation. When active particles fall below a threshold, it archives the best particle from each deactivated sub-population to create new particles using archived particles as seeds. This process maintains exploration and exploitation, enabling the tracking of moving optima without explicit change detection. In our experiment, we used two variants with subpopulation sizes of 
+
+5 and 33 .
+
+5.3.3 Species-based PSO with Adaptive Population and Deactivation. 
+
+The species-based PSO with adaptive population and deactivation 
+
+(SPSO +AP +AD ) [ 32 ], or SPSO for short, maintains the swarm as a species, similar to PSPSO. Given a species size 𝑚 , the best unas-signed particles become species seeds with 𝑚 − 1 nearest particles assigned to them, with seeds serving as the species’ best. A species is labeled as a tracker when its spatial size falls below the track-ing threshold. To avoid redundancy, an exclusion rule removes the weaker of two species whose seeds are closer than the preset exclusion distance. A deactivation radius 𝑟 𝑎 controls tracker de-activation, whereas species with the global best remain active to track the potential global best. Particle diversity is injected when Stephen Raharja and Toshiharu Sugawara 
+
+all species converge within 𝑟 generate by injecting 𝑚 new individuals or re-randomizing the worst species. Upon environmental change, SPSO re-diversifies tracker species by scattering non-seed members using the estimated shift severity ˆ𝑠 (𝑡 ) , re-evaluates the fitness of all particles, and resets deactivation controls in proportion to ˆ𝑠 (𝑡 ) . For our experiment, we used species sizes of 𝑛 ∈ { 5, 33 }.
+
+## 6 Results and Discussion 6.1 Comparison with Baselines 
+
+We compared our proposed methods with the baseline algorithms under identical experimental parameters (Table 1) and observa-tion counts using different environmental groups (Table 2). Each generated environment used the same random seed for identical peak and center positions and movements. The comparison focused on the mean and SD error values obtained from the experiments within each environment group E𝑖 using the measurement methods defined in Section 5.2. Table 4 lists the quantitative results, including the algorithm name, particle count |𝑝 |, subspecies count 𝑛 , and error values for each environment group, with aggregated values ¯E across all groups computed using Eqs. 13 and 14. For the canonical PSO and our proposed method, the species count 𝑛 was left blank. Comparing the aggregate error values ¯E across environmental groups, both variants of our method(CNNPSO and DNNPSO) pro-duced the lowest error mean and standard deviation compared to the baselines. The neural network component appeared to learn the environment behavior allowing particles to more reliably predict the next the global optimum through observation points, improv-ing convergence performance and adapting capability to track the global optimum position throughout the experiments. DNNPSO showed better error values with 16.25% lower mean but 1.11% higher SD than CNNPSO. This advantage can be attributed to the neural networks in DNNPSO initialized with separate random weights and pre-training, improving particle diversity and thus the swarm exploration capability. Figure 3 shows the maximum utility values of the actual global best position 𝒂 (𝑡 ) and detected global best position 𝒈 (𝑡 ) in 𝐸 13,2 at each time 𝑡 . When the peaks in 𝐻 have not converged to the as-signed centers and remain dispersed throughout the environment, 
+
+util (𝒂 (𝑡 ), 𝑡 ) may change dramatically at every 𝑡 as new global opti-mal points appear or the existing ones disappear. This rapid fluctua-tion of util (𝒂 (𝑡 ), 𝑡 ) appears in Figure 3 for example, at 0 ≤ 𝑡 ≤ 10000 ,where the dotted blue line appears as a blue area owing to frequent fluctuations. In our experiments, all the algorithms had difficulty identifying and tracking 𝒂 (𝑡 ) during this rapid fluctuation period. Figure 3a shows the canonical PSO tendency to converge prema-turely to local optima, even with |P | = 165 . The swarm remained trapped after converging to the local optima, even when util (𝒂 (𝑡 ), 𝑡 )
+
+increased. Without the adaptation capability, the canonical PSO swarm cannot adapt to decreasing util (𝒂 (𝑡 ), 𝑡 ) nor can it escape from a local optimum. In contrast, Fig. 3b shows that DNNPSO tracked the global best position when util (𝒂 (𝑡 ), 𝑡 ) increased or decreased throughout the experiment. Table 4 shows that DNNPSO achieved an average error reduction of 47.81% across environments when comparing error ( ¯E) 
+
+between canonical PSO and DNNPSO.         
+
+> (a) Canonical PSO with |𝑝 |=165
+> (b) DNNPSO with |𝑝 |=5
+
+Figure 3: Utility values of actual global best position 𝒂 (𝑡 ) and detected global best position 𝒈 (𝑡 ) in 𝐸 13,2
+
+However, the network in our method uses the MSE to minimize the distance between 𝒈 (𝑡 ) and 𝒂 (𝑡 ). This allowed the NNGPSO swarm to track 𝒈 (𝑡 ) with minimal error when util (𝒈 (𝑡 ), 𝑡 ) changed gradually, as shown in Fig. 3b. However, because the distance is an error function, swarms tend to be conservative when util (𝒈 (𝑡 ), 𝑡 )
+
+fluctuates rapidly, tracking the lower fluctuation bound instead of the maximum, such as when 0 ≤ 𝑡 ≤ 10000 in Fig. 3b. Further-more, DNNPSO is not completely immune to misidentifying a local optimal as the global optimal, such as when 10000 ≤ 𝑡 ≤ 12500 .Despite employing a subpopulation with re-diversification, PSPSO yields the largest average cumulative tracking error among all methods, including our proposed methods, for both configurations 
+
+𝑛 ∈ { 5, 33 }. In model environments, the peak motion can place the global optimum at time 𝑡 far from that at 𝑡 − 1. As shown in Fig. 3, which shows the utility values of the actual global best position 
+
+𝒂 (𝑡 ) and the detected global best position 𝒈 (𝑡 ) in 𝐸 3,2, the utility of the global optimum may decrease while the peaks have not converged to their assigned centers. Although PSPSO can rapidly converge to the global optimum, the subsequent optimum may be far away with a lower utility, leading to frequent tracking failures, especially during periods of rapid fluctuations of util (𝒂 (𝑡 ), 𝑡 ). Under penalty factor 𝜆 (𝑡 ) in Eq. 5.2, these tracking lapses accrue substan-tial penalties, as the swarm remains anchored to the last known global optimal position with the highest utility instead of following the downward trend in the true optimum, thereby increasing the cumulative error. Deep Neural Network-guided PSO for Tracking a Global Optimal Position in Complex Dynamic Environment 
+
+Table 4: Tracking error comparison against baselines Algorithm |𝑝 | 𝑛 error (E 𝑖 ) per Environment Group error ( ¯E) E1 E2 E3 E4
+
+CNNPSO 5 - 5.331 ± 4.464 5.827 ± 3.603 5.350 ± 3.753 5.471 ± 3.747 5.495 ± 3.911 
+
+DNNPSO 5 - 4.552 ± 4.370 5.213 ± 3.879 4.786 ± 3.611 3.858 ± 3.798 4.602 ± 3.955 
+
+PSO 5 - 8.595 ± 4.347 10 .196 ± 4.576 8.526 ± 4.042 7.995 ± 3.926 8.828 ± 4.310 
+
+PSO 165 - 8.804 ± 4.893 9.486 ± 4.773 8.356 ± 4.092 8.583 ± 4.242 8.818 ± 4.423 
+
+PSPSO 165 5 16 .889 ± 7.060 18 .878 ± 8.310 18 .085 ± 8.266 16 .739 ± 8.919 18 .503 ± 7.507 
+
+PSPSO 165 33 18 .211 ± 5.619 20 .198 ± 6.919 19 .904 ± 6.694 19 .118 ± 6.965 19 .358 ± 6.617 
+
+SPSO 165 5 5.265 ± 5.998 6.576 ± 7.149 6.442 ± 6.890 4.932 ± 6.414 5.804 ± 6.666 
+
+SPSO 165 33 5.641 ± 6.457 6.431 ± 7.151 6.492 ± 6.965 5.625 ± 6.729 5.926 ± 6.756 
+
+Table 5: NNGPSO tracking errors against particle counts |𝑝 |
+
+Algorithm |𝑝 | error ( ¯E) 
+
+CNNPSO 5 4.860 ± 3.847 
+
+CNNPSO 7 4.688 ± 3.749 
+
+CNNPSO 10 4.656 ± 4.005 
+
+DNNPSO 5 4.390 ± 3.531 
+
+DNNPSO 7 4.248 ± 3.801 
+
+DNNPSO 10 4.129 ± 3.562 
+
+SPSO employs subspecies and re-diversification, similar to PSPSO, to track the global optimum in dynamic environments. Unlike PSPSO, SPSO triggers re-diversification only when all subspecies contract within a radius 𝑟 generate . In our experiments, non-seed par-ticles within subspecies tended to be trapped in local optima, main-taining the spatial spread 𝔰 𝑖 of each subspecies 𝑖 above 𝑟 generate . The re-diversification condition was rarely met and the swarm could not refresh its diversity. The tracker subspecies remained stuck in a local optimum, and the computed shift severity ˆ𝑠 (𝑡 ) progres-sively decreased. This issue is worsened by SPSO’s lack of random perturbations in the subspecies. Because ˆ𝑠 (𝑡 ) guides the tracker designation to follow the global optimum, the SPSO’s tracking ca-pability degrades under these conditions, causing a higher average cumulative tracking error than that of our proposed method. 
+
+## 6.2 Scalability by Particle Count 
+
+To assess scalability with particle count, we evaluated both variants with |𝑝 | ∈ { 5, 7, 10 } under the same environment settings as in the main experiment (Table 2), except that the environments per group were set to 𝐸 count = 3. The environments were fixed across experiments within each group. For each particle count, we report the aggregated mean and SD error ( ¯E) over all the environment groups using Eqs. 13 and14. As shown in Table 5, both variants exhibited a decreasing total error as the particle count increased relative to the baseline |𝑝 | = 5
+
+used in the main experiment. For CNNPSO, increasing |𝑝 | from 5 to 7 reduced the error by 3.53% and from 5 to 10 by 4.20%. For DNNPSO, the reductions were 3.22% at |𝑝 | = 7 and 5.93% at |𝑝 | = 10 .These results indicate that our method scales with particle count, with DNNPSO showing larger gains than CNNPSO, possibly due to independent networks causing unique particle behavior. Adding more particles to DNNPSO enhances swarm exploration by increasing the diversity and probability of finding optimal po-sitions. However, adding particles to CNNPSO only increases the probability of exploring optimal points without increasing diversity, as particles share the same neural network, and NNGPSO does not use random coefficients, which are often used in PSO algorithms to enhance the exploration capability [13]. Owing to the online training in our proposed methods, increasing the particle count increases the potential maximum training count per time step. This issue is amplified in DNNPSO because it includes information from 𝐷 𝑖 (𝑡 − 1) in the data propagated to other particles, potentially exponentially increasing the training data per time step for each particle. 
+
+## 7 Conclusion 
+
+We modeled the distribution and movement of potential survivors in a post-disaster environment using bivariate Gaussian distributions and randomly positioned the significant locations. Owing to the unpredictable nature of post-disaster environments, we assumed the most complex case of a dynamic optimization problem with a constantly changing environment and fewer particles than the number of potential optima. To reliably track the global optimum, we introduced a DNN into the PSO algorithm so that the DNN could learn the environmental characteristics and guide the swarm to the global optimum. We conducted experiments in environment groups with increas-ing complexity to test the tracking performance of our methods against baselines. The DNN of our method successfully guides swarms into the global optimum, resulting in the lowest cumulative tracking error compared with the baselines. This suggests that our method can track the global optimum over a given timeframe. This capability can be useful in solving real-world dynamic optimiza-tion problems with time critical solutions, such as dynamic task scheduling or portfolio optimization. We identified several issues to improve our proposed methods. First, although our method exhibits strong adaptability in dynamic environments, its convergence in static environments remains sub-optimal. The neural network component can be improved by using alternative observation strategies, such as orbiting or randomly positioned observation points, to provide more diverse environ-ment observation. Furthermore, a sampling strategy can be used for Stephen Raharja and Toshiharu Sugawara 
+
+online training to reduce time while improving the results [ 18 ]. Ad-ditionally, different neural network architectures, such as recurrent neural networks (RNNs), may capture temporal correlations that are not fully utilized in the current feed-forward design, potentially improving the performance. Finally, further evaluation is required in more challenging settings, including higher-dimensional prob-lems and additional metrics such as computational time. 
+
+## Acknowledgments 
+
+This work is partly supported by JSPS KAKENHI grant number 25K03188. 
+
+## References 
+
+[1] Linus Bengtsson, Xin Lu, Anna Ekeus Thorson, Richard Garfield, and Johan von Schreeb. Improved response to disasters and outbreaks by tracking population movements with mobile phone network data: A post-earthquake geospatial study in haiti. PLoS Medicine , 8, 2011. [2] Tim M. Blackwell and Peter John Bentley. Dynamic search with charged swarms. In Annual Conference on Genetic and Evolutionary Computation , 2002. [3] Tim M. Blackwell and Jürgen Branke. Multiswarms, exclusion, and anti-convergence in dynamic environments. IEEE Transactions on Evolutionary Com-putation , 10:459–472, 2006. [4] M. Clerc and J. Kennedy. The Particle Swarm : Explosion , Stability , and Conver-gence in a Multi-Dimensional Complex Space. IEEE Transactions on Evolutionary Computation , 6(1):58–73, 2002. [5] George V. Cybenko. Approximation by superpositions of a sigmoidal function. 
+
+Mathematics of Control, Signals and Systems , 2:303–314, 1989. [6] John C. Duchi, Elad Hazan, and Yoram Singer. Adaptive subgradient methods for online learning and stochastic optimization. J. Mach. Learn. Res. , 12:2121–2159, 2011. [7] Federal Emergency Management Agency. National response framework. Tech-nical Report Fourth Edition, U.S. Department of Homeland Security, October 2019. [8] Boyu Feng, Ying Zhang, and Robert E. Bourke. Urbanization impacts on flood risks based on urban growth data and coupled flood models. Natural Hazards ,106:613 – 627, 2021. [9] Ian Goodfellow, Yoshua Bengio, and Aaron Courville. Deep Learning . MIT Press, 2016. http://www.deeplearningbook.org. [10] Yongxuan Guo, Jianghao Wang, Yong Ge, and Chenghu Zhou. Global expansion of wildland-urban interface intensifies human exposure to wildfire risk in the 21st century. Science Advances , 10, 2024. [11] Kaiming He, X. Zhang, Shaoqing Ren, and Jian Sun. Delving deep into rectifiers: Surpassing human-level performance on imagenet classification. 2015 IEEE International Conference on Computer Vision (ICCV) , pages 1026–1034, 2015. [12] Gautam Siddharth Kashyap, Alexander Edward Ian Brownlee, Orchid Chetia Phukan, Karan Malik, and Samar Wazir. Roulette-wheel selection-based pso algorithm for solving the vehicle routing problem with time windows. ArXiv ,abs/2306.02308, 2023. [13] James Kennedy and Russell C. Eberhart. Particle swarm optimization. In Pro-ceedings of IEEE International Conference on Neural Networks , pages 1942–1948. IEEE, 1995. [14] Alex Krizhevsky, Ilya Sutskever, and Geoffrey E. Hinton. Imagenet classification with deep convolutional neural networks. Communications of the ACM , 60:84 – 90, 2012. [15] Andrei Lihu and Stefan Holban. A study on the minimal number of particles for a simplified particle swarm optimization algorithm. 2011 6th IEEE International Symposium on Applied Computational Intelligence and Informatics (SACI) , pages 299–303, 2011. [16] Zhou Lu, Hongming Pu, Feicheng Wang, Zhiqiang Hu, and Liwei Wang. The ex-pressive power of neural networks: A view from the width. In Neural Information Processing Systems , 2017. [17] Volodymyr Mnih, Koray Kavukcuoglu, David Silver, Andrei A. Rusu, Joel Veness, Marc G. Bellemare, Alex Graves, Martin A. Riedmiller, Andreas Kirkeby Fidjeland, Georg Ostrovski, Stig Petersen, Charlie Beattie, Amir Sadik, Ioannis Antonoglou, Helen King, Dharshan Kumaran, Daan Wierstra, Shane Legg, and Demis Hassabis. Human-level control through deep reinforcement learning. Nature , 518:529–533, 2015. [18] Barza Nisar, Hruday Vishal Kanna Anand, and Steven L. Waslander. Gradient-based maximally interfered retrieval for domain incremental 3d object detection. 
+
+2023 20th Conference on Robots and Vision (CRV) , pages 304–311, 2023. [19] William Nordhaus. Two centuries of productivity growth in computing. The Journal of Economic History , 67:128 – 159, 2007. [20] Alena Otto, Niels A. H. Agatz, James F. Campbell, Bruce L. Golden, and Erwin Pesch. Optimization approaches for civil applications of unmanned aerial vehicles (uavs) or aerial drones: A survey. Networks , 72:411 – 58, 2018. [21] German Ignacio Parisi, Ronald Kemker, Jose L. Part, Christopher Kanan, and Stefan Wermter. Continual lifelong learning with neural networks: A review. 
+
+Neural networks : the official journal of the International Neural Network Society ,113:54–71, 2018. [22] Surendra Kumar Patel and Anil Kumar Sharma. Improved pso based job schedul-ing algorithm for resource management in grid computing. International Journal of Advanced Technology and Engineering Exploration , 2019. [23] Adam P. Piotrowski, Jaroslaw J. Napiorkowski, and Agnieszka E. Piotrowska. Population size in particle swarm optimization. Swarm Evol. Comput. , 58:100718, 2020. [24] Riccardo Poli, Andries Petrus Engelbrecht, and James Kennedy. Editorial for the special issue on particle swarm optimization. Swarm Intelligence , 3:243–244, 2009. [25] Stephen Raharja and Toshiharu Sugawara. An extension of particle swarm optimization to identify multiple peaks using re-diversification in static and dynamic environments. International Journal of Smart Computing and Artificial Intelligence , 2023. [26] Federico Signorelli and Anil Yaman. A perturbation and speciation-based algo-rithm for dynamic optimization uninformed of change. In Annual Conference on Genetic and Evolutionary Computation , 2025. [27] Xuan Song, Quanshi Zhang, Yoshihide Sekimoto, Ryosuke Shibasaki, Nicholas Jing Yuan, and Xing Xie. Prediction and simulation of human mo-bility following natural disasters. ACM Transactions on Intelligent Systems and Technology (TIST) , 8:1 – 23, 2016. [28] United Nations, Department of Economic and Social Affairs, Population Division. 
+
+World Urbanization Prospects: The 2018 Revision . United Nations, New York, 2019. [29] United Nations Office for Disaster Risk Reduction (UNDRR). The human cost of disasters: An overview of the last 20 years (2000–2019). Technical report, United Nations Office for Disaster Risk Reduction, Geneva, Switzerland, 2020. [30] Cvetkov V. The central limit theorem and the measures of central tendency. 
+
+Deutsche internationale Zeitschrift für zeitgenössische Wissenschaft , 49, February 2023. [31] Danial Yazdani, Mohammad Nabi Omidvar, Ran Cheng, Jürgen Branke, Trung-Thanh Nguyen, and Xin Yao. Benchmarking continuous dynamic optimization: Survey and generalized test suite. IEEE Transactions on Cybernetics , 52:3380–3393, 2020. [32] Delaram Yazdani, Danial Yazdani, Donya Yazdani, Mohammad Nabi Omidvar, Amir H. Gandomi, and Xin Yao. A species-based particle swarm optimization with adaptive population size and deactivation of species for dynamic optimization problems. ACM Transactions on Evolutionary Learning and Optimization , 3:1 – 25, 2023. [33] Pei-Yao Zhu, Sheng-Hao Wu, Ke-Jing Du, Hua Wang, Jun Zhang, and Zhi hui Zhan. Diversity-driven multi-population particle swarm optimization for dy-namic optimization problem. Proceedings of the Companion Conference on Genetic and Evolutionary Computation , 2023.

@@ -1,0 +1,126 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.12070v1/fig-001.webp",
+      "caption": "Fig. 4: Chosen age threshold policy vs. degeneracy and algorithm. Policy curves are determined by minimizing the quadratic that covers all data points.",
+      "page": 11,
+      "index": 1,
+      "width": 923,
+      "height": 258
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12070v1/fig-002.webp",
+      "caption": "Table 7: ISA: high-level statistics for the 824 ‘easier’ instances that were solved by all algorithms",
+      "page": 15,
+      "index": 2,
+      "width": 579,
+      "height": 248
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12070v1/fig-003.webp",
+      "caption": "Table 6: ISA: high-level statistics for all 1735 instances",
+      "page": 15,
+      "index": 3,
+      "width": 579,
+      "height": 248
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12070v1/fig-004.webp",
+      "caption": "Fig. 8: Column management heatmap for Dantzig pricing on instance c10400. Solve time is shown as a function of age threshold and activation frequency. Green and yellow correspond to shorter solve times, while red indicates 1-hour timeout. Each cell is a locally smoothed average of 200 replications including nearby parameter settings. The sparklines on the right show the relative solve-time profile for each activation frequency setting.",
+      "page": 21,
+      "index": 4,
+      "width": 791,
+      "height": 256
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12070v1/fig-005.webp",
+      "caption": "Fig. 9: Age-threshold sweep for Dantzig pricing on instance a05200. Solve time is shown as a function of the age threshold using five replications and a 1000-second time limit. Black solid dots show the centered rolling geometric mean (window size 5), and the dashed vertical line marks the selected threshold. The figure illustrates the high variability at small thresholds and the robustness-based criteria used to select the threshold.",
+      "page": 21,
+      "index": 5,
+      "width": 943,
+      "height": 228
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12070v1/fig-006.webp",
+      "caption": "Fig. 1: The optimal 𝛼 weight and delta change per iteration for a single machine in LT pricing for the instance c10400.",
+      "page": 7,
+      "index": 6,
+      "width": 957,
+      "height": 284
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12070v1/fig-007.webp",
+      "caption": "Fig. 2: Average of the optimal 𝛼 weights across all machines per iteration in LT pricing for instance c10400. Min/Max values of 𝛼 across machine is shown by shaded region. The fit plotted above corresponds to: 0.014𝑒0.0234𝑥",
+      "page": 7,
+      "index": 7,
+      "width": 947,
+      "height": 260
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12070v1/fig-008.webp",
+      "caption": "Table 9: Average of RMP time (columns 4–7) and Pricing time (columns 8–11) across classes, jobs, and machines. Additionally, total time (RMP + Pricing) comparison against LT (columns 12-13), clearly showing instances where Template pricing is over 1000× faster than Dantzig, and 100× faster than Pessoa. Five replications each, six hour time limit.",
+      "page": 22,
+      "index": 8,
+      "width": 808,
+      "height": 1204
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12070v1/fig-009.webp",
+      "caption": "Fig. 3: Convergence of c10400 to optimality with various initialization methods (seed = 0). See Table 1 for additional statistics.",
+      "page": 10,
+      "index": 9,
+      "width": 946,
+      "height": 503
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12070v1/fig-010.webp",
+      "caption": "Table 4: Yagiura: RMP and Pricing time (s) for different job/machine",
+      "page": 14,
+      "index": 10,
+      "width": 702,
+      "height": 386
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12070v1/fig-011.webp",
+      "caption": "Fig. 6: ISA: Solved vs solve time. Instances where LR does not reach optimal bound are treated as timed-out.",
+      "page": 14,
+      "index": 11,
+      "width": 931,
+      "height": 301
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12070v1/fig-012.webp",
+      "caption": "Table 3: Yagiura: high-level summary.",
+      "page": 13,
+      "index": 12,
+      "width": 579,
+      "height": 290
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12070v1/fig-013.webp",
+      "caption": "Fig. 7: Geometric view of Pessoa’s directional smoothing and limited 𝛼𝑘 𝑡 backtracking line search. Terminates at the first point that yields a column with good reduced cost. Backtracking starts at *, when the gradient is available.",
+      "page": 19,
+      "index": 13,
+      "width": 604,
+      "height": 246
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12070v1/fig-014.webp",
+      "caption": "Table 2: Yagiura: Comparison of initialization quality. % gap is relative to optimal RMP (excludes timeout). 5 replications, 10 min time limit.",
+      "page": 12,
+      "index": 14,
+      "width": 590,
+      "height": 290
+    },
+    {
+      "url": "assets/figures/arxiv/2604.12070v1/fig-015.webp",
+      "caption": "Table 8: ISA: Statistics per class and number of jobs. Instances where LR terminated early without finding optimal are treated as timeout.",
+      "page": 16,
+      "index": 15,
+      "width": 827,
+      "height": 826
+    }
+  ]
+}
