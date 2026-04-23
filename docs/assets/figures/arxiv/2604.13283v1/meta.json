@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.13283v1/fig-001.webp",
+      "caption": "Table 2: Results averaged over 20 seeds (±std). FAO: 100 acquisition queries + final CP-SAT solve (total time includes the final solve). L&O: cutoff Q=100, terminating when the current CP-SAT proposal under L is accepted by the oracle. Gap: relative to the CP-SAT reference († = best feasible in 120 s). q∗: main query at which the best solution was first found during interleaving. Speedup: FAO time / L&O time.",
+      "page": 10,
+      "index": 1,
+      "width": 633,
+      "height": 348
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13283v1/fig-002.webp",
+      "caption": "Figure 1: Convergence of L&O on a representative n=50 instance. Red markers indicate oracle rejections, each followed by a CCA update. The blue curve is the value returned by the timelimited CP-SAT solve under the current learned model L. The black curve is the best oracleconfirmed solution found so far. The plot illustrates the typical anytime behavior of the current implementation: the constraint-model value changes as CCA refines L, while the best accepted solution improves in discrete jumps and the run terminates once the current proposal under L is accepted by the oracle.",
+      "page": 11,
+      "index": 2,
+      "width": 846,
+      "height": 485
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.14345v2/fig-001.webp",
+      "caption": "Table 4: COMPLETE SUMMARY OF MATHEMATICAL NOTATIONS",
+      "page": 7,
+      "index": 1,
+      "width": 560,
+      "height": 415
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14345v2/fig-002.webp",
+      "caption": "Figure 1: Robustness analysis (∆ = 0.1). While Naive Pruning (red) exhibits a monotonic decline in performance as bias increases, PAC-MCTS (blue) maintains higher robustness at moderate bias levels (L ∈ [0.1, 0.2]). It effectively mitigates initial estimation errors before performance eventually degrades under extreme bias conditions.",
+      "page": 3,
+      "index": 2,
+      "width": 492,
+      "height": 418
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14345v2/fig-003.webp",
+      "caption": "Figure 4: Safety boundary validation in Amazons. Aggressive pruning (α = 0.5) strictly violates the safety condition of Lemma 3, inducing an immediate performance collapse.",
+      "page": 5,
+      "index": 3,
+      "width": 437,
+      "height": 333
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14345v2/fig-004.webp",
+      "caption": "Figure 5: Algorithm Robustness on the Standard TSP50 benchmark under the Top-K Adversarial Hallucination Model. The true gap is ∆ ≈ 2.91. PAC-MCTS (blue) maintains dominance in the adversarial regime (L ∈ [0.83, 1.17]) and perfectly respects the theoretical information limit (gray line at L = 1.46).",
+      "page": 5,
+      "index": 4,
+      "width": 500,
+      "height": 335
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.14725v1/fig-001.webp",
+      "caption": "TABLE II THE PARTITIONING POLICY FOR WORKLOAD.",
+      "page": 7,
+      "index": 1,
+      "width": 501,
+      "height": 442
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14725v1/fig-002.webp",
+      "caption": "Fig. 4. PER-based Knowledge Retention in RELOAD. ➊ Experience Extraction gathers structural and runtime features from states. ➋ PER prioritizes the sampling of experiences from the replay buffer.",
+      "page": 4,
+      "index": 2,
+      "width": 500,
+      "height": 254
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14725v1/fig-003.webp",
+      "caption": "Fig. 3. RELOAD integration into the RL-based Query Optimizer, with new components in dashed lines.",
+      "page": 4,
+      "index": 3,
+      "width": 1022,
+      "height": 371
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14725v1/fig-004.webp",
+      "caption": "Fig. 10. Micro-experiment results of RELOAD on the JOB test set. (a) evaluates the impact of different weighting strategies in knowledge retention using PER, and (b) compares query and data complexity–based partitioning policies for knowledge transfer with MAML. Vertical dashed lines indicate the convergence point of each strategy. Results are reported as the median of six runs. Both experiments examine module variants, including baselines without retention or transfer, to evaluate their impact on robustness and efficiency.",
+      "page": 12,
+      "index": 4,
+      "width": 1060,
+      "height": 303
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14725v1/fig-005.webp",
+      "caption": "Fig. 6. Performance of RELOAD on test set in PostgreSQL. Shaded areas denote variation across runs.",
+      "page": 9,
+      "index": 5,
+      "width": 1060,
+      "height": 227
+    },
+    {
+      "url": "assets/figures/arxiv/2604.14725v1/fig-006.webp",
+      "caption": "Fig. 7. Performance of RELOAD on train set in PostgreSQL. Shaded areas denote variation across runs.",
+      "page": 9,
+      "index": 6,
+      "width": 1060,
+      "height": 228
+    }
+  ]
+}

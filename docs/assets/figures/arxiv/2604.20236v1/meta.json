@@ -1,0 +1,94 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.20236v1/fig-001.webp",
+      "caption": "Fig. 3. Sensitivity of the pruning threshold η on the union base graph (N=100, validation set). Left: retained density (Edges/N). Right: optimal-tour coverage (%).",
+      "page": 7,
+      "index": 1,
+      "width": 725,
+      "height": 204
+    },
+    {
+      "url": "assets/figures/arxiv/2604.20236v1/fig-002.webp",
+      "caption": "Table 7. Ablation: Effect of Base Graph Choice (XGBoost)",
+      "page": 10,
+      "index": 2,
+      "width": 720,
+      "height": 334
+    },
+    {
+      "url": "assets/figures/arxiv/2604.20236v1/fig-003.webp",
+      "caption": "Fig. 6. Feature profiles of extra-lost optimal edges for the union base graph. Each column is one of the 20 TSP families; each row is one ML model. Each dot is one feature value of a lost optimal-tour edge; dots cluster where the model systematically misjudges.",
+      "page": 14,
+      "index": 3,
+      "width": 710,
+      "height": 387
+    },
+    {
+      "url": "assets/figures/arxiv/2604.20236v1/fig-004.webp",
+      "caption": "Fig. 5. Source provenance of extra-lost optimal edges in union mode. Each bar shows the share of coverage losses from dual-source edges (both generators), α-only edges, and POPMUSIC-only edges. Single-source edges, especially α-only, are over-represented among losses.",
+      "page": 13,
+      "index": 4,
+      "width": 710,
+      "height": 385
+    },
+    {
+      "url": "assets/figures/arxiv/2604.20236v1/fig-005.webp",
+      "caption": "Table 4. LKH Solver Performance on Pruned Union Graphs",
+      "page": 8,
+      "index": 5,
+      "width": 720,
+      "height": 237
+    },
+    {
+      "url": "assets/figures/arxiv/2604.20236v1/fig-006.webp",
+      "caption": "Table 3. Two-Stage Pruning Results on the Union Base Graph",
+      "page": 8,
+      "index": 6,
+      "width": 720,
+      "height": 193
+    },
+    {
+      "url": "assets/figures/arxiv/2604.20236v1/fig-007.webp",
+      "caption": "Fig. 1. Single-stage vs. two-stage sparsification. Top: existing approaches apply heuristics or ML independently to the full graph. Bottom: our method first maximises recall via a heuristic union, then reduces density via learned pruning.",
+      "page": 4,
+      "index": 7,
+      "width": 725,
+      "height": 367
+    },
+    {
+      "url": "assets/figures/arxiv/2604.20236v1/fig-008.webp",
+      "caption": "Fig. 4. Feature importance for the union base graph by instance family. Columns are the 20 TSP families; rows are LR, SVM, and XGBoost. Coloured segments show the share of each feature family. Source provenance dominates across all models and families.",
+      "page": 12,
+      "index": 8,
+      "width": 710,
+      "height": 386
+    },
+    {
+      "url": "assets/figures/arxiv/2604.20236v1/fig-009.webp",
+      "caption": "Table 10. Hard Case: ATT Corridor (XGBoost)",
+      "page": 12,
+      "index": 9,
+      "width": 725,
+      "height": 274
+    },
+    {
+      "url": "assets/figures/arxiv/2604.20236v1/fig-010.webp",
+      "caption": "Table 5. Comparison with Neural Sparsification Methods (EUC_2D, TSP500)",
+      "page": 9,
+      "index": 10,
+      "width": 725,
+      "height": 326
+    },
+    {
+      "url": "assets/figures/arxiv/2604.20236v1/fig-011.webp",
+      "caption": "Table 2. Complete Feature Reference for the Learned Pruning Pipeline",
+      "page": 5,
+      "index": 11,
+      "width": 702,
+      "height": 388
+    }
+  ]
+}

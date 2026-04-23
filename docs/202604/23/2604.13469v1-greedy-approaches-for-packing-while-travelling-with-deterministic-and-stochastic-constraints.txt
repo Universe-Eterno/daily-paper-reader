@@ -1,0 +1,564 @@
+Title: Greedy Approaches for Packing While Travelling with Deterministic and Stochastic Constraints
+
+URL Source: https://arxiv.org/pdf/2604.13469v1
+
+Published Time: Thu, 16 Apr 2026 00:29:34 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+# GREEDY APPROACHES FOR PACKING WHILE TRAVELLING WITH 
+
+# DETERMINISTIC AND STOCHASTIC CONSTRAINTS 
+
+Thilina Pathirage Don 
+
+Optimisation and Logistics School of Computer Science and Information Technology Adelaide University Adelaide, Australia 
+
+Aneta Neumann 
+
+Optimisation and Logistics School of Computer Science and Information Technology Adelaide University Adelaide, Australia 
+
+Frank Neumann 
+
+Optimisation and Logistics School of Computer Science and Information Technology Adelaide University Adelaide, Australia April 16, 2026 
+
+# ABSTRACT 
+
+The travelling thief problem (TTP) is a well-known multi-component optimisation problem that captures the interdependence between two components: the tour across cities and the packing of items. The packing while travelling problem (PWT) is an NP-hard subproblem of TTP where the packing of items should be optimised for a given fixed tour. In many solvers, the packing component is often addressed using greedy heuristics. Here, the use of suitable greedy functions is essential for the success of greedy algorithms. In this paper, we introduce new reward functions tailored to the PWT and extend them to a hyper-heuristic framework to achieve further advantage. Furthermore, we investigate the chance constrained PWT for greedy approaches and adopt the newly introduced reward functions for stochastic weights. The experimental results clearly demonstrate the benefit of the tailored heuristics over the standard heuristics in both deterministic and stochastic constraints. 
+
+Keywords Packing while travelling problem · travelling thief problem · greedy algorithms · local search heuristics ·
+
+hyper-heuristics. 
+
+# 1 Introduction 
+
+Multi-component problems, which combine several problems in an interacting way, occur in many real-world appli-cations. A prominent multi-component problem is the travelling thief problem (TTP), which has received significant interest in the evolutionary computation domain and heuristic search literature. Algorithms for TTP have to deal with the interactions between the two underlying problems, namely the travelling salesperson problem (TSP) and the knapsack problem (KP). Many solvers for TTP use packing heuristics for the KP, and they are often based on greedy approaches. Choosing the right greedy function is crucial for the success of greedy approaches. For classical problems such as TSP, neighbouring heuristics have been frequently applied, whereas for KP, sorting items according to profit-weight ratio is a popular approach. Greedy heuristics for TTP, such as the P ACK algorithm [1], have to take the information from the TSP and KP into account, and the question arises how the information from both problems should be combined into an appropriate greedy function. The goal of this paper is to investigate different greedy approaches for the packing part of TTP. Considering different tours, we examine the impact of using different reward functions for solving the packing problem, which is also known as the packing while travelling problem (PWT). Uncertainty in the problem components, such as the item weights and profits, can significantly affect aspects of a combinatorial problem, including fitness computation, reward calculation, and functionality of the constraints. It is interesting to see how the algorithms designed for the deterministic problem behave in the presence of stochastic elements and what level of adaptation they need to produce high-quality solutions. Hence, we further examine the impact of the greedy approaches under different constraint settings. 
+
+> arXiv:2604.13469v1 [cs.NE] 15 Apr 2026
+
+A PREPRINT - A PRIL 16, 2026 
+
+1.1 Related Work 
+
+Greedy algorithms are efficient for many classical polynomially solvable combinatorial optimisation problems, such as the computation of minimum spanning trees [2] and shortest paths [3]. They have also been applied to many NP-hard problems and provide good approximations for problems such as vertex cover [4] and the optimisation of monotone submodular functions under different types of constraints [5]. However, they yield suboptimal solutions in such cases, and the choice of greedy functions is a key determinant for success. Since the introduction of the TTP [6] and PWT [7, 8], many studies have investigated solutions to the classical problems and their variants. Apart from the many studies focusing on a variety of evolutionary approaches [9 – 13], the literature includes different heuristic approaches [1, 14 – 17] as well as studies on using hyper-heuristics [18 –22]. Chance constrained optimisation [23] has been studied in relation to the KP [24 – 26]. Solvers for KP have been introduced, and the insights obtained are useful for developing solvers for the TTP, as KP is embedded as a component in the TTP definition. For other optimisation problems such as submodular functions [27 – 31], the vehicle routing problem [32 –34], the makespan scheduling problem [35] and the TTP [36, 37], have also been studied for the chance constraints. 
+
+1.2 Our Contribution 
+
+In this paper, we focus on a well-known greedy algorithm called P ACK , originally introduced for the TTP. This algorithm introduces a reward function (also known as goodness value) that assigns a score to each item before the packing process begins. The original reward function is inspired by the profit-to-weight ratio commonly used to solve the KP greedily [25] and incorporates new elements that account for the tour component. To further improve item picking order, we introduce multiple reward functions for P ACK , tailored to the exact benefit each item selection yields in the final solution. We then refine these reward functions to dynamically update the scores whenever an item is added to the packing plan. It takes into account the cost imposed by items already decided to collect on the items intended for pickup next. Finally, by using both existing and newly introduced reward functions, we develop a hyper-heuristic approach to gain further advantage. To clearly visualise the advantages of the new reward functions for packing in experiments, we reduce the effect of the tour on the final solution by limiting it to fixed tours, a version of the problem known as PWT. We examine the behaviour of the greedy approaches in PWT with both deterministic and stochastic constraints. To adopt reward functions for the stochastic environment, we first explore ways to represent stochastic weights using popular tail-bound inequalities. In total, we investigate the performance of four reward functions for the deterministic problem and two adaptations for stochastic variation. Furthermore, we test four algorithms for deterministic constraints and two for stochastic constraints, referring to the hyper-heuristic framework we proposed for packing. We observe a positive impact of tailored reward functions across all constraint settings for PWT, and the adaptability of these methods for the TTP. The rest of the paper is as follows. Section 2 provides background on the classical PWT problem with the deterministic constraints and extends into the chance constrained variation with stochastic weights. The latter part of the section gives a brief introduction to the greedy heuristics found in TTP and the P ACK algorithm. Section 3 describes the new tailored reward functions introduced for packing. In Section 4, we present the adaptation of new reward functions to the PWT with stochastic constraints. Section 5 explains how the different heuristics are combined in a hyper-heuristic framework to gain further improvement. Section 6 provides details on the experimental setup and the results obtained. Finally, Section 7 gives the concluding remarks. 
+
+# 2 Preliminaries 
+
+The following sections explain the PWT under deterministic and stochastic constraints and then discuss the greedy heuristics applied in the P ACK algorithm, which serve as the starting point for the novel methods introduced in this study. 
+
+2.1 Packing While Travelling Problem 
+
+The PWT has been formulated as a nonlinear knapsack problem based on the TTP. Similar to the definition of TTP, PWT involves a set of items of distinct profits and weights, distributed across a set of cities, skipping the first city. A vehicle (or an agent) starting from the first city, visits each city exactly once in a specific order, collecting items of its choice, and returns to the starting point. A collected item contributes to total profit but also slows the vehicle due to the added weight. A PWT solution includes two components: a tour and a packing plan. However, since the tour is predefined, the objective is to find the packing plan that maximises total benefit while satisfying the vehicle’s capacity constraints. We refer to the formal definition of PWT as introduced in [7] in this section. 2A PREPRINT - A PRIL 16, 2026 Given is a tour x = ( x1, . . . , x n), x i ∈ N as a sequence of a set of cities N = {1, . . . , n } with distances dij , i, j ∈ N ,between them, and a set of items M = {e1, . . . , e m}, where each item ei has a profit pi and a weight wi, 1 ≤ i ≤ m.The vehicle visits all cities in the tour order x and may pick up items along the way, provided that the total weight of the collected items does not exceed the vehicle capacity B. The goal is to find a solution s = ( x, y ) that consists of the given tour x and a packing plan y = ( y1, . . . , y m) ∈ { 0, 1}m which maximises 
+
+z(x, y ) = g(y) − R dxnx1
+
+νmax − νW xn
+
++
+
+> n−1
+
+X
+
+> i=1
+
+dxixi+1 
+
+νmax − νW xi
+
+!
+
+(1) subject to 
+
+> m
+
+X
+
+> j=1
+
+wj yj ≤ B. (2) Here g(y) = Pmj=1 pj yj , which represents the total profit of the picked items. Equation 2 provides a classical knapsack constraint, which states that the total weight of the picked items can not exceed the knapsack capacity B. The parameters 
+
+νmax and νmin are the maximum and minimum traveling speed and ν = νmax −νmin  
+
+> B
+
+is a normalising constant. The accumulated weight of the items collected from city x1 to city xi in tour x is given by Wxi . A cost factor (rental rate) 
+
+R is applied to the overall travel time. 
+
+2.2 Stochastic Constraints for the PWT 
+
+As described above, the classical PWT problem is a nonlinear knapsack problem that involves a deterministic weight constraint. To investigate the same problem under stochastic constraints, we assume that the weights assigned to each item are stochastic. With stochastic weights, we treat the knapsack constraint as a probabilistic constraint (a chance constraint), in which the probability of satisfying the knapsack bound should exceed a predefined threshold. Hence, the objective of the chance constrained PWT would be remodelled to find a solution that delivers the maximum benefit while meeting the knapsack constraint with a probability of at least α, which is a larger value ( α ≥ 0.9). We refer to the surrogate-based model [36] introduced for the chance constrained TTP, which involves stochastic weights, to formulate the PWT with stochastic constraints. The surrogate-based model defines the chance constrained PWT as follows. The input is given by n cities and m
+
+items, where the stochastic weights of the items are random variables {w1, ..., w m}. The uncertainty of the weights is represented by the expected values {μ1, ..., μ m} and the variances {σ21 , ..., σ 2
+
+> m
+
+}. The profits {p1, ..., p m} of the items are deterministic. We aim to find a solution s = ( x, y ) consisting of the predefined tour x = {x1, ..., x n}, x i ∈ N and a packing plan y = {y1, ..., y m}, y j ∈ { 0, 1}, that maximises the benefit, referring to the objective function of the PWT (1), subject to Pr
+
+
+
+> m
+
+X
+
+> j=1
+
+wj yj ≤ B
+
+ ≥ α. (3) To estimate the probability that the constraints are satisfied, we refer to two popular tail inequalities, namely the Hoeffding bound (4) and Chebyshev’s inequality (6). We consider each weight wi to be uniformly distributed in 
+
+[μi − δ, μ i + δ] range, where the δ presents the uncertainty of the weights. It is important to note that other distributions can also be considered similarly. However, the applicability of tail inequalities depends on the underlying distributions. For independent and identically distributed random variables and a large value of α, a Chernoff/Hoeffding-type surrogate function is recommended [25]. 
+
+Theorem 1 (Hoeffding bound) Let y1, . . . , y m be independent variables taking values in [aj , b j ] of length cj := 
+
+bj − aj . Let y = Pnj=1 yj Then for any λ ≥ 0,
+
+P r [y ≥ μ + λ] ≤ e− 2λ2  
+
+> Pni=1 c2
+> i
+
+(4) Let |y|1 be the number of items in the packing plan y. Based on the Hoeffding bound (4), the chance constraint is met if, 
+
+ˆWHoe (y) = μ(y) + δ · p2|y|1 · ln (1 /(1 − α)) ≤ B. (5) 
+
+Theorem 2 (Chebyshev’s inequality) Let y be a random variable with the expected value μy and the variance var (y).Then, for any λ ∈ R+,
+
+Pr( y ≥ μy + λ) ≤ var (y)
+
+var (y) + λ2 . (6) 3A PREPRINT - A PRIL 16, 2026 Let w(y) = Pmj=1 wj yj be the weight of a given packing plan y = ( y1, ..., y m), μ(y) = Pmj=1 μj yj be the expected weight, and var (y) = Pmj=1 σ2 
+
+> j
+
+yj be its variance. Based on Chebyshev’s inequality (6), the chance constraint is met if, 
+
+ˆWCheb (y) = μ(y) + pα/ (1 − α) · pvar (y) ≤ B. (7) 
+
+2.3 Packing Heuristics for TTP 
+
+Here, we discuss the P ACK algorithm [1], introduced as a greedy solver for packing items in the deterministic TTP, and the heuristics incorporated, as our study is set in this context. In general, P ACK refers to a reward function r1 to compute a score (goodness value) for each item and prioritise items for the packing based on the score. To generate the score r1ik for the item k placed in city i, the algorithm refer to the given reward function (8), where pik is the profit of the item, wik is the weight of the item and di is the distance from the city i to the end of a given tour x.
+
+r1ik = pγik 
+
+wγik × di
+
+(8) The reward function is further modified by introducing an exponent γ for the weight and profit. The γ value is useful when a parent algorithm, such as P ACK ITERATIVE [1], iteratively executes the P ACK with different exponents. In our study, we are interested in understanding how different types of reward functions influence the quality of a packing plan, and we consider the case γ = 1 as a baseline for comparison. Once the scores are assigned, the algorithm sorts the items in non-decreasing order and considers each item in turn, starting with the first. If the constraint is satisfied, the item is added to the packing plan y and the algorithm calculates the objective score Z. If Z is better than the current best objective score, Z becomes the new best objective score, and y
+
+becomes the new best packing plan. If not, the packing plan drops the added item and returns to the previous packing plan. When no further improvement is possible, the algorithm stops and returns the best packing plan. The combination of the tour and the final packing plan is the final solution. As shown, the greedy algorithm primarily relies on the reward function to select items for the packing plan. Hence, it is important to design a tailored reward function to improve item selection. During our preliminary studies, we examined a range of reward functions with both simple and complex packing heuristics and narrowed the list based on the improvements they brought over existing methods. The next sections describe the new approaches we introduce to improve the function of rewarding items. 
+
+# 3 Improved Heuristics: Tailoring the Packing Heuristics for PWT 
+
+As explained in Section 2.1, once an item is picked, it affects the total benefit of the solution in two different ways. First, it increases the total profit by adding the profit of the picked item. Second, the weight of the picked item increases the vehicle’s total weight, slowing it down. An increase in profit increases total benefit, whereas an increase in travel cost has the opposite effect. So it would be beneficial to consider these two factors when deciding which item to pick. We propose a new reward approach r2 that better reflects this requirement in the context of PWT. In the r2 setting, we treat the reward of an item as its profit minus the travel cost difference incurred by including it in the packing plan. The gain from the cost is the difference between the cost of travelling without picking up the item and the cost of travelling with the item. The rewards are calculated before packing begins, when no items have been added to the packing plan. If the item k in city i is not collected, we assume the vehicle travels a distance di from the city i to the end of the tour at maximum velocity νmax . If collected, the velocity is reduced due to the item’s weight wik . The travel cost in each scenario can be computed by multiplying the travel time ( distance velocity ) by the rental rate R. We use the cost difference between these two scenarios along with the profit of the item pik to calculate the reward (9). 
+
+r2ik = pik − R
+
+ di
+
+νmax − νw ik 
+
+− di
+
+νmax 
+
+
+
+(9) Based on preliminary investigations, we figure that using the ratio between the r2ik and the weight of the item wik also serves as an effective reward function (10). 
+
+r3ik = r2ik 
+
+wik 
+
+(10) The rewards are usually calculated once before packing begins, since the values of the elements used in the calculation are considered deterministic and will not change over time. However, it is clear that the travel costs would change 4A PREPRINT - A PRIL 16, 2026 1 234
+
+e1
+
+e2e3
+
+d12 
+
+d23 
+
+d34 
+
+d41 
+
+Figure 1: Example TSP tour to represent the weight accumulation in r4 reward function. See the discussion in the text. whenever an item is added to the packing plan. Given the potential dynamic changes in travel costs, we modify r2 to an iterative reward function r4, which updates the rewards for all remaining items whenever an item is added to the packing plan. To re-calculate the reward for all the remaining items {e1, e 3}, we refer to the r4 (11). The function refers to the accumulated weight Wi from the city i to the end of the tour to calculate the current travel cost. If the item 
+
+k in city i is selected, its weight wik is added to Wi to compute the updated travel cost. The cost difference will be incorporated in updating the item’s reward. 
+
+r4ik = pik − R
+
+ di
+
+νmax − ν(Wi + wik ) − di
+
+νmax − νW i
+
+
+
+(11) Further, we take the ratio between r4ik and the weight of the item wik also as a new reward function (12). 
+
+r5ik = r4ik 
+
+wik 
+
+(12) The weight of an item in the packing plan may or may not affect the travel cost of a remaining item, depending on the position of the remaining item in the tour relative to the picked item. To explain how it works, we refer to the Figure 1, which represents a sample TSP tour x∗ = [1 , 2, 3, 4, 1] in a setup with four cities {1, 2, 3, 4} and three items 
+
+{e1, e 2, e 3}. The distances between adjacent cities i and j are denoted as dij . Assume the item e2 is already in the packing plan. The weight of the picked item e2 will affect the cost of travelling from city 2 to the end of the tour, as 
+
+e2 lies between them. Hence, the reward calculation for the remaining item e1 will be affected by the weight of e2.However, the picked item e2 won’t affect the cost of travelling from city 4 to the end of the tour. Hence, the reward calculation of item e3 does not consider the weight of e2.To reflect these iterative reward calculations in the P ACK algorithm, we introduce a modified version as presented in Algorithm 1 ( PACK IH ). Once an item is added to the packing plan, the algorithm removes the selected item from the list of items M , updates the scores based on new accumulated weights and sorts the list in non-decreasing order. Then the counter c is set to zero to begin at the top of the reordered list of items. If the item is not picked, a recalculation of rewards is not needed. The algorithm restores the current best packing plan and increments the counter c to refer to the next item in the ordered list. This version does not include the technique referred to in the original P ACK [1] to reduce the number of fitness calculations, as it is important to capture the gain from adding each item. The rest of the algorithm works similarly to the classical counterpart. 
+
+# 4 Adaptation of Heuristic Algorithms for the Chance Constrained PWT 
+
+As discussed earlier, the PACK algorithm computes a reward for each item, which involves weights, sorts the items by score, and considers items for the packing plan from the sorted list. There are adaptations of the PACK algorithm that can be directly applied in this context, such as PACK SF , PACK S and PACK W S , which were originally developed for the chance constrained TTP [36, 37]. Since the definition of the chance constrained PWT introduced in Section 2.2 aligns with the surrogate functions, we refer to PACK SF [36] as a foundation for further improvements. These adaptations refer to either the deterministic or the averaged weights to calculate rewards. In all of these approaches, the effect of stochasticity on the reward function is relatively small. Hence, to adopt the aforementioned greedy approaches for the chance constrained PWT with stochastic weights, we first introduce a method to compute stochastic weights referring to the tail bound inequalities. Then, the new weight representation is applied to the reward functions introduced in Section 3 to produce a set of optimised reward functions for the item selection in a chance constrained setting. In our approach, we apply a similar technique employed by Neumann et al. [25] to compute the increased expected values for the weights ( w′) in the reward calculation. Both the Hoeffding bound and Chebyshev’s inequality are used to estimate the uncertainty. 5A PREPRINT - A PRIL 16, 2026 
+
+Algorithm 1 PACK IH (x∗) 
+
+> 1:
+
+Compute a score for each of the items Im ∈ M 
+
+> 2:
+
+Sort the items in non-decreasing order of their scores  
+
+> 3:
+
+Set the current packing plan P = ∅ and total weight W ′ = 0  
+
+> 4:
+
+Set the best packing plan P ∗ = ∅ 
+
+> 5:
+
+Set the best objective value Z∗ = −∞  
+
+> 6:
+
+Set the counter c = 0  
+
+> 7:
+
+while (W ′ ≤ B) and (k ≤ | M |) do  
+
+> 8:
+
+if (W ′ + wk ≤ B) then  
+
+> 9:
+
+Add item Ik ∈ M to the packing plan P = P ∪ Ik 
+
+> 10:
+
+Set W ′ = W ′ + wk 
+
+> 11:
+
+Compute the objective value Z = Z(x, y ) 
+
+> 12:
+
+if (Z < Z ∗) then  
+
+> 13:
+
+Update W ′ = W ′ − wk 
+
+> 14:
+
+Restore the packing plan P = P ∗ 
+
+> 15:
+
+Set c = c + 1  
+
+> 16:
+
+else  
+
+> 17:
+
+Update the best packing plan with P ∗ = P 
+
+> 18:
+
+Set Z∗ = Z 
+
+> 19:
+
+Set M ′ = M 
+
+> 20:
+
+Remove selected item from the list M = M ′ \ Ik 
+
+> 21:
+
+Update the score for each of items Im ∈ M 
+
+> 22:
+
+Sort the items in non-decreasing order of their scores  
+
+> 23:
+
+Set c = 0  
+
+> 24:
+
+return P ∗
+
+First, we refer to the Hoeffding bound to obtain an increased expected weight w′ 
+
+> ik
+
+for the item k placed in city i. The increased expected weight ( w′
+
+> ik
+
+) modifies the expected weight ( μik ) by adding uncertainty ( u). The uncertainty is based on the packing plan y and the impact if item k is added to y (Equation 13). It is important to note that the increased expected weight should be calculated each time an item is added to the packing plan. 
+
+w′ 
+
+> ik
+
+= μik + u(y, k ) (13) Referring to the Hoeffding bound, we derive the following to estimate the uncertainty, where |y|1 is the number of items in the packing plan. Since the packing plan initially contains no items, the algorithm refers to Equation 14 to generate the increased expected weights. 
+
+u(y, k ) = δi · p2 · ln (1 /(1 − α)) (14) The algorithm uses w′ 
+
+> ik
+
+in the reward function. As usual, the algorithm then sorts all items, selects one item at a time, and considers it for the packing plan. After the first item is added to the packing plan, the algorithm updates the w′ 
+
+> ik
+
+of all remaining items, referring to the Equation 15 and recalculates the goodness values. Then it picks the first item on the sorted list and considers it for the packing plan. 
+
+u(y, k ) = δi ·
+
+p 2( |y|1 + 1) · ln (1 /(1 − α)) − p2|y|1 · ln (1 /(1 − α)) 
+
+
+
+(15) Similarly, we refer to Chebyshev’s inequality and compute the increased expected weights. Since the packing plan initially contains no items, the algorithm refers to the Equation 16, which generates the increased expected weights and uses them to compute the rewards for items. 
+
+w′ 
+
+> ik
+
+= μ(wik ) + pα/ (1 − α) · pvar (y) (16) Subsequently, the algorithm sorts all items, selects one item at a time, and considers it for the packing plan. Every time an item is added to the packing plan, the algorithm updates the w′ 
+
+> ik
+
+of all remaining items, referring to the Equation 17. 
+
+w′ 
+
+> ik
+
+= μ(wik ) + pα/ (1 − α) ·
+
+p var (y′) − pvar (y)
+
+
+
+(17) 6A PREPRINT - A PRIL 16, 2026 
+
+Algorithm 2 HYPER -HEURISTICS FRAMEWORK  
+
+> 1:
+
+Input the packing heuristics hi ∈ H and fixed tour x∗. 
+
+> 2:
+
+Initialise the heuristics combination hh with size n. 
+
+> 3:
+
+Generate the initial packing plan y = PACK HH (x∗, hh ).  
+
+> 4:
+
+Set the initial PWT solution s = ( x∗, y ). 
+
+> 5:
+
+Set mutation rate ω 
+
+> 6:
+
+while stopping criterion is not satisfied do  
+
+> 7:
+
+Generate hh ′=mutate ( hh , ω).  
+
+> 8:
+
+Generate the new packing plan y′ = PACK HH (x∗, hh ′).  
+
+> 9:
+
+Set the new PWT solution s′ = ( x∗, y ′). 
+
+> 10:
+
+if f (s′) ≥ f (s) then  
+
+> 11:
+
+Set hh ← hh ′ 
+
+> 12:
+
+Set y ← y′ 
+
+> 13:
+
+Set s ← s′ 
+
+> 14:
+
+return s, hh 
+
+The variance of the new packing plan y′ can be calculated as var (y′) = var (y) + σ2
+
+> k
+
+, where the σ2 
+
+> k
+
+is the variance of the item k in city i. Then, the algorithm recalculates the goodness value, sorts the item list, and selects the first item for consideration in the packing plan. To use this new weight representation in iterative reward functions, including r4 (11) and r5 (12), we simply swap the deterministic weight w with the stochastic weight w′, to produce the reward functions 
+
+r6 (18) and r7 (19) for the PWT with the stochastic constraints. 
+
+r6ik = pik − R
+
+ di
+
+νmax − ν(Wi + w′
+
+> ik
+
+) − di
+
+νmax − νW i
+
+
+
+(18) 
+
+r7ik = r6ik 
+
+w′
+
+> ik
+
+(19) 
+
+# 5 Hyper-heuristics: Combined Use of Tailored Heuristics 
+
+Hyper-heuristics serve as search methodologies to automate the heuristic design process by selecting low-level heuristics (LLHs) or by generating new heuristics that combine the components of LLHs [19, 38]. We develop a hyper-heuristic framework (Algorithm 2) that takes multiple reward functions as LLHs and iteratively improves the selection of heuristics for each item. The process is as follows. First, the algorithm takes a list of reward functions ( H) as inputs and uses them to initialise a combination of heuristics hh of size n, where n equals the total number of items. The hh represents the order of the reward functions to be used for each item when picking. Then the algorithm uses a modified version of P ACK named PACK HH to take in the fixed tour x∗ and the hh to generate the initial packing plan y. In order to do that, initially, PACK HH refers to the first LLH (reward function) in hh and uses it to score items and orders based on the score. Once an item is picked, the algorithm removes it from the list, points the next LLH to recalculate the scores of the remaining items, and reorders them based on the new scores. The process continues until it considers all items for the packing plan and outputs the generated packing plan. As the next step, the algorithm randomly flips each LLH in hh to one of the other heuristics from H, with a given mutation rate and generates a new combination of heuristics hh ′. Then, it uses hh ′ to generate a new packing plan y′.The algorithm compares the two solutions to select the best combination of heuristics with the corresponding solution to carry forward to the next iteration. The process stops once the given stopping criteria are satisfied. We use two methods to initialise the heuristic combination hh . The simplest technique we use is to initialise hh using the original reward function r1. The other technique is to run P ACK with each reward function separately and pick the one that yields the best objective score to initialise hh . Based on the initialisation technique and the number of heuristics used, we identify six variations of the hyper-heuristic approach for PWT with both deterministic and stochastic constraints (Table 1). 7A PREPRINT - A PRIL 16, 2026 Table 1: Initialisation techniques and the reward functions used in the hyper-heuristic algorithms. problem type algorithm initialisation heuristics used deterministic HH 1 r1 {r1, r 2, r 3}
+
+HH 2 best {r1, r 2, r 3}
+
+HH 3 r1 {r1, r 2, r 3, r 4, r 5}
+
+HH 4 best {r1, r 2, r 3, r 4, r 5}stochastic HH 5 r1 {r1, r 6, r 7}
+
+HH 6 best {r1, r 6, r 7}
+
+# 6 Experimental Investigations 
+
+We conducted experiments to evaluate the performance of these greedy approaches for PWT under both deterministic and stochastic constraints. We test each algorithm on a range of benchmark TTP instances and analyse the results to gain insights. 
+
+6.1 Experimental Setup 
+
+We refer to a set of comprehensive benchmark instances for TTP [39] to construct PWT instances for our experiments. Each TTP instance includes a TSP component mapped with a KP component. The TSP component consists of a list of cities, each with coordinates in a Cartesian plane. The KP component lists the items, each with its profit, weight, and assigned city. The knapsack capacity B and a renting rate R are predefined in each instance. The number of cities in the instances ranges from 51 to 1000 , with one item per city except for the first city. Two types of TTP instances are considered, where the weights and profits of an item are either strongly correlated (bsc) or uncorrelated (unc). Unlike a TTP instance, a PWT instance includes a fixed tour. Hence, to construct the PWT instances, we first utilise the Chained Lin-Kernighan heuristics (CLK) [40] to generate 30 random tours for each TTP instance, referring to its TSP component. Then, we couple each tour with the KP component from the same TTP instance to set up PWT instances. Altogether, we generate 300 PWT instances by producing 30 PWT instances for each of the 10 TTP instances. The generated instances facilitate the evaluation of reward functions and hyper-heuristic algorithms. For the experiments with stochastic constraints, we consider fixed uncertainties in the weights. We set a small uncertainty (δ = 20 ) and refer to the same δ value in all the benchmark instances to define uncertainty in weights. To evaluate the chance constraint, we set two different confidence levels ( α), where α ∈ { 0.9, 0.999 }. We set up α values in a way to utilise both tail inequalities introduced in Section 2.2. The algorithms refer to Chebyshev’s inequality for the smaller α
+
+and to the Hoeffding bound for the larger α. The stopping criterion for the hyper-heuristics algorithms is limited to 
+
+1000 iterations due to their resource intensity. Based on preliminary studies, we associate a higher mutation rate of 0.1
+
+with the hyper-heuristic framework (Algorithm 2) to gain sufficient benefit. In all experimental settings, we run each experiment independently with the 30 PWT instances and compute the mean and standard deviation of the resulting objective scores. We adopt P ACK with certain modifications, in order to accommodate various heuristic applications in different constraint settings (see Table 2). For the deterministic constraints, we employ P ACK as the base algorithm. The reward functions 
+
+r2 and r3 are implemented in P ACK by simply replacing the original reward function r1. To include the iterative reward functions ( r4 and r5), we updated the base algorithm with a module that recalculates the scores, as in PACK IH . For the simple hyper heuristic approaches ( HH 1 and HH 2), we modify the base algorithm to take a combination of heuristics 
+
+hh as an additional input parameter and to do the selection of items based on hh , which is described as PACK HH in Section 5. To handle hyper-heuristics that involve iterative reward functions ( HH 3 and HH 4), we update PACK HH 
+
+with an additional module to recalculate the scores, similar to PACK IH . For the stochastic constraints, we use PACK SF 
+
+as the base algorithm and make modifications whenever it accommodates iterative reward functions and hyper-heuristics in a similar way. It is important to note that none of the modifications affects the greedy algorithm’s core functionality. 
+
+6.2 Experimental Results 
+
+We present the key experimental results for each setting as mean objective scores and standard deviations to compare the effectiveness of existing reward functions with the new ones in both deterministic and stochastic constrained environments. Table 3 presents the results for the PWT with deterministic constraints. It compares the performance of the four new reward functions with the original reward function r1. Among the reward functions that calculate the score only once, r3 shows better performance across all instances. However, once iterative updates to the rewards are allowed, greedy approaches achieve even better results. r5 shows the best mean values for the majority of the instances. 8A PREPRINT - A PRIL 16, 2026 Table 2: Modifications done for the P ACK algorithm to implement the reward functions and algorithms. heuristics/algorithm PACK modification 
+
+r1, r 2, r 3 PACK 
+
+r4, r 5 PACK for iterative reward functions 
+
+r6, r 7 PACK SF for iterative reward functions 
+
+HH 1, HH 2 PACK for hyper-heuristics 
+
+HH 3, HH 4 PACK for hyper-heuristics and iterative reward functions 
+
+HH 5, HH 6 PACK SF for hyper-heuristics and iterative reward functions Table 3: Performance of the P ACK algorithm with different reward functions on the PWT with deterministic constraints. instance r1 r2 r3 r4 r5                                                                                                             
+
+> mean std mean std mean std mean std mean std unc_51 1368.04 476.93 1444.64 309.07 1820.21 169.68 1108.05 691.93 1775.67 147.59 unc_152 2754.18 921.60 2153.71 695.75 3727.24 1062.50 2700.60 970.43 3701.47 1012.03 unc_280 10637.54 986.40 12683.06 661.05 16535.55 1531.58 12273.59 549.02 16345.35 1322.97 unc_575 20604.12 1235.43 19020.23 2178.85 30702.12 860.41 15587.63 1928.82 30833.99 631.09 unc_1000 104190.60 2489.20 90115.00 0.00 165486.00 0.00 90115.00 0.00 165486.00 0.00 bsc_51 3532.57 116.22 2806.14 170.74 3632.57 15.52 2500.68 405.45 3687.53 116.94 bsc_152 8038.93 195.98 4334.62 61.28 8714.79 887.24 5200.71 70.47 10366.22 159.84 bsc_280 13197.18 478.54 7103.99 751.89 14127.89 1113.72 9827.85 1555.11 16888.90 1290.47 bsc_575 21981.33 1621.35 2508.19 2019.59 25226.55 1194.84 12978.57 1077.09 29849.01 623.15 bsc_1000 109490.63 2117.59 99425.00 0.00 144219.00 0.00 99425.00 0.00 144219.00 0.00
+
+When comparing the new reward functions, the key observation we made is that when a reward function uses the benefit of adding an item (profit minus cost difference) as a heuristic, such as r2 and r4, it underperforms r1. However, the benefit and the weight of the item are brought in as a ratio (benefit-to-weight), which exceeds the performance of the original setting across all instances. For the PWT with deterministic constraints, Table 4 presents the performance of the various hyper-heuristic algorithms we tested across different heuristic settings, and compares their outcomes with the original reward function r1 coupled with the P ACK algorithm. We first examine the advantage of combining only simple one-time reward functions ( r1, r2
+
+and r3) in the hyper-heuristic framework. It provides a significant improvement in the objective scores and reduces standard deviations, compared to the original setting. A further improvement is observed when the LLH combination is initialised using the best-performing individual reward function ( HH 2). As hyper-heuristic methods are resource-intensive, initialisation is a key aspect for achieving better optimisation within the limited iterations available. Then, we include the iterative reward functions ( r4 and r5) in the selection and investigate the performance with different initialisation settings. The increased number of LLHs in the mix can lead to diverse combinations of heuristics, which may provide further opportunities to reach better solutions. The results showcase this advantage in all instances. Further, the advantage of using iterative reward functions is more evident when the initialisation is based on the best-performing heuristic. Overall, the hyper-heuristic approaches tested give higher objective scores for all instances than the original reward function. They perform better when initialisation is based on the best-performing reward function, and when Table 4: Performance of P ACK algorithms with different hyper-heuristics on the PWT with deterministic constraints. 
+
+instance HH 1 HH 2 HH 3 HH 4
+
+mean std mean std mean std mean std unc_51 1864.76 171.12 1925.51 125.61 1876.87 232.16 1915.51 111.23 unc_152 3472.97 1120.34 3865.93 1078.53 3424.79 1089.50 3865.93 1078.53 unc_280 15734.58 671.98 16840.14 1286.13 15590.71 946.79 16908.97 1265.31 unc_575 29444.28 868.48 31511.08 652.25 29227.75 1420.34 31767.77 606.75 unc_1000 127662.70 4200.46 165486.00 0.00 130883.07 4595.76 165486.00 0.00 bsc_51 3726.74 127.31 3841.73 1.94 3771.62 92.58 3838.71 8.12 bsc_152 9411.23 573.29 9897.17 429.89 9483.09 805.12 10526.35 260.06 bsc_280 14888.44 1150.00 16267.19 1788.83 14981.98 1055.24 17078.60 1198.00 bsc_575 24794.52 1380.44 27993.55 1234.79 24640.65 1826.39 29896.53 634.26 bsc_1000 114412.13 1568.70 144219.00 0.00 115236.03 1615.89 144219.00 0.00 
+
+9A PREPRINT - A PRIL 16, 2026 Table 5: Statistical analysis of best performing algorithms for PWT with deterministic constraints. 
+
+instance p value r5 HH 4
+
+unc_51 0.0002 (-) (+) unc_152 0.0012 (-) (+) unc_280 0.0026 (-) (+) unc_575 1.80e-07 (-) (+) unc_1000 1.0000 * *bsc_51 8.26e-11 (-) (+) bsc_152 0.0004 (-) (+) bsc_280 0.0345 (-) (+) bsc_575 0.7901 * *bsc_1000 1.0000 * *
+
+Table 6: Performance of PACK SF with different reward functions and hyper-heuristics on PWT with stochastic constraints instance α δ r1 r6 r7 HH 5 HH 6                                                                                                                                                                                                                                                         
+
+> mean std mean std mean std mean std mean std unc_51 0.9 20 1480.11 389.67 1108.05 680.30 1788.41 163.12 1519.44 414.30 1853.82 153.64 unc_51 0.999 20 1451.51 409.89 1104.94 654.95 1691.28 199.48 1464.50 428.26 1915.51 109.36 unc_152 0.9 20 2751.33 905.66 2225.26 1238.71 3701.47 995.02 2974.88 661.36 3802.90 1077.78 unc_152 0.999 20 2724.08 910.39 2094.89 1312.99 3533.24 837.81 2944.65 679.81 3540.27 832.94 unc_280 0.9 20 10297.09 983.66 11784.74 629.92 16337.69 1293.67 14569.46 668.68 16634.86 1168.34 unc_280 0.999 20 9806.09 1064.92 10901.52 467.24 16285.62 1242.00 14164.76 589.89 16602.22 1163.03 unc_575 0.9 20 20195.44 1164.50 14827.18 1771.62 30677.60 688.41 23318.88 1537.12 30745.92 711.34 unc_575 0.999 20 19312.53 1227.05 14032.89 1876.54 30337.38 664.34 22090.88 1550.59 30470.06 668.71 unc_1000 0.9 20 102906.63 2407.09 89150.00 0.00 164414.00 0.00 127484.37 1404.88 164414.00 0.00 unc_1000 0.999 20 101787.87 2449.01 88872.00 0.00 163259.00 0.00 125996.33 4374.81 163259.00 0.00 bsc_51 0.9 20 3535.07 114.68 2842.49 567.00 3647.34 76.10 3593.11 41.47 3690.34 62.49 bsc_51 0.999 20 3318.30 105.25 2742.30 161.16 3484.37 21.59 3559.28 120.85 3648.58 25.24 bsc_152 0.9 20 7843.27 116.44 5025.25 32.39 10226.01 137.96 9299.20 791.04 10344.11 216.81 bsc_152 0.999 20 7699.76 162.76 4827.09 171.65 10037.06 138.93 9226.12 739.15 10164.30 247.06 bsc_280 0.9 20 13132.68 487.96 9573.68 1583.75 16818.31 1217.60 14920.64 889.49 16878.59 1217.71 bsc_280 0.999 20 12915.01 471.16 9367.55 1560.37 16754.71 1194.45 14687.31 898.94 16812.78 1196.57 bsc_575 0.9 20 21809.29 1531.53 12697.51 1131.90 29689.24 560.88 23605.91 1109.11 29693.90 558.57 bsc_575 0.999 20 21591.31 1504.21 12732.64 1176.07 29449.92 532.99 23521.20 1216.99 29454.14 532.92 bsc_1000 0.9 20 108733.47 2117.32 99033.00 0.00 143381.00 0.00 113512.80 1069.06 143381.00 0.00 bsc_1000 0.999 20 108287.53 2143.95 97840.00 0.00 142551.00 0.00 113011.27 1582.90 142551.00 0.00
+
+iterative heuristics are involved ( HH 2 and HH 4). HH 4 outperforms all other hyper-heuristics settings, except for the smaller instances (unc_51 and bsc_51). Table 6 collectively presents the performances of both the heuristic and hyper-heuristic approaches and compares them against the original reward function r1 coupled with the PACK SF algorithm. We use a small uncertainty ( δ = 20 )and two different thresholds for the chance constraint ( α = {0.9, 0.999 }), to examine the behaviour of the algorithms. The algorithms utilise either the Hoeffding bound or Chebyshev’s inequality based on the threshold in use. When the threshold is tighter, the algorithms find it harder to reach higher optimisation levels, as reflected in the lower mean objective scores for α = 0 .999 in almost all cases. As shown, we present only the iterative heuristics for stochastic constraints. The reason is that, based on our previous experiments on the deterministic constraint, we realise the iterative heuristics work better than the simple one-time heuristics. Further, since PACK SF needs to calculate the increased expected weights, each time an item is added to the packing plan, it is necessary to recalculate rewards, which naturally makes the reward function iterative. Similar to the performance observed in the deterministic constraints, the benefit of adding an item used directly as the reward function ( r6) is not successful over the original reward function in the stochastic setting. The benefit and the increased expected weight combined in a ratio ( r7) provide a significant improvement. However, the hyper-heuristic setting HH 6, which initialises the heuristic combination with the best-performing reward function, outperforms all other methods across all instances. Finally, we conduct statistical tests to assess the significance of the distribution of objective scores of the best-performing algorithms in both constraint settings. In particular, we are interested in whether the use of the hyper-heuristic approach allows for an improvement that is statistically significant over the best single greedy reward function. We use the Kruskal-Wallis test to determine if at least one of the algorithms has a significantly different distribution, and call a result significant if the p-value is less than 0.05 . Once the statistical significance is verified, we refer to the resulting mean values and denote each algorithm as statistically significantly better or worse using the symbols (+) and (−),respectively. If the distributions are not significantly different, we denote that using a ∗. For the results with respect to the deterministic constraints, HH 4 significantly outperforms r5 in 7 out of the 10 instances (see Table 5). For the 10 A PREPRINT - A PRIL 16, 2026 Table 7: Statistical analysis of best performing algorithms for PWT with stochastic constraints.                                                                                     
+
+> instance αp value r7HH 6
+> unc_51 0.9 0.0002 (-) (+) unc_51 0.999 0.0002 (-) (+) unc_152 0.9 0.5027 **unc_152 0.999 0.0012 (-) (+) unc_280 0.9 0.0493 (-) (+) unc_280 0.999 0.0211 (-) (+) unc_575 0.9 0.3830 **unc_575 0.999 0.3366 **unc_1000 0.9 1.0000 **unc_1000 0.999 1.0000 **bsc_51 0.9 0.0007 (-) (+) bsc_51 0.999 9.76e-12 (-) (+) bsc_152 0.9 0.0004 (-) (+) bsc_152 0.999 0.0004 (-) (+) bsc_280 0.9 0.3750 **bsc_280 0.999 0.3750 **bsc_575 0.9 0.9058 **bsc_575 0.999 0.8941 **bsc_1000 0.9 1.0000 **bsc_1000 0.999 1.0000 **
+
+results with respect to the stochastic constraints, HH 6 significantly outperforms r7 in 5 of the 10 considered instances (see Table 7). 
+
+# 7 Conclusions 
+
+Reward functions play a critical role in greedy algorithms as they determine the order in which items are used for selection. In this paper, we introduced a set of tailored reward functions and hyper-heuristic approaches for a well-known greedy algorithm, namely P ACK , to solve PWT. Our approach captures the exact benefit of having an item in the packing plan and utilises that insight within the reward function to influence the packing order. Through extensive experiments, we investigated the impact of new methods relative to the original reward function, under both deterministic and stochastic constraints. Overall, our tailored reward functions based on the benefit-to-weight ratio show a significant improvement in the packing optimisation across all constraint settings. The hyper-heuristic approaches revealed additional improvements achievable by combining new reward functions at an additional cost. 
+
+# Acknowledgement 
+
+This work was supported by the Australian Research Council (ARC) through grant FT200100536 and by supercomputing resources provided by the P hoenix HPC service at Adelaide University. 
+
+# References 
+
+[1] Hayden Faulkner, Sergey Polyakovskiy, Tom Schultz, and Markus Wagner. Approximate approaches to the traveling thief problem. In Proceedings of the Genetic and Evolutionary Computation Conference , pages 385–392. ACM, 2015. [2] Joseph B Kruskal. On the shortest spanning subtree of a graph and the traveling salesman problem. Proceedings of the American Mathematical society , 7(1):48–50, 1956. [3] Edsger W Dijkstra. A note on two problems in connexion with graphs. Numerische mathematik , 1(1):269–271, 1959. [4] Wanru Gao, Tobias Friedrich, Frank Neumann, and Christian Hercher. Randomized greedy algorithms for covering problems. In Proceedings of the Genetic and Evolutionary Computation Conference , page 309–315. ACM, 2018. [5] Andreas Krause and Daniel Golovin. Submodular function maximization. In Tractability , pages 71–104. Cambridge University Press, 2014. 11 A PREPRINT - A PRIL 16, 2026 [6] Mohammad Reza Bonyadi, Zbigniew Michalewicz, and Luigi Barone. The travelling thief problem: The first step in the transition from theoretical problems to realistic problems. In 2013 IEEE Congress on Evolutionary Computation , pages 1037–1044. IEEE, 2013. [7] Sergey Polyakovskiy and Frank Neumann. The packing while traveling problem. Eur. J. Oper. Res. , 258(2):424– 439, 2017. [8] Vahid Roostapour, Mojgan Pourhassan, and Frank Neumann. Analysis of baseline evolutionary algorithms for the packing while travelling problem. In Proceedings of the 15th ACM/SIGEVO Conference on Foundations of Genetic Algorithms , page 124–132. ACM, 2019. [9] Mohammad Reza Bonyadi, Zbigniew Michalewicz, Michał Roman Przybyłek, and Adam Wierzbicki. Socially inspired algorithms for the traveling thief problem. In Proceedings of the Genetic and Evolutionary Computation Conference , pages 421–428. ACM, 2014. [10] Junhua Wu, Markus Wagner, Sergey Polyakovskiy, and Frank Neumann. Exact approaches for the travelling thief problem. In Proceedings of the Simulated Evolution and Learning - 11th International Conference , volume 10593 of Lecture Notes in Computer Science , pages 110–121. Springer, 2017. [11] Mohamed El Yafrani and Belaïd Ahiod. Efficiently solving the traveling thief problem using hill climbing and simulated annealing. Information Sciences , 432:231–244, 2018. [12] Rogier Hans Wuijts and Dirk Thierens. Investigation of the traveling thief problem. In Proceedings of the Genetic and Evolutionary Computation Conference , pages 329–337. ACM, 2019. [13] Thilina Pathirage Don, Aneta Neumann, and Frank Neumann. Evolutionary multitasking for the scenario-based travelling thief problem. In Proceedings of the Genetic and Evolutionary Computation Conference , page 809–817. ACM, 2025. [14] Mohamed El Yafrani and Belaïd Ahiod. Population-based vs. single-solution heuristics for the travelling thief problem. In Proceedings of the Genetic and Evolutionary Computation Conference , pages 317–324. ACM, 2016. [15] Majid Namazi, M. A. Hakim Newton, Abdul Sattar, and Conrad Sanderson. A profit guided coordination heuristic for travelling thief problems. In Proceedings of the 12th International Symposium on Combinatorial Search , pages 140–144. AAAI Press, 2019. [16] Alenrex Maity and Swagatam Das. Efficient hybrid local search heuristics for solving the travelling thief problem. 
+
+Appl. Soft Comput. , 93:106284, 2020. [17] Zitong Zhang, Lei Yang, Peipei Kang, Xiaotian Jia, and Wensheng Zhang. Solving the traveling thief problem based on item selection weight and reverse-order allocation. IEEE Access , 9:54056–54066, 2021. [18] Marcella S. R. Martins, Mohamed El Yafrani, Myriam R. B. S. Delgado, Markus Wagner, Belaïd Ahiod, and Ricardo Lüders. Hseda: a heuristic selection approach based on estimation of distribution algorithm for the travelling thief problem. In Proceedings of the Genetic and Evolutionary Computation Conference , page 361–368. ACM, 2017. [19] Mohamed El Yafrani, Marcella Martins, Markus Wagner, Belaïd Ahiod, Myriam Delgado, and Ricardo Lüders. A hyperheuristic approach based on low-level heuristics for the travelling thief problem. Genetic Programming and Evolvable Machines , 19(1–2):121–150, 2018. [20] Fathelrahman Ali and Mohamedelfatih Mohamedkhair. Hyper-heuristic approaches for the travelling thief problem. In International Conference on Computer, Control, Electrical, and Electronics Engineering , pages 1–6. IEEE, 2021. [21] Daniel Rodríguez, Jorge M Cruz-Duarte, José Carlos Ortiz-Bayliss, and Ivan Amaya. A sequence-based hyper-heuristic for traveling thieves. Applied Sciences , 13(1):56, 2022. [22] Tamalika Sarkar and Chandrasekharan Rajendran. Travelling thief problem: a survey of recent variants, so-lution approaches and future directions. International Journal of Systems Science: Operations & Logistics ,11(1):2424200, 2024. [23] Bruce L Miller and Harvey M Wagner. Chance constrained programming with joint constraints. Operations Research , 13:930–945, 1965. [24] Yue Xie, Oscar Harper, Hirad Assimi, Aneta Neumann, and Frank Neumann. Evolutionary algorithms for the chance-constrained knapsack problem. In Proceedings of the Genetic and Evolutionary Computation Conference ,pages 338–346. ACM, 2019. [25] Aneta Neumann, Yue Xie, and Frank Neumann. Evolutionary algorithms for limiting the effect of uncertainty for the knapsack problem with stochastic profits. In Parallel Problem Solving from Nature - 17th International 
+
+12 A PREPRINT - A PRIL 16, 2026 
+
+Conference, Proceedings, Part I , volume 13398 of Lecture Notes in Computer Science , pages 294–307. Springer, 2022. [26] Xuanfeng Li, Shengcai Liu, Jin Wang, Xiao Chen, Yew-Soon Ong, and Ke Tang. Chance-constrained multiple-choice knapsack problem: Model, algorithms, and applications. IEEE Trans. Cybern. , 54(12):7969–7980, 2024. [27] Benjamin Doerr, Carola Doerr, Aneta Neumann, Frank Neumann, and Andrew M. Sutton. Optimization of chance-constrained submodular functions. In Proceedings of the 34th AAAI Conference on Artificial Intelligence ,pages 1460–1467. AAAI Press, 2020. [28] Xiankun Yan, Anh Viet Do, Feng Shi, Xiaoyu Qin, and Frank Neumann. Optimizing chance-constrained submodular problems with variable uncertainties. In Proceedings of the 26th European Conference on Artificial Intelligence , volume 372 of Frontiers in Artificial Intelligence and Applications , pages 2826–2833. IOS Press, 2023. [29] Aneta Neumann and Frank Neumann. Optimizing monotone chance-constrained submodular functions using evolutionary multiobjective algorithms. Evolutionary Computation , 33(3):363–393, 2025. [30] Aneta Neumann, Jakob Bossek, and Frank Neumann. Diversifying greedy sampling and evolutionary diversity optimisation for constrained monotone submodular functions. In Proceedings of the Genetic and Evolutionary Computation Conference , pages 261–269. ACM, 2021. [31] Xiankun Yan, Aneta Neumann, and Frank Neumann. Sampling-based pareto optimization for chance-constrained monotone submodular problems. In Proceedings of the Genetic and Evolutionary Computation Conference , pages 621–629. ACM, 2024. [32] Robert Kohout, Kutluhan Erol, and C Robert. In-time agent-based vehicle routing with a stochastic improvement heuristic. In Proceedings of the 16th National Conference on Artificial Intelligence , pages 864–869. AAAI, 1999. [33] Russell Bent and Pascal Van Hentenryck. Dynamic vehicle routing with stochastic requests. In Proceedings of the 18th International Joint Conference on Artificial Intelligence , pages 1362–1363. Morgan Kaufmann, 2003. [34] Russell Bent and Pascal Van Hentenryck. Waiting and relocation strategies in online stochastic vehicle routing. In Proceedings of the 20th International Joint Conference on Artificial Intelligence , pages 1816–1821. Morgan Kaufmann, 2007. [35] Feng Shi, Xiankun Yan, and Frank Neumann. Runtime analysis of simple evolutionary algorithms for the chance-constrained makespan scheduling problem. In Parallel Problem Solving from Nature - 17th International Conference, Proceedings, Part II , volume 13399 of Lecture Notes in Computer Science , pages 526–541. Springer, 2022. [36] Thilina Pathirage Don, Aneta Neumann, and Frank Neumann. The chance constrained travelling thief problem: Problem formulations and algorithms. In Proceedings of the Genetic and Evolutionary Computation Conference ,pages 214–222. ACM, 2024. [37] Thilina Pathirage Don, Aneta Neumann, and Frank Neumann. Weighted-scenario optimisation for the chance constrained travelling thief problem. In IEEE Congress on Evolutionary Computation , pages 1–8. IEEE, 2025. [38] Peter Ross, Javier G. Marín-Blázquez, Sonia Schulenburg, and Emma Hart. Learning a procedure that can solve hard bin-packing problems:A new ga-based approach to hyper-heuristics. In Genetic and Evolutionary Computation Conference. Proceedings, Part II , volume 2724 of Lecture Notes in Computer Science , pages 1295–1306. Springer, 2003. [39] Sergey Polyakovskiy, Mohammad Reza Bonyadi, Markus Wagner, Zbigniew Michalewicz, and Frank Neumann. A comprehensive benchmark set and heuristics for the traveling thief problem. In Proceedings of the Genetic and Evolutionary Computation Conference , pages 477–484. ACM, 2014. [40] David Applegate, Wiliam Cook, and Andre Rohe. Chained lin-kernighan for large traveling salesman problems. 
+
+INFORMS Journal on Computing; Winter , 15:82–92, 2003. 13

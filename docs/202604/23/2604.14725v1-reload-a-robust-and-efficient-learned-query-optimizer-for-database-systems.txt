@@ -1,0 +1,644 @@
+Title: RELOAD: A Robust and Efficient Learned Query Optimizer for Database Systems
+
+URL Source: https://arxiv.org/pdf/2604.14725v1
+
+Published Time: Fri, 17 Apr 2026 00:38:19 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+> JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 1
+
+# RELOAD: A Robust and Efficient Learned Query Optimizer for Database Systems 
+
+Seokwon Lee , Graduate Student Member, IEEE , Jaeyoung Sim , Graduate Student Member, IEEE , Sihyun Kim , Graduate Student Member, IEEE , Yuhsing Li , Graduate Student Member, IEEE , Yiwen Zhu ,Member, IEEE and Kwanghyun Park , Member, IEEE 
+
+Abstract —Recent advances in query optimization have shifted from traditional rule-based and cost-based techniques towards machine learning-driven approaches. Among these, reinforce-ment learning (RL) has attracted significant attention due to its ability to optimize long-term performance by learning poli-cies over query planning. However, existing RL-based query optimizers often exhibit unstable performance at the level of individual queries, including severe performance regressions, and require prolonged training to reach the plan quality of expert, cost-based optimizers. These shortcomings make learned query optimizers difficult to deploy in practice and remain a major barrier to their adoption in production database systems. To address these challenges, we present RELOAD, a robust and efficient learned query optimizer for database systems. RELOAD focuses on (i) robustness, by minimizing query-level performance regressions and ensuring consistent optimization behavior across executions, and (ii) efficiency, by accelerating convergence to expert-level plan quality. Through extensive experiments on standard benchmarks, including Join Order Benchmark, TPC-DS, and Star Schema Benchmark, RELOAD demonstrates up to 2.4 × higher robustness and 3.1 × greater efficiency compared to state-of-the-art RL-based query optimization techniques. 
+
+Index Terms —Query optimization, Machine Learning, Rein-forcement Learning 
+
+I. INTRODUCTION 
+
+# THE query optimizer is an important component of database management systems (DBMSs). The tireless ef-forts of human experts have made traditional query optimizers perform well [1]. Traditional query optimizers are mostly cost-based, but even the most well-crafted cost-based optimizers still partially rely on rules from experts. Even the best cost-based optimization tools cannot completely eliminate this dependence on predefined cost models and heuristics, which limits their ability to handle complex data and query structures. In addition, traditional query optimizers have limitations when they lack key factors such as statistical information, data distribution, index availability, and query complexity [2]. To overcome the limitations of cost-based optimizers, a machine learning-based query optimizer is proposed [3]. Among these, reinforcement learning (RL) has emerged as a particularly 
+
+Corresponding Author: Kwanghyun Park. Seokwon Lee, Jaeyoung Sim, Sihyun Kim, Yuhsing Li and Kwanghyun Park are with Yonsei University BDAI Lab, Seoul 03722, South Korea (e-mail: {guguri, jaeyoung.sim, sihyun.kim, yuhsing.li, kwanghyun.park }@yonsei.ac.kr). Yiwen Zhu is with Microsoft Gray Systems Lab, Redmond, USA (e-mail: yiwzh@microsoft.com) This work is currently under review. 
+
+(a) Inconsistent robustness (b) Low efficiency Fig. 1. Challenges encountered by an RL-based query optimizer on the Join Order Benchmark (JOB). Expert and RL are PostgreSQL and Balsa, respectively. (a) shows that RL is behind in about 58% of the 26 test queries compared to the ones created by domain experts. (b) shows the time it takes for RL to catch up to the performance of the PostgreSQL optimizer. 
+
+promising approach, because its iterative evaluation and im-provement of decision policies resemble the dynamic program-ming strategies traditionally used in query optimization [4]– [6]. This conceptual similarity has inspired recent research that integrates RL into query optimization, enabling data-driven learning beyond handcrafted cost models [7], [8]. This integration enables query optimizers to leverage the predictive and adaptive capabilities of RL to generate more efficient query plans without expert intervention. With advances in deep neural networks, deep RL has been employed to effectively learn both the environment and state space of various logical and physical plans [8]. However, despite their potential, RL-based optimizers face significant challenges in replacing traditional optimizers due to inconsistent optimization stability and the excessive time required to reach a performance level comparable to expert-crafted plans in practical settings. This shortcoming stems from several core limitations of RL: its reliance on trial-and-error exploration makes it sample inefficient and lacking robustness; it is highly sensitive to distributional shifts in the environment; and its dependence on delayed, sparse, and often ambiguous reward signals significantly hinders effective credit assignment [9], [10]. While implementing state-of-the-art RL-based query optimizers such as Bao [11], Balsa [12], LOGER [13], and LIMAO [14] and benchmarking them against execution plans crafted by domain experts, we en-countered several limitations (Figure 1) in practical settings as follows. 
+
+Robustness. Ensuring consistent robustness, where all queries reliably achieve optimal performance exceeding that of do-  
+
+> arXiv:2604.14725v1 [cs.DB] 16 Apr 2026 JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 2
+> (a) Plateau (b) Rebound Fig. 2. (a) and (b) illustrate two trends of performance regression observed in RL-based query optimizers, as tested on the JOB: convergence to suboptimal plans and performance regression, respectively.
+
+main experts, remains a significant challenge. As shown in Figure 1a, the RL-based optimizer fails to outperform expert plans in 57.7% of the test queries, revealing its inconsistent robustness across queries within the same workload. While most learned query optimizers report aggregate workload per-formance as their primary evaluation metric, this approach can obscure significant regressions on individual queries or corner cases. In contrast, this work targets query-level robustness ,aiming to ensure consistent and stable performance improve-ments across all individual queries. This objective imposes a substantially higher standard than aggregate metrics, as it requires optimizers to maintain stable performance effectively across diverse query patterns without sacrificing performance on any subset. Specifically, we want to avoid:  
+
+> •
+
+Convergence to suboptimal plans : In some instances, the RL-generated plans converged prematurely, failing to reach the latency levels achieved by expert-crafted plans. The learning curve exhibits a plateau -like shape (see Figure 2a), where performance stagnates as the optimizer becomes trapped in local optima [9].  
+
+> •
+
+Performance regression : We also observe cases where, during training iterations, performance initially improves but later deteriorates (see Figure 2b). This rebound effect arises primarily from the credit assignment problem in sparse and delayed reward settings [10], where beneficial early decisions are not consistently reinforced. 
+
+Efficiency. Another challenge is the inefficiency in learning to reach a sufficient level of performance and in the design of the RL training process. The inefficiency appears primarily as an increase in the time required to run the total workload to reach the performance level of an expert. The underlying causes include not only the scarcity of training data but also the lack of data that effectively facilitates learning. In real-world systems, such inefficiencies can significantly impact overall execution time, which is a critical performance metric to ensure system efficiency and user satisfaction (see Figure 1b). This inefficiency reflects a slow convergence problem inherent in RL-based query optimizers, where convergence requires extensive interactions due to the numerous decisions involved in generating query plans, from logical to physical operators. Overall, these challenges related to inconsistent robustness and slow convergence often result in noticeable gaps between simulated training environments and real-world deployments, which complicates the practical adoption of RL-based strate-gies. 
+
+Novelty & Contributions. In this work, we propose RELOAD, a robust and efficient learned query optimizer designed to address the critical limitations of RL-based query optimizers—inconsistent robustness (i.e., Plateau , Rebound ), and low efficiency (i.e., Slow convergence ). To the best of our knowledge, RELOAD is the first to explicitly mitigate these query-level regressions. This contrasts with prior works [12]– [17], which primarily focused on aggregate performance. To achieve this, rather than merely applying generic RL tech-niques, RELOAD tailors two core mechanism specifically for the query optimization domain: knowledge retention to ensure robustness and knowledge transfer to accelerate efficiency. RELOAD operates as a complementary enhancement frame-work compatible with existing RL-based query optimizers, facilitating stable learning without altering their core archi-tectures. Specifically, our contributions are as follows:  
+
+> •
+
+Implementation on a DBMS (section III): We inte-grate RELOAD into both commercial and open-source DBMSs, demonstrating its applicability with existing RL-based frameworks, and release it as open-source 1. 
+
+> •
+
+Experience-aware knowledge retention (section IV): We introduce a specialized prioritized experience replay (PER) mechanism that extracts fine-grained learning signals instead of coarse-grained full plans. By prioritizing recent and hard-to-predict experiences, this module mitigates the sparse reward problem and prevents the optimizer from forgetting crucial high-cost signals.  
+
+> •
+
+Complexity-aware knowledge transfer (section V): To accelerate convergence across diverse workloads, we devise a model-agnostic meta-learning (MAML) strategy integrated with novel workload partitioning policies. By grouping queries based on structural complexity (e.g., Halstead met-rics) rather than naive arrival order, we enable an efficient initialization that accelerates convergence to surpass expert-level performance.  
+
+> •
+
+Query-level robustness formalization (subsection VI-A): We identify two distinct failure modes in RL-based query optimizers—convergence to suboptimal local minima (Plateau) and performance regression due to credit assign-ment failure (Rebound). We propose a metric to quantify these query-level performance regressions, overcoming the limitations of standard aggregate evaluations.  
+
+> •
+
+Evaluation on diverse workloads (section VI): Exten-sive experiments on benchmarks, including the Join Order Benchmark (JOB), TPC-DS, and Star Schema Benchmark (SSB), demonstrate RELOAD’s superiority, achieving 2.4 ×
+
+higher robustness and 3.1 × greater efficiency compared to state-of-the-art approaches. II. BACKGROUND This section provides the learning principles behind RELOAD, which addresses the key challenges of robustness and efficiency in query optimization. We first outline the concept of adaptive reinforcement learning, which enables  
+
+> 1https://anonymous.4open.science/r/RELOAD JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 3
+
+an optimizer to iteratively refine its decision policies. We then describe two core modules that build upon this founda-tion: (1) knowledge retention, which enables robust learning by selectively reusing past experiences, and (2) knowledge transfer, which accelerates convergence through meta-learning by providing an informed initialization for various query structures. These modules together form the basis of RELOAD ’s design for robust and efficient query optimization. 
+
+A. Adaptive Reinforcement Learning 
+
+Adaptive RL enables agents to operate effectively across complex optimization scenarios by retaining useful knowledge from past experiences and leveraging it to enhance learning ef-ficiency. Its effectiveness relies on two complementary mecha-nisms: knowledge retention [18], which ensures robustness by preventing the loss of previously acquired information, and 
+
+knowledge transfer [19], which promotes efficiency by lever-aging past knowledge to accelerate learning in new contexts. Together, these mechanisms enhance the adaptability of RL systems in practical DBMS environments. 
+
+B. Knowledge Retention 
+
+Knowledge retention is not just about storing experiences but about integrating accumulated knowledge. In reinforce-ment learning, this is particularly challenging because re-wards are sparse and training is often unstable. Experience replay [20] has been widely adopted to alleviate such issues and improve sample efficiency. 
+
+Prioritized experience replay (PER) [21] has been used to achieve knowledge retention. In general, off-policy meth-ods sample experiences evenly, whereas PER prioritizes by sampling high-importance experiences. PER follows a pro-cess of adding experiences, calculating priorities, sampling experiences, training the model, and updating priorities. This process reduces the loss of existing knowledge and ensures that important patterns are remembered effectively. However, traditional PER assumes frequent rewards and stationary tasks, which makes it less effective for query optimization workloads that provide sparse and highly variable feedback. To address this, we design the replay mechanism for query optimization by weighting experiences according to their learning value, thereby improving robustness and stability. 
+
+C. Knowledge Transfer 
+
+Knowledge transfer [22] enables agents to leverage prior knowledge to enhance the learning efficiency of subsequent optimization tasks. Meta-learning [23] is a commonly used method for knowledge transfer, and meta-reinforcement learn-ing (meta-RL) [24] is the application of the concept of meta-learning to RL. Meta-RL facilitates the optimization process by providing robust initial parameters that serve as an informed starting point. In query optimization, depending on the pattern or struc-ture of the workload, each workload can be considered a different Markov decision process (MDP) [7], [25]. Achieving rapid convergence toward expert-level performance requires initializing the model with parameters that effectively capture the underlying regularities across these MDPs. This improved initialization enhances both training efficiency and the quality of the resulting query plans. 
+
+Model-agnostic meta-learning (MAML) [26] is one of the most common meta-learning algorithms for this purpose, and was specifically selected for RELOAD because it offers supe-rior initialization quality compared to standard transfer learn-ing methods [27]. While MAML facilitates efficient learning, it assumes predefined task boundaries, which do not naturally exist in query sets. We address this by applying a complexity-aware partitioning strategy to define meaningful task groups across, ensuring stable and accelerated convergence. III. SYSTEM OVERVIEW RELOAD is a robust and efficient RL-based query opti-mizer designed to ensure query-level performance stability and accelerated convergence toward expert-level optimization. As shown in Figure 3, the system integrates two core modules— Knowledge Transfer and Knowledge Retention—that comple-ment each other to achieve both fast convergence and long-term robustness. 
+
+Knowledge Transfer. To reduce convergence time and achieve expert-level performance, RELOAD first performs knowledge transfer through meta-learning. This process begins when training queries are received from a workload (Figure 3 ➊). Each query is featurized based on structural and execution-specific characteristics—such as the number of operators, estimated cost, and estimated cardinality—and then grouped into tasks using multiple partitioning policies. The most ef-fective policy is selected using clustering metrics, ensuring that queries with similar complexity or behavior are trained together. Once the task groups are defined, RELOAD applies MAML to establish initial parameters across tasks. After convergence, the resulting meta-learned parameters are used to update the value model (Figure 3 ➋), providing an informed and transfer-able initialization that improves plan quality and accelerates convergence to outperform expert. 
+
+Knowledge Retention. After initialization, RELOAD pro-ceeds with its training phase, where the DBMS generates and executes a query plan using the current value model initialized with meta-learned parameters (Figure 3 ➌). The execution latency returned from the DBMS serves as feedback to evaluate the quality of the generated plan (Figure 3 ➍). This feedback is then passed to the knowledge retention module, where the executed plan is processed through experience extraction (Figure 3 ➎). Each experience, the basic learning unit in RELOAD, corresponds to a featurized join-rooted subplan (i.e., a state extracted from an executed query plan). The extracted expe-riences are stored in a prioritized replay buffer and later re-sampled during training to reinforce valuable learning signals while mitigating performance regressions such as Plateau and Rebound. JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 4     
+
+> Fig. 3. RELOAD integration into the RL-based Query Optimizer, with new components in dashed lines.
+> Fig. 4. PER-based Knowledge Retention in RELOAD. ➊Experience Extrac-tion gathers structural and runtime features from states. ➋PER prioritizes the sampling of experiences from the replay buffer.
+
+IV. ROBUSTNESS VIA KNOWLEDGE RETENTION The knowledge retention module in the RELOAD frame-work is designed to tackle two key performance chal-lenges— Plateau and Rebound . An overview of the module’s role and significance within the framework is provided in subsection IV-A, followed by detailed explanations of its two main components: experience extraction (subsection IV-B) and PER (subsection IV-C). PER selectively reuses informative past experiences to recover from local optima (Plateau) and employs temporal-difference (TD) error [10] weighting to mitigate credit assignment issues (Rebound) by emphasizing experiences with high prediction errors, thereby reinforcing beneficial decisions under sparse reward conditions. 
+
+A. Overview of Knowledge Retention Process 
+
+Figure 4 illustrates how the replay buffer is utilized for knowledge retention in RELOAD. Starting from the left, the replay buffer maintains experiences derived from executed query plans. Each query plan is processed through experi-ence extraction , where meaningful fragments of the plan are identified, featurized, and stored as experiences. This process (see Figure 4 ➊) facilitates fine-grained learning by extracting and focusing on critical features, including structural attributes, execution metrics, and temporal information. In Figure 4 ➋, the extracted features from experiences are then used in PER , where priority weights are calculated based on a defined weighting policy. The weighting policy ensures that the most impactful and relevant experiences are se-lected for training. These priority weights are normalized into probabilities, creating a multinomial distribution. Experiences are then stochastically sampled from this distribution, giving higher-priority experiences a greater likelihood of selection while still allowing for exploration of less frequently selected experiences. 
+
+B. Experience Extraction 
+
+Experience extraction serves as the foundation for ro-bustness by converting complex query execution plans into granular experiences. Each experience encapsulates structural and runtime features associated with subplans of the execu-tion, enabling the optimizer to capture fine-grained variations across queries. This process provides a more precise basis for knowledge retention and improves optimization reliability for diverse query structures. While understanding the total cost at the plan level is essential, analyzing intermediate states within the plan provides critical insights that underpin the robust policy refinement aspect of RELOAD. Each intermediate state in the MDP corresponds to a join-rooted subplan, capturing partial progress toward the final plan. By learning from these states, the optimizer can address fine-grained variations in execution characteristics and improve decision-making at a granular level. For practicality, we extract only the states that appear in the actual plan executed by the DBMS, focusing on subtrees rooted at join operators in the final plan. This design choice prevents the search space from becoming too large and allows the learning process to focus only on factors that are relevant to execution. To guide the prioritization within PER, we extract specific informative attributes from each experience that help assess its learning value beyond the basic state representation. In this step, the following information can be collected from each experience:  
+
+> •
+
+Structural features : These features include the logical op-erators present in the subplan, such as joins, filters, and JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 5
+
+aggregations. They also include the types of joins used (e.g., hash join, nested loop join), which determine the execution strategy and cardinality estimates of intermediate states that indicate expected data sizes.  
+
+> •
+
+Execution-specific features : It includes estimated resource usage metrics, such as CPU, memory, and I/O, which indicate the computational requirements of the subplan. It also includes data size metrics, including row count, which corresponds to the cardinality, and data volume, which can be approximated by multiplying the row count by the av-erage row width. These metrics give a better understanding of the data processing characteristics of the experience.  
+
+> •
+
+Temporal features : Recency of query execution helps assess how recently an experience was observed and its relevance to maintaining stable performance.  
+
+> •
+
+Predicted execution latency: The estimated time required to execute the given subplan under the current workload and system conditions. The information gathered from these experiences is lever-aged by PER to guide the prioritization and retention of experiences, identifying precisely the knowledge gaps of the current model. By integrating these features, PER effectively leverages the most relevant and impactful experiences to improve the adaptability and robustness. 
+
+C. PER with Weighting Policies 
+
+To improve robustness and adaptability, RELOAD adopts 
+
+prioritized experience replay (PER) [21], which emphasizes informative or underrepresented experiences to mitigate credit assignment and local optima issues. We define a weighting policy ω that computes the importance of each experience based on recency and temporal-difference (TD) error , and normalize these weights for stochastic sampling in the replay buffer. 
+
+> TABLE I THE WEIGHTING POLICY FOR PRIORITIZATION .
+> Weighting policy ( ω)
+> Recency-based TD error (low) TD error (high) Recency-based + TD error
+
+Weighting policy. We introduce four weighting policies (Ta-ble I), which are computed based on two important weighting factors: Recency-based and TD error-based weightings [21]. These policies balance the importance of recent experiences and the magnitude of prediction errors.  
+
+> •
+
+Recency-based : Recent experiences are assumed to better reflect current execution conditions. The weight τ for a experience stored at time τe is computed as: 
+
+τ = 1 − τcurrent − τe
+
+T , (1) where τcurrent is the current time and T is a normalization constant representing the maximum possible time difference. This ensures τ ∈ [0 , 1] and gives higher scores to more recent experiences. 
+
+Algorithm 1 Selective Experience Replay 
+
+Input: Replay buffer of executed plans D = {π1, . . . , π M },weighting policy ω, replay budget k
+
+Output: Selected Experiences S 
+
+> 1:
+
+S ← ∅  
+
+> 2:
+
+X ← ∅  
+
+> 3:
+
+for all πi ∈ D do  
+
+> 4:
+
+Xi ← EXTRACT EXPERIENCES (πi) 
+
+> 5:
+
+for all exp i,j ∈ X i do  
+
+> 6:
+
+si,j ← ω(exp i,j ) 
+
+> 7:
+
+X ← X ∪ { (exp i,j , s i,j )} 
+
+> 8:
+
+end for  
+
+> 9:
+
+end for  
+
+> 10:
+
+Z ← P si,j ▷ Normalization constant  
+
+> 11:
+
+p(exp i,j ) ← si,j /Z  
+
+> 12:
+
+for n = 1 to k do  
+
+> 13:
+
+exp n ∼ p(exp) ▷ Sample from X according to p 
+
+> 14:
+
+S ← S ∪ { exp n} 
+
+> 15:
+
+end for  
+
+> 16:
+
+Return S 
+
+> •
+
+TD error-based : TD error quantifies the discrepancy be-tween the predicted and observed execution latencies, high-lighting experiences requiring further learning [10]. The TD error is defined as: 
+
+δt = rt+1 + γV (st+1 ) − V (st), (2) Here, rt+1 is the reward from the database engine, defined as the negative execution latency. st and st+1 represent the current and next subplan states, where the latter reflects an additional join. The value function V (·) estimates latency using the value model, and γ is the discount factor. TD errors are normalized via min-max scaling with exponent α
+
+as a tunable hyperparameter: 
+
+ˆδ = δα − δα
+
+> min
+
+δα 
+
+> max
+
+− δα
+
+> min
+
+. (3) Two strategies are used in our experiments: TD error (low) and TD error (high) , which assign higher weights to samples with smaller or larger TD errors, respectively. This choice determines whether sampling prioritizes stable or challenging experiences, influencing learning stability.  
+
+> •
+
+Combined weighting policy : A flexible policy integrates both factors with a tunable hyperparameter β:
+
+ωi = β · ˆδi + (1 − β) · τi. (4) When β = 0 , only recency is used; when β = 1 , only TD error is used. Intermediate values allow for a weighted combination. 
+
+Sampling strategy. Based on the weights defined in Equa-tion 4, the priorities are normalized into a probability distri-bution: 
+
+ˆωi = ωi
+
+PNj=1 ωj
+
+i = 1 , . . . , N. (5) Here, N denotes the total number of experiences. Experiences are then sampled from a multinomial distribution with a fixed JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 6       
+
+> Fig. 5. MAML-based Knowledge Transfer in RELOAD. ➊Task Partitioning groups queries by policy. ➋Policy Evaluator selects the best policy. ➌Inner loop learns task-specific models; outer loop refines shared initialization across tasks.
+
+budget k. The selected experiences, denoted by X, are drawn as: 
+
+X = ( X1, X 2, . . . , X k) ∼ Multinomial (k, ˆω1, . . . , ˆωN ). (6) This strategy increases the likelihood of selecting high-importance experiences, thereby reinforcing the learning pro-cess with more impactful samples. In sum, Algorithm 1illustrates the process of generating the replay buffer using the weighting policy. Each experience, derived from a subplan, is assigned a priority using the selected weighting policy. Experiences are then sampled based on their normalized priorities until the budget is exhausted (lines 12-15). 
+
+Implementation note. Unlike standard PER [21], RELOAD stores only recent experiences without priority updates to re-duce overhead, while recency-based weighting still emphasizes new samples. In summary, this replay mechanism allows RELOAD to efficiently focus on subplans that matter most for learning, enhancing both convergence and robustness. The replay of structural features of the subplan by PER also has the effect of enhancing the efficacy improvement of MAML in terms of feature reuse [28]. V. EFFICIENCY VIA KNOWLEDGE TRANSFER The knowledge transfer module in the RELOAD framework is designed to accelerate convergence while reducing ramp-up time by providing an informed initialization. This module leverages model-agnostic meta-learning (MAML) , a flexible and powerful meta-learning technique that facilitates efficient learning by establishing high-quality initial parameters that can be fine-tuned for specific tasks [27]. This section first introduces the overall knowledge transfer module of RELOAD (subsection V-A). Next, we discuss the task partitioning poli-cies which are evaluated using a clustering metric to ensure optimal grouping (subsection V-B). Finally, we detail the MAML-based meta-learning process, demonstrating how task-specific and cross-task parameters are refined to maximize convergence efficiency (subsection V-C). 
+
+A. Overview of Knowledge Transfer Process 
+
+Figure 5 illustrates the MAML-based process utilized in RELOAD for knowledge transfer. The process starts with a workload W , partitioned into query groups (tasks) based on structural or execution features such as operator count or estimated cost. This task partitioning (Figure 5 ➊) enhances inner-loop refinement and outer-loop aggregation. Queries can be grouped based on various criteria. For instance, Policy 1 may use structural query characteristics, and Policy 2 may focus on execution-specific metrics. Multiple partitioning policies are evaluated by a policy evaluator ,which selects the one achieving the best grouping quality (Fig-ure 5 ➋). Once the optimal policy (e.g., Policy 2) is selected, the corresponding groups of queries (tasks) are passed to the 
+
+MAML process. During this process, the outer loop iterates repeatedly, with the inner loop being executed multiple times in each duration. Finally, the task-specific parameters are refined through gradient updates in the inner loop, tailored to each task, and then aggregated in the value model during the outer loop (Figure 5 ➌). This nested process ensures that the model accelerates convergence across various tasks by improving the initial parameter θ through iterative optimization at both levels. Finally, the task-specific parameters are refined through gradient updates in the inner loop, tailored to each task, and then aggregated in the value model during the outer loop (Figure 5 ➌). This nested process ensures that the model generalizes efficiently to new tasks by improving the initial parameter θ through iterative optimization at both levels. 
+
+B. Task Partitioning Policy Selection 
+
+To effectively apply MAML, workloads must be divided into tasks. Task partitioning relies on structural and execution-specific features of queries, such as:  
+
+> •
+
+Structural features : Logical operators, physical operators, and query complexity.  
+
+> •
+
+Execution-specific features : Estimated costs (CPU, memory, I/O), data size, and cardinality estimates. Queries within a task should share similar features to ensure consistency in the inner-loop updates. At the same time, tasks should exhibit diversity to enable effective knowledge aggregation during the outer loop. To evaluate the quality of task partitioning produced by each policy, a clustering metric such as the Davies-Bouldin Index (DBI) [29] can be used [30]. The DBI quantifies intra-task similarity and inter-task separation. The policy evaluator selects the policy with the lowest DBI, as this indicates the most suitable task partitioning. This ensures that:  
+
+> •
+
+Queries within each task are highly similar, allowing con-sistent and effective inner loop updates.  
+
+> •
+
+Tasks are sufficiently distinct, ensuring well-informed ini-tialization across diverse workloads in the outer loop. 
+
+Partitioning policy. We introduce four partitioning policies (Table II) designed to classify queries based on structural and execution-specific features:  
+
+> •
+
+Halstead complexity measures [31]: Halstead complexity measures are a quantitative metric for evaluating query complexity, adapted from metrics originally designed for programming languages. Each component of the equation corresponds to elements within SQL: JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 7  
+
+> TABLE II THE PARTITIONING POLICY FOR WORKLOAD .
+> Partitioning policy ( P)Features Query complexity Halstead complexity measures Total number of operators Estimated query cost Data complexity Estimated rows
+
+N = Total number of operands. 
+
+η1 = Number of distinct operators. 
+
+η2 = Number of distinct operands. The query complexity is then computed as: Query complexity = η1
+
+2 × Nη2
+
+× log 2(η1 + η2).
+
+For example, in the query: 
+
+SELECT MIN(t.title) FROM title AS t; SELECT , MIN , and FROM are operators, while t and title 
+
+are operands ( N ).  
+
+> •
+
+Number of operators : The number of operators is a simple yet effective indicator of query complexity. This metric is derived directly from the Halstead complexity measures, focusing on the count of logical operations within the query.  
+
+> •
+
+Estimated query cost : Query cost is calculated by database systems (e.g., PostgreSQL) based on resource usage, includ-ing CPU, disk I/O, and memory. Using the EXPLAIN com-mand, we extract the Total Cost to represent the estimated query cost.  
+
+> •
+
+Estimated rows : Cardinality, or the number of rows returned by operations, is a key factor in query optimization [2], [32]. The estimated number of rows can be extracted from the Plan Rows value in the query plan generated by the 
+
+EXPLAIN command. 
+
+Evaluating task partition policy. To classify tasks effectively, tasks must exhibit intra-task similarity and inter-task separa-tion. To evaluate this, we use the DBI [29]: 
+
+DBI = 1
+
+k
+
+> k
+
+X
+
+> i=1
+
+Ri,
+
+where Ri is the worst-case similarity between task i and all other tasks, computed as: 
+
+Ri = max 
+
+> j={1,...,n },i̸=j
+
+Rij and Rij = σi + σj
+
+dij 
+
+, (7) 
+
+σi = 1
+
+|Ti|
+
+X
+
+> x∈Ti
+
+d(x, c i) Ti ⊂ W , (8) 
+
+dij = max( ϵ, d (ci, c j )) ϵ > 0, (9) 
+
+> k
+
+X
+
+> i=1
+
+|Ti| = |W| . (10) Each task is a cluster of query embeddings. σi is the average distance between all query embeddings in the cluster. We use 
+
+Algorithm 2 Partitioning Workloads with Optimal Policy 
+
+Input: Workload W, Partitioning policy P, Task set size k
+
+Output: Task set  
+
+> 1:
+
+DBI min ← +∞ 
+
+> 2:
+
+Tbest ← ∅  
+
+> 3:
+
+for all p ∈ P do  
+
+> 4:
+
+Tasks T ← ∅  
+
+> 5:
+
+for all q ∈ W do  
+
+> 6:
+
+score ← p(q) 
+
+> 7:
+
+T ← T ∪ { (q, score )} 
+
+> 8:
+
+end for  
+
+> 9:
+
+Sort T by score in ascending order  
+
+> 10:
+
+ˆT ← ∅  
+
+> 11:
+
+size ← ⌊ |W|  
+
+> k
+
+⌋ 
+
+> 12:
+
+for 1 ≤ i < k do  
+
+> 13:
+
+ˆT ← ˆT ∪ T [( i − 1) × size : i × size ] 
+
+> 14:
+
+end for  
+
+> 15:
+
+DBI ← DAVIES BOULDIN SCORE ( ˆT ) 
+
+> 16:
+
+if DBI min > DBI then  
+
+> 17:
+
+DBI min ← DBI  
+
+> 18:
+
+Tbest ← ˆT 
+
+> 19:
+
+end if  
+
+> 20:
+
+end for  
+
+> 21:
+
+Return Tbest 
+
+the center of cluster ci to find the distance between points in the cluster and the center, or the distance between clusters. We denote the distance between ci and cj as d(ci, c j ). Given a workload W, we denote by Ti each task created by partitioning the workload according to the policy. Different tasks must be a disjoint set, so the total number of queries in the tasks must equal the number of queries in the workload. A smaller DBI implies better clustering, and the policy that minimizes DBI is selected. As described in Algorithm 2, the policy minimizing the DBI is selected to form meaningful tasks for MAML, ensuring high intra-task similarity and inter-task diversity. For practicality, we adopt a fixed number of equally sized tasks to ensure stable meta-training and balanced gradients [33], leaving adaptive grouping as future work. 
+
+C. Meta-Learning and MAML in Query Optimization 
+
+The MAML process involves two key phases: the inner loop , which performs task-specific refinement, and the outer loop , which aggregates knowledge to establish a robust ini-tialization across all tasks. 
+
+Inner loop: Task-specific refinement. The inner loop adapts the model to a specific task Ti by performing gradient updates on the task-specific loss function LTi . At iteration t, we refine the initial parameters θ(t) into task-specific parameters θ′
+
+> i
+
+:
+
+θ′ 
+
+> i
+
+= θ(t) − α∇θ LTi (fθ ). (11) Here, α is the inner-loop learning rate, and fθ is the model with initial parameters θ. Task-specific refinement allows the model to effectively capture the distinct workload characteris-tics of task Ti.
+
+Outer loop: Cross-task aggregation. The outer loop aggre-gates results from multiple tasks to learn a set of high-quality JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 8
+
+initial parameters θ(t+1) , by minimizing accumulated losses computed with task-specific parameters θ′
+
+> i
+
+:
+
+θ(t+1) = θ(t) − β∇θNX
+
+> i=1
+
+LTi (fθ′ 
+
+> i
+
+). (12) Here, β is the outer-loop learning rate and N is the total number of tasks. By training across diverse tasks, the outer loop ensures that the updated parameters θ(t+1) serve as an informed initialization. As shown in Figure 5, it refines θ(t)
+
+toward the optimal parameters that provide a reliable starting point for subsequent learning phases. VI. E VALUATION 
+
+In this section, we evaluate the performance of RELOAD on different workloads using two database systems—PostgreSQL and a commercial DBMS (SQL Server). We describe our experimental setup in subsection VI-A. First, we summarize the overall performance of RELOAD using Workload Relative Latency (WRL) [13], [34], which measures the performance of a learned query optimizer relative to an expert optimizer across the entire workload. We then compare our approach with state-of-the-art methods—Bao, LOGER, Balsa and LIMAO—from two perspectives: Robustness and Efficiency . These metrics are separately evaluated for PostgreSQL and SQL Server in subsection VI-B. Finally, we conduct micro-experiments to show the effec-tiveness of the two components of RELOAD— knowledge retention and knowledge transfer —with results reported in subsection VI-C. Our key findings on PostgreSQL are as follows:  
+
+> •
+
+RELOAD demonstrates consistent robustness across various workloads. Among all configurations, Balsa (vanilla) +RELOAD achieves the best overall robustness, reducing the total number of performance regressions (Plateau + Rebound) by up to 2.4 ×, 2.3 ×, 1.8 × and 2.0 × compared to Bao, LOGER, Balsa, and LIMAO, respectively.  
+
+> •
+
+RELOAD exhibits enhanced efficiency through faster con-vergence. RELOAD converges 1.1 × faster on JOB (from 5.3 h to 4.7 h) and 2.4 × on SSB (from 1.9 h to 0.8 h) compared to Balsa. Other baselines failed to converge, preventing direct comparison.  
+
+> •
+
+In WRL, RELOAD achieves 0.64 on JOB and 0.85 on SSB for the test set, indicating speedups of 1.55 × and 1.18 × compared to PostgreSQL. On TPC-DS, while other methods fail to reach PostgreSQL’s performance, RELOAD successfully catches up.  
+
+> •
+
+We further validate the portability of RELOAD on SQL Server, where it maintains robust performance and achieves up to 3.1 × faster efficiency on the test set. 
+
+A. Experimental Setup 
+
+System setup. We conduct our experiments using PostgreSQL version 12.5. Specifically, PostgreSQL is set up with 32GB of shared buffers and cache size, 4GB of work memory. The Ge-netic Query Optimizer (GEQO) is disabled in all experiments to ensure compatibility with the pg hint plan extension and to follow standard benchmarking practices. These settings closely align with prior work to ensure fair benchmarking against state-of-the-art query optimization techniques [2], [12]. Our experiments utilize an NVIDIA RTX 6000 Ada GPU with 48GB of memory and Intel Xeon Gold 6530 CPUs for model training and inference. The SQL Server-based experi-ments are conducted under the same hardware configuration to ensure a fair comparison. We use the SQL Server 2022 with default configuration settings. In this study, the expert plan refers to the execution plan generated by the default cost-based optimizers of PostgreSQL and SQL Server. We experiment with Balsa as a base with our modules plugged in. All experiments are performed on a single agent in a nonparallel setting, and we use the median as the metric after 6 repetitions.                
+
+> TABLE III WORKLOAD SCALE FACTOR AND TRAIN /TEST DISTRIBUTION .
+> Scale Factor Queries Train Set Test Set JOB N/A 113 87 26
+> TPC-DS 457 42 15
+> SSB 10 13 10 3
+
+Datasets and workloads. We conduct experiments on three different datasets to evaluate the performance of RELOAD: Join Order Benchmark [2], TPC-DS [35], and Star Schema Benchmark [36]. Following the principle of rigorous and valid evaluation, we configure the workloads to have completely disjoint train and test sets at the template level. This strict isolation is essential to prevent performance inflation through structure leakage and to ensure the integrity of our evaluation metrics. By adhering to this standard of absolute separation, we verify that the performance gains of RELOAD are derived from genuine structural robustness rather than simple pattern memorization. The split of train and test used in each bench-mark is shown in Table III. 
+
+Join Order Benchmark (JOB) : JOB is a real-world bench-mark based on the IMDB dataset, containing 113 queries with complex joins and filters. We adopt the most challenging split, Base Query Sampling 3 2, which assigns all variants of a query template to either train or test, preventing structure leakage [37]. 
+
+TPC-DS : TPC-DS is an industry standard benchmark, with tables based on the Snowflake schema [38]. This benchmark contains 99 query templates. We have selected 19 select-project-join (SPJ) query templates and there are 3 generated queries for each query template. We ranked the top 5 templates based on Halstead complexity measures for each query and used them as our test set 3.
+
+Star Schema Benchmark (SSB) : SSB is simplified and opti-mized based on TPC-H and consists of 13 queries in total. We specifically selected SSB to evaluate join-heavy performance in a star schema environment. The queries are divided into four groups called “Query flight” and we use the most complex Q4        
+
+> 2The templates in the JOB, 1, 5, 12, 16, 22, 26, and 27, are used for testing.
+> 3The templates we use in TPC-DS are 3, 7, 12, 18, 20, 26, 27, 37, 42, 43, 52, 55, 62, 82, 84, 91, 96, 98, 99, and we used 12, 20, 43, 62, 99 for our test. JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 9
+> (a) JOB (b) TPC-DS (c) SSB Fig. 6. Performance of RELOAD on test set in PostgreSQL. Shaded areas denote variation across runs.
+> (a) JOB (b) TPC-DS (c) SSB Fig. 7. Performance of RELOAD on train set in PostgreSQL. Shaded areas denote variation across runs.
+
+query flight, which joins all tables [39]. This provides a more rigorous test of the optimizer’s ability to navigate dense join paths than standard TPC-H. 
+
+Baseline configuration. We compare RELOAD with four baselines, each following their official setup. (1) Bao uses Thompson sampling over five arms—the configuration re-ported as optimal in its original paper. Each iteration includes 25 training queries, model update, and train/test evaluation. (2) LOGER uses a validation interval of 4; test latency is measured every 4 iterations. (3) Balsa runs in single-agent mode with the official simulator and minimal cost model for consistency. (4) LIMAO is implemented on top of Balsa and runs under the same experimental configurations to ensure a fair comparison. 
+
+Implementation details. We set k = 256 , α = 1 , β = 0 .5,
+
+LR = 10 −3, and used 150 outer and 5 inner iterations for MAML. These values were determined through empirical tuning to ensure stable convergence. 
+
+Robustness and efficiency criteria. We define robustness and efficiency by comparing each query’s latency to that of an expert. For each query, the expert plan is executed ten times to estimate performance variability. The standard deviation of these executions is calculated, and twice the standard deviation (95% confidence range under normal variability) is used as a tolerance band to account for measurement noise. A query is considered superior or inferior based on whether its latency falls with this tolerance band. Two robustness failures are identified: Plateau (always inferior) and Rebound (initially superior, then regresses). Efficiency is the number of iterations needed for test latency to match the expert. 
+
+B. End-to-end Evaluation 
+
+In this section, we compare the performance of RELOAD against all state-of-the-art RL-based methods for each bench-mark. We report overall performance using WRL, followed by robustness and efficiency analysis. Results on PostgreSQL, which demonstrate RELOAD’s compatibility and improve-ments across all three metrics, are presented in subsubsec-tion VI-B1. Results on a commercial DBMS, which validate its portability under realistic system constraints, are presented in subsubsection VI-B2. In both cases, we use the same configurations: PER with a hybrid of recency and high TD error, and MAML with the best partitioning policy selected via DBI. 
+
+1) RELOAD on PostgreSQL: We first evaluate RELOAD on the PostgreSQL query optimizer, one of the most used open-source DBMSs, to ensure compatibility with traditional database systems. 
+
+Performance Overview. Figure 6 and Figure 7 show the performance of our experiments in three workloads. Although WRL is not our primary metric, it has been used as aperformance indicator in previous studies. After 300 iterations, RELOAD achieves WRL of 0.65, 0.73, and 0.88 on the train set for JOB, TPC-DS, and SSB, corresponding to speedups of 1.54 ×, 1.37 ×, and 1.13 ×, respectively. On the test set, RELOAD achieves 0.64, 1.02, and 0.85 in WRL, demonstrat-ing speedups of 1.55 ×, 0.98 ×, and 1.18 ×, respectively. Results are reported for the Balsa (vanilla)+RELOAD configuration, representative of overall RELOAD performance. Across all workloads, Bao consistently shows the weakest robustness, as it fails to outperform PostgreSQL and struggling to main-tain consistent performance across various queries. LOGER achieves rapid convergence on the training set but shows JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 10 
+
+TABLE IV RESULTS OF SIX METHODS —B AO , LOGER, B ALSA (VANILLA ), B ALSA (VANILLA )+RELOAD, B ALSA (LIMAO), AND BALSA 
+
+(LIMAO)+RELOAD— ON THREE WORKLOADS . R OBUSTNESS IS SHOWN AS FREQUENCY /TOTAL , AND EFFICIENCY AS ITERATIONS (HOURS ). 
+
+Robustness Efficiency 
+
+JOB TPC-DS SSB JOB TPC-DS SSB Plateau Rebound Total Plateau Rebound Total Plateau Rebound Total Convergence time Bao 15/26 7/26 22/26 9/15 0/15 9/15 2/3 1/3 3/3 NC NC NC LOGER 18/26 3/26 21/26 4/15 1/15 5/15 1/3 1/3 2/3 NC NC NC Balsa (vanilla) 4/26 12/26 16/26 0/15 6/15 6/15 1/3 1/3 2/3 69(5.3) NC 77(1.9) Balsa (vanilla)+RELOAD 5/26 4/26 9/26 0/15 4/15 4/15 0/3 2/3 2/3 50(4.7) 95(1.3) 20(0.8) 
+
+Balsa (LIMAO) 8/26 9/26 17/26 0/15 8/15 8/15 0/3 2/3 2/3 NC NC 76(4.9) Balsa (LIMAO)+RELOAD 7/26 5/26 12/26 0/15 8/15 8/15 0/3 1/3 1/3 125(16.7) NC 21(0.8) 
+
+Best Balsa (vanilla) +RELOAD Balsa (vanilla) +RELOAD Balsa(LIMAO) +RELOAD Balsa (vanilla) +RELOAD 
+
+Note: NC = No Convergence. 
+
+(a) Bao (b) LOGER (c) Balsa (vanilla) (d) Balsa (vanilla) +RELOAD 
+
+(e) Balsa (LIMAO) (f) Balsa (LIMAO) +RELOAD 
+
+Fig. 8. Speedup in execution latency per test query ( >500ms with PostgreSQL’s plan) in JOB. A total of 13 test queries satisfying this condition are shown. 0 100 200 300 
+
+> Iterations
+> 0.9
+> 1
+> 2
+> 4
+> Normalized Latency [log]
+> Balsa (vanilla)
+> Balsa (vanilla)+RELOAD
+> Balsa (LIMAO)
+> Balsa (LIMAO)+RELOAD
+
+Fig. 9. Impact of RELOAD on SQL Server under the SSB test set. Shaded areas denoted variation across runs. 
+
+limited stability on queries not encountered during training. Balsa performs competitively on JOB and SSB but underper-forms on TPC-DS. LIMAO performs moderately but remains sensitive to query templates excluded from the training set. When combined with RELOAD, both Balsa and LIMAO exhibit faster convergence and stronger robustness, confirming RELOAD’s effectiveness. 
+
+Robustness. The results are summarized in Table IV. Robust-ness is evaluated by counting the total number of Plateaus and Rebounds observed during training, where smaller val-ues indicate higher stability and fewer performance regres-sions. On JOB, RELOAD substantially improves robustness. Balsa (vanilla)+RELOAD reduces the number of Plateaus and Rebounds from 16 to 9, a 44% reduction compared with the baseline. Similarly, when integrated with LIMAO, RELOAD reduces the total number of performance regressions by about 30%, demonstrating that it stabilizes training even when applied to an optimizer originally designed for online adaptation. As shown in Figure 8, RELOAD further improves query-level performance, yielding speedups for about 77% of test queries with Balsa (vanilla)+RELOAD, and roughly 62% with Balsa (LIMAO)+RELOAD, despite LIMAO’s stronger baseline. On TPC-DS , RELOAD with Balsa (vanilla) achieves the lowest total regression count 4. When paired with LIMAO, RELOAD maintains a similar level of robustness. This is likely because LIMAO’s predefined k-prototypes do not fully align with the characteristics of the TPC-DS workload, thereby limiting additional improvement. For SSB, the smaller query set makes performance differences less pronounced, resulting in generally comparable performance across all methods. Specifically, on JOB, all methods commonly struggle with template q1. LOGER shows weak robustness in templates q12, q17, and q22, while Balsa shows weak robustness in templates q5, q22, and q28. On TPC-DS, LOGER struggles with templates query43, query62, and query99; Balsa struggles with templates query12, query62, and query99; and RELOAD struggles with template query20. In particular, query20 ex-hibits an opposite performance trend compared to query62 and query99, implying that they have significantly different strategies for generating optimal query plans. We next analyze how each method behaves across query templates to explain these robustness differences. Bao, unlike these methods that fail only on specific templates, struggles across all query templates and workloads because its online update scheme lacks a fixed training set, limiting its ability to maintain consistent performance per query. LOGER achieves fast and stable convergence by restricting its search space for plan operators, which improves training stability but shows limited reliability on query patterns not observed during train-ing. Balsa achieves solid performance, but occasionally shows plateau or rebound behaviors on certain templates. LIMAO, designed for online adaptation based on recurring subpatterns, shows limited robustness under the template-disjoint setting. In contrast, RELOAD consistently improves robustness across JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 11 
+
+both Balsa (vanilla) and Balsa (LIMAO), mitigating template-specific regressions while maintaining stable convergence be-havior. These results demonstrate that RELOAD substantially improves performance stability across a broad range of in-dividual queries. By prioritizing informative, underlearned, and timely experiences, the knowledge retention module ef-fectively mitigates plateau and rebound behaviors. It further mitigates the underlying local optima and credit assignment issues that have long hindered stability in RL-based query optimization. 
+
+Efficiency. As shown in Table IV, RELOAD consistently accelerates convergence across all workloads. On JOB, Balsa (vanilla)+RELOAD converges in 50 iterations (4.7 h), faster than the baseline Balsa. On TPC-DS, RELOAD is the only configuration that successfully converges, completing in 95 iterations (1.3 h). On SSB, both RELOAD variants reach convergence within an hour, while all baselines require longer or fail to converge. These results indicate that existing RL-based optimizers often suffer from slow convergence due to the absence of cross-task knowledge transfer, requiring extensive interactions. In contrast, RELOAD mitigates this inefficiency by initializing value model with meta-learned parameters. The integration of knowledge transfer substantially reduces the learning overhead, allowing RELOAD to shorten the initial ramp-up phase and achieve rapid, consistent convergence across diverse query patterns. 
+
+2) RELOAD on SQL Server: To verify the competitiveness of RELOAD on commercial database systems, we conducted experiments on SQL Server. As the JOB and TPC-DS work-loads exhibited trends consistent with the PostgreSQL results, we report only SSB for clarity and space efficiency. We adapted the query hints to conform to SQL Server syntax, ensuring that the queries would execute correctly and preserve their intended optimization behavior. 
+
+Performance Overview. Figure 9 shows the experimental results of RELOAD on the SSB workload running on SQL Server. While SQL Server incorporates advanced system-level optimizations, RELOAD still delivers consistent improvements in WRL—1.12 × on the training set and 1.01 × on the test set. 
+
+Robustness. All configurations show stable performance, ex-cept for a single Rebound in Balsa (LIMAO). Both RELOAD variants maintain robust performance across all test queries, even within a commercial database system. 
+
+Efficiency. RELOAD achieves efficiency by 3.1 × on Balsa (vanilla) (from 0.4 h to 0.13 h) and 1.4 × on Balsa (LIMAO) (from 2.1 h to 1.5 h). These results confirm that RELOAD consistently improves efficiency across both optimizers. 
+
+C. Micro-experiments 
+
+In this section, we analyze how different design choices affect robustness and efficiency. For the PER module (sub-subsection VI-C1), we test five configurations: four proposed weighting policies—recency, low TD error, high TD error, and their combination—and one ablation without knowledge retention. For the MAML module (subsubsection VI-C2), we also evaluate five configurations: four partitioning poli-cies—Halstead complexity, total number of operators, es-timated query cost, and estimated rows—and one ablation without knowledge transfer. All experiments are performed on the JOB workload. 
+
+1) PER: We first analyze the impact of PER on robustness. Figure 10a compares five configurations, performing PER with different weight policies for each. The baseline without knowledge retention shows the largest fluctuations, confirming that learning solely from recent sam-ples leads to unstable behavior. Recency-based sampling also exhibits high variability throughout training and fails to consistently approach the expert performance, indicating that emphasizing only recent experiences results in short-term bias without meaningful improvement. TD error (high) reaches the expert performance early but struggles to improve further, suggesting that emphasizing only large TD errors helps accelerate initial convergence yet limits long-term progress. In contrast, TD error (low) improves steadily and maintains stable performance, but its slower learning pace causes it to catch up to the expert only near the end. Among all policies, the Hybrid policy—combining recency and high TD error—achieves the best balance, showing stable progress and maintaining latency consistently below the expert baseline. This combination implicitly mitigates credit assignment issues by reinforcing meaningful states and helps the agent escape local optima caused by overfitting to recent or easy samples. Recency ensures continuous policy refinement, while high TD error emphasizes underlearned but valuable experiences, leading to more balanced and reliable performance across all query patterns. As a result, RELOAD achieves stable robust-ness, confirming the effectiveness of experience prioritization through PER weighting. 
+
+2) MAML: We investigate the effect of MAML, which is key to improving efficiency. We evaluate five configurations and perform MAML for each grouping. Figure 10b presents representative results on the JOB test set. For clarity, we show only the Halstead-based partitioning policy among the query complexity configurations, as others exhibit similar trends. This policy also achieved the smallest DBI, consistent with its fastest and most stable convergence observed in the figure. All MAML-based configurations converge faster and more stably than the baseline without knowledge transfer, confirm-ing that cross-task initialization enhances training efficiency. However, none of the configurations outperforms expert-level performance, indicating that faster convergence alone does not ensure optimal learning outcomes. Overall, these results highlight that while meta-learning accelerates learning, effec-tive task grouping remains essential for maintaining stable training. VII. R ELATED WORK 
+
+Learned query optimizers. Learned query optimizers use ML to overcome traditional optimizers’ reliance on static heuristics and cost models, improving adaptability to complex query workloads [40]. A common theme across prior work is to enhance plan quality by improving plan representations, explo-ration strategies, or cost/value estimation models. For example, Neo [3], ReJoin [41] and Balsa [12] employ deep reinforce-ment learning to generate execution plans, while Bao [11] JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 12  
+
+> (a) Impact of weighting policies on PER. (b) Impact of partitioning polices on MAML. Fig. 10. Micro-experiment results of RELOAD on the JOB test set. (a) evaluates the impact of different weighting strategies in knowledge retention using PER, and (b) compares query and data complexity–based partitioning policies for knowledge transfer with MAML. Vertical dashed lines indicate the convergence point of each strategy. Results are reported as the median of six runs. Both experiments examine module variants, including baselines without retention or transfer, to evaluate their impact on robustness and efficiency.
+
+guides plan selection among candidates generated by the underlying DBMS using learned value models. GLO [15] inte-grates DBMS statistics and Transformer-based value models, and Athena [17] diversifies join-order candidates and applies a learned comparator for plan selection. While these approaches consistently demonstrate performance improvements at the workload level, their training objectives—typically formulated to minimize aggregate loss or maximize expected reward over a workload—implicitly. In contrast, RELOAD explicitly targets query-level robustness and learning efficiency, address-ing performance regressions that hinder practical adoption of learned optimizers in commercial database systems. 
+
+Addressing performance regression and suboptimality. Per-formance regression can occur in certain machine learning scenarios, particularly when training iteratively in nonstation-ary environments. In query optimizers, mitigating regression and addressing suboptimality are crucial for achieving robust optimization. Lero [42] enhances stability by learning relative rankings between subqueries instead of predicting absolute latencies, improving robustness. LOGER [13] and Eraser [43] achieve robustness by deliberately narrowing the plan selec-tion space, encouraging the optimizer to favor more stable execution plans. In contrast to these methods, RELOAD in-troduces specialized PER, which prioritizes experiences based on recency and TD error, effectively mitigating regression, preventing premature convergence, and enhancing adaptability in complex optimization tasks. 
+
+Knowledge retention. In query optimization, preserving past knowledge is essential for maintaining stable performance under evolving workloads. LIMAO [14] addresses this by introducing a lifelong learning framework that stores policies in a module hub and reuses them when workloads drift, demonstrating the feasibility of continual learning. However, its workload-level design leads to coarse-grained adaptation and limited rapid convergence. RELOAD extends this di-rection by adopting a sampling-based approach that priori-tizes fine-grained sub-plan experiences through PER rather than reusing clustered modules as in LIMAO. In addition to knowledge retention, RELOAD incorporates a knowledge transfer mechanism based on meta-learning, enabling efficient convergence to surpass expert-level performance. VIII. C ONCLUSION 
+
+In this paper, we propose RELOAD, a robust and effi-cient learned query optimizer for advanced database systems. RELOAD enhances robustness and efficiency in RL-based optimizers through two complementary modules: (1) knowl-edge retention , which employs PER to overcome local optima and alleviate credit assignment issues under sparse rewards, and (2) knowledge transfer , which applies MAML for rapid adaptation via complexity-aware task grouping. Experiments on JOB, TPC-DS, and SSB show that RELOAD significantly mitigates performance regressions and accelerates convergence to expert-level performance, improving robustness by up to 2.4 × and efficiency by up to 3.1 ×. Overall, RELOAD provides a practical and general framework for robust and efficient learned query optimization, serving as a foundation for more adaptive and reliable optimizers. AI-G ENERATED CONTENT ACKNOWLEDGEMENT 
+
+We utilized ChatGPT throughout the manuscript to assist with minor language proofreading and grammar refinement. Additionally, ChatGPT provided limited support in improving the visualization quality of figures in Chapter 6 (Evaluation) through Python code refinement. All AI-assisted content was carefully reviewed, verified, and edited by the authors. The technical ideas, analysis, and results presented in this paper are entirely the work of the authors. REFERENCES [1] X. Chen, H. Chen, Z. Liang, S. Liu, J. Wang, K. Zeng, H. Su, and K. Zheng, “LEON: A New Framework for ML-Aided Query Optimization,” Proceedings of the VLDB Endowment ,vol. 16, no. 9, pp. 2261–2273, May 2023. [Online]. Available: https://dl.acm.org/doi/10.14778/3598581.3598597 [2] V. Leis, A. Gubichev, A. Mirchev, P. Boncz, A. Kemper, and T. Neumann, “How good are query optimizers, really?” Proc. VLDB Endow. , vol. 9, no. 3, pp. 204–215, Nov. 2015. [Online]. Available: https://dl.acm.org/doi/10.14778/2850583.2850594 JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 13 
+
+[3] R. Marcus, P. Negi, H. Mao, C. Zhang, M. Alizadeh, T. Kraska, O. Papaemmanouil, and N. Tatbul, “Neo: A Learned Query Optimizer,” 
+
+Proceedings of the VLDB Endowment , vol. 12, no. 11, pp. 1705–1718, Jul. 2019, arXiv:1904.03711 [cs]. [Online]. Available: http://arxiv.org/abs/1904.03711 [4] Y. E. Ioannidis, “Query optimization,” ACM Computing Surveys , vol. 28, no. 1, pp. 121–123, Mar. 1996. [5] D. Kossmann and K. Stocker, “Iterative dynamic programming: A new class of query optimization algorithms,” ACM Transactions on Database Systems , vol. 25, no. 1, pp. 43–82, Mar. 2000. [6] T. M. Moerland, J. Broekens, A. Plaat, and C. M. Jonker, “Model-based Reinforcement Learning: A Survey,” Mar. 2022. [7] S. Krishnan, Z. Yang, K. Goldberg, J. Hellerstein, and I. Stoica, “Learn-ing to Optimize Join Queries With Deep Reinforcement Learning,” Jan. 2019. [8] R. Marcus and O. Papaemmanouil, “Towards a Hands-Free Query Optimizer through Deep Learning,” Dec. 2018. [9] R. S. Sutton and A. G. Barto, Reinforcement Learning: An Introduction ,ser. Adaptive Computation and Machine Learning. Cambridge, Mass: MIT Press, 1998. [10] R. S. Sutton, “Learning to predict by the methods of temporal differ-ences,” Machine Learning , vol. 3, no. 1, pp. 9–44, Aug. 1988. [11] R. Marcus, P. Negi, H. Mao, N. Tatbul, M. Alizadeh, and T. Kraska, “Bao: Making Learned Query Optimization Practical,” in 
+
+Proceedings of the 2021 International Conference on Management of Data , ser. SIGMOD ’21. New York, NY, USA: Association for Computing Machinery, Jun. 2021, pp. 1275–1288. [Online]. Available: https://dl.acm.org/doi/10.1145/3448016.3452838 [12] Z. Yang, W.-L. Chiang, S. Luan, G. Mittal, M. Luo, and I. Stoica, “Balsa: Learning a Query Optimizer Without Expert Demonstrations,” in Proceedings of the 2022 International Conference on Management of Data , ser. SIGMOD ’22. New York, NY, USA: Association for Computing Machinery, Jun. 2022, pp. 931–944. [Online]. Available: https://dl.acm.org/doi/10.1145/3514221.3517885 [13] T. Chen, J. Gao, H. Chen, and Y. Tu, “LOGER: A Learned Optimizer Towards Generating Efficient and Robust Query Execution Plans,” Proceedings of the VLDB Endowment , vol. 16, no. 7, pp. 1777–1789, Mar. 2023. [Online]. Available: https://dl.acm.org/doi/10. 14778/3587136.3587150 [14] Q. Zhang, S. Xie, and I. Sabek, “LIMAO: A Framework for Lifelong Modular Learned Query Optimization,” Jun. 2025. [15] T. Chen, J. Gao, Y. Tu, and M. Xu, “Glo: Towards generalized learned query optimization,” in 2024 IEEE 40th International Conference on Data Engineering (ICDE) . IEEE, 2024, pp. 4843–4855. [16] L. Weng, R. Zhu, D. Wu, B. Ding, B. Zheng, and J. Zhou, “Eraser: Eliminating performance regression on learned query optimizer,” Pro-ceedings of the VLDB Endowment , vol. 17, no. 5, pp. 926–938, 2024. [17] R. Li, Q. Li, H. Liu, R. Mao, Q. Li, and B. Tang, “Athena: An effective learning-based framework for query optimizer performance improvement,” Proceedings of the ACM on Management of Data , vol. 3, no. 3, pp. 1–24, 2025. [18] Z. Zhu, K. Lin, A. K. Jain, and J. Zhou, “Transfer Learning in Deep Reinforcement Learning: A Survey,” IEEE Transactions on Pattern Analysis and Machine Intelligence , vol. 45, no. 11, pp. 13 344–13 362, Nov. 2023. [Online]. Available: https://ieeexplore.ieee.org/document/ 10172347/ [19] K. Khetarpal, M. Riemer, I. Rish, and D. Precup, “Towards Continual Reinforcement Learning: A Review and Perspectives,” Journal of Arti-ficial Intelligence Research , vol. 75, pp. 1401–1476, Dec. 2022. [20] L.-J. Lin, “Self-improving reactive agents based on reinforcement learn-ing, planning and teaching,” Machine Learning , vol. 8, no. 3, pp. 293– 321, May 1992. [21] T. Schaul, J. Quan, I. Antonoglou, and D. Silver, “Prioritized Experience Replay,” Feb. 2016. [22] M. E. Taylor and P. Stone, “Transfer Learning for Reinforcement Learning Domains: A Survey,” J. Mach. Learn. Res. , vol. 10, pp. 1633– 1685, 2009. [23] S. Thrun and L. Pratt, “Learning to learn: Introduction and overview,” in Learning to learn . Springer, 1998, pp. 3–17. [24] J. Beck, R. Vuorio, E. Z. Liu, Z. Xiong, L. Zintgraf, C. Finn, and S. Whiteson, “A Survey of Meta-Reinforcement Learning,” Aug. 2024. [25] J. Ortiz, M. Balazinska, J. Gehrke, and S. S. Keerthi, “Learning State Representations for Query Optimization with Deep Reinforcement Learning,” in Proceedings of the Second Workshop on Data Management for End-To-End Machine Learning , ser. DEEM’18. New York, NY, USA: Association for Computing Machinery, 2018, pp. 1–4. [26] C. Finn, P. Abbeel, and S. Levine, “Model-Agnostic Meta-Learning for Fast Adaptation of Deep Networks,” in Proceedings of the 34th International Conference on Machine Learning . PMLR, Jul. 2017, pp. 1126–1135. [27] A. Fallah, A. Mokhtari, and A. Ozdaglar, “Generalization of Model-Agnostic Meta-Learning Algorithms: Recurring and Unseen Tasks,” in 
+
+Advances in Neural Information Processing Systems , vol. 34. Curran Associates, Inc., 2021, pp. 5469–5480. [28] A. Raghu, M. Raghu, S. Bengio, and O. Vinyals, “Rapid Learning or Feature Reuse? Towards Understanding the Effectiveness of MAML,” Feb. 2020. [29] D. L. Davies and D. W. Bouldin, “A Cluster Separation Measure,” IEEE Transactions on Pattern Analysis and Machine Intelligence , vol. PAMI-1, no. 2, pp. 224–227, Apr. 1979. [30] O. Arbelaitz, I. Gurrutxaga, J. Muguerza, J. M. P´ erez, and I. Perona, “An extensive comparative study of cluster validity indices,” Pattern Recognition , vol. 46, no. 1, pp. 243–256, Jan. 2013. [31] A. Vashistha and S. Jain, “Measuring Query Complexity in SQLShare Workload,” in Proceedings of the 2019 International Conference on Management of Data , 2016. [32] H. Lan, Z. Bao, and Y. Peng, “A Survey on Advancing the DBMS Query Optimizer: Cardinality Estimation, Cost Model, and Plan Enumeration,” Jan. 2021. [Online]. Available: https://arxiv.org/abs/2101.01507v1 [33] A. Cioba, M. Bromberg, Q. Wang, R. Niyogi, G. Batzolis, J. Garcia, D.-s. Shiu, and A. Bernacchia, “How to Distribute Data across Tasks for Meta-Learning?” Proceedings of the AAAI Conference on Artificial Intelligence , vol. 36, no. 6, pp. 6394–6401, Jun. 2022. [34] K. Zhong, L. Sun, T. Ji, C. Li, and H. Chen, “FOSS: ASelf-Learned Doctor for Query Optimizer,” in 2024 IEEE 40th International Conference on Data Engineering (ICDE) , May 2024, pp. 4329–4342, arXiv:2312.06357 [cs]. [Online]. Available: http: //arxiv.org/abs/2312.06357 [35] M. Poess, B. Smith, L. Kollar, and P. Larson, “TPC-DS, taking decision support benchmarking to the next level,” in Proceedings of the 2002 ACM SIGMOD International Conference on Management of Data , ser. SIGMOD ’02. New York, NY, USA: Association for Computing Machinery, 2002, pp. 582–587. [36] P. O’Neil, E. O’Neil, X. Chen, and S. Revilak, “The star schema bench-mark and augmented fact table indexing,” in Performance Evaluation and Benchmarking , R. Nambiar and M. Poess, Eds. Berlin, Heidelberg: Springer Berlin Heidelberg, 2009, pp. 237–252. [37] C. Lehmann, P. Sulimov, and K. Stockinger, “Is Your Learned Query Optimizer Behaving As You Expect? A Machine Learning Perspective,” 
+
+Proc. VLDB Endow. , vol. 17, no. 7, pp. 1565–1577, May 2024. [Online]. Available: https://dl.acm.org/doi/10.14778/3654621.3654625 [38] M. P¨ oss, R. Nambiar, and D. Walrath, “Why You Should Run TPC-DS: A Workload Analysis,” Sep. 2007. [Online]. Available: https://www.semanticscholar.org/paper/ Why-You-Should-Run-TPC-DS%3A-A-Workload-Analysis-P% C3%B6ss-Nambiar/660aa29ca30b1e73f7a85abd97496435b76e0e8d [39] T. Rabl, M. Poess, H.-A. Jacobsen, P. O’Neil, and E. O’Neil, “Variations of the star schema benchmark to test the effects of data skew on query performance,” in Proceedings of the 4th ACM/SPEC International Conference on Performance Engineering , ser. ICPE ’13. New York, NY, USA: Association for Computing Machinery, 2013, pp. 361–372. [40] R. Zhu, L. Weng, B. Ding, and J. Zhou, “Learned Query Optimizer: What is New and What is Next,” in Companion of the 2024 International Conference on Management of Data ,ser. SIGMOD/PODS ’24. New York, NY, USA: Association for Computing Machinery, Jun. 2024, pp. 561–569. [Online]. Available: https://dl.acm.org/doi/10.1145/3626246.3654692 [41] R. Marcus and O. Papaemmanouil, “Deep Reinforcement Learning for Join Order Enumeration,” in Proceedings of the First International Workshop on Exploiting Artificial Intelligence Techniques for Data Management , Jun. 2018, pp. 1–4, arXiv:1803.00055 [cs]. [Online]. Available: http://arxiv.org/abs/1803.00055 [42] R. Zhu, W. Chen, B. Ding, X. Chen, A. Pfadler, Z. Wu, and J. Zhou, “Lero: A Learning-to-Rank Query Optimizer,” Proc. VLDB Endow. , vol. 16, no. 6, pp. 1466–1479, Feb. 2023. [Online]. Available: https://dl.acm.org/doi/10.14778/3583140.3583160 [43] L. Weng, R. Zhu, D. Wu, B. Ding, B. Zheng, and J. Zhou, “Eraser: Eliminating Performance Regression on Learned Query Optimizer,” 
+
+Proc. VLDB Endow. , vol. 17, no. 5, pp. 926–938, May 2024. [Online]. Available: https://dl.acm.org/doi/10.14778/3641204.3641205

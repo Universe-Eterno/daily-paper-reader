@@ -1,0 +1,38 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.16967v1/fig-001.webp",
+      "caption": "Fig. 4: A scenario with (a) cultivation and biocultivation areas, (b) their segmentation and spraying points (triangles), and (c) NaviFormer’s solution from start to end depot (cyan and red circles).",
+      "page": 6,
+      "index": 1,
+      "width": 412,
+      "height": 505
+    },
+    {
+      "url": "assets/figures/arxiv/2604.16967v1/fig-002.webp",
+      "caption": "TABLE I: Ablation study showing the performance for synthetic scenarios with n = 50 and T = 3.",
+      "page": 7,
+      "index": 2,
+      "width": 752,
+      "height": 199
+    },
+    {
+      "url": "assets/figures/arxiv/2604.16967v1/fig-003.webp",
+      "caption": "TABLE II: Comparison with some baselines on the PASTIS and synthetic datasets.",
+      "page": 7,
+      "index": 3,
+      "width": 908,
+      "height": 429
+    },
+    {
+      "url": "assets/figures/arxiv/2604.16967v1/fig-004.webp",
+      "caption": "Fig. 3: Novel NaviFormer modules: (a) the combined multi-head attention operation to merge node and obstacle information, (b) the state embedding module to encode the situation of the agent at each time step t, and (c) the direction prediction layers to predict the policy πθ(a d t |st) from local maps based on the obstacles and the next goal agt .",
+      "page": 5,
+      "index": 4,
+      "width": 1026,
+      "height": 545
+    }
+  ]
+}

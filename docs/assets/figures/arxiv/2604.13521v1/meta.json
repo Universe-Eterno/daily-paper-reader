@@ -1,0 +1,102 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.13521v1/fig-001.webp",
+      "caption": "Table 3: Hyperparameters for AKOrN.",
+      "page": 15,
+      "index": 1,
+      "width": 826,
+      "height": 437
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13521v1/fig-002.webp",
+      "caption": "Figure 1: (a): The overview of confidence-based voting (C-voting). The candidates of the latent state are initialized by random variables, and the recurrent model updates the latent states from t = 0 to t = T using input x. Calculating probabilities from the final states, C-voting selects the most confident prediction. (b): The performance comparisons of ItrSA++ with C-voting to other state-of-the-art models. The proposed method outperforms in Sudoku-hard, Sudoku-extreme, and Maze-hard tasks.",
+      "page": 2,
+      "index": 2,
+      "width": 739,
+      "height": 360
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13521v1/fig-003.webp",
+      "caption": "Figure 2: A performance comparison between C-voting and E-voting in AKOrN.",
+      "page": 7,
+      "index": 3,
+      "width": 635,
+      "height": 296
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13521v1/fig-004.webp",
+      "caption": "Figure 3: Scaling analysis of ItrSA++ with C-voting.",
+      "page": 7,
+      "index": 4,
+      "width": 818,
+      "height": 260
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13521v1/fig-005.webp",
+      "caption": "Figure 6: Distributions of confidence of ItrSA++ at t = 32.",
+      "page": 10,
+      "index": 5,
+      "width": 634,
+      "height": 611
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13521v1/fig-006.webp",
+      "caption": "Figure 7: Time step dependency of confidence.",
+      "page": 10,
+      "index": 6,
+      "width": 634,
+      "height": 562
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13521v1/fig-007.webp",
+      "caption": "Table 2: Hyperparameters for modified HRM.",
+      "page": 14,
+      "index": 7,
+      "width": 560,
+      "height": 325
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13521v1/fig-008.webp",
+      "caption": "Figure 9: Board accuracy of a transformer with C-voting.",
+      "page": 14,
+      "index": 8,
+      "width": 399,
+      "height": 336
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13521v1/fig-009.webp",
+      "caption": "Figure 8: Test-time scaling in ItrSA++",
+      "page": 13,
+      "index": 9,
+      "width": 797,
+      "height": 215
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13521v1/fig-010.webp",
+      "caption": "Figure 5: Visualization of calibration of ItrSA++.",
+      "page": 9,
+      "index": 10,
+      "width": 643,
+      "height": 558
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13521v1/fig-011.webp",
+      "caption": "Figure 11: Random seed dependency of board accuracy.",
+      "page": 16,
+      "index": 11,
+      "width": 742,
+      "height": 335
+    },
+    {
+      "url": "assets/figures/arxiv/2604.13521v1/fig-012.webp",
+      "caption": "Figure 10: Comparison of voting effects across different metrics.",
+      "page": 16,
+      "index": 12,
+      "width": 741,
+      "height": 335
+    }
+  ]
+}

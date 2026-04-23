@@ -1,0 +1,742 @@
+Title: Tight Sample Complexity Bounds for Best-Arm Identification Under Bounded Systematic Bias
+
+URL Source: https://arxiv.org/pdf/2604.14345v2
+
+Published Time: Tue, 21 Apr 2026 00:16:22 GMT
+
+Number of Pages: 10
+
+Markdown Content:
+# Tight Sample Complexity Bounds for Best-Arm Identification Under Bounded Systematic Bias 
+
+Tianhao Qian 
+
+School of Mathematics, Southeast University Nanjing 210096, China qth2mir@seu.edu.cn 
+
+Abstract 
+
+As search depth increases in autonomous reasoning and em-bodied planning, the candidate action space expands ex-ponentially, heavily taxing computational budgets. While heuristic pruning is a common countermeasure, it operates without formal safety guarantees when surrogate models (like LLMs) exhibit systematic evaluation biases. This paper frames the node expansion process as a localized Best-Arm Identification (BAI) problem over dynamic frontiers, subject to a bounded systematic bias L. By inverting the Lambert W function, we establish an additive sample complexity of 
+
+O((∆ −4L)−2), which indicates that safe node elimination is only feasible when the empirical reward gap exceeds 4L. We complement this with an information-theoretic lower bound of Ω((∆ − 2L)−2) to confirm the structural limits of biased search. Subsequent evaluations on both synthetic trees and complex reasoning tasks demonstrate that adhering to this lo-cal safety boundary successfully preserves optimal trajecto-ries while maximizing sample allocation efficiency. 
+
+Introduction and Problem Formulation 
+
+Monte Carlo Tree Search (MCTS) (Kocsis and Szepesv´ ari 2006) and similar lookahead algorithms are fundamental to sequential decision-making. These methods are increasingly applied to extend the test-time compute of Large Language Models (LLMs) in complex reasoning and Task and Motion Planning (TAMP) (Garrett et al. 2021; Huang et al. 2023). Given the vast branching factors in these domains, prun-ing unpromising nodes is essential to manage computational costs. However, standard heuristic pruning assumes unbiased re-ward signals, an assumption frequently violated by neural evaluators. LLMs often exhibit systematic biases ( L) due to inherent reasoning blind spots or hallucinated confidence (Valmeekam et al. 2023; Lu, Zhang, and Wang 2025). While existing literature addresses adversarial corruptions (Lyk-ouris, Mirrokni, and Paes Leme 2018), those frameworks often lead to overly conservative global exploration. Con-versely, standard MCTS variants tolerate stochastic noise but lack mechanisms to correct deterministic, structured bias. This vulnerability risks the premature elimination of optimal reasoning paths. To resolve this, we model the active node expansion phase as a localized Best-Arm Identification (BAI) instance over an expanding frontier At. Sampling a node m ∈ A t pro-duces a biased observation Ym,t (Notations are summarized in Appendix ). 
+
+Assumption 1 (Bounded Systematic Bias) . The heuristic reward observation Ym,t satisfies a bounded conditional bias: |E[Ym,t |F t−1] − μm| ≤ L, where Ft−1 is the natu-ral filtration, and the centered noise is σ2-sub-Gaussian. 
+
+In this context, L represents the supremum of the system-atic bias over the active candidate set. It acts as a determinis-tic bound on the worst-case calibration error of the heuristic model. Our goal is to identify the optimal node m∗ (value 
+
+μ∗) while safely discarding suboptimal candidates (with a suboptimality gap ∆m). By integrating this bias constraint, we prove that pruning remains safe strictly when the effec-tive gap outpaces the bias ( ∆m > 4L). This analysis yields a tight O((∆ − 4L)−2) sample complexity bound, matching the fundamental limits of biased exploration. 
+
+Main Theoretical Results 
+
+This section establishes the sample complexity boundaries for safe node elimination under bounded systematic bias. Detailed proofs, including the change-of-measure argu-ments, are provided in Appendix . 
+
+Lemma 1 (Global Time-Uniform Concentration) . Let 
+
+bm(n) be the empirical mean of arm m after n samples. For failure probability δ, defining the robust confidence radius 
+
+udist (n) = 
+
+q 2σ2 ln( π2n2|A t|/3δ) 
+
+> n
+
++ L, it holds with proba-bility 1 − δ simultaneously for all m ∈ A t and n ≥ 1 that: 
+
+|bm(n) − μm| ≤ udist (n). (1) 
+
+Theorem 1 (Step-wise PAC Upper Bound) . With probabil-ity 1−δ, an adaptive pruning mechanism correctly identifies an ε-optimal node. The pairwise sample complexity strictly bounding the worst-case evaluations to safely prune subop-timal arm m scales additively as: 
+
+Nm = O
+
+ σ2(ln( |A t|/δ ) + ln(∆ −2eff )) (∆ m − 4L − ε)2
+
+
+
+, (2) 
+
+provided the effective gap satisfies ∆eff = ∆ m − 4L > ε .
+
+Furthermore, in Appendix , we establish a graceful degra-dation bound (Corollary 1) that mathematically bounds the 
+
+> arXiv:2604.14345v2 [cs.LG] 17 Apr 2026
+
+Table 1: C OMPARISON OF SAMPLE COMPLEXITY BOUNDS FOR IDENTIFYING AN ε-O PTIMAL ARM 
+
+Setting Reward Assumption Sample Complexity BAI (Kaufmann, Capp´ e, and Garivier 2016) Unbiased ( L = 0 ) O(P ∆−2 
+
+> i
+
+ln(1 /δ )) 
+
+Robust (Gupta, Koren, and Talcar 2019) Adversarial Corrupt. O(P ∆−2 
+
+> i
+
++ C · ∆−1min )
+
+Ours Bounded Bias ( L) O(P(∆ i − 4L)−2 ln(1 /δ )) 
+
+maximum suboptimality of the selected arm even when extreme bias completely obscures the optimal trajectory (∆m ≤ 4L). 
+
+Theorem 2 (Information-Theoretic Lower Bound) . Any al-gorithm identifying an ε-optimal arm with probability 1 − δ
+
+under the bounded-bias model satisfies: 
+
+E[N ] ≥ Ω
+
+ X
+
+> m̸=m∗
+
+σ2 ln(1 /δ )(∆ m + ε − 2L)2
+
+ . (3) Theorems 1 and 2 prove that when bias obscures the gap (∆m < 4L), standard UCT asymptotically degenerates; an infinite budget N cannot compensate for this irreducible information-theoretic floor. 
+
+Bias-Aware Pruning Mechanism 
+
+Translating these theoretical bounds into a practical search strategy, we introduce PAC-MCTS (summarized in Algo-rithm 1). This algorithm dynamically manages the active frontier At. At each decision epoch t, the algorithm sam-ples nodes and updates their empirical means bm(t). To pre-vent statistical dilution across the growing tree, we compute a dynamic confidence radius udist (nm) using a union bound over the current frontier size |A t|. A candidate m is removed from the active set if: 
+
+bm(t) + udist (nm) < max  
+
+> j
+
+bj (t) − udist (nj ) − ε. (4) Applying this condition ensures that the true optimal node 
+
+m∗ remains in the candidate pool with probability 1 − δ,thereby upholding the localized PAC safety requirement dur-ing deep expansions. 
+
+Validation of Theoretical Bounds (Synthetic Environments) 
+
+To validate the theoretical boundary ( ∆ = 4 L) and sam-ple complexity bounds derived in Section , we first isolate the search mechanism in controlled synthetic environments. This strips away the confounding epistemic uncertainties of neural evaluators, allowing us to test the statistical behavior of bias-aware pruning. 
+
+Experimental Setup and Baselines 
+
+We consider a Best Arm Identification (BAI) problem as the foundation. The environment consists of M candidate ac-tions, where the observed reward for action m is drawn from a Gaussian distribution N (˜ μm, σ 2), with the biased mean satisfying |˜μm − μm| ≤ L.
+
+Algorithm 1 PAC-MCTS: Adaptive Bias-Aware Pruning 
+
+Require: Confidence δ, Tolerance ε, Bias L, Budget Tmax  
+
+> 1:
+
+Initialize: Active frontier A0 = {Root }, t = 0  
+
+> 2:
+
+while t < T max and At̸ = ∅ do  
+
+> 3:
+
+% Phase 1: MCTS Evaluation & Backpropagation  
+
+> 4:
+
+Allocate samples to active m ∈ A t via traversal  
+
+> 5:
+
+Update empirical means bm(t) and counts nm 
+
+> 6:
+
+% Phase 2: Dynamic Confidence Scaling  
+
+> 7:
+
+for each m ∈ A t do  
+
+> 8:
+
+ustat ←
+
+q 2σ2 ln( π2n2 
+
+> m|A t|/3δ)
+> nm
+
+{Union bound } 
+
+> 9:
+
+udist (nm) ← ustat + L {Add bounded bias } 
+
+> 10:
+
+end for  
+
+> 11:
+
+% Phase 3: Strict PAC Pruning  
+
+> 12:
+
+m∗ ← arg max m∈A t bm(t) {Empirical best } 
+
+> 13:
+
+for each m ∈ A t \ { m∗} do  
+
+> 14:
+
+if bm(t) + udist (nm) < b m∗ (t) − udist (nm∗ ) − ε
+
+then  
+
+> 15:
+
+At ← A t \ { m} { Safely prune } 
+
+> 16:
+
+end if  
+
+> 17:
+
+end for  
+
+> 18:
+
+% Phase 4: Optimistic Frontier Expansion  
+
+> 19:
+
+UCB: Qm(t) ← bm(t) + udist (nm), ∀m ∈ A t 
+
+> 20:
+
+ˆm ← arg max m∈A t Qm(t) {Greedy UCB selection } 
+
+> 21:
+
+Generate children C( ˆ m) 
+
+> 22:
+
+At+1 ← (At \ { ˆm}) ∪ C ( ˆ m) 
+
+> 23:
+
+t ← t + 1  
+
+> 24:
+
+end while  
+
+> 25:
+
+return arg max m∈A t bm(t)
+
+Global Settings: While the systematic bias L is exactly controlled in synthetic environments, the true global supre-mum is inaccessible in the real-world Game of Amazons. Rather than tuning L arbitrarily, we empirically measure it using the 99 th -percentile absolute validation error on a hold-out dataset of expert endgame positions. This statistically principled proxy securely bounds the worst-case calibration error aligned with the network’s behavior, while effectively rejecting extreme outliers. 
+
+Synthetic Benchmark I: Bias Sensitivity and Robustness 
+
+We first isolate the impact of bounded bias without con-founding epistemic uncertainties from deep RL architec-tures. We configure a tree expansion environment ( M =30 actions) with a strict underlying action gap ( ∆ =0.1). To comprehensively evaluate the algorithm’s bound-aries, we perform a grid search across varying search budgets ( N ∈ {2000 , 3000 , 4000 }), environmental noise 0.0                              
+
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> PCS
+> Budget: 2000 | Noise : 0.2 Budget: 2000 | Noise : 0.3 Budget: 2000 | Noise : 0.4
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> PCS
+> Budget: 3000 | Noise : 0.2 Budget: 3000 | Noise : 0.3 Budget: 3000 | Noise : 0.4
+> 0.0 0.1 0.2 0.3 0.4 0.5
+> Systematic Bias Magnitude ( L)
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> PCS
+> Budget: 4000 | Noise : 0.2
+> 0.0 0.1 0.2 0.3 0.4 0.5
+> Systematic Bias Magnitude ( L)
+> Budget: 4000 | Noise : 0.3
+> 0.0 0.1 0.2 0.3 0.4 0.5
+> Systematic Bias Magnitude ( L)
+> Budget: 4000 | Noise : 0.4
+> PAC-MCTS (Ours) Naive Pruning
+
+Figure 1: Robustness analysis ( ∆ = 0 .1). While Naive Prun-ing (red) exhibits a monotonic decline in performance as bias increases, PAC-MCTS (blue) maintains higher robust-ness at moderate bias levels ( L ∈ [0 .1, 0.2] ). It effectively mitigates initial estimation errors before performance even-tually degrades under extreme bias conditions. (σ ∈ { 0.2, 0.3, 0.4}), and injected systematic bias ( L ∈
+
+[0 .0, 0.5] ). 
+
+Bias Sensitivity & The Resilience Peak (Fig. 1): As illustrated, Naive Pruning (red) degrades steadily as sys-tematic bias L increases, erroneously eliminating the opti-mal trajectory early. Conversely, PAC-MCTS (blue) demon-strates a resilience peak at moderate bias ( L ≈ 0.1 ∼ 0.2). These results empirically validate our dynamic radius for-mulation ( +L): this theoretical shield successfully buys cru-cial exploration time for the statistical bounds to shrink and safely override the systematic bias. 
+
+Budget Dependency and Asymptotic Ceilings: The comprehensive grid analysis depicts the asymptotic relation-ship between sample complexity and the magnitude of sys-tematic bias. Expanding the search budget from N = 2000 
+
+to N = 4000 significantly elevates the PAC-MCTS per-formance peak (reaching PCS ≈ 0.98 under low noise, 
+
+σ = 0 .2) and delays the onset of the asymptotic floor. How-ever, at extreme bias magnitudes ( L ≥ 0.4, where 4L ≫ ∆), the required sample complexity to resolve the gap exponen-tially exceeds the allocated budget, leading both algorithms to converge toward the baseline. This phase transition per-fectly aligns with the theoretical boundaries derived in The-orem 1, proving that our pruning mechanism safely maxi-mizes utility within the feasible theoretical limits. 
+
+Synthetic Benchmark II: Ablation on Safety Boundary 
+
+To rigorously evaluate the theoretical boundary ( ∆ = 4 L)derived in Theorem 1, we designed a resource-constrained ablation environment (Table 2). We strictly calibrated the core parameters: a high branching factor ( M = 50 ), a fixed gap ( ∆ = 0 .25 ), high environmental noise ( σ = 0 .3), and a Table 2: Ablation Study on the Theoretical Safety Boundary (∆ > 4L). PAC-MCTS exhibits aggressive efficiency in the safe regime and mathematically guaranteed graceful degra-dation when the theoretical condition is violated.                                
+
+> Injected Bias (L)Condition (∆−4L > 0)Pruning Rate UCT (PCS) PAC-MCTS (Ours)
+> L= 0 .05∆ Yes (Safe) 99.1% 1.00 0.97
+> L= 0 .15∆ Yes (Safe) 91.3% 1.00 0.96
+> L= 0 .25∆ No (Violated / Singularity) 44.4% 0.98 0.98
+> L= 0 .40∆ No (Violated) 8.9% 0.42 0.98
+
+severely restricted budget ( N = 1500 ) to simulate the rapid exhaustion of computational resources. 
+
+Graceful Degradation: Table 2 illustrates a textbook phase transition. In the mathematically safe regime ( L ≤
+
+0.15∆ ), PAC-MCTS aggressively eliminates suboptimal tra-jectories, achieving a pruning rate of up to 99.1% . However, as the injected bias crosses the theoretical singularity ( ∆ ≤
+
+4L), a critical behavioral shift occurs. At L = 0 .40∆ , over-whelming adversarial hallucination completely misleads the standard UCT, collapsing its PCS to 0.42 . In stark contrast, PAC-MCTS mathematically detects this violation, sharply dropping its pruning rate to 8.9% . By autonomously falling back to a conservative exploration strategy, it shields the op-timal node from premature elimination, empirically validat-ing the Graceful Degradation Bound (Corollary 1) and pre-serving an outstanding PCS of 0.98 .
+
+Conservative Pruning Behavior and Bound Tightness: 
+
+During our evaluation under strictly theoretical conditions (cstat = 1 .0, severely limited budgets), an intriguing phe-nomenon emerged at the theoretical boundary. The algo-rithm’s pruning rate abruptly dropped to exactly 0.0% .Rather than a failure, this conservative pruning behavior empirically demonstrates the tightness of the Hoeffding-derived safety bounds. When the budget is insufficient to shrink the confidence radius below the effective gap, the al-gorithm mathematically refuses to prune, strictly honoring the 1 − δ safety guarantee. While theoretically flawless, this extreme conservatism highlights an SNR bottleneck in prac-tical planning, necessitating the empirical calibration of the radius factor ( cstat ) explored in our subsequent grid analy-sis. 
+
+Synthetic Benchmark III: Allocation Efficiency Grid 
+
+Sample Allocation Efficiency & Safety Tradeoff (Fig. 2): 
+
+To validate the exact sample complexity bound, we eval-uate efficiency gains over UCB across 32 configurations (M = 200 , ∆ = 0 .4). Unlike naive approaches that risk discarding optimal solutions, Bias-Aware PAC-MCTS uni-versally maintained absolute safety ( PCS ≈ 1.00 ) across all configurations. Crucially, Fig. 2 visualizes the algorithm’s autonomous Safety-Efficiency Tradeoff as a continuous macroscopic gra-dient. In benign environments with low noise and appropri-ately calibrated radii (bottom-left quadrant), the algorithm confidently locks the active frontier early, yielding massive efficiency gains peaking at 7.22 ×.However, as we traverse towards the top-right quad-0.25 0.3 0.4 0.5                                  
+
+> Environmental Noise ( )
+> L=0.05 | cstat =0.2
+> L=0.05 | cstat =0.3
+> L=0.05 | cstat =0.4
+> L=0.05 | cstat =0.5
+> L=0.1 | cstat =0.2
+> L=0.1 | cstat =0.3
+> L=0.1 | cstat =0.4
+> L=0.1 | cstat =0.5
+> Bias ( L) & Radius Factor ( cstat )
+> 7.22 7.16 6.96 6.16
+> 6.76 6.31 5.27 4.56
+> 6.25 5.98 3.90 2.55
+> 5.70 4.28 1.33 0.77
+> 7.03 6.36 4.77 5.34
+> 4.54 4.64 1.93 0.42
+> 2.49 1.67 0.08 0.54
+> 1.22 0.05 0.05 0.05
+> Safety Violation
+> (PCS < 0.85)
+> 0
+> 1
+> 2
+> 3
+> 4
+> 5
+> 6
+> 7
+> 8
+> Efficiency Gain over UCB ( x times)
+
+Figure 2: Global hyperparameter grid search for Sample Al-location Efficiency and Safety boundaries ( M = 200 , ∆ = 0.4). The size of the bubble represents the efficiency gain multiplier over standard UCB. Across all configurations, PAC-MCTS maintains 100% safety (PCS ≥ 0.90 ), dynam-ically trading efficiency for safety in highly noisy environ-ments (top-right quadrant). rant (escalating environmental noise σ, systematic bias L,and radius factor cstat ), a systematic degradation in effi-ciency emerges. Mathematically, the confidence radius ex-pands multiplicatively with σ and cstat . As these theoreti-cal bounds widen and overlap, the algorithm’s conservative pruning behavior proportionally scales back its pruning ag-gressiveness to prevent safety violations. In the extreme top-right regime (e.g., σ ≥ 0.4, L = 0 .1, c stat ≥ 0.4), pruning halts almost entirely, causing efficiency to smoothly decay below 1.0× and eventually bottom out at ≈ 0.05 × (default-ing to pure uniform exploration). This progressive trend is a feature, not a flaw. It transpar-ently exposes the strict cost of absolute safety in adversar-ial environments, confirming that PAC-MCTS dynamically modulates its behavior to maximize allocation utility strictly up to—but never beyond—its mathematically permissible limit. 
+
+Test-Time Compute Scaling Law 
+
+Recent advancements in LLM planning highlight the im-portance of test-time compute scaling (Snell et al. 2024). To demonstrate PAC-MCTS’s efficiency in translating com-putational budget into task accuracy, we evaluated its scal-ing behavior under a fixed adversarial gap ( ∆ = 3 .5, L =1.2, σ = 2 .0). As shown in our empirical scaling analysis, PAC-MCTS exhibits a monotonic performance improvement as the eval-uation budget increases. At a severely restricted budget of 
+
+N = 50 , the algorithm maintains a foundational Probabil-ity of Correct Selection (PCS) of 0.253 . As compute scales to N = 150 and N = 250 , the PCS surges to 0.713 and 
+
+0.880 , respectively. Crucially, at approximately N ≈ 120 ,the localized PAC-MCTS utilizing a computationally cheap heuristic evaluator eclipses the fixed zero-shot baseline of a theoretically larger model. This validates that dynamic, bias-aware pruning is an economically viable strategy for test-time scaling, effectively trading low-cost sampling for high-fidelity reasoning. 
+
+Sensitivity to PRM Quality and Graceful Degradation 
+
+To empirically validate the Graceful Degradation Bound es-tablished in Corollary 1, we subjected PAC-MCTS to vary-ing qualities of Process Reward Models (PRMs). We fixed the effective gap at ∆ = 4.0 and tested three evaluator profiles: a Fine-tuned PRM ( L = 0 .5), a Zero-shot PRM (L = 1 .5), and a Weak Small Model ( L = 3 .0). Under the Strong and Medium PRMs, the safety condition (∆ > 4L) holds, and the algorithm identifies the optimal trajectory with a PCS of 1.00 and 0.76 , respectively, yielding near-perfect average rewards ( ≈ 9.01 − 10 .0). However, under the Weak PRM ( L = 3 .0), the injected bias violates the safety boundary ( 12 .0 ≫ 4.0). As theoret-ically predicted, the PCS mathematically drops to 0.0. Yet, the algorithm does not experience catastrophic failure. In-stead of collapsing to random exploration, the adaptive con-fidence mechanism strictly bounds the suboptimality. The empirical average reward stabilizes at ≈ 5.89 (with the the-oretical maximum suboptimal arm capped at 6.0). This text-book phase transition perfectly aligns with our mathemat-ical framework: when systematic hallucination completely obscures the optimal path, PAC-MCTS gracefully degrades to the bounded empirical supremum, providing an absolute safety net for autonomous planning. 
+
+Ablation on Dynamic Bias Estimation 
+
+While a static supremum bias L provides rigid safety guar-antees, real-world search trees exhibit heterogeneous hallu-cination risks. We ablated a dynamic variant of PAC-MCTS that estimates the localized Lt using the empirical variance of the active frontier’s rewards. Results demonstrate that dynamic estimation maintains the rigorous safety baseline (PCS ≈ 0.817 , compared to the static 0.820 ) while allowing for more aggressive pruning in low-variance, benign sub-trees. This flexibility highlights the algorithm’s capability to autonomously throttle its pruning aggressiveness without re-quiring oracle knowledge of the global bias distribution. 
+
+Evaluation on Complex Planning Domains 
+
+While synthetic environments validate the exact theoreti-cal boundaries, real-world LLM-guided planning introduces complex semantic constraints, variable branching factors, and deeply coupled logic chains. To prove the algorithm’s practical scalability and cross-domain generalization, we deploy PAC-MCTS across four distinct high-dimensional paradigms: a combinatorial game, continuous spatial opti-mization, symbolic logic, and embodied text interaction. 
+
+Combinatorial Domain: Game of Amazons 
+
+To verify real-world scalability, we test PAC-MCTS in the Game of Amazons endgame. With an effective branching Figure 3: Impact of pruning on search depth. Under a re-stricted budget ( N = 200 ), standard UCT exhausts re-sources horizontally. PAC-MCTS stabilizes the active fron-tier, reallocating the budget to achieve effective lookahead depths exceeding 10 plies. 
+
+Figure 4: Safety boundary validation in Amazons. Aggres-sive pruning ( α = 0 .5) strictly violates the safety condition of Lemma 3, inducing an immediate performance collapse. factor B ≈ 80 , this rigorous stress-test the algorithm’s ability to trade statistical breadth for logical depth under severely constrained budgets ( N = 200 ), serving as a proxy for high-dimensional autonomous planning. 
+
+Frontier Stabilization under Restricted Budgets: With a budget-to-branching ratio of N/B ≈ 2.5, standard UCT mathematically fails to surpass Depth 3, exhausting its bud-get horizontally across unpromising nodes. As shown in Fig. 3, by enforcing the safety boundary derived from Lemma 1, PAC-MCTS continuously eliminates statistically dominated branches. This establishes that dynamic pruning is a theoret-ical prerequisite for transitioning from shallow exploration to deep logical reasoning (Depth > 10 ) under bounded bud-gets. Furthermore, empirical tests revealed that aggressive pruning without the safety scaling led to immediate per-formance collapse, corroborating the rigorous mathematical constraint that safe elimination is strictly bound by the ef-fective gap. 
+
+Safety Boundary Validation (Fig. 4): Ablating the prun-ing ratio confirmed that while moderate pruning ( α = 0 .3)safely trades breadth for depth, aggressive elimination ( α =0.5) violates the ∆ > 4L condition, inducing an immediate performance downgrade. This corroborates that safe pruning 
+
+Figure 5: Algorithm Robustness on the Standard TSP-50 benchmark under the Top-K Adversarial Hallucination Model. The true gap is ∆ ≈ 2.91 . PAC-MCTS (blue) main-tains dominance in the adversarial regime ( L ∈ [0 .83 , 1.17] )and perfectly respects the theoretical information limit (gray line at L = 1 .46 ). must be strictly bound by the effective gap, empirically vali-dating Lemma 3 even in complex, high-dimensional combi-natorial domains. 
+
+Continuous Optimization on Standard TSP-50 
+
+To rigorously evaluate the robustness of PAC-MCTS in high-density combinatorial spaces, we employ the standard Uniform Random 2D TSP-50 benchmark (Kool, van Hoof, and Welling 2019). Unlike datasets with easily separable optimal paths, TSP-50 features densely clustered local op-tima. In our instance, the true suboptimality gap between the optimal and second-best trajectory is remarkably narrow (∆ ≈ 2.91 ), posing a severe challenge for heuristic search under constrained computational budgets. 
+
+Top-K Adversarial Hallucination Model: In real-world LLM-guided planning, neural evaluators rarely assign high scores to obviously flawed trajectories (e.g., paths at the bottom of the distribution). Instead, they succumb to local greedy traps , producing dense hallucinations among the top-tier candidates. To accurately simulate this, we inject sys-tematic bias using a Top-K Adversarial Model ( K = 5 ). We apply a penalty of −L to the true optimal node and a decep-tive boost of +L to the top 5 most competitive suboptimal nodes. We restrict the search budget to N = 120 with an environmental noise of σ = 3 .5, forcing the algorithms into a regime of severe budget starvation where efficient pruning is critical. 
+
+Results and Discussion: As illustrated in Fig. 5, the em-pirical performance evaluates our theoretical claims across three distinct mathematical phases: 
+
+1) Competency in Benign Environments ( L = 0 ): When no systematic bias is present, standard Vanilla MCTS (UCT) successfully resolves the narrow gap, achieving a Probability of Correct Selection (PCS) of 1.00 . Cru-cially, PAC-MCTS closely matches this peak performance (PCS = 0 .98 ). This proves that our dynamic confidence scaling ( cstat = 0 .45 ) provides sufficient protection against early-stage stochastic extreme values, confirming that the bias-aware pruning mechanism does not introduce over-conservatism or unnecessary performance degradation in be-nign environments. 
+
+2) The PAC Advantage Zone ( L ∈ [0 .83 , 1.17] ): As the adversarial bias intensifies, the core advantage of PAC-MCTS becomes strikingly apparent. At L = 1.17 , stan-dard UCT exhausts its limited budget exploring the hallu-cinated local optima, causing its accuracy to drop to 0.72 .Naive Pruning, lacking the protective +L radius, falls victim to premature elimination induced by overconfidence, plum-meting to 0.67 . In stark contrast, PAC-MCTS safely isolates the active frontier and continuously reallocates its budget to the surviving optimal node, achieving a dominant PCS of 0.77 —outperforming the baseline by a significant margin under severe computational starvation. 
+
+3) Hitting the Information-Theoretic Limit ( L ≥ 1.46 ): 
+
+Most remarkably, the empirical curves execute a collective, sharp collapse precisely as the injected bias crosses the the-oretical singularity ( ∆/2 ≈ 1.46 ). At L = 1 .50 , the max-imum achievable PCS across all algorithms drops below 
+
+0.47 . This physical phenomenon serves as a empirical ev-idence of the fundamental information-theoretic floor de-rived in Theorem 2: no algorithm, regardless of its explo-ration strategy, can reliably identify the optimal arm when the deterministic bias structurally reverses the effective gap (∆ ≤ 2L). 
+
+Symbolic Long-Horizon Planning: Blocksworld 
+
+To evaluate the algorithm’s capacity for extreme depth pen-etration and its resilience against sequential hallucination chains, we deploy the classic Blocksworld domain. Unlike continuous optimization, symbolic planning requires strict logical prerequisites (e.g., unstacking before moving). We employ three variations of increasing complexity to test the baseline efficiency, adversarial resilience, and physical lim-its of LLM-guided search. 
+
+Experimental Setup & Hyperparameters: We utilize a state-of-the-art LLM as the zero-shot heuristic evaluator (temperature τ = 0 .0). To isolate the intrinsic search effi-ciency, we eliminate generation stochasticity by enforcing strict lexicographical sorting on the action space. For the PAC-MCTS, the maximum absolute error bound is empir-ically calibrated to L = 30 .0. To combat the “loop hallu-cination” phenomenon inherent in deep logical chains, we introduce a depth discount factor γ = 0 .99 and tune the ex-ploration constant to U CB = 2 .5 (U CB = 3 .0 and γ = 1 .0
+
+for the 4-blocks baseline). 
+
+Results and Discussion: The empirical results (Table 3) reveal a stark contrast in algorithm behavior across varying levels of heuristic deception: 
+
+1) Baseline Efficiency in Benign States (4-Blocks): In a standard half-reversal task where the LLM’s heuristic is perfectly aligned with the optimal 3-step path, PAC-MCTS achieves a 100% sample efficiency, matching the performance of Vanilla MCTS (11 APIs, Depth 3). Tree of Thoughts (ToT), lacking a depth-aware value mechanism, Table 3: Performance Metrics across Symbolic (Blocksworld) and Embodied (ALFWorld) Domains. 
+
+API denotes the number of LLM evaluations; Depth 
+
+indicates the maximum trajectory depth reached.                                                    
+
+> Task / Environment ToT (Beam=3) Vanilla MCTS (RAP) PAC-MCTS (Ours)
+> Succ. Depth API Succ. Depth API Succ. Depth API
+> 4-Blocks (Half-Reversal) True 631 True 311 True 311 6-Blocks (Deceptive Trap) False 533* False 733* True 733 8-Blocks (Event Horizon) False 44 347* False 56 344* False 60 347
+> ALFWorld (Dirty Apple) False 836* True 31 113 True 23 92
+> *Budget strictly capped by the API consumption of PAC-MCTS to evaluate sample efficiency.
+
+exhibits significant width redundancy, requiring 31 APIs and extending to depth 6. This confirms that our heavy-duty pruning mechanism introduces zero computational overhead in simple environments. 
+
+2) The Deceptive Trap & Dynamic Budgeting (6-Blocks): 
+
+To simulate an adversarial semantic landscape, we construct a deceptive initial state where a suboptimal configuration appears structurally complete, prompting the LLM to out-put extreme high-score hallucinations (e.g., 88 .0). We dy-namically anchor the strict computational budget to the total APIs required by PAC-MCTS to solve the task ( N = 33 ). Under this severe budget restriction, both ToT and Vanilla MCTS are decisively defeated. ToT greedily falls into the hallucinated local optimum and depletes its budget by depth 5. PAC-MCTS, however, leverages the γ = 0.99 depth penalty to detect the declining value gradient, triggering the 
+
+L = 30 .0 bound to surgically prune the hallucination and successfully recover the optimal path. 
+
+3) The Hallucination Event Horizon (8-Blocks): When scaling to 8 blocks (optimal path length 7), we push the framework to its physical limits. At iteration 347, the LLM generates a catastrophic hallucination evaluating a terminal dead-end at 100 .0. Because the true optimal path averages 
+
+35 .0, the true error ∆ = 65 .0 violates our configured safety armor ( 2L = 60 .0). As dictated by Theorem 2, the pruning mechanism fails, resulting in an infinite depth loop (cutoff at depth 60). Despite receiving the massive 347 API budget, ToT and Vanilla MCTS similarly succumb to compounding errors, stalling at depths 44 and 56 respectively. This collec-tive failure acts as a profound empirical proof of the intrinsic “event horizon” in LLM planning: without an oracle-level L
+
+bound, sequential heuristic errors inevitably compound be-yond the algorithm’s recovery threshold. 
+
+Cross-Domain Generalization in Embodied AI: ALFWorld 
+
+To prove that PAC-MCTS is immune to domain-specific overfitting and can generalize to multimodal semantic en-vironments, we evaluate it on ALFWorld (Shridhar et al. 2021). Embodied text environments are notorious for induc-ing “commonsense hallucinations,” where the LLM ignores physical prerequisites (e.g., placing a dirty object in a clean receptacle). 
+
+The Semantic Trap Setup: We design a targeted trap where the agent is instructed to place a clean apple in the fridge, but the initial environment provides a dirty apple. The LLM heavily penalizes the counter-intuitive action of navigating to the sink (scoring ≈ 35 .0) while rewarding the immediate action of interacting with the fridge (scor-ing ≈ 90 .0). We constrain the budget for all algorithms to 
+
+N = 150 .
+
+Results and Discussion: As shown in Table 3, ToT com-pletely collapses under the semantic deception, stubbornly attempting to place the dirty apple into the fridge until it ex-hausts its valid action space at depth 8. While Vanilla MCTS eventually resolves the trap, the absence of aggressive prun-ing forces it to wander aimlessly through the environment, resulting in a bloated trajectory of 31 steps and consuming 113 APIs. PAC-MCTS demonstrates decisive superiority: by ob-serving the sharp value drop-off after the initial hallucinated actions, it mathematically invalidates the deceptive branch. It achieves mission success in only 23 steps, utilizing 92 APIs. Compared to the robust Vanilla baseline, PAC-MCTS reduces computational overhead by roughly 20% and short-ens the physical execution trajectory by 25% , firmly estab-lishing its state-of-the-art capability in generalizing robust heuristic search across discrete mathematical, symbolic, and semantic domains. 
+
+Conclusion 
+
+We established a rigorously bounded framework for tree search under expanding frontiers and biased estimators. We revealed that aggressive node elimination must respect an effective gap ∆ − 4L. This structural dependency provides a quantifiable guideline for deploying heuristic search: prun-ing aggressiveness must be dynamically throttled based on the L∞-norm validation error of the surrogate model. 
+
+References 
+
+Garrett, C. R.; Chitnis, R.; Holladay, R.; Kim, B.; Silver, T.; Kaelbling, L. P.; and Lozano-P´ erez, T. 2021. Integrated task and motion planning. Annual review of control, robotics, and autonomous systems , 4: 265–293. Gupta, A.; Koren, T.; and Talcar, K. 2019. Better Algo-rithms for Stochastic Bandits with Adversarial Corruptions. In Conference on Learning Theory (COLT) .Howard, S. R.; Ramdas, A.; McAuliffe, J.; and Sekhon, J. 2021. Time-uniform, Nonparametric, Nonasymptotic Con-fidence Sequences. The Annals of Statistics , 49(2): 1055– 1080. Huang, W.; Wang, C.; Zhang, R.; Li, Y.; Wu, J.; and Fei-Fei, L. 2023. VoxPoser: Composable 3D Value Maps for Robotic Manipulation with Language Models. In Proceedings of the Conference on Robot Learning (CoRL) .Kaufmann, E.; Capp´ e, O.; and Garivier, A. 2016. On the Complexity of Best-arm Identification in Multi-armed Ban-dit Models. Journal of Machine Learning Research (JMLR) ,17(1): 1–42. Kocsis, L.; and Szepesv´ ari, C. 2006. Bandit Based Monte-Carlo Planning. In European Conference on Machine Learn-ing (ECML) .Kool, W.; van Hoof, H.; and Welling, M. 2019. Attention, Learn to Solve Routing Problems! In International Confer-ence on Learning Representations .Table 4: C OMPLETE SUMMARY OF MATHEMATICAL NO-
+
+> TATIONS
+
+Symbol Description 
+
+M, At Total number of candidate nodes and the active frontier set at time step t.
+
+m, m ∗ Index of a specific arm ( m ∈ { 1, . . . , M }), and the optimal node index. 
+
+μm, μ ∗ The unknown true expected value of node m,and the maximum value max m μm.
+
+∆m, ∆eff Suboptimality gap μ∗ − μm, and the effective gap defined as ∆m − 4L.
+
+Ym,t , L Biased surrogate reward of node m at time t, and the global supremum of systematic bias. 
+
+ε, δ Suboptimality tolerance parameter and the fail-ure probability (confidence) parameter. 
+
+bm(t), n m(t) Empirical mean and the number of samples drawn for node m up to time t.
+
+udist (n) The dynamic robust confidence radius incorpo-rating the systematic bias ( ustat (n) + L). Lu, Y.-L.; Zhang, C.; and Wang, W. 2025. Systematic Bias in Large Language Models: Discrepant Response Patterns in Binary vs. Continuous Judgment Tasks. arXiv preprint arXiv:2504.19445 .Lykouris, T.; Mirrokni, V.; and Paes Leme, R. 2018. Stochastic Bandits Robust to Adversarial Corruptions. In 
+
+Proceedings of the 50th Annual ACM SIGACT Symposium on Theory of Computing (STOC) .Shridhar, M.; Yuan, X.; Cˆ ot´ e, M.-A.; Bisk, Y.; Trischler, A.; and Hausknecht, M. 2021. ALFWorld: Aligning Text and Embodied Environments for Interactive Learning. In Pro-ceedings of the International Conference on Learning Rep-resentations (ICLR) .Snell, C.; Lee, J.; Xu, K.; and Kumar, A. 2024. Scal-ing LLM Test-Time Compute Optimally Can be More Ef-fective than Scaling Model Parameters. arXiv preprint arXiv:2408.03314 .Valmeekam, K.; Marquez, A.; Sreedharan, S.; and Kamb-hampati, S. 2023. Large Language Models Still Can’t Plan (A Benchmark for LLMs on PDDL Planning). In NeurIPS 2023 Foundation Models for Decision Making Workshop .
+
+Extended Mathematical Notations Graceful Degradation under Severe Bias 
+
+When the systematic evaluator bias strictly dominates the effective gap, mathematically guaranteeing the exact identi-fication of m∗ becomes theoretically impossible. However, the PAC-MCTS dynamic bounds ensure a controlled failure mode. 
+
+Corollary 1 (Graceful Degradation under High Bias) . When extreme bias obscures the optimal arm ( ∆m ≤ 4L), PAC-MCTS cannot guarantee exact identification of m∗. How-ever, it ensures graceful degradation by identifying an arm ˆm whose suboptimality is strictly bounded by the bias mag-nitude. Specifically, with probability 1 − δ:
+
+μ∗ − μ ˆm ≤ 4L + ε. 
+
+Detailed Theoretical Proofs 
+
+This appendix details the proofs for Section . We denote the empirical mean of arm m after n samples as bm(n). Be-cause our framework formulates node expansion as a local-ized BAI problem over the dynamic frontier At, the bias 
+
+L strictly represents the global supremum of the system-atic bias within At. Bounding individual node biases by this supremum preserves the validity of all algebraic inequalities without invoking the unrealistic assumption of global error uniformity. 
+
+Lemma 2 (Global Time-Uniform Concentration) . Let 
+
+bm(n) = 1
+
+> n
+
+Pnt=1 Ym,t be the empirical mean of node m
+
+after n samples. For a failure probability δ ∈ (0 , 1) and to-tal nodes M , let 
+
+ustat (n, δ/M ) = 
+
+s
+
+2σ2 ln   π2n2M
+
+> 3δ
+
+
+
+n .
+
+Then with probability at least 1 − δ, for all nodes m ∈{1, . . . , M } and all times n ≥ 1:
+
+|bm(n) − μm| ≤ ustat (n, δ/M ) + L. 
+
+Proof. We start with the triangle inequality decomposition for a single arm m and time n:
+
+|bm(n) − μm| ≤ | bm(n) − E[bm(n)] |
+
+| {z }
+
+> Stochastic Error
+
++ |E[bm(n)] − μm|
+
+| {z }
+
+> Systematic Bias
+
+.
+
+It therefore suffices to bound the bias and the stochastic term. By Assumption 1, for any single observation, the con-ditional bias is bounded by |E[Ym,t |F t−1] − μm| ≤ L. Due to the linearity of expectation, the bias of the empirical mean is bounded by the average of the individual biases: 
+
+|E[bm(n)] − μm| = 1
+
+n
+
+> n
+
+X
+
+> t=1
+
+(E[Ym,t |F t−1] − μm)
+
+≤ 1
+
+n
+
+> n
+
+X
+
+> t=1
+
+L = L. 
+
+To bound the stochastic term, we first let ξm,t = Ym,t −
+
+E[Ym,t |F t−1]. Under Assumption 1, ξm,t constitutes a σ2-sub-Gaussian martingale difference sequence. To establish a bound valid for all n ≥ 1 simultaneously, we employ the Method of Mixtures (Howard et al. 2021). Consider the exponential supermartingale Mn(λ) = exp( Pnt=1 λξ m,t − 
+
+> λ2σ2n
+> 2
+
+). According to Ville’s Maximal Inequality, we have for any δ′ ∈ (0 , 1) :
+
+P(∃n ≥ 1 : |Sn| ≥ uboundary (n, δ ′)) ≤ δ′,
+
+where Sn = Pnt=1 ξm,t .With the sub-Gaussian boundary uboundary (n, δ ′) =q
+
+2σ2n ln( π2n2 
+
+> 3δ′
+
+), normalizing by n yields the desired time-uniform concentration: 
+
+P (∃n ≥ 1 : |bm(n) − E[bm(n)] | ≥ ustat (n, δ ′)) ≤ δ′.
+
+Based on these two bounds, we can apply a union bound over M arms by setting the per-arm failure probability to 
+
+δ′ = δ/M so that the bound holds for all M nodes simulta-neously: 
+
+P
+
+
+
+∃m ∈ { 1, . . . , M } : |bm(n) − μm| > u stat (n, δ/M ) + L
+
+
+
+≤
+
+> M
+
+X
+
+> m=1
+
+δM = δ. 
+
+Thus, with probability 1 − δ, the condition holds for all m
+
+and all n.
+
+Lemma 3 (Safety Condition for Proportion-based Pruning) .
+
+Assume the high-probability event E holds. Let Mbad be the set of suboptimal nodes that are distinguishable from the op-timal node m∗ under the current sample size, satisfying the gap condition: 
+
+∀j ∈ Mbad : ∆j > 2L+ustat (nm∗ , δ/M )+ ustat (nj , δ/M ).
+
+Let K = ⌊a|A t|⌋ be the number of nodes to be pruned. If the pruning proportion a is chosen such that: 
+
+K ≤ | Mbad |,
+
+then the optimal node m∗ is strictly separated from the elim-ination set and is guaranteed to survive. Proof. We first condition on event E. By applying the bounds from Lemma 2, we lower-bound the empirical dif-ference between m∗ and any j ∈ Mbad :
+
+bm∗ (t) − bj (t) ≥ (μ∗ − ustat (nm∗ ) − L) − (μj + ustat (nj ) + L)= ∆ j − 2L − ustat (nm∗ ) − ustat (nj ).
+
+Under the gap condition for Mbad , the right-hand side is strictly positive, implying bm∗ (t) > b j (t) holds for all j ∈
+
+Mbad .Since m∗ has a strictly higher empirical mean than any node in Mbad , it is guaranteed a rank strictly above all 
+
+|Mbad | candidates in the sorted list. Consequently, combining this ranking with the cardinality constraint K ≤ | Mbad |, the set of eliminated nodes (the bot-tom K positions) corresponds exclusively to indices associ-ated with Mbad (or nodes strictly inferior to them). Thus, 
+
+m∗ falls strictly outside the elimination set and is preserved in the next iteration. This safety condition inherently provides the formal the-oretical justification for dynamic pruning schedules in prac-tical implementations. Intuitively, early in the search when clearly suboptimal nodes abound (i.e., |Mbad | is large), a higher pruning rate a is permissible to aggressively accel-erate convergence. However, as the candidate set becomes more competitive and the active frontier shrinks, the prun-ing rate must be dynamically decayed to continually satisfy the constraint K ≤ | Mbad |, thereby ensuring the optimal trajectory is never erroneously discarded. 
+
+Theorem 3 (Step-wise PAC Guarantee) . Consider any ex-pansion step with a frontier set of size M . With probability 
+
+1 − δ, Algorithm 1 correctly identifies an ε-optimal node m∗to expand. The sample complexity required to distinguish a suboptimal node m from m∗ is bounded by: 
+
+Nm = O σ2  ln( M/δ ) + ln(∆ −2eff )
+
+(∆ m − ε − 4L)2
+
+!
+
+,
+
+provided the effective gap satisfies ∆eff = ∆ m − 4L > ε .Proof. The algorithm eliminates a suboptimal node m via Confidence-based Pruning (Algorithm 1) when: 
+
+bm(t) + udist (nm) < b m∗ (t) − udist (nm∗ ) − ε. 
+
+By the definition of the robust confidence radius udist (n) = 
+
+ustat (n, δ/M ) + L, we analyze the worst-case scenario where the empirical means deviate maximally towards each other to find the required sample size. Substituting the bounds from Lemma 2: • bm(t) ≤ μm + ustat (nm) + L;• bm∗ (t) ≥ μ∗ − ustat (nm∗ ) − L.The pruning condition is satisfied if the following inequality holds: 
+
+(μm + ustat (nm) + L) + ( ustat (nm) + L)
+
+< (μ∗ − ustat (nm∗ ) − L) − (ustat (nm∗ ) + L) − ε. 
+
+Rearranging the terms and substituting the true suboptimal-ity gap ∆m = μ∗ − μm, we obtain: 
+
+2ustat (nm) + 2 ustat (nm∗ ) < ∆m − 4L − ε. 
+
+Because tree search algorithms inherently sample nodes highly asymmetrically, we cannot assume uniform visits 
+
+nm ≈ nm∗ . Let nmin = min( nm, n m∗ ) denote the worst-case minimum sample count between the evaluated nodes. Since the statistical confidence radius ustat (n) is strictly monotonically decreasing with n, it holds that ustat (nm) ≤
+
+ustat (nmin ) and ustat (nm∗ ) ≤ ustat (nmin ).Thus, a sufficient and strictly bounded condition to guar-antee safe pruning is: 
+
+4ustat (nmin ) < ∆m − 4L − ε. 
+
+This inequality formally demonstrates that the discrimina-tive power is bottlenecked by the least-sampled node in the active frontier, and the effective gap is explicitly constrained by ∆m −4L. If ∆m ≤ 4L+ε, the safety condition can never be guaranteed regardless of the sample size. To derive the exact sample complexity without loose asymptotic approximations, we must substitute the pre-cise form of the confidence radius ustat (nmin ) =q 2σ2 ln( C1n2min ) 
+
+> nmin
+
+(where C1 = π2M/ 3δ) into the strict safety condition. This yields a non-linear inequality: 
+
+nmin 
+
+ln( C1n2min ) > C 2,
+
+where the constant is defined as C2 = 32 σ2 
+
+> (∆ m−4L−ε)2
+
+. To iso-late nmin explicitly, we apply the standard transformation 
+
+xe x = y, which allows us to solve the boundary via the neg-ative branch of the Lambert W function, W−1. Applying the established asymptotic expansion −W−1(−x) ≈ ln(1 /x ) + ln(ln(1 /x )) for x → 0+, the leading terms directly extract the additive dependencies of ln( C1) and ln( C2). Substitut-ing C1 ∝ M/δ and C2 ∝ (∆ m − 4L)−2, this derivation rigorously generates the exact additive sample complexity: 
+
+Nm = O σ2  ln( M/δ ) + ln(∆ −2eff )
+
+(∆ m − 4L − ε)2
+
+!
+
+.
+
+Unlike looser multiplicative envelopes, this precise additive inversion preserves the exact structural order of the sam-ple complexity required to safely prune arm m (Kaufmann, Capp´ e, and Garivier 2016). 
+
+Theorem 4 (Lower Bound) . Any algorithm identifying an ε-optimal arm with probability 1 − δ under the bounded-bias model satisfies: 
+
+E[N ] ≥ Ω
+
+ X
+
+> m̸=m∗
+
+σ2 ln(1 /δ )(∆ m + ε − 2L)2
+
+ .
+
+Proof. We establish this lower bound via a change-of-measure argument. Consider a bandit problem with M arms, and let P and Q denote two distinct probability measures corresponding to two hypothetical reward environments. Under measure P, let arm 1 be optimal with expected true reward μ1, and arm 2 (representing an arbitrary suboptimal node m) have μ2 = μ1 − ∆m. The adversary assigns a pos-itive systematic bias +L to arm 2, yielding an observation mean EP[Y2] = μ2 + L.Under the alternative measure Q, we construct an envi-ronment where arm 2 is the unique ε-optimal arm. We set its true mean to μ′ 
+
+> 2
+
+= μ1 +ε+γ (for an arbitrarily small γ > 0). Here, the adversary assigns a negative systematic bias −L to arm 2, yielding an observation mean EQ[Y2] = μ′ 
+
+> 2
+
+− L. The distributions for all other arms remain identical across both measures. For any algorithm to satisfy the PAC guarantee, it must identify the correct arm with probability at least 1 − δ un-der both measures. By the Bretagnolle-Huber inequality, the Kullback-Leibler (KL) divergence between the observation trajectories must satisfy: 
+
+DKL (P⊗N ∥ Q⊗N ) ≥ ln 
+
+ 14δ
+
+
+
+.
+
+Assuming Gaussian noise N (0 , σ 2), the KL divergence for arm 2 after E[N ] expected pulls is given by: 
+
+DKL (P⊗N ∥ Q⊗N ) = E[N ] (EQ[Y2] − EP[Y2]) 2
+
+2σ2 .
+
+The analytical distance between the observation means is: 
+
+EQ[Y2] − EP[Y2] = ( μ′ 
+
+> 2
+
+− L) − (μ2 + L)= ( μ1 + ε + γ − L) − (μ1 − ∆m + L)= ∆ m + ε + γ − 2L. 
+
+Substituting this distance into the KL divergence bound yields: 
+
+E[N ] (∆ m + ε + γ − 2L)2
+
+2σ2 ≥ ln 
+
+ 14δ
+
+
+
+.Taking the limit as γ → 0+, we obtain the necessary sam-ple complexity for distinguishing arm m:
+
+E[N ] ≥ 2σ2 ln(1 /4δ)(∆ m + ε − 2L)2 .
+
+Summing this requisite complexity over all suboptimal arms m̸ = m∗ yields the overall lower bound, mathemati-cally confirming that systematic bias enforces a rigid sample penalty of at least 2L on the effective gap.
