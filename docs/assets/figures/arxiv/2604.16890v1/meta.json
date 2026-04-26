@@ -1,0 +1,54 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.16890v1/fig-001.webp",
+      "caption": "Figure 1: Advantages of our Step-GRPO.",
+      "page": 1,
+      "index": 1,
+      "width": 475,
+      "height": 510
+    },
+    {
+      "url": "assets/figures/arxiv/2604.16890v1/fig-002.webp",
+      "caption": "Table 1: Experimental results. The order is arranged as requested. “Acc” denotes accuracy, “Tok” denotes token count, and “CR” denotes compression rate (relative to Vanilla). Intermediate CR columns are omitted for brevity. Best results are in bold, and second-best results are underlined.",
+      "page": 6,
+      "index": 2,
+      "width": 941,
+      "height": 599
+    },
+    {
+      "url": "assets/figures/arxiv/2604.16890v1/fig-003.webp",
+      "caption": "Table 7: Accuracy (Mean ± Std) across 3 independent runs on Qwen3-8B.",
+      "page": 15,
+      "index": 3,
+      "width": 937,
+      "height": 236
+    },
+    {
+      "url": "assets/figures/arxiv/2604.16890v1/fig-004.webp",
+      "caption": "Figure 2: The overall pipeline of Step-GRPO.",
+      "page": 3,
+      "index": 4,
+      "width": 946,
+      "height": 540
+    },
+    {
+      "url": "assets/figures/arxiv/2604.16890v1/fig-005.webp",
+      "caption": "Figure 4: Structural and Training Dynamics Analysis. (a) Step Composition Analysis. Proportions of step types with average step counts annotated on top. (b) Semantic Density Distribution. Tokens per step (outliers excluded); dashed lines denote means. (c)(d) Training Dynamics. Evolution of accuracy (Grey) and length (Blue) for GRPO+LP and Step-GRPO.",
+      "page": 8,
+      "index": 5,
+      "width": 938,
+      "height": 262
+    },
+    {
+      "url": "assets/figures/arxiv/2604.16890v1/fig-006.webp",
+      "caption": "Figure 3: Qualitative comparison of reasoning chains on a number theory problem from AIME 2024.",
+      "page": 8,
+      "index": 6,
+      "width": 946,
+      "height": 517
+    }
+  ]
+}

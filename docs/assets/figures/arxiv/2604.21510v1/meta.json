@@ -1,0 +1,94 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.21510v1/fig-001.webp",
+      "caption": "Table 3: Model performance comparisons on the OptiVerse benchmark. The evaluation is categorized by Domain (MP, CO, SO, DO, OC, and GO) and Difficulty (Easy, Medium, and Hard). Avg. denotes the mean performance.",
+      "page": 6,
+      "index": 1,
+      "width": 950,
+      "height": 707
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21510v1/fig-002.webp",
+      "caption": "Figure 11: A Hard Example in OptiVerse.",
+      "page": 15,
+      "index": 2,
+      "width": 457,
+      "height": 667
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21510v1/fig-003.webp",
+      "caption": "Figure 2: The hierarchical taxonomy of OptiVerse benchmark, which provides comprehensive coverage across six distinct optimization domains to comprehensively evaluate the diverse reasoning capabilities of LLMs.",
+      "page": 2,
+      "index": 3,
+      "width": 923,
+      "height": 511
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21510v1/fig-004.webp",
+      "caption": "Figure 5: Distribution of error types across nine representative models. While Code & Syntax errors become negligible with increased capability, Modeling & Logic errors remain the predominant bottleneck across all LLMs.",
+      "page": 7,
+      "index": 4,
+      "width": 917,
+      "height": 477
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21510v1/fig-005.webp",
+      "caption": "Figure 9: An Easy Example in OptiVerse.",
+      "page": 14,
+      "index": 5,
+      "width": 457,
+      "height": 608
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21510v1/fig-006.webp",
+      "caption": "Figure 10: A Medium Example in OptiVerse.",
+      "page": 14,
+      "index": 6,
+      "width": 456,
+      "height": 454
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21510v1/fig-007.webp",
+      "caption": "Table 1: Comparison with existing benchmarks. OptiVerse benchmark provides structured textual contexts (table and graph), difficulty level, and vector-based solution across six optimization domains: Mathematical Programming, Combinatorial Optimization, Stochastic Optimization, Dynamic Optimization, Optimal Control, Game Optimization.",
+      "page": 3,
+      "index": 7,
+      "width": 950,
+      "height": 374
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21510v1/fig-008.webp",
+      "caption": "Table 4: Solving accuracy (%) comparison across OptiVerse benchmark using three different LLMs.",
+      "page": 8,
+      "index": 8,
+      "width": 452,
+      "height": 446
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21510v1/fig-009.webp",
+      "caption": "Figure 4: Statistical analysis of question tokens and result counts across optimization problem domain and difficulty, benchmarked against NL4Opt (Ramamonjison et al., 2023) and Optibench (Yang et al., 2025b).",
+      "page": 4,
+      "index": 9,
+      "width": 904,
+      "height": 302
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21510v1/fig-010.webp",
+      "caption": "Figure 8: Data Construction Pipeline.",
+      "page": 12,
+      "index": 10,
+      "width": 456,
+      "height": 302
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21510v1/fig-011.webp",
+      "caption": "Figure 7: Distribution of Data Sources.",
+      "page": 12,
+      "index": 11,
+      "width": 456,
+      "height": 295
+    }
+  ]
+}

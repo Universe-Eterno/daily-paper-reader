@@ -1,0 +1,54 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.17332v1/fig-001.webp",
+      "caption": "Figure 2: Entropy landscape, its increment, and the resulting entropy-driven drift in the random walk on the Johnson graph J(200, 40). The left panel shows the entropy landscape S(d), the middle panel shows the entropy increment ∆S(d), and the right panel shows the entropy-driven drift E[∆d | d] of the distance process. The dashed vertical line indicates the equilibrium distance d∗ = 32.00.",
+      "page": 15,
+      "index": 1,
+      "width": 943,
+      "height": 311
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17332v1/fig-002.webp",
+      "caption": "Figure 1: Sample trajectories of the distance process in random walks on the Johnson graph J(200, 40). Each trajectory starts from the initial state d = 1 and evolves according to random swap moves. The dashed horizontal line indicates the equilibrium distance d∗ = 32.00 where the drift vanishes. The mean trajectory (thick curve) approaches this equilibrium distance, illustrating the systematic bias induced by entropy-driven drift.",
+      "page": 14,
+      "index": 2,
+      "width": 943,
+      "height": 563
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17332v1/fig-003.webp",
+      "caption": "Figure 4: Sample trajectories of the distance process under idealized objective guidance (β = 1), starting from d = 1. While the objective introduces a tendency toward the target, the trajectories do not concentrate at d = 0, but instead stabilize around a nonzero equilibrium distance d∗ = 26.13. This behavior reflects the competition between objective-driven drift toward the target and entropy-driven drift away from it.",
+      "page": 18,
+      "index": 3,
+      "width": 943,
+      "height": 563
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17332v1/fig-004.webp",
+      "caption": "Figure 5: Expected hitting time to the target configuration under the idealized objective guidance f(x) = v(x, x∗), shown as a function of the initial distance m. Increasing β reweights the contribution of outward trajectories, leading to a substantial reduction in expected hitting time across all initial distances.",
+      "page": 19,
+      "index": 4,
+      "width": 943,
+      "height": 675
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17332v1/fig-005.webp",
+      "caption": "Figure 6: Logarithmic ratio of expected hitting time for local random-walk search relative to IID uniform sampling. The vertical axis shows log ( Em[τRW0 ]/ ( n k )) , where ( n k ) is the IID baseline corresponding to the combinatorial rarity of the target. Positive values indicate that the random walk requires longer search times than IID sampling, reflecting the effect of locality and the resulting entropy-driven drift.",
+      "page": 20,
+      "index": 5,
+      "width": 943,
+      "height": 567
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17332v1/fig-006.webp",
+      "caption": "Figure 3: Interaction between idealized objective guidance and entropy-driven drift. The figure shows the drift of the distance process under Metropolis dynamics for various values of β. The parameter β represents the strength of objective-based guidance toward the target. When β = 0 (unbiased random walk), the drift is dominated by entropy-driven drift across the entire space. As β increases, the downward shift of the curves illustrates the effect of objective guidance. Crucially, even for β = 2, the drift can remain positive in the vicinity of the target, showing that, for moderate levels of objective guidance, entropy-driven drift can remain dominant near the target.",
+      "page": 16,
+      "index": 6,
+      "width": 943,
+      "height": 604
+    }
+  ]
+}

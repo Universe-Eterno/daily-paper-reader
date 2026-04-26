@@ -1,0 +1,62 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.19070v1/fig-001.webp",
+      "caption": "Table 2: Performance comparison under the zero-shot setting with Accuracy (%) and Macro-F1 (%) reported with",
+      "page": 6,
+      "index": 1,
+      "width": 941,
+      "height": 260
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19070v1/fig-002.webp",
+      "caption": "Table 7: Meta information for benchmark TRNs grouped by relation type.",
+      "page": 13,
+      "index": 2,
+      "width": 950,
+      "height": 909
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19070v1/fig-003.webp",
+      "caption": "Table 8: Statistics of benchmark datasets. Datasets marked with ∗ (Citeseer and History) are used for RL training, while the others are held out for evaluation and generalisation studies.",
+      "page": 13,
+      "index": 3,
+      "width": 950,
+      "height": 335
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19070v1/fig-004.webp",
+      "caption": "Figure 5: Accuracy comparison between base reward and neighbour-aware reward across Cora dataset. Neighbour-aware shaping consistently improves both optimisation stability and reasoning depth.",
+      "page": 8,
+      "index": 4,
+      "width": 450,
+      "height": 346
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19070v1/fig-005.webp",
+      "caption": "Figure 6: Zero-shot node classification accuracy across three model scales. Green annotations show absolute gain over the base LLM.",
+      "page": 8,
+      "index": 5,
+      "width": 390,
+      "height": 476
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19070v1/fig-006.webp",
+      "caption": "Figure 2: Overall training pipeline of TRN-R1-Zero, comprising three key components: graph sampling, prompt construction, and neighbour-aware policy objective.",
+      "page": 4,
+      "index": 6,
+      "width": 941,
+      "height": 281
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19070v1/fig-007.webp",
+      "caption": "Table 5: Comparison of model size, average response length (Resp. Len.), and accuracy (Acc.) between TRNR1-Zero and Graph-R1 on Cora and WikiCS.",
+      "page": 9,
+      "index": 7,
+      "width": 461,
+      "height": 527
+    }
+  ]
+}

@@ -1,0 +1,598 @@
+Title: Entropy-Driven Drift as a Source of Optimization Difficulty in Combinatorial Spaces
+
+URL Source: https://arxiv.org/pdf/2604.17332v1
+
+Published Time: Tue, 21 Apr 2026 01:13:51 GMT
+
+Number of Pages: 27
+
+Markdown Content:
+# Entropy-Driven Drift as a Source of Optimization Difficulty in Combinatorial Spaces 
+
+## Fumio Ishizaki 
+
+Modal Stage, Tokyo, Japan 
+
+ishizaki@modalstage.com 
+
+Abstract 
+
+Understanding the origin of optimization difficulty in high-dimensional combinatorial spaces remains a fundamental problem. Existing perspectives typically characterize diffi-culty in terms of properties of states, their connectivity, or distributions over states. How-ever, search algorithms operate as stochastic processes evolving over time, and optimization is inherently a trajectory-level phenomenon. This motivates a shift from state-based to trajectory-based analysis. In this work, we adopt a trajectory-based perspective and analyze search dynamics through the evolution of a distance process. We identify a structural mechanism, which we term entropy-driven drift. This mechanism systematically biases trajectories toward high-entropy regions. This drift arises from asymmetry in local transitions induced by the underlying graph structure, independent of objective variation. In the absence of objective variation, trajectories that reach the target are atypical under the induced dynamics, leading to a discrepancy between rapid mixing and slow hitting. We formalize this mechanism in a canonical combinatorial setting with a highly symmet-ric underlying graph, where the symmetry allows explicit characterization of the induced drift. The mechanism highlights entropy-driven drift as a source of optimization difficulty and provides a trajectory-level framework for understanding search dynamics in combinato-rial spaces. 
+
+# 1 Introduction 
+
+Understanding the origin of optimization difficulty in high-dimensional combinatorial spaces remains a fundamental problem in optimization. A foundational perspective attributes this difficulty to the combinatorial explosion of the feasible space, which determines the intrinsic computational complexity of such problems [22, 12]. While this viewpoint captures the worst-case scaling of problem size, it does not explain the behavior of search algorithms operating within the space. In practice, many search algorithms rely on local, neighborhood-based im-provements guided by objective values, yet their performance often deteriorates rapidly as the dimensionality of the search space increases. This gap highlights the need for a perspective that explains the mechanisms underlying the deterioration of optimization performance, rather than solely characterizing the size or static structural properties of the feasible space. Such a perspective must account for how the search process evolves over time and how its dynamics influence the generation of search trajectories. Beyond this intrinsic notion of computational difficulty, a variety of perspectives have been proposed to explain the observed difficulty of search in high-dimensional combinatorial spaces. A dominant framework is the fitness landscape view [25, 19, 39], in which optimization is interpreted as a search process evolving over an energy landscape defined by the objective function. For example, models such as NK landscapes [19, 39, 32] study how the structure of the objective function influences search performance on a fixed underlying graph. In this view, difficulty is typically attributed to local optima, ruggedness, and energy barriers. More 1
+
+> arXiv:2604.17332v1 [cs.CE] 19 Apr 2026
+
+generally, such approaches characterize difficulty in terms of objective values associated with individual states and their connectivity induced by the underlying neighborhood structure. Recent work has also moved toward more dynamic characterizations of search processes. For example, Local Optima Networks (LONs) [33, 10] represent local optima and their connectivity, while Search Trajectory Networks (STNs) [31, 37] represent observed search trajectories as graphs. While these approaches provide valuable descriptive insights into search behavior, they do not explicitly identify the mechanisms that generate the observed trajectory-level difficulty. Within the fitness landscape framework, various measures have been proposed to quantify problem difficulty based on the relationship between objective values and the structure of the state space. A representative example is fitness-distance correlation (FDC) [19, 1], which eval-uates the correlation between fitness and distance to the optimum and has been widely used as an indicator of fitness landscape difficulty in empirical studies. However, such measures depend on an underlying sampling measure over the state space, which is often induced by the search dynamics themselves. As a result, they characterize statistical relationships among sampled states, but do not capture how the sequential structure of the dynamics generates trajectories that reach the target. Related perspectives arise in statistical physics, where the interplay between energy and entropy is captured through free energy landscapes [27, 30]. These approaches provide a pow-erful description of equilibrium behavior, in which the probability of observing a configuration is determined by its free energy. While entropy plays a central role, it contributes primar-ily through the weighting of states, thereby giving rise to entropic barriers and free energy differences defined over states or equilibrium distributions. A related line of work is found in the study of Markov chain Monte Carlo (MCMC) [35], where stochastic processes are analyzed through their stationary distributions and the rate at which these distributions are approached. In this framework, performance is characterized by mixing properties, such as spectral gaps or mixing times, which quantify convergence to equilibrium [24]. From an information-theoretic perspective, high-dimensional distributions are known to con-centrate on a typical set [6, 14], which captures the regions of the state space that carry most of the probability mass. This provides a geometric description of state-level typicality and measure concentration. In machine learning, the difficulty of high-dimensional optimization is often described as the curse of dimensionality [4], which refers to the rapid deterioration of performance as the dimensionality of the space increases. Existing explanations typically emphasize geometric or statistical effects, such as sparsity, distance concentration, or sample complexity. Despite their differences, these perspectives share a common limitation: they characterize difficulty in terms of properties of states, their connectivity, or distributions over states. How-ever, search algorithms operate as stochastic processes evolving over time, and optimization is inherently a transient phenomenon. Accordingly, the performance of search algorithms should be measured not by the probability of the target under a stationary distribution, but by the ability of the search process to generate trajectories that reach the target within a finite time. This gap motivates a shift from state-based to trajectory-based analysis. In this trajectory-based perspective, optimization difficulty is characterized by the structure and typicality of trajectories induced by the search dynamics. Within this trajectory-based perspective, drift analysis [23] has become a central tool in the theoretical study of randomized search algorithms [17, 29, 2] including evolutionary algorithms [8]. It provides a way to quantify the expected progress of a search process toward a target state, and is therefore central to understanding how search dynamics influence optimization performance. In this paper, we consider the drift of a search process in terms of its underlying sources. Specifically, the observed drift can be viewed as a combination of two components. The first 2component arises from the objective function, while the second arises from structural biases induced by the underlying graph structure, itself determined by the combination of the problem structure and the search operator. We refer to the first component as objective-driven drift and the second as entropy-driven drift , and explicitly distinguish between them. Distinguishing these components is essential not only for algorithm design, but also for understanding the dynamical behavior of the search process, since without such a separation, the individual contributions of different factors to the resulting drift cannot be identified. In many existing approaches, however, these components are not explicitly distinguished. In this study, we take a trajectory-based perspective by analyzing the dynamics at the level of the distance process , which governs the evolution of trajectories in terms of their distance from the target configuration. To make this perspective concrete, we analyze search dynamics on the Johnson graph [13], which provides a canonical model of k-of-n subset selection problems under a local swap-based operator. The k-of-n subset selection problem arises in a wide range of applications including feature selection, combinatorial design, and portfolio selection [15, 5, 3]. We consider the limiting case of a flat objective landscape in order to isolate the effect of entropy-driven drift from that of the objective-driven drift. In this setting, the search process becomes a random walk on the Johnson graph. This setting, together with the strong symmetry properties of the Johnson graph, allows us to explicitly characterize the entropy-driven drift of the distance process. Our analysis reveals that asymmetry in local transitions gives rise to the entropy-driven drift, which systematically drives trajectories toward high-entropy regions. As a consequence, trajectories that reach the target become atypical under the induced dynamics. In this sense, the entropy-driven drift acts as a trajectory-level barrier to optimization. As a result, the process can exhibit fast mixing while the hitting time to the target remains large, revealing a fundamental discrepancy between equilibrium behavior and transient optimization performance. Furthermore, we show that the entropy-driven drift is intrinsically coupled with an informa-tion limitation: the coordinate governing the drift depends on the unknown target configuration and is therefore not directly observable to the search process. Consequently, the search process does not have direct access to information indicating whether a given local transition corre-sponds to an inward or outward move relative to the target. While objective-based guidance can influence the transition probabilities of the search process, it does not, in general, induce alignment of the resulting drift with the target direction, and thus cannot effectively counteract the entropy-driven drift. The entropy-driven drift arises from a general structural property: the combinatorial vari-ation in the number of states with distance from a reference configuration, together with local transition rules that connect neighboring states. In particular, any search space in which (i) a notion of distance from a target configuration can be defined, (ii) transitions are local with respect to an underlying graph structure induced by the search operator, and (iii) the number of states varies with distance in a non-uniform manner, is expected to exhibit a similar asymmetry between inward and outward transitions. This asymmetry induces a drift in the distance pro-cess. As a result, the same qualitative phenomenon emerges at the level of trajectories. Thus, the mechanism identified in this work should be viewed as a consequence of general structural properties of the underlying graph, rather than a peculiarity specific to the Johnson graph. The contributions of this paper are as follows. First, we identify a structural mechanism, termed entropy-driven drift, that induces a systematic bias toward high-entropy regions, even in the absence of objective variation. Second, we show that this mechanism leads to a distortion at the level of trajectories, in which typical trajectories concentrate in high-entropy regions rather than near the target, giving rise to an entropy-driven barrier. Third, we demonstrate that this provides a natural explanation for a source of optimization difficulty: target-reaching trajectories are atypical under the induced dynamics. Finally, we provide a unified perspective in which optimization difficulty emerges from the interaction between the underlying graph 3structure and information limitation in the observability of the target-dependent structure, and discuss its implications for algorithm design. The remainder of this paper is organized as follows. Section 2 introduces the Johnson graph and the associated distance structure. Section 3 analyzes the combinatorial multiplicity of distance shells. Section 4 characterizes the entropy landscape induced by the combinatorial structure of distance shells. Section 5 derives an explicit expression for the entropy-driven drift in the distance process, analyzes the resulting dynamics, and characterizes the expected hitting time to the target. Section 6 presents numerical experiments illustrating trajectory-level behavior of the distance process. Section 7 discusses implications for optimization and algorithm design from the perspective of entropy-driven drift. Section 8 concludes the paper. 
+
+# 2 Structure of the Feasible Space 
+
+In this section, we introduce the geometric structure of the feasible space induced by the un-derlying graph for k-of-n subset selection problems. The structural organization of the feasible space will serve as the foundation for analyzing the induced search dynamics in subsequent sections. We consider subset selection problems in which exactly k elements are chosen from a ground set of size n. Throughout the paper, we assume that 1 ≤ k ≤ n − 1, excluding the trivial cases of selecting no elements or all elements. Let [ n] = {1, 2, . . . , n } denote the ground set of n elements. The feasible space consists of all k-element subsets of [ n]: Ω = 
+
+[n]
+
+k
+
+
+
+= {Ω+ ⊆ [n] : |Ω+| = k},
+
+where  [n]
+
+> k
+
+ denotes the family of all k-subsets of [ n]. Each configuration corresponds to a 
+
+k-subset x ∈ Ω. The feasible space Ω can be viewed from three equivalent perspectives: as configurations of a k-of-n subset selection problem, as states of a search process, and as vertices of the Johnson graph J(n, k ) [13]. Each of these perspectives provides a different interpretation of the same underlying object. Accordingly, we use the terms configuration (in the optimization sense), 
+
+state (in the stochastic-process sense), and vertex (in the graph-theoretic sense) interchangeably throughout the paper. Two configurations x, y ∈ Ω are adjacent if they differ by a single swap, that is, 
+
+|x \ y| = |y \ x| = 1 ,
+
+where x \ y denotes the set difference. Thus each step replaces one element of the subset with another element outside the subset. Each vertex in the Johnson graph has degree k(n − k). This graph structure naturally captures local search operations used in many combinatorial optimization procedures. The distance between two configurations x and y is defined as the number of swaps required to transform one subset into the other: 
+
+v(x, y ) = |x \ y| = |y \ x| = |x△y|
+
+2 , (1) where x△y = ( x\y)∪(y\x) denotes the symmetric difference between the two sets. This distance 
+
+v defines the natural graph metric on the Johnson graph, corresponding to the shortest-path distance under the swap operation. In the theoretical analysis that follows, we consider a reference state on the feasible space, i.e., a reference vertex in the Johnson graph. Throughout the paper we fix a state, which may 4represent an optimal solution. If multiple optimal solutions exist, we choose one arbitrarily as the reference state. Note that because the Johnson graph is vertex-transitive [13], the choice of reference vertex does not affect the structure of the analysis itself. Let x∗ denote a fixed reference state, which may represent an optimal solution. For each integer d ∈ { 0, 1, . . . , d max } where dmax = min( k, n − k), we define the distance shell 
+
+Ωd = {x ∈ Ω : v(x, x ∗) = d}.
+
+These shells form a partition of the feasible space: Ω = 
+
+> dmax
+
+[
+
+> d=0
+
+Ωd.
+
+This shell decomposition provides a natural coordinate system for the feasible space relative to the reference state x∗.The Johnson graph exhibits strong symmetry properties, which play a central role in sim-plifying the analysis of the induced dynamics. These properties are summarized as follows. 
+
+Property 1 (Symmetry of the Johnson Graph) . The Johnson graph J(n, k ) satisfies the fol-lowing transitivity properties [13, Chapter 4]: 1. Vertex-transitivity : The automorphism group of J(n, k ) acts transitively on the set of vertices Ω. This ensures that global structural properties of the state space are invariant across configurations. 2. Distance-transitivity : The graph is distance-transitive, meaning that any pair of ver-tices at distance d can be mapped to any other pair at the same distance by an au-tomorphism. This property, which is stronger than vertex-transitivity, implies that for any fixed target x∗ ∈ Ω, all vertices at the same distance from x∗ are structurally and probabilistically equivalent. 
+
+# 3 Distance Shell Structure 
+
+In this section, we analyze the combinatorial structure of the distance shells introduced in the previous section. This structure determines how the volume of the state space is distributed as a function of distance from the reference state, and provides the basis for understanding the induced search dynamics in subsequent sections. We first consider the cardinalities |Ωd| of the distance shells Ω d. The following proposi-tion provides an explicit formula for the number of states in each distance shell, i.e., for the cardinalities |Ωd|.
+
+Proposition 1. Let x∗ be a fixed reference state. The number of states at distance d from x∗
+
+is 
+
+|Ωd| =
+
+kd
+
+ n − kd
+
+
+
+. (2) 
+
+Proof. To obtain a state at distance d from x∗, we must remove d elements from x∗ and replace them with d elements from [ n] \ x∗. The number of ways to remove d elements from x∗ is  kd
+
+,and the number of ways to choose d replacement elements from the n − k elements outside x∗
+
+is  n−kd
+
+. Multiplying these choices gives the result. We next analyze how the shell cardinalities vary with distance, as this variation plays an important role in the subsequent analysis of local transition behavior. The following proposition shows that the shell cardinalities form a unimodal sequence as a function of the distance d from the reference state x∗.5Proposition 2. The sequence {| Ωd|} dmax  
+
+> d=0
+
+is unimodal. Proof. From (2) in Proposition 1, the ratio of the cardinalities of adjacent shells is given by 
+
+|Ωd+1 ||Ωd| =
+
+  kd+1 
+
+  n−kd+1 
+
+ kd
+
+  n−kd
+
+
+
+= (k − d)( n − k − d)(d + 1) 2 . (3) We then consider 
+
+|Ωd+1 ||Ωd| − 1 = (k − d)( n − k − d)(d + 1) 2 − 1= −(n + 2) d + k(n − k) − 1(d + 1) 2 .
+
+Since the denominator ( d + 1) 2 > 0 for all d = 0 , . . . , d max , the sign of |Ωd+1 |/|Ωd| − 1 is determined by the numerator, which is a linear function of d given by 
+
+−(n + 2) d + k(n − k) − 1. (4) Hence the sign of |Ωd+1 |/|Ωd| − 1 can change from positive to negative at most once as d
+
+increases. Therefore the sequence {| Ωd|} first increases and then decreases as d increases, and is unimodal. We here point out that the shell cardinalities admit a natural probabilistic interpretation associated with k-of-n subset selection problems. Consider drawing k elements without replace-ment from a population of size n containing k distinguished elements. Let Z denote the number of distinguished elements that are selected. Then Z follows a hypergeometric distribution and the probability of Z = k − d is given by 
+
+P(Z = k − d) = 
+
+  kk−d
+
+  n−kn−k−d
+
+ nk
+
+ =
+
+ kd
+
+  n−kd
+
+ nk
+
+ .
+
+Up to normalization, the shell cardinalities coincide with a hypergeometric distribution. We then confirm that since the hypergeometric distribution is unimodal, the shell cardinalities increase for small d, reach a maximum at an intermediate distance, and then decrease. We finally consider the maximum shell cardinality and the corresponding distance from the reference state. The following proposition shows that the shell cardinality is maximized away from the reference state. 
+
+Proposition 3. Assume n ≥ 3. The shell cardinality |Ωd| is maximized at an integer 
+
+d ∈ {⌊ ˆd∗⌋, ⌈ ˆd∗⌉} 
+
+where 
+
+ˆd∗ = k(n − k) − 1
+
+n + 2 . (5) 
+
+In particular, the maximizer satisfies d ≥ 1.Proof. From the unimodality of the shell cardinalities shown in Proposition 2, the shell cardi-nality is maximized at an integer d where 
+
+|Ωd||Ωd−1| ≥ 1 and |Ωd+1 ||Ωd| ≤ 16hold, with the obvious modification at the boundary. We first consider the case d ≥ 1. For d ≥ 1, using (4) from the proof of Proposition 2, these conditions are equivalent to 
+
+−(n + 2)( d − 1) + k(n − k) − 1 ≥ 0and 
+
+−(n + 2) d + k(n − k) − 1 ≤ 0.
+
+Hence ˆd∗ ≤ d ≤ ˆd∗ + 1 , ˆd∗ = k(n − k) − 1
+
+n + 2 .
+
+Therefore, any maximizer belongs to {⌊ ˆd∗⌋, ⌈ ˆd∗⌉} .We then treat the boundary case d = 0. Since 
+
+|Ω0| = 1 and |Ω1| =
+
+k
+
+1
+
+ n − k
+
+1
+
+
+
+= k(n − k),
+
+we have |Ω1||Ω0| = k(n − k).
+
+Under the assumptions 1 ≤ k ≤ n − 1 and n ≥ 3, we have 
+
+k(n − k) ≥ 2.
+
+Thus 
+
+|Ω1| > |Ω0|,
+
+so the shell cardinality cannot be maximized at d = 0. Therefore, the maximizer satisfies 
+
+d ≥ 1. While the above result holds under the minimal assumption 1 ≤ k ≤ n − 1, in typical subset selection settings where 2 ≤ k ≤ n − 2, the maximizer lies at an intermediate distance from the reference state. In particular, in typical settings with 1 ≪ k ≪ n in k-of-n subset selection problems, the maximizing distance lies well away from the boundary, indicating that most configurations are concentrated at intermediate distances. Recall that the Johnson graph is vertex-transitive, so the shell structure revealed in this section is the same relative to any reference state. 
+
+# 4 Entropy Landscape 
+
+In this section, we introduce the entropy landscape over the feasible space defined by the shell cardinalities derived in the previous section. This provides a static description of how combi-natorial volume is distributed as a function of distance from the reference state. Let S(d) = log |Ωd| denote the entropy associated with the distance shell Ω d. Using (2) in Proposition 1, we obtain 
+
+S(d) = log 
+
+kd
+
+
+
++ log 
+
+n − kd
+
+
+
+. (6) The entropy landscape is the function S(d) viewed over the distance coordinate d. It is therefore entirely determined by the shell cardinalities of the Johnson graph. 74.1 Entropy Gradient 
+
+Since the logarithm is monotone, the entropy is maximized at the same distance where the shell cardinality is maximized. From Proposition 3, the shell cardinality |Ωd| attains its maximum at an integer d ∈ {⌊ ˆd∗⌋, ⌈ ˆd∗⌉} , and thus the entropy attains its maximum at the same distance d,too. Importantly, this distance is typically separated from the reference configuration, especially in high-dimensional settings. To understand the shape of the entropy landscape, we examine the entropy gradient, i.e., the discrete entropy increment ∆S(d) = S(d + 1) − S(d).
+
+Using the ratio (3) of the cardinalities of adjacent shells, we obtain ∆S(d) = log (k − d)( n − k − d)(d + 1) 2 . (7) From the unimodality of the shell cardinality shown in Proposition 2 and the monotonicity of the logarithm, we see that ∆S(d) > 0 for d ≤ ⌊ ˆd∗⌋,
+
+and ∆S(d) < 0 for d ≥ ⌈ ˆd∗⌉,
+
+where ˆd∗ is given by (5). As d increases, the entropy thus increases as the distance approaches the entropy-maximizing shell and decreases beyond it. 
+
+## 4.2 Distribution over Distance Shells 
+
+The shell cardinalities also admit a natural probabilistic interpretation. If a configuration X
+
+is drawn uniformly at random from the feasible space Ω, the probability that v(X, x ∗) = d is proportional to |Ωd|. This interpretation is consistent with the hypergeometric structure of the shell cardinalities discussed in Section 3. Thus, the entropy landscape S(d) = log |Ωd| describes how the uniform measure over Ω is distributed across distances from the reference state. From this viewpoint, the induced distribution over d is maximized at distances near ˆd∗,namely at d ∈ {⌊ ˆd∗⌋, ⌈ ˆd∗⌉} . Hence, shells near ˆd∗ carry the largest combinatorial weight and are the most typical under the uniform measure. This shows that the feasible space is combinatori-ally biased toward intermediate distances from the reference state. In particular, configurations close to or far from the reference state are relatively less frequent compared to those near ˆd∗.This probabilistic viewpoint provides a natural interpretation of the entropy landscape: the function S(d) captures how the combinatorial volume of the feasible space is distributed across distances. This structural bias interacts with local transition dynamics, as analyzed in the next section. 
+
+## 4.3 Free-Energy Perspective 
+
+The entropy landscape derived above also admits an interpretation in terms of free energy [27, 30]. In stochastic search processes, the dynamics can be interpreted through the lens of the Helmholtz free energy 
+
+F = E − T S, 
+
+where E denotes the objective function, S is the entropy, and T is a parameter controlling the relative influence of energy and entropy. In the present setting, the entropy term S(d) is determined solely by the combinatorial structure of the feasible space, independently of the objective function. This highlights a fun-damental distinction between two sources of bias in search dynamics: objective-driven effects 8through E, and combinatorial-structure-induced effects through S, which are typically combined in standard free-energy formulations. As illustrated in the experimental results (Section 6), the interaction between these two components influences the behavior of search trajectories. 
+
+# 5 Search Dynamics with Entropy-Driven Drift 
+
+We now analyze how asymmetry of local transitions between neighboring distance shells influ-ences the search dynamics on the Johnson graph. In the analysis provided in this section, in addition to the assumption 1 ≤ k ≤ n − 1, we exclude the trivial case ( n, k ) = (2 , 1). 
+
+## 5.1 Random Walk on the Johnson Graph 
+
+We consider the simple swap random walk {Xt}∞ 
+
+> t=0
+
+on the Johnson graph J(n, k ), which serves as a canonical model of local search dynamics for k-of-n subset selection problems. From a configuration Xt ∈ Ω =  [n]
+
+> k
+
+ at time t (t = 0 , 1, 2, . . . ), a step of the walk replaces one element of Xt with one element from [ n] \ Xt, where both elements are chosen uniformly at random as 
+
+Xt+1 . This random walk is a Markov chain on the finite state space Ω. We first summarize basic structural properties of this random walk, which will be used in the analysis of the induced distance process. 
+
+Lemma 1. The random walk {Xt} on the Johnson graph J(n, k ) is a finite-state Markov chain that is irreducible and aperiodic. Consequently, it admits a unique stationary distribution and its stationary distribution is uniform on the feasible space Ω.Proof. Irreducibility follows from the connectivity of the Johnson graph: any k-subset can be transformed into any other by a finite sequence of swaps. Since the Johnson graph is vertex-transitive (Property 1), the transition probabilities are symmetric. Thus, to prove aperiodicity, it suffices to show that the graph contains an odd cycle. If k = 1, then J(n, 1) = Kn, where Kn is the complete graph on n vertices. Thus, it contains triangles for n ≥ 3. If k ≥ 2, choose distinct a, b ∈ X and c / ∈ X, where X denotes any configuration X ∈ Ω. Then the configurations X, X \ { a} ∪ { c}, and X \ { b} ∪ { c} form a triangle in J(n, k ). Hence the graph is non-bipartite and the Markov chain is aperiodic. Finally, as J(n, k ) is vertex-transitive (Property 1), it is a regular graph. For any random walk on a connected, undirected regular graph, the stationary distribution is unique and uniform on Ω. 
+
+## 5.2 Distance Process 
+
+To analyze the search dynamics, we consider the distance between the current state Xt and a fixed reference configuration x∗ ∈ Ω. Let 
+
+Yt = v(Xt, x ∗) (8) be the distance process, representing the graph distance from Xt to the fixed reference config-uration x∗.
+
+Proposition 4. The distance process {Yt} determined by (8) is a Markov chain on {0, 1, . . . , d max }.More specifically, {Yt} is a birth-and-death chain on {0, 1, . . . , d max }.Proof. By distance-transitivity of the Johnson graph J(n, k ) (Property 1), for each d = 0 , 1, . . . , d max 
+
+and each d′ ∈ { d − 1, d, d + 1 }, the transition probability 
+
+P (Xt+1 ∈ Ωd′ | Xt = x)9is constant over all x ∈ Ωd. This implies that the transition probabilities depend only on the distance d, not on the specific state x ∈ Ωd, satisfying the condition for lumpability [20], The lumpability condition ensures that the aggregated process {Yt} retains the Markov property, Since each step in the swap random walk {Xt} changes the distance by at most one, the distance Yt can change by at most 1 in a single transition. Consequently, the distance process 
+
+{Yt} is a birth-and-death chain [24] on the state space {0, 1, . . . , d max }.Due to the distance-transitivity of J(n, k ) (Property 1), for any vertices xd ∈ Ωd, the number of neighbors of xd in Ω d+1 is given by ( k − d)( n − k − d), the number of neighbors of xd in Ωd−1 is given by d2. Since each vertex in Ω d has k(n − k) neighbors in total, and the numbers of neighbors in Ω d−1 and Ω d+1 are given as above, the transition probabilities of the distance process {Yt} are determined as follows: 
+
+qd = P (Yt+1 = d − 1 | Yt = d) = d2
+
+k(n − k) , (9) 
+
+pd = P (Yt+1 = d + 1 | Yt = d) = (k − d)( n − k − d)
+
+k(n − k) , (10) 
+
+rd = P (Yt+1 = d | Yt = d) = 1 − pd − qd. (11) These expressions naturally incorporate the boundary conditions: 
+
+• At the target state d = 0, we have q0 = 0, reflecting that the process cannot move to a negative distance. 
+
+• At the maximum distance d = dmax , we have pdmax = 0, ensuring the process remains within the feasible state space. This confirms that the distance process {Yt} is a well-defined birth-and-death chain on the finite state space {0, 1, . . . , d max }.
+
+## 5.3 Entropy-Driven Drift 
+
+In this subsection, we analyze the drift E[Yt+1 − Yt | Yt = d] of the distance process. We call this drift the entropy-driven drift , as it arises from asymmetry in local transitions induced by the combinatorial structure of the Johnson graph. For notational simplicity, we hereafter denote 
+
+E[∆ d | d] instead of E[Yt+1 − Yt | Yt = d]. Using the transition probabilities of the distance process {Yt} in (9) and (10), we can express the entropy-driven drift as 
+
+E[∆ d | d] = pd − qd (12) = (k − d)( n − k − d) − d2
+
+k(n − k)= 1 − nd k(n − k) . (13) 
+
+Connection to the Entropy Gradient. The transition probabilities of the distance process are directly linked to the shell multiplicities. In particular, from (10), (9), and (2), we obtain 
+
+pd
+
+qd
+
+= |Ωd+1 ||Ωd−1| . (14) Thus, the asymmetry of local transitions is governed by the relative sizes of neighboring shells. Taking logarithms yields log pd
+
+qd
+
+= S(d + 1) − S(d − 1) , (15) 10 which shows that the local transition bias is closely related to a discrete entropy gradient. Therefore, the entropy-driven drift arises from the imbalance of transition probabilities, which is induced by the underlying graph structure through the entropy landscape. This estab-lishes a direct quantitative link between the entropy landscape and the induced search dynamics. From (13), we see that the entropy-driven drift vanishes at 
+
+d∗ = k(n − k)
+
+n , (16) which is considered as the stochastic equilibrium point of the search process. We can rewrite (13) in the linear form of the stochastic equilibrium point d∗ given by (16) as 
+
+E[∆ d | d] = − nk(n − k) (d − d∗). (17) Thus the distance process exhibits a linear mean-reverting drift toward the stochastic equilib-rium point. This structure is analogous to the restoring drift appearing in Ornstein–Uhlenbeck processes [34]. Under appropriate scaling, this structure suggests a connection to Ornstein– Uhlenbeck type diffusion processes. For completeness, the conditional variance of the distance increment can also be computed explicitly. Since ∆ d ∈ { +1 , 0, −1},
+
+E[(∆ d)2 | d] = pd + qd = (k − d)( n − k − d) + d2
+
+k(n − k) .
+
+The conditional variance therefore becomes Var(∆ d | d) = (k − d)( n − k − d) + d2
+
+k(n − k) −
+
+
+
+1 − nd k(n − k)
+
+2
+
+.
+
+Remark 1 (Entropy-Driven Drift vanishing point vs. Entropy-maximizing point) . The results derived so far exhibit that the entropy-driven drift vanishing point d∗ given by (16) is not iden-tical to the entropy-maximizing point ˆd∗ given by (5). The vanishing of the drift is determined by the condition pd = qd, where pd and qd denote the transition probabilities of the induced birth-and-death chain. This condition is not identical to the maximization of the entropy S(d), which is defined through the shell multiplicities. However, in the thermodynamic limit where 
+
+n → ∞ with k/n = α fixed, both points converge to the same normalized concentration point 
+
+α(1 − α). The entropy gradient and the entropy-driven drift are closely related but conceptually dis-tinct: the former is a static property of shell multiplicities, whereas the latter arises dynamically from the asymmetry of local transitions between neighboring shells induced by these multiplic-ities, as quantified by (12). 
+
+## 5.4 Expected Hitting Time to a Target Configuration 
+
+In this subsection, we consider the random walk {Xt} on the Johnson graph J(n, k ) and analyze the expected hitting time to a fixed target configuration x∗.We now derive the expected time required for the search process {Xt} to reach a target configuration x∗. Due to the distance-transitivity of the Johnson graph (Property 1), the expected hitting time to x∗ from any configuration x ∈ Ω depends only on its initial distance 
+
+m = v(x, x ∗). Formally, for all x ∈ Ωm, E[τx∗ | X0 = x] = E[τ0 | Y0 = m]. This allows us to analyze the hitting time of the original search process {Xt} directly through the induced distance process {Yt}.11 Theorem 1 (Expected Hitting Time of the Search Process) . Let {Xt}∞ 
+
+> t=0
+
+be the random walk defined in Section 5.1, and let x∗ ∈ Ω be a fixed target configuration. For any initial configuration 
+
+X0 ∈ Ω with v(X0, x ∗) = m, the expected hitting time τx∗ = inf {t ≥ 0 : Xt = x∗} satisfies: 
+
+E[τx∗ | v(X0, x ∗) = m] = 
+
+> m
+
+X
+
+> i=1
+
+1
+
+qi|Ωi|
+
+> dmax
+
+X
+
+> j=i
+
+|Ωj |, (18) 
+
+where |Ωj | denotes the cardinality of the distance shell Ωj , which is given by (2), and qi is the downward transition probability in the distance process {Yt}, which is given by (9). Proof. First, we establish that the analysis of the search process {Xt} can be reduced to the distance process {Yt} on {0, . . . , d max }. For the search process {Xt}, the expected hitting time from x to x∗ depends only on the distance m = v(x, x ∗) due to the distance-transitivity of 
+
+J(n, k ) (Property 1), which ensures that all states at the same distance are equivalent under the dynamics Thus, we define hm = E[τx∗ | X0 ∈ Ωm] = E[τ0 | Y0 = m] for m ∈ { 0, . . . , d max }.For the birth-and-death chain {Yt}, from its Markov property, the first-step analysis for 
+
+i ∈ { 1, . . . , d max − 1} yields 
+
+hi = 1 + pihi+1 + qihi−1 + rihi, (19) where pi, qi, and ri are the transition probabilities defined in (10), (9), and (11), respectively. Let δi = hi − hi−1 for i ∈ { 1, . . . , d max }. For i ∈ { 1, . . . , d max − 1}, adding pihi + qihi to both sides of (19), using pi + qi + ri = 1, and rearranging gives 
+
+qiδi = 1 + piδi+1 . (20) At the boundary i = dmax , since pdmax = 0, the first-step equation reduces to 
+
+qdmax δdmax = 1 . (21) Next, from (9), (10), and (2), we have 
+
+pi
+
+qi+1 
+
+= (k − i)( n − k − i)(i + 1) 2 = |Ωi+1 ||Ωi| , (22) which implies the detailed balance relation [24] 
+
+|Ωi|pi = |Ωi+1 |qi+1 . (23) Multiplying (20) by |Ωi| and using (23) yields, for i ∈ { 1, . . . , d max − 1},
+
+|Ωi|qiδi = |Ωi| + |Ωi+1 |qi+1 δi+1 .
+
+Define 
+
+Ai = |Ωi|qiδi.
+
+Then the above relation becomes 
+
+Ai = |Ωi| + Ai+1 , i = 1 , . . . , d max − 1,
+
+while the boundary condition (21) gives 
+
+Admax = |Ωdmax |.
+
+By backward iteration, we obtain 
+
+Ai =
+
+> dmax
+
+X
+
+> j=i
+
+|Ωj |,
+
+12 and therefore 
+
+δi = 1
+
+qi|Ωi|
+
+> dmax
+
+X
+
+> j=i
+
+|Ωj |.
+
+Finally, since h0 = 0 and hm = Pmi=1 δi, we conclude that 
+
+hm =
+
+> m
+
+X
+
+> i=1
+
+1
+
+qi|Ωi|
+
+> dmax
+
+X
+
+> j=i
+
+|Ωj |,
+
+which completes the proof. For the fixed-ratio regime where k/n = α (0 < α < 1), the expected hitting time E[τx∗ ] grows exponentially in n in the fixed-ratio regime. This follows from the fact that the shell cardinalities 
+
+|Ωj | grow exponentially in n, with leading order |Ωj | ≈ exp( nS (j/n )). In particular, the sum in (18) is dominated by contributions from shells near the entropy-maximizing distance, which are exponentially far from the target. Consequently, trajectories that reach the target correspond to rare events. More precisely, following the standard asymptotic properties of random walks on high-dimensional combinatorial structures [24] and the entropy-based approximation of binomial coefficients [6], the leading order is given by E[τx∗ ] ≈ exp( nH (α)), where H(α) = −α log α −
+
+(1 − α) log(1 − α) denotes the binary entropy function. This can be interpreted as a large-deviation phenomenon induced by the entropy landscape, where trajectories reaching the target correspond to exponentially rare events [7]. 
+
+# 6 Experimental Illustration of Entropy-Driven Drift 
+
+The theoretical analysis in the previous sections shows that the combinatorial structure of distance shells in the Johnson graph induces an entropy landscape, which in turn generates a systematic entropy-driven drift toward an equilibrium distance in a high-entropy region of the state space. The purpose of this section is not to provide empirical performance comparisons, but to illustrate the trajectory-level phenomena predicted by the theory. In particular, we visualize how entropy-driven drift biases the behavior of trajectories and causes typical trajectories to move away from the target and toward high-entropy regions. Throughout the experiments we consider the Johnson graph J(n, k ) with n = 200 and 
+
+k = 40. 
+
+## 6.1 Sample Trajectories of the Distance Process 
+
+To understand the implications of the entropy-driven drift studied in Section 5, we first examine the behavior of the distance process through simulation. Figure 1 shows 100 sample trajectories of the distance process. Each trajectory starts from the initial state d = 1, which is close to the target configuration, and evolves according to the random walk on the Johnson graph J(200 , 40). The thick curve in the figure represents the mean trajectory, while the shaded area indicates one standard deviation around the mean. The dashed horizontal line in the figure indicates the equilibrium distance d∗ = 32 .00, which is calculated by (16) for n = 200 and k = 40. The trajectories exhibit a clear drift toward the equilibrium distance d∗. We observe that even when the initial state is close to the target, typical trajectories move away from it and concentrate around the equilibrium distance d∗. We also observe that the mean trajectory, shown as the thick line, approaches the equilibrium distance. 13 Figure 1: Sample trajectories of the distance process in random walks on the Johnson graph 
+
+J(200 , 40). Each trajectory starts from the initial state d = 1 and evolves according to random swap moves. The dashed horizontal line indicates the equilibrium distance d∗ = 32 .00 where the drift vanishes. The mean trajectory (thick curve) approaches this equilibrium distance, illustrating the systematic bias induced by entropy-driven drift. These observations are consistent with the theoretical analysis: even when the initial state is close to the target, typical trajectories are rapidly pushed toward the equilibrium distance 
+
+d∗ rather than toward the target itself. This illustrates that the difficulty of optimization here arises not from isolated traps or local minima, but from a systematic trajectory-level bias that drives typical trajectories away from the target. 
+
+## 6.2 Entropy Landscape and Drift Structure 
+
+We next visualize the structural origin of the behavior observed in Fig. 1. Figure 2 shows the entropy landscape S(d) together with the corresponding entropy incre-ment ∆ S(d) and the entropy-driven drift E[∆ d | d] as a function of d, which are given by (6), (7) and (13), respectively. The dashed vertical lines in Fig. 2 indicate d∗ = 32 .00, where the entropy-driven drift vanishes in this setting. In the left panel of Fig. 2, we observe that the entropy landscape exhibits a pronounced unimodal structure and its peak is far from the target state. The continuous entropy-maximizing point is ˆd∗ = 31 .68, as given by (5) for n = 200 and k = 40. The discrete entropy landscape attains its maximum at the nearest shell(s), which in this case lie essentially at the same location. Note here that the maximum distance dmax is 40 in this case, and thus the entropy maximum is located closer to the high-distance region of the state space than to the target In the middle panel of Fig. 2, we observe that the entropy increment ∆ S(d) = S(d+1) −S(d)is positive for d < ˆd∗ and negative for d > ˆd∗. We also observe that around the target state, the entropy increment is positive and relatively large. This means that the entropy landscape is steeply increasing near the target. The steep increase in entropy near the target reflects a strong asymmetry in local transitions, which induces a bias away from the target 14 Figure 2: Entropy landscape, its increment, and the resulting entropy-driven drift in the random walk on the Johnson graph J(200 , 40). The left panel shows the entropy landscape 
+
+S(d), the middle panel shows the entropy increment ∆ S(d), and the right panel shows the entropy-driven drift E[∆ d | d] of the distance process. The dashed vertical line indicates the equilibrium distance d∗ = 32 .00. In the right panel of Fig. 2, we observe that the entropy-driven drift E[∆ d | d] is positive for d < d ∗ and negative for d > d ∗. This indicates that the dynamics exhibit a systematic drift toward the equilibrium distance d∗.Owing to this mean-reverting nature shown in (17), the closer the process approaches the target state within the region d < d ∗, the more it encounters a strong outward drift that impedes further progress toward the target. The key mechanism is not merely the multiplicity of states, but the asymmetry in the number of edges between distance shells, which induces the entropy-driven drift in the dynamics. More precisely, the asymmetry arises from the interaction between the combinatorial structure of the distance shells and the local transition structure. While shells near d∗ contain vastly more states than those closer to the reference state, as observed in the left panel of Fig. 2, the number of edges from a state in Ω d to Ω d+1 and to Ω d−1 is determined by the local combinatorial structure of the Johnson graph, as described in Section 5.2. In particular, the number of edges from Ω d
+
+to Ω d+1 scales as |Ωd|(k − d)( n − k − d), while that to Ω d−1 scales as |Ωd|d2. Together, these effects induce a strong asymmetry in the total number of edges between neighboring distance shells, which gives rise to the entropy-driven drift observed in the dynamics. 
+
+## 6.3 Idealized Objective Guidance and Entropy Competition 
+
+In this subsection, we examine how entropy-driven drift interacts with objective guidance. For this purpose, we introduce an idealized objective function f that directly reflects the distance to the target state, which is given by 
+
+f (x) = v(x, x ∗),
+
+where x∗ is the target state and v is the distance function defined in (1). Thus the objective favors states closer to the target state. The exploitation of this idealized objective function f
+
+assumes that the distance to the target state is directly observable. This assumption removes the informational limitation typically present in optimization problems and therefore represents an idealized form of objective guidance. Under this idealized setting where the objective directly reflects the distance to the target, we can isolate the interaction between entropy-driven drift and objective guidance, allowing us to examine how strong an objective force must be to counteract the entropy-driven drift induced by the search space. To incorporate the guidance of the idealized objective function f into the search dynamics, we implement a Metropolis-based search process. In this process, at each step, a candidate 15 Figure 3: Interaction between idealized objective guidance and entropy-driven drift. The figure shows the drift of the distance process under Metropolis dynamics for various values of β. The parameter β represents the strength of objective-based guidance toward the target. When β = 0 (unbiased random walk), the drift is dominated by entropy-driven drift across the entire space. As β increases, the downward shift of the curves illustrates the effect of objective guidance. Crucially, even for β = 2, the drift can remain positive in the vicinity of the target, showing that, for moderate levels of objective guidance, entropy-driven drift can remain dominant near the target. move is generated according to the same random swap mechanism as the original random walk on the Johnson graph. However, instead of accepting all moves, we apply a Metropolis acceptance criterion based on the change in the objective function value [24]. Specifically, a move that reduces the distance to the target (i.e., decreases the objective value) is accepted with probability 1, while a move that increases the distance (i.e., increases the objective value) is accepted with probability e−β∆f , where ∆ f is the change in the objective function value and 
+
+β ≥ 0 is a parameter controlling the strength of the objective guidance. When β = 0, the Metropolis-based search reduces to the original random walk, while larger values of β introduce stronger preference for moves that reduce the distance to the target. Although the Metropolis acceptance criterion modifies the transition probability pd for out-ward moves, and consequently rd = 1 − pd − qd, it leaves qd unchanged, because every move that decreases the distance is accepted with probability 1. Thus, when β is finite, it does not alter the underlying connectivity of the Johnson graph. Since the rule only reweights existing edges, the underlying graph structure remains unchanged. Since the Metropolis rule only reweights existing edges, the underlying graph structure remains unchanged for finite β. Moreover, be-cause the objective function f depends only on the distance to the target, the induced distance process also forms a birth-and-death chain. We then derive the drift of the distance process under the Metropolis-based search dynamics with the idealized objective f . Because every outward move increases the objective by exactly one, its acceptance probability is e−β , whereas every inward move is accepted with probability 16 1. Therefore, the drift of the distance process under the Metropolis-based search dynamics can be expressed as 
+
+E[∆ d | d] = pde−β − qd, (24) where pd and qd are the original transition probabilities of the distance process without the Metropolis acceptance criterion, given by (10) and (9), respectively. Note here that when 
+
+β = 0, the Metropolis-based chain reduces to the original random walk, and thus the drift in (24) reduces to the original entropy-driven drift pd − qd derived in Section 5. Using the expressions (10) and (9) in (24), we can explicitly write the drift as 
+
+E[∆ d | d] = (k − d)( n − k − d)e−β − d2
+
+k(n − k) . (25) Notably, while the entropy-driven drift in the unbiased case ( β = 0) is linear in d, the intro-duction of objective-based reweighting leads to a nonlinear dependence on d. From (25), we see that the distance d∗ where the drift vanishes follows 
+
+d∗ = −n + pn2 + 4( eβ − 1) k(n − k)2( eβ − 1) . (26) Figure 3 plots the drift E[∆ d | d] of the distance process under the Metropolis chain for β =0, 0.5, 1.0, 2.0. In Fig. 3, we observe that increasing β strengthens the influence of objective-based guidance and shifts the drift curve downward. The increase in β corresponds to increasing the strength of the objective-driven drift, analogous to increasing the inverse temperature parameter in simulated annealing (SA) [21]. We also observe that as β increases, d∗ decreases. Indeed, from (26), we obtain d∗ =32 .00 , 29 .23 , 26 .13 , 19 .66 for β = 0 , 0.5, 1.0, 2.0, respectively. However, the entropy-driven drift, which systematically pulls the distance process toward the equilibrium distance d∗, persists as a structural component of the dynamics, and its influence remains visible in the resulting drift over a wide range of distances. Crucially, even for β = 2, the drift of the distance process can remain positive in the vicinity of the target. This observation shows that the effect of entropy-induced barriers can be counteracted through objective-based reweighting of local transitions, although the structural entropy-driven component of the dynamics remains present for finite β.Figure 4 shows 100 sample trajectories of the distance process under idealized objective guidance ( β = 1). As in Fig. 1, each trajectory starts from the initial state d = 1, which is close to the target configuration. The thick curve in the figure represents the mean trajectory, while the shaded area indicates one standard deviation around the mean. The dashed horizontal line in the figure indicates the equilibrium distance d∗ = 26 .13, which is calculated by (26) for n = 200, k = 40 and β = 1. In Fig. 4, we observe that even under idealized objective guidance ( β = 1), the target configuration does not act as a stable attractor for the search trajectories. Instead, the trajectories stabilize around a nonzero equilibrium distance d∗. This behavior reflects the competition between the objective-driven drift toward the target and the entropy-driven drift toward the equilibrium distance d∗ corresponding to β = 0. We next consider the expected hitting time to the target configuration under the Metropolis-based search process with the idealized objective function f . The expected hitting time can be derived by modifying the original expression in Theorem 1 to account for the Metropolis acceptance probabilities. Specifically, the expected hitting time under the Metropolis-based search process can be expressed as 
+
+Eβ [τx∗ | v( ˜X0, x ∗) = m] = 
+
+> m
+
+X
+
+> i=1
+
+1
+
+qi|Ωi|
+
+> dmax
+
+X
+
+> j=i
+
+|Ωj |e−β(j−i), (27) where ˜X0 denotes the initial state of the Metropolis-based search process and Eβ denotes the expectation under this process. Note here that when β = 0, the expected hitting time in (27) reduces to the original expected hitting time given by (18). 17 Figure 4: Sample trajectories of the distance process under idealized objective guidance ( β =1), starting from d = 1. While the objective introduces a tendency toward the target, the trajectories do not concentrate at d = 0, but instead stabilize around a nonzero equilibrium distance d∗ = 26 .13. This behavior reflects the competition between objective-driven drift toward the target and entropy-driven drift away from it. Figure 5 plots the expected hitting time Eβ [τx∗ | v( ˜X0, x ∗) = m] as a function of the initial distance m = 1 , . . . , 40 for β = 0 , 0.5, 1.0, 2.0. In Fig. 5, we observe that increasing 
+
+β substantially reduces the expected hitting time across all initial distances. This is because increasing β suppresses the outward transitions that push away from the target, which are responsible for the entropy-driven drift. We also observe that the expected hitting time is largely insensitive to the initial distance m, while it varies significantly with β. This observation indicates that the dominant effect arises from the reweighting of local transition probabilities, in particular the suppression of outward moves, rather than from the initial position. From the viewpoint of fitness-distance correlation (FDC) in the sense of [19], the flat land-scape ( β = 0) can be regarded as FDC = 0, whereas all guided cases with β > 0 yield FDC = 1, since the objective function coincides with the distance to the target in this setting. However, this state-based characterization does not fully determine the search dynamics. Although all 
+
+β > 0 cases share the same FDC value, their expected hitting times differ substantially, as shown in Fig. 5. This observation indicates that state-based measures such as FDC do not fully capture the trajectory-level behavior of the search process. In the limit β → ∞ , the dynamics approach those of a greedy hill-climbing process, in which only energy-decreasing transitions are allowed. Note here that in this regime, the underlying connectivity of the Johnson graph is altered. In this situation, the entropy-driven outward bias no longer appears in the observed dynamics, because transitions that increase the objective value are effectively suppressed. However, in general optimization problems, such greedy dy-namics may become trapped in local minima of the objective function, from which escape is impossible without stochastic exploration. Thus, increasing β does not necessarily resolve the difficulty of search, but rather shifts it from an entropy barrier to an energy barrier. In the idealized objective considered here, since such local minima are absent, the search process is 18 Figure 5: Expected hitting time to the target configuration under the idealized objective guidance f (x) = v(x, x ∗), shown as a function of the initial distance m. Increasing β reweights the contribution of outward trajectories, leading to a substantial reduction in expected hitting time across all initial distances. able to generate trajectories toward the target with increasingly high probability as β becomes sufficiently large. Nevertheless, this situation highlights that search difficulty need not disap-pear when entropy-induced effects are suppressed, because objective landscapes can introduce distinct energy barriers. In this sense, eliminating one source of difficulty may reveal another rather than removing the difficulty of search altogether. Consequently, eliminating one source of difficulty does not remove the problem of search, but instead reveals another. The results provided in this subsection highlight the critical role of information limitations in optimization difficulty and indicate that even when distance-to-target information is available, the entropy-driven barrier can be substantially suppressed through objective-based reweighting of local transitions, and may no longer be observed in the resulting dynamics for sufficiently large β. Importantly, however, the entropy-driven drift persists as a structural component induced by the underlying graph structure, since the connectivity of the state space remains unchanged for finite β.
+
+## 6.4 Comparison with IID Uniform Sampling 
+
+In this subsection, to clarify the role of locality, we compare the random walk on the Johnson graph with IID uniform sampling over the state space. Under IID uniform sampling, each step selects a configuration uniformly from all k-subsets. 19 Figure 6: Logarithmic ratio of expected hitting time for local random-walk search relative to IID uniform sampling. The vertical axis shows log  Em[τ RW 0 ]/ nk
+
+ , where  nk
+
+ is the IID baseline corresponding to the combinatorial rarity of the target. Positive values indicate that the random walk requires longer search times than IID sampling, reflecting the effect of locality and the resulting entropy-driven drift. Since the probability of hitting the target at each step is 1 / nk
+
+, the expected hitting time is 
+
+E[τ IID 0 ] = 
+
+nk
+
+
+
+.
+
+This baseline reflects only the combinatorial rarity of the target and contains no notion of locality. By contrast, the random walk is constrained by local transitions. As shown in Section 5, this locality induces an entropy-driven drift away from the target, so that the hitting time depends not only on the size of the state space but also on the transition dynamics. To quantify the additional cost induced by locality, we consider the ratio of the expected hitting time of the random walk to the IID baseline, which is given by log Em[τ RW 0 ]
+
+ nk
+
+!
+
+,
+
+where Em[τ RW 0 ] is the expected hitting time of the random walk starting from distance m.Figure 6 shows that the random walk requires longer expected hitting times than the IID baseline, except for the special case m = 1, where the random walk can reach the target in a single step, resulting in E1[τ RW 0 ] =  nk
+
+ − 1, which is slightly smaller than the IID baseline. This reflects a trivial local advantage that disappears once the process is more than one step away from the target. Moreover, the ratio is largely insensitive to the initial distance m for 
+
+m ≥ 2. This observation indicates that once the process is more than one step away from the target, the dominant effect is not the initial geometric proximity itself, but trajectory-level bias induced by the asymmetry of local transitions. 20 Notably, both processes share the same stationary distribution, yet exhibit fundamentally different hitting-time behavior. Thus, the comparison with IID sampling shows that optimiza-tion difficulty is not determined by the rarity of the target alone. Rather, locality imposes structural constraints on transitions, resulting in a trajectory distribution that differs funda-mentally from that of IID sampling and leading to an additional hitting-time cost beyond the combinatorial baseline. This provides a concrete illustration that state-based properties such as multiplicity are insufficient to characterize search dynamics, and that locality plays a funda-mental role in shaping trajectory behavior. 
+
+# 7 Implications of Entropy-Driven Drift for Optimization 
+
+In this section, we discuss the implications of the entropy-driven drift identified in this work for understanding optimization difficulty. We interpret the results from multiple perspectives, including underlying graph structure, dynamics, information limitation, and algorithmic behav-ior, and clarify how these factors jointly contribute to the observed difficulty. These viewpoints provide a unified understanding of the roles of state space structure and search dynamics in combinatorial optimization. The results of this paper suggest that optimization difficulty is fundamentally a trajectory-level phenomenon rather than a property of individual states. In particular, the difficulty arises because trajectories that reach the target configuration are not typical under the entropy-driven dynamics. From this perspective, the following discussions examine how entropy-driven drift, induced by the underlying graph structure, gives rise to trajectory-level distortion and the resulting optimization difficulty. 
+
+## 7.1 Entropy barriers and energy barriers 
+
+In optimization, the objective function can be viewed as an energy function, and the objective landscape corresponds to an energy landscape in statistical physics. Traditional explanations of optimization difficulty focus on this energy (objective) landscape. These explanations focus on unfavorable structures of the energy landscape, such as local minima and barriers, which impede the search process. In contrast, the mechanism identified in this work arises even under a completely flat objec-tive function. The difficulty can be traced to the entropy-driven drift induced by the underlying graph structure, which is determined by the problem structure and the search operator. The mechanism can be described as follows. The combinatorial growth in the number of states across distance shells induces an asymmetry in local transitions between inward and outward directions. This asymmetry gives rise to entropy-driven drift, which systematically drives the process toward high-entropy regions. As a result, search trajectories are biased away from the target configuration, which lies in a low-entropy region far from the equilibrium distance. This distinction highlights a fundamental difference between two types of barriers. Energy barriers arise from the structure of the objective function, while entropy barriers arise as a trajectory-level consequence of entropy-driven drift induced by the underlying graph structure. Even in the absence of any unfavorable objective landscape, the entropy-driven drift can make the optimal configuration difficult to reach. These observations suggest that optimization difficulty in combinatorial spaces cannot be understood solely in terms of energy barriers, but must also account for entropy barriers arising from entropy-driven drift induced by the underlying graph structure. From a trajectory-level perspective, entropy barriers can be interpreted as biases in the path distribution that system-atically push trajectories away from the target. 21 7.2 From multiplicity to drift: transition asymmetry and induced dynamics 
+
+From the trajectory-level viewpoint, the mechanism by which static combinatorial structure is translated into dynamical bias in trajectories can be explained as follows. A natural and traditional explanation for the observed difficulty is to attribute it to the multiplicity of states in high-dimensional combinatorial spaces. Indeed, the number of con-figurations grows combinatorially with distance from the target, leading to a concentration of states in high-distance shells. However, multiplicity alone does not fully explain the behavior of search processes. This can be seen by the comparison with IID sampling, where the stationary distribution is identical, yet the search dynamics exhibit qualitatively different behavior. The key mechanism identified in this paper is the asymmetry in local transitions induced by the underlying graph structure. While multiplicity determines the entropy landscape and the stationary distribution, it is the local transition structure that translates this static imbalance into a dynamical bias. In particular, when the search process is restricted to local moves, the imbalance in local transitions directly induces a persistent drift away from the target for states with distance smaller than the equilibrium distance. This shows that the entropy-driven drift is not caused directly by entropy as a static quantity, but by transition asymmetry induced by the underlying graph structure. The comparison between random walk dynamics and IID sampling further clarifies the role of locality. IID sampling corresponds to global exploration unconstrained by local connectivity, and therefore no systematic drift arises. In contrast, local search processes are constrained by the graph structure of the state space, and the resulting transition asymmetry systematically biases trajectories toward high-entropy regions. Thus, the difficulty identified in this work arises not merely from the static distribution of states, but from the entropy-driven drift induced by the underlying graph structure. While approaches such as Local Optima Networks (LONs) [33] provide a compressed rep-resentation of the search space by aggregating local optima and their basins of attraction, they inherently operate at a coarse-grained level. As a consequence, the detailed transition struc-ture along paths toward a target configuration is not explicitly represented. In particular, the asymmetry in local transitions that gives rise to entropy-driven drift is not directly captured in such representations. The discussion in this subsection highlights that optimization difficulty cannot be explained solely by structural information about the state space, but is better understood in terms of the transition dynamics induced by the underlying graph structure. 
+
+## 7.3 Information limitation and hidden structure 
+
+The entropy-driven drift can be characterized in terms of the distance to the target configuration, as the asymmetry in local transition probabilities depends on the distance. More precisely, the imbalance between inward and outward transitions is determined by the combinatorial structure of the underlying graph, which allows the resulting drift to be expressed as a function of the distance. However, this distance is not directly observable to the search process, since it depends on the unknown target itself. This unobservability creates a fundamental mismatch between the observable information and the variables that determine the evolution of search trajectories. While the state space and its underlying graph structure are known, the reference point (the target configuration) that defines the distance is unknown. As a result, the coordinate that governs the drift cannot be directly constructed from observable information. As a consequence, the drift cannot be directly inferred or compensated by the search process, even though it systematically biases the dynamics. The difficulty arises not only from the underlying graph structure, but also from the mismatch between the variables governing the dynamics and the information accessible to the search process. From a control-theoretic perspective, the search process corresponds to a stochastic system 22 that is neither fully observable nor fully controllable: the underlying graph structure is known, but the key variable governing the drift remains hidden. As a result, the search process cannot directly control the trajectory distribution with respect to the relevant coordinate governing the drift. This makes it difficult to generate target-directed trajectories. This point of view implies that optimization algorithms cannot, in general, directly steer the trajectory distribution toward the target, but can only influence it indirectly through observable quantities. 
+
+## 7.4 Transition kernels and algorithmic implications 
+
+The transition kernel of a search process is determined by the combination of the problem structure and the search operator, which together define the underlying graph structure of the state space and the set of feasible transitions. Transition probabilities are then assigned to these feasible transitions, reflecting both objective-based preferences and structural biases induced by the graph. This transition kernel governs the behavior of search trajectories and the resulting search dynamics. The analysis in this paper suggests that optimization difficulty depends not only on the underlying graph structure, but also on the transition kernel governing the search dynamics. Local search methods are constrained by the underlying graph structure, which restricts tran-sitions to local moves. This constraint induces asymmetry in local transitions, which gives rise to entropy-driven drift and the resulting entropy barriers. Pure energy-based methods such as simulated annealing (SA) [21] modify the transition ker-nel by reweighting local transitions according to energy differences. In this case, the underlying graph structure is preserved, while transition probabilities are adjusted to favor moves toward lower-energy configurations. From the perspective developed in this paper, this corresponds to altering the energy-driven component of the drift while leaving the entropy-driven component unchanged, as the under-lying asymmetry in local transitions remains intact. As a result, while SA can bias the search toward lower-energy configurations, it does not remove the entropy-driven drift arising from this structural asymmetry. This suggests that entropy-driven drift cannot, in general, be eliminated, as it is induced by the underlying graph structure. However, its effect on the trajectory distri-bution may be counteracted through energy-based reweighting of local transitions, potentially suppressing the resulting entropy barriers. Increasing the inverse temperature parameter in SA strengthens the energy-driven bias, which can locally offset the effect of entropy-driven drift on the net dynamics. However, this comes at the cost of reduced global exploration, as the chain becomes increasingly confined to energetically favored regions. In contrast, algorithms that incorporate non-local transitions effectively modify the un-derlying graph structure by introducing transitions that connect distant regions of the state space. These transitions alter the set of feasible moves, thereby changing the transition kernel. By modifying the underlying graph structure, such algorithms can bypass the asymmetry in local transitions between inward and outward directions responsible for entropy-driven drift. From this perspective, their effectiveness can be understood as arising from their ability to reshape the induced dynamics in ways that mitigate entropy barriers. Such mechanisms may arise in algorithms incorporating non-local moves, such as parallel tempering [36, 18], genetic algorithms [16, 28], and related population-based methods [9]. More broadly, this discussion suggests that entropy barriers do not arise from the com-binatorial structure of the state space alone, but from its interaction with local transition constraints, which give rise to entropy-driven drift. Since this phenomenon is fundamentally trajectory-level, it is natural to interpret optimization algorithms as mechanisms for shaping the trajectory distribution of the search process. Thus, effective algorithms are those that suppress or circumvent the trajectory-level distortion induced by entropy-driven drift, thereby increasing the probability of target-reaching trajectories. Many techniques in evolutionary computation can be reinterpreted from this trajectory-level perspective. For example, crossover operators 23 introduce non-local transitions that disrupt the effect of accumulated local transition asymme-try [16, 28], while population-based methods maintain multiple trajectories in parallel, thereby increasing the likelihood of rare target-directed trajectories [9]. 
+
+## 7.5 Mixing versus hitting times 
+
+The behavior observed in this work can be interpreted in the context of the well-known distinc-tion between mixing time and hitting time in Markov chains [24, 26]. While the random walk on Johnson graphs rapidly mixes over the state space due to its high connectivity, the expected time required to reach a specific target configuration can remain extremely large. The entropy-driven drift provides a structural explanation for this discrepancy. Although the chain explores the state space efficiently in a global sense, the local transition asymmetry systematically biases the dynamics toward the equilibrium distance, corresponding to high-entropy regions. This makes trajectories less likely to reach the target configuration. Thus, fast mixing does not imply efficient optimization. This analysis shows that the difficulty of reaching a specific configuration is governed not only by global connectivity, but also by the entropy-driven drift induced by the underlying graph structure. From a trajectory-level perspective, this discrepancy reflects the fact that typical trajectories rapidly explore high-entropy regions, while trajectories leading to the target correspond to atypical trajectories. 
+
+## 7.6 Generality and robustness of the mechanism 
+
+The mechanism identified in this work is not tied to any particular target configuration. This follows from the distance-transitivity of the Johnson graph, which ensures that the combinatorial and transition structure of distance shells, and hence the induced distance dynamics, is identical around every state. As a consequence, the entropy-driven drift does not arise from any special property of a particular solution, but is instead an intrinsic feature of the underlying graph structure. This observation also clarifies that the mechanism is robust to the presence of multiple optimal solutions, provided that these solutions do not occupy a significant fraction of high-entropy regions. If the number of optimal states grows only polynomially with the problem size and remains concentrated in low-entropy regions, their total volume remains negligible compared to the exponentially large volume of high-entropy regions. In such situations, the entropy-driven drift is not significantly altered, and the optimization difficulty persists. Only when the set of optimal solutions is sufficiently dispersed across the state space, particularly into high-entropy regions, would the effective accessibility of target configurations be substantially altered, thereby altering the effective distance-based representation of the search dynamics and the resulting trajectory-level behavior. The Johnson graph studied in this work provides a particularly tractable setting where entropy-driven drift can be explicitly expressed as a function of distance, due to its high degree of symmetry. However, entropy-driven drift is not limited to this specific setting, but is expected to arise in a broad class of combinatorial spaces where the underlying graph structure produces asymmetric dynamics. In particular, any search space in which (i) a notion of distance from a target configuration can be defined, (ii) transitions are local with respect to an underlying graph structure induced by the search operator, and (iii) the number of states varies with distance in a non-uniform manner, is expected to exhibit a similar asymmetry between inward and outward transitions. This asymmetry induces an entropy-driven drift in the distance process. As a result, the same qualitative phenomenon can emerge at the level of trajectories. Thus, the mechanism identified in this work should be viewed as a consequence of general structural properties of the underlying graph, rather than a peculiarity specific to the Johnson graph. More generally, the observed difficulty should be understood as a consequence of entropy-driven drift shaping the trajectory distribution in combinatorial spaces with asymmetric local 24 transitions. From this perspective, optimization difficulty is fundamentally a property of trajec-tory generation dynamics, arising from the interplay between the underlying graph structure, the induced transition dynamics, and the limited observability of the target-dependent coordi-nate governing the drift. 
+
+# 8 Conclusion 
+
+This work identifies a structural mechanism that shapes search trajectories in high-dimensional combinatorial spaces. Through the analysis of random walks on the Johnson graph, we show that the underlying graph structure induces asymmetry in local transitions, which gives rise to a systematic bias in search trajectories, termed entropy-driven drift .This effect becomes particularly transparent in the limiting case of a flat objective landscape, where the influence of objective-driven drift is absent. The resulting optimization difficulty in this setting can be attributed to entropy-driven drift, which is induced by the asymmetry between inward and outward transitions on the underlying graph. A key implication of this work is that optimization difficulty is fundamentally a trajectory-level phenomenon rather than a property of individual states. In particular, the entropy-driven drift distorts the trajectory distribution of the search process, causing typical trajectories to move toward high-entropy regions. As a consequence, trajectories that reach the target con-figuration are not typical under the induced dynamics, but correspond to atypical trajectories under the induced dynamics. We further show that this difficulty is closely tied to an information limitation. Because the coordinate governing the drift depends on the unknown target configuration, it is not directly observable, and the search process cannot explicitly compensate for the induced bias. This mismatch between the governing dynamics and available information further exacerbates the difficulty of generating target-directed trajectories. Taken together, these results suggest that entropy-driven drift, induced by the underlying graph structure, can constitute a fundamental source of optimization difficulty in large com-binatorial spaces, together with the limited observability of the target-dependent coordinate governing the drift. More broadly, this perspective naturally connects to large deviation theory [7] and control-theoretic approaches to stochastic systems [11, 38], providing a promising direction for future re-search on quantifying and controlling trajectory distributions in high-dimensional search spaces. Successful optimization can thus be viewed as the realization of atypical trajectories under the induced dynamics, rather than merely the discovery of favorable states. 
+
+# References 
+
+[1] Lee Altenberg. Fitness distance correlation analysis: An instructive counterexample. In 
+
+Proceedings of the 7th International Conference on Genetic Algorithms , pages 57–64, 1997. [2] Anne Auger and Benjamin Doerr. Theory of Randomized Search Heuristics . World Scien-tific, 2011. [3] Konstantinos Benidis, Yiyong Feng, and Daniel P. Palomar. Sparse portfolios for high-dimensional financial index tracking. IEEE Transactions on Signal Processing , 66(1):155– 170, 2018. [4] Christopher M. Bishop. Pattern Recognition and Machine Learning . Springer, 2006. [5] Avrim L. Blum and Pat Langley. Selection of relevant features and examples in machine learning. Artificial Intelligence , 97(1):245–271, 1997. Relevance. 25 [6] Thomas M. Cover and Joy A. Thomas. Elements of Information Theory . Wiley, 2006. [7] Amir Dembo and Ofer Zeitouni. Large Deviations Techniques and Applications . Springer, 2 edition, 1998. [8] Benjamin Doerr and Frank Neumann, editors. Theory of Evolutionary Computation: Re-cent Developments in Discrete Optimization . Springer, 2020. [9] Agoston E. Eiben and James E. Smith. Introduction to Evolutionary Computing . Springer, 2003. [10] Jonathan Fieldsend, Arnaud Liefooghe, Katherine Malan, and S´ ebastien Verel. Local op-tima networks for constrained search spaces. In Proceedings of the Genetic and Evolu-tionary Computation Conference , GECCO ’25, pages 204–212, New York, NY, USA, 2025. Association for Computing Machinery. [11] Wendell H. Fleming and H. Mete Soner. Controlled Markov Processes and Viscosity So-lutions , volume 25 of Stochastic Modelling and Applied Probability . Springer, 2nd edition, 2006. [12] Michael R. Garey and David S. Johnson. Computers and Intractability: A Guide to the Theory of NP-Completeness . W. H. Freeman, 1979. [13] Chris Godsil and Gordon Royle. Algebraic Graph Theory . Springer, 2001. [14] Robert M. Gray. Entropy and Information Theory . Springer, 2011. [15] Isabelle Guyon and Andr´ e Elisseeff. An introduction to variable and feature selection. 
+
+Journal of Machine Learning Research , 3:1157–1182, 2003. [16] John H. Holland. Adaptation in Natural and Artificial Systems . University of Michigan Press, 1975. [17] Holger H. Hoos and Thomas St¨ utzle. Stochastic Local Search: Foundations and Applica-tions . Elsevier / Morgan Kaufmann, 2005. [18] Koji Hukushima and Koji Nemoto. Exchange Monte Carlo method and application to spin glass simulations. Journal of the Physical Society of Japan , 65(6):1604–1608, 1996. [19] Terry Jones. Evolutionary Algorithms, Fitness Landscapes and Search . PhD thesis, Uni-versity of New Mexico, Albuquerque, NM, 1995. [20] John G. Kemeny and J. Laurie Snell. Finite Markov Chains . Springer-Verlag, 1976. [21] Scott Kirkpatrick, C. Daniel Gelatt, and Mario P. Vecchi. Optimization by simulated annealing. Science , 220(4598):671–680, 1983. [22] Bernhard Korte and Jens Vygen. Combinatorial Optimization: Theory and Algorithms .Springer, 6th edition, 2018. [23] Johannes Lengler. Drift analysis. In Theory of Evolutionary Computation: Recent Devel-opments in Discrete Optimization , pages 89–131. Springer, 2020. [24] David A. Levin, Yuval Peres, and Elizabeth L. Wilmer. Markov Chains and Mixing Times .American Mathematical Society, 2009. [25] Katherine M. Malan and Andries P. Engelbrecht. A survey of techniques for characterising fitness landscapes and some possible ways forward. Information Sciences , 241:148–163, 2013. 26 [26] Sean P. Meyn and Richard L. Tweedie. Markov Chains and Stochastic Stability . Cambridge University Press, 2nd edition, 2009. [27] Marc M´ ezard and Andrea Montanari. Information, Physics, and Computation . Oxford University Press, 2009. [28] Melanie Mitchell. An Introduction to Genetic Algorithms . MIT Press, 1998. [29] Frank Neumann and Carsten Witt. Bioinspired Computation in Combinatorial Opti-mization: Algorithms and Their Computational Complexity . Natural Computing Series. Springer, 2010. [30] Hidetoshi Nishimori. Statistical Physics of Spin Glasses and Information Processing: An Introduction . Oxford University Press, 2001. [31] Gabriela Ochoa, Katherine M. Malan, and Christian Blum. Search trajectory networks: A tool for analysing and visualising the behaviour of metaheuristics. Applied Soft Computing ,109:107492, 2021. [32] Gabriela Ochoa, Marco Tomassini, Seb´ astien V´ erel, and Christian Darabos. A study of NK landscapes’ basins and local optima networks. In Proceedings of the 10th Annual Conference on Genetic and Evolutionary Computation , GECCO ’08, pages 555–562, New York, NY, USA, 2008. Association for Computing Machinery. [33] Gabriela Ochoa, S´ ebastien Verel, Fabio Daolio, and Marco Tomassini. Local Optima Net-works: A New Model of Combinatorial Fitness Landscapes , pages 233–262. Springer Berlin Heidelberg, Berlin, Heidelberg, 2014. [34] Bernt Øksendal. Stochastic Differential Equations: An Introduction with Applications .Universitext. Springer, Berlin, Heidelberg, 6 edition, 2003. [35] Christian P. Robert and George Casella. Monte Carlo Statistical Methods . Springer, 2004. [36] Robert H. Swendsen and Jian-Sheng Wang. Replica Monte Carlo simulation of spin-glasses. 
+
+Physical Review Letters , 57(21):2607–2609, 1986. [37] Sarah L. Thomson, Gabriela Ochoa, Daan van den Berg, Tianyu Liang, and Thomas Weise. Entropy, search trajectories, and explainability for frequency fitness assignment. In Michael Affenzeller, Stephan M. Winkler, Anna V. Kononova, Heike Trautmann, Tea Tuˇ sar, Penousal Machado, and Thomas B¨ ack, editors, Parallel Problem Solving from Nature – PPSN XVIII , pages 377–392, Cham, 2024. Springer Nature Switzerland. [38] Emanuel Todorov. Efficient computation of optimal actions. Proceedings of the National Academy of Sciences , 106(28):11478–11483, 2009. [39] E. Weinberger. Correlated and uncorrelated fitness landscapes and how to tell the differ-ence. Biological Cybernetics , 63(5):325–336, 1990. 27

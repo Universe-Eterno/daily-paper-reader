@@ -6,97 +6,88 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-23
-- 运行时间：2026-04-23 20:19:55 UTC
+- 最新运行日期：2026-04-26
+- 运行时间：2026-04-26 19:47:20 UTC
 - 运行状态：成功
-- 本次总论文数：25
-- 精读区：13
+- 本次总论文数：22
+- 精读区：10
 - 速读区：12
 
 ### 今日简报（AI）
-今日深挖 25 篇运筹优化前沿，重点聚焦大模型自动建模与神经组合优化（NCO）两大满分课题。
-核心突破在于 LLM 自动形式化运筹问题及 CVRP 路径规划的高效求解，同时涵盖卫星调度等实战场景。
-建议关注 AI 与传统运筹学的深度融合，尝试利用大模型简化复杂业务逻辑的数学建模过程。
-- 详情：[/202604/23/README](/202604/23/README)
+今日深度解析 22 篇前沿论文，聚焦奖励模型优化与复杂求解基准。
+满分力作 PARM 实现了流水线适配的奖励机制，OptiVerse 则为优化问题提供了全方位的评测标杆。
+推荐优先研读这两篇满分论文，以掌握大模型在逻辑推理与系统优化领域的最新突破。
+- 详情：[/202604/26/README](/202604/26/README)
 
 ### 精读区论文标签
-1. [NCO4CVRP: Neural Combinatorial Optimization for the Capacitated Vehicle Routing Problem](/202604/23/2604.16581v1-nco4cvrp-neural-combinatorial-optimization-for-the-capacitated-vehicle-routing-problem)  
+1. [PARM: Pipeline-Adapted Reward Model](/202604/26/2604.18327v1-parm-pipeline-adapted-reward-model)  
    标签：评分：10.0/10、query:nco-llm
-   evidence：针对带容量限制车辆路径问题的神经组合优化，改进了LEHD和POMO
-2. [AutoOR: Scalably Post-training LLMs to Autoformalize Operations Research Problems](/202604/23/2604.16804v1-autoor-scalably-post-training-llms-to-autoformalize-operations-research-problems)  
+   evidence：用于组合优化的代码生成，将奖励模型集成到建模和求解阶段
+2. [OptiVerse: A Comprehensive Benchmark towards Optimization Problem Solving](/202604/26/2604.21510v1-optiverse-a-comprehensive-benchmark-towards-optimization-problem-solving)  
    标签：评分：10.0/10、query:nco-llm
-   evidence：大模型自动形式化优化问题并对接求解器
-3. [Co-evolving Agent Architectures and Interpretable Reasoning for Automated Optimization](/202604/23/2604.17708v1-co-evolving-agent-architectures-and-interpretable-reasoning-for-automated-optimization)  
-   标签：评分：10.0/10、query:nco-llm
-   evidence：利用大模型和协同进化框架实现运筹学 (OR) 自动化
-4. [PARM: Pipeline-Adapted Reward Model](/202604/23/2604.18327v1-parm-pipeline-adapted-reward-model)  
-   标签：评分：10.0/10、query:nco-llm
-   evidence：研究使用LLM流水线和奖励模型进行组合优化的代码生成
-5. [What Makes an LLM a Good Optimizer? A Trajectory Analysis of LLM-Guided Evolutionary Search](/202604/23/2604.19440v1-what-makes-an-llm-a-good-optimizer-a-trajectory-analysis-of-llm-guided-evolutionary-search)  
-   标签：评分：10.0/10、query:nco-llm
+   evidence：针对大模型在包括组合优化在内的复杂优化任务上的全面基准测试
+3. [AutoOR: Scalably Post-training LLMs to Autoformalize Operations Research Problems](/202604/26/2604.16804v1-autoor-scalably-post-training-llms-to-autoformalize-operations-research-problems)  
+   标签：评分：9.0/10、query:nco-llm
+   evidence：大语言模型自动将优化问题形式化以供求解器使用
+4. [Co-evolving Agent Architectures and Interpretable Reasoning for Automated Optimization](/202604/26/2604.17708v1-co-evolving-agent-architectures-and-interpretable-reasoning-for-automated-optimization)  
+   标签：评分：9.0/10、query:nco-llm
+   evidence：利用大语言模型实现运筹学（OR）自动化
+5. [AutoPPA: Automated Circuit PPA Optimization via Contrastive Code-based Rule Library Learning](/202604/26/2604.18445v1-autoppa-automated-circuit-ppa-optimization-via-contrastive-code-based-rule-library-learning)  
+   标签：评分：9.0/10、query:nco-llm
+   evidence：大模型驱动的电路优化启发式生成
+6. [CHICO-Agent: An LLM Agent for the Cross-layer Optimization of 2.5D and 3D Chiplet-based Systems](/202604/26/2604.18764v1-chico-agent-an-llm-agent-for-the-cross-layer-optimization-of-25d-and-3d-chiplet-based-systems)  
+   标签：评分：9.0/10、query:nco-llm
+   evidence：针对高度组合化的芯粒设计空间的LLM驱动优化框架
+7. [Streamliners for Answer Set Programming](/202604/26/2604.19251v1-streamliners-for-answer-set-programming)  
+   标签：评分：9.0/10、query:nco-llm
+   evidence：利用大模型为组合问题生成流线型约束
+8. [What Makes an LLM a Good Optimizer? A Trajectory Analysis of LLM-Guided Evolutionary Search](/202604/26/2604.19440v1-what-makes-an-llm-a-good-optimizer-a-trajectory-analysis-of-llm-guided-evolutionary-search)  
+   标签：评分：9.0/10、query:nco-llm
    evidence：大模型引导的进化搜索优化轨迹分析
-6. [Empirical Evidence of Complexity-Induced Limits in Large Language Models on Finite Discrete State-Space Problems with Explicit Validity Constraints](/202604/23/2604.13371v1-empirical-evidence-of-complexity-induced-limits-in-large-language-models-on-finite-discrete-state-space-problems-with-explicit-validity-constraints)  
+9. [Dual-Cluster Memory Agent: Resolving Multi-Paradigm Ambiguity in Optimization Problem Solving](/202604/26/2604.20183v1-dual-cluster-memory-agent-resolving-multi-paradigm-ambiguity-in-optimization-problem-solving)  
    标签：评分：9.0/10、query:nco-llm
-   evidence：评估大模型在图着色和SAT等离散状态空间问题上的表现
-7. [Generalization in LLM Problem Solving: The Case of the Shortest Path](/202604/23/2604.15306v1-generalization-in-llm-problem-solving-the-case-of-the-shortest-path)  
-   标签：评分：9.0/10、query:nco-llm
-   evidence：大模型解决最短路径顺序优化问题
-8. [NaviFormer: A Deep Reinforcement Learning Transformer-like Model to Holistically Solve the Navigation Problem](/202604/23/2604.16967v1-naviformer-a-deep-reinforcement-learning-transformer-like-model-to-holistically-solve-the-navigation-problem)  
+   evidence：基于大模型智能体的优化问题求解，采用记忆增强推理
+10. [Graph Neural Network-Informed Predictive Flows for Faster Ford-Fulkerson and PAC-Learnability](/202604/26/2604.21175v1-graph-neural-network-informed-predictive-flows-for-faster-ford-fulkerson-and-pac-learnability)  
    标签：评分：9.0/10、query:nco
-   evidence：用于路径规划的深度强化学习Transformer模型
-9. [CHICO-Agent: An LLM Agent for the Cross-layer Optimization of 2.5D and 3D Chiplet-based Systems](/202604/23/2604.18764v1-chico-agent-an-llm-agent-for-the-cross-layer-optimization-of-25d-and-3d-chiplet-based-systems)  
-   标签：评分：9.0/10、query:nco-llm
-   evidence：针对高度组合化芯粒设计空间的LLM驱动优化框架
-10. [Streamliners for Answer Set Programming](/202604/23/2604.19251v1-streamliners-for-answer-set-programming)  
-   标签：评分：9.0/10、query:nco-llm
-   evidence：使用大模型为组合求解器生成流线型约束
-11. [Learning to Solve the Quadratic Assignment Problem with Warm-Started MCMC Finetuning](/202604/23/2604.20109v1-learning-to-solve-the-quadratic-assignment-problem-with-warm-started-mcmc-finetuning)  
-   标签：评分：9.0/10、query:nco
-   evidence：学习解决二次指派问题 (QAP)
-12. [Dual-Cluster Memory Agent: Resolving Multi-Paradigm Ambiguity in Optimization Problem Solving](/202604/23/2604.20183v1-dual-cluster-memory-agent-resolving-multi-paradigm-ambiguity-in-optimization-problem-solving)  
-   标签：评分：9.0/10、query:nco-llm
-   evidence：用于解决优化问题建模歧义的LLM智能体
-13. [Machine Learning for Two-Stage Graph Sparsification for the Travelling Salesman Problem](/202604/23/2604.20236v1-machine-learning-for-two-stage-graph-sparsification-for-the-travelling-salesman-problem)  
-   标签：评分：9.0/10、query:nco
-   evidence：机器学习用于旅行商问题的图稀疏化
+   evidence：将图神经网络与Ford-Fulkerson算法结合用于最大流组合优化
 
 ### 速读区论文标签
-1. [Optimizing Earth Observation Satellite Schedules under Unknown Operational Constraints: An Active Constraint Acquisition Approach](/202604/23/2604.13283v1-optimizing-earth-observation-satellite-schedules-under-unknown-operational-constraints-an-active-constraint-acquisition-approach)  
+1. [Do LLM-derived graph priors improve multi-agent coordination?](/202604/26/2604.17191v1-do-llm-derived-graph-priors-improve-multi-agent-coordination)  
+   标签：评分：8.0/10、query:nco-llm
+   evidence：大模型衍生的图先验用于多智能体强化学习协调
+2. [TRN-R1-Zero: Text-rich Network Reasoning via LLMs with Reinforcement Learning Only](/202604/26/2604.19070v1-trn-r1-zero-text-rich-network-reasoning-via-llms-with-reinforcement-learning-only)  
+   标签：评分：8.0/10、query:nco-llm
+   evidence：通过强化学习整合大模型与图上下文进行推理
+3. [Effective Traveling for Metric Instances of the Traveling Thief Problem](/202604/26/2604.19271v1-effective-traveling-for-metric-instances-of-the-traveling-thief-problem)  
    标签：评分：8.0/10、query:nco
-   evidence：具有主动约束获取的卫星调度组合优化
-2. [Tight Sample Complexity Bounds for Best-Arm Identification Under Bounded Systematic Bias](/202604/23/2604.14345v1-tight-sample-complexity-bounds-for-best-arm-identification-under-bounded-systematic-bias)  
-   标签：评分：8.0/10、query:nco-llm
-   evidence：在搜索中使用大语言模型作为代理模型进行启发式剪枝
-3. [SGA-MCTS: Decoupling Planning from Execution via Training-Free Atomic Experience Retrieval](/202604/23/2604.14712v1-sga-mcts-decoupling-planning-from-execution-via-training-free-atomic-experience-retrieval)  
-   标签：评分：8.0/10、query:nco-llm
-   evidence：通过 MCTS 和经验检索进行大语言模型规划
-4. [Autonomous Evolution of EDA Tools: Multi-Agent Self-Evolved ABC](/202604/23/2604.15082v1-autonomous-evolution-of-eda-tools-multi-agent-self-evolved-abc)  
-   标签：评分：8.0/10、query:nco-llm
-   evidence：大模型智能体自主演化EDA优化工具
-5. [Greedy Approaches for Packing While Travelling with Deterministic and Stochastic Constraints](/202604/23/2604.13469v1-greedy-approaches-for-packing-while-travelling-with-deterministic-and-stochastic-constraints)  
+   evidence：结合 TSP 和背包问题的旅行窃贼问题路径优化
+4. [AAC: Admissible-by-Architecture Differentiable Landmark Compression for ALT](/202604/26/2604.20744v1-aac-admissible-by-architecture-differentiable-landmark-compression-for-alt)  
+   标签：评分：8.0/10、query:nco
+   evidence：用于最短路径启发式算法的可微地标压缩
+5. [Potential Energy Savings from Quantum Computing-Based Route Optimization](/202604/26/2604.16718v1-potential-energy-savings-from-quantum-computing-based-route-optimization)  
    标签：评分：7.0/10、query:nco
-   evidence：使用贪婪函数的旅行装箱问题超启发式框架
-6. [Chain of Uncertain Rewards with Large Language Models for Reinforcement Learning](/202604/23/2604.13504v1-chain-of-uncertain-rewards-with-large-language-models-for-reinforcement-learning)  
+   evidence：旅行商问题和车辆路径问题的路径优化
+6. [Step-GRPO: Internalizing Dynamic Early Exit for Efficient Reasoning](/202604/26/2604.16890v1-step-grpo-internalizing-dynamic-early-exit-for-efficient-reasoning)  
    标签：评分：7.0/10、query:nco-llm
-   evidence：大语言模型用于强化学习中的奖励函数设计
-7. [Tight Sample Complexity Bounds for Best-Arm Identification Under Bounded Systematic Bias](/202604/23/2604.14345v2-tight-sample-complexity-bounds-for-best-arm-identification-under-bounded-systematic-bias)  
-   标签：评分：7.0/10、query:nco-llm
-   evidence：自主推理中带有大模型评估偏差的启发式剪枝
-8. [RELOAD: A Robust and Efficient Learned Query Optimizer for Database Systems](/202604/23/2604.14725v1-reload-a-robust-and-efficient-learned-query-optimizer-for-database-systems)  
+   evidence：通过Step-GRPO优化大模型的推理与问题解决能力
+7. [Enabling Safety-Critical Wireless Communications via Safe Reinforcement Learning](/202604/26/2604.17032v1-enabling-safety-critical-wireless-communications-via-safe-reinforcement-learning)  
    标签：评分：7.0/10、query:nco
-   evidence：强化学习用于查询优化
-9. [Bridging MARL to SARL: An Order-Independent Multi-Agent Transformer via Latent Consensus](/202604/23/2604.13472v1-bridging-marl-to-sarl-an-order-independent-multi-agent-transformer-via-latent-consensus)  
-   标签：评分：6.0/10、query:nco
-   evidence：用于多智能体强化学习的Transformer架构
-10. [C-voting: Confidence-Based Test-Time Voting without Explicit Energy Functions](/202604/23/2604.13521v1-c-voting-confidence-based-test-time-voting-without-explicit-energy-functions)  
-   标签：评分：6.0/10、query:nco
-   evidence：用于数独和迷宫求解等推理任务的神经模型
-11. [A Comparative Study of Dynamic Programming and Reinforcement Learning in Finite Horizon Dynamic Pricing](/202604/23/2604.14059v1-a-comparative-study-of-dynamic-programming-and-reinforcement-learning-in-finite-horizon-dynamic-pricing)  
-   标签：评分：6.0/10、query:nco
-   evidence：动态定价优化中的强化学习
-12. [GFT: From Imitation to Reward Fine-Tuning with Unbiased Group Advantages and Dynamic Coefficient Rectification](/202604/23/2604.14258v1-gft-from-imitation-to-reward-fine-tuning-with-unbiased-group-advantages-and-dynamic-coefficient-rectification)  
+   evidence：用于混合整数非凸资源分配问题的安全强化学习
+8. [Entropy-Driven Drift as a Source of Optimization Difficulty in Combinatorial Spaces](/202604/26/2604.17332v1-entropy-driven-drift-as-a-source-of-optimization-difficulty-in-combinatorial-spaces)  
+   标签：评分：7.0/10、query:nco
+   evidence：高维组合空间中优化难度的分析
+9. [GRAIL: Autonomous Concept Grounding for Neuro-Symbolic Reinforcement Learning](/202604/26/2604.16871v1-grail-autonomous-concept-grounding-for-neuro-symbolic-reinforcement-learning)  
    标签：评分：6.0/10、query:nco-llm
-   evidence：使用策略梯度优化微调大模型
+   evidence：大语言模型为神经符号强化学习提供概念表示
+10. [RLM-on-KG: Heuristics First, LLMs When Needed: Adaptive Retrieval Control over Mention Graphs for Scattered Evidence](/202604/26/2604.17056v1-rlm-on-kg-heuristics-first-llms-when-needed-adaptive-retrieval-control-over-mention-graphs-for-scattered-evidence)  
+   标签：评分：6.0/10、query:nco-llm
+   evidence：大模型控制与启发式遍历在图探索中的对比
+11. [Compiling Deterministic Structure into SLM Harnesses](/202604/26/2604.17450v1-compiling-deterministic-structure-into-slm-harnesses)  
+   标签：评分：6.0/10、query:nco-llm
+   evidence：利用语义梯度将智能体工作流编译为离散执行计划
+12. [Stratagem: Learning Transferable Reasoning via Trajectory-Modulated Game Self-Play](/202604/26/2604.17696v1-stratagem-learning-transferable-reasoning-via-trajectory-modulated-game-self-play)  
+   标签：评分：6.0/10、query:nco
+   evidence：通过游戏博弈学习可迁移的推理和启发式策略
 
 
 <div class="dpr-home-promo-card">

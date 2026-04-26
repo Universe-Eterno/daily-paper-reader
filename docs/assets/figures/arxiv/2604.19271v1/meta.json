@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.19271v1/fig-001.webp",
+      "caption": "Figure 5: Growth of Running Time with Increasing Problem Size",
+      "page": 14,
+      "index": 1,
+      "width": 900,
+      "height": 275
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19271v1/fig-002.webp",
+      "caption": "Figure 4: 21.6% Improvement Compared to Benchmark",
+      "page": 13,
+      "index": 2,
+      "width": 948,
+      "height": 191
+    },
+    {
+      "url": "assets/figures/arxiv/2604.19271v1/fig-003.webp",
+      "caption": "Figure 3: Same Result as Benchmark",
+      "page": 13,
+      "index": 3,
+      "width": 948,
+      "height": 192
+    }
+  ]
+}
