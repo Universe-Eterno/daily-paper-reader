@@ -1,0 +1,779 @@
+Title: Order Optimal Task Allocation in Distributed Computing via Interweaved Cliques
+
+URL Source: https://arxiv.org/pdf/2604.18232v1
+
+Published Time: Tue, 21 Apr 2026 02:30:49 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+# Order Optimal Task Allocation in Distributed Computing via Interweaved Cliques 
+
+Javad Maheri, K. K. Krishnan Namboodiri, and Petros Elia 
+
+EURECOM, Sophia Antipolis, France Email: {maheri, karakkad, elia}@eurecom.fr 
+
+Abstract —We consider a distributed computing system in which a master node coordinates N workers to evaluate afunction over n input files, where this function accepts general decomposition. In particular, we focus on the general case where the requested function admits a d-uniform decomposition, meaning that it can be decomposed into a set of subfunctions that each depends on a unique d-tuple of the n files. Our objective is to design file and task allocations that minimize the worst-case communication from the master to any worker and the worst-case computational load across workers. We first show that the optimal file and task allocation with minimum communication and computation costs admits a natural characterization within combinatorial design theory: it corresponds to a Steiner system 
+
+S(t, k, v ) with t = d, v = n, and k ≈ n 
+
+> N1/d
+
+. However, Steiner systems are known to exist only for very restricted parameter regimes. To overcome this limitation, we propose the information-theoretic-inspired Interweaved Clique (IC) design , a universal and deterministic allocation framework that relaxes the strict struc-ture of Steiner systems by allowing slight variations in worker file loads. Although slightly suboptimal, the IC design achieves a communication cost within a constant factor 4e from our converse, while also maintaining an order-optimal computation cost, thus allowing this work to derive the fundamental scaling laws of this general distributed computing problem for a large range of parameters. 
+
+Index Terms —Distributed Computing, Coded Distributed Computing, Coded Caching, Distributed Learning, Communi-cation Optimization, Map Reduce, Hypergraph Partitioning, Combinatorial Designs, t-Designs, Steiner Systems. 
+
+I. I NTRODUCTION 
+
+The efficient allocation of computational tasks and data is a cornerstone of modern distributed computing, caching, and distributed learning frameworks [1]–[5]. Across applica-tions such as large-scale machine learning, covariance matrix estimation, and scientific simulation, system performance is often constrained by the volume of communication required during distributed execution and by the associated compu-tational burden. This challenge has motivated extensive re-cent work on communication- and computation-efficient dis-tributed function evaluation. A prominent line of research studies coded distributed computing frameworks, beginning with Coded MapReduce [6] and extending to variants that 
+
+This work was supported by the Huawei France-funded Chair towards Future Wireless Networks, by the French government under the France 2030 ANR program “PEPR Networks of the Future” (ref. ANR-22-PEFT-0010), and by European Research Council ERC-StG Project SENSIBILITÉ under Grant 101077361. 
+
+address stragglers, heterogeneity, and network topology [7]– [14], demonstrating that structured data placement and task allocation can substantially reduce communication through coded exchanges. Another set of works focuses on linearly separable functions and straggler resilience [15], [16], multi-user architectures and task assignment using covering and tiling constructions [17], [18], and worst-case communication minimization under task constraints [19]. All the above lines of research share the goal of designing, under various settings and assumptions, task and data assignment methods that reduce communication and computation costs in distributed comput-ing, and in certain settings, highlight inherent interactions between these two resources. Motivated by the same need for efficient task and data allocation, we here consider a general coded distributed com-puting framework for computing decomposable functions in distributed systems. In our framework, the function is de-composable into multiple subfunctions, each taking as input a different d-tuple of files, allowing the master node to assign collections of subfunctions (each represented here by a d-tuple) to multiple workers and communicates the necessary file inputs so as to enable local computation. Naturally, this setting entails a communication cost (as servers need to be communicated the necessary files), and a computation cost (which scales with the number of subfunctions each server must compute). The central design problem is to jointly determine the task assignment and file placement strategies that minimize communication while maintaining balanced computational loads across workers. Unlike formulations tai-lored to specific computation pipelines, our framework models the distributed evaluation of general d-tuple decomposable functions by explicitly characterizing the interaction between task partitioning and file placement. The resulting problem is inherently combinatorial in nature. Accordingly, we seek solutions based on structured combinatorial constructions that minimize both communication and computation costs. Indeed, combinatorial designs have been widely used in prior coded distributed computing frameworks, particularly in MapReduce-based models, where clique covers based on t-designs and related combinatorial structures guide task and data assignment [20]–[24]. While these approaches have been effective in reducing communication, they are largely special-ized to MapReduce-style computation pipelines. In contrast, our work develops combinatorial constructions for a more 
+
+> arXiv:2604.18232v1 [cs.IT] 20 Apr 2026
+
+general d-tuple subfunction model, enabling distributed com-putation beyond the MapReduce paradigm. 
+
+Notations: We represent d-tuples using bold lowercase let-ters, such as a = {a1, a 2, . . . , a d}. Sets of d-tuples are denoted by bold uppercase letters, such as Φ. We use [n] to denote the set {1, 2, . . . , n }. For any set S, (S
+
+> d
+
+) denotes the set of all d-sized subsets of S. We use An,d to denote ([n]
+
+> d
+
+). For positive integers a and b, a | b indicates that a divides b. Finally, we write f (n) ≍ g(n) if there exist constants c1, c 2, and n0 such that for all n ≥ n0, c1g(n) ≤ f (n) ≤ c2g(n).II. S YSTEM MODEL AND PROBLEM STATEMENT 
+
+We consider a distributed computing system consisting of 
+
+N worker nodes (servers) and a master node that coordinates the computation of a desired function of n input files (as shown in Fig. 1). The master has access to a library of files 
+
+W = {W1, . . . , W n}, where each file Wj ∈ FB contains B
+
+symbols over a field F. The desired function F : ( FB )n → FL
+
+is assumed to be decomposable into (nd
+
+) subfunctions, each depending on a unique subset of d files. Accordingly, any such decomposition can be written as 
+
+Ψ({ζT (WT ) : T ∈ 
+
+([n]
+
+d
+
+)
+
+}) : ( FT )(nd) → FL (1) where Ψ is an aggregation function and each subfunction ζT :(FB )d → FT operates on the set of files WT = {Wj : j ∈ T } .The parameter d is referred to as the subfunction file degree .
+
+Task and File Allocation: The master assigns to each worker 
+
+b ∈ [N ] a set of subfunctions Φb ⊆ An,d to compute. The collection P , {Φ1, . . . , ΦN } forms a partition of An,d ,
+
+⋃Nb=1 Φb = An,d , Φb ∩ Φb′ = ∅ for b 6 = b′. (2) To compute the subfunctions in Φb, worker b must receive all files indexed by the union of the d-tuples in Φb. Let 
+
+α(Φb) = ⋃
+
+> T ∈ Φb
+
+T ⊆ [n] (3) denote the set of required file indices. The master sends the set of files W(b) = α(Φb) to worker b. The communication cost is defined as 
+
+π = max   
+
+> b∈[N]
+
+|α(Φb)| (4) which captures the bottleneck communication load across workers. 
+
+Computing Phase: During the computing phase, each worker b computes all subfunctions ζT (WT ) for T ∈ Φb.Assuming identical computational capability across workers and equal cost per subfunction, the computation time is proportional to the maximum number of subfunctions assigned to any worker. Accordingly, the computation cost is defined as 
+
+δ = max b∈[N ] |Φb|
+
+⌈(nd
+
+)/N ⌉ (5) where the denominator corresponds to the ideal uniform as-signment achieving the minimum possible computation delay.              
+
+> Fig. 1. Distributed computing model. The set of files communicated to worker bis denoted with W(b)=α(Φb), while πdenotes the maximum communication cost across the master–worker links under the assumption of parallel, uniform-capacity links. Similarly, the set of subfunctions assigned for computation to worker bis denoted by Φb, while δdenotes the computational delay normalized by the minimum possible computational delay, assuming homogeneous workers.
+
+We define π⋆ as the minimum communication cost over all valid allocation schemes. Our objective is to design a partition 
+
+P = {Φb}Nb=1 that minimizes the communication cost π while ensuring that the computation cost δ remains close to unity, for given n, d, and N .Our approach, and specifically the d-tuple based decom-posability model we proposed, is motivated by the many practically relevant functions that require aggregating inter-actions over a large fraction of subfunctions - and which thus entail interactions over the d-tuples in An,d = ([n]
+
+> d
+
+), the collection of all subsets of [n] of size d. Canonical examples include covariance and correlation computations involving all pairwise dependencies ( d = 2 ) [25], higher-order cumulant estimation with d > 2 interactions [26], and kernel matrix construction in kernel methods, which requires evaluating similarities over all pairs of data points [27]. Similar dense interaction patterns arise in particle and molecular dynamics simulations, where forces are computed over all particle pairs or higher-order groups [28], [29], as well as in exhaustive SNP–SNP interaction analysis in genomics [30]. In all these settings, the final output depends on a very large collection of 
+
+d-tuple subfunctions, making scalable distributed computation a central challenge. 
+
+A. The Combinatorial Perspective: Steiner Systems 
+
+The set of all d-tuples (the subfunctions) can be represented as the edge set of a complete d-uniform hypergraph on vertex set [n]. Consequently, assigning subfunctions to N servers is equivalent to partitioning the hyperedges of this complete hypergraph into N groups. From combinatorial design theory, one natural solution to this hyperedge partitioning problem is a Steiner system , denoted by S(t, k, v ).
+
+Definition 1 (Steiner System): A Steiner system S(t, k, v )
+
+consists of a set of v points and a collection of blocks, each of size k, such that every subset of t points is contained in exactly one block. Directly from the definition, the following lemma follows. 
+
+Lemma 1: Let S(t, k, v ) be a Steiner system. Consider a distributed computing setting with n = v files and subfunction degree d = t, and let N = (nd
+
+)/(kd
+
+). Then there exists an assignment of files and subfunctions to N workers such that each worker is communicated with k files and is assigned exactly (kd
+
+) subfunctions. Consequently, the communication cost π = k and the computation cost δ = 1 are achievable. 
+
+Proof: Let S1, . . . , SN denote the blocks of S(d, k, n ).Assign worker b the subfunction set Φb = (Sb
+
+> d
+
+), and commu-nicate to it the k files indexed by Sb. Since every d-subset of [n] is contained in exactly one block, the sets {Φb}Nb=1 
+
+form a partition of An,d , and each worker is assigned (kd
+
+)
+
+subfunctions. Hence, we have π = k and δ = 1 .
+
+However, the applicability of Steiner systems is severely limited by their stringent existence requirements. A Steiner system S(d, π, n ) can exist only if the divisibility conditions that (n−id−i
+
+) is divisible by (π−id−i
+
+) for all 0 ≤ i ≤ d − 1
+
+are satisfied, and even when these necessary conditions hold, existence is guaranteed only for restricted parameter regimes. Consequently, for most choices of n, d, and N , no Steiner system exists. This strong structural rigidity makes Steiner systems unsuitable as a general design tool for distributed computing systems in which n or N may vary freely. III. M AIN RESULTS 
+
+To overcome the non-existence of Steiner systems for most parameter regimes, we propose the Interweaved Clique (IC) design , a relaxed combinatorial framework that provides a constructive and broadly applicable solution for a wide range of system parameters (n, N, d ). The relaxation allows a slight variation in the number of tasks assigned to each worker, while preserving a deterministic structure based on interweaved cliques. Unlike prior appearances of clique-based constructions in information-theoretic problems such as coded caching [1], where cliques represent user side-information structures, in this work cliques serve as the combinatorial seed for constructing the worker–file–task allocation. Specifically, the global allocation is built over An,d using a smaller seed structure Af,d , where f can be much smaller than n. Similar two-level complete-set formulations have also appeared in other coding-theoretic and information-theoretic contexts [11], [31]–[37]. The proposed IC design enjoys the following key properties: 
+
+1) Universality : A valid partition exists for a wide range of parameters (n, N, d ).
+
+2) Order-Optimality : The proposed scheme achieves π ≤
+
+4e n/N 1/d and therefore achieves a gain in communication cost that scales as N 1/d , where e denotes Euler’s constant. Moreover, the scheme is order-optimal, as its communication cost is within a constant factor 4e of the information-theoretic lower bound obtained from a packing argument. Let us now formally state the performance guarantees of the IC design, emphasizing the communication cost π.
+
+Theorem 1 (Optimal Communication Cost): For a distributed computing system with n files and N ≤ ( 9
+
+> 10
+
+√ n 
+
+> d
+
+)d workers, the IC design achieves a communication cost π satisfying 
+
+π ≤ 4e · n
+
+N 1/d .
+
+Furthermore, the scaling law π ≍ n  
+
+> N1/d
+
+is optimal. 
+
+Proof: The proof of Theorem 1 follows from the IC design presented in Section IV and a converse on π⋆ presented in Section V, and is provided in Section VI. 
+
+In the end, let us here also note that in the extended version of our work in [38], we also show that this same IC design guarantees, in a very broad setting and with high probability, a near-optimal computation cost of δ ≤ 4.
+
+IV. A CHIEVABLE SCHEME : I NTERWEAVED -C LIQUES 
+
+DESIGN 
+
+We now describe the Interweaved-Cliques (IC) design, which constructs a partition of An,d for any given tuple (n, d, N ≤
+
+( 9
+
+> 10
+
+√ n 
+
+> d
+
+)d). The design leverages an intermediate parameter f
+
+to structure the file library into families and then assigns tasks based on the intersection of these families. The parameter f
+
+is choosen as 
+
+f = max {r ∈ Z+ |
+
+(rd
+
+)
+
+≤ N }. (6) First, we design the partition of An,d for an intermediate number of groups N ′, defined as N ′ , (fd
+
+). Then, we extend the construction from N ′ to N groups. The construction of 
+
+Φ1, Φ2, . . . , ΦN ′ proceeds in two cases. 
+
+A. Case 1: Divisible Parameters ( f | n)
+
+Assume n is divisible by f , so s , n/f is an integer. 
+
+1) File Families: We partition the n files into f disjoint sets called families, denoted F1, . . . , Ff , each containing s
+
+files. Specifically, Fi contains files with indices {(i − 1) s +1, . . . , is }.
+
+2) Group Identification: We create N ′ = (fd
+
+) base groups, indexed by the set of d-subsets of families, i.e., σ ∈ ([f ]
+
+> d
+
+). We denote the set of all base groups as 
+
+Σ , {σ ⊆ [f ] : |σ| = d} . (7) Each group σ ∈ Σ is allocated the union of files from the families in σ. The number of files allocated to each base group is thus 
+
+π = ∑
+
+> i∈σ
+
+|F i| = s · d = n · d
+
+f . (8) 
+
+3) Task Partitioning: We partition An,d by assigning each d-tuple a ∈ An,d to one of the groups. We define the support family of a tuple a as B(a) , {j ∈ [f ] | a ∩ F j 6 = ∅} . 
+
+> •
+
+Full Support Tuples: We let Afull , {a ∈ An,d | |B (a)| =
+
+d} represent the so-called set of full support (maximal support) d-tuples. If |B (a)| = d, the a intersects exactly one file from d distinct families. For a d-tuple a ∈ Afull ,let B(a) = σ. We assign a to the group σ which belongs to 
+
+[N ′] = ([f ]
+
+> d
+
+). For each σ ∈ ([f ]
+
+> d
+
+), we form its full supports members as follows 
+
+Φ(full)  
+
+> σ
+
+, {a ∈ An,d | B (a) = σ}. (9) This forms the clique core of the design.  
+
+> •
+
+Complement Tuples: We also let Acom , An,d \Afull . For each a ∈ Acom , |B (a)| < d . This means, this d-tuple is supported by a subset of families I ⊂ [f ] with |I| < d . The 
+
+a is eligible to be assigned to all σ ∈ ([f ]
+
+> d
+
+) such that I ⊂ σ.To design partition Acom into N ′ groups, we consider a partition of An,d , which classifies its d-tuples according to the size of their support family. This partition is as follows 
+
+An,d = {C⌈ d 
+
+> s⌉
+
+, C⌈ d 
+
+> s⌉+1
+
+, . . . , Cd} (10) where for each β ∈ [⌈ d 
+
+> s
+
+⌉, d ], the set Cβ , {a ∈ An,d ||B (a)| = β} represents the set of d-tuples a ∈ Cβ that each intersects exactly β families. Naturally, we have Cd = Afull 
+
+and Acom = ⋃d−1   
+
+> β=⌈d
+> s⌉
+
+Cβ . Let us fix a β ∈ [⌈ d 
+
+> s
+
+⌉, d − 1] .Then, for each I ∈ ([f ]
+
+> β
+
+), we define 
+
+Cβ, I , {a ∈ Cβ | B (a) = I} . (11) We define Cβ, I,σ as the subset of Cβ, I allocated to group 
+
+σ. In Appendix B.C of [38], we describe a sequence of steps that leads to the construction of the sets Cβ, I,σ . For each 
+
+σ ∈ ([f ]
+
+> d
+
+), there exist (dβ
+
+) distinct I ∈ ([f ]
+
+> β
+
+) such that I ⊂ σ.Consequently, Φ(com)  
+
+> σ
+
+, ⋃d−1  
+
+> β=⌈d
+> s⌉
+
+⋃ 
+
+> I⊂ σ
+
+Cβ, I,σ . Then, the subfunctions ( d-tuples) allocated to worker σ, where σ ∈([f ]
+
+> d
+
+), is 
+
+Φσ , Φ(full)  
+
+> σ
+
+∪ Φ(com)  
+
+> σ
+
+. (12) 
+
+B. Case 2: General Parameters ( f ∤ n)
+
+In this case, we cannot create equal-sized families. We adapt the design by introducing excluded files. Let s0 , ⌊ n  
+
+> f+d
+
+⌋ + 1 
+
+and define g , n − f · s0. We treat the last g files as an excluded set E, i.e., 
+
+E , [n]/[n − g] = {n, n − 1, . . . , n − g + 1 }. (13) The remaining n′ , n − g files are partitioned into f families of size s0. The partition of An,d is constructed by 
+
+1) Step 1: In this step, we apply the Case IV-A construction to the n′ non-excluded files, i.e., [n′]. Thus, each group σ ∈ ([f ]
+
+> d
+
+)
+
+receives from An′ ,d 
+
+Φ(full)  
+
+> σ
+
+∪ Φ(com)  
+
+> σ
+
+. (14) 
+
+2) Step 2: The second step considers the excluded 1d-tuples 
+
+Aexc , An,d \ An′ ,d . (15) Thus, we aim to distribute the Aexc that contain excluded files (from E) into the groups N ′ = (fd
+
+) formed by their non-excluded elements (see Section IV-A). Any d-tuple t ∈ Aexc 
+
+will have an arbitrary number mt = |t ∩ E| of compo-nents/elements from the excluded file-index set E, and it will have d − mt = |t ∩ [n′]| elements from the rest. It is easy to see that mt ∈ [1 , min {d, g }] and thus that 
+
+d − mt ∈ [max {d − g, 0}, d − 1] . Whenever there is no ambiguity, we will henceforth revert to the simpler notation 
+
+m instead of mt. For every m ∈ [1 , min {d, g }], we define the set 
+
+Rm,β , {t ∈ Aexc | |B (t)| = β, |t ∩ E| = m} (16)                   
+
+> 1For example, for n=5, n ′=4, d =2, we have that Aexc ={{1,5},{2,5},{3,5},{4,5}}consisting of 4 pairs.
+
+which describes the d-tuples t that intersect exactly β families and contain m excluded elements from E. Notice that β can take values in the range [⌈ d−m 
+
+> s0
+
+⌉, d − m]. If m = d ≤ g,then β = 0, which means that all the entries of t are from E. Let us now partition Aexc as follows Aexc =⋃min {d,g }
+
+> m=1
+
+⋃d−mβ=⌈ d−m  
+
+> s0⌉
+
+Rm,β . For each I ∈ ([f ]
+
+> β
+
+), let us now define 
+
+Rβ, I , {t ∈ Aexc | B (t) = I, t ∈
+
+> min {d−β,g }
+
+⋃
+
+> m=1
+
+Rm,β 
+
+} (17) to be the set of all d-tuples t ∈ Aexc that intersect exactly all families in I, where in the above, B(t) denotes the set of families that t intersects. Let us now also define Rβ ,⋃
+
+> I∈
+
+([f ] 
+
+> β
+
+) Rβ, I ⊂ Aexc to be the set of all excluded d-tuples that meet exactly β families. Furthermore, directly by applying the established ranges of parameters m and k, we can conclude that the range of β ∈ [βmin , β max ], is defined by βmin ,
+
+⌈ d−min {d,g } 
+
+> s0
+
+⌉ = ⌈ max {0,d −g} 
+
+> s0
+
+⌉ and βmax , d − 1.
+
+Our next step involves going through the range of β. For each 
+
+β ∈ [βmin , β max ], we partition each time the set Rβ into N ′ =(fd
+
+) groups. This partitioning is described in detail in Appendix B.E of [38]. In particular, let us first recall that each group is labeled by a σ ∈ ([f ]
+
+> d
+
+). For each such σ, there exist (dβ
+
+)
+
+different subsets I ⊂ σ with cardinality β. For each I ⊂ σ,the set Rβ, I,σ collects all d-tuples in Rβ, I associated to group 
+
+σ. We then form the union and define 
+
+Φ(exc)  
+
+> σ
+
+, ⋃βmax 
+
+> β=βmin
+
+⋃ 
+
+> I⊂ σ
+
+Rβ, I,σ . (18) Combining (14) and (18), we get the subfunctions ( d-tuples) allocated to worker σ, where σ ∈ ([f ]
+
+> d
+
+), as follows. 
+
+Φσ , Φ(full)  
+
+> σ
+
+∪ Φ(com)  
+
+> σ
+
+∪ Φ(exc)  
+
+> σ
+
+. (19) Finally, the partition of An,d into N ′ groups is described by 
+
+An,d = ⋃
+
+> σ∈
+
+([f ] 
+
+> d
+
+) Φσ . (20) We continue with the following lemma. 
+
+Lemma 2: For given n, d, and N , the IC design in Case 2 (Section IV-B) achieves 
+
+π ≤ s0 · d + g. 
+
+Proof: The proof is direct by noting that worker σ receives all files in families σ plus, at worst case, the entire set E.
+
+C. Extension of the Partition from N ′ Groups to N Groups 
+
+Recall (cf. (20)) that we have already partitioned An,d into 
+
+N ′ = (fd
+
+) disjoint groups Φσ1 , . . . , ΦσN ′ , σ1, . . . , σ N ′ ∈
+
+([f ]
+
+> d
+
+). We will now redistribute the d-tuples of these N ′ groups across all existing N groups. Towards this, let us assume that the indices σ1, . . . , σ N ′ are in lexicographic order and, in order to ease notation, let us rename the corresponding N ′ groups by their lexicographic position, as follows Φ1, . . . , ΦN ′ where in particular, Φb = Φσb for b ∈ [N ′]. Recalling that there are 
+
+N ≥ N ′ actual groups, let us first define the variables 
+
+q , ⌊ N
+
+N ′
+
+⌋, p , ⌈ N
+
+N ′
+
+⌉, r , N mod N ′ (21) thus noting that N = qN ′ + r, where p = q if r = 0 , and 
+
+p = q +1 if r > 0. At this point, we proceed with the first step of dividing the d-tuple set of each of the first N ′ groups into different parts, and then with the second step of redistributing some of these parts to fill up the empty N − N ′ groups. 
+
+Step 1 – Dividing the d-tuples of each of the first N ′ groups: 
+
+For each b ∈ [N ′], we define the number of parts 
+
+sb ,
+
+{p if 1 ≤ b ≤ r, q if r < b ≤ N ′ (22) and we split each Φb into sb disjoint sub-parts using lex-icographic ordering that yields slicing of equal sizes, plus or minus 1, where we naturally keep track of the ex-act size of each sub-part. We denote these sub-parts by 
+
+Φ(0)  
+
+> b
+
+, Φ(1)  
+
+> b
+
+, . . . , Φ(sb−1)  
+
+> b
+
+, where Φb = ⋃sb−1 
+
+> b′=0
+
+Φ(b′ ) 
+
+> b
+
+.
+
+Step 2 – Extending to N groups: We then relabel these sub-parts to obtain the desired N groups. We define the new N
+
+groups Φ1, . . . , ΦN by the indexing rule 
+
+Φ b+b′ N ′ , Φ(b′) 
+
+> b
+
+, for b ∈ [N ′], b ′ ∈ { 0, . . . , s b − 1}. (23) We conclude this section with the following lemma. 
+
+Lemma 3: For any n, d, N , the IC design uses N ′ = (fd
+
+),where f = max {r ∈ Z+ ∣∣ (rd
+
+) ≤ N } (cf. (6)), and guarantees that N
+
+N ′ < d + 1 ≤ 2d.
+
+Proof: Directly from the definitions of f and N ′, we note that N < (f +1 
+
+> d
+
+) and N ′ = (fd
+
+), and thus N  
+
+> N′
+
+< (f +1  
+
+> d
+
+)
+
+(fd) =   
+
+> f+1
+> f+1 −d
+
+. Since the function x 
+
+> x−d
+
+is decreasing on [d + 1 , ∞),we conclude that N  
+
+> N′
+
+≤ max f ≥d f +1   
+
+> f+1 −d
+
+≤ d + 1 ≤ 2d.
+
+V. A L OWER BOUND ON π⋆
+
+A converse bound on the communication cost can be derived by observing that a worker with π files can compute at most (πd
+
+) subfunctions. To cover all (nd
+
+) tasks with N workers, we must have 
+
+(nd
+
+)
+
+≤
+
+> N
+
+∑
+
+> b=1
+
+(|α(Φb)|
+
+d
+
+)
+
+≤ N
+
+(πd
+
+)
+
+(24) since π = max b∈[N ] |α(Φb)|.Using the inequality π−i 
+
+> n−i
+
+≤ π 
+
+> n
+
+for 1 ≤ i ≤ d − 1 in (24), we obtain the following lower bound on ππ ≥ n
+
+N 1/d . (25) For any possible π, the (25) holds. Consequently, for the optimal π, denoted by π⋆, we have 
+
+π⋆ ≥ n
+
+N 1/d . (26) This lower bound represents the packing radius of the hyper-graph. While Steiner systems achieve this bound with equality (where π is exactly the block size), their non-existence for most N forces us to seek approximate designs that still respect this N −1/d scaling (please see Appendix B.A in [38] for more details). VI. P ROOF OF THEOREM 1From the achievable scheme discussed in Section IV-A, we have π = s · d = n 
+
+> f
+
+· d. Using the simple bound N ′ = (fd
+
+) ≤
+
+( e·f 
+
+> d
+
+)d, we can conclude that f ≥ d 
+
+> e
+
+N ′1/d , which directly yields 
+
+π ≤ nd  
+
+> d
+> e
+
+N ′1/d = N 1/d 
+
+N ′1/d · nd  
+
+> d
+> e
+
+N 1/d = 2e · n
+
+N 1/d (27) where the last step follows from Lemma 3. Then from Lemma 2, we conclude that π = s0 · d + g. Similarly, we can show that 
+
+s0 · d ≤ 2e · n
+
+N 1/d . (28) This, combined with g = n − s0 · f , directly yields 
+
+g = n −
+
+(⌊ n
+
+f + d
+
+⌋
+
++ 1 
+
+)
+
+· f ≤ n −
+
+⌈ n
+
+f + d
+
+⌉
+
+· f (29) 
+
+≤ n − n
+
+f + d · f = n · d
+
+f + d (30) and since n  
+
+> f+d
+
+<
+
+⌊ n 
+
+> f+d
+
+⌋
+
++ 1 = s0, we can directly conclude that g ≤ n·d  
+
+> f+d
+
+≤ s0 · d. Combining this with (28), we get 
+
+π ≤ 4e·n  
+
+> N1/d
+
+. Finally, applying the converse in (26) shows that for any (n, d, N ≤ ( 9
+
+> 10
+
+√ n 
+
+> d
+
+)d), we have π/π ⋆ ≤ 4e, and hence the scaling law π ≍ n/N 1/d is optimal. VII. C OMPARISON WITH STEINER SYSTEMS 
+
+The advantage of the IC design over Steiner systems lies in its flexibility with respect to column sizes. A Steiner system S(d, π, n ) requires the number of blocks (nd
+
+)/(πd
+
+) to be exactly equal to N , which severely restricts its applicability. In contrast, the IC design fixes N and n, and then effectively determines the optimal clique size f (and hence π) compatible with the available workers. By allowing file assignments to overlap according to a family-based interlaced clique structure, rather than a rigid block structure, the IC design guarantees the existence of a valid partition for any N ≤ ( 9
+
+> 10
+
+√ n 
+
+> d
+
+)d.As we have discussed, while a Steiner system would achieve 
+
+π ≍ n/N 1/d with δ = 1 , it may not exist for a given N .The IC design attains the same communication scaling with 
+
+δ ≤ 4, offering a practical trade-off that represents a controlled increase in computation imbalance in exchange for universal applicability. VIII. C ONCLUSION 
+
+This paper addressed a fundamental file and task allocation problem in distributed computing. We highlighted the theoret-ical optimality of Steiner systems while exposing their prac-tical limitations due to sparsity. The proposed Interweaved-Cliques (IC) design was shown to bridge this gap, offering a deterministic and universally applicable allocation scheme. By achieving order-optimal communication cost π ≍ n/N 1/d and bounded computation balance, the IC design provides a robust solution for deploying large-scale distributed function evalu-ations without the rigid constraints of classical combinatorial designs. REFERENCES [1] M. A. Maddah-Ali and U. Niesen, “Fundamental limits of caching,” 
+
+IEEE Trans. Inf. Theory , vol. 60, no. 5, pp. 2856–2867, 2014. [2] K. Wan, D. Tuninetti, and P. Piantanida, “An index coding approach to caching with uncoded cache placement,” IEEE Trans. Inf. Theory ,vol. 66, no. 3, pp. 1318–1332, 2020. [3] R. Bitar, M. Wootters, and S. El Rouayheb, “Stochastic gradient coding for straggler mitigation in distributed learning,” IEEE J. Sel. Areas Inf. Theory , vol. 1, no. 1, pp. 277–291, 2020. [4] R. Bitar, P. Parag, and S. El Rouayheb, “Minimizing latency for secure distributed computing,” in 2017 IEEE Int. Symp. Inf. Theory (ISIT) ,2017, pp. 2900–2904. [5] V. K. Vavilapalli, A. C. Murthy, C. Douglas, S. Agarwal, M. Konar, R. Evans, T. Graves, J. Lowe, H. Shah, S. Seth et al. , “Apache Hadoop yarn: Yet another resource negotiator,” in Proc. of the 4th annu. Symp. Cloud Comput. , 2013, pp. 1–16. [6] S. Li, M. A. Maddah-Ali, Q. Yu, and A. S. Avestimehr, “A fundamental tradeoff between computation and communication in distributed com-puting,” IEEE Trans. Inf. Theory , vol. 64, no. 1, pp. 109–128, 2018. [7] H. Chen, M. Cheng, and Y. Wu, “On the fundamental limits of decentralized linearly separable computation under cyclic assignment,” 
+
+IEEE Trans. Commun. , pp. 1–1, 2025. [8] Y. Wang and Y. Wu, “Coded distributed computing with pre-set data placement and output functions assignment,” IEEE Trans. Inf. Theory ,vol. 71, no. 3, pp. 2195–2217, 2025. [9] Y. Bi, M. Wigger, and Y. Wu, “Normalized delivery time of wireless MapReduce,” IEEE Trans. Inf. Theory , vol. 70, no. 10, pp. 7005–7022, 2024. [10] E. Peter, K. K. K. Namboodiri, and B. S. Rajan, “Wireless MapReduce arrays for coded distributed computing,” in Proc. IEEE Inf. Theory Workshop (ITW) , 2024, pp. 163–168. [11] F. Brunero and P. Elia, “Multi-access distributed computing,” IEEE Trans. Inf. Theory , vol. 70, no. 5, pp. 3385–3398, 2024. [12] K. Wan, H. Sun, M. Ji, D. Tuninetti, and G. Caire, “On the optimal load-memory tradeoff of cache-aided scalar linear function retrieval,” 
+
+IEEE Trans. Inf. Theory , vol. 67, no. 6, pp. 4001–4018, 2021. [13] Y. Yao and S. A. Jafar, “The capacity of 3 user linear computation broadcast,” IEEE Trans. Inf. Theory , vol. 70, no. 6, pp. 4414–4438, 2024. [14] Y. Ma and D. Tuninetti, “An achievable scheme for the k-user linear computation broadcast channel,” arXiv 2501.12322 , 2025. [15] K. Wan, H. Sun, M. Ji, and G. Caire, “Distributed linearly separable computation,” IEEE Trans. Inf. Theory , vol. 68, no. 2, pp. 1259–1278, 2022. [16] ——, “On the tradeoff between computation and communication costs for distributed linearly separable computation,” IEEE Trans. Commun. ,vol. 69, no. 11, pp. 7390–7405, 2021. [17] A. Khalesi and P. Elia, “Multi-user linearly-separable distributed com-puting,” IEEE Trans. Inf. Theory , vol. 69, no. 10, pp. 6314–6339, 2023. [18] ——, “Tessellated distributed computing,” IEEE Trans. Inf. Theory ,vol. 71, no. 6, pp. 4754–4784, 2025. [19] K. K. K. Namboodiri, E. Peter, D. Malak, and P. Elia, “Fundamental limits of distributed computing for linearly separable functions,” arXiv 2509.23447 , 2025. [20] M. Cheng, Y. Wu, X. Li, and D. Wu, “Asymptotically optimal coded distributed computing via combinatorial designs,” IEEE/ACM Trans. Networking , vol. 32, no. 4, pp. 3018–3033, 2024. [21] J. Jiang, W. Wang, and L. Zhou, “Cascaded coded distributed computing schemes based on symmetric designs,” IEEE Trans. Commun. , vol. 70, no. 11, pp. 7179–7190, 2022. [22] S. Agrawal and P. Krishnan, “Low complexity distributed computing via binary matrices with extension to stragglers,” in 2020 IEEE Int. Symp. Inf. Theory (ISIT) , 2020, pp. 162–167. [23] S. Agrawal, K. V. S. Sree, P. Krishnan, A. Vaishya, and S. Kale, “Cache-aided communication schemes via combinatorial designs and their q-analogs,” IEEE J. Sel. Areas Inf. Theory , vol. 4, pp. 551–568, 2023. [24] J. Maheri and P. Elia, “Constructing hamiltonian decompositions of complete k-uniform hypergraphs,” in 2025 IEEE Int. Symp. Inf. Theory (ISIT) , 2025, pp. 1–6. [25] O. Ledoit and M. Wolf, “A well-conditioned estimator for large-dimensional covariance matrices,” J. Multivariate Analysis , vol. 88, no. 2, pp. 365–411, 2004. [26] P. Comon, “Independent component analysis, a new concept?” Signal processing , vol. 36, no. 3, pp. 287–314, 1994. [27] B. Schölkopf, A. Smola, and K.-R. Müller, “Nonlinear component analysis as a kernel eigenvalue problem,” Neural computation , vol. 10, no. 5, pp. 1299–1319, 1998. [28] G. Dhaliwal, P. B. Nair, and C. V. Singh, “Machine learned interatomic potentials using random features,” npj Computational Materials , vol. 8, no. 1, p. 7, 2022. [29] A. Rahimi and B. Recht, “Random features for large-scale kernel machines,” Advances neural inf. process. syst. , vol. 20, p. 1177–1184, 2007. [30] P. Li, M. Guo, C. Wang, X. Liu, and Q. Zou, “An overview of SNP interactions in genome-wide association studies,” Briefings in functional genomics , vol. 14, no. 2, pp. 143–155, 2015. [31] P. N. Muralidhar, D. Katyal, and B. S. Rajan, “Maddah-Ali-Niesen scheme for multi-access coded caching,” in 2021 IEEE Inf. Theory Workshop (ITW) , 2021, pp. 1–6. [32] F. Brunero and P. Elia, “Fundamental limits of combinatorial multi-access caching,” IEEE Trans. Inf. Theory , vol. 69, no. 2, pp. 1037–1056, 2023. [33] E. Parrinello, E. Lampiris, and P. Elia, “Coded distributed computing with node cooperation substantially increases speedup factors,” in 2018 IEEE Int. Symp. Inf. Theory (ISIT) , 2018, pp. 1291–1295. [34] K. K. K. Namboodiri and B. S. Rajan, “Combinatorial multi-access coded caching: Improved rate-memory trade-off with coded placement,” 
+
+IEEE Trans. Inf. Theory , vol. 70, no. 3, pp. 1787–1805, 2024. [35] E. Peter, K. K. K. Namboodiri, and B. S. Rajan, “Coded caching with shared caches and private caches,” IEEE Trans. Commun. , vol. 72, no. 8, pp. 4857–4872, 2024. [36] F. Engelmann and P. Elia, “A content-delivery protocol, exploiting the privacy benefits of coded caching,” in 2017 15th Int. Symp. Modeling and Optimization in Mobile, Ad Hoc, and Wireless Networks (WiOpt) ,2017, pp. 1–6. [37] H. Zhao, A. Bazco-Nogueras, and P. Elia, “Vector coded caching multiplicatively increases the throughput of realistic downlink systems,” 
+
+IEEE Trans. Wireless Commun. , vol. 22, no. 4, pp. 2683–2698, 2023. [38] J. Maheri, K. K. K. Namboodiri, and P. Elia, “Universal and asymptot-ically optimal data and task allocation in distributed computing,” arXiv 2601.05873 , 2026.

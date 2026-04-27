@@ -1,0 +1,54 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.17411v1/fig-001.webp",
+      "caption": "Figure 1: Overview of the text-attributed graph learning pipeline (top) and comparison between existing methods and the proposed DuConTE (bottom).",
+      "page": 2,
+      "index": 1,
+      "width": 664,
+      "height": 425
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17411v1/fig-002.webp",
+      "caption": "Table 1: Experiment results: Mean accuracy and standard deviation over 10 runs with different random seeds. Bold indicates the best performance, underlined denotes the second-best, and ‘–’ signifies that the method is not applicable to the dataset.“DuConTE” refers to the pipeline instance using DuConTE as the text encoder, as described in Section 5.3.",
+      "page": 8,
+      "index": 2,
+      "width": 827,
+      "height": 297
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17411v1/fig-003.webp",
+      "caption": "Figure 4: Sensitive analysis of the fusion coefficient β.",
+      "page": 9,
+      "index": 3,
+      "width": 826,
+      "height": 229
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17411v1/fig-004.webp",
+      "caption": "Table 2: Ablation results on Cora, CiteSeer, and OGBN-Products",
+      "page": 9,
+      "index": 4,
+      "width": 622,
+      "height": 235
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17411v1/fig-005.webp",
+      "caption": "Figure 3: Sensitive analysis of the fusion coefficient α",
+      "page": 9,
+      "index": 5,
+      "width": 826,
+      "height": 229
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17411v1/fig-006.webp",
+      "caption": "Figure 2: Overview of DuConTE with the dual-granularity cascaded architecture (middle), the topology-constrained attention mechanism (left), and the target node representation construction process in the node representation composer (right). The node representation composer is denoted as Composer in the figure.",
+      "page": 5,
+      "index": 6,
+      "width": 826,
+      "height": 465
+    }
+  ]
+}

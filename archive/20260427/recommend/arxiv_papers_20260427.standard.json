@@ -1,0 +1,917 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-27T20:43:08.100796+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 16,
+    "deep_cap": 7,
+    "deep_selected": 10,
+    "quick_candidates": 52,
+    "quick_skim_target": 12,
+    "quick_selected": 12
+  },
+  "deep_dive": [
+    {
+      "id": "2604.17708v1",
+      "source": "arxiv",
+      "title": "Co-evolving Agent Architectures and Interpretable Reasoning for Automated Optimization",
+      "abstract": "Automating operations research (OR) with large language models (LLMs) remains limited by hand-crafted reasoning--execution workflows. Complex OR tasks require adaptive coordination among problem interpretation, mathematical formulation, solver selection, code generation, and iterative debugging. To address this limitation, we propose EvoOR-Agent, a co-evolutionary framework for automated optimization. The framework represents agent workflows as activity-on-edge (AOE)-style networks, making workflow topology, execution dependencies, and alternative reasoning paths explicit. On this representation, the framework maintains an architecture graph and evolves a population of reasoning individuals through graph-mediated path-conditioned recombination, multi-granularity semantic mutation, and elitist population update. A knowledge-base-assisted experience-acquisition module further injects reusable OR practices into initialization and semantic variation. Empirical results on heterogeneous OR benchmarks show that the proposed framework consistently improves over zero-shot LLMs, fixed-pipeline OR agents, and representative evolutionary agent frameworks. Case studies and ablation analyses further indicate that explicit architecture evolution and graph-supported reasoning-trajectory search contribute to both performance improvement and structural interpretability. These results suggest that treating agent architectures and reasoning trajectories as evolvable objects provides an effective route toward adaptive and interpretable automated optimization.",
+      "authors": [
+        "Jiahao Huang",
+        "Peilan Xu",
+        "Xiaoya Nan",
+        "Wenjian Luo"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-04-20T01:44:18+00:00",
+      "link": "https://arxiv.org/pdf/2604.17708v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "Automating operations research with LLM-based agent workflows",
+      "llm_evidence_cn": "利用大模型智能体工作流自动化运筹学任务",
+      "llm_evidence": "利用大模型智能体工作流自动化运筹学任务",
+      "canonical_evidence": "利用大模型智能体工作流自动化运筹学任务",
+      "llm_tldr_en": "EvoOR-Agent automates OR tasks by co-evolving LLM reasoning paths and execution workflows.",
+      "llm_tldr_cn": "EvoOR-Agent通过协同演化大模型推理路径和执行流来自动化运筹学任务。",
+      "llm_tldr": "EvoOR-Agent通过协同演化大模型推理路径和执行流来自动化运筹学任务。",
+      "llm_tags": [
+        "query:nco-llm:composite"
+      ],
+      "matched_query_tag": "query:nco-llm:composite",
+      "matched_query_text": "Papers central to 查找神经组合优化结合大模型相关的论文, especially work that connects or combines: Neural Combinatorial Optimization (NCO) methods and frameworks; Large Language Models (LLM) for optimization tasks; Deep Reinforcement Learning in combinatorial optimization; LLM-based heuristic search and optimization; Integration of GNN and LLM for combinatorial optimization; Neural combinatorial optimization for vehicle routing problems; In-context learning for combinatorial optimization problems; LLM-guided heuristic search for optimization; Integrating large language models with combinatorial optimization solvers; LLM driven heuristic generation for combinatorial optimization.",
+      "matched_requirement_id": "req-composite-nco-llm",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.19251v1",
+      "source": "arxiv",
+      "title": "Streamliners for Answer Set Programming",
+      "abstract": "Streamliner constraints reduce the search space of combinatorial problems by ruling out portions of the solution space. We adapt the StreamLLM approach, which uses Large Language Models (LLMs) to generate streamliners for Constraint Programming, to Answer Set Programming (ASP). Given an ASP encoding and a few small training instances, we prompt multiple LLMs to propose candidate constraints. Candidates that cause syntax errors, render satisfiable instances unsatisfiable, or degrade performance on all training instances are discarded. The surviving streamliners are evaluated together with the original encoding, and we report results for a virtual best encoding (VBE) that, for each instance, selects the fastest among the original encoding and its streamlined variants. On three ASP Competition benchmarks (Partner Units Problem, Sokoban, Towers of Hanoi), the VBE achieves speedups of up to 4--5x over the original encoding. Different LLMs produce semantically diverse constraints, not mere syntactic variations, indicating that the approach captures genuine problem structure.",
+      "authors": [
+        "Florentina Voboril",
+        "Martin Gebser",
+        "Stefan Szeider",
+        "Alice Tarzariol"
+      ],
+      "primary_category": "cs.LO",
+      "categories": [
+        "cs.LO",
+        "cs.AI"
+      ],
+      "published": "2026-04-21T09:10:04+00:00",
+      "link": "https://arxiv.org/pdf/2604.19251v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "LLMs to generate streamliners for combinatorial problems in ASP",
+      "llm_evidence_cn": "利用LLM为ASP中的组合问题生成流线型约束",
+      "llm_evidence": "利用LLM为ASP中的组合问题生成流线型约束",
+      "canonical_evidence": "利用LLM为ASP中的组合问题生成流线型约束",
+      "llm_tldr_en": "Adapts LLM-based streamliner generation to Answer Set Programming to reduce combinatorial search space.",
+      "llm_tldr_cn": "将基于LLM的流线型约束生成应用于回答集程序设计，以减少组合问题的搜索空间。",
+      "llm_tldr": "将基于LLM的流线型约束生成应用于回答集程序设计，以减少组合问题的搜索空间。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Integrating large language models with combinatorial optimization solvers",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.19440v1",
+      "source": "arxiv",
+      "title": "What Makes an LLM a Good Optimizer? A Trajectory Analysis of LLM-Guided Evolutionary Search",
+      "abstract": "Recent work has demonstrated the promise of orchestrating large language models (LLMs) within evolutionary and agentic optimization systems. However, the mechanisms driving these optimization gains remain poorly understood. In this work, we present a large-scale study of LLM-guided evolutionary search, collecting optimization trajectories for 15 LLMs across 8 tasks. Although zero-shot problem-solving ability correlates with final optimization outcomes, it explains only part of the variance: models with similar initial capability often induce dramatically different search trajectories and outcomes. By analyzing these trajectories, we find that strong LLM optimizers behave as local refiners, producing frequent incremental improvements while progressively localizing the search in semantic space. Conversely, weaker optimizers exhibit large semantic drift, with sporadic breakthroughs followed by stagnation. Notably, various measures of solution novelty do not predict final performance; novelty is beneficial only when the search remains sufficiently localized around high-performing regions of the solution space. Our results highlight the importance of trajectory analysis for understanding and improving LLM-based optimization systems and provide actionable insights for their design and training.",
+      "authors": [
+        "Xinhao Zhang",
+        "Xi Chen",
+        "François Portet",
+        "Maxime Peyrard"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.NE"
+      ],
+      "published": "2026-04-21T13:16:45+00:00",
+      "link": "https://arxiv.org/pdf/2604.19440v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "trajectory analysis of LLM-guided evolutionary search",
+      "llm_evidence_cn": "大模型引导进化搜索的轨迹分析",
+      "llm_evidence": "大模型引导进化搜索的轨迹分析",
+      "canonical_evidence": "大模型引导进化搜索的轨迹分析",
+      "llm_tldr_en": "Analyzes how LLMs behave as optimizers in evolutionary search trajectories across various tasks.",
+      "llm_tldr_cn": "分析了大模型在各项任务的进化搜索轨迹中作为优化器的表现。",
+      "llm_tldr": "分析了大模型在各项任务的进化搜索轨迹中作为优化器的表现。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM-guided heuristic search for optimization",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.22234v1",
+      "source": "arxiv",
+      "title": "GR-Evolve: Design-Adaptive Global Routing via LLM-Driven Algorithm Evolution",
+      "abstract": "Modern ASIC design is becoming increasingly complex, driving up design costs while limiting productivity gains from existing EDA tools. Despite decades of progress, current tools rely on fixed heuristics and offer limited control via tool hyperparameters, requiring extensive manual tuning to achieve an acceptable quality of results (QoR). While prior work has explored learning-based optimization and design-specific hyperparameter tuning, these approaches operate within the constraints of static tool algorithm implementations and do not adapt the underlying algorithms to individual designs. To address this limitation, we introduce the concept of design-adaptive EDA tooling, in which the internal algorithms of EDA tools are automatically specialized to the characteristics of a given design. We instantiate this paradigm through GR-Evolve, a code evolution framework that leverages an agentic large language model (LLM) to iteratively modify global routing source code using QoR-driven feedback. The framework equips the LLM with persistent contextual knowledge of open-source global routers along with an integrated toolchain for QoR evaluation within the OpenROAD infrastructure. We evaluate GR-Evolve across seven benchmark designs across three technology nodes and demonstrate up to 8.72% reduction in post-detailed-routing wirelength over existing baseline routers, highlighting the potential of LLM-driven EDA code evolution for design-adaptive global routing.",
+      "authors": [
+        "Taizun Jafri",
+        "Vidya A. Chhabria"
+      ],
+      "primary_category": "cs.AR",
+      "categories": [
+        "cs.AR"
+      ],
+      "published": "2026-04-24T05:18:51+00:00",
+      "link": "https://arxiv.org/pdf/2604.22234v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "LLM-driven algorithm evolution for global routing optimization",
+      "llm_evidence_cn": "大模型驱动的全局布线优化算法演化",
+      "llm_evidence": "大模型驱动的全局布线优化算法演化",
+      "canonical_evidence": "大模型驱动的全局布线优化算法演化",
+      "llm_tldr_en": "Uses LLMs to automatically evolve and specialize internal algorithms for EDA global routing tasks.",
+      "llm_tldr_cn": "利用大语言模型自动演化并定制用于EDA全局布线任务的内部算法。",
+      "llm_tldr": "利用大语言模型自动演化并定制用于EDA全局布线任务的内部算法。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM driven heuristic generation for combinatorial optimization",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.18327v1",
+      "source": "arxiv",
+      "title": "PARM: Pipeline-Adapted Reward Model",
+      "abstract": "Reward models (RMs) are central to aligning large language models (LLMs) with human preferences, powering RLHF and advanced decoding strategies. While most prior work focuses on single-step generation, real-world applications increasingly adopt multi-stage LLM pipelines, where effective reward guidance remains underexplored. We investigate this through code generation for combinatorial optimization, constructing a pipeline that integrates reward models into both formulation and solution stages. We identify a critical challenge: inconsistency between reward model predictions and actual pipeline execution outcomes. To address this, we propose the Pipeline-Adapted Reward Model (PARM), which leverages pipeline-specific data and direct preference optimization to align rewards with downstream feedback. We instantiate PARM as a two-stage pipeline (formulation -> code generation) and evaluate it on four public optimization benchmarks, measuring execution rate and solving accuracy against baselines and sampling methods. A supplementary cross-domain experiment on GSM8K assesses transferability. Results demonstrate that PARM consistently improves pipeline output quality and stability, providing new insights into reward modeling for multi-stage LLM reasoning.",
+      "authors": [
+        "Xingyu Fan",
+        "Wei Shao",
+        "Jiacheng Liu",
+        "Linqi Song",
+        "Pheng Ann Heng"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CL"
+      ],
+      "published": "2026-04-20T14:29:08+00:00",
+      "link": "https://arxiv.org/pdf/2604.18327v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 9.5,
+      "llm_evidence_en": "code generation for combinatorial optimization integrating reward models into formulation and solution stages",
+      "llm_evidence_cn": "将奖励模型集成到公式化和求解阶段的组合优化代码生成",
+      "llm_evidence": "将奖励模型集成到公式化和求解阶段的组合优化代码生成",
+      "canonical_evidence": "将奖励模型集成到公式化和求解阶段的组合优化代码生成",
+      "llm_tldr_en": "Proposes PARM to align reward models with downstream execution in LLM pipelines for combinatorial optimization.",
+      "llm_tldr_cn": "提出PARM，旨在将奖励模型与组合优化LLM流水线中的下游执行结果对齐。",
+      "llm_tldr": "提出PARM，旨在将奖励模型与组合优化LLM流水线中的下游执行结果对齐。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Integrating large language models with combinatorial optimization solvers",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.18445v1",
+      "source": "arxiv",
+      "title": "AutoPPA: Automated Circuit PPA Optimization via Contrastive Code-based Rule Library Learning",
+      "abstract": "Performance, power, and area (PPA) optimization is a fundamental task in RTL design, requiring a precise understanding of circuit functionality and the relationship between circuit structures and PPA metrics. Recent studies attempt to automate this process using LLMs, but neither feedback-based nor knowledge-based methods are efficient enough, as they either design without any prior knowledge or rely heavily on human-summarized optimization rules.   In this paper, we propose AutoPPA, a fully automated PPA optimization framework. The key idea is to automatically generate optimization rules that enhance the search for optimal solutions. To do this, AutoPPA employs an Explore-Evaluate-Induce ($E^2I$) workflow that contrasts and abstracts rules from diverse generated code pairs rather than manually defined prior knowledge, yielding better optimization patterns. To make the abstracted rules more generalizable, AutoPPA employs an adaptive multi-step search framework that adopts the most effective rules for a given circuit. Experiments show that AutoPPA outperforms both the manual optimization and the state-of-the-art methods SymRTLO and RTLRewriter.",
+      "authors": [
+        "Chongxiao Li",
+        "Pengwei Jin",
+        "Di Huang",
+        "Guangrun Sun",
+        "Husheng Han",
+        "Jianan Mu",
+        "Xinyao Zheng",
+        "Jiaguo Zhu",
+        "Shuyi Xing",
+        "Hanjun Wei",
+        "Tianyun Ma",
+        "Shuyao Cheng",
+        "Rui Zhang",
+        "Ying Wang",
+        "Zidong Du",
+        "Qi Guo",
+        "Xing Hu"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AR"
+      ],
+      "published": "2026-04-20T16:02:04+00:00",
+      "link": "https://arxiv.org/pdf/2604.18445v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "LLM-driven heuristic generation for circuit optimization",
+      "llm_evidence_cn": "大模型驱动的电路优化启发式规则生成",
+      "llm_evidence": "大模型驱动的电路优化启发式规则生成",
+      "canonical_evidence": "大模型驱动的电路优化启发式规则生成",
+      "llm_tldr_en": "AutoPPA uses LLMs to automatically generate optimization rules for circuit design.",
+      "llm_tldr_cn": "AutoPPA利用大模型自动生成电路设计的优化规则，提升搜索效率。",
+      "llm_tldr": "AutoPPA利用大模型自动生成电路设计的优化规则，提升搜索效率。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM driven heuristic generation for combinatorial optimization",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.18764v1",
+      "source": "arxiv",
+      "title": "CHICO-Agent: An LLM Agent for the Cross-layer Optimization of 2.5D and 3D Chiplet-based Systems",
+      "abstract": "The rapid growth of large language models (LLMs) and AI workloads has pushed monolithic silicon to its reticle and economic limits, accelerating the adoption of 2.5D/3D chiplet systems. However, these systems increase design complexity by requiring co-design across multiple levels of the computing stack, including application, architecture, chip, and package. The resulting design space is highly combinatorial, with trade-offs among latency, energy, area, and cost. To address this challenge, we propose CHICO-Agent, an LLM-driven optimization framework for 2.5D/3D chiplet-based systems. CHICO-Agent maintains a persistent knowledge base to capture parameter-outcome trends and coordinates exploration through an admin-field multi-agent workflow. Compared with a simulated-annealing baseline, CHICO-Agent finds lower-cost configurations and provides an interpretable audit trail for designers.",
+      "authors": [
+        "Qihang Wu",
+        "Aman Arora",
+        "Vidya A. Chhabria"
+      ],
+      "primary_category": "cs.AR",
+      "categories": [
+        "cs.AR"
+      ],
+      "published": "2026-04-20T19:17:24+00:00",
+      "link": "https://arxiv.org/pdf/2604.18764v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "LLM-driven optimization framework for combinatorial chiplet design space",
+      "llm_evidence_cn": "用于组合芯粒设计空间的LLM驱动优化框架",
+      "llm_evidence": "用于组合芯粒设计空间的LLM驱动优化框架",
+      "canonical_evidence": "用于组合芯粒设计空间的LLM驱动优化框架",
+      "llm_tldr_en": "Introduces an LLM-driven agent for cross-layer optimization of complex chiplet-based systems.",
+      "llm_tldr_cn": "引入一种LLM驱动的智能体，用于复杂芯粒系统的跨层组合优化。",
+      "llm_tldr": "引入一种LLM驱动的智能体，用于复杂芯粒系统的跨层组合优化。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Large Language Models (LLM) for optimization tasks",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.20183v1",
+      "source": "arxiv",
+      "title": "Dual-Cluster Memory Agent: Resolving Multi-Paradigm Ambiguity in Optimization Problem Solving",
+      "abstract": "Large Language Models (LLMs) often struggle with structural ambiguity in optimization problems, where a single problem admits multiple related but conflicting modeling paradigms, hindering effective solution generation. To address this, we propose Dual-Cluster Memory Agent (DCM-Agent) to enhance performance by leveraging historical solutions in a training-free manner. Central to this is Dual-Cluster Memory Construction. This agent assigns historical solutions to modeling and coding clusters, then distills each cluster's content into three structured types: Approach, Checklist, and Pitfall. This process derives generalizable guidance knowledge. Furthermore, this agent introduces Memory-augmented Inference to dynamically navigate solution paths, detect and repair errors, and adaptively switch reasoning paths with structured knowledge. The experiments across seven optimization benchmarks demonstrate that DCM-Agent achieves an average performance improvement of 11%- 21%. Notably, our analysis reveals a ``knowledge inheritance'' phenomenon: memory constructed by larger models can guide smaller models toward superior performance, highlighting the framework's scalability and efficiency.",
+      "authors": [
+        "Xinyu Zhang",
+        "Yuchen Wan",
+        "Boxuan Zhang",
+        "Zesheng Yang",
+        "Lingling Zhang",
+        "Bifan Wei",
+        "Jun Liu"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-04-22T04:55:31+00:00",
+      "link": "https://arxiv.org/pdf/2604.20183v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "LLMs for optimization problem solving and modeling paradigms",
+      "llm_evidence_cn": "大语言模型用于优化问题的求解与建模范式",
+      "llm_evidence": "大语言模型用于优化问题的求解与建模范式",
+      "canonical_evidence": "大语言模型用于优化问题的求解与建模范式",
+      "llm_tldr_en": "Proposes DCM-Agent to help LLMs resolve structural ambiguity in optimization modeling using memory clusters.",
+      "llm_tldr_cn": "提出DCM-Agent，通过双簇记忆机制帮助大模型解决优化建模中的结构歧义。",
+      "llm_tldr": "提出DCM-Agent，通过双簇记忆机制帮助大模型解决优化建模中的结构歧义。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Large Language Models (LLM) for optimization tasks",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.21510v1",
+      "source": "arxiv",
+      "title": "OptiVerse: A Comprehensive Benchmark towards Optimization Problem Solving",
+      "abstract": "While Large Language Models (LLMs) demonstrate remarkable reasoning, complex optimization tasks remain challenging, requiring domain knowledge and robust implementation. However, existing benchmarks focus narrowly on Mathematical Programming and Combinatorial Optimization, hindering comprehensive evaluation. To address this, we introduce OptiVerse, a comprehensive benchmark of 1,000 curated problems spanning neglected domains, including Stochastic Optimization, Dynamic Optimization, Game Optimization, and Optimal Control, across three difficulty levels: Easy, Medium, and Hard. The experiments with 22 LLMs of different sizes reveal sharp performance degradation on hard problems, where even advanced models like GPT-5.2 and Gemini-3 struggle to exceed 27% accuracy. Through error analysis, we identify that modeling & logic errors remain the primary bottleneck. Consequently, we propose a Dual-View Auditor Agent that improves the accuracy of the LLM modeling process without introducing significant time overhead. OptiVerse will serve as a foundational platform for advancing LLMs in solving complex optimization challenges.",
+      "authors": [
+        "Xinyu Zhang",
+        "Boxuan Zhang",
+        "Yuchen Wan",
+        "Lingling Zhang",
+        "YiXing Yao",
+        "Bifan Wei",
+        "Yaqiang Wu",
+        "Jun Liu"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-04-23T10:12:32+00:00",
+      "link": "https://arxiv.org/pdf/2604.21510v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Benchmark for LLMs on complex optimization tasks including combinatorial optimization",
+      "llm_evidence_cn": "针对大语言模型在包括组合优化在内的复杂优化任务上的基准测试",
+      "llm_evidence": "针对大语言模型在包括组合优化在内的复杂优化任务上的基准测试",
+      "canonical_evidence": "针对大语言模型在包括组合优化在内的复杂优化任务上的基准测试",
+      "llm_tldr_en": "Introduces OptiVerse, a benchmark to evaluate LLMs on diverse optimization problems including combinatorial ones.",
+      "llm_tldr_cn": "引入OptiVerse基准，评估大语言模型在包括组合优化在内的多种优化问题上的表现。",
+      "llm_tldr": "引入OptiVerse基准，评估大语言模型在包括组合优化在内的多种优化问题上的表现。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Large Language Models (LLM) for optimization tasks",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.22107v1",
+      "source": "arxiv",
+      "title": "A Hybrid Reinforcement and Self-Supervised Learning Aided Benders Decomposition Algorithm",
+      "abstract": "We propose a hybrid reinforcement and self-supervised learning framework for accelerating generalized Benders decomposition (GBD). In this framework, a graph based reinforcement learning agent operates on a bipartite representation of the master problem and, together with a verification mechanism, determines the integer variable assignments that solve the master problem. These assignments are then used as inputs to a KKT informed neural network, trained via self supervision to predict primal dual solutions that approximately satisfy the Karush Kuhn Tucker conditions of the subproblem. The predicted solutions are used to construct Benders cuts directly. The framework is evaluated on a mixed integer nonlinear programming case study, where it achieves a 57.5% reduction in solution time relative to classical GBD while consistently recovering optimal solutions across all test instances.",
+      "authors": [
+        "Bernard T. Agyeman",
+        "Zhe Li",
+        "Ilias Mitrai",
+        "Prodromos Daoutidis"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY"
+      ],
+      "published": "2026-04-23T22:47:04+00:00",
+      "link": "https://arxiv.org/pdf/2604.22107v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "hybrid reinforcement learning for Benders decomposition in MINLP",
+      "llm_evidence_cn": "用于MINLP中Benders分解的混合强化学习",
+      "llm_evidence": "用于MINLP中Benders分解的混合强化学习",
+      "canonical_evidence": "用于MINLP中Benders分解的混合强化学习",
+      "llm_tldr_en": "Accelerates Benders decomposition using a hybrid RL and self-supervised learning framework for MINLP.",
+      "llm_tldr_cn": "利用混合强化学习和自监督学习框架加速混合整数非线性规划中的Benders分解。",
+      "llm_tldr": "利用混合强化学习和自监督学习框架加速混合整数非线性规划中的Benders分解。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Hybrid approaches combining deep learning and traditional optimization",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2604.17191v1",
+      "source": "arxiv",
+      "title": "Do LLM-derived graph priors improve multi-agent coordination?",
+      "abstract": "Multi-agent reinforcement learning (MARL) is crucial for AI systems that operate collaboratively in distributed and adversarial settings, particularly in multi-domain operations (MDO). A central challenge in cooperative MARL is determining how agents should coordinate: existing approaches must either hand-specify graph topology, rely on proximity-based heuristics, or learn structure entirely from environment interaction; all of which are brittle, semantically uninformed, or data-intensive. We investigate whether large language models (LLMs) can generate useful coordination graph priors for MARL by using minimal natural language descriptions of agent observations to infer latent coordination patterns. These priors are integrated into MARL algorithms via graph convolutional layers within a graph neural network (GNN)-based pipeline, and evaluated on four cooperative scenarios from the Multi-Agent Particle Environment (MPE) benchmark against baselines spanning the full spectrum of coordination modeling, from independent learners to state-of-the-art graph-based methods. We further ablate across five compact open-source LLMs to assess the sensitivity of prior quality to model choice. Our results provide the first quantitative evidence that LLM-derived graph priors can enhance coordination and adaptability in dynamic multi-agent environments, and demonstrate that models as small as 1.5B parameters are sufficient for effective prior generation.",
+      "authors": [
+        "Nikunj Gupta",
+        "Rajgopal Kannan",
+        "Viktor Prasanna"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-04-19T01:40:39+00:00",
+      "link": "https://arxiv.org/pdf/2604.17191v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "LLMs generating coordination graph priors for multi-agent reinforcement learning",
+      "llm_evidence_cn": "大模型为多智能体强化学习生成协调图先验",
+      "llm_evidence": "大模型为多智能体强化学习生成协调图先验",
+      "canonical_evidence": "大模型为多智能体强化学习生成协调图先验",
+      "llm_tldr_en": "Explores using LLMs to infer latent coordination patterns for multi-agent reinforcement learning.",
+      "llm_tldr_cn": "探索利用大模型推断多智能体强化学习中的潜在协调模式。",
+      "llm_tldr": "探索利用大模型推断多智能体强化学习中的潜在协调模式。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Large Language Models (LLM) for optimization tasks",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2604.18232v1",
+      "source": "arxiv",
+      "title": "Order Optimal Task Allocation in Distributed Computing via Interweaved Cliques",
+      "abstract": "We consider a distributed computing system in which a master node coordinates $N$ workers to evaluate a function over $n$ input files, where this function accepts general decomposition. In particular, we focus on the general case where the requested function admits a $d$-uniform decomposition, meaning that it can be decomposed into a set of subfunctions that each depends on a unique $d$-tuple of the $n$ files. Our objective is to design file and task allocations that minimize the worst-case communication from the master to any worker and the worst-case computational load across workers. We first show that the optimal file and task allocation with minimum communication and computation costs admits a natural characterization within combinatorial design theory: it corresponds to a Steiner system $S(t, k, v)$ with $t=d$, $v=n$, and $k \\approx \\frac{n}{N^{1/d}}$. However, Steiner systems are known to exist only for very restricted parameter regimes. To overcome this limitation, we propose the information-theoretic-inspired \\emph{Interweaved Clique (IC) design}, a universal and deterministic allocation framework that relaxes the strict structure of Steiner systems by allowing slight variations in worker file loads. Although slightly suboptimal, the IC design achieves a communication cost within a constant factor $4e$ from our converse, while also maintaining an order-optimal computation cost, thus allowing this work to derive the fundamental scaling laws of this general distributed computing problem for a large range of parameters.",
+      "authors": [
+        "Javad Maheri",
+        "K. K. Krishnan Namboodiri",
+        "Petros Elia"
+      ],
+      "primary_category": "cs.IT",
+      "categories": [
+        "cs.IT"
+      ],
+      "published": "2026-04-20T13:16:37+00:00",
+      "link": "https://arxiv.org/pdf/2604.18232v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.5,
+      "llm_evidence_en": "Optimal task allocation characterized within combinatorial optimization",
+      "llm_evidence_cn": "在组合优化框架内表征的最优任务分配",
+      "llm_evidence": "在组合优化框架内表征的最优任务分配",
+      "canonical_evidence": "在组合优化框架内表征的最优任务分配",
+      "llm_tldr_en": "Characterizes optimal file and task allocation in distributed computing using combinatorial optimization.",
+      "llm_tldr_cn": "利用组合优化方法表征分布式计算中的最优文件和任务分配。",
+      "llm_tldr": "利用组合优化方法表征分布式计算中的最优文件和任务分配。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Machine learning approaches to combinatorial optimization",
+      "matched_requirement_id": "req-19",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.19669v1",
+      "source": "arxiv",
+      "title": "HardNet++: Nonlinear Constraint Enforcement in Neural Networks",
+      "abstract": "Enforcing constraint satisfaction in neural network outputs is critical for safety, reliability, and physical fidelity in many control and decision-making applications. While soft-constrained methods penalize constraint violations during training, they do not guarantee constraint adherence during inference. Other approaches guarantee constraint satisfaction via specific parameterizations or a projection layer, but are tailored to specific forms (e.g., linear constraints), limiting their utility in other general problem settings. Many real-world problems of interest are nonlinear, motivating the development of methods that can enforce general nonlinear constraints. To this end, we introduce HardNet++, a constraint-enforcement method that simultaneously satisfies linear and nonlinear equality and inequality constraints. Our approach iteratively adjusts the network output via damped local linearizations. Each iteration is differentiable, admitting an end-to-end training framework, where the constraint satisfaction layer is active during training. We show that under certain regularity conditions, this procedure can enforce nonlinear constraint satisfaction to arbitrary tolerance. Finally, we demonstrate tight constraint adherence without loss of optimality in a learning-for-optimization context, where we apply this method to a model predictive control problem with nonlinear state constraints.",
+      "authors": [
+        "Andrea Goertzen",
+        "Kaveh Alim",
+        "Navid Azizan"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-04-21T16:49:37+00:00",
+      "link": "https://arxiv.org/pdf/2604.19669v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.5,
+      "llm_evidence_en": "Enforcing nonlinear constraints in neural network outputs for decision-making",
+      "llm_evidence_cn": "在神经网络输出中强制执行非线性约束以进行决策",
+      "llm_evidence": "在神经网络输出中强制执行非线性约束以进行决策",
+      "canonical_evidence": "在神经网络输出中强制执行非线性约束以进行决策",
+      "llm_tldr_en": "Introduces HardNet++ to enforce general nonlinear constraints in neural networks for reliable decision-making.",
+      "llm_tldr_cn": "引入HardNet++在神经网络中强制执行通用非线性约束，以实现可靠的决策。",
+      "llm_tldr": "引入HardNet++在神经网络中强制执行通用非线性约束，以实现可靠的决策。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Hybrid approaches combining deep learning and traditional optimization",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.17364v1",
+      "source": "arxiv",
+      "title": "LLM-Guided Strategy Synthesis for Scalable Equality Saturation",
+      "abstract": "Equality saturation (EqSat) is a powerful optimization paradigm that compactly represents many equivalent programs in an e-graph and delays commitment until extraction selects a lowest-cost program. Making EqSat effective, therefore, requires not only domain-specific rewrite rules but also domain-specific strategies. Today, much of this strategy design is still manual, making it a major obstacle to automating e-graph-based compilers. Recent rule-synthesis frameworks can automatically infer large rewrite vocabularies from semantic specifications, but they also enlarge the rewrite space and further exacerbate e-graph explosion. Although large language models (LLMs) make automated strategy synthesis plausible, directly evolving backend code remains ineffective in practice. The search lacks reusable strategy abstractions and actionable feedback, and can easily trigger e-graph explosion or converge to poor designs.   We present EggMind, an LLM-guided, end-to-end framework for synthesizing reusable EqSat strategies. At its core, EggMind introduces a domain-specific language, EqSatL, to represent EqSat strategies as explicit and inspectable artifacts. It then proposes an LLM-guided agentic workflow, equipped with novel techniques including proof-derived rewrite motif caching and tractability guidance, to search efficiently for high-quality strategies while keeping synthesis stable under e-graph growth. Evaluation shows that EggMind substantially improves the resource-quality trade-off on vectorization benchmarks, reducing final cost by 45.1% and peak RAM by 69.1% relative to full EqSat. We further show that the same methodology transfers effectively to an XLA-based tensor compiler, and demonstrate its practical potential in a logic-synthesis case study with augmented rewrite spaces.",
+      "authors": [
+        "Chenyun Yin",
+        "Youwei Xiao",
+        "Yuze Luo",
+        "Yuyang Zou",
+        "Yun Liang"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.MA",
+        "cs.PL"
+      ],
+      "published": "2026-04-19T10:21:26+00:00",
+      "link": "https://arxiv.org/pdf/2604.17364v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "LLM-guided strategy synthesis for equality saturation optimization",
+      "llm_evidence_cn": "大模型引导的等式饱和优化策略合成",
+      "llm_evidence": "大模型引导的等式饱和优化策略合成",
+      "canonical_evidence": "大模型引导的等式饱和优化策略合成",
+      "llm_tldr_en": "Uses LLMs to automate strategy synthesis for equality saturation, improving program optimization efficiency.",
+      "llm_tldr_cn": "利用LLM自动合成等式饱和策略，提高程序优化效率。",
+      "llm_tldr": "利用LLM自动合成等式饱和策略，提高程序优化效率。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM-guided heuristic search for optimization",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2604.17324v1",
+      "source": "arxiv",
+      "title": "SigGate-GT: Taming Over-Smoothing in Graph Transformers via Sigmoid-Gated Attention",
+      "abstract": "Graph transformers achieve strong results on molecular and long-range reasoning tasks, yet remain hampered by over-smoothing (the progressive collapse of node representations with depth) and attention entropy degeneration. We observe that these pathologies share a root cause with attention sinks in large language models: softmax attention's sum-to-one constraint forces every node to attend somewhere, even when no informative signal exists. Motivated by recent findings that element-wise sigmoid gating eliminates attention sinks in large language models, we propose SigGate-GT, a graph transformer that applies learned, per-head sigmoid gates to the attention output within the GraphGPS framework. Each gate can suppress activations toward zero, enabling heads to selectively silence uninformative connections. On five standard benchmarks, SigGate-GT matches the prior best on ZINC (0.059 MAE) and sets new state-of-the-art on ogbg-molhiv (82.47% ROC-AUC), with statistically significant gains over GraphGPS across all five datasets ($p < 0.05$). Ablations show that gating reduces over-smoothing by 30% (mean relative MAD gain across 4-16 layers), increases attention entropy, and stabilizes training across a $10\\times$ learning rate range, with about 1% parameter overhead on OGB.",
+      "authors": [
+        "Dongxin Guo",
+        "Jikun Wu",
+        "Siu Ming Yiu"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-04-19T08:33:48+00:00",
+      "link": "https://arxiv.org/pdf/2604.17324v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Graph transformer architecture with sigmoid-gated attention to solve over-smoothing",
+      "llm_evidence_cn": "采用Sigmoid门控注意力的图Transformer架构以解决过度平滑问题",
+      "llm_evidence": "采用Sigmoid门控注意力的图Transformer架构以解决过度平滑问题",
+      "canonical_evidence": "采用Sigmoid门控注意力的图Transformer架构以解决过度平滑问题",
+      "llm_tldr_en": "Proposes SigGate-GT to mitigate over-smoothing in graph transformers using sigmoid-gated attention.",
+      "llm_tldr_cn": "提出SigGate-GT，通过Sigmoid门控注意力减轻图Transformer中的过度平滑。",
+      "llm_tldr": "提出SigGate-GT，通过Sigmoid门控注意力减轻图Transformer中的过度平滑。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Transformer architectures for combinatorial optimization",
+      "matched_requirement_id": "req-20",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.17337v1",
+      "source": "arxiv",
+      "title": "AutoSearch: Adaptive Search Depth for Efficient Agentic RAG via Reinforcement Learning",
+      "abstract": "Agentic retrieval-augmented generation (RAG) systems enable large language models (LLMs) to solve complex tasks through multi-step interaction with external retrieval tools. However, such multi-step interaction often involves redundant search steps, incurring substantial computational cost and latency. Prior work limits search depth (i.e., the number of search steps) to reduce cost, but this often leads to underexploration of complex questions. To address this, we first investigate how search depth affects accuracy and find a minimal sufficient search depth that defines an accuracy-efficiency trade-off, jointly determined by question complexity and the agent's capability. Furthermore, we propose AutoSearch, a reinforcement learning (RL) framework that evaluates each search step via self-generated intermediate answers. By a self-answering mechanism, AutoSearch identifies the minimal sufficient search depth and promotes efficient search by rewarding its attainment while penalizing over-searching. In addition, reward mechanisms are introduced to stabilize search behavior and improve answer quality on complex questions. Extensive experiments on multiple benchmarks show that AutoSearch achieves a superior accuracy-efficiency trade-off, alleviating over-searching while preserving search quality.",
+      "authors": [
+        "Jingbo Sun",
+        "Wenyue Chong",
+        "Songjun Tu",
+        "Qichao Zhang",
+        "Yaocheng Zhang",
+        "Jiajun Chai",
+        "Xiaohan Wang",
+        "Wei Lin",
+        "Guojun Yin",
+        "Dongbin Zhao"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-04-19T09:05:48+00:00",
+      "link": "https://arxiv.org/pdf/2604.17337v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "RL-based adaptive search depth for agentic LLM tasks",
+      "llm_evidence_cn": "基于强化学习的智能体大模型任务自适应搜索深度",
+      "llm_evidence": "基于强化学习的智能体大模型任务自适应搜索深度",
+      "canonical_evidence": "基于强化学习的智能体大模型任务自适应搜索深度",
+      "llm_tldr_en": "Optimizes LLM search efficiency using RL to balance accuracy and computational cost in agentic RAG.",
+      "llm_tldr_cn": "利用强化学习优化大模型搜索效率，在智能体RAG中平衡准确性与计算成本。",
+      "llm_tldr": "利用强化学习优化大模型搜索效率，在智能体RAG中平衡准确性与计算成本。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM-guided heuristic search for optimization",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.17805v1",
+      "source": "arxiv",
+      "title": "Ranking Abuse via Strategic Pairwise Data Perturbations",
+      "abstract": "Pairwise ranking systems based on Maximum Likelihood Estimation (MLE), such as the Bradley-Terry model, are widely used to aggregate preferences from pairwise comparisons. However, their robustness under strategic data manipulation remains insufficiently understood.   In this paper, we study the vulnerability of MLE-based ranking systems to adversarial perturbations. We formulate the manipulation task as a constrained combinatorial optimization problem and propose an Adaptive Subset Selection Attack (ASSA) to efficiently identify high-impact perturbations.   Experimental results on both synthetic data and real-world election datasets show that MLE-based rankings exhibit a sharp phase-transition behavior: beyond a small perturbation budget, a limited number of strategic voters can significantly alter the global ranking. In particular, our method consistently outperforms random and greedy baselines under constrained budgets.   These findings reveal a fundamental sensitivity of MLE-based ranking mechanisms to structured perturbations and highlight the need for more robust aggregation methods in collective decision-making systems.",
+      "authors": [
+        "Junyi Yao",
+        "Zihao Zheng",
+        "Jiayu Long"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.GT"
+      ],
+      "published": "2026-04-20T04:52:30+00:00",
+      "link": "https://arxiv.org/pdf/2604.17805v1",
+      "tags": [
+        "keyword:NCO",
+        "query:NCO"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Formulates ranking manipulation as a constrained combinatorial optimization problem",
+      "llm_evidence_cn": "将排名操纵建模为受约束的组合优化问题",
+      "llm_evidence": "将排名操纵建模为受约束的组合优化问题",
+      "canonical_evidence": "将排名操纵建模为受约束的组合优化问题",
+      "llm_tldr_en": "Studies ranking system vulnerability by formulating manipulation as a constrained combinatorial optimization problem.",
+      "llm_tldr_cn": "通过将操纵建模为受约束的组合优化问题，研究排名系统的脆弱性。",
+      "llm_tldr": "通过将操纵建模为受约束的组合优化问题，研究排名系统的脆弱性。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Deep learning models for solving NP hard combinatorial problems",
+      "matched_requirement_id": "req-23",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2604.17830v1",
+      "source": "arxiv",
+      "title": "SYMBOLIZER: Symbolic Model-free Task Planning with VLMs",
+      "abstract": "Traditional Task and Motion Planning (TAMP) systems depend on physics models for motion planning and discrete symbolic models for task planning. Although physics model are often available, symbolic models (consisting of symbolic state interpretation and action models) must be meticulously handcrafted or learned from labeled data. This process is both resource-intensive and constrains the solution to the specific domain, limiting scalability and adaptability. On the other hand, Visual Language Models (VLMs) show desirable zero-shot visual understanding (due to their extensive training on heterogeneous data), but still achieve limited planning capabilities. Therefore, integrating VLMs with classical planning for long-horizon reasoning in TAMP problems offers high potential. Recent works in this direction still lack generality and depend on handcrafted, task-specific solutions, e.g. describing all possible objects in advance, or using symbolic action models. We propose a framework that generalizes well to unseen problem instances. The method requires only lifted predicates describing relations among objects and uses VLMs to ground them from images to obtain the symbolic state. Planning is performed with domain-independent heuristic search using goal-count and width-based heuristics, without need for action models. Symbolic search over VLM-grounded state-space outperforms direct VLM-based planning and performs on par with approaches that use a VLM-derived heuristic. This shows that domain-independent search can effectively solve problems across domains with large combinatorial state spaces. We extensively evaluate on extensively evaluate our method and achieve state-of-the-art results on the ProDG and ViPlan benchmarks.",
+      "authors": [
+        "Sami Azirar",
+        "Zlatan Ajanovic",
+        "Hermann Blum"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-04-20T05:32:47+00:00",
+      "link": "https://arxiv.org/pdf/2604.17830v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Integrating VLMs with classical planning for long-horizon task and motion planning",
+      "llm_evidence_cn": "将视觉语言模型与经典规划结合用于长程任务和运动规划",
+      "llm_evidence": "将视觉语言模型与经典规划结合用于长程任务和运动规划",
+      "canonical_evidence": "将视觉语言模型与经典规划结合用于长程任务和运动规划",
+      "llm_tldr_en": "Combines VLMs with symbolic planning to improve zero-shot task planning in complex domains.",
+      "llm_tldr_cn": "将视觉语言模型与符号规划结合，以提高复杂领域中的零样本任务规划能力。",
+      "llm_tldr": "将视觉语言模型与符号规划结合，以提高复杂领域中的零样本任务规划能力。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM-based heuristic search and optimization",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.17411v1",
+      "source": "arxiv",
+      "title": "DuConTE: Dual-Granularity Text Encoder with Topology-Constrained Attention for Text-attributed Graphs",
+      "abstract": "Text-attributed graphs integrate semantic information of node texts with topological structure, offering significant value in various applications such as document classification and information extraction. Existing approaches typically encode textual content using language models (LMs), followed by graph neural networks (GNNs) to process structural information. However, during the LM-based text encoding phase, most methods not only perform semantic interaction solely at the word-token granularity, but also neglect the structural dependencies among texts from different nodes. In this work, we propose DuConTE, a dual-granularity text encoder with topology-constrained attention. The model employs a cascaded architecture of two pretrained LMs, encoding semantics first at the word-token granularity and then at the node granularity. During the self-attention computation in each LM, we dynamically adjust the attention mask matrix based on node connectivity, guiding the model to learn semantic correlations informed by the graph structure. Furthermore, when composing node representations from word-token embeddings, we separately evaluate the importance of tokens under the center-node context and the neighborhood context, enabling the capture of more contextually relevant semantic information. Extensive experiments on multiple benchmark datasets demonstrate that DuConTE achieves state-of-the-art performance on the majority of them.",
+      "authors": [
+        "Lexuan Liang",
+        "Tao Zou",
+        "Xuxiang Ta",
+        "Zekun Qiu"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI"
+      ],
+      "published": "2026-04-19T12:36:18+00:00",
+      "link": "https://arxiv.org/pdf/2604.17411v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Integration of language models and GNNs for text-attributed graphs",
+      "llm_evidence_cn": "语言模型与图神经网络在文本属性图上的集成",
+      "llm_evidence": "语言模型与图神经网络在文本属性图上的集成",
+      "canonical_evidence": "语言模型与图神经网络在文本属性图上的集成",
+      "llm_tldr_en": "Proposes a dual-granularity text encoder with topology-constrained attention for text-attributed graphs.",
+      "llm_tldr_cn": "提出了一种具有拓扑约束注意力的双粒度文本编码器，用于处理文本属性图。",
+      "llm_tldr": "提出了一种具有拓扑约束注意力的双粒度文本编码器，用于处理文本属性图。",
+      "llm_tags": [
+        "query:nco"
+      ],
+      "matched_query_tag": "query:nco",
+      "matched_query_text": "Graph Neural Networks for solving combinatorial problems",
+      "matched_requirement_id": "req-15",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2604.19070v1",
+      "source": "arxiv",
+      "title": "TRN-R1-Zero: Text-rich Network Reasoning via LLMs with Reinforcement Learning Only",
+      "abstract": "Zero-shot reasoning on text-rich networks (TRNs) remains a challenging frontier, as models must integrate textual semantics with relational structure without task-specific supervision. While graph neural networks rely on fixed label spaces and supervised objectives, recent large language model (LLM)-based approaches often overlook graph context or depend on distillation from larger models, limiting generalisation. We propose TRN-R1-Zero, a post-training framework for TRN reasoning trained solely via reinforcement learning. TRN-R1-Zero directly optimises base LLMs using a Neighbour-aware Group Relative Policy Optimisation objective that dynamically adjusts rewards based on a novel margin gain metric for the informativeness of neighbouring signals, effectively guiding the model toward relational reasoning. Unlike prior methods, TRN-R1-Zero requires no supervised fine-tuning or chain-of-thought data generated from large reasoning models. Extensive experiments across citation, hyperlink, social and co-purchase TRN benchmarks demonstrate the superiority and robustness of TRN-R1-Zero. Moreover, relying strictly on node-level training, TRN-R1-Zero achieves zero-shot inference on edge- and graph-level tasks, extending beyond cross-domain transfer. The codebase is publicly available at https://github.com/superallen13/TRN-R1-Zero.",
+      "authors": [
+        "Yilun Liu",
+        "Ruihong Qiu",
+        "Zi Huang"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.LG"
+      ],
+      "published": "2026-04-21T04:24:46+00:00",
+      "link": "https://arxiv.org/pdf/2604.19070v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "LLM-based reasoning on text-rich networks using reinforcement learning and neighbor-aware objectives",
+      "llm_evidence_cn": "基于大模型和强化学习的富文本网络推理，利用邻居感知目标",
+      "llm_evidence": "基于大模型和强化学习的富文本网络推理，利用邻居感知目标",
+      "canonical_evidence": "基于大模型和强化学习的富文本网络推理，利用邻居感知目标",
+      "llm_tldr_en": "A post-training framework for LLM reasoning on networks using RL without task-specific supervision.",
+      "llm_tldr_cn": "一种利用强化学习在网络上进行大模型推理的后训练框架，无需特定任务监督。",
+      "llm_tldr": "一种利用强化学习在网络上进行大模型推理的后训练框架，无需特定任务监督。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "Integration of GNN and LLM for combinatorial optimization",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2604.17870v1",
+      "source": "arxiv",
+      "title": "GraSP: Graph-Structured Skill Compositions for LLM Agents",
+      "abstract": "Skill ecosystems for LLM agents have matured rapidly, yet recent benchmarks show that providing agents with more skills does not monotonically improve performance -- focused sets of 2-3 skills outperform comprehensive documentation, and excessive skills actually hurt. The bottleneck has shifted from skill availability to skill orchestration: agents need not more skills, but a structural mechanism to select, compose, and execute them with explicit causal dependencies. We propose GraSP, the first executable skill graph architecture that introduces a compilation layer between skill retrieval and execution. GraSP transforms flat skill sets into typed directed acyclic graphs (DAGs) with precondition-effect edges, executes them with node-level verification, and performs locality-bounded repair through five typed operators -- reducing replanning from O(N) to O(d^h). Across ALFWorld, ScienceWorld, WebShop, and InterCode with eight LLM backbones, GraSP outperforms ReAct, Reflexion, ExpeL, and flat skill baselines in every configuration, improving reward by up to +19 points over the strongest baseline while cutting environment steps by up to 41%. GraSP's advantage grows with task complexity and is robust to both skill over-retrieval and quality degradation, confirming that structured orchestration -- not larger skill libraries -- is the key to reliable agent execution.",
+      "authors": [
+        "Tianle Xia",
+        "Lingxiang Hu",
+        "Yiding Sun",
+        "Ming Xu",
+        "Lan Xu",
+        "Siying Wang",
+        "Wei Xu",
+        "Jie Jiang"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-04-20T06:31:11+00:00",
+      "link": "https://arxiv.org/pdf/2604.17870v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "graph-structured skill compositions for LLM agents using directed acyclic graphs",
+      "llm_evidence_cn": "使用有向无环图的大语言模型智能体图结构技能组合",
+      "llm_evidence": "使用有向无环图的大语言模型智能体图结构技能组合",
+      "canonical_evidence": "使用有向无环图的大语言模型智能体图结构技能组合",
+      "llm_tldr_en": "Introduces GraSP, a framework for orchestrating LLM agent skills using executable skill graphs.",
+      "llm_tldr_cn": "引入 GraSP，一个使用可执行技能图编排大语言模型智能体技能的框架。",
+      "llm_tldr": "引入 GraSP，一个使用可执行技能图编排大语言模型智能体技能的框架。",
+      "llm_tags": [
+        "query:nco-llm"
+      ],
+      "matched_query_tag": "query:nco-llm",
+      "matched_query_text": "LLM driven heuristic generation for combinatorial optimization",
+      "matched_requirement_id": "req-10",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2604.17706v1",
+      "source": "arxiv",
+      "title": "OmniVLA-RL: A Vision-Language-Action Model with Spatial Understanding and Online RL",
+      "abstract": "Visual-Language-Action (VLA) models represent a paradigm shift in embodied AI, yet existing frameworks often struggle with imprecise spatial perception, suboptimal multimodal fusion, and instability in reinforcement learning. To bridge these gaps, we propose OmniVLA-RL, a novel architecture that leverages a Mix-of-Transformers (MoT) design to synergistically integrate reasoning, spatial, and action experts. Furthermore, we introduce Flow-GSPO, which reformulates flow matching as a Stochastic Differential Equation (SDE) process and integrates it with Group Segmented Policy Optimization (GSPO) to enhance action precision and training robustness. Extensive evaluations on the LIBERO and LIBERO-Plus benchmarks demonstrate that OmniVLA-RL significantly outperforms state-of-the-art methods, effectively overcoming the fundamental limitations of current VLA models.",
+      "authors": [
+        "Haoxiang Jie",
+        "Yaoyuan Yan",
+        "Xiangyu Wei",
+        "Kailin Wang",
+        "Hongjie Yan",
+        "Zhiyou Heng",
+        "Daocheng Chen"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-04-20T01:36:58+00:00",
+      "link": "https://arxiv.org/pdf/2604.17706v1",
+      "tags": [
+        "keyword:NCO",
+        "keyword:NCO+LLM",
+        "query:NCO",
+        "query:NCO+LLM"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Vision-Language-Action model with online reinforcement learning",
+      "llm_evidence_cn": "结合在线强化学习的视觉-语言-动作模型",
+      "llm_evidence": "结合在线强化学习的视觉-语言-动作模型",
+      "canonical_evidence": "结合在线强化学习的视觉-语言-动作模型",
+      "llm_tldr_en": "Introduces OmniVLA-RL, integrating reasoning and action experts with reinforcement learning for embodied AI.",
+      "llm_tldr_cn": "引入了OmniVLA-RL，将推理和动作专家与强化学习相结合，用于具身智能。",
+      "llm_tldr": "引入了OmniVLA-RL，将推理和动作专家与强化学习相结合，用于具身智能。",
+      "llm_tags": [
+        "query:nco-llm:composite"
+      ],
+      "matched_query_tag": "query:nco-llm:composite",
+      "matched_query_text": "Papers central to 查找神经组合优化结合大模型相关的论文, especially work that connects or combines: Neural Combinatorial Optimization (NCO) methods and frameworks; Large Language Models (LLM) for optimization tasks; Deep Reinforcement Learning in combinatorial optimization; LLM-based heuristic search and optimization; Integration of GNN and LLM for combinatorial optimization; Neural combinatorial optimization for vehicle routing problems; In-context learning for combinatorial optimization problems; LLM-guided heuristic search for optimization; Integrating large language models with combinatorial optimization solvers; LLM driven heuristic generation for combinatorial optimization.",
+      "matched_requirement_id": "req-composite-nco-llm",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
