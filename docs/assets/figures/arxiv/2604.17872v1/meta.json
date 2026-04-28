@@ -1,0 +1,102 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.17872v1/fig-001.webp",
+      "caption": "Table 1: HV results (mean and SD) of the four algorithms on the multi-objective TSP (MOTSP) under the eight settings. The bold numbers for each algorithm denote the numbers of pairwise comparisons in which the algorithm performs statistically better, equally, or worse than its competitors, respectively.",
+      "page": 6,
+      "index": 1,
+      "width": 936,
+      "height": 360
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17872v1/fig-002.webp",
+      "caption": "Figure 1: Solution sets obtained by the four algorithms in a representative run under a budget of 105 evaluations on MOTSP with (a) 100, (b) 500, (c) 1,000 and (d) 5,000 decision variables.",
+      "page": 6,
+      "index": 2,
+      "width": 514,
+      "height": 465
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17872v1/fig-003.webp",
+      "caption": "Figure 2: Solution sets obtained by the four algorithms in a representative run under two budgets of 105 and 107 evaluations on MOTSP with 1,000 decision variables.",
+      "page": 6,
+      "index": 3,
+      "width": 514,
+      "height": 242
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17872v1/fig-004.webp",
+      "caption": "Figure 7: Solution sets obtained by SEMO and SEMOx on the MONK with 5,000 decision variables under two evaluation budgets: (a) 105 evaluations and (b) 107 evaluations, alongside with (c) the HV trajectory of SEMO and SEMOx over the search process. In (c), the bold line and the shaded area represent the mean and standard deviation of the HV over 30 independent runs, respectively.",
+      "page": 11,
+      "index": 4,
+      "width": 979,
+      "height": 253
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17872v1/fig-005.webp",
+      "caption": "Table 2: HV results (mean and SD) of the four algorithms on the multi-objective knapsack problem (MOKP) under the eight settings. The bold numbers for each algorithm denote the numbers of pairwise comparisons in which the algorithm performs statistically better, equally, or worse than its competitors, respectively.",
+      "page": 7,
+      "index": 5,
+      "width": 936,
+      "height": 362
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17872v1/fig-006.webp",
+      "caption": "Figure 6: Solution sets obtained by SEMO and SEMOx, along with the other three MOEAs, in a representative run under a budget of 105 evaluations on MOKP with (a) 100 and (b) 5000 decision variables.",
+      "page": 10,
+      "index": 6,
+      "width": 582,
+      "height": 478
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17872v1/fig-007.webp",
+      "caption": "Table 6: HV results (mean) of SEMO and SEMOx on the four multi-objective combinatorial optimisation problems under a budget of 107 evaluations. For each problem and dimension, a larger HV value with statistical significance is highlighted in bold.",
+      "page": 10,
+      "index": 7,
+      "width": 582,
+      "height": 224
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17872v1/fig-008.webp",
+      "caption": "Figure 4: Solution sets obtained by the four algorithms in a representative run under two budgets of 105 and 107 evaluations on MOKP with 1,000 decision variables.",
+      "page": 8,
+      "index": 8,
+      "width": 514,
+      "height": 243
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17872v1/fig-009.webp",
+      "caption": "Table 3: HV results (mean and SD) of the four algorithms on the multi-objective NK-landscape (MONK) under the eight settings. The bold numbers for each algorithm denote the numbers of pairwise comparisons in which the algorithm performs statistically better, equally, or worse than its competitors, respectively.",
+      "page": 8,
+      "index": 9,
+      "width": 902,
+      "height": 361
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17872v1/fig-010.webp",
+      "caption": "Figure 3: Solution sets obtained by the four algorithms in a representative run under a budget of 105 evaluations on MOKP with (a) 100 and (b) 1,000 decision variables.",
+      "page": 8,
+      "index": 10,
+      "width": 512,
+      "height": 242
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17872v1/fig-011.webp",
+      "caption": "Figure 5: Solution sets obtained by the four algorithms in a representative run under two budgets of 105 and 107 evaluations on MONK with 5,000 decision variables",
+      "page": 9,
+      "index": 11,
+      "width": 512,
+      "height": 243
+    },
+    {
+      "url": "assets/figures/arxiv/2604.17872v1/fig-012.webp",
+      "caption": "Table 4: HV results (mean and SD) of the four algorithms on multi-objective QAP (MOQAP) under the eight settings. The bold numbers for each algorithm denote the numbers of pairwise comparisons in which the algorithm performs statistically better, equally, or worse than its competitors, respectively.",
+      "page": 9,
+      "index": 12,
+      "width": 944,
+      "height": 277
+    }
+  ]
+}

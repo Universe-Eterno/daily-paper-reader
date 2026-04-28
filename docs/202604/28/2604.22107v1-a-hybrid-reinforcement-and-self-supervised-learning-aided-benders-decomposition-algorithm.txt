@@ -1,0 +1,444 @@
+Title: A Hybrid Reinforcement and Self-Supervised Learning Aided Benders Decomposition Algorithm
+
+URL Source: https://arxiv.org/pdf/2604.22107v1
+
+Published Time: Mon, 27 Apr 2026 00:11:14 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+# A Hybrid Reinforcement and Self-Supervised Learning Aided Benders Decomposition Algorithm ⋆,⋆⋆ 
+
+Bernard T. Agyeman ∗ Zhe Li ∗ Ilias Mitrai ∗∗ 
+
+Prodromos Daoutidis ∗∗ Department of Chemical Engineering and Materials Science, University of Minnesota, Minneapolis, MN 55455, United States.  
+
+> ∗∗
+
+McKetta Department of Chemical Engineering, The University of Texas at Austin, Austin, TX 78712, United States. 
+
+Abstract: We propose a hybrid reinforcement and self-supervised learning framework for accelerating generalized Benders decomposition (GBD). In this framework, a graph-based reinforcement learning agent operates on a bipartite representation of the master problem and, together with a verification mechanism, determines the integer variable assignments that solve the master problem. These assignments are then used as inputs to a KKT-informed neural network, trained via self-supervision to predict primal–dual solutions that approximately satisfy the Karush–Kuhn–Tucker conditions of the subproblem. The predicted solutions are used to construct Benders cuts directly. The framework is evaluated on a mixed-integer nonlinear programming case study, where it achieves a 57.5% reduction in solution time relative to classical GBD while consistently recovering optimal solutions across all test instances. 
+
+Keywords: Generalized Benders decomposition; mixed-integer nonlinear programming; reinforcement learning; graph neural networks; KKT-informed neural networks. 1. INTRODUCTION Generalized Benders decomposition (GBD) (Geoffrion, 1972) is a widely used algorithm for solving mixed-integer nonlinear programs (MINLPs). It decomposes the original problem into a master problem that handles the integer variables and a subproblem that handles the continuous variables. The two problems are solved sequentially and coordinated via Benders cuts, yielding a sequence of lower and upper bounds that, under convexity assumptions on the subproblem, converge to the optimal solution. GBD has been successfully applied in mixed-integer optimal con-trol (Menta et al., 2020), model predictive control (War-rington, 2019), and locomotion planning (Ren et al., 2025). Despite its effectiveness, a straightforward implementation of GBD can be computationally demanding. Its perfor-mance depends on the complexity of both the master problem and the subproblem, as well as the quality of the generated Benders cuts. To address these challenges, several acceleration strategies have been proposed, includ-ing exploiting problem structure (Saharidis et al., 2011), approximating the solutions of the master problem and the subproblem (Mitrai and Daoutidis, 2024a), and cut management techniques (Su et al., 2015). In this work, we           
+
+> ⋆©2026 Agyeman, Li, Mitrai, Daoutidis. This work has been accepted to IFAC World Congress 2026 for publication under a Creative Commons Licence CC-BY-NC-ND.
+> ⋆⋆ The partial financial support of NSF CBET (award number 2313289) is gratefully acknowledged. IM would like to acknowledge financial support from the McKetta Department of Chemical Engi-neering.
+
+focus on approaches that leverage approximate solutions of both the master problem and the subproblem. The master problem is a mixed-integer program whose complexity increases as cuts are added during the solution process. Classical strategies to reduce its computational cost include solving it approximately using heuristics, particularly in early iterations where the relaxation is weak (Geoffrion and Graves, 1974; Raidl et al., 2014; Sohn et al., 2012). For the subproblem, the presence of nonlinear constraints can also lead to significant computational chal-lenges. This has motivated approximate solution strate-gies, such as solving the subproblem to local optimality while still generating valid cuts (Zakeri et al., 2000). Machine learning (ML) has emerged as a promising tool for accelerating optimization algorithms by learning sur-rogates that approximate expensive computations or par-tially replace classical solvers (Bengio et al., 2021; Mitrai and Daoutidis, 2025). ML-based acceleration methods are particularly effective when solving families of related opti-mization problems under varying parameter realizations, where information from previously solved instances can be leveraged to guide the efficient solution of new instances. In the context of GBD, prior work has applied classification to identify valuable cuts (Jia and Shen, 2021), active learn-ing to warm-start the master problem (Mitrai and Daou-tidis, 2024b), supervised learning to approximate subprob-lem solutions and cuts (Mitrai and Daoutidis, 2024a), and reinforcement learning (RL) to control inexactness or guide solver decisions (Li et al., 2025). 
+
+> arXiv:2604.22107v1 [eess.SY] 23 Apr 2026
+
+In our recent work, we developed a graph-based RL agent that operates on a bipartite representation of the master problem and provides candidate assignments for the inte-ger variables. A verification mechanism was introduced to ensure that the absence of feasibility and optimality guar-antees in the agent’s predictions does not compromise the finite convergence of the GBD algorithm (Agyeman et al., 2026).While these approaches demonstrate the potential of ML for accelerating GBD, they typically focus on a single component of the algorithm. In this paper, we investigate a unified framework that leverages learning-based surro-gates for both the master problem and the subproblem to achieve improved computational performance. To this end, we build on the graph-based agent for the master problem and introduce a Karush–Kuhn–Tucker (KKT)-informed neural network (KINN) as a surrogate for the subproblem. For a fixed value of the integer vari-ables, the subproblem solution can be characterized via the KKT conditions. The KINN is trained via a self-supervised loss that enforces these conditions, enabling it to predict primal–dual solutions that approximately satisfy them and support the direct construction of Benders cuts. Compared to existing neural network-based approaches for approxi-mating KKT systems in optimization problems (e.g., (Nel-likkath and Chatzivasileiadis, 2022; Chen et al., 2024)), the proposed formulation incorporates a tailored loss function and network architecture suited to the structure of the subproblem in GBD. In the proposed framework, the graph-based agent and the KINN are coordinated within the GBD iterations. The agent generates assignments for the integer variables, which are processed through a verification mechanism to ensure feasibility with respect to the master problem and to preserve the correctness of the resulting bound updates at each iteration. The verified assignments are then used as inputs to the KINN to obtain approximate primal–dual solutions, which are used to construct Benders cuts. The effectiveness of the approach is demonstrated on a benchmark MINLP case study and compared against classical GBD and single-surrogate variants. 2. PRELIMINARIES 
+
+2.1 Problem formulation 
+
+We consider a subclass of MINLPs in which the integer variables enter linearly in both the cost function and the constraints, while the continuous variables appear nonlinearly: min   
+
+> x,y
+
+f (x) + e⊤y (1) s.t. h(x) + Ay = 0, (2) 
+
+g(x) + By ≤ 0, (3) 
+
+Ky − b ≤ 0, (4) 
+
+x ∈ X , y ∈ { 0, 1}m,
+
+where x ∈ Rn are continuous variables, y ∈ { 0, 1}m are binary variables, K ∈ Ro×m, b ∈ Ro, e ∈ Rm, A ∈ Rp×m,and B ∈ Rq×m. The set X is defined as 
+
+X := {x ∈ Rn | Ex ≤ d} ,
+
+where E ∈ Rl×n, d ∈ Rl. The functions f , h, and g
+
+are continuous, differentiable, and convex. Inequality (4) represents constraints involving only the binary variables and are referred to as pure binary constraints. 
+
+2.2 Generalized Benders decomposition 
+
+GBD (Geoffrion, 1972; Floudas, 1995) proceeds by iter-atively refining upper and lower bounds on the optimal solution of the original MINLP. At iteration k, the sub-problem S(yk) is defined as 
+
+Z(yk) = min  
+
+> x
+
+f (x) + e⊤yk
+
+s.t. h(x) + Ay k = 0,
+
+g(x) + By k ≤ 0,
+
+x ∈ X .
+
+(5) For simplicity, we assume that the subproblem is feasible for all y. The subproblem objective value provides an upper bound (UBD) on the optimal value of the original MINLP. The original MINLP can then be equivalently expressed as min  
+
+> y
+
+Z(y)s.t. Ky − b ≤ 0,
+
+y ∈ { 0, 1}m.
+
+(6) Since Z(y) is not known explicitly, it is approximated via Benders optimality cuts. The kth optimality cut, denoted by C(k), is given by Θb ≥ f (xk) + e⊤
+
+y + λ⊤
+
+> k
+
+ h(xk) + Ay  + μ⊤
+
+> k
+
+ g(xk) + By ,
+
+(7) where xk is an optimal solution of S(yk), and λk, μk are the corresponding dual multipliers. We denote the right-hand side (RHS) of C(k) by 
+
+Ok(y) := f (xk)+ e⊤
+
+y+λ⊤
+
+> k
+
+ h(xk) + Ay +μ⊤
+
+> k
+
+ g(xk) + By .
+
+The master problem M is defined as min   
+
+> Θb,y
+
+Θb
+
+s.t. C(k), ∀k ∈ KO ,
+
+Ky − b ≤ 0,
+
+y ∈ { 0, 1}m
+
+(8) where KO denotes the set of optimality cuts accumulated up to iteration k. The solution of M provides a lower bound on the optimal value. 3. GRAPH-BASED AGENT FOR THE MASTER PROBLEM We employ a graph-based RL agent together with averification mechanism to solve M (Agyeman et al., 2026). The overall workflow is shown in Fig. 1. The agent receives a bipartite graph representation of M and outputs a probability vector over the binary decision variables, which is used to generate candidate binary assignments. 
+
+3.1 Bipartite graph of the master problem 
+
+Each instance of M is encoded as a bipartite graph G := (V, E, A d, X f , X e), where V is the set of nodes, E is the set of edges, Ad is the adjacency matrix, Xf is the node feature matrix, and Xe is the edge feature matrix. The main components of G are explained below: Input 
+
+> ECC Layers
+> ∑
+> Pooling
+> Dense Layers
+> Sigmoid
+> Assignment & Verification
+> 
+> y1
+> ...
+> ym
+> 
+
+Fig. 1. Workflow of the graph-based agent for the master problem. (1) Nodes : V is partitioned into variable nodes (binary decision variables) and constraint nodes (pure-binary constraints and optimality cuts). (2) Node features : Variable node features correspond to the values of the binary variables from the pre-vious iteration (or an initial assignment at the first iteration), while constraint node features correspond to the RHS values of the associated constraints. (3) Edges : An edge connects a variable node and a constraint node whenever the variable appears in that constraint, and this connectivity is encoded in Ad.(4) Edge features : The entries of Xe correspond to the nonzero coefficients linking binary variables and constraints. 
+
+3.2 Agent design and training 
+
+The agent is trained in an actor–critic RL framework, with both actor and critic parameterized by graph neu-ral networks (GNNs). The actor (policy) network takes (Ad, X f , X e) as input, applies edge-conditioned convolu-tion (ECC) (Simonovsky and Komodakis, 2017), performs global sum-pooling, and outputs a vector of sigmoid units, one per binary variable. The critic shares the same archi-tecture up to the global sum-pooling layer but uses a single output unit with no activation function to approximate the state-value function. The Markov decision process el-ements of the agent are defined as follows: (1) State : The graph G of the current instance of M.(2) Action : The action a ∈ {0, 1}m is obtained by sampling independently from Bernoulli distributions parameterized by the policy output: 
+
+πθ (Ad, X f , X e) := p = ( p1, . . . , p m),ai ∼ Bernoulli( pi), i = 1 , . . . , m, 
+
+a := ( a1, . . . , a m).
+
+(9) (3) Transition dynamics : At iteration k, the policy uses ( Adk , X fk , X ek ) to produce ak via Eq. (9). If ak
+
+satisfies the pure-binary constraints, it is passed to the subproblem; otherwise, M is solved using an MIP solver to obtain a feasible assignment yk. Applying 
+
+ak or yk to the subproblem yields an optimality cut, whose addition updates M and its graph representa-tion from ( Adk , X fk , X ek ) to ( Adk+1 , X fk+1 , X ek+1 ). (4) Reward design : The agent is rewarded for produc-ing feasible assignments, improving the bound gap, and reducing the subproblem solution time tSP . The scalar reward is 
+
+r := α1rfeas + α2rgap − α3rtime , (10) with 
+
+rfeas := 
+
+(−β1, if infeasible ,β2, if feasible , (11) 
+
+rgap := 
+
+
+
+max 
+
+
+
+0, ∆k−1 − ∆k
+
+∆0
+
+
+
+if M is feasible ,
+
+0 otherwise ,
+
+(12) 
+
+rtime := min( tSP , τ ), (13) where ∆ k := UBD k −Θ(k) 
+
+> b
+
+, Θ (k) 
+
+> b
+
+denotes the candidate lower-bound value at iteration k, and α1, α2, α3, β1,
+
+β2, τ are nonnegative tuning parameters. 
+
+3.3 Verification mechanism 
+
+The graph-based agent is not guaranteed to produce fea-sible or optimal assignments. In particular, its predictions may violate the constraints of the master problem and, even when feasible, may induce candidate lower-bound values that are not valid lower bounds for the original MINLP. To address these issues, the integration of the agent into GBD is coordinated through a confidence-based post-processing step. A high-confidence region [0 , δ 1] ∪
+
+[δ2, 1] is defined for the policy output p = ( p1, . . . , p m), where variables with pi ≤ δ1 or pi ≥ δ2 are fixed to 0 or 1, while the remaining variables are left free for a mixed-integer programming (MIP) solver. This procedure yields three regimes: (1) Full assignment : All variables are fixed, yielding a candidate ˆy. The candidate is first checked for feasibility with respect to the pure-binary constraints. If any constraint is violated, ˆ y is discarded and M is solved using an MIP solver. Otherwise, the candidate lower-bound value associated with ˆ y is computed as ˆΘb := max 
+
+> k∈KO
+
+Ok( ˆ y).
+
+The candidate value ˆΘb is accepted only if ˆΘb ≤ UBD; otherwise, ˆ y is discarded and M is solved using an MIP solver. (2) Partial assignment : A subset of variables is fixed and M is solved using an MIP solver with these values fixed. If infeasible, the fixing is discarded and M is solved with all variables free. If feasible, the resulting solution ( y, Θb) is obtained, and the corresponding value Θ b is treated as a candidate lower-bound value. The solution (y, Θb) is accepted if Θb ≤ UBD; otherwise, M is re-solved with all variables free. (3) No assignment : No variable is fixed and M is solved directly with all variables free. Since the values ˆΘb and Θ b are not guaranteed to be valid lower bounds of the original MINLP, they are treated as candidate values. A record of these values is maintained to define a surrogate termination criterion based on the gap between the incumbent UBD and the candidate values. Unlike classical GBD, where the LBD sequence is nonde-creasing, the agent-based approach does not guarantee this property. To enforce a monotone sequence, we define the candidate lower bound (CLBD) as CLBD k := max {Θ(k) 
+
+> b
+
+, CLBD k−1},
+
+where Θ (k) 
+
+> b
+
+∈ { ˆΘb, Θb} is the candidate value at iteration 
+
+k. The algorithm is terminated when the gap between the incumbent UBD and CLBD k falls below a specified tolerance. 4. KKT-INFORMED SUBPROBLEM PREDICTOR 
+
+4.1 Learning task design 
+
+In classical GBD, the Benders optimality cut (7) is con-structed by solving S(yk) for a given yk at each iteration 
+
+k. This problem can be characterized via the KKT condi-tions: 
+
+∇f (xk) + μ⊤ 
+
+> k
+
+∇g(xk) + λ⊤ 
+
+> k
+
+∇h(xk) = 0 ,
+
+h(xk) + Ay k = 0 ,
+
+g(xk) + By k ≤ 0,
+
+μ⊤
+
+> k
+
+ g(xk) + By k = 0 ,
+
+μk ≥ 0.
+
+(14) To reduce the computational burden associated with re-peatedly solving the subproblem, we introduce a KKT-informed neural network (KINN) predictor. Given yk, the model KINN ω (·) predicts approximate primal and dual variables KINN ω (yk) := ( ˆ xk, ˆμk, ˆλk),
+
+where ω denotes the network parameters. The model is trained using a KKT-informed loss that minimizes residuals of the stationarity ( ℓstat ), primal feasibility ( ℓpri ), and complementarity ( ℓcomp ) conditions: 
+
+ℓstat = ∇f ( ˆ xk) + ˆ μ⊤ 
+
+> k
+
+∇g( ˆ xk) + ˆλ⊤ 
+
+> k
+
+∇h( ˆ xk) 22, (15) 
+
+ℓpri = ∥ max(0 , g( ˆ xk)+ By k)∥22 + ∥h( ˆ xk) + Ay k∥22, (16) 
+
+ℓcomp =
+
+> q
+
+X
+
+> i=1
+
+ϕε
+
+ ˆμi, −gi( ˆ xk) − Biyk2 , (17) where ϕε(a, b ) = a + b − √a2 + b2 + ε2 is the smoothed Fischer–Burmeister function with smoothing parameter 
+
+ε. Dual feasibility is enforced via the softplus function ˆμk ← ln(1 + e ˆμk ). The overall loss is 
+
+ℓ = αsp ℓstat + βsp ℓpri + γsp ℓcomp ,
+
+with positive weights αsp , β sp , γ sp .To improve prediction performance, we employ a branched architecture that separately models the primal and dual variables, as illustrated in Fig. 2. A shared trunk extracts common features from yi, followed by branch networks that predict the primal ˆ xi and dual ( ˆ μi, ˆλi) variables. For training, we construct a dataset Y = {yi}Ni=1 of feasible binary assignments satisfying the pure-binary con-straints. The model is trained using mini-batch stochastic gradient descent, as presented in Algorithm 1. 
+
+4.2 Deployment 
+
+During deployment, the trained KINN is used to predict approximate primal–dual solutions for a given yk. These Primal Branch 1 
+
+> Primal Branch 2
+> ...
+> Dual Branch 1
+> Dual Branch 2
+> ...
+> Shared Trunk Net
+> 
+> y1
+> ...
+> ym
+> 
+> 
+> x1
+> ...
+> xn
+> 
+> 
+> λ1
+> ...
+> λp
+> μ1
+> ...
+> μq
+> 
+
+Fig. 2. The architecture of the proposed KINN. 
+
+Algorithm 1 KINN training procedure 
+
+Require: Y = {yi}Ni=1 , KINN ω , ℓ, epochs T , batch size 
+
+B, learning rate η 
+
+> 1:
+
+for t = 1 , 2, . . . , T do  
+
+> 2:
+
+for each mini-batch YB ⊂ Y of size B do  
+
+> 3:
+
+For each yi ∈ YB , compute ( ˆ xi, ˆμi, ˆλi) ←
+
+KINN ω (yi) 
+
+> 4:
+
+Evaluate L(ω) ← 1 
+
+> |Y B|
+
+P 
+
+> yi∈Y B
+
+ℓ(yi, ˆxi, ˆμi, ˆλi) 
+
+> 5:
+
+g ← ∇ ω L(ω) 
+
+> 6:
+
+ω ← ω − η g  
+
+> 7:
+
+end for  
+
+> 8:
+
+end for  
+
+> 9:
+
+return ω
+
+predictions are used to construct Benders optimality cuts without explicitly solving the subproblem. As the pre-dicted solutions do not guarantee exact satisfaction of the KKT conditions, the resulting cuts are inexact. The im-pact of these inexact cuts on GBD convergence is assessed empirically. 5. CASE STUDY We consider an MINLP adapted from (Floudas, 1995), with parameterized objective coefficients: min  
+
+> x,y
+
+c1y1 + c2y2 + c3y3 + c4y4 + c5y5 − 10 x3 − 15 x5 − 15 x9
+
++ 15 x11 + 5 x13 − 20 x16 + exp( x3) + exp 
+
+ x5
+
+1.2
+
+
+
+− 60 ln( x11 + x13 + 1) + 140 (E1) s.t. − ln( x11 + x13 + 1) ≤ 0 (E2) 
+
+− x3 − x5 − 2x9 + x11 + 2 x16 ≤ 0 (E3) 
+
+− x3 − x5 − 0.75 x9 + x11 + 2 x16 ≤ 0 (E4) 
+
+x9 − x16 ≤ 0 (E5) 2x9 − x11 − 2x16 ≤ 0 (E6) 
+
+− 0.5x11 + x13 ≤ 0 (E7) 0.2x11 − x13 ≤ 0 (E8) exp( x3) − U y 1 ≤ 1 (E9) exp 
+
+ x5
+
+1.2
+
+
+
+− U y 2 ≤ 1 (E10) 1.25 x9 − U y 3 ≤ 0 (E11) 
+
+x11 + x13 − U y 4 ≤ 0 (E12) 
+
+− 2x9 + 2 x16 − U y 5 ≤ 0 (E13) 
+
+y1 + y2 = 1 (E14) 
+
+y4 + y5 ≤ 1 (E15) 
+
+y⊤ = ( y1, y 2, y 3, y 4, y 5) ∈ { 0, 1}5,x⊤ = ( x3, x 5, x 9, x 11 , x 13 , x 16 ) ∈ R6,
+
+a⊤ = (0 , 0, 0, 0, 0, 0) , b⊤ = (2 , 2, 2, –, –, 3) ,
+
+a ≤ x ≤ b, U = 10 .
+
+The coefficients c1, . . . , c 4 are sampled as positive integers from [1 , 39], while c5 is sampled from [1 , 7]. This pa-rameterization enables the generation of diverse problem instances for training and evaluation. 
+
+5.1 Graph-based agent development 
+
+The actor network comprised two ECC layers with 64 units and ReLU activations, followed by global sum pooling, a dense layer with 64 ReLU units, and an output layer with 5 sigmoid units. The critic shared the same architecture up to the global pooling layer but employed a single output unit with no activation function to approximate the value function. Prior to RL training, behavioural cloning was used to obtain a warm-start policy for the actor. Specifically, 3,000 instances were solved using GBD, with Gurobi 12.0.1 (Gurobi Optimization, LLC, 2024) for the master problem and IPOPT 3.12.6 (W¨ achter and Biegler, 2006) for the subproblem, and the actor was trained to imitate the resulting optimal binary assignments. The agent was trained over 10,000 episodes using proximal policy optimization (PPO) (Schulman et al., 2017). The training hyperparameters were: batch size = 32, epochs = 5, learning rate = 5 × 10 −4, discount factor = 0 .99, generalized advantage estimation parameter = 0 .97, and clipping parameter = 0 .25. The reward parameters were set to α1 = 1 .0, α2 = 6 .0, α3 = 1 .0, τ = 1 .0, β1 = 0 .50, and β2 = 1 .50. The termination criterion was 1 × 10 −3,and the confidence thresholds were δ1 = 0 .10, δ2 = 0 .90. 
+
+5.2 KINN development 
+
+The KINN architecture consisted of a shared trunk net-work and three branch networks. A single primal branch (PB) predicted the primal variables x. For the dual vari-ables, one branch (DB1) predicted the dual variables asso-ciated with constraints (E9)–(E13) involving both x and 
+
+y, while a second branch (DB2) predicted the remaining dual variables associated with constraints involving only x.The trunk network consisted of two layers with 64 neurons each. Each branch network consisted of two layers with 64 and 128 neurons, respectively. The input dimension was 5, and the output dimensions of PB, DB1, and DB2 were 6, 5, and 17, respectively. In the training phase, the set of complicating variables Y =
+
+{yi}12  
+
+> i=1
+
+was generated from the pure binary constraints (E14) and (E15). Due to the small size of Y, full-batch training was used at each epoch. The weights in the KKT-informed loss were set to αsp = βsp = γsp = 1 and the smoothing parameter ε in ϕε(·) was set to 1 × 10 −3. The model was trained for 40,000 epochs, followed by fine-tuning of the dual branches for an additional 40,000 epochs with the trunk and primal branch frozen. The learning rate was set to 1 × 10 −4.
+
+5.3 Performance evaluation 
+
+A comparative study over 100 test instances was con-ducted to evaluate the proposed approach against three baselines. The first baseline corresponded to classical GBD, in which the master problem was solved using BON-MIN 1.8.9 (Bonami et al., 2008) and the subproblem using IPOPT. The second baseline (agent-only) replaced the master problem solver with the trained graph-based agent, while the subproblem was solved using IPOPT. The third baseline (KINN-only) replaced the subproblem solver with the trained KINN, while the master problem was solved using BONMIN. The proposed approach combined both surrogates. The methods were compared using the average total so-lution time per instance (¯ ttot ), average master problem time (¯ tMP ), average subproblem time (¯ tSP ), and average number of iterations ( ¯Niter ). The reference solution for each instance was obtained by directly solving the original MINLP using BONMIN. All experiments were conducted on a desktop equipped with an Intel i7-14700 CPU and 32 GB RAM. Table 1 shows that the single-surrogate approaches achieved reductions in total solution time relative to classical GBD, with decreases of 50.8% (agent-only) and 14.0% (KINN-only). The proposed hybrid approach achieved the largest reduction of 57.5%. All approaches converged in a com-parable number of iterations, indicating that the observed speedups arose primarily from reduced per-iteration com-putational cost. All methods recovered the reference solu-tion across the 100 test instances. Table 2 reports the predictive performance of the KINN. The NRMSE values indicate accurate prediction of both the primal and dual variables. The stationarity and primal feasibility residuals are on the order of 10 −3, showing that the predicted solutions approximately satisfy the KKT conditions. The complementarity residual is comparatively larger, reflecting the difficulty of enforcing complementar-ity conditions during training. Despite these approxima-tion errors, the empirical results indicate that the resulting inexact cuts do not degrade the convergence behavior of GBD, as the reference solution was recovered in all the test instances. These results suggest that the KINN provides sufficiently accurate approximations for practical use within the GBD framework. 6. CONCLUSION This paper presents a hybrid learning-augmented frame-work for accelerating GBD, in which a graph-based agent guides the solution of the master problem and a KKT-informed neural network approximates the solution of the subproblem. A confidence-based assignment mechanism is employed to ensure a robust integration of the agent’s pol-icy into the GBD algorithm. On a representative MINLP case study, the proposed approach achieves a substantial reduction in total solution time relative to classical GBD. The results further indicate that the use of inexact cuts generated by the KINN does not degrade convergence in the tested instances. These findings demonstrate the ef-fectiveness of integrating learning-based surrogates within decomposition algorithms. Future work will investigate solver-assisted strategies to further improve subproblem approximations and enhance the robustness of the pro-posed framework. Table 1. Summary of performance over 100 test instances. CPU times are reported as mean ±
+
+std per instance; percentage reduction relative to classical GBD is shown in parentheses.                                                         
+
+> Approach ¯ttot [s] ¯tMP [s] ¯tSP [ms] ¯Niter [–] Classical GBD 0.64 ±0.14 0.56 ±0.14 71 .2±7.39.2±0.9Agent-only 0.32 ±0.11 (50.8%) 0.23 ±0.10 71 .9±7.29.3±0.9KINN-only 0.55 ±0.12 (14.0%) 0.54 ±0.12 0.5±0.19.1±0.9Proposed 0.27 ±0.08 (57.5%) 0.26 ±0.08 0.4±0.19.2±0.9
+
+Table 2. KINN accuracy over 100 test instances ( residuals are reported as mean ± std).                               
+
+> NRMSE (primal) NRMSE (dual) Stationarity residual Primal feas. residual Complementarity residual 1.20 ×10 −36.60 ×10 −26.78 ×10 −3±7.76 ×10 −33.52 ×10 −3±4.02 ×10 −31.50 ×10 −1±1.72 ×10 −1
+
+REFERENCES Agyeman, B.T., Li, Z., Mitrai, I., and Daoutidis, P. (2026). Graph-based imitation and reinforcement learn-ing for efficient Benders decomposition. AIChE Journal ,e70342. Bengio, Y., Lodi, A., and Prouvost, A. (2021). Machine learning for combinatorial optimization: A methodolog-ical tour d’horizon. European Journal of Operational Research , 290(2), 405–421. Bonami, P., Biegler, L.T., Conn, A.R., Cornu´ ejols, G., Grossmann, I.E., Laird, C.D., Lee, J., Lodi, A., Margot, F., Sawaya, N., and W¨ achter, A. (2008). An algorithmic framework for convex mixed integer nonlinear programs. 
+
+Discrete Optimization , 5(2), 186–204. Chen, H., Flores, G.E.C., and Li, C. (2024). Physics-informed neural networks with hard linear equality constraints. Computers & Chemical Engineering , 189, 108764. Floudas, C.A. (1995). Nonlinear and mixed-integer opti-mization: Fundamentals and applications . Oxford Uni-versity Press. Geoffrion, A.M. (1972). Generalized Benders decomposi-tion. Journal of Optimization Theory and Applications ,10(4), 237–260. Geoffrion, A.M. and Graves, G.W. (1974). Multicommod-ity distribution system design by Benders decomposi-tion. Management Science , 20(5), 822–844. Gurobi Optimization, LLC (2024). Gurobi Optimizer Reference Manual. URL https://www.gurobi.com .Jia, H. and Shen, S. (2021). Benders cut classification via support vector machines for solving two-stage stochastic programs. INFORMS Journal on Computing , 3(3), 278– 297. Li, Z., Agyeman, B.T., Mitrai, I., and Daoutidis, P. (2025). Learning to control inexact Benders decomposition via reinforcement learning. Computers & Chemical Engi-neering , 109461. Menta, S., Warrington, J., Lygeros, J., and Morari, M. (2020). Learning solutions to hybrid control problems using Benders cuts. In Learning for Dynamics and Control , 118–126. PMLR. Mitrai, I. and Daoutidis, P. (2024a). Computationally effi-cient solution of mixed integer model predictive control problems via machine learning aided Benders decompo-sition. Journal of Process Control , 137, 103207. Mitrai, I. and Daoutidis, P. (2024b). Taking the human out of decomposition-based optimization via artificial intelligence, Part II: Learning to initialize. Computers & Chemical Engineering , 186, 108686. Mitrai, I. and Daoutidis, P. (2025). Accelerating process control and optimization via machine learning: A re-view. Reviews in Chemical Engineering , 41(4), 401–418. Nellikkath, R. and Chatzivasileiadis, S. (2022). Physics-informed neural networks for ac optimal power flow. 
+
+Electric Power Systems Research , 212, 108412. Raidl, G.R., Baumhauer, T., and Hu, B. (2014). Speeding up logic-based Benders’ decomposition by a metaheuris-tic for a bi-level capacitated vehicle routing problem. In 
+
+International Workshop on Hybrid Metaheuristics , 183– 197. Springer. Ren, J., Lin, X., Mineyev, R., Feigh, K.M., Coogan, S., and Zhao, Y. (2025). Accelerating signal-temporal-logic-based task and motion planning of bipedal nav-igation using Benders decomposition. arXiv preprint arXiv:2508.13407 .Saharidis, G.K., Boile, M., and Theofanis, S. (2011). Initialization of the Benders master problem using valid inequalities applied to fixed-charge network problems. 
+
+Expert Systems with Applications , 38(6), 6627–6636. Schulman, J., Wolski, F., Dhariwal, P., Radford, A., and Klimov, O. (2017). Proximal policy optimization algo-rithms. arXiv preprint arXiv:1707.06347 .Simonovsky, M. and Komodakis, N. (2017). Dynamic edge-conditioned filters in convolutional neural networks on graphs. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition , 3693–3702. Sohn, H., Tseng, B., and Bricker, D.L. (2012). A hy-brid Benders/genetic algorithm for vehicle routing and scheduling problem. International Journal of Industrial Engineering , 19(1), 33–46. Su, L., Tang, L., and Grossmann, I.E. (2015). Com-putational strategies for improved MINLP algorithms. 
+
+Computers & Chemical Engineering , 75, 40–48. Warrington, J. (2019). Learning continuous Q-functions using generalized Benders cuts. In 2019 18th European Control Conference (ECC) , 530–535. IEEE. W¨ achter, A. and Biegler, L.T. (2006). On the implemen-tation of an interior-point filter line-search algorithm for large-scale nonlinear programming. Mathematical Programming , 106(1), 25–57. doi:10.1007/s10107-004-0559-y. Zakeri, G., Philpott, A.B., and Ryan, D.M. (2000). Inexact cuts in Benders decomposition. SIAM Journal on Optimization , 10(3), 643–657.

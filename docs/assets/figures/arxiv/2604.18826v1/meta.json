@@ -1,0 +1,78 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.18826v1/fig-001.webp",
+      "caption": "Fig. 1 Problem Structure of the VRTPP-PR",
+      "page": 6,
+      "index": 1,
+      "width": 948,
+      "height": 585
+    },
+    {
+      "url": "assets/figures/arxiv/2604.18826v1/fig-002.webp",
+      "caption": "Table 6 Comparison Results Between Arc-based and Path-based Methods",
+      "page": 25,
+      "index": 2,
+      "width": 848,
+      "height": 835
+    },
+    {
+      "url": "assets/figures/arxiv/2604.18826v1/fig-003.webp",
+      "caption": "Fig. 3 Numerical experiment results: a) computation time comparison between the path-based formulation (P) and arc-based formulation (A); b) relative difference of the objective value between the path-based and arc-based methods.",
+      "page": 26,
+      "index": 3,
+      "width": 960,
+      "height": 441
+    },
+    {
+      "url": "assets/figures/arxiv/2604.18826v1/fig-004.webp",
+      "caption": "Table 1 Parameters for the case study and numerical experiments",
+      "page": 21,
+      "index": 4,
+      "width": 560,
+      "height": 534
+    },
+    {
+      "url": "assets/figures/arxiv/2604.18826v1/fig-005.webp",
+      "caption": "Table 2 Geocentric Orbital Elements, Payload Requirements, and Profits for Case Study",
+      "page": 21,
+      "index": 5,
+      "width": 992,
+      "height": 316
+    },
+    {
+      "url": "assets/figures/arxiv/2604.18826v1/fig-006.webp",
+      "caption": "Table 3 Summary and Comparison of Case Study Results",
+      "page": 22,
+      "index": 6,
+      "width": 668,
+      "height": 264
+    },
+    {
+      "url": "assets/figures/arxiv/2604.18826v1/fig-007.webp",
+      "caption": "Table 4 Detailed Mission Sequence: Arc-based Method",
+      "page": 23,
+      "index": 7,
+      "width": 975,
+      "height": 421
+    },
+    {
+      "url": "assets/figures/arxiv/2604.18826v1/fig-008.webp",
+      "caption": "Table 5 Detailed Mission Sequence: Path-based Method",
+      "page": 23,
+      "index": 8,
+      "width": 975,
+      "height": 420
+    },
+    {
+      "url": "assets/figures/arxiv/2604.18826v1/fig-009.webp",
+      "caption": "Fig. 2 Δ𝑣 contour plots for two typical transfers: a) Target 2→ Target 1, b) Target 1→ Refuel Station 2.",
+      "page": 24,
+      "index": 9,
+      "width": 972,
+      "height": 389
+    }
+  ]
+}

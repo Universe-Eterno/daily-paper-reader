@@ -1,0 +1,86 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.23921v1/fig-001.webp",
+      "caption": "Table 3: ROG and energy values of the best structures our method computed with respect to the graph that was used for message-passing and for every investigated composition.",
+      "page": 21,
+      "index": 1,
+      "width": 790,
+      "height": 397
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23921v1/fig-002.webp",
+      "caption": "Figure 7: ROG curves for the structures GNT-CSP computed with respect to type of graph we performed the message-passing on and as a function of the combinatorial search space, in logarithmic scale, of the compositions we experimented with. The blue curve that corresponds to the case of the Gabber-Galil 3D graph is below both the orange one (3D margulis) and the green one (radius cutoff), indicating the consistently higher-quality solutions that are associated with choosing it.",
+      "page": 21,
+      "index": 2,
+      "width": 490,
+      "height": 368
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23921v1/fig-003.webp",
+      "caption": "Figure 1: GNT-CSP: neural combinatorial approach to CSP. A. Following Gusev et al. [2023], a dense grid of points is defined within a unit cell as potential atomic positions. We seek to identify the optimal, in terms of energy, allocation of the required number of atoms corresponding to a chosen stoichiometry (in this figure, SrTiO3), to this set of positions. B. A computational graph based on a classic expander graph construction is built over these positions. It comprises both short-range edges (green) and long-range edges (red). C. The aim is to classify each node of this graph to the most appropriate atom for allocation (Sr, Ti, O, or void ∅ in this figure), in an unsupervised manner. Message passing takes place, and the resulting node embeddings (D.) are used to solve a node classification problem that involves minimizing the total interaction energy. E. The Gumbel–Sinkhorn approach is applied to the final node embeddings before backpropagation to ensure that the predicted structure satisfies the desired stoichiometry. F. Predicted structure corresponding to SrTiO3.",
+      "page": 3,
+      "index": 3,
+      "width": 979,
+      "height": 195
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23921v1/fig-004.webp",
+      "caption": "Table 4: ROG and energy values for Greedy and SA under different configuration sampling strategies.",
+      "page": 23,
+      "index": 4,
+      "width": 902,
+      "height": 579
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23921v1/fig-005.webp",
+      "caption": "Figure 3: Number of epochs our method needed to compute the lowest energy structure of each composition as a function of their combinatorial search space (in logarithmic scale). Our model tends to need more training epochs to find low-energy feasible structures as the the combinatorial search space of a composition gets larger, while inherent symmetries found in SrTiO3 with Z = {8, 27} require a comparable number of epochs to compositions with a slightly larger combinatorial search space.",
+      "page": 13,
+      "index": 5,
+      "width": 490,
+      "height": 368
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23921v1/fig-006.webp",
+      "caption": "Figure 5: The developed model architecture for our GNN. An embedding block is used to create a d0-dimensional node embedding for each of the n positions. We create b0-dimensional edge embeddings by taking the respective columns of the interactions matrix Q and passing them from a linear layer. Node and edge embeddings are fed to GINE layers which generate node embeddings according to message-passing as shown in the GINE layer block. The output of the last GINE layer provides the final node k + 1-dimensional node embeddings.",
+      "page": 19,
+      "index": 6,
+      "width": 970,
+      "height": 816
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23921v1/fig-007.webp",
+      "caption": "Table 2: ROG and Energy values (in eV) of the best structures computed by each method and for each composition.",
+      "page": 12,
+      "index": 7,
+      "width": 776,
+      "height": 397
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23921v1/fig-008.webp",
+      "caption": "Figure 2: ROG curves for the configurations predicted by each method as a function of the combinatorial search space (in logarithmic scale) of the investigated compositions. The orange curve corresponding to SA is always below the blue curve of greedy but above the green curve of the traditional solver used in IPCSP. Therefore, IPCSP performs consistently better than both classical methods SA, while SA outperforms greedy. GNT-CSP performs at least as good as the traditional solver of IPCSP and often better than it for compositions with different magnitudes of combinatorial search spaces, as the red curve is below or intersecting with the green one.",
+      "page": 12,
+      "index": 8,
+      "width": 590,
+      "height": 443
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23921v1/fig-009.webp",
+      "caption": "Table 1: The list of compositons used in our computational experiments and the parameters of atom allocation problems.",
+      "page": 9,
+      "index": 9,
+      "width": 990,
+      "height": 274
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23921v1/fig-010.webp",
+      "caption": "Figure 6: Instances of one-hop node connectivities for radius cutoff, Margulis 3D and Gabber-Galil 3D graphs. Each row of subfigures illustrates the connections (blue edges) of the same central node (in yellow color) with its one-hop neighbors (in green color) for all three graphs. Radius cutoff graphs capture mainly connections between neighboring nodes, while periodicity introduces few connections between more distant nodes. Margulis 3D captures both local and long-range connections but its expansion seems limited compared to Gabber-Galil 3D which includes long-range connections across all directions.",
+      "page": 20,
+      "index": 10,
+      "width": 894,
+      "height": 981
+    }
+  ]
+}
