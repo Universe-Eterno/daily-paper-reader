@@ -1,0 +1,70 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.22746v1/fig-001.webp",
+      "caption": "Table 9 Pinball loss (mean ± std over seeds, scaled ×102) on cflp 50 50 for each regularizer and architecture. Values are computed on the held-out test set. Bold indicates the lowest pinball loss within each λ level per architecture, excluding",
+      "page": 25,
+      "index": 1,
+      "width": 667,
+      "height": 566
+    },
+    {
+      "url": "assets/figures/arxiv/2604.22746v1/fig-002.webp",
+      "caption": "Table 10 Pinball loss (mean ± std over seeds, scaled ×102) on cflp 75 75 for each regularizer and architecture. Values are computed on the held-out test set. Bold indicates the lowest pinball loss within each λ level per architecture, excluding",
+      "page": 26,
+      "index": 2,
+      "width": 667,
+      "height": 566
+    },
+    {
+      "url": "assets/figures/arxiv/2604.22746v1/fig-003.webp",
+      "caption": "Fig. 2 Conceptual depiction of the various goals of MILP-related regularization.",
+      "page": 10,
+      "index": 3,
+      "width": 685,
+      "height": 209
+    },
+    {
+      "url": "assets/figures/arxiv/2604.22746v1/fig-004.webp",
+      "caption": "Fig. 3 LP gap for NN models with {32,32} hidden layers trained on the scaled Peaks function with two inputs (x1,x2), with output f(x). Different regularizers are applied during training, with weights chosen to maintain validation MSE of similar scale.",
+      "page": 14,
+      "index": 4,
+      "width": 781,
+      "height": 463
+    },
+    {
+      "url": "assets/figures/arxiv/2604.22746v1/fig-005.webp",
+      "caption": "Table 1 Summary of MILP- and relaxation-informed regularization strategies.",
+      "page": 13,
+      "index": 5,
+      "width": 746,
+      "height": 193
+    },
+    {
+      "url": "assets/figures/arxiv/2604.22746v1/fig-006.webp",
+      "caption": "Fig. 5 Tradeoff between solution time of downstream MILP performance and pinball loss for QNNs in stochastic programming setting. Each plotted marker shows mean performance for a different regularizer and weight.",
+      "page": 27,
+      "index": 6,
+      "width": 785,
+      "height": 386
+    },
+    {
+      "url": "assets/figures/arxiv/2604.22746v1/fig-007.webp",
+      "caption": "Fig. 1 Predictions and LP lower bounds for NN models with {32,32} hidden layers trained on the scaled Peaks function with two inputs (x1,x2), with output f(x). Different regularizers are applied during training, with weights chosen to maintain validation MSE of similar scale.",
+      "page": 5,
+      "index": 7,
+      "width": 789,
+      "height": 511
+    },
+    {
+      "url": "assets/figures/arxiv/2604.22746v1/fig-008.webp",
+      "caption": "Fig. 4 Parity plots for NN models with {32,32} hidden layers trained on the scaled Peaks function with two inputs (x1,x2), with output f(x). Different regularizers are applied during training, with weights chosen to maintain validation MSE of similar scale.",
+      "page": 16,
+      "index": 8,
+      "width": 784,
+      "height": 516
+    }
+  ]
+}

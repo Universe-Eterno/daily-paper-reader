@@ -1,0 +1,46 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.21891v1/fig-001.webp",
+      "caption": "Fig. 4: Distribution of optimality ratios for models M1 - M6, capped at 1.01. Only feasible samples are considered.",
+      "page": 5,
+      "index": 1,
+      "width": 500,
+      "height": 308
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21891v1/fig-002.webp",
+      "caption": "TABLE I: Various model iterations for each solver. P.P = postprocessing, W.S = warm-start, Th. = threshold, T.R = time ratio, O.R = optimality ratio.",
+      "page": 5,
+      "index": 2,
+      "width": 529,
+      "height": 247
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21891v1/fig-003.webp",
+      "caption": "Fig. 3: Predicted generator statuses on a sample data point where the model prediction obtained a lower cost than the ground truth. Grey values indicate the generator was turned off by the post-processing, while light blue indicates the generator was turned on by post-processing.",
+      "page": 5,
+      "index": 3,
+      "width": 806,
+      "height": 358
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21891v1/fig-004.webp",
+      "caption": "Fig. 1: The 3 stages of the proposed pipeline. Stage 1 is the deep learning model. Stage 2 is the post-processing heuristics to restore feasibility. Stage 3 is the warm-started MILP solver.",
+      "page": 3,
+      "index": 4,
+      "width": 702,
+      "height": 406
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21891v1/fig-005.webp",
+      "caption": "Fig. 2: The components of the proposed architecture. The latent component is used to process the input with positional encoding. The deep encoder consists of self-attention to map the input to the output. Finally, the classification head is responsible for generating the final predictions.",
+      "page": 3,
+      "index": 5,
+      "width": 594,
+      "height": 325
+    }
+  ]
+}

@@ -1,0 +1,898 @@
+Title: Crystal structure prediction using graph neural combinatorial optimization
+
+URL Source: https://arxiv.org/pdf/2604.23921v1
+
+Published Time: Tue, 28 Apr 2026 01:32:52 GMT
+
+Number of Pages: 23
+
+Markdown Content:
+# CRYSTAL STRUCTURE PREDICTION USING GRAPH NEURAL 
+
+# COMBINATORIAL OPTIMIZATION 
+
+A P REPRINT 
+
+Stavros Gerolymatos 1, J. Kyle Brubaker 2,3 , Martin J. A. Schuetz 2, and Vladimir V. Gusev 11School of Computer Science and Informatics, University of Liverpool, Liverpool, England, UK 
+
+> 2
+
+Amazon Advanced Solutions Lab, Seattle, Washington 98170, USA 
+
+> 3
+
+Arm Inc., San Jose, California 95134 {s.gerolymatos, vladimir.gusev }@liverpool.ac.uk, maschuet@amazon.com, kyle.brubaker@arm.com April 28, 2026 
+
+# ABSTRACT 
+
+Crystalline materials are widely used in technological applications, yet their discovery remains a significant challenge. As their properties are driven by structure, crystal structure prediction (CSP) methods play a central role in computational approaches aiming to accelerate this process. Previously, CSP has been approached from a combinatorial optimization perspective, with the core challenge of allocating atoms on a fine grid of predefined discrete positions within a unit cell while minimizing their interaction energy. Exact mathematical optimization methods provide guaranteed solutions, but they become computationally expensive for large-scale instances, where the atomic configuration space grows rapidly, particularly in the absence of additional symmetry constraints. In this work, we introduce a neural combinatorial optimization approach to the atom allocation challenge and, subsequently, CSP, based on graph neural networks (GNNs), which can effectively sample from the distribution of feasible structures in an unsupervised manner. We leverage expander graphs to construct computational graphs over discrete positions that capture both short- and long-range interactions between atoms, and employ the Gumbel–Sinkhorn approach to enforce the desired stoichiometry of the generated structures. We demonstrate that our method outperforms classical heuristic approaches and is competitive with a commercial optimization solver across a range of chemical compositions. This enables the use of ever-expanding GPU infrastructure to tackle the inherent combinatorial challenges of CSP, paving the way for scaling beyond current capabilities. 
+
+# 1 Introduction 
+
+The discovery of novel functional materials has enabled technological innovation in areas such as energy storage Zhao et al. [2020], catalysis Zhao et al. [2019] and semiconductor design Sumida et al. [2012]. At the same time, the search for new materials remains a challenging endeavor requiring extensive experimentation and human intuition. In order to accelerate the discovery process a range of computational tools has emerged taking advantage of high-throughput screening Curtarolo et al. [2013], public materials databases Jain et al. [2013], Kirklin et al. [2015], and a wide range of machine learning models Chen et al. [2019] to identify promising candidates for synthesis. Crystal structure prediction (CSP) is a central component of computational discovery methods in inorganic chemistry, as structure determines the stability and properties of a material Oganov et al. [2019], Collins et al. [2017], Woodley et al. [2020]. At a high level, CSP aims to determine the positions of atoms in space that minimize their interaction energy. Although CSP approaches can be used to finetune the structures of already known materials using template based allocation, their greatest potential lies in the identification of novel structural types that have not been previously reported in databases Antypov et al. [2025]. The quantum nature of interatomic interactions, as well as the computational cost of solving atomic allocation problems, pose inherent obstacles to the widespread use of CSP Adamson et al. [2022]. In a recent breakthrough, CSP was approached from the combinatorial optimization (CO) point of view Gusev et al. [2023]. CO is a field of optimization that aims to compute the minimum or maximum of an objective function, typically 
+
+> arXiv:2604.23921v1 [cs.LG] 27 Apr 2026
+
+arXiv Template A P REPRINT 
+
+expressed in terms of a set of integer variables, over a finite set of feasible solutions subject to some constraints. CO problems have a wide range of critical real-world applications, among which are drug therapy planning Pulkkinen et al. [2020], vehicle routing/scheduling Korte and Vygen [2012], logistics management Paschos [2013], and structure search Yin and Gounaris [2022], and have had a profound impact on advancing theoretical computer science and discrete mathematics over the last few decades Karp [1972], Kuhn [1955]. To deal with these often NP-hard and non-convex problems, researchers suggested exact (such as Gurobi Gurobi Optimization, LLC [2024]), approximate Vazirani [2010] and heuristic Quenel Boussaid et al. [2013] solvers. The recent emergence of massive parallel computational devices such as GPUs Shen et al. [2025] has led to the development of data-dependent and learning-based methods such as Bengio et al. [2021a], Gasse et al. [2022] to solve CO problems. These methods take advantage of some specific patterns or characteristics found in the given CO instances and aim to rapidly compute (approximate) solutions for them. In this paper, we introduce a learning-based method that can leverage GPU infrastructure to address the inherent combinatorial challenge of CSP. Graphs are fundamental in the study of CO because they serve as models for many real-world phenomena, with the Traveling Salesman Problem (TSP) being one of the most well-known examples.In materials science, graphs are commonly used to represent molecules and crystal structures Xie and Grossman [2018]. Graph neural networks (GNNs) Scarselli et al. [2009] are well-established deep learning architectures that are used with graph-structured inputs and are trained to solve tasks such as node/graph classification and link prediction. Schuetz et al. [2022a] blended concepts from physics, optimization theory and GNNs to efficiently solve hard CO problems without supervision. In another unsupervised approach, Karalias and Loukas [2020] combined GNNs with neural probabilistic sampling to compute low-cost valid solutions to CO tasks. Towards the same direction, Karalias et al. [2025] introduced a geometric self-supervised method based on convex geometry and Carathéodory’s theorem. Finally, a notable practical application of GNNs in CO corresponds to chip placement, as studied by Mirhoseini et al. [2021]. GNNs iteratively propagate information between neighboring nodes using the message-passing neural network (MPNN) framework Gilmer et al. [2017]: node representations are computed by aggregating vector-based messages from their neighbors defined by the (computational) graph with their own representations. In practice, however, for many tasks it is essential to consider interactions between nodes that are not directly connected. Although stacking more GNN layers offers a straightforward way to achieve that, it has been found to lead to over-smoothing Rusch et al. [2023], Oono and Suzuki [2020], Zhao and Akoglu [2020], a main shortcoming of the MPNN framework referring to the phenomenon in which node representations tend to become increasingly similar as the number of GNN layers grows. Another shortcoming of MPNNs corresponds to over-squashing Alon and Yahav [2020], the phenomenon in which messages between distant nodes are exchanged with significant loss of information, due to some graph connectivity properties, known as bottlenecks. Over-squashing affects the expressivity and representation power of a GNN and can be addressed by decoupling the computational graph used for message-passing from the problem-defined graph. As a result, the flow of information between distant nodes for graphs that are not friendly to message-passing can be improved. Different approaches to do this include graph rewiring, where the graph connectivity is modified through edge removal and addition to reduce the over-squashing effect Topping et al. [2022], the introduction of virtual (artificial) nodes that are connected to existing nodes to enable long-distance message propagation Qian et al. [2025] and the use of expander graphs. Expander graphs Deac et al. [2022], Shirzad et al. [2023] have been identified as appealing because they are constructed to eliminate over-squashing and reduce bottlenecks by allowing effective communication between distant nodes within a small number of hops. In this work, we introduce a neural combinatorial approach for CSP, which we refer to as Graph Neural Transportation (GNT-CSP). Following Gusev et al. [2023], we seek a minimum energy allocation of atoms to a uniform grid of points within a given unit cell. Two types of constraints are always present in this setting: (a) no two atoms are allowed to occupy the same position; (b) the desired stoichiometry dictates the number of atoms and their species. Our GNT-CSP approach, inspired by Schuetz et al. [2022a], inherently encodes both CSP constraints, eliminating the need for explicit penalty terms, and finds high-quality feasible structures without relying on any solutions precomputed by a solver. Starting from a grid of points that discretizes the unit cell and defines potential atomic positions, we construct a 3D graph based on the Gabber-Galil graph. We then train a GNN to compute node representations that are projected into the feasible solution space and sample high-quality solutions minimizing the total interaction energy. In essence, we solve the CSP problem as a multiclass node classification problem, where each node can be assigned to either an atom of a specific chemical element or void (the position remains unoccupied), while ensuring that the CSP constraints are satisfied and the solution space of atom allocations is explored to compute feasible low-energy atom allocations. A schematic diagram illustrating the key steps of our proposed method is provided in Figure 1. Our contributions are as follows. • We introduce a GNN-based approach with which we can inherently handle both CSP constraints and obtain low-energy solutions by projecting the node embeddings into the feasible solution space. 2arXiv Template A P REPRINT A Allocation Problem B Expander-like graph C Graph Neural Network D Node embeddings E Gumbel-Sinkhorn F Low-energy solutions                
+
+> Loss function E(S) = vec( S)TQvec( S)Min E(S)
+> vu............
+> Sr Ti O Ø
+> 123
+> Sr OOOTi ............Sr Ti O Ø
+> 123343 342 341 343 342 341 hkhk+1
+> U( hk,mk+1 )
+
+Figure 1: GNT-CSP: neural combinatorial approach to CSP. A. Following Gusev et al. [2023], a dense grid of points is defined within a unit cell as potential atomic positions. We seek to identify the optimal, in terms of energy, allocation of the required number of atoms corresponding to a chosen stoichiometry (in this figure, SrTiO 3), to this set of positions. B. A computational graph based on a classic expander graph construction is built over these positions. It comprises both short-range edges (green) and long-range edges (red). C. The aim is to classify each node of this graph to the most appropriate atom for allocation (Sr, Ti, O, or void ∅ in this figure), in an unsupervised manner. Message passing takes place, and the resulting node embeddings ( D. ) are used to solve a node classification problem that involves minimizing the total interaction energy. E. The Gumbel–Sinkhorn approach is applied to the final node embeddings before backpropagation to ensure that the predicted structure satisfies the desired stoichiometry. F. Predicted structure corresponding to SrTiO 3.• We introduce a 3D graph topology, inspired by the Gabber-Galil graph that combines both local and long-range connections, providing a more appropriate option for message-passing than simple local cutoff graphs. • We empirically demonstrate that our approach can find high-quality solutions to combinatorial CSP for a variety of compositions. 
+
+# 2 Related Work 
+
+We begin with a brief overview of the existing literature for CO problems using machine learning. For a detailed review of CO with GNNs, we refer the reader to Cappart et al. [2023]. Further, we provide a summary of related methods for solving the CSP task. 
+
+ML in Combinatorial Optimization . Over the last few years, ML algorithms have emerged as a novel paradigm towards solving CO problems. The development of machine learning algorithms has had a significant impact on the solving of combinatorial optimization problems. Supervised learning models Selsam et al. [2019], Nair et al. [2021] are trained with labeled data computed by numerical solvers. Because of this, these models often require pre-solving many hard problems, which can take time and can be computationally expensive. Supervised learning models can also struggle to generalize across different problem size scales. These limitations appear in the context of material discovery, where collecting labeled training data often requires computationally heavy and time-extensive experiments. Unsupervised learning models are introduced to account for these limitations by jointly optimizing the objective of a CO’s problem and a measure of constraints’ violation, without requiring labeled data in terms of precomputed solutions. Schuetz et al. [2022b] formulated the NP-hard graph coloring problem as a multiclass node classification problem. In addition to this, they introduced a physics-inspired GNN to solve it by minimizing an unsupervised loss function based on the statistical Potts model Wu [1982]. Alternatively, generative approaches such as diffusion models Ho et al. [2020] and generative flow networks Bengio et al. [2021b] have recently been employed to solve CO problems in an unsupervised fashion. DiffUCO Sanokowski et al. [2024] describes a diffusion-based model, where during the forward process, discrete solutions are iteratively corrupted with noise until they converge towards a stationary distribution. Subsequently, during the reverse process, a GNN is trained to iteratively remove the noise and generate good complete configurations (discrete solutions). On the other hand, a generative flow network (GflowNet) Zhang et al. [2023] designs a problem-specific Markov decision process (MDP) to sample good complete configurations from the distribution of solutions in an autoregressive manner. Both generative approaches were tested on standard benchmark CO problems. 
+
+CSP via QUBO/HUBO. Gusev et al. [2023] formulated the CSP task as an integer programming optimization problem. The crystal structure is represented as a set of binary variables which express the existence or non-existence of an atom on each grid point of a discretized unit cell. The total crystal energy, which corresponds to the objective function, is defined as the sum of pairwise energy contributions. These can be efficiently computed using two-body interatomic potentials for each grid point and atom type. The objective function takes the form of a quadratic unconstrained 3arXiv Template A P REPRINT 
+
+binary optimization (QUBO) problem and can be solved using branch-and-cut methods, which are implemented in state-of-the-art optimizers Gurobi Optimization, LLC [2024]. Similarly, Couzinie et al. [2023] proposed an annealing scheme usable on modern Ising machines for CSP by taking into account the general n-body atomic interactions, and in particular three-body interactions, which are necessary to simulate covalent bonds. The crystal structure is represented in a similar way to Gusev et al. [2023] and the CSP problem can be defined as a quadratic unconstrained binary optimization (QUBO) or higher-order unconstrained binary optimization (HUBO), where additional penalty terms are incorporated in the Hamiltonian to account for the constraints. A GPU-based Ising machine, Fixstars Amplify, was used in Liang et al. [2025] for CSP, with a specific focus on large crystals with high symmetry. 
+
+# 3 Problem Definition 
+
+To mathematically formalize the optimization problem of CSP, we follow the notation used by Gusev et al. [2023]. Let 
+
+P = {p1, p 2, . . . , p n} be a set of n positions within a unit cell. These positions constitute a lattice and are described by their fractional coordinates as ( ig , jg , kg ), with integers i, j, k ∈ (0 , 1, . . . , g − 1) . The discretization parameter g defines the number of discrete positions along each dimension of the unit cell. We also let T = {t1, t 2, . . . , t k} be a set of k
+
+chemical elements under consideration and the crystal stoichiometry c = [ c1, c 2, . . . , c k], the number of atoms of each respective element. CSP aims to find the allocation of a given number of atoms belonging in T to positions P so that the total interaction energy is minimized. As the number of atoms can be lower than the number of positions, some subset of the positions can be left empty (void). An example is given in Figure 1, where atoms of types T = {Sr , Ti , O} with respective stoichiometries c = [1 , 1, 3] , have to be assigned to a dense grid of 343 ( g = 7 ) positions within the unit cell. To measure the energy of an allocation, we use methods based on interatomic potentials Woodley et al. [2020]. These methods define the energy as the sum of two terms, namely the electrostatic interaction of ions and the repulsion from close ions, with the ions regarded as point charges. Since the electrostatic interaction is long-range, it can be computed using the Ewald summation method Toukmaji and Board [1996]. The Ewald sum can be expressed as a finite sum over all atom pairs within a unit cell, where each pairwise contribution can be computed independently of the positions of other atoms. By representing the repulsion term using two-body potentials (such as Buckingham or Lennard-Jones), the total potential energy can be formulated as the sum of pairwise contributions. Each of these accounts for the allocation of a pair of ions. Importantly, the contribution of each possible ion pair allocation can be computed independently and stored in a table. Assuming that ions with chemical elements t1 and t2 are assigned to positions p1, p2, respectively, 
+
+αt1,t 2 
+
+> p1,p 2
+
+corresponds to their pairwise energy contribution. By introducing binary variables Xtp for each chemical element 
+
+t and position p (with Xtp = 1 if element t is placed at position p and zero otherwise), the total interaction energy can be calculated as Gusev et al. [2023]: 
+
+E = X
+
+> p1,p 2∈P ,t1,t 2∈T
+
+αt1,t 2 
+
+> p1,p 2
+
+Xt1 
+
+> p1
+
+Xt2 
+
+> p2
+
+, X ∈ { 0, 1}, (1) Eq. 1 consists of quadratic terms and takes the form of the objective function of a quadratic unconstrained binary opti-mization problem (QUBO) Glover et al. [2022]. CSP, as an atom allocation problem, has exclusivity and stoichiometry constraints. Exclusivity ensures that each position is allocated with at most one atom, while stoichiometry guarantees that the number of allocated atoms for each chemical element corresponds to the element’s specified stoichiometry value. One way to account for these constraints is to introduce appropriate penalty terms and fold them into the objective of eq. 1, as done by Gusev et al. [2023]. However, this results in additional computational overhead, as these terms come with respective penalty weights that need to be tuned carefully and often specifically for each composition and due to the need for verifying the feasibility of computed solutions. To avoid the need for penalty terms, we reformulate eq. 1 by defining the allocation matrix X ∈ R n×k which describes the hard (one-hot-encoded) assignment of atoms from T with stoichiometry C to n positions. Each row corresponds to a specific position, while each column corresponds to a specific chemical species. To mathematically encode the void possibility for each position, we introduce an additional column to X which becomes X ∈ R n×(k+1) and comes with a stoichiometry value of n − Pki=1 ci that corresponds to the number of empty positions and is included as the 
+
+(k + 1) -th value of the updated stoichiometry vector c. The exclusivity constraint is satisfied by ensuring that the rows of X sum to 1, while the correct stoichiometry is satisfied by ensuring that the columns sum to the correct atom-specific stoichiometry given by c = [ c1, c 2, . . . , c k, n − Pki=1 ci]. Finally, vec( X) corresponds to its column-vectorized version, 4arXiv Template A P REPRINT 
+
+and we have: 
+
+E(X) = vec( X)⊤Q vec( X),
+
+s.t. X ∈ { 0, 1}n×(k+1) , X⊤1n = 1k+1 , X1 k+1 = c (2) Here 1n corresponds to a column vector of length n whose elements are equal to 1. Q ∈ R n(k+1) ×n(k+1) stores all possible pairwise energy contributions for each position and chemical element. We wish to compute atom allocations X
+
+that simultaneously minimize the objective of eq. 2 and satisfy both the exclusivity and stoichiometry constraints. 
+
+# 4 Preliminaries 
+
+In this section, we briefly introduce few concepts that are integral parts of our proposed approach and contributions. More specifically, we later introduce a graph construction that is inspired by expander graphs. Furthermore, we train a graph neural network in an end-to-end fashion to compute node representations that are projected in the transportation polytope of feasible CSP solutions using an appropriately designed Sinkhorn operator. 
+
+4.1 Matrix scaling problem and transportation polytopes 
+
+The matrix scaling problem looks to scale a non-negative matrix so that it has fixed positive prescribed row and column sums. It can be solved using the Sinkhorn-Knopp algorithm Sinkhorn [1967], which is applied to a matrix by iteratively alternating between scaling its rows and its columns. The formal definition of a matrix scaling problem and the Sinkhorn-Knopp algorithm are provided in section A of the Appendix. Importantly, the resulting scaled matrix belongs to a transportation polytope. Formally, a transportation polytope consists of non-negative P ∈ Rn×m 
+
+> ≥0
+
+matrices, termed as feasible transport plans, that have fixed positive row sums r ∈ Rn > 0 and column sums c ∈ Rm > 0, and can be written as: 
+
+U(r, c) = P ∈ Rn×m 
+
+> ≥0
+
+P1 m = r, P⊤1n = c .
+
+In the case of r ∈ Zn>0, c ∈ Zm>0, the feasible transport plan matrices are integral, i.e. P ∈ Zn×m 
+
+> ≥0
+
+, also denoted as basic feasible solutions (BFS) and correspond to the vertices of U(r, c).
+
+4.2 Geometric graph construction and expander graphs 
+
+In the CSP context, the crystal data define an atomic system that consists of a set of atom types (as defined in the stoichiometry constraint) and a set of 3D positions, which form a 3D point cloud and serve as candidates for the assignment of the atoms. Crystals can be modeled by infinite periodic structures, with the unit cell being the smallest repeating three-dimensional substructure. A geometric crystal graph represents the unit cell by considering neighboring cells in all directions using periodic boundary conditions (PBC). These appropriately modify the calculation of the nodes’ distances to account for neighboring cells. To construct a geometric graph from a unit cell, we take its points as nodes, and we need to define an adjacency matrix that models pairwise interactions while considering the PBC. Popular approaches for geometric graph construction involve complete graphs, cutoff graphs, and long-range connections Duval et al. [2024]. In complete graphs, every node is connected to every other node, and thus all pairwise interactions (long-range among them) can be captured. Although this strategy has been chosen for small molecular datasets (MD17 Duvenaud et al. [2015]), it comes with increased computational complexity as the graphs become very dense. This issue is addressed in radius cutoff graphs Schütt et al. [2017], Klicpera et al. [2021], where nodes are connected with an edge if their Euclidean distance is below a cutoff threshold distance, often measured in Angstrom units. To make a radius cutoff graph regular, a fixed number of nearest neighbors is selected for each node. Due to the local nature of cutoff graphs, GNNs often struggle to aggregate messages among distant nodes without significant loss of information. Although stacking more layers helps to consider long-range connections that can model electrostatic interactions and van der Waals forces, this often leads to over-smoothing. Relevant approaches account for this shortcoming of cutoff graphs by enriching them with long-range connections that could be randomly sampled with some heuristically chosen probability Ingraham et al. [2023]. Meanwhile, even after dealing with over-smoothing, GNNs can still struggle with incorporating global information from distant nodes, as a result of over-squashing Alon and Yahav [2020]. Informally, over-squashing can be deemed as the difficulty in exchanging messages between two nodes without loss of information and can happen when the reachability of two nodes is limited (there are only few possible routes between them in contrast to every other available route for the rest of nodes). Intuitively, over-squashing occurs when bottlenecks appear in a graph. Bottlenecks correspond to 5arXiv Template A P REPRINT 
+
+a small number of edges that are under representational pressure Deac et al. [2022] because they have to transport information between large groups of nodes. An example of a bottleneck is shown in figure 4 in the Appendix. Expanders Hoory et al. [2006] are a special kind of graphs with desirable properties, such as a small diameter, that are sparse, having edges linear in the number of nodes, but at the same time highly interconnected. Intuitively, in an expander graph, any two vertices are connected by a path consisting of a few hops. Importantly, expanders allow effective communication between nodes, eliminating topological properties known as bottlenecks that are often responsible for over-squashing and providing a paradigm that enables global propagation of information with message-passing neural networks. In addition to that, their sparsity helps reduce the complexity and computational demands. 
+
+Margulis graph. Margulis [1973] introduced the first explicit expander graph construction. For an integer n, we let 
+
+Gn be a graph with n2 vertices and vertex set Zn × Zn. Then, we can construct the Margulis expander by selecting as neighbors of each vertex (x, y ) ∈ Zn × Zn, the following vertices: 
+
+(x ± 1, y ), (x, y ± 1) , (x ± y, y ), (x, y ± x), (3) where all operations are modulo n. As a result, Gn is an 8-regular graph with parallel edges and self-loops. 
+
+Gabber-Galil graph. Subsequently, Gabber and Galil [1979] provided an analysis of Margulis [1973] graphs and introduced an additional graph construction with expansion properties better than the Margulis one. This construction, following the same notation as the margulis one, selects as neighbors of vertex (x, y, z ) as : 
+
+(x, y ± 2x), (x, y ± (2 x + 1)) , (x ± 2y, y ), (x ± (2 y + 1) , y ) (4) As in the Margulis case, all operations are modulo n.
+
+4.3 Graph Neural Networks 
+
+Graph neural networks are deep learning models that are applied to graph data. GNNs compute node representations under permutation invariance (with respect to node ordering) by implementing the message-passing process for a fixed number of iterations that correspond to the number of GNN layers. This process updates the representation of each node by aggregating feature information from its local neighbors. More formally, let G = ( V, E) be a graph with node features X ∈ Rd×n. Then, the update rule for the kth layer of the GNN is defined as Gilmer et al. [2017]: 
+
+mkv = AGGREGATE kw({hk−1 
+
+> u
+
+| u ∈ N v }),
+
+hkv = UPDATE kw(hk−1 
+
+> v
+
+, mkv ) (5) where hkv corresponds to the representation (embedding) of node v computed at layer k, with h0 
+
+> v
+
+= xv being the 
+
+d-dimensional initial feature vector of the node. Furthermore, AGGREGATE w(·) and UPDATE w(·) are parameter-izable differentiable functions Kipf and Welling [2017], Veliˇ ckovi´ c et al. [2017], Xu et al. [2019]. For each layer 
+
+k, a vectorized “message" mkv is computed for every node v by aggregating information from its local neighborhood defined as Nv = {u ∈ V| (u, v ) ∈ E} . Intuitively, by stacking K layers, every node embedding considers information from its K-hop neighborhood, also denoted as the receptive field of the graph. The resulting node embeddings hKv
+
+can be directly fed into a task-specific loss function and, along with the network’s parameters, can be optimized in an end-to-end fashion (usually with some form of stochastic gradient descent) to solve tasks such as classification and prediction. 
+
+# 5 Methods 
+
+In this section, we present our two main contributions, which include a differentiable method to solve the CSP problem and the construction of an expander-inspired graph from a 3D point cloud of positions that represent the discretized unit cell. More specifically, we introduce an approach which inherently handles both CSP constraints, as a result of which eliminating the need for penalty terms to account for them. To do this, we define an appropriate Sinkhorn operator and combine it with differentiable sampling techniques to sample and obtain feasible optimal structures. Furthermore, we introduce an expander-inspired 3D graph which consists of both local and long-range interactions and provides a better choice for message-passing than radius cutoff graphs. 
+
+5.1 Graph neural transportation for crystal structure prediction 
+
+Following the CSP formulation in eq. 2 and the definition of transportation polytopes in section 4.1, the CSP solutions belong to the vertices of the transportation polytope U(r, c). This polytope consists of matrices with row sums 6arXiv Template A P REPRINT 
+
+r = [1 , . . . , 1] = 1n and column sums c = [ c1, c 2, . . . , c k, n − Pki=1 ci], encoding the exclusivity and stoichiometry constraints in the CSP context, respectively. We wish to compute the optimal basic feasible solution that minimizes the energy of eq. 2. To do this, we construct a graph (either a radius cutoff one or our expander-inspired) from the 3D point cloud of the discretized unit cell positions and solve CSP as a multiclass node classification problem using a differentiable unsupervised training process that projects the embeddings computed by a GNN to the vertices of U(r, c).We start with some randomly initialized node embeddings h0 
+
+> v
+
+that can be created through an embedding block and are learnable. We then apply a 3-layer graph isomorphism network (GIN) Xu et al. [2019], which we modified to incorporate edge features as Hu et al. [2020], to compute node embeddings hlv that reflect their l-hop neighborhood information. At the core, the node embeddings of each layer are calculated after aggregating feature information from their neighbors and applying a nonlinear activation function. Formally, the l-th layer of our GNN is: 
+
+h(l) 
+
+> v
+
+= GeLU 
+
+MLP (l)
+
+(1 + α) · h(l−1)  
+
+> v
+
++ X 
+
+> j∈N (v)
+
+GeLU( h(l−1)  
+
+> j
+
++ e(l−1)  
+
+> j,v
+
+)
+
+ (6) where α is a learnable parameter and MLP denotes a Multilayer Perceptron. h(0)  
+
+> v
+
+are randomly initialized via an embedding block. Edge features correspond to vectors that include every possible pairwise energy contribution as a result of placing every combination of atoms in the respective positions, as defined through Q. These features are then passed through a linear layer to match the dimensions of the node embeddings. A schematic diagram of the developed architecture is shown in Figure 5 of the Appendix. We apply a relaxation strategy to the interaction energy of the CSP problem, as formalized in eq. 2, and replace the (hard) one-hot-encoded assignment matrix with a corresponding (soft) normalized assignment matrix S ∈ [0 , 1] n×(k+1) .The differentiable CSP problem is formalized as: 
+
+E(S) = vec( S)⊤Q vec( S),
+
+s.t. S ∈ [0 , 1] n×(k+1) , S⊤1n = 1k+1 , S1 k+1 = c (7) 
+
+S needs to provide an approximation of the discrete assignment matrix. A temperature-dependent softmax function, defined as softmax τ (s)i = exp( si/τ ) / P 
+
+> j
+
+exp( sj/τ ), is a normalization operator that can be used to approximate a discrete category from a set of continuous values Maddison et al. [2017], Jang et al. [2017]. As τ → 0, in the limit 
+
+softmax τ converges to a one-hot vector corresponding to the largest si. In this section, we introduce a temperature-dependent Sinkhorn operator, which provides an analog of softmax normalization Mena et al. [2018], and can be used to approximate the choice of a (discrete) basic feasible solution to our CSP problem. To do this, we first consider Sinkhorn and Knopp [1967] and introduce the Sinkhorn operator S(·) for differentiable CSP, which we apply on the embeddings’ matrix H ∈ Rn×(k+1) computed by the GNN. This operator solves a matrix scaling problem by iteratively scaling the rows and columns of H so that it has the prescribed row r and columns c
+
+sums, and is defined as : 
+
+S0(H) = exp( H),Sl(H) = Tc(Tr (Sl−1(H))) ,S(H) = lim  
+
+> l→∞
+
+Sl(H)
+
+(8) with Tr (H) = H⊙
+
+ 1n ⊘(H1 k+1 ) 1⊤
+
+> k+1
+
+
+
+, Tc(H) = H⊙
+
+
+
+1n
+
+ c⊘(1⊤ 
+
+> n
+
+H)⊤
+
+denoting row-wise and column-wise scaling operators, respectively, while ⊙ corresponds to Hadamard product and ⊘ to element-wise division. Importantly, following Adams and Zemel [2011], we can apply an incomplete version of the Sinkhorn operator, which instead of l
+
+has a fixed number of iterations L. For numerical stability, the Sinkhorn operator is often implemented in the log-space and exponentiation takes place after convergence. Sinkhorn [1967] proved that S(H) belongs to the transportation polytope U(r, c). Nevertheless, as mentioned above, we wish to compute basic feasible solutions that lie on the vertices of this polytope. We can select a category from a set of continuous variables h by finding the one hot vector v∗ that maximizes ⟨h, v⟩,i.e. the index of the largest value of h. In a similar manner, we parameterize the hard (discrete) choice of a basic feasible solution B through a matrix H as the solution to the linear assignment problem Kuhn [1955], with vert( U(r, c)) 
+
+denoting the set of vertices of the transportation polytope U(r, c) and ⟨A, B⟩F = trace( A, BT) denoting the Frobenius 7arXiv Template A P REPRINT 
+
+inner product of matrices, as: 
+
+BFS( H) = arg max 
+
+> B∈vert( U(r,c))
+
+⟨B, H⟩F (9) Cuturi [2013] used entropic regularization to prove that, in the limit, for a small τ , S(H/τ ) approximates BFS( H), i.e., 
+
+BFS( H) ≈ S(H/τ ) and can thus serve as a differentiable relaxation of it. This is summarized in the theorem provided in section B of the Appendix. In practice, choosing lower τ values usually requires more Sinkhorn iterations to achieve convergence as the solution is encouraged to converge to a basic feasible solution, which is in essence one-hot encoded. As a result of this theorem, we can use our Sinkhorn operator to compute basic feasible solutions in a differentiable fashion. Furthermore, techniques similar to the re-parameterization trick Kingma and Welling [2014] can be applied for the differentiable sampling from latent distributions. Importantly, discrete distributions can become re-parameterizable via the gumbel trick Papandreou and Yuille [2011], by taking argmax( h + ϵ), where ϵ ∼ Gumbel . To make this operation differentiable, we replace argmax with S(·). Overall, to parameterize the sampling from the latent distribution of basic feasible solutions, we introduce i.i.d. samples of Gumbel noise ϵ to the entries of H and apply our Sinkhorn operator for differentiable CSP as S(H + ϵ)/τ . As a result, we can differentiably sample from the distribution of feasible atom allocations that satisfy both CSP constraints. After Sinkhorn convergence, the resulting matrix is exponentiated in an entry-wise fashion and corresponds to the soft assignment matrix S of a CSP atom allocation. Finally, we apply a simple threshold of 0.5 to the soft assignment probabilities S and map them to the one-hot-encoded allocation matrix 
+
+Σ, i.e., Σij = [ Sij ≥ 0.5] . The complete pipeline of GNT-CSP is provided in algorithm 1. To conclude, using our end-to-end differentiable approach, we can compute atom allocations that satisfy both constraints of CSP and look for optimal feasible structures that minimize the total interaction energy. 
+
+Algorithm 1 GNT-CSP 
+
+Require: Stoichiometry constraint vector c, Pairwise interactions matrix Q, temperature value τ , number of epochs 
+
+Epochs , number of positions n, number of unique atom species k, maximum number of Sinkhorn iterations 
+
+SinkIter , sinkhorn convergence precision d, number of GNN layers L
+
+Ensure: Energy of the best feasible solution to CSP Ebest  
+
+> 1:
+
+Construct graph G with n nodes  
+
+> 2:
+
+Initialize node embeddings h(0)  
+
+> v
+
+via an embedding block  
+
+> 3:
+
+Initialize edge embeddings e(0) using Q 
+
+> 4:
+
+Ebest ← ∞  
+
+> 5:
+
+for e = 1 to Epochs do  
+
+> 6:
+
+for l = 1 to L do  
+
+> 7:
+
+h(l) 
+
+> v
+
+= GeLU 
+
+
+
+MLP (l)
+
+
+
+(1 + α) · h(l−1)  
+
+> v
+
++ P  
+
+> j∈N (v)
+
+GeLU( h(l−1)  
+
+> j
+
++ e(l−1)  
+
+> j,v
+
+)
+
+ 
+
+{Compute node embed-dings with message-passing on G} 
+
+> 8:
+
+end for  
+
+> 9:
+
+ϵ ∼ Gumbel(0 , 1)  
+
+> 10:
+
+H = ( HL + ϵ)/τ  
+
+> 11:
+
+for i = 1 to SinkIter do  
+
+> 12:
+
+H = H − log( Pk+1  
+
+> j=1
+
+exp Hj ) {Vectorized row-scaling}  
+
+> 13:
+
+H = H + log c − log( Pni=1 exp Hi) {Vectorized column-scaling}  
+
+> 14:
+
+if || exp( H)1k+1 − 1n)|| ∞ < d and || exp( H)⊤1n − c|| ∞ < d then  
+
+> 15:
+
+S = exp( H) {Exponentiation after convergence to get soft allocation matrix}  
+
+> 16:
+
+break {Sinkhorn termination}  
+
+> 17:
+
+end if  
+
+> 18:
+
+end for  
+
+> 19:
+
+E(S) = vec( S)⊤Q vec( S) {Calculate soft atom allocation energy}  
+
+> 20:
+
+min E(S) {Update GNN’s weights using backpropagation}  
+
+> 21:
+
+Σ = S ≥ 0.5 {Compute one-hot encoded allocation matrix}  
+
+> 22:
+
+E(Σ) = vec( Σ)⊤Q vec( Σ) {Calculate atom allocation energy}  
+
+> 23:
+
+if E(Σ) < E best and Σ1 k+1 = 1n and Σ⊤1n = c then  
+
+> 24:
+
+Ebest = E(Σ) {Update best feasible solution energy}  
+
+> 25:
+
+end if  
+
+> 26:
+
+end for  
+
+> 27:
+
+return Ebest 
+
+8arXiv Template A P REPRINT 
+
+5.2 Geometric graph construction 
+
+Expander graphs Hoory et al. [2006] are sparse and provide a spectral approximation of a complete graph Shirzad et al. [2023]. They are designed to have strong connectivity properties (such as low diameter and good mixing) Deac et al. [2022], allowing efficient information propagation between distant nodes within a small number of hops, which helps eliminate bottlenecks and can alleviate the over-squashing phenomenon of GNNs. Their sparsity, which ensures a lower complexity and thus lighter computational requirements, and their desirable connectivity properties motivate the introduction of a 3D graph inspired by expanders that can be used for message-passing instead of local cutoff graphs. 
+
+Proposed graph construction . Our proposed graph construction extends the connectivity pattern of the Gabber-Galil graph Gabber and Galil [1979] to 3D. Formally, for an integer n, we let Gn be a graph that has n3 vertices with vertex set 
+
+Zn × Zn × Zn. We select the neighbors of each vertex (x, y, z ) ∈ Zn × Zn × Zn, by keeping one at a time coordinate fixed and using the Gabber-Galil formulas of Eq. 4 on the other two. We repeat this procedure for all three pairs of coordinates. In other words, we apply the Gabber-Galil construction on the ’xy’, ’yz’ and ’xz’ planes separately, and get the following neighbors for each vertex (x, y, z ) :
+
+(x, y ± 2x, z ), (x, y ± (2 x + 1) , z ), (x ± 2y, y, z ), (x ± (2 y + 1) , y, z )(x, y ± 2z, z ), (x, y ± (2 z + 1) , z ), (x, y, z ± 2y), (x, y, z ± (2 y + 1)) (x ± 2z, y, z ), (x ± (2 z + 1) , y, z ), (x, y, z ± 2x), (x, y, z ± (2 x + 1)) 
+
+(10) Finally, we make sure that there are no parallel edges, which means that each edge appears only once. The resulting graph is sparse and designed to provide a good balance between local and longer-range connections. 
+
+# 6 Evaluation 
+
+6.1 Experimental setup 
+
+Our experiments involve solving the combinatorial CSP on a set of compositions, namely SrTiO 3, Y 2O3, Y 2Ti 2O7,MgAl 2O4 and Ca 3Al 2Si 3O12 , which correspond to cubic crystal structures of perovskite, bixbyite, pyrochlore, spinel and garnet types, respectively. These compositions were modeled using classical pairwise force-fields, with their parameters provided in Gusev et al. [2023]. Importantly, unlike Gusev et al. [2023], we solve the periodic lattice atom allocation problem, using the simplest symmetry group P1(1) containing only identity operation. Therefore, all g3 lattice positions are unique, where g defines the number of lattice positions per side of the unit cell. We investigate different supercells of SrTiO 3 by varying the number of formula units (Z), which controls how much the unit cell is expanded in each dimension. Increasing Z leads to additional symmetries and more atoms within the unit cell, which increases the CSP complexity. To measure the difficulty in solving the CSP of different compositions, we calculate the size of the combinatorial space, which refers to the size of the set that includes all feasible configurations of a composition. This can be computed by the multinomial coefficient   nc1,c 2,...,c k
+
+ = n!  
+
+> c1!c2!...c k!
+
+, where ci correspond to the stoichiometry constraints, as defined in Section 3. Table 1 reports multiple properties for the examined compositions as well as the order of magnitude of the combinatorial space for the periodic atom allocation of each composition. 
+
+Compound Number of ions in the unit cell Cell parameter (Å) Discretization, g Number of unique lattice positions Combinatorial Space Size 
+
+SrTiO 3, Z=1 5 3.9 4 64 10 8
+
+SrTiO 3, Z=1 5 3.9 8 512 10 12 
+
+SrTiO 3, Z=8 40 7.8 8 512 10 74 
+
+SrTiO 3, Z=27 135 11.7 8 512 10 180 
+
+Y2O3 80 10.7 8 512 10 97 
+
+Y2Ti 2O7 88 10.2 8 512 10 133 
+
+MgAl 2O4 56 8.2 8 512 10 97 
+
+Ca 3Al 2Si 3O12 160 11.9 8 512 10 210 
+
+Table 1: The list of compositons used in our computational experiments and the parameters of atom allocation problems. We compare the performance of multiple algorithms in solving the CSP problem across all reported compositions. The algorithms used include our proposed approach, IPCSP ( Gusev et al. [2023]), Simulated Annealing (SA), and a 9arXiv Template A P REPRINT 
+
+bespoke Greedy solver. We evaluate the quality of each obtained structure by examining the energy associated with it. Furthermore, since the ground truth energy of each composition has been reported in Gusev et al. [2023], we use the relative optimality gap (ROG) to measure how close a configuration with energy Ef is to the ground state with energy 
+
+Eg , expressed as a percentage of the ground state energy. Mathematically, this is defined as: 
+
+ROG = |Eg − Ef ||Eg | , (11) where lower ROG values are indicative of higher-quality allocations whose energies are closer to the ground state. Note that, for some discretizations, an ROG of zero is unattainable. 
+
+GNT-CSP . We implemented our method and ran experiments with it on the proposed graph. To highlight the gain of introducing the expander-inspired graph, we additionally ran experiments using radius cutoff graphs (using an empirically selected radius cutoff threshold of 4 Å and 16 nearest neighbors) and an extension of the Margulis graph in 3D for message-passing and provide their results in Section E of the Appendix. Our method has been implemented in Python, using the open-source libraries PyTorch and PyTorch geometric Fey and Lenssen [2019] and is publicly available in https://github.com/StavGer/CSP-with-GNNs . To tune the GNN hyperparameters, we performed five searches (each on three seeds), using hyperopt Bergstra et al. [2013] on the CSP of Ca 3Al 2Si 3O12 , whose structure is the most difficult to predict with respect to the combinatorial search space. Finally, for each composition, we trained our model five times, for 100k epochs each, and report the lowest energy and ROG of all computed structures. To run our experiments, we used an A100 GPU with 80 GiB of memory. 
+
+IPCSP . We used the official IPCSP implementation, which solves the CSP task via Gurobi, provided by Gusev et al. [2023] and set P1(1) as the symmetry group for each structure, as well as a 24 hour time limit for the termination of each run. 
+
+Greedy . As a simple baseline we implemented a greedy method to solve the CSP task in its unconstrained form, where we start from a random feasible configuration that satisfies both the exclusivity and the stoichiometry constraints. We then sample a new configuration that we make sure is consistent with both constraints by moving an atom from an occupied position to an empty one, where both positions are chosen randomly. Greedy adopts a new configuration x′
+
+with energy E(x′) only when it is lower than the energy E(x) of the current configuration x. This process is repeated for a finite number of steps and the configuration with the lowest energy is returned. A greedy pseudoalgorithm for CSP is presented in Algorithm 2 in section F of the Appendix. 
+
+Simulated Annealing (SA) . For Simulated annealing, we sample new configurations in the same fashion as greedy. However, while SA accepts new configurations that have lower energy than the current one, it is additionally designed to accept higher energy configurations with probability based on the temperature-dependent Metropolis criterion Metropolis et al. [1953]. Specifically, assuming that a configuration x has energy E(x) and a candidate configuration x′ has energy 
+
+E(x′), the probability of accepting the new configuration is defined as : 
+
+P (x′|x) = 
+
+
+
+1, if E(x′) < E (x),
+
+exp 
+
+
+
+− E(x′) − E(x)
+
+T
+
+
+
+, if E(x′) ≥ E(x),
+
+where T > 0 is the temperature value. Higher temperature values result in accepting most moves to configurations with worse energies, while lower temperature values lead to accepting moves to worse configurations more rarely. We implement SA and iteratively sample new configurations, which we accept or reject based on the Metropolis criterion. Importantly, during this iterative process, we anneal the temperature from higher to lower values. As a result, SA favors the exploration of the configuration space in the earlier stages of the solution search and allows for escaping local minima, while it switches to exploitation and becomes greedy once the space has been explored to a good extent. Finally, SA comes with a few hyperparameters that need to be appropriately selected. We provide details about their selection as well as context about additional strategies to find new configurations that we experimented with in section F of the Appendix, where we also include the pseudoalgorithm 3 of our SA implementation. For each composition, we ran greedy and SA ten times (shots), for 200k steps each, and report the lowest energy and ROG of all predicted structures in Table 2. 
+
+6.2 Results and Discussion 
+
+Our numerical results are summarized in Table 2, with the compositions listed in ascending order according to the size of their combinatorial search space. We include the energies of the reference structures reported in Gusev et al. [2023] 10 arXiv Template A P REPRINT 
+
+in the “Ground Truth” column. Note that, depending on the discretization, this value can be strictly lower than any feasible solution of the allocation problem. For each composition, we used every method to obtain feasible structures and report their lowest ROG and energy (in eV) associated with the best feasible structure. We observe that all methods find the optimal structure of SrTiO 3 with Z = 1 for both g values as ROG = 0 . With the remaining compositions, SA finds better allocations than greedy by 1-6 %, while IPCSP consistently outperforms both of them, by 1-14 %. For MgAl 2O4 and Ca 3Al 2Si 3O12 , our method outperforms the state-of-the-art Gurobi solver used in IPCSP. In addition to this, SrTiO 3 with Z = 8 , which involves more atoms than the Z = 1 case, can only be optimally predicted by our approach with the Gabber-Galil 3D graph. For the remaining compositions, the allocations computed by IPCSP and our method yield comparable energies. These findings are also illustrated in Figure 2, where ROG is plotted as a function of the combinatorial search space for each composition and method. We generally observe that the performance of all methods tends to drop (ROG becomes larger) as the combinatorial search space of the compositions we investigate increases. This is expected because compositions with larger sizes of combinatorial search space include more feasible structures that correspond to local minima and are often difficult for computational methods to escape from. An interesting discussion point concerns the prediction of SrTiO 3 with Z = 8 which exhibits a strongly repetitive structure inherited from Z = 1 case and a combinatorial search space with a size magnitude of 10 72 . As mentioned above, GNT-CSP is the only one that can compute an optimal structure for it, with all three competitors finding suboptimal structures. In addition to this, all three competitors achieve slightly better performance (lower ROG) when dealing with compositions that have a slightly larger combinatorial search space than 10 72 . Although this may seem counterintuitive, it occurs due to this additional structural periodicity present in SrTiO 3 with Z = 8 and despite the smaller relative combinatorial search space, make the prediction of a high-quality structure more difficult. Apart from these, we observe that the ROG curve of our method is always below or intersecting with the IPCSP one, which in turn is always below both classical methods. Finally, the ROG of the structure predicted by our method for Ca 3Al 2Si 3O12 is slightly lower than the one for SrTiO 3 with Z = 27 ,despite the larger relative combinatorial search space size, as shown by the red points on the far-right of the figure. This happens because of the highly repetitive nature of SrTiO 3 with Z = 27 that introduces additional difficulty in escaping local minima. We also provide, in Figure 3, the number of training epochs that our approach requires to predict the best feasible structure as a function of the size of the combinatorial search space of the compositions we examined. Intuitively, our method needs more epoch as the size of the combinatorial search space of compositions grows. In a similar fashion to ROG, the epochs’ number is also impacted by the inherent symmetries of the investigated compositions, with SrTiO 3
+
+(Z = 8 ) and SrTiO 3 (Z = 27 ) needing almost as many epochs as compositions with slightly larger combinatorial search spaces. We see a practical application of our method in materials discovery workflows as a high-quality generator of probe structures capable of leveraging GPU infrastructure Collins et al. [2017], Antypov et al. [2025]. Probe structures do not necessarily provide the absolute global energy minimum for a given composition, but rather an approximation whose primary purpose is to guide experimental synthesis decisions. As a chemist selects a chemical system to study, existing compounds define the convex hull, representing the energy threshold for every composition. Probe structures with energies below the convex hull indicate the potential presence of previously unknown compounds within a given chemical system. In this context, the aim of a structure search method is not to find exact structures at specific compositions, but to identify high-quality probe structures on average across the chemical space. Notably, in this work we do not fully assess the performance of our method in this setting, but instead focus specifically on the combinatorial aspect of CSP, omitting the usual sources of improvement such as structure relaxation, symmetry constraints, and related refinements. Overall, GNT-CSP consistently finds high-quality atom allocations for a range of compositions that have combinatorial search spaces of different magnitudes and involve different levels of symmetries. The very good and promising performance of our method demonstrates its applicability and sets the ground for future use in larger scale experiments and for additional compositions. 
+
+# 7 Conclusions and Future Work 
+
+In this work, we introduce a neural combinatorial approach to the CSP problem that intrinsically accounts for its constraints, without requiring penalty terms or precomputed solutions. This is achieved by projecting node embeddings computed by a graph neural network into the feasible solution space and directly sampling low-energy structures. We additionally introduce an expander-inspired 3D graph construction that consists of both local and long-range connections, which compensates for the locality shortcomings in our case of, widely used in the literature, radius cutoff graphs. The competitive, and sometimes superior, performance of our approach with respect to classical heuristics and 11 arXiv Template A P REPRINT 
+
+Composition Metrics Ground truth Greedy SA IPCSP GNT-CSP SrTiO 3 ROG 0 0 0 0 0
+
+g=4, Z=1 Energy -158.76 -158.76 -158.76 -158.76 -158.76 
+
+SrTiO 3 ROG 0 0 0 0 0
+
+g=8, Z=1 Energy -158.76 -158.76 -158.76 -158.76 -158.76 
+
+SrTiO 3, ROG 0 0.12 0.11 0.07 0
+
+Z=8 Energy -1268.67 -1121.39 -1129.15 -1179.67 -1268.67 
+
+MgAl 2O4 ROG 0 0.09 0.08 0.06 0.05 
+
+Energy -1620.89 -1483.11 -1486.06 -1525.63 -1546.48 
+
+Y2O3 ROG 0 0.18 0.12 0.04 0.04 Energy -2191.57 -1795.61 -1932.94 -2111.54 -2096.51 Y2Ti 2O7 ROG 0 0.14 0.13 0.05 0.05 Energy -3093.53 -2660.99 -2706.28 -2949.29 -2947.37 SrTiO 3, ROG 0 0.16 0.15 0.13 0.13 Z=27 Energy -4281.76 -3609.5 -3618.77 -3745.89 -3742.86 Ca 3Al 2Si 3O12 ROG 0 0.16 0.16 0.15 0.10 
+
+Energy -2199.99 -1840.75 -1852.75 -1880.42 -1986.79 
+
+Table 2: ROG and Energy values (in eV) of the best structures computed by each method and for each composition. 
+
+Figure 2: ROG curves for the configurations predicted by each method as a function of the combinatorial search space (in logarithmic scale) of the investigated compositions. The orange curve corresponding to SA is always below the blue curve of greedy but above the green curve of the traditional solver used in IPCSP. Therefore, IPCSP performs consistently better than both classical methods SA, while SA outperforms greedy. GNT-CSP performs at least as good as the traditional solver of IPCSP and often better than it for compositions with different magnitudes of combinatorial search spaces, as the red curve is below or intersecting with the green one. a reference solver, as evidenced by our experiments on multiple compositions with varying levels of symmetry and combinatorial search space sizes, paves the way for large scale crystal structure prediction tasks, where traditional solvers tend to struggle due to the very high dimensionality. Its ability to take advantage of GPU infrastructure enables effective materials discovery campaigns centered around extensive probe structure calculations. Subsequent improvements in the design of communication graphs and the integration of a wider range of potential energy functions can further improve the efficiency and applicability of our approach to structure search problems. 12 arXiv Template A P REPRINT 
+
+Figure 3: Number of epochs our method needed to compute the lowest energy structure of each composition as a function of their combinatorial search space (in logarithmic scale). Our model tends to need more training epochs to find low-energy feasible structures as the the combinatorial search space of a composition gets larger, while inherent symmetries found in SrTiO 3 with Z = {8, 27 } require a comparable number of epochs to compositions with a slightly larger combinatorial search space. 
+
+# Acknowledgements 
+
+We thank Helmut Katzgraber for his genuine support and vision for interdisciplinary research. This work was supported by a studentship from the School of Electrical Engineering, Electronics and Computer Science, at the University of Liverpool, UK. V. V. Gusev is supported by the Leverhulme Research Fellowship and UK Engineering and Physical Sciences Research Council (EPSRC) through AI for Chemistry: AIchemy Hub (EP/Y028775/1 and EP/Y028759/1). 
+
+# References 
+
+Qing Zhao, Sanjuna Stalin, Chen-Zi Zhao, and Lynden A. Archer. Designing solid-state electrolytes for safe, energy-dense batteries. Nature Reviews Materials , 5(3):229–252, 2020. ISSN 2058-8437. doi:10.1038/s41578-019-0165-5. Zhi-Jian Zhao, Sihang Liu, Shenjun Zha, Dongfang Cheng, Felix Studt, Graeme Henkelman, and Jinlong Gong. Theory-guided design of catalytic materials using scaling relationships and reactivity descriptors. Nature Reviews Materials , 4(12):792–804, 2019. ISSN 2058-8437. doi:10.1038/s41578-019-0152-x. Kenji Sumida, David L. Rogow, Jarad A. Mason, Thomas M. McDonald, Eric D. Bloch, Zachary R. Herm, Tae-Hyun Bae, and Jeffrey R. Long. Carbon dioxide capture in metal-organic frameworks. Chemical Reviews , 112(2):724–781, 2012. doi:10.1021/cr2003272. Stefano Curtarolo, Gus L. W. Hart, Marco Buongiorno Nardelli, Natalio Mingo, Stefano Sanvito, and Ohad Levy. The high-throughput highway to computational materials design. Nature Materials , 12(3):191–201, 2013. ISSN 1476-4660. doi:10.1038/nmat3568. URL https://doi.org/10.1038/nmat3568 .Anubhav Jain, Shyue Ping Ong, Geoffroy Hautier, Wei Chen, William Davidson Richards, Stephen Dacek, Shreyas Cholia, Dan Gunter, David Skinner, Gerbrand Ceder, and Kristin A. Persson. Commentary: The materials project: A materials genome approach to accelerating materials innovation. APL Materials , 1(1):011002, 07 2013. ISSN 2166-532X. doi:10.1063/1.4812323. Scott Kirklin, James E. Saal, Bryce Meredig, Alex Thompson, Jeff W. Doak, Muratahan Aykol, Stephan Rühl, and Chris Wolverton. The open quantum materials database (oqmd): assessing the accuracy of dft formation energies. 
+
+npj Computational Materials , 1(1):15010, 2015. ISSN 2057-3960. doi:10.1038/npjcompumats.2015.10. URL 
+
+https://doi.org/10.1038/npjcompumats.2015.10 .Chi Chen, Weike Ye, Yunxing Zuo, Chen Zheng, and Shyue Ping Ong. Graph networks as a universal machine learning framework for molecules and crystals. Chemistry of Materials , 31(9):3564–3572, 2019. ISSN 0897-4756. doi:10.1021/acs.chemmater.9b01294. URL https://doi.org/10.1021/acs.chemmater.9b01294 .13 arXiv Template A P REPRINT 
+
+Artem R. Oganov, Chris J. Pickard, Qiang Zhu, and Richard J. Needs. Structure prediction drives materials discovery. 
+
+Nature Reviews Materials , 4(5):331–348, 2019. ISSN 2058-8437. doi:10.1038/s41578-019-0101-8. URL https: //doi.org/10.1038/s41578-019-0101-8 .C. Collins, M. S. Dyer, M. J. Pitcher, G. F. S. Whitehead, M. Zanella, P. Mandal, J. B. Claridge, G. R. Darling, and M. J. Rosseinsky. Accelerated discovery of two crystal structure types in a complex inorganic phase field. 
+
+Nature , 546(7657):280–284, 2017. ISSN 1476-4687. doi:10.1038/nature22374. URL https://doi.org/10. 1038/nature22374 .Scott Woodley, Graeme Day, and Richard Catlow. Structure prediction of crystals, surfaces and nano-particles. 
+
+Philosophical Transactions of The Royal Society A , 378, 10 2020. doi:10.1098/rsta.2019.0600. D. Antypov, A. Vasylenko, C. M. Collins, L. M. Daniels, G. R. Darling, M. S. Dyer, J. B. Claridge, and M. J. Rosseinsky. Discovery of crystalline inorganic solids in the digital age. Accounts of Chemical Research , 58(9):1355–1365, 2025. doi:10.1021/acs.accounts.4c00694. PMID: 40243388. Duncan Adamson, Argyrios Deligkas, Vladimir Gusev, and Igor Potapov. The complexity of periodic energy minimisa-tion. In 47th International Symposium on Mathematical Foundations of Computer Science (MFCS 2022) , August 2022. doi:10.4230/LIPIcs.MFCS.2022.8. Vladimir V Gusev, Duncan Adamson, Argyrios Deligkas, Dmytro Antypov, Christopher M Collins, Piotr Krysta, Igor Potapov, George R Darling, Matthew S Dyer, Paul Spirakis, et al. Optimality guarantees for crystal structure prediction. Nature , 619(7968):68–72, 2023. OI Pulkkinen, P Gautam, V Mustonen, and T Aittokallio. Multiobjective optimization identifies cancer-selective combination therapies. PLoS Computational Biology , 16(12):e1008538, 2020. doi:10.1371/journal.pcbi.1008538. Bernhard Korte and Jens Vygen. Combinatorial Optimization: Theory and Algorithms . Springer Publishing Company, Incorporated, 5th edition, 2012. ISBN 3642244874. Vangelis Paschos. Applications of combinatorial optimization. 02 2013. doi:10.1002/9781118600283. Xiwen Yin and Chrysanthos E. Gounaris. Search methods for inorganic materials crystal structure prediction. Current Opinion in Chemical Engineering , 35:100726, 2022. ISSN 2211-3398. doi:10.1016/j.coche.2021.100726. R. Karp. Reducibility among combinatorial problems. In Complexity of Computer Computations , pages 85–103. Springer, 1972. H. W. Kuhn. The hungarian method for the assignment problem. Naval Research Logistics Quarterly , 2(1-2):83–97, 1955. doi:https://doi.org/10.1002/nav.3800020109. URL https://onlinelibrary.wiley.com/doi/abs/10. 1002/nav.3800020109 .Gurobi Optimization, LLC. Gurobi Optimizer Reference Manual, 2024. URL https://www.gurobi.com .Vijay V. Vazirani. Approximation Algorithms . Springer Publishing Company, Incorporated, 2010. ISBN 3642084699. Ilhem Quenel Boussaid, Julien Lepagnot, and Patrick Siarry. A survey on optimization metaheuristics. Information Sciences , 237:82–117, 11 2013. doi:10.1016/j.ins.2013.02.041. Zi-Song Shen, Feng Pan, Yao Wang, Yi-Ding Men, Wen-Biao Xu, Man-Hong Yung, and Pan Zhang. Free-energy machine for combinatorial optimization. Nature Computational Science , 5:322–332, 2025. doi:10.1038/s43588-025-00782-0. Yoshua Bengio, Andrea Lodi, and Antoine Prouvost. Machine learning for combinatorial optimization: A method-ological tour d’horizon. European Journal of Operational Research , 290(2):405–421, 2021a. ISSN 0377-2217. doi:https://doi.org/10.1016/j.ejor.2020.07.063. Maxime Gasse, Simon Bowly, Quentin Cappart, Jonas Charfreitag, Laurent Charlin, Didier Chételat, Antonia Chmiela, Justin Dumouchelle, Ambros Gleixner, Aleksandr M. Kazachkov, Elias Khalil, Pawel Lichocki, Andrea Lodi, Miles Lubin, Chris J. Maddison, Morris Christopher, Dimitri J. Papageorgiou, Augustin Parjadis, Sebastian Pokutta, Antoine Prouvost, Lara Scavuzzo, Giulia Zarpellon, Linxin Yang, Sha Lai, Akang Wang, Xiaodong Luo, Xiang Zhou, Haohan Huang, Shengcheng Shao, Yuanming Zhu, Dong Zhang, Tao Quan, Zixuan Cao, Yang Xu, Zhewei Huang, Shuchang Zhou, Chen Binbin, He Minggui, Hao Hao, Zhang Zhiyu, An Zhiwu, and Mao Kun. The machine learning for combinatorial optimization competition (ml4co): Results and insights. In Douwe Kiela, Marco Ciccone, and Barbara Caputo, editors, Proceedings of the NeurIPS 2021 Competitions and Demonstrations Track , volume 176 of Proceedings of Machine Learning Research , pages 220–231. PMLR, 06–14 Dec 2022. URL 
+
+https://proceedings.mlr.press/v176/gasse22a.html .Tian Xie and Jeffrey C. Grossman. Crystal graph convolutional neural networks for an accurate and interpretable prediction of material properties. Phys. Rev. Lett. , 120:145301, Apr 2018. doi:10.1103/PhysRevLett.120.145301. 14 arXiv Template A P REPRINT 
+
+Franco Scarselli, Marco Gori, Ah Chung Tsoi, Markus Hagenbuchner, and Gabriele Monfardini. The graph neural network model. Trans. Neur. Netw. , 20(1):61–80, 2009. ISSN 1045-9227. doi:10.1109/TNN.2008.2005605. Martin J. A. Schuetz, J. Kyle Brubaker, and Helmut G. Katzgraber. Combinatorial optimization with physics-inspired graph neural networks. Nature Machine Intelligence , 4(4):367–377, 4 2022a. ISSN 2522-5839. doi:10.1038/s42256-022-00468-6. URL https://doi.org/10.1038/s42256-022-00468-6 .Nikolaos Karalias and Andreas Loukas. Erdos goes neural: an unsupervised learning framework for combinatorial optimization on graphs. In Proceedings of the 34th International Conference on Neural Information Processing Systems , NIPS ’20, Red Hook, NY, USA, 2020. Curran Associates Inc. ISBN 9781713829546. Nikolaos Karalias, Arash Rafiey, et al. Geometric algorithms for neural combinatorial optimization with constraints. 
+
+arXiv preprint arXiv:2510.24039 , 2025. Azalia Mirhoseini, Anna Goldie, Mustafa Yazgan, Joe Wenjie Jiang, Ebrahim M. Songhori, Shen Wang, Young-Joon Lee, Eric Johnson, Omkar Pathak, Azade Nazi, Jiwoo Pak, Andy Tong, Kavya Srinivasa, Will Hang, Emre Tuncer, Quoc V. Le, James Laudon, Richard Ho, Roger Carpenter, and Jeff Dean. A graph placement methodology for fast chip design. Nature , 594:207 – 212, 2021. Justin Gilmer, Samuel S. Schoenholz, Patrick F. Riley, Oriol Vinyals, and George E. Dahl. Neural message passing for quantum chemistry. In Proceedings of the 34th International Conference on Machine Learning - Volume 70 ,ICML’17, page 1263–1272. JMLR.org, 2017. T. Konstantin Rusch, Michael M. Bronstein, and Siddhartha Mishra. A survey on oversmoothing in graph neural networks, 2023. URL https://arxiv.org/abs/2303.10993 .Kenta Oono and Taiji Suzuki. Graph neural networks exponentially lose expressive power for node classification. In International Conference on Learning Representations , 2020. URL https://openreview.net/forum?id= S1ldO2EFPr .Lingxiao Zhao and Leman Akoglu. Pairnorm: Tackling oversmoothing in {gnn}s. In International Conference on Learning Representations , 2020. URL https://openreview.net/forum?id=rkecl1rtwB .Uri Alon and Eran Yahav. On the bottleneck of graph neural networks and its practical implications. ArXiv ,abs/2006.05205, 2020. Jake Topping, Francesco Di Giovanni, Benjamin Paul Chamberlain, Xiaowen Dong, and Michael M. Bronstein. Understanding over-squashing and bottlenecks on graphs via curvature, 2022. Chendi Qian, Andrei Manolache, Christopher Morris, and Mathias Niepert. Probabilistic graph rewiring via virtual nodes. In Proceedings of the 38th International Conference on Neural Information Processing Systems , NIPS ’24, Red Hook, NY, USA, 2025. Curran Associates Inc. ISBN 9798331314385. Andreea Deac, Marc Lackenby, and Petar Veliˇ ckovi´ c. Expander graph propagation, 2022. Hamed Shirzad, Ameya Velingker, Balaji Venkatachalam, Danica J Sutherland, and Ali Kemal Sinop. Exphormer: Sparse transformers for graphs. In International Conference on Machine Learning , 2023. Quentin Cappart, Didier Chételat, Elias B. Khalil, Andrea Lodi, Christopher Morris, and Petar Veliˇ ckovi´ c. Combinatorial optimization and reasoning with graph neural networks. J. Mach. Learn. Res. , 24(1), January 2023. ISSN 1532-4435. Daniel Selsam, Matthew Lamm, Benedikt Bünz, Percy Liang, Leonardo de Moura, and David L. Dill. Learning a sat solver from single-bit supervision, 2019. Vinod Nair, Sergey Bartunov, Felix Gimeno, Ingrid von Glehn, Pawel Lichocki, Ivan Lobov, Brendan O’Donoghue, Nicolas Sonnerat, Christian Tjandraatmadja, Pengming Wang, Ravichandra Addanki, Tharindi Hapuarachchi, Thomas Keck, James Keeling, Pushmeet Kohli, Ira Ktena, Yujia Li, Oriol Vinyals, and Yori Zwols. Solving mixed integer programs using neural networks, 2021. Martin J. A. Schuetz, J. Kyle Brubaker, Zhihuai Zhu, and Helmut G. Katzgraber. Graph coloring with physics-inspired graph neural networks. Physical Review Research , 4(4), November 2022b. ISSN 2643-1564. doi:10.1103/physrevresearch.4.043131. URL http://dx.doi.org/10.1103/PhysRevResearch.4.043131 .F. Y. Wu. The potts model. Rev. Mod. Phys. , 54:235–268, Jan 1982. doi:10.1103/RevModPhys.54.235. Jonathan Ho, Ajay Jain, and Pieter Abbeel. Denoising diffusion probabilistic models. In Proceedings of the 34th International Conference on Neural Information Processing Systems , NIPS ’20, Red Hook, NY, USA, 2020. Curran Associates Inc. ISBN 9781713829546. Emmanuel Bengio, Moksh Jain, Maksym Korablyov, Doina Precup, and Yoshua Bengio. Flow network based generative models for non-iterative diverse candidate generation. In Proceedings of the 35th International Conference on Neural Information Processing Systems , NIPS ’21, Red Hook, NY, USA, 2021b. Curran Associates Inc. ISBN 9781713845393. 15 arXiv Template A P REPRINT 
+
+Sebastian Sanokowski, Sepp Hochreiter, and Sebastian Lehner. A diffusion model framework for unsupervised neural combinatorial optimization. In Proceedings of the 41st International Conference on Machine Learning , ICML’24. JMLR.org, 2024. Dinghuai Zhang, Hanjun Dai, Nikolay Malkin, Aaron Courville, Yoshua Bengio, and Ling Pan. Let the flows tell: solving graph combinatorial optimization problems with gflownets. In Proceedings of the 37th International Conference on Neural Information Processing Systems , NIPS ’23, Red Hook, NY, USA, 2023. Curran Associates Inc. Yannick Couzinie, Yusuke Nishiya, Hirofumi Nishi, Taichi Kosugi, Hidetoshi Nishimori, and Yu ichiro Matsushita. Annealing for prediction of grand canonical crystal structures: Efficient implementation of n-body atomic interactions, 2023. Chen Liang, Diptesh Das, Jiang Guo, Ryo Tamura, Zetian Mao, and Koji Tsuda. Predicting symmetric structures of large crystals with gpu-based ising machines. Communications Physics , 8(1):477, 2025. doi:10.1038/s42005-025-02380-y. URL https://doi.org/10.1038/s42005-025-02380-y .Abdulnour Y. Toukmaji and John A. Board. Ewald summation techniques in perspective: a survey. Computer Physics Communications , 95:73–92, 1996. Fred Glover, Gary Kochenberger, Rick Hennig, and Yu Du. Quantum bridge analytics i: a tutorial on formulating and using qubo models. Annals of Operations Research , 314, 07 2022. Richard Sinkhorn. Diagonal equivalence to matrices with prescribed row and column sums. The American Mathematical Monthly , 74(4):402–405, 1967. ISSN 00029890, 19300972. Alexandre Duval, Simon V. Mathis, Chaitanya K. Joshi, Victor Schmidt, Santiago Miret, Fragkiskos D. Malliaros, Taco Cohen, Pietro Liò, Yoshua Bengio, and Michael Bronstein. A hitchhiker’s guide to geometric gnns for 3d atomic systems, 2024. URL https://arxiv.org/abs/2312.07511 .David Duvenaud, Dougal Maclaurin, Jorge Aguilera-Iparraguirre, Rafael Gómez-Bombarelli, Timothy Hirzel, Alán Aspuru-Guzik, and Ryan P. Adams. Convolutional networks on graphs for learning molecular fingerprints. In 
+
+Proceedings of the 29th International Conference on Neural Information Processing Systems - Volume 2 , NIPS’15, page 2224–2232, Cambridge, MA, USA, 2015. MIT Press. K. T. Schütt, P.-J. Kindermans, H. E. Sauceda, S. Chmiela, A. Tkatchenko, and K.-R. Müller. Schnet: a continuous-filter convolutional neural network for modeling quantum interactions. In Proceedings of the 31st International Conference on Neural Information Processing Systems , NIPS’17, page 992–1002, Red Hook, NY, USA, 2017. Curran Associates Inc. ISBN 9781510860964. Johannes Klicpera, Florian Becker, and Stephan Günnemann. Gemnet: universal directional graph neural networks for molecules. In Proceedings of the 35th International Conference on Neural Information Processing Systems , NIPS ’21, Red Hook, NY, USA, 2021. Curran Associates Inc. ISBN 9781713845393. John Ingraham, Max Baranov, Zak Costello, Karl Barber, Wujie Wang, Ahmed Ismail, Vincent Frappier, Dana Lord, Christopher Ng-Thow-Hing, Erik Vlack, Shan Tie, Vincent Xue, Sarah Cowles, Alan Leung, João Rodrigues, Claudio Morales-Perez, Alex Ayoub, Robin Green, Katherine Puentes, and Gevorg Grigoryan. Illuminating protein space with a programmable generative model. Nature , 623:1–9, 11 2023. doi:10.1038/s41586-023-06728-8. Shlomo Hoory, Nathan Linial, and Avi Wigderson. Expander graphs and their applications. Bull. Amer. Math. Soc. , 43 (04):439–562, August 2006. ISSN 0273-0979. doi:10.1090/s0273-0979-06-01126-8. G. A. Margulis. Explicit constructions of expanders. Problemy Peredaˇ ci Informacii , 9(4):71–80, 1973. Ofer Gabber and Zvi Galil. Explicit constructions of linear size superconcentrators. In Proceedings of the 20th Annual Symposium on Foundations of Computer Science , SFCS ’79, page 364–370, USA, 1979. IEEE Computer Society. doi:10.1109/SFCS.1979.16. URL https://doi.org/10.1109/SFCS.1979.16 .Thomas N. Kipf and Max Welling. Semi-Supervised Classification with Graph Convolutional Networks. In Proceedings of the 5th International Conference on Learning Representations , ICLR ’17, 2017. URL https://openreview. net/forum?id=SJU4ayYgl .Petar Veliˇ ckovi´ c, Guillem Cucurull, Arantxa Casanova, Adriana Romero, Pietro Liò, and Yoshua Bengio. Graph attention networks. 6th International Conference on Learning Representations , 2017. Keyulu Xu, Weihua Hu, Jure Leskovec, and Stefanie Jegelka. How powerful are graph neural networks? In International Conference on Learning Representations , 2019. URL https://openreview.net/forum?id=ryGs6iA5Km .Weihua Hu, Bowen Liu, Joseph Gomes, Marinka Zitnik, Percy Liang, Vijay Pande, and Jure Leskovec. Strategies for pre-training graph neural networks. In International Conference on Learning Representations , 2020. URL 
+
+https://openreview.net/forum?id=HJlWWJSFDH .16 arXiv Template A P REPRINT 
+
+Chris J. Maddison, Andriy Mnih, and Yee Whye Teh. The concrete distribution: A continuous relaxation of discrete random variables. In International Conference on Learning Representations , 2017. Eric Jang, Shixiang Gu, and Ben Poole. Categorical reparameterization with gumbel-softmax. In International Conference on Learning Representations , 2017. Gonzalo Mena, David Belanger, Scott Linderman, and Jasper Snoek. Learning latent permutations with gumbel-sinkhorn networks, 2018. Richard Sinkhorn and Paul Knopp. Concerning nonnegative matrices and doubly stochastic matrices. Pacific Journal of Mathematics , 21:343–348, 1967. Ryan Prescott Adams and Richard S. Zemel. Ranking via sinkhorn propagation, 2011. URL https://arxiv.org/ abs/1106.1925 .Marco Cuturi. Sinkhorn distances: lightspeed computation of optimal transport. In Proceedings of the 27th International Conference on Neural Information Processing Systems - Volume 2 , NIPS’13, page 2292–2300, Red Hook, NY, USA, 2013. Curran Associates Inc. Diederik P. Kingma and Max Welling. Auto-Encoding Variational Bayes. In 2nd International Conference on Learning Representations , 2014. George Papandreou and Alan L. Yuille. Perturb-and-map random fields: Using discrete optimization to learn and sample from energy models. In Proceedings of the 2011 International Conference on Computer Vision , ICCV ’11, page 193–200, USA, 2011. IEEE Computer Society. ISBN 9781457711015. doi:10.1109/ICCV.2011.6126242. URL 
+
+https://doi.org/10.1109/ICCV.2011.6126242 .Matthias Fey and Jan E. Lenssen. Fast graph representation learning with PyTorch Geometric. In ICLR Workshop on Representation Learning on Graphs and Manifolds , 2019. James Bergstra, Daniel Yamins, and David Cox. Making a science of model search: Hyperparameter optimization in hundreds of dimensions for vision architectures. In Proceedings of the 30th International Conference on Machine Learning (ICML) , volume 28 of Proceedings of Machine Learning Research , pages 115–123, Atlanta, Georgia, USA, June 2013. PMLR. URL https://proceedings.mlr.press/v28/bergstra13.html .Nicholas Metropolis, Arianna W. Rosenbluth, Marshall N. Rosenbluth, Augusta H. Teller, and Edward Teller. Equation of state calculations by fast computing machines. The Journal of Chemical Physics , 21(6):1087–1092, 1953. doi:10.1063/1.1699114. 17 arXiv Template A P REPRINT 
+
+# A Matrix scaling problem and Sinkhorn-Knopp algorithm 
+
+The matrix scaling problem looks for positive multipliers for the rows and columns of a non-negative matrix that can scale it to have prescribed row and column sums. Formally, given A ∈ Rn×m ≥ 0, positive target row sums 
+
+r = [ r1, . . . , r n] > 0 and positive target column sums c = [ c1, . . . , c m] > 0, the goal of the matrix scaling problem is to obtain positive diagonal matrices P = diag( ρ1, . . . , ρ n), Γ = diag( γ1, . . . , γ m) such that the scaled matrix X = PAΓ 
+
+has row sums r and column sums c :
+
+PAΓ1 n = r, (PAΓ )⊤1n = c,
+
+where 1k = (1 , . . . , 1) ⊤ is a k-dimensional vector full of ones. A necessary condition to solve this problem is that the sum of all target sums is equal to the target sum of all row sums, Pni=1 ri = Pmj=1 cj .Mathematically, after initializing A(0) = A, the Sinkhorn-Knopp algorithm Sinkhorn [1967] is defined as follows and implemented for a fixed number of K steps: For k = 0 , 1, . . . , K − 1 : 
+
+If k is even, row scaling : A(k+1)  
+
+> ij
+
+= A(k) 
+
+> ij
+
+ri
+
+P 
+
+> j
+
+A(k)
+
+> ij
+
+, ∀ i ∈ { 1, . . . , n },
+
+If k is odd, column scaling: A(k+1)  
+
+> ij
+
+= A(k) 
+
+> ij
+
+cj
+
+P 
+
+> i
+
+A(k)
+
+> ij
+
+, ∀ j ∈ { 1, . . . , m }
+
+(12) 
+
+# B Entropic regularization 
+
+Theorem 1 shows that we can obtain a basic feasible solution BFS( H) that lies on a vertex of the transportation polytope U(r, c), as the limit of S(H/τ ). This means that we can approximate BFS( H) ≈ S(H/τ ), for a small value of τ .
+
+Theorem 1 . For a solution B that belongs to the transportation polytope U(r, c), define its entropy as h(B) = 
+
+− P 
+
+> i,j
+
+Bi,j log Bij . Then, 
+
+S(H/τ ) = arg max 
+
+> B∈ U (r,c)
+
+⟨B, H⟩F + τ h (B). (13) 
+
+Assume further that the entries of H are drawn from a distribution absolutely continuous with respect to the Lebesgue measure on R. Then, it almost surely holds that: 
+
+BF S (H) = lim  
+
+> τ→0+
+
+S(H/τ ) (14) In practice, an incomplete version of the Sinkhorn operator that was described earlier is applied. The number of Sinkhorn iterations directly depends on τ , with smaller τ values requiring more Sinkhorn iterations to achieve convergence to a vertex of U(r, c).
+
+# C Bottlenecks in graphs 
+
+Figure 4: Barbell graph. One typical example of a bottleneck that can lead to oversquashing can be found in a barbell graph, where the green edge is responsible to propagate information between two large groups of nodes. 18 arXiv Template A P REPRINT 
+
+# D Architecture of our model       
+
+> Embedding Linear
+> GINE Layer
+> GINE Layer
+> GINE Layer
+> Output
+> nQci
+> d0b0
+> hvhjejv
+> Linear
+> +
+> GeLU
+> P
+> j
+> 1+ α
+> +(1 + α)hv
+> MLP
+> GeLU
+> hv
+> GINE layer Block
+
+Figure 5: The developed model architecture for our GNN. An embedding block is used to create a d0-dimensional node embedding for each of the n positions. We create b0-dimensional edge embeddings by taking the respective columns of the interactions matrix Q and passing them from a linear layer. Node and edge embeddings are fed to GINE layers which generate node embeddings according to message-passing as shown in the GINE layer block. The output of the last GINE layer provides the final node k + 1 -dimensional node embeddings. 
+
+# E Radius cutoff and margulis graphs 
+
+To highlight the gain of introducing the 3D Gabber-Gallil graph, we additionally conducted experiments on radius cutoff graphs as well as Margulis 3D graphs which we created following the same logic as the Gabber-Galil 3D construction. Importantly, the topologies of both Margulis 3D and Gabber-Galil 3D change only as a result of altering the number of nodes, that is controlled by the discretization parameter g. Therefore, the same graph is created for all compositions that share the same g. However, this is not the case for the radius cutoff graphs, whose construction depends on the radius cutoff threshold and the cell parameter of each composition. For the following experiments, we empirically selected a radius cutoff threshold of 4 Å and 16 nearest neighbors. We provide a few instances of node connectivities for all three types of graphs in Figure 6. As expected, radius cutoff graphs, instances of which are shown in figures 6a, 6d, 6g, favor connections between neighboring nodes, while they also incorporate a small number of long-range interactions that account for periodicity. Margulis 3D graphs, whose 19 arXiv Template A P REPRINT 
+
+connectivities are shown in figures 6b, 6e, 6h, are designed to include interactions between both neighboring and distant nodes. Nevertheless, Gabber-Galil 3D graphs, illustrated in figures 6c, 6f, 6i, expand better than the Margulis 3D graphs as they capture long-range interactions across all directions.       
+
+> (a) Cutoff (b) Margulis 3D (c) Gabber-Galil 3D
+> (d) Cutoff (e) Margulis 3D (f) Gabber-Galil 3D
+> (g) Cutoff (h) Margulis 3D (i) Gabber-Galil 3D
+
+Figure 6: Instances of one-hop node connectivities for radius cutoff, Margulis 3D and Gabber-Galil 3D graphs. 
+
+Each row of subfigures illustrates the connections (blue edges) of the same central node (in yellow color) with its one-hop neighbors (in green color) for all three graphs. Radius cutoff graphs capture mainly connections between neighboring nodes, while periodicity introduces few connections between more distant nodes. Margulis 3D captures both local and long-range connections but its expansion seems limited compared to Gabber-Galil 3D which includes long-range connections across all directions. Table 3 provides ROG and energy values of the structures computed by our method when using different graph types and with respect to each composition. Our method, when applied with radius-cutoff graphs, finds solutions that are comparable to SA (slightly better or worse) but definitely worse than IPCSP in terms of energy, except for SrTiO 3 with 
+
+Z = 27 . When using the Margulis 3D graphs, our method computes comparable solutions in terms of energy and ROG 20 arXiv Template A P REPRINT 
+
+Figure 7: ROG curves for the structures GNT-CSP computed with respect to type of graph we performed the message-passing on and as a function of the combinatorial search space, in logarithmic scale, of the compositions we experimented with. The blue curve that corresponds to the case of the Gabber-Galil 3D graph is below both the orange one (3D margulis) and the green one (radius cutoff), indicating the consistently higher-quality solutions that are associated with choosing it. with the solutions associated with the radius cutoff graphs. More specifically, our method with Margulis 3D graphs provides better solutions than with radius cutoff graphs in the cases of SrTiO 3 with Z = 8 and Y 2O3 and worse solutions in the rest of the compositions. However, when using the Gabber-Galil 3D graph, our method samples higher quality solutions than both radius cutoff graphs and 3D margulis graphs since the ROG drops and the energy gets closer to the ground truth one. We argue that this happens because of the expander nature of the Gabber-Galil 3D graphs that include both local and long-range connections, compared to the radius cutoff graphs that favor local connections by design and Margulis 3D graphs which have less powerful expansion properties. As a result, by performing the message-passing on 3D Gabber-Galil graphs the GNN can learn more powerful node representations that subsequently improve the quality of the obtained solutions. The observations we made above are shown in Figure 7 that illustrates the ROG of the structures our method computed using the different types of graphs as a function of the size of the combinatorial search space of the compositions that were investigated. Composition Metrics Ground truth radius-cutoff Margulis 3D Gabber-Galil 3D SrTiO 3 ROG 0 0 0 0
+
+g=4, Z=1 Energy -158.76 eV -158.76 eV -158.76 eV -158.76 eV SrTiO 3 ROG 0 0 0 0
+
+g=8, Z=1 Energy -158.76 eV -158.76 eV -158.76 eV -158.76 eV SrTiO 3 ROG 0 0.16 0.09 0
+
+Z=8 Energy -1268.67 eV -1065.67 eV -1157.46 eV -1268.67 eV MgAl 2O4 ROG 0 0.08 0.10 0.05 
+
+Energy -1620.89 eV -1494.5 eV -1461.64 eV -1546.48 eV Y2O3 ROG 0 0.11 0.08 0.04 
+
+Energy -2191.57 eV -1947.82 eV -2006.32 eV -2096.51 eV Y2Ti 2O7 ROG 0 0.07 0.08 0.05 
+
+Energy -3093.53 eV -2865.87 eV -2841.92 eV -2947.37 eV SrTiO 3 ROG 0 0.13 0.13 0.13 Z=27 Energy -4281.76 eV -3746.67 eV -3702.32 eV -3742.86 eV Ca 3Al 2Si 3O12 ROG 0 0.17 0.21 0.10 
+
+Energy -2199.99 eV -1806.55 eV -1743.99 eV -1986.79 eV Table 3: ROG and energy values of the best structures our method computed with respect to the graph that was used for message-passing and for every investigated composition. 21 arXiv Template A P REPRINT 
+
+# F Greedy and SA 
+
+SA comes with a few hyperparameters that need to be appropriately selected. These correspond to: the initial temperature 
+
+T0, the sweep factor S that controls after every how many iterations the temperature is annealed, the cooling factor 
+
+a < 1 that controls by how much the temperature is annealed, and the minimum temperature Tmin .
+
+Algorithm 2 Greedy for CSP solver 
+
+Require: Initial configuration x0, Pairwise interactions matrix Q, number of iterations MaxIter , Set of occupied positions O, Set of void positions V
+
+Ensure: Energy of best configuration x, E(x) ← vec( x)⊤Q vec( x) 
+
+> 1:
+
+x ← x0 {Start from a random feasible configuration}  
+
+> 2:
+
+for k = 1 to MaxIter do  
+
+> 3:
+
+p1 ∼ O {Randomly sample an occupied position p1} 
+
+> 4:
+
+p2 ∼ V {Randomly sample an empty position p2} 
+
+> 5:
+
+x′ ← Move atom from p1 to p2 {Candidate configuration after constraint-preserving move}  
+
+> 6:
+
+E(x) ← vec( x)⊤Q vec( x), E(x′) ← vec( x′)⊤Q vec( x′) 
+
+> 7:
+
+if E(x′) < E (x]) then  
+
+> 8:
+
+x ← x′ {Accept move if energy lower than current best}  
+
+> 9:
+
+O ← O \ { p1} ∪ { p2} {Update O to include p2 and exclude p1} 
+
+> 10:
+
+V ← V \ { p2} ∪ { p1} {Update V to include p1 and exclude p2} 
+
+> 11:
+
+end if  
+
+> 12:
+
+end for  
+
+> 13:
+
+return E(x)
+
+Algorithm 3 Simulated Annealing for CSP 
+
+Require: Initial configuration x0 satisfying constraints, Pairwise interactions matrix Q, initial temperature T0, mini-mum temperature Tmin , cooling factor α, sweep factor S, number of iterations MaxIter , Set of occupied positions 
+
+O, Set of void positions V
+
+Ensure: Energy of best configuration xbest , E(xbest ) 
+
+> 1:
+
+Initialize feasible configuration x ← x0 
+
+> 2:
+
+E(xbest ) ← E(x) 
+
+> 3:
+
+xbest ← x 
+
+> 4:
+
+t ← T0 {Temperature is initialized as T0} 
+
+> 5:
+
+for k = 1 to MaxIter do  
+
+> 6:
+
+p1 ∼ O {Randomly sample an occupied position p1} 
+
+> 7:
+
+p2 ∼ V {Randomly sample an empty position p2} 
+
+> 8:
+
+x′ ← Move atom from p1 to p2 {Candidate configuration after constraint-preserving move}  
+
+> 9:
+
+r ∼ unif orm (0 , 1) {Sample a random number in (0,1)}  
+
+> 10:
+
+E(x) ← vec( x)⊤Q vec( x), E(x′) ← vec( x′)⊤Q vec( x′) 
+
+> 11:
+
+if E(x′) < E (x) or r < exp(( E(x) − E(x′)) /t ) then  
+
+> 12:
+
+x ← x′ {Accept move}  
+
+> 13:
+
+O ← O \ { p1} ∪ { p2} {Update O to include p2 and exclude p1} 
+
+> 14:
+
+V ← V \ { p2} ∪ { p1} {Update V to include p1 and exclude p2} 
+
+> 15:
+
+if E(x) < E (xbest ) then  
+
+> 16:
+
+xbest ← x {Update best configuration}  
+
+> 17:
+
+end if  
+
+> 18:
+
+end if  
+
+> 19:
+
+if k mod ( S · n) = 0 then  
+
+> 20:
+
+t ← max( t · α, T min ) 
+
+> 21:
+
+end if  
+
+> 22:
+
+end for  
+
+> 23:
+
+Return xbest 
+
+We performed additional experiments with different strategies to sample new configurations for the Greedy and SA baselines. More specifically, instead of always moving an atom from an occupied position to an empty one, we also tried 22 arXiv Template A P REPRINT 
+
+with some probability to swap atoms of different elements that occupy different positions. Importantly, this strategy also ensures that the new configurations do not violate either of the two constraints. We provide results for three different probability scenarios in Table 4, where the first three columns correspond to Greedy experiments and the last three to SA experiments. The Greedy and SA columns involve sampling new configurations only by moving atoms from occupied to empty positions, while the 70-30 columns sample new configurations with a 70% probability to move an atom from a filled position to an empty one and a 30% probability of swapping two atoms of different elements. The 50-50 columns select new configurations accordingly. We observe that for both the Greedy and the SA algorithms, the best configurations of every compound (except SrTiO 3 with g=8 and Z=8) are obtained when choosing to move only atoms from occupied positions to empty ones. This happens because in the examined compounds the number of empty positions is much larger than the total number of atoms. As a result, the solution space is explored faster and more efficiently when atoms are allocated to previously empty positions. Structure Metrics Greedy 50-50 70-30 SA 50-50 70-30 SrTiO 3, g=4 Mean Best ROG 0 0 0 0 0 0Z=1 Best ROG 0 0 0 0 0 0-158.76 eV Best energy -158.76 -158.76 -158.76 -158.76 -158.76 -158.76 SrTiO 3, g=8 Mean Best ROG 0 0 0 0 0 0Z=1 Best ROG 0 0 0 0 0 0-158.76 eV Best energy -158.76 -158.76 -158.76 -158.76 -158.76 -158.76 SrTiO 3, g=8 Mean Best ROG 0.13 0.13 0.13 0.13 0.13 0.13 Z=8 Best ROG 0.12 0.11 0.12 0.11 0.11 0.11 -1268.67 eV Best energy -1121.39 -1125.73 -1118.1 -1125.61 -1127.18 -1129.15 MgAl 2O4 Mean Best ROG 0.10 0.10 0.10 0.10 0.10 0.10 Best ROG 0.09 0.09 0.09 0.09 0.10 0.09 -1620.89 eV Best energy -1483.11 -1474.55 -1476.47 -1477.50 -1465.88 -1476.86 Y2O3 Mean Best ROG 0.16 0.17 0.17 0.13 0.18 0.17 Best ROG 0.15 0.16 0.16 0.08 0.16 0.15 -2191.57 eV Best energy -1869.21 -1841.20 -1843.13 -1932.94 -1833.96 -1871.66 Y2Ti 2O7 Mean Best ROG 0.17 0.17 0.16 0.16 0.16 0.16 Best ROG 0.14 0.15 0.15 0.13 0.15 0.15 -3093.53 eV Best energy -2660.99 -2634.71 -2637.75 -2706.28 -2631.52 -2642.48 SrTiO 3, g=8 Mean Best ROG 0.17 0.17 0.17 0.18 0.18 0.18 Z=27 Best ROG 0.16 0.16 0.16 0.16 0.17 0.17 -4281.76 eV Best energy -3609.5 -3588.22 -3580.96 -3600.31 -3558.41 -3551.13 Ca 3Al 2Si 3O12 Mean Best ROG 0.17 0.18 0.17 0.18 0.19 0.18 Best ROG 0.16 0.17 0.17 0.16 0.18 0.17 -2199.99 eV Best energy -1840.75 -1813.50 -1833.20 -1852.75 -1799.60 -1831.05 Table 4: ROG and energy values for Greedy and SA under different configuration sampling strategies. 23

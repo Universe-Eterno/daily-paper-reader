@@ -1,0 +1,150 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.23327v1/fig-001.webp",
+      "caption": "Figure 19. Autonomous volumetric exploration using unknown voxels as the gain. Experiments were conducted in both a cafeteria and a lab environment.",
+      "page": 25,
+      "index": 1,
+      "width": 1031,
+      "height": 376
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23327v1/fig-002.webp",
+      "caption": "Figure 18. Autonomous surface reconstruction using surface frontiers as the gain. The robot’s trajectory is visualized with a red arrow indicating its direction of movement. The mesh reconstructed from the captured RGB-D images is also shown, with boundary artifacts removed for clarity.",
+      "page": 25,
+      "index": 2,
+      "width": 1031,
+      "height": 455
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23327v1/fig-003.webp",
+      "caption": "Figure 9. The range of final collected gain in the graph online perception scenario. The expected gain selection criterion delivers the strongest results overall, and replanning at every node further improves performance compared to other replanning strategies. With this setup, NBS offers the most reliable performance with little sensitivity to parameter choices.",
+      "page": 15,
+      "index": 3,
+      "width": 956,
+      "height": 873
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23327v1/fig-004.webp",
+      "caption": "Figure 13. Visualization of an agent navigating to collect points represented as golden rings. These points are initially unknown and become visible only when the corresponding regions are perceived by the agent. The trajectory is visualized using a temporal gradient, transitioning from dark blue (start) to bright yellow (end). Each node is visualized as an arrow, with clusters of nodes at identical positions forming node clusters. Node gains are color-coded, with blue indicating the lowest gain and red the highest. Frontier nodes are emphasized with larger markers, while transparent nodes indicate non-frontier nodes with zero gain.",
+      "page": 21,
+      "index": 4,
+      "width": 1004,
+      "height": 583
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23327v1/fig-005.webp",
+      "caption": "Figure 1. Surface reconstruction in hardware experiments. The figure illustrates the robot’s navigation sequence alongside the corresponding reconstructed scene. The completed trajectory is visualized with a color gradient from dark blue to bright yellow, while the currently planned path is shown as a sequence of light green arrows. The camera’s view frustum is depicted, and yellow voxels represent surface frontiers visible within it. Each node is represented by a color-coded arrow: low-gain nodes are blue, high-gain nodes are red. The bottom left panel illustrates the planning pipeline: the planner identifies the optimal path using NBS and, upon reaching the next node, updates and expands the graph with new information before computing the next-best path.",
+      "page": 2,
+      "index": 5,
+      "width": 1021,
+      "height": 612
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23327v1/fig-006.webp",
+      "caption": "Figure 4. The illustration of path selection criteria. Each path is represented by a circle: open circles denote paths leading to frontier nodes PF , while solid circles represent non-frontier paths. The x-axis represents cost c, and the y-axis represents gain g. The optimal path under each criterion is highlighted with a green check mark. For the path gain criterion, the best path corresponds to the one with the highest g-value. Under the path ratio criterion, the optimal path is the one with the highest slope. For the expected gain criterion, the best path is the one whose extrapolated g-value is maximal.",
+      "page": 7,
+      "index": 6,
+      "width": 834,
+      "height": 202
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23327v1/fig-007.webp",
+      "caption": "Figure 14. Qualitative comparison of surface reconstruction for scene 102816852. Each planner is executed 10 times, and the visualization shows the worst-case result among the trials, representing a lower-bound performance. The total reconstructed surface area (in square meters) for each planner is as follows: NBS: 445.73, DBS: 419.10, SPT: 349.96, TSP: 432.21, FUEL: 341.03, RRT*: 301.75, and RRT: 348.43. The trajectory is visualized using a temporal gradient, from dark blue to bright yellow.",
+      "page": 22,
+      "index": 7,
+      "width": 991,
+      "height": 310
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23327v1/fig-008.webp",
+      "caption": "Figure 8. The range of final collected gain in the graph a priori scenario. NBS achieves the highest and most consistent gains, as shown by short horizontal bars positioned to the far right.",
+      "page": 14,
+      "index": 8,
+      "width": 968,
+      "height": 873
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23327v1/fig-009.webp",
+      "caption": "Figure 2. Paper organization overview. Circled numbers indicate the corresponding sections. In the graph a priori and online perception settings, the environment is represented as a graph, either fully known or partially known. In contrast, active perception necessitates graph construction from the collision-free state space. The path selection strategy encompasses both selection criteria and replanning frequencies, which are benchmarked in the graph-based settings. The best-performing combination is subsequently applied to the active perception tasks.",
+      "page": 3,
+      "index": 9,
+      "width": 1026,
+      "height": 214
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23327v1/fig-010.webp",
+      "caption": "Figure 15. The mean and half the standard deviation of accumulated gain across large HSSD scenarios. Trajectory time serves as the cost function with a 10-minute budget. Planning terminates at the 15-minute time limit.",
+      "page": 23,
+      "index": 10,
+      "width": 915,
+      "height": 1152
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23327v1/fig-011.webp",
+      "caption": "Figure 7. Average computation time in the graph a priori experiments.",
+      "page": 13,
+      "index": 11,
+      "width": 992,
+      "height": 242
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23327v1/fig-012.webp",
+      "caption": "Figure 12. Eight HSSD scenarios used in the active perception simulation environment. Note that the scenarios are displayed at different scales for visualization purposes.",
+      "page": 19,
+      "index": 12,
+      "width": 979,
+      "height": 306
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23327v1/fig-013.webp",
+      "caption": "Figure 11. Example of the RRAG with all orientations preserved. Only the edges are visualized. An offset perpendicular to the edge direction is applied to inter-cluster edges to distinguish overlapping connections. For intra-cluster edges, an offset is applied along the node’s yaw direction, forming a polygonal pattern around the actual node. Since FLS can be used to connect nodes, the edges are not strictly straight lines.",
+      "page": 19,
+      "index": 13,
+      "width": 929,
+      "height": 471
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23327v1/fig-014.webp",
+      "caption": "Table 1. Asymptotic time and space complexity of the evaluated algorithms.",
+      "page": 12,
+      "index": 14,
+      "width": 958,
+      "height": 536
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23327v1/fig-015.webp",
+      "caption": "Figure 6. Illustrations of four types of graphs used for benchmarking.",
+      "page": 12,
+      "index": 15,
+      "width": 924,
+      "height": 434
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23327v1/fig-016.webp",
+      "caption": "Figure 16. The mean and half the standard deviation of accumulated gain across small HSSD scenarios. Trajectory time serves as the cost function with a 5-minute budget. Planning terminates at the 7-minute time limit.",
+      "page": 24,
+      "index": 16,
+      "width": 915,
+      "height": 706
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23327v1/fig-017.webp",
+      "caption": "Figure 17. Comparison of normalized gain across methods and tasks.",
+      "page": 24,
+      "index": 17,
+      "width": 1016,
+      "height": 270
+    },
+    {
+      "url": "assets/figures/arxiv/2604.23327v1/fig-018.webp",
+      "caption": "Table 4. Planner parameters.",
+      "page": 20,
+      "index": 18,
+      "width": 335,
+      "height": 440
+    }
+  ]
+}

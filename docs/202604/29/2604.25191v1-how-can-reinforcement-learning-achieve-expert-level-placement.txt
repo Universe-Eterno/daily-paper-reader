@@ -1,0 +1,314 @@
+Title: How Can Reinforcement Learning Achieve Expert-level Placement?
+
+URL Source: https://arxiv.org/pdf/2604.25191v1
+
+Published Time: Wed, 29 Apr 2026 00:28:05 GMT
+
+Number of Pages: 7
+
+Markdown Content:
+# How Can Reinforcement Learning Achieve Expert-level Placement? 
+
+## Ruo-Tong Chen 1,2,3, Ke Xue 1,2, Chengrui Gao 1,2,3, Yunqi Shi 1,2, Tian Xu 1,2, Peng Xie 1,2,Siyuan Xu 3, Mingxuan Yuan 3, Chao Qian 1,2,∗, Zhi-Hua Zhou 1,2
+
+> 1
+
+State Key Laboratory of Novel Software Technology, Nanjing University, China 
+
+> 2
+
+School of Artificial Intelligence, Nanjing University, China 
+
+> 3
+
+Huawei Noah’s Ark Lab, China 
+
+## Abstract 
+
+Chip placement is a critical step in physical design. While reinforcement learning (RL)-based methods have recently emerged, their training primarily focuses on wirelength op-timization, and therefore often fail to achieve expert-quality layouts. We identify the reward design as the primary cause for the performance gap with experts, and instead of for-malizing intricate processes, we circumvent this by directly learning from expert layouts to derive a reward model. Our approach starts from the final expert layouts to infer step-by-step expert trajectories. Using these trajectories as demon-strations or preferences, we train a model that captures the latent implicit rewards in expert results. Experiments show that our framework can efficiently learn from even a single design and generalize well to unseen cases. 
+
+ACM Reference Format: 
+
+Ruo-Tong Chen 1,2,3, Ke Xue 1,2, Chengrui Gao 1,2,3, Yunqi Shi 1,2, Tian Xu 1,2, Peng Xie 1,2,, Siyuan Xu 3, Mingxuan Yuan 3, Chao Qian 1,2,∗,Zhi-Hua Zhou 1,2. 2026. How Can Reinforcement Learning Achieve Expert-level Placement?. In 63rd ACM/IEEE Design Automation Con-ference (DAC ’26), July 26–29, 2026, Long Beach, CA, USA. ACM, New York, NY, USA, 7 pages. https://doi.org/10.1145/3770743.3804357 
+
+## 1 Introduction 
+
+Chip Placement plays an important role in physical design, as it determines the physical positions of macros (e.g, mem-ory blocks) and standard cells (e.g., logic gates) on the chip canvas [ 15 , 30 ]. To handle the various sizes and numbers between macros and standard cells, placement is usually di-vided into a macro placement stage, followed by a standard cell placement stage. Macro placement provides a fundamen-tal solution for the subsequent processes (e.g., standard cell placement, clock tree synthesis, and routing), thus having a   
+
+> ∗Corresponding author. E-mail: qianc@lamda.nju.edu.cn .
+> This work is licensed under a Creative Commons Attribution 4.0 Interna-tional License.
+> DAC ’26, Long Beach, CA, USA
+> ©2026 Copyright held by the owner/author(s). ACM ISBN 979-8-4007-2254-7/2026/07
+> https://doi.org/10.1145/3770743.3804357
+
+great impact on the final power, performance, and area (PPA) metrics of the circuit [2]. Given the rapidly growing number of large macros in com-plex modern chips, macro placement has become increas-ingly complex and tediously lengthy, making the pursuit of automated algorithms imperative. Reinforcement learning (RL) methods have emerged as particularly promising ap-proaches [ 7 , 10 , 11 , 17 , 24 , 32 ], which typically formulate the macro placement problem as a Markov decision pro-cess (MDP), and learn a policy through interaction with a chip placement environment. The adaptability and learning-driven optimization framework of RL offers innovative ap-proaches for macro placement, and has made significant progress, especially in reward modeling: AlphaChip [ 12 , 24 ]receives no reward feedback until all macros have been placed, making the reward signal sparse for policy training; MaskPlace [ 17 ] solves this problem by introducing a dense macro half-perimeter wirelength (HPWL) reward. However, most of the RL methods primarily focus on wirelength opti-mization during training, consequently struggling to achieve expert-level placement results and satisfactory PPA metrics. Automatically achieving expert-level layout remains a longstanding challenge. In current design flows, human ex-perts leverage various forms of domain knowledge to guide macro placement, such as design hierarchy [ 15 ] and dataflow structure [ 20 ]. Recently, several automated approaches have been proposed to approximate expert-level placement by in-corporating expert prior knowledge, including macro group-ing [ 4] and periphery biasing [ 28 , 32 ]. However, these meth-ods still fall short of fully capturing expert knowledge, as much of the expertise is inherently difficult to formalize and integrate into learning-based frameworks [ 4 , 14 , 15 ]. For ex-ample, macro regularity in terms of dead space management and notch avoidance is crucial but difficult to quantify [ 15 ]. Simplified formulations often fail to accurately describe the complex nature of such regularity. However, a viable pathway emerges from practical obser-vations: Even though explicit formalization of expert knowl-edge remains challenging, numerous expert-level final layout results are readily available. Thus, instead of formalizing the detailed expertise, this work circumvents this challenge by learning from the expert-level final layouts themselves. The proposed expert imitation model (EIM) framework starts 
+
+> arXiv:2604.25191v1 [cs.AR] 28 Apr 2026
+
+DAC ’26, July 26–29, 2026, Long Beach, CA, USA Chen et al. Expert Placements 
+
+Previous 
+
+Methods 
+
+Ours 
+
+Manual formulation of expert knowledge  
+
+> Wire Mask Regularity Mask
+
+Hard to manually  formalize 
+
+various  expert knowledge 
+
+(b) Learning from demonstrations  (c) Learning from preferences 
+
+Decompose the layout step by step  Resulting trajectory Expert layout 
+
+> (a)
+
+> EIM -D
+
+Unseen design superblue18                                                                                                                                                                                         
+
+> Expert
+> -4-3-2-10-1-2-3-4-4
+> -4-3-2-10-1-2-3-4-4
+> -3-2-1010-1-2-3-3
+> -2-101210-1-2-2
+> -10123210-1-1
+> 0123432100
+> -10123210-1-1
+> -2-101210-1-2-2
+> -3-2-1010-1-2-3-3
+> -4-3-2-10-1-2-3-4-4
+> 7532100013
+> 5310-1-2-2-2-11
+> 31-1-2-3-4-4-4-3-1
+> 20-2-3-4-5-5-5-4-2
+> 1-1-3-4-5-6-6-6-5-3
+> 1-1-3-4-5-6-6-6-5-3
+> 20-2-3-4-5-5-5-4-2
+> 31-1-2-3-4-4-4-3-1
+> 5310-1-2-2-2-11
+> 7532100013
+> MaskPlace [17]
+> EIM -P
+> EfficientPlace [10]
+> DREAMPlace [18]
+> (171 ,6)
+> 𝑠 𝑠′ 𝑎
+
+Figure 1. Illustration of our proposed framework. Instead of manually formalizing intricate expert knowledge, we circumvent this by directly learning from the final expert layouts to derive a reward model. The visualizations of design superblue18 of MaskPlace [ 17 ], EfficientPlace [ 10 ], DREAMPlace 4.1.0 [ 18 ], EIM-D, EIM-P and Expert are illustrated. The reward models of EIM-D and EIM-P are trained on design superblue1 .from the final expert-level layout to infer dense, step-by-step expert trajectories. As shown in Figure 1, EIM first constructs the expert dataset through two key steps: demonstration generation and preference assignment. For demonstration generation, we assume macros are placed sequentially; this allows us to expand a single expert layout into a trajectory of length equal to the number of macros, where each time step yields a transition tuple (𝑠, 𝑎, 𝑠 ′) that characterizes the incremental placement process. For preference assignment, EIM derives preference signals from these expert transitions: given an expert action 𝑎 in state 𝑠 , we sample a random legal action 𝑎 random from the action space to form a preference tuple (𝑠, 𝑎, 𝑎 random ), explicitly encoding the expert’s action preference over alternative choices. Using these trajectories (as demonstrations) and preference tuples (as preference signals), EIM trains a reward model capable of capturing la-tent implicit rewards through two approaches, i.e., learning from demonstrations (EIM-D) and learning from preferences (EIM-P), respectively. To comprehensively examine our approach, we conduct experiments on ICCAD 2015 contest benchmark [ 16 ] and OpenROAD-flow-scripts test cases [ 3]. The compared meth-ods in our experiments include two RL methods, where MaskPlace [ 17 ] as the baseline and EfficientPlace [ 10 ] as an advanced method, as well as the popular analytical placer DREAMPlace 4.1.0 [ 5, 21 ]. On the seen chip designs, both EIM-D and EIM-P achieve high reward accuracy and the corresponding trained RL policies achieve performance com-parable to that of experts. Furthermore, results on unseen chips demonstrate that the learned reward model can still make meaningful progress, validating the generalization ca-pability of our method. Our work preliminarily validates the possibility of learning expert knowledge from final place-ment outcomes and generalizing to unseen designs, paving the way towards more data-driven and expert-level auto-mated placement with reduced human intervention. 
+
+## 2 Background 
+
+Macro Placement is a vital stage in modern chip design. The input of a macro placement problem is a netlist N = (𝑉 , 𝐸 ),where 𝑉 denotes the information (e.g., height and width) about circuit components (including macros and standard cells) for placement, and 𝐸 is a hyper-graph comprised of hyper-edges 𝑒 𝑖 ∈ 𝐸 , which encompasses all components and signifies their interconnectivity during the routing phase. A macro placement method is expected to determine the opti-mal physical locations of movable macros on the chip canvas such that the objective (e.g., timing metrics) of measuring the chip performance after standard cell placement can be opti-mized. The mainstream classical approaches for macro place-ment include the analytical methods [ 6 , 18 , 21 , 22 ], which formulate it as a gradient optimization problem, and can place macros and standard cells simultaneously, as well as the black-box optimization methods [ 25 , 30 ], which optimize the placement layout from a black-box feedback. 
+
+Reinforcement Learning for Macro Placement is a recent popular topic that aims to automatically achieve high-quality placement results [7, 10, 11, 17, 24, 32]. These meth-ods formulate the macro placement process as a MDP, and train an agent to place macros step by step. AlphaChip [ 24 ]first models macro placement as a RL problem. It divides the chip canvas into several discrete grids, and places one macro in a valid grid coordinate at each time step. How-ever, it suffers from low sample efficiency since no reward is How Can Reinforcement Learning Achieve Expert-level Placement? DAC ’26, July 26–29, 2026, Long Beach, CA, USA 
+
+provided until all macros have been placed. To address this issue, MaskPlace [ 17 ] introduces a dense reward by splitting the calculation of HPWL into cumulative rewards, leading to steadier convergence. To further improve the placement quality, MaskRegulate [ 32 ] incorporates a regularity mask to encourage peripheral placements that reflect expert prefer-ences. Existing methods mainly rely on wirelength optimiza-tion or manual reward engineering. However, the quality of macro placement is influenced by various factors, such as wirelength, routability, macro halo, power delivery, and electrical characteristics [ 19 ]. How these factors affect the final PPA metrics remains an open problem [ 1]. Therefore, an inadequately crafted reward function may prevent the ex-isting RL-based methods from achieving expert-level results. Although it is hard to design an expert-level reward func-tion, it is possible to collect some expert-level placements for imitation. In this paper, we propose a novel framework that leverages imitation learning to learn an expert-driven reward model, instead of manual reward engineering. 
+
+Imitation Learning aims to mimic human expert behav-ior in a given task, which can be divided into two categories: policy learning and reward learning. Policy learning methods such as behavioral cloning [ 27 ] try to minimize the action differences between the agent policy and the expert, and for-mulate the imitation problem as regression or classification tasks. Reward learning methods [ 26 , 33 ] first learn a reward model from expert feedback, and then learn the policy by maximizing the learned reward. Unlike policy learning meth-ods, which are vulnerable to the accumulated errors from long-horizon planning and distribution shift, reward learn-ing methods can more effectively extract intrinsic knowledge from expert data [ 23 ], making them better suited for the chip placement problem. 
+
+## 3 Expert Imitation Model 
+
+In this section, we begin by describing the construction of the expert dataset using expert-level placement layouts in Section 3.1. We then present two approaches for imitating the expert model: learning from demonstrations (Section 3.2) and learning from preferences (Section 3.3). Finally, we discuss policy training based on the learned reward model. 
+
+3.1 Dataset Construction 
+
+Given an expert-level placement result, we first need to pro-cess it into expert data that can be used for reward learning. This process can be done by demonstration generation and preference assignment. 
+
+3.1.1 Demonstration Generation. An expert demonstra-tion is a trajectory that involves many transition tuples 
+
+(𝑠, 𝑎, 𝑠 ′), where 𝑠 denotes the current state, 𝑎 denotes the current action, and 𝑠 ′denotes the next state after applying the action. In order to decompose the placement layout into a step-by-step demonstration, we assume that the macros are placed one by one in a specific order. Given that assumption, the placement result can be expanded into a trajectory, of which the length is the number of macros placed. At each time step, the expert observes the current layout (i.e., the macros placed currently, denoting the current state 𝑠 ), and then decides the location of the next macro (i.e., the expert action 𝑎 ). After that, the expert can obtain the updated layout (i.e., the next state 𝑠 ′). By doing so, these transition tuples 
+
+(𝑠, 𝑎, 𝑠 ′) decompose the placement outcome, therefore en-abling reward learning based on demonstrations. 
+
+3.1.2 Preference Assignment. To enable learning from preference methods, preferences can be induced from expert transition tuples. For example, given an expert transition 
+
+(𝑠, 𝑎, 𝑠 ′), the action 𝑎 adopted by the expert is more preferred than any other action within the action space (i.e., other legal positions for the current macro). Therefore, a random action 
+
+𝑎 random different from the expert action can be sampled from the action space to form the preference tuple (𝑠, 𝑎, 𝑎 random ).
+
+3.2 Approach 1: Learning from Demonstration 
+
+Learning from demonstrations [ 33 ] learns the reward model from expert trajectories. We choose a representative learning method named IQ-Learn [ 9] for implementation. IQ-Learn is an inverse reinforcement learning method that starts from the max entropy inverse reinforcement learning with the original objective function: 
+
+max   
+
+> 𝑟 ∈ R
+
+min   
+
+> 𝜋 ∈Π
+
+𝐿 (𝜋, 𝑟 ) = E𝜌 𝐸 [𝑟 (𝑠, 𝑎, 𝑠 ′)] − E𝜌 𝜋 [𝑟 (𝑠, 𝑎, 𝑠 ′)] − 𝐻 (𝜋 ) − 𝜓 (𝑟 ),
+
+where R denotes the reward function set, Π denotes the policy set, 𝜌 𝐸 denotes the occupancy measure of the expert, 
+
+𝜌 𝜋 denotes the occupancy measure of the learning policy, 
+
+𝐻 (𝜋 ) denotes the entropy of learning policy, and 𝜓 (𝑟 ) is the reward regularizer. This method looks for a reward function that assigns a high reward to the expert and a low reward to others, while the inner loop searches for the best policy for the current reward function. However, the adversarial training between the reward model and policy makes the training unstable. To address this issue, IQ-Learn unifies the parameters of the two models using a state-action value function 𝑄 𝜃 (𝑠, 𝑎 )
+
+parametrized with 𝜃 :
+
+𝜋 (𝑎 |𝑠 ) = 1
+
+𝑍 𝑠 
+
+exp 𝑄 𝜃 (𝑠, 𝑎 ),𝑟 (𝑠, 𝑎, 𝑠 ′) = 𝑄 𝜃 (𝑠, 𝑎 ) − 𝛾 · E𝑠 ′∼P (· | 𝑠,𝑎 ) [𝑉 ∗ (𝑠 ′)] ,
+
+where 𝑍 𝑠 = Í𝑎 exp 𝑄 𝜃 (𝑠, 𝑎 ) denotes the normalization factor, 
+
+𝛾 denotes the discount factor, P (·| 𝑠, 𝑎 ) denotes the transition function, and 𝑉 ∗ (𝑠 ) = log Í𝑎 exp 𝑄 𝜃 (𝑠, 𝑎 ) denotes the state value function in soft Q-learning [13]. We provide our expert imitation model by demonstration (EIM-D in short) following this basic framework, and ex-tract the reward model in a transition deterministic manner: DAC ’26, July 26–29, 2026, Long Beach, CA, USA Chen et al. 
+
+𝑟 (𝑠, 𝑎, 𝑠 ′) = 𝑄 𝜃 (𝑠, 𝑎 ) − 𝛾𝑉 ∗ (𝑠 ′), where 𝑠 ′ is the next state ac-cording to the deterministic transition function 𝑠 ′ = P ( 𝑠, 𝑎 ).
+
+3.3 Approach 2: Learning from Preference 
+
+Learning from preferences learns the reward model based on expert preferences [ 31 ]. We adopt the RLHF [ 8 ] as our reward learning framework, which is a machine learning technique that enables an agent to learn optimal behavior by incorporating human evaluations, such as preferences, ratings, or corrections, into its training process. The training dataset 𝐷 of our proposed EIM-P consists of multiple preference tuples (𝑠, 𝑎 𝑐 , 𝑎 𝑟 ), where 𝑎 𝑐 denotes the chosen action and 𝑎 𝑟 denotes the rejected action. This method trains a reward model that assigns a high reward to the chosen action and a low reward to others. To further avoid learned rewards with excessively large scale and com-plex structure, we add a reward regularization term in the objective function: 
+
+J ( 𝜃 ) = E(𝑠,𝑎 𝑐 ,𝑎 𝑟 )∼ 𝐷 [log 𝜎 (𝑟 𝜃 (𝑠, 𝑎 𝑐 ) − 𝑟 𝜃 (𝑠, 𝑎 𝑟 ))] − 𝜓 (𝑟 ),
+
+where 𝜃 denotes the parameter of the reward model 𝑟 𝜃 , 𝜎 (·) 
+
+denotes the sigmoid function, and 𝜓 (𝑟 ) = 𝛼 · | 𝑟 |2 denotes the reward regularizer with weighted parameter 𝛼 .
+
+3.4 Policy Training 
+
+After learning reward models from expert layouts, it is essen-tial to select a high-quality reward model for policy training. To facilitate the evaluation of the reward model, we propose a reward accuracy criterion based on the Top-1 accuracy. Specifically, we first decompose the expert trajectories into 𝑛 
+
+transition tuples (𝑠, 𝑎 𝑒 , 𝑠 ′). For each state, we randomly sam-ple 𝑚 legal actions from the action space to form a validation tuple (𝑠, A𝑒 ), where A𝑒 = {𝑎 𝑒 , 𝑎 1, · · · , 𝑎 𝑚 } denotes the set containing the expert action 𝑎 𝑒 and the 𝑚 sampled actions. All validation tuples collectively form the validation set 𝐷 .Then, the reward accuracy is computed as follows: Acc (𝑟 𝜃 ) = 1
+
+𝑛 ∑︁ (𝑠, A𝑒 ) ∈ 𝐷 
+
+I
+
+
+
+arg 𝑎 ∈ A 𝑒 max 𝑟 𝜃 (𝑠, 𝑎 ) = 𝑎 𝑒 
+
+
+
+,
+
+where 𝑛 denotes the number of validation tuples, and I(·) 
+
+denotes the indicator function. This metric evaluates whether the expert action receives the highest reward among different actions under each state according to the reward model 𝑟 𝜃 .A higher value indicates a better reward quality. Once the reward model is chosen, we employ a policy net-work with the same architecture as MaskPlace [ 17 ], in which the policy is implemented using a convolutional encoder-decoder network. The chip canvas is divided into 𝑁 × 𝑁 
+
+grids, leading to a discrete action space of size 𝑁 2. We train the policy using the proximal policy optimization [ 29 ] algo-rithm. For a fair comparison, we use the same policy network as MaskPlace [ 17 ], where the input has a set of pixel-level feature maps including view mask (describes the overall distribution of chip modules), position mask (describes the available physical positions), and wire mask (describes the incremental value of HPWL), and the output is an action that maps to a valid grid coordinate. 
+
+## 4 Experiment 
+
+Benchmarks. To comprehensively examine our method, we use eight designs from the ICCAD 2015 contest C benchmark suite [ 16 ] and six RTL designs from the OpenROAD-flow-scripts [3] as our test-beds. 
+
+Training and Evaluation. For the first design in each benchmark (i.e., ariane133 from the OpenROAD benchmark and superblue1 from the ICCAD 2015 benchmark), we ob-tained 50 placement layouts assisted by the human expert to construct the learning dataset, following the procedure described in Section 3.2. Subsequently, the reward models are trained using methods EIM-D and EIM-P on ariane133 
+
+and superblue1 , respectively. In order to validate the qual-ity of learned reward on unseen designs, we further acquire several expert-level placements on designs ariane136 and 
+
+superblue18 , and calculate the reward accuracy metric for evaluation. 
+
+PPA Evaluation. To analyze the quality of the learned reward more thoroughly, we further compare the policies trained using the learned reward models. For a fair compari-son, the policy architecture follows that of MaskPlace. For the ICCAD 2015 benchmark, we apply global placement us-ing DREAMPlace [ 18 ] for all macro placement methods, and evaluate routing and timing metrics using Cadence Innovus. Several performance indicators are adopted for comprehen-sive comparison, including routed wirelength (rWL, in m, reported by EarlyGlobalRoute ), horizontal/vertical routed overflow (rOH/V, in %), worst negative slack (WNS, in ns), total negative slack (TNS, in ×10 5ns), and number of violated paths (NVP, in ×10 4). For the OpenROAD benchmark, we use the OpenROAD framework to execute the full physical design flow, including global placement, clock tree synthesis, global routing, and detailed routing. To ensure an accurate performance assessment on OpenROAD cases, we report PPA metrics including rWL (m), WNS (ns), TNS (ns), number of global routing overflows (# overflow), and number of de-sign rule check violations (# DRC). In each table, the best and runner-up results are bolded and underlined, respectively. 
+
+4.1 Preliminary Studies 
+
+In this section, we first evaluate the learned reward models using the reward accuracy metric. Then, we compare the placement policies with the Expert’s layout on the ariane133 
+
+and superblue1 designs, respectively, for further analysis. The results of reward accuracy are presented in Table 1. Both EIM-D and EIM-P demonstrate substantial improve-ments on ariane133 and superblue1 compared to the Ran-dom Model (column 2). As shown in column 5, EIM-P achieves an accuracy close to 1 on both ariane133 and superblue1 ,How Can Reinforcement Learning Achieve Expert-level Placement? DAC ’26, July 26–29, 2026, Long Beach, CA, USA 
+
+indicating its strong ability to imitate expert behavior. Given the similarity between ariane136 and ariane133 in terms of macro size and quantity, EIM-P also performs remarkably well on ariane136 . However, its accuracy drops consider-ably on superblue18 , a design that differs significantly from 
+
+superblue1 , revealing the limited generalization capability of EIM-P on previously unseen designs. Regarding EIM-D (shown in column 4), although its performance on the train-ing set does not match that of EIM-P, it achieves significantly better accuracy on superblue18 , demonstrating stronger generalization ability even on significantly different unseen designs. As shown in column 3, MaskPlace [ 17 ], which uses macro HPWL as its reward, aligns well with expert behavior on ariane133 and ariane136 , but struggles to match the expert on other designs. The results of policy comparisons are shown in Table 2. On design superblue1 , EIM-D and EIM-P achieve compara-ble results: EIM-D performs better on routing metrics such as rWL, rOH, and rOV, while EIM-P outperforms in timing metrics, including WNS and TNS. When compared to exter-nal methods, both EIM-D and EIM-P outperform MaskPlace, and achieve comparable performance to that of experts. On design ariane133 , the results are similar where both EIM-D and EIM-P achieve superior performance. However, although EIM-P achieves the highest reward accuracy, it overfits with the expert data, thus leading to inferior routing and timing metrics to EIM-D. 
+
+4.2 Main Results 
+
+In this section, we further evaluate the generalization ca-pability of the learned reward models by directly applying them to unseen designs. Specifically, the model trained on 
+
+ariane133 is applied to other cases from the OpenROAD benchmark, while the one trained on superblue1 is reused on designs from the ICCAD 2015 benchmark, both without any retraining. To demonstrate the efficiency of our proposed methods, results from EfficientPlace [10] and DREAMPlace 4.1.0 [ 18 ] are incorporated for a comprehensive comparison. 
+
+Results on ICCAD 2015. As shown in Table 3, EIM-D achieves better average ranks than EIM-P across nearly all metrics. Specifically, EIM-D reduces rWL by 5.40%, and achieves significant reductions in rOH and rOV by 75.55% and 70.64%, respectively, averaged across designs. Notably, EIM-D consistently delivers near-optimal congestion results across all test cases, demonstrating its superior performance in terms of routability. In terms of timing performance, al-though EIM-D ranks lower in WNS, it achieves better results in TNS and NVP metrics. This outcome aligns with the re-ward quality comparison shown in Table 1, where the reward model trained by EIM-D exhibits stronger generalization ca-pability on unseen designs, ultimately enabling better overall policy performance compared to EIM-P. Among all RL-based methods, EIM-D, EIM-P, and MaskPlace share the same network architecture and training process. 
+
+Table 1. Reward accuracy of our methods on the four designs, where the last two rows are unseen designs during training.                     
+
+> Benchmark Random Model MaskPlace EIM-D EIM-P
+> ariane133 0.02 0.54 0.77 0.99
+> superblue1 0.04 0.12 0.78 1.00
+> ariane136 0.07 0.45 0.64 0.99
+> superblue18 0.09 0.14 0.38 0.09
+
+Table 2. PPA results on the two seen designs, where the reward models are trained on the corresponding benchmark.                                                  
+
+> Benchmark Metrics MaskPlace EIM-D EIM-P Expert
+> ariane133
+> rWL 7.21 8.91 9.16 7.71 WNS -1.28 -1.15 -1.17 -1.04
+> TNS -3760.32 -3067.01 -3146.82 -2766.97
+> # overflow 0000
+> # DRC 20 18 59 17
+> superblue1
+> rWL 139.40 121.52 132.80 108.49
+> rOH 4.61 0.17 5.01 0.28 rOV 0.39 0.07 0.27 0.04
+> WNS -77.36 -77.99 -59.18 -66.50 TNS -3.15 -1.72 -1.53 -1.29
+> NVP 2.73 1.84 2.21 1.51
+
+Nevertheless, both EIM-D and EIM-P outperform MaskPlace across all evaluated metrics, achieving average improve-ments of 9.16% and 3.89% in rWL, and significantly reducing average congestion by 80.17% (horizontal) and 24.19% (verti-cal), respectively. Similarly, our proposed methods achieve higher average ranks than MaskPlace in WNS and TNS, and reduce NVP by 21.25% and 14.40% on average. These results confirm the effectiveness of expert-imitation-based rewards compared to macro HPWL-based rewards. EIM-D generally demonstrates superior overall performance, achieving the highest average ranks in rWL, rOH, rOV, TNS, and NVP. Specifically, when compared to the two RL-based methods, EIM-D reduces rWL by 8.23%, reduces congestion (rOH/V) by 43.35%, and reduces NVP by 24.68%. When compared to analytical methods, the improvements are even more sig-nificant: rWL reduces by 14.98%, congestion is reduced by 92.75%, and NVP decreases by 30.59%. 
+
+Results on OpenROAD. Table 4 summarizes the average rank of each method across ariane136 , bp , bp_be , bp_fe ,and swerv_wrapper designs. EIM-D continues to lead across several key metrics, including WNS, TNS, # overflow, and # DRC. Regarding the rWL metric, the combination of lower density in OpenROAD designs and EIM-D’s strategy of utiliz-ing the entire chip canvas may lead to increased wirelength compared to DREAMPlace 4.1.0. 
+
+## 5 Conclusion and Discussion 
+
+In this work, we propose a framework that directly learns an expert-driven reward model from the final expert layouts. By decomposing expert layouts into step-by-step trajecto-ries, we treat these as distinct forms of human feedback, thus introducing two specialized methods: EIM-D and EIM-P. Experimental results on the OpenROAD and the ICCAD benchmarks show that our proposed framework can effi-ciently learn from even a single design and generalize well DAC ’26, July 26–29, 2026, Long Beach, CA, USA Chen et al. 
+
+Table 3. Results of PPA metrics on seven unseen designs of ICCAD 2015 of method MaskPlace [ 17 ], EfficientPlace [ 10 ], DREAMPlace 4.1.0 [ 18 ], EIM-D, and EIM-P. The reward models obtained from EIM-D and EIM-P are trained on the superblue1 .
+
+Method Metric superblue3 superblue4 superblue5 superblue7 superblue10 superblue16 superblue18 Avg. Rank MaskPlace 
+
+rWL 175.17 104.83 172.49 213.98 212.14 115.40 63.79 3.71 rOH 8.91 12.00 2.74 2.41 0.64 8.82 0.70 3.86 rOV 0.66 0.52 0.18 0.56 0.05 0.16 0.14 3.43 WNS -101.68 -71.93 -169.07 -92.96 -67.80 -50.24 -35.26 3.29 TNS -2.27 -1.69 -2.21 -2.44 -3.52 -2.55 -1.04 4.29 NVP 1.99 1.79 2.01 3.71 1.92 2.54 2.96 3.71 
+
+EfficientPlace 
+
+rWL 179.52 99.38 181.77 190.40 205.93 113.97 69.36 3.00 rOH 4.70 3.96 4.07 0.39 0.23 1.09 0.56 2.29 rOV 0.27 0.19 0.20 0.11 0.06 0.14 0.19 3.00 WNS -89.93 -69.21 -111.13 -54.79 -71.83 -51.61 -35.08 2.29 
+
+TNS -1.89 -1.32 -1.64 -1.79 -3.42 -2.12 -0.48 2.71 NVP 2.04 1.46 1.52 3.28 1.82 2.55 1.13 3.29 
+
+DREAMPlace 
+
+rWL 199.40 139.71 167.29 219.87 243.87 136.05 53.34 4.00 rOH 15.05 18.74 5.67 6.93 3.83 16.37 0.19 4.57 rOV 7.40 11.60 2.18 5.24 2.10 1.93 0.02 4.57 WNS -107.95 -106.38 -71.72 -59.58 -240.30 -65.48 -30.26 3.57 TNS -2.51 -2.18 -1.74 -1.37 -4.10 -2.10 -0.18 2.86 NVP 1.98 2.69 2.05 3.81 2.45 3.75 0.50 4.00 
+
+EIM-D 
+
+rWL 144.87 101.08 140.72 194.80 204.12 103.05 62.92 1.71 
+
+rOH 0.22 1.01 0.04 0.22 0.41 3.61 0.00 1.29 
+
+rOV 0.04 0.06 0.02 0.03 0.03 0.08 0.01 1.00 
+
+WNS -78.17 -64.11 -143.06 -66.20 -99.54 -51.62 -47.57 3.00 TNS -1.57 -1.28 -1.21 -1.75 -4.12 -2.07 -0.31 2.00 
+
+NVP 1.14 1.09 1.37 1.88 1.76 2.33 0.69 1.43 EIM-P 
+
+rWL 157.92 99.84 168.07 213.48 218.89 107.29 59.95 2.57 rOH 4.24 7.58 1.86 4.02 0.50 5.73 0.57 3.00 rOV 0.27 0.29 0.18 0.24 0.08 0.09 0.05 2.71 WNS -100.58 -50.36 -284.17 -71.43 -69.64 -63.24 -21.78 2.86 TNS -1.84 -1.18 -2.07 -2.00 -4.90 -2.17 -0.23 3.14 NVP 1.98 1.42 2.51 3.00 2.10 2.11 0.66 2.57 
+
+Table 4. Results of PPA metrics on five unseen designs of OpenROAD of method MaskPlace [ 17 ], EfficientPlace [ 10 ], DREAM-Place 4.1.0 [18], EIM-D, and EIM-P. The reward models obtained from EIM-D and EIM-P are trained on the ariane133 .
+
+Rank Metrics MaskPlace EfficientPlace DREAMPlace EIM-D EIM-P Avg. Rank 
+
+rWL 3.00 3.00 2.20 2.80 4.00 WNS 3.60 2.60 2.80 2.40 3.60 TNS 4.20 3.40 2.40 2.00 3.00 # overflow 2.80 4.00 3.00 1.20 3.40 # DRC 2.40 3.80 4.00 1.40 3.40 to unseen cases, outperforming the state-of-the-art RL-based methods and analytical-based methods. EIM exemplifies a hybrid approach that integrates domain knowledge with data-driven learning, which has been a promising direction in AI research such as abductive learning [ 34 ]. Future re-search will explore dataset augmentation through synthetic data to alleviate the scarcity of expert data, and integrate advanced techniques like adversarial inverse RL and diffu-sion model-based imitation learning for more sophisticated reward modeling. 
+
+## Acknowledgment 
+
+This work was supported by the National Science Foundation of China (624B2069), the Jiangsu Science Foundation Leading-edge Technology Program (BK20232003), the Fundamental Research Funds for the Central Universities (14380020), and the Fundamental and Interdisciplinary Disciplines Break-through Plan of the Ministry of Education of China (No. JYB2025XDXM118). How Can Reinforcement Learning Achieve Expert-level Placement? DAC ’26, July 26–29, 2026, Long Beach, CA, USA 
+
+## References 
+
+[1] Saurabh N. Adya, Mehmet Can Yildiz, Igor L. Markov, Paul Villarrubia, Phiroze N. Parakh, and Patrick H. Madden. 2004. Benchmarking for large-scale placement and beyond. Transactions on Computer-Aided Design of Integrated Circuits and Systems 23, 4 (2004). [2] Anthony Agnesina, Puranjay Rajvanshi, Tian Yang, Geraldo Pradipta, Austin Jiao, Ben Keller, Brucek Khailany, and Haoxing Ren. 2023. Au-toDMP: Automated DREAMPlace-based macro placement. In Proceed-ings of the 2023 International Symposium on Physical Design .[3] Tutu Ajayi, Vidya A Chhabria, Mateus Fogaça, Soheil Hashemi, Abdel-rahman Hosny, Andrew B Kahng, Minsoo Kim, Jeongsup Lee, Uday Mallappa, Marina Neseem, et al . 2019. Toward an open-source digital flow: First learnings from the openroad project. In Proceedings of the 56th Design Automation Conference .[4] Chin-Hao Chang, Yao-Wen Chang, and Tung-Chieh Chen. 2017. A novel damped-wave framework for macro placement. In Proceedings of the 36th International Conference on Computer-Aided Design .[5] Yifan Chen, Zaiwen Wen, Yun Liang, and Yibo Lin. 2023. Stronger mixed-size placement backbone considering second-order information. In Proceedings of the 42nd International Conference on Computer-Aided Design .[6] Chung-Kuan Cheng, Andrew B Kahng, Ilgweon Kang, and Lutong Wang. 2018. Replace: Advancing solution quality and routability validation in global placement. IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems 38, 9 (2018). [7] Ruoyu Cheng and Junchi Yan. 2021. On joint learning for solving place-ment and routing in chip design. In Advances in Neural Information Processing Systems 34 .[8] Paul F Christiano, Jan Leike, Tom Brown, Miljan Martic, Shane Legg, and Dario Amodei. 2017. Deep reinforcement learning from human preferences. In Advances in Neural Information Processing Systems 30 .[9] Divyansh Garg, Shuvam Chakraborty, Chris Cundy, Jiaming Song, and Stefano Ermon. 2021. IQ-Learn: Inverse soft-Q learning for imitation. In Advances in Neural Information Processing Systems 34 .[10] Zijie Geng, Jie Wang, Ziyan Liu, Siyuan Xu, Zhentao Tang, Mingxuan Yuan, Jianye Hao, Yongdong Zhang, and Feng Wu. 2024. Reinforcement learning within tree search for fast macro placement. In Proceedings of the 41st International Conference on Machine Learning .[11] Anna Goldie, Azalia Mirhoseini, and Jeff Dean. 2024. That chip has sailed: A critique of unfounded skepticism around AI for chip design. 
+
+arxiv:2411.10053 (2024). [12] Anna Goldie, Azalia Mirhoseini, Mustafa Yazgan, Joe Wenjie Jiang, Ebrahim Songhori, Shen Wang, Young-Joon Lee, Eric Johnson, Omkar Pathak, Azade Nova, et al . 2024. Addendum: A graph placement methodology for fast chip design. Nature 634, 8034 (2024). [13] Tuomas Haarnoja, Haoran Tang, Pieter Abbeel, and Sergey Levine. 2017. Reinforcement learning with deep energy-based policies. In 
+
+Proceedings of the 34th International Conference on Machine Learning .[14] Andrew B. Kahng, Ravi Varadarajan, and Zhiang Wang. 2022. RTL-MP: Toward practical, human-quality chip planning and macro placement. In Proceedings of the 2022 International Symposium on Physical Design .[15] Andrew B Kahng, Ravi Varadarajan, and Zhiang Wang. 2023. Hier-RTLMP: A hierarchical automatic macro placer for large-scale complex IP blocks. IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems 43, 5 (2023). [16] Myung-Chul Kim, Jin Hu, Jiajia Li, and Natarajan Viswanathan. 2015. ICCAD-2015 CAD contest in incremental timing-driven placement and benchmark suite. In Proceedings of the 34th International Conference on Computer-Aided Design .[17] Yao Lai, Yao Mu, and Ping Luo. 2022. MaskPlace: Fast chip placement via reinforced visual representation learning. In Advances in Neural Information Processing Systems 35 .[18] Peiyu Liao, Dawei Guo, Zizheng Guo, Siting Liu, Yibo Lin, and Bei Yu. 2023. DREAMPlace 4.0: Timing-driven placement with momentum-based net weighting and lagrangian-based refinement. IEEE Transac-tions on Computer-Aided Design of Integrated Circuits and Systems 42, 10 (2023). [19] Jai-Ming Lin, You-Lun Deng, Szu-Ting Li, Bo-Heng Yu, Li-Yen Chang, and Te-Wei Peng. 2019. Regularity-aware routability-driven macro placement methodology for mixed-size circuits with obstacles. IEEE Transactions on Very Large Scale Integration Systems 27, 1 (2019), 57–68. [20] Jai-Ming Lin, You-Lun Deng, Ya-Chu Yang, Jia-Jian Chen, and Po-Chen Lu. 2021. Dataflow-aware macro placement based on simulated evolution algorithm for mixed-size designs. IEEE Transactions on Very Large Scale Integration Systems 29, 5 (2021). [21] Yibo Lin, Zixuan Jiang, Jiaqi Gu, Wuxi Li, Shounak Dhar, Haoxing Ren, Brucek Khailany, and David Z Pan. 2020. DREAMPlace: Deep learning toolkit-enabled GPU acceleration for modern VLSI placement. 
+
+IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems 40, 4 (2020). [22] Jingwei Lu, Pengwen Chen, Chin-Chih Chang, Lu Sha, Dennis Jen-Hsin Huang, Chin-Chi Teng, and Chung-Kuan Cheng. 2015. ePlace: Electrostatics-based placement using fast Fourier transform and Nes-terov’s method. ACM Transactions on Design Automation of Electronic Systems 20, 2 (2015). [23] Alberto Maria Metelli, Giorgia Ramponi, Alessandro Concetti, and Marcello Restelli. 2021. Provably efficient learning of transferable rewards. In Proceedings of the 38th International Conference on Machine Learning .[24] Azalia Mirhoseini, Anna Goldie, Mustafa Yazgan, Joe Wenjie Jiang, Ebrahim Songhori, Shen Wang, Young-Joon Lee, Eric Johnson, Omkar Pathak, Azade Nazi, et al . 2021. A graph placement methodology for fast chip design. Nature 594, 7862 (2021). [25] Hiroshi Murata, Kunihiro Fujiyoshi, Shigetoshi Nakatake, and Yoji Kajitani. 1996. VLSI module placement based on rectangle-packing by the sequence-pair. IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems 15, 12 (1996). [26] Andrew Y. Ng and Stuart Russell. 2000. Algorithms for inverse rein-forcement learning. In Proceedings of the 17th International Conference on Machine Learning .[27] Takayuki Osa, Joni Pajarinen, Gerhard Neumann, J. Andrew Bagnell, Pieter Abbeel, and Jan Peters. 2018. An algorithmic perspective on imitation learning. Foundations and Trends in Robotics (2018). [28] Yuan Pu, Tinghuan Chen, Zhuolun He, Chen Bai, Haisheng Zheng, Yibo Lin, and Bei Yu. 2024. IncreMacro: Incremental macro placement refinement. In Proceedings of the 2024 International Symposium on Physical Design .[29] John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Radford, and Oleg Klimov. 2017. Proximal policy optimization algorithms. 
+
+arXiv:1707.06347 (2017). [30] Yunqi Shi, Ke Xue, Lei Song, and Chao Qian. 2023. Macro placement by wire-mask-guided black-box optimization. In Advances in Neural Information Processing Systems 36 .[31] Christian Wirth, Riad Akrour, Gerhard Neumann, and Johannes Fürnkranz. 2017. A survey of preference-based reinforcement learning methods. Journal of Machine Learning Research (2017). [32] Ke Xue, Ruo-Tong Chen, Xi Lin, Yunqi Shi, Shixiong Kai, Siyuan Xu, and Chao Qian. 2024. Reinforcement learning policy as macro regulator rather than macro placer. In Advances in Neural Information Processing Systems 37 .[33] Rui Yu, Shenghua Wan, Yucen Wang, Chen-Xiao Gao, Le Gan, Zongzhang Zhang, and De-Chuan Zhan. 2025. Reward models in deep reinforcement learning: A survey. In Proceedings of the 34th In-ternational Joint Conference on Artificial Intelligence .[34] Zhi-Hua Zhou and Yu-Xuan Huang. 2021. Abductive Learning. In 
+
+Neuro-Symbolic Artificial Intelligence: The State of the Art . Vol. 342.
