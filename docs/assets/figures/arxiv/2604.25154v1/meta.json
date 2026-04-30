@@ -1,0 +1,38 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.25154v1/fig-001.webp",
+      "caption": "Figure 6: C4 error sensitivity: TabPFN v2 accuracy vs. MCAR rate (0–30% in 6 steps) for D1, D3, D5, D7, D9. B0 (grey), B1",
+      "page": 11,
+      "index": 1,
+      "width": 497,
+      "height": 266
+    },
+    {
+      "url": "assets/figures/arxiv/2604.25154v1/fig-002.webp",
+      "caption": "Figure 1: C1 reward heatmap: best-pipeline score for each (reward function, dataset) pair evaluated by an exhaustive greedy search over 112 ordered pipeline sequences at MCAR 15%. Trivial-collapse rewards (R1, R6a, R6b) saturate at ≈ 1.0 uniformly",
+      "page": 8,
+      "index": 2,
+      "width": 1031,
+      "height": 339
+    },
+    {
+      "url": "assets/figures/arxiv/2604.25154v1/fig-003.webp",
+      "caption": "Figure 2: C1 per-dataset scatter: best-pipeline reward score",
+      "page": 8,
+      "index": 3,
+      "width": 493,
+      "height": 339
+    },
+    {
+      "url": "assets/figures/arxiv/2604.25154v1/fig-004.webp",
+      "caption": "Figure 3: C1 aggregated scatter: mean ± SD best-pipeline reward score vs. mean ± SD TabPFN v2 accuracy per re-",
+      "page": 8,
+      "index": 4,
+      "width": 494,
+      "height": 341
+    }
+  ]
+}

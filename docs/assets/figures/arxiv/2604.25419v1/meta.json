@@ -1,0 +1,110 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.25419v1/fig-001.webp",
+      "caption": "Table 1. RL performance (%) on math reasoning benchmarks. Cell background colors indicate relative performance: darker colors denote better results within each model group.",
+      "page": 6,
+      "index": 1,
+      "width": 913,
+      "height": 654
+    },
+    {
+      "url": "assets/figures/arxiv/2604.25419v1/fig-002.webp",
+      "caption": "Figure 5. Training dynamics under different values of the hyperparameter c.",
+      "page": 25,
+      "index": 2,
+      "width": 1011,
+      "height": 225
+    },
+    {
+      "url": "assets/figures/arxiv/2604.25419v1/fig-003.webp",
+      "caption": "Table 10. Pass@k results (%) of RL performance comparison on math reasoning benchmarks.",
+      "page": 26,
+      "index": 3,
+      "width": 729,
+      "height": 806
+    },
+    {
+      "url": "assets/figures/arxiv/2604.25419v1/fig-004.webp",
+      "caption": "Figure 8. Training dynamics of precision, recall, validation accuracy, and training entropy under different Lean pass@k verification settings.",
+      "page": 30,
+      "index": 4,
+      "width": 1008,
+      "height": 638
+    },
+    {
+      "url": "assets/figures/arxiv/2604.25419v1/fig-005.webp",
+      "caption": "Figure 1. The JURY-RL workflow: Votes Propose, Proofs Dispose. For each problem, a majority vote from multiple rollouts (Jury) proposes a candidate answer. A Lean verifier (Judge) then disposes the reward. If the answer is Verified (δ = 1), supporting rollouts receive a positive reward, directly linking the update to successful formal verification. Conversely, when verification is Inconclusive (δ = 0), all rollouts receive the proposed ResZero (Residual-Zero) fallback reward.",
+      "page": 2,
+      "index": 5,
+      "width": 931,
+      "height": 433
+    },
+    {
+      "url": "assets/figures/arxiv/2604.25419v1/fig-006.webp",
+      "caption": "Table 3. Ablation results for the proposed ResZero reward (δ = 0) on reasoning benchmark.",
+      "page": 7,
+      "index": 6,
+      "width": 1013,
+      "height": 479
+    },
+    {
+      "url": "assets/figures/arxiv/2604.25419v1/fig-007.webp",
+      "caption": "Figure 7. Test-Time Training Dynamics on Qwen2.5-14B. We plot exponentially moving-averaged (EMA) validation accuracy for JURY-RL (purple) and majority-voting TTRL (orange) over 150 test-time training steps. JURY-RL exhibits more stable and continued improvement on challenging benchmarks.",
+      "page": 28,
+      "index": 7,
+      "width": 1011,
+      "height": 198
+    },
+    {
+      "url": "assets/figures/arxiv/2604.25419v1/fig-008.webp",
+      "caption": "Figure 3. Accuracy on MATH5000 Validation set over training steps.",
+      "page": 8,
+      "index": 8,
+      "width": 1011,
+      "height": 239
+    },
+    {
+      "url": "assets/figures/arxiv/2604.25419v1/fig-009.webp",
+      "caption": "Figure 4. The pipeline of our Lean Verifier: a collaborative system that combines autoformalization, formal verification, and consistency checking to validate mathematical reasoning with high reliability.",
+      "page": 19,
+      "index": 9,
+      "width": 713,
+      "height": 323
+    },
+    {
+      "url": "assets/figures/arxiv/2604.25419v1/fig-010.webp",
+      "caption": "Table 11. Ablation results (Pass@k) for the proposed ResZero reward (δ = 0) on math reasoning benchmark.",
+      "page": 27,
+      "index": 10,
+      "width": 904,
+      "height": 658
+    },
+    {
+      "url": "assets/figures/arxiv/2604.25419v1/fig-011.webp",
+      "caption": "Figure 6. Test-Time Training Dynamics on Qwen2.5-7B. We plot exponentially moving-averaged (EMA) validation accuracy for Jury-RL (purple) and majority-voting TTRL (orange) over 400 test-time training steps. Jury-RL exhibits more stable and continued improvement on challenging benchmarks.",
+      "page": 27,
+      "index": 11,
+      "width": 1011,
+      "height": 198
+    },
+    {
+      "url": "assets/figures/arxiv/2604.25419v1/fig-012.webp",
+      "caption": "Table 9. Reinforcement learning training hyperparameters. This configuration is consistently applied across all experiments to ensure a fair comparison.",
+      "page": 24,
+      "index": 12,
+      "width": 1017,
+      "height": 580
+    },
+    {
+      "url": "assets/figures/arxiv/2604.25419v1/fig-013.webp",
+      "caption": "Figure 9. Accuracy on MATH5000 Validation set over training steps.",
+      "page": 31,
+      "index": 13,
+      "width": 1017,
+      "height": 902
+    }
+  ]
+}

@@ -6,95 +6,100 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-29
-- 运行时间：2026-04-29 20:41:50 UTC
+- 最新运行日期：2026-04-30
+- 运行时间：2026-04-30 21:06:36 UTC
 - 运行状态：成功
-- 本次总论文数：24
-- 精读区：12
+- 本次总论文数：26
+- 精读区：14
 - 速读区：12
 
 ### 今日简报（AI）
-- 今日共生成 24 篇推荐（精读 12 篇，速读 12 篇）
-- 精读：《Crystal structure prediction using graph neural combinatorial optimization》（10.0/10）, 《A2DEPT: Large Language Model-Driven Automated Algorithm Design via Evolutionary Program Trees》（10.0/10）
-- 速读：《ML-Guided Primal Heuristics for Mixed Binary Quadratic Programs》（8.5/10）, 《How Can Reinforcement Learning Achieve Expert-level Placement?》（8.5/10）, 《A Multi-Stage Warm-Start Deep Learning Framework for Unit Commitment》（8.0/10）
-- 这些结果覆盖了当下较热的方向，建议先看精读区论文的关键问题与方法。
-- 详情：[/202604/29/README](/202604/29/README)
+今日深度研读 26 篇前沿论文，重点聚焦大模型驱动的算法设计与复杂优化问题求解。
+满分神作 OptiVerse 建立了优化求解新基准，而 A2DEPT 展现了 LLM 结合进化程序树自动设计算法的巨大潜力。
+建议优先关注大模型如何赋能供应链、金融组合及城市交通等实际场景的落地优化方案。
+- 详情：[/202604/30/README](/202604/30/README)
 
 ### 精读区论文标签
-1. [Crystal structure prediction using graph neural combinatorial optimization](/202604/29/2604.23921v1-crystal-structure-prediction-using-graph-neural-combinatorial-optimization)  
+1. [OptiVerse: A Comprehensive Benchmark towards Optimization Problem Solving](/202604/30/2604.21510v1-optiverse-a-comprehensive-benchmark-towards-optimization-problem-solving)  
    标签：评分：10.0/10、query:nco-llm
-   evidence：利用图神经组合优化进行晶体结构预测
-2. [A2DEPT: Large Language Model-Driven Automated Algorithm Design via Evolutionary Program Trees](/202604/29/2604.24043v1-a2dept-large-language-model-driven-automated-algorithm-design-via-evolutionary-program-trees)  
+   evidence：针对包括组合优化在内的复杂优化任务的大模型基准测试
+2. [A2DEPT: Large Language Model-Driven Automated Algorithm Design via Evolutionary Program Trees](/202604/30/2604.24043v1-a2dept-large-language-model-driven-automated-algorithm-design-via-evolutionary-program-trees)  
    标签：评分：10.0/10、query:nco-llm
-   evidence：利用大语言模型驱动的进化程序树为组合优化问题自动设计启发式算法
-3. [From Soliloquy to Agora: Memory-Enhanced LLM Agents with Decentralized Debate for Optimization Modeling](/202604/29/2604.25847v1-from-soliloquy-to-agora-memory-enhanced-llm-agents-with-decentralized-debate-for-optimization-modeling)  
+   evidence：大模型驱动的组合优化问题自动启发式设计
+3. [From Soliloquy to Agora: Memory-Enhanced LLM Agents with Decentralized Debate for Optimization Modeling](/202604/30/2604.25847v1-from-soliloquy-to-agora-memory-enhanced-llm-agents-with-decentralized-debate-for-optimization-modeling)  
    标签：评分：10.0/10、query:nco-llm
-   evidence：具有去中心化辩论的大模型智能体用于优化建模及求解器验证
-4. [Streamliners for Answer Set Programming](/202604/29/2604.19251v1-streamliners-for-answer-set-programming)  
+   evidence：用于从自然语言进行优化建模的大模型智能体框架
+4. [Learning to Route Electric Trucks Under Operational Uncertainty](/202604/30/2604.26566v1-learning-to-route-electric-trucks-under-operational-uncertainty)  
+   标签：评分：10.0/10、query:nco
+   evidence：用于随机电动卡车路径规划问题的强化学习方法
+5. [GR-Evolve: Design-Adaptive Global Routing via LLM-Driven Algorithm Evolution](/202604/30/2604.22234v1-gr-evolve-design-adaptive-global-routing-via-llm-driven-algorithm-evolution)  
    标签：评分：9.5/10、query:nco-llm
-   evidence：使用大模型为组合问题生成流线型约束
-5. [GR-Evolve: Design-Adaptive Global Routing via LLM-Driven Algorithm Evolution](/202604/29/2604.22234v1-gr-evolve-design-adaptive-global-routing-via-llm-driven-algorithm-evolution)  
+   evidence：大模型驱动的全局布线优化算法演进
+6. [RAG-Enhanced Kernel-Based Heuristic Synthesis (RKHS): A Structured Methodology Using Large Language Models for Hardware Design](/202604/30/2604.26153v1-rag-enhanced-kernel-based-heuristic-synthesis-rkhs-a-structured-methodology-using-large-language-models-for-hardware-design)  
    标签：评分：9.5/10、query:nco-llm
-   evidence：大模型驱动的全局布线算法演进优化
-6. [What Makes an LLM a Good Optimizer? A Trajectory Analysis of LLM-Guided Evolutionary Search](/202604/29/2604.19440v1-what-makes-an-llm-a-good-optimizer-a-trajectory-analysis-of-llm-guided-evolutionary-search)  
+   evidence：大模型驱动的调度与布线优化启发式算法合成
+7. [MappingEvolve: LLM-Driven Code Evolution for Technology Mapping](/202604/30/2604.26591v1-mappingevolve-llm-driven-code-evolution-for-technology-mapping)  
+   标签：评分：9.5/10、query:nco-llm
+   evidence：大模型驱动的技术映射优化代码演进
+8. [Dual-Cluster Memory Agent: Resolving Multi-Paradigm Ambiguity in Optimization Problem Solving](/202604/30/2604.20183v1-dual-cluster-memory-agent-resolving-multi-paradigm-ambiguity-in-optimization-problem-solving)  
    标签：评分：9.0/10、query:nco-llm
-   evidence：分析大语言模型引导的进化搜索与优化轨迹
-7. [Dual-Cluster Memory Agent: Resolving Multi-Paradigm Ambiguity in Optimization Problem Solving](/202604/29/2604.20183v1-dual-cluster-memory-agent-resolving-multi-paradigm-ambiguity-in-optimization-problem-solving)  
+   evidence：基于大语言模型的代理，用于解决优化问题求解中的结构歧义
+9. [A Hybrid Reinforcement and Self-Supervised Learning Aided Benders Decomposition Algorithm](/202604/30/2604.22107v1-a-hybrid-reinforcement-and-self-supervised-learning-aided-benders-decomposition-algorithm)  
    标签：评分：9.0/10、query:nco-llm
-   evidence：用于解决优化问题建模歧义的大模型智能体
-8. [OptiVerse: A Comprehensive Benchmark towards Optimization Problem Solving](/202604/29/2604.21510v1-optiverse-a-comprehensive-benchmark-towards-optimization-problem-solving)  
+   evidence：用于Benders分解的混合强化学习和基于图的表示
+10. [Crystal structure prediction using graph neural combinatorial optimization](/202604/30/2604.23921v1-crystal-structure-prediction-using-graph-neural-combinatorial-optimization)  
+   标签：评分：9.0/10、query:nco
+   evidence：使用图神经组合优化进行晶体结构预测
+11. [An Analysis of the Coordination Gap between Joint and Modular Learning for Job Shop Scheduling with Transportation Resources](/202604/30/2604.24117v1-an-analysis-of-the-coordination-gap-between-joint-and-modular-learning-for-job-shop-scheduling-with-transportation-resources)  
+   标签：评分：9.0/10、query:nco
+   evidence：用于作业车间调度和运输的多智能体强化学习
+12. [Agentic Architect: An Agentic AI Framework for Architecture Design Exploration and Optimization](/202604/30/2604.25083v1-agentic-architect-an-agentic-ai-framework-for-architecture-design-exploration-and-optimization)  
    标签：评分：9.0/10、query:nco-llm
-   evidence：评估大语言模型在包括组合优化在内的复杂优化任务上的基准测试
-9. [A Hybrid Reinforcement and Self-Supervised Learning Aided Benders Decomposition Algorithm](/202604/29/2604.22107v1-a-hybrid-reinforcement-and-self-supervised-learning-aided-benders-decomposition-algorithm)  
+   evidence：利用大语言模型驱动的代码演化来探索计算机架构中庞大的组合空间
+13. [DGLight: DQN-Guided GRPO Fine-Tuning of Large Language Models for Traffic Signal Control](/202604/30/2604.25259v1-dglight-dqn-guided-grpo-fine-tuning-of-large-language-models-for-traffic-signal-control)  
    标签：评分：9.0/10、query:nco-llm
-   evidence：混合强化学习与自监督学习加速Benders分解
-10. [SeaEvo: Advancing Algorithm Discovery with Strategy Space Evolution](/202604/29/2604.24372v1-seaevo-advancing-algorithm-discovery-with-strategy-space-evolution)  
+   evidence：DQN引导的大模型交通信号控制微调
+14. [LLM-Flax : Generalizable Robotic Task Planning via Neuro-Symbolic Approaches with Large Language Models](/202604/30/2604.26569v1-llm-flax--generalizable-robotic-task-planning-via-neuro-symbolic-approaches-with-large-language-models)  
    标签：评分：9.0/10、query:nco-llm
-   evidence：大语言模型引导的进化搜索用于自动算法发现
-11. [Agentic Architect: An Agentic AI Framework for Architecture Design Exploration and Optimization](/202604/29/2604.25083v1-agentic-architect-an-agentic-ai-framework-for-architecture-design-exploration-and-optimization)  
-   标签：评分：9.0/10、query:nco-llm
-   evidence：大模型驱动的组合设计空间探索
-12. [DGLight: DQN-Guided GRPO Fine-Tuning of Large Language Models for Traffic Signal Control](/202604/29/2604.25259v1-dglight-dqn-guided-grpo-fine-tuning-of-large-language-models-for-traffic-signal-control)  
-   标签：评分：9.0/10、query:nco-llm
-   evidence：使用强化学习将预训练大语言模型应用于交通信号控制优化
+   evidence：集成GNN对象评分器与LLM引导的任务规划
 
 ### 速读区论文标签
-1. [ML-Guided Primal Heuristics for Mixed Binary Quadratic Programs](/202604/29/2604.23053v1-ml-guided-primal-heuristics-for-mixed-binary-quadratic-programs)  
-   标签：评分：8.5/10、query:nco
-   evidence：机器学习引导的组合优化原始启发式算法
-2. [How Can Reinforcement Learning Achieve Expert-level Placement?](/202604/29/2604.25191v1-how-can-reinforcement-learning-achieve-expert-level-placement)  
+1. [Hybrid Deep Learning Approach for Coupled Demand Forecasting and Supply Chain Optimization](/202604/30/2604.21567v1-hybrid-deep-learning-approach-for-coupled-demand-forecasting-and-supply-chain-optimization)  
    标签：评分：8.5/10、query:nco-llm
-   evidence：强化学习用于芯片布局优化与奖励设计
-3. [A Multi-Stage Warm-Start Deep Learning Framework for Unit Commitment](/202604/29/2604.21891v1-a-multi-stage-warm-start-deep-learning-framework-for-unit-commitment)  
+   evidence：结合LSTM预测和MILP优化的混合方法
+2. [Comparative Evaluation of Modern Deep Learning Methodologies for Portfolio Optimization](/202604/30/2604.24486v1-comparative-evaluation-of-modern-deep-learning-methodologies-for-portfolio-optimization)  
+   标签：评分：8.5/10、query:nco-llm
+   evidence：结合GNN、DRL和Transformer的混合方法用于投资组合优化
+3. [Semi-Markov Reinforcement Learning for City-Scale EV Ride-Hailing with Feasibility-Guaranteed Actions](/202604/30/2604.25848v1-semi-markov-reinforcement-learning-for-city-scale-ev-ride-hailing-with-feasibility-guaranteed-actions)  
+   标签：评分：8.5/10、query:nco
+   evidence：用于城市规模车辆调度与路径规划的强化学习
+4. [LLM-Steered Power Allocation for Parallel QPSK-AWGN Channels](/202604/30/2604.21316v1-llm-steered-power-allocation-for-parallel-qpsk-awgn-channels)  
    标签：评分：8.0/10、query:nco-llm
-   evidence：深度学习框架用于求解机组组合中的混合整数线性规划
-4. [Relaxation-Informed Training of Neural Network Surrogate Models](/202604/29/2604.22746v1-relaxation-informed-training-of-neural-network-surrogate-models)  
-   标签：评分：8.0/10、query:nco-llm
-   evidence：用于混合整数线性规划优化的神经网络代理模型
-5. [Hybrid Deep Learning Approach for Coupled Demand Forecasting and Supply Chain Optimization](/202604/29/2604.21567v1-hybrid-deep-learning-approach-for-coupled-demand-forecasting-and-supply-chain-optimization)  
-   标签：评分：7.5/10、query:nco-llm
-   evidence：结合LSTM与混合整数线性规划的混合AI框架用于供应链优化
-6. [ATRS: Adaptive Trajectory Re-splitting via a Shared Neural Policy for Parallel Optimization](/202604/29/2604.22715v1-atrs-adaptive-trajectory-re-splitting-via-a-shared-neural-policy-for-parallel-optimization)  
-   标签：评分：7.5/10、query:nco-llm
-   evidence：将深度强化学习策略嵌入并行ADMM优化循环中
-7. [An Efficient Beam Search Algorithm for Active Perception in Mobile Robotics](/202604/29/2604.23327v1-an-efficient-beam-search-algorithm-for-active-perception-in-mobile-robotics)  
+   evidence：大模型作为功率分配优化的高层决策模块
+5. [Replay-buffer engineering for noise-robust quantum circuit optimization](/202604/30/2604.21863v1-replay-buffer-engineering-for-noise-robust-quantum-circuit-optimization)  
    标签：评分：7.5/10、query:nco
-   evidence：用于解决机器人领域旅行商问题的束搜索算法
-8. [Comparative Evaluation of Modern Deep Learning Methodologies for Portfolio Optimization](/202604/29/2604.24486v1-comparative-evaluation-of-modern-deep-learning-methodologies-for-portfolio-optimization)  
+   evidence：用于量子电路优化的深度强化学习
+6. [JURY-RL: Votes Propose, Proofs Dispose for Label-Free RLVR](/202604/30/2604.25419v1-jury-rl-votes-propose-proofs-dispose-for-label-free-rlvr)  
    标签：评分：7.5/10、query:nco-llm
-   evidence：结合图神经网络、深度强化学习和Transformer进行投资组合优化
-9. [Accelerating trajectory optimization with Sobolev-trained diffusion policies](/202604/29/2604.19011v1-accelerating-trajectory-optimization-with-sobolev-trained-diffusion-policies)  
+   evidence：通过可验证奖励的强化学习增强大模型在机器可检查领域的推理能力
+7. [Learning to Evolve: A Self-Improving Framework for Multi-Agent Systems via Textual Parameter Graph Optimization](/202604/30/2604.20714v1-learning-to-evolve-a-self-improving-framework-for-multi-agent-systems-via-textual-parameter-graph-optimization)  
+   标签：评分：7.0/10、query:nco-llm
+   evidence：通过文本参数图优化来优化多智能体系统
+8. [The CriticalSet problem: Identifying Critical Contributors in Bipartite Dependency Networks](/202604/30/2604.21537v1-the-criticalset-problem-identifying-critical-contributors-in-bipartite-dependency-networks)  
+   标签：评分：7.0/10、query:nco
+   evidence：二分网络中的NP难组合问题
+9. [Self-Guided Plan Extraction for Instruction-Following Tasks with Goal-Conditional Reinforcement Learning](/202604/30/2604.20601v1-self-guided-plan-extraction-for-instruction-following-tasks-with-goal-conditional-reinforcement-learning)  
+   标签：评分：6.5/10、query:nco
+   evidence：协同训练大模型规划器与强化学习智能体
+10. [Enforcing TSP-Optimality in Fair Vehicle Routing by Cutting Planes](/202604/30/2604.23748v1-enforcing-tsp-optimality-in-fair-vehicle-routing-by-cutting-planes)  
+   标签：评分：6.5/10、query:nco
+   evidence：在公平车辆路径问题中通过割平面法强制执行TSP最优性
+11. [Compute Aligned Training: Optimizing for Test Time Inference](/202604/30/2604.24957v1-compute-aligned-training-optimizing-for-test-time-inference)  
    标签：评分：6.5/10、query:nco-llm
-   evidence：结合学习扩散策略与传统轨迹优化求解器的混合方法
-10. [TRN-R1-Zero: Text-rich Network Reasoning via LLMs with Reinforcement Learning Only](/202604/29/2604.19070v1-trn-r1-zero-text-rich-network-reasoning-via-llms-with-reinforcement-learning-only)  
-   标签：评分：6.5/10、query:nco-llm
-   evidence：基于大语言模型和强化学习的富文本网络推理
-11. [Adaptive Test-Time Compute Allocation with Evolving In-Context Demonstrations](/202604/29/2604.21018v1-adaptive-test-time-compute-allocation-with-evolving-in-context-demonstrations)  
-   标签：评分：6.5/10、query:nco-llm
-   evidence：自适应测试时计算分配与演化上下文示例，用于解决复杂查询
-12. [Nemobot Games: Crafting Strategic AI Gaming Agents for Interactive Learning with Large Language Models](/202604/29/2604.21896v1-nemobot-games-crafting-strategic-ai-gaming-agents-for-interactive-learning-with-large-language-models)  
-   标签：评分：6.5/10、query:nco-llm
-   evidence：大模型利用数学推理计算最优策略
+   evidence：通过测试时计算缩放和强化学习对齐优化大语言模型性能
+12. [Prior-Aligned Data Cleaning for Tabular Foundation Models](/202604/30/2604.25154v1-prior-aligned-data-cleaning-for-tabular-foundation-models)  
+   标签：评分：6.5/10、query:nco
+   evidence：用于数据清洗顺序决策的深度强化学习框架
 
 
 <div class="dpr-home-promo-card">

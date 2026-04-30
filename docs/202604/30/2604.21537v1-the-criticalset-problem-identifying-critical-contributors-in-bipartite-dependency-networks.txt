@@ -1,0 +1,321 @@
+Title: 2604.21537v1.pdf
+
+URL Source: https://arxiv.org/pdf/2604.21537v1
+
+Published Time: Fri, 24 Apr 2026 00:45:22 GMT
+
+Number of Pages: 14
+
+Markdown Content:
+# The CriticalSet problem: Identifying Critical Contributors in Bipartite Dependency Networks 
+
+Sebastiano A. Piccolo 1 [0000 −0002 −6986 −3344 ]
+
+Andrea Tagarelli 2 [0000 −0002 −8142 −503 𝑋 ] 
+
+> 1
+
+University of Calabria, DeMaCS – Dept. Mathematics and Computer Science  
+
+> 2
+
+University of Calabria, DIMES – Dept. Computer Engineering, Modeling, Electronics, and Systems Engineering 
+
+{sebastiano.piccolo, andrea.tagarelli}@unical.it 
+
+Abstract. Identifying critical nodes in complex networks is a fundamental task in graph mining. Yet, methods addressing an all-or-nothing coverage mechanics in a bipartite dependency network— a graph with two types of nodes where edges represent dependency relationships across the two groups only—remain largely unexplored. We formalize the CriticalSet problem: given an arbitrary bipartite graph modeling dependencies of items on contributors, identify the set of 𝑘 contributors whose removal isolates the largest number of items. We prove that this problem is NP-hard and requires maximizing a supermodular set function, for which standard forward greedy algorithms provide no approximation guarantees. Consequently, we model CriticalSet as a coalitional game, deriving a closed-form centrality, ShapleyCov , based on the Shapley value. This measure can be interpreted as the expected number of items isolated by a contributor’s departure. Leveraging these insights, we propose MinCov , a linear-time iterative peeling algorithm that explicitly accounts for connection redundancy, prioritizing contributors who uniquely support many items. Extensive experiments on synthetic and large-scale real datasets, including a Wikipedia graph with over 250 million edges, reveal that MinCov and ShapleyCov significantly outperform traditional baselines. Notably, MinCov achieves near-optimal performance, within 0.02 AUC of a Stochastic Hill Climbing metaheuristic, while remaining several orders of magnitude faster. 
+
+Keywords: Critical Set · Bipartite Networks · Coalitional Game Theory · Shapley Value · Super-modular maximization. 
+
+# 1 Introduction 
+
+Many real-world systems and online platforms including Wikipedia, open-source software repositories, review websites, and collaborative communities, rely critically on the contributions of their participants. In practice, however, contributions are highly uneven: a small fraction of users typically produces a disproportionate share of the content. This concentration of activity has important consequences for both the robustness and the reliability of these systems. When a platform depends heavily on a limited set of contributors, it becomes more vulnerable to failures, strategic behavior, or systematic biases in the information provided. Consequently, identifying the key contributors and quantifying how strongly a system depends on them are fundamental steps toward understanding influence, responsibility, and information concentration. We model these systems as bipartite dependency networks , where one node set, the contributors, is connected to the other node set, the items, where the latter have a functional dependency on the contrib-utors. Typical examples of such network span different domains, such as code dependencies of software 2 S.A. Piccolo and A. Tagarelli i3i1        
+
+> c2
+> i4i5
+> c3c4
+> i7i6
+> c5
+> i2
+> c1
+> Items
+> Contributors
+> Fig. 1. An example of bipartite dependency graph of contributors ( 𝑐 𝑖 ) and items ( 𝑖 𝑗 ). The shaded subgraph denotes to the Critical Set of size 3, which corresponds to the set {𝑐 1, 𝑐 2, 𝑐 3}, as their removal causes the isolation of items
+> 𝑖 1–𝑖 5.
+
+applications on libraries, supply dependencies of industries on suppliers, or purchase dependencies of products on customers. To identify the contributors on whom many items critically depend, we formalize the CriticalSet 
+
+problem. Given a bipartite graph and a budget 𝑘 , the objective is to select 𝑘 contributors that maximize the number of items whose contributors are all selected (Figure 1). In this way, CriticalSet provides a direct approach to unveil the critical dependencies of items on specific contributors. We argue that standard network-analysis tools do not adequately capture this notion of functional dependency. Path-based centrality measures, such as betweenness, PageRank or eigenvector centrality, emphasize global connectivity and diffusion, which are often less meaningful in settings dominated by localized contributor-item interactions. Conversely, purely local measures such as node degree ignore redundancy: contributing to an item already supported by many others is less critical than being its sole or one of few contributors. Similarly, classic robustness metrics and percolation approaches that focus on connectivity or network fragmentation fail to capture the relevant notion of vulnerability here, which is determined by item coverage rather than structural disconnection. From an algorithmic perspective, CriticalSet is challenging. We show that the problem is NP-hard and inherits the strong inapproximability of the Densest 𝑘 -Subgraph problem, ruling out efficient exact or constant-factor approximation algorithms under standard assumptions. Moreover, the objective is supermodular, and therefore the classic greedy approximation guarantees that rely on submodularity in influence maximization and coverage problems do not apply. To address these challenges, we adopt a game-theoretic and algorithmic viewpoint centered on contributors’ pivotality . Essentially, a contributor is pivotal if they represent the final point of failure needed to completely isolate an item (Figure 1). We exploit this structural property in two complementary ways. First, we model CriticalSet as a coalitional game and derive an exact closed-form expression for the Shapley value, yielding a principled centrality that quantifies each contributor’s expected pivotality. Second, we design MinCov , a linear-time iterative peeling algorithm that deterministically prioritizes contributors with low marginal impact, producing high-quality approximations in practice. Beyond contributor–item systems, in our experiments we applied our framework to web trackers and word-document networks as well. Our experiments show that our Shapley value centrality and 
+
+MinCov consistently yield critical sets of contributors that cover a larger number of items compared to baselines including forward-greedy maximization, PageRank, betweenness, and 𝑘 -core decomposition. Our findings confirm that diverse real-world systems depend disproportionately on a small fraction Identifying Critical Contributors in Bipartite Dependency Networks 3
+
+of critical contributors, highlighting a significant structural vulnerability. Identifying such critical sets provides a direct measure of dependence, vulnerability, and concentration of influence. 
+
+Contributions. Our main contributions are: 
+
+– We introduce the CriticalSet problem, a new all-or-nothing coverage formulation designed to identify functionally critical nodes in bipartite networks. 
+
+– We prove NP-hardness and approximation hardness via a reduction from Densest 𝑘 -Subgraph, and characterize structural properties of the objective. 
+
+– We model the problem as a coalitional game and derive an exact closed-form Shapley-value centrality computable in 𝑂 (| 𝐸 |) time. 
+
+– We design MinCov , a linear-time iterative peeling algorithm that generalizes 𝑘 -core decomposition and scales to large graphs. 
+
+– We conduct an extensive empirical evaluation on diverse synthetic and real-world dependency net-works. Our results demonstrate that our algorithms consistently outperform traditional baselines and achieve near-optimal performance: reaching within 0.02 AUC of a Stochastic Hill Climbing metaheuristic while being up to three orders of magnitude faster. Together, these results provide both theoretical foundations and scalable tools for analyzing criticality and dependence in large bipartite networks. We are committed to reproducible research and release our code and evaluation data upon acceptance of this work. 
+
+# 2 Related Work 
+
+The CriticalSet problem is conceptually related to node ranking and top-𝑘 selection in networks, including centrality-based rankings [23, 22], influence maximization, and coverage problems [12, 5, 6, 17]. However, unlike influence maximization under the Independent Cascade or Linear Threshold diffusion models, or maximum coverage, where an item is considered affected or activated if at least one selected node reaches it through the diffusion process, CriticalSet requires all contributors of an item to be selected. As we show in Section 4, this difference makes the objective of CriticalSet supermodular, in contrast to the submodular objective of influence maximization. From an optimization perspective, CriticalSet generalizes densest-𝑘 -subgraph [10, 11, 20] and node-removal problems on bipartite graphs, including variants of network resilience formulations and percolation approaches [1, 2]. However, these problems typically aim to maximize internal density or to fragment connectivity, whereas our objective focuses on preserving item functionality under contributor selection, which is orthogonal to graph fragmentation and leads to different optimal solutions. The problem is also related to the computation of project robustness (e.g. the bus factor in software engineering) and redundancy analysis in collaborative systems [4, 28, 15, 27], where degree-based heuris-tics are commonly used to identify critical contributors. Our theoretical and empirical results show that such heuristics can be highly suboptimal, motivating the need for principled formulations and algorithms that explicitly account for contributor redundancy and full item coverage. Finally, unlike common projection-based approaches that collapse bipartite structures into cliques [26], thereby losing information and creating spurious links [8], our method performs a direct analysis that preserves the full dependency mechanics of the original network. 4 S.A. Piccolo and A. Tagarelli 
+
+# 3 The Critical Set Problem 
+
+Preliminaries. Let 𝐺 = (𝑉, 𝐸 ) be an undirected graph, with 𝑉 being the set of nodes and 𝐸 the set of edges. For a node 𝑣 , we denote its neighborhood (i.e. the set of nodes connected to 𝑣 ) by Γ(𝑣 ) and its degree by deg (𝑣 ) = |Γ(𝑣 )| . Given a graph 𝐺 = (𝑉, 𝐸 ), for 𝑆 ⊆ 𝑉 the induced subgraph 𝐺 [𝑆 ]
+
+contains the nodes in 𝑆 and all the edges with both endpoints in 𝑆 (i.e., the set of edges of 𝐺 [𝑆 ] is 
+
+𝐸 (𝐺 [𝑆 ]) = {( 𝑢, 𝑣 ) ∈ 𝐸 | 𝑢 ∈ 𝑆 ∧ 𝑣 ∈ 𝑆 }). A graph is bipartite if its node set can be partitioned into two disjoint sets 𝑉 1 and 𝑉 2, such that 𝑉 = 𝑉 1 ∪ 𝑉 2, 𝑉 1 ∩ 𝑉 2 = ∅, and every edge connects a node in 𝑉 1 to one in 𝑉 2.
+
+The CriticalSet Problem. We consider a specific class of heterogeneous networks consisting of two types of nodes: contributors (e.g., individuals) and items (e.g., products, opinions). Since our focus is exclusively on contributor–item relationships, we model these structures as bipartite graphs 𝐵 = (𝐶, 𝐼, 𝐸 )
+
+where 𝐶 denotes contributors and 𝐼 items, and 𝐸 ⊆ 𝐶 × 𝐼 . Given 𝑆 ⊆ 𝐶 , an item 𝑖 ∈ 𝐼 is fully covered if Γ(𝑖 ) ⊆ 𝑆 . That is, if 𝑆 contains all neighbors of 𝑖 . Finally, let cov (𝑆 ) = |{ 𝑖 ∈ 𝐼 : Γ(𝑖 ) ⊆ 𝑆 }| denote the number of items fully covered by 𝑆 (i.e., the number of items that would become isolated if the contributors in 𝑆 were removed from 𝐵 ). 
+
+Definition 1 (The CriticalSet problem). Given a bipartite graph 𝐵 = (𝐶, 𝐼, 𝐸 ) and a positive integer 
+
+𝑘 , the CriticalSet problem asks for a set 𝑆 ∗ ⊆ 𝐶 of size |𝑆 ∗ | ≤ 𝑘 that maximizes cov (𝑆 ∗). Formally: 
+
+𝑆 ∗ = arg max      
+
+> 𝑆 ⊆𝐶, |𝑆 | ≤ 𝑘
+
+cov (𝑆 )
+
+Any maximizing set is called a critical set. 
+
+# 4 Hardness of the CriticalSet Problem 
+
+We establish the computational hardness of CriticalSet via a reduction from the Densest 𝑘 -Subgraph (DkS ) problem, which is known to be NP-hard [10]. Given a simple graph 𝐺 = (𝑉, 𝐸 ) and an integer 𝑘 ,
+
+DkS asks for a subset 𝑋 ⊆ 𝑉 with |𝑋 | ≤ 𝑘 maximizing the number of induced edges |𝐸 (𝐺 [𝑋 ])| .The reduction is intuitive: each vertex of 𝐺 becomes a contributor and each edge becomes an item; covering an item then requires selecting both endpoints of the corresponding edge. 
+
+Theorem 1. CriticalSet is NP-hard and at least as hard to approximate as DkS . In particular, any approximation guarantee for one problem transfers to the other with the same factor. Proof. Let 𝑥 = (𝐺 = (𝑉, 𝐸 ), 𝑘 ) be an instance of DkS . We construct a bipartite graph 𝐵 = (𝐶, 𝐼, 𝐸 ′) as follows: 𝐶 = 𝑉 , 𝐼 = 𝐸 , and 
+
+𝐸 ′ = {( 𝑢, 𝑒 ) | 𝑢 is an endpoint of edge 𝑒 }.
+
+Thus each item is adjacent exactly to the two contributors corresponding to the endpoints of the original edge. The construction clearly takes 𝑂 (| 𝑉 | + | 𝐸 |) time. Consider any set 𝑆 ⊆ 𝐶 with |𝑆 | ≤ 𝑘 . An item corresponding to edge (𝑢, 𝑣 ) ∈ 𝐸 is fully covered if and only if both 𝑢 and 𝑣 belong to 𝑆 . Therefore, 
+
+cov (𝑆 ) = |𝐸 (𝐺 [𝑆 ])| .Identifying Critical Contributors in Bipartite Dependency Networks 5
+
+Hence maximizing coverage in 𝐵 is equivalent to maximizing the number of induced edges in 𝐺 , and optimal solutions have identical objective values. This establishes an approximation-preserving reduction [9] (specifically an S-reduction) from DkS to CriticalSet , implying both NP-hardness and the transfer of inapproximability results. ⊓⊔
+
+The reduction extends naturally to multigraphs by treating parallel edges as distinct items, and to hypergraphs via their standard bipartite incidence representation. The reduction also transfers the strong inapproximability of DkS . Despite extensive study, DkS admits neither a PTAS nor any known constant-factor approximation, with the best algorithms achieving only 𝑂 (𝑛 1/4+𝜖 ) guarantees [11, 7, 18]. Stronger lower bounds hold under ETH and the Small Set Expansion hypothesis [24, 29]. Consequently, 
+
+CriticalSet inherits the same hardness of approximation. 
+
+Supermodularity of CriticalSet . We also provide a further insight into the hardness of CriticalSet ,showing that the function cov (·) is supermodular. 
+
+Lemma 1. The function cov : 2 𝐶 → N is monotone and supermodular. Proof. For each item 𝑖 ∈ 𝐼 , let 𝑓 𝑖 (𝑆 ) = I(Γ(𝑖 ) ⊆ 𝑆 ). Then cov (𝑆 ) = Í𝑖 ∈𝐼 𝑓 𝑖 (𝑆 ).Fix an item with neighborhood 𝑇 = Γ (𝑖 ). For any 𝐴 ⊆ 𝐵 ⊆ 𝐶 and 𝑣 ∉ 𝐵 , adding 𝑣 can only complete the containment 𝑇 ⊆ 𝑆 if all other elements of 𝑇 are already present. Hence 
+
+𝑓 𝑖 ( 𝐴 ∪ { 𝑣 }) − 𝑓 𝑖 ( 𝐴 ) ≤ 𝑓 𝑖 (𝐵 ∪ { 𝑣 }) − 𝑓 𝑖 (𝐵 ),
+
+so 𝑓 𝑖 is supermodular. Since sums of supermodular functions are supermodular, cov is supermodular. Monotonicity is immediate. ⊓⊔
+
+This contrasts with submodular objectives that admit strong greedy approximation guarantees. The supermodular (increasing-returns) structure of CriticalSet aligns instead with clique-like objectives and helps explain its strong hardness of approximation. 
+
+# 5 Approximating CriticalSet 
+
+By studying the CriticalSet problem as a coalitional game, we uncover a key structural property: coverage increases only when the last missing contributor of an item is selected, i.e., value is created at pivotal events. This naturally suggests prioritizing contributors that are often pivotal. We formalize this idea in two ways. First, we derive a closed form solution for the Shapley value of the CriticalSet game, obtaining a centrality score, ShapleyCov , that quantifies expected pivotality of contributors over uniformly random orderings. Second, we develop an algorithm, MinCov , that imple-ments the same principle deterministically through iterative peeling, repeatedly removing the contributor with the smallest marginal impact on coverage. 
+
+5.1 CriticalSet as a coalitional game 
+
+We model contributors as players in a coalitional game where the value of a coalition equals the number of items it fully covers. This perspective assigns each contributor a score proportional to its marginal contribution to coverage. 6 S.A. Piccolo and A. Tagarelli 
+
+A coalitional game is specified by a characteristic function 𝑣 : 2 𝐶 → R with 𝑣 (∅) = 0. We adopt the 
+
+Shapley value , which assigns to each player its average marginal contribution over all arrival orders: 
+
+𝜙 𝑖 = 1
+
+|𝐶 |!∑︁ 𝜋 ∈Π𝐶 
+
+ 𝑣 (𝐵 (𝑖, 𝜋 ) ∪ { 𝑖 }) − 𝑣 (𝐵 (𝑖, 𝜋 )) . (1) where Π𝑁 denotes the set of all permutations of 𝐶 , and 𝐵 (𝑖, 𝜋 ) is the set of contributors that precede 𝑖 in the permutation 𝜋 .The Shapley value is uniquely characterized by standard fairness axioms and therefore provides a canonical (rather than heuristic) allocation of utility. Although computing it is generally #P-hard, the structure of CriticalSet yields an exact closed-form solution. We define the game by 
+
+𝑣 (𝑆 ) = cov (𝑆 ) =∑︁ 
+
+> 𝑖 ∈𝐼
+
+I Γ(𝑖 ) ⊆ 𝑆 , 𝑆 ⊆ 𝐶. (2) Here players are contributors, while items only determine coalition utility; maximizing 𝑣 (𝑆 ) under |𝑆 | ≤ 𝑘 
+
+recovers CriticalSet , and 𝑣 (𝐶 ) = |𝐼 |.
+
+Theorem 2 (Shapley value for CriticalSet ). The Shapley value of the coalitional game (𝐶, 𝑣 ) admits the following closed form 
+
+𝜙 𝑐 =∑︁ 
+
+> 𝑖 ∈Γ(𝑐 )
+
+1deg (𝑖 ) , ∀𝑐 ∈ 𝐶. (3) 
+
+Proof. Since the Shapley value is linear and the characteristic function is 
+
+𝑣 (𝑆 ) =∑︁ 
+
+> 𝑖 ∈𝐼
+
+𝑣 𝑖 (𝑆 ) with 𝑣 𝑖 (𝑆 ) = I(Γ(𝑖 ) ⊆ 𝑆 ),
+
+it suffices to analyze each 𝑣 𝑖 (·) . Contributor 𝑐 ∈ Γ(𝑖 ) has a marginal contribution of one if and only if it is the last neighbor of 𝑖 in a uniformly random permutation, which occurs with probability 1/deg (𝑖 ).Summing these probabilities over all items incident to 𝑐 yields equation (3). ⊓⊔
+
+The Shapley value in equation (3) is effectively a centrality measure, which we call ShapleyCov ,that can be computed in 𝑂 (| 𝐸 |) time in a single pass over the edges and is trivially parallelizable. It can be interpreted as a refined degree measure: importance increases with the number of supported items but decreases with redundancy, prioritizing contributors that are critical for coverage. 
+
+5.2 An iterative peeling procedure to approximate CriticalSet 
+
+The pivotality interpretation and the supermodularity of the objective suggest a reverse-greedy strategy: when seeking any size-𝑘 Critical Set, contributors that are connected to few items are unlikely to be pivotal and should be removed first . This leads to an iterative peeling procedure (Algorithm 1) that repeatedly removes the contributor covering the fewest items (lines 4–6) and updates remaining counts (lines 7–12). The final ordering 𝜋 is obtained by reversing this removal sequence (line 13), such that the first 𝑘 contributors represent the most critical nodes for a given budget. By using a bucket queue (line 2), a specialized priority queue where an array Q stores nodes in lists indexed by their current coverage, MinCov maintains 𝑂 (1) operations for insertion, extraction, and priority updates, achieving an 
+
+𝑂 (| 𝐸 |) -time implementation. Conceptually, MinCov is a greedy analogue of the ShapleyCov ordering: both prioritize contributors according to their likelihood of being pivotal, the former adaptively and the latter in expectation. Identifying Critical Contributors in Bipartite Dependency Networks 7
+
+Algorithm 1: Minimum Coverage ( MinCov )                                                                           
+
+> Input: a bipartite graph 𝐵 =(𝐶, 𝐼, 𝐸 )
+> Output: Ordering 𝜋 of contributors
+> 1inserted[ 𝑐 ]←0,∀𝑐 ∈𝐶 ;covered[ 𝑖 ]←0,∀𝑖 ∈𝐼 ;𝜋 ← []
+> 2Q ← BucketQueue( 𝐵 )// Prioritizes contributors by lowest item coverage
+> 3while Qnot empty do
+> 4𝑐 ← Q .pop() // Gets the contributor with the lowest coverage
+> 5𝜋 .append( 𝑐 )// Appends 𝑐 to the ordering 𝜋
+> 6inserted[ 𝑐 ]←1// Marks the contributor 𝑐 as processed
+> 7foreach 𝑖 ∈𝐵. neighbors (𝑐 )do
+> 8if not covered[ 𝑖 ]then // Decreases by one the coverage of all
+> 9foreach 𝑐 ′∈𝐵. neighbors (𝑖 )do // contributors 𝑐 ′connected to
+> 10 if not inserted[ 𝑐 ′]then // the items now covered by 𝑐
+> 11 Q.decrease_coverage( 𝑐 ′)
+> 12 covered[ 𝑖 ]←1// Marks all items connected to 𝑐 as fully covered
+> 13 return 𝜋 .reverse()
+
+Relations between MinCov and 𝑘 -core decomposition. MinCov can be viewed as a strict generalization of the classical minimum-degree peeling procedure underlying the 𝑘 -core decomposition. Applying the standard incidence transformation that maps edges to items reduces 𝑘 -core exactly to MinCov . However, coverage differs fundamentally from degree: an item is removed after being covered once, which discounts redundant connections and better captures criticality. Consequently, while MinCov can recover 𝑘 -cores as a special case, the reverse is not true, and the resulting rankings differ substantially in practice, as highlighted by our subsequent experiments. 
+
+# 6 Experimental setup 
+
+Real-world networks. To assess the performance of our CriticalSet methods and competing ones, we employ the following twelve large-scale bipartite networks obtained from: (𝑖 ) the actor-movie network dbpedia [3], (𝑖𝑖 ) the GitHub 2009 competition dataset [30] connecting developers to repositories, (𝑖𝑖𝑖 ) the bag-of-words of NeurIPS papers [21] connecting words to papers, (𝑖𝑣 ) the bag-of-word of Wikipedia’s excellent articles [19] connecting words to articles, (𝑣 ) the user ratings of stories on the social media platform Digg [14] connecting users to stories, (𝑣𝑖 ) Amazon user–item ratings [16], (𝑣𝑖𝑖 ) the affiliations of users to groups on Flickr [25], (𝑣𝑖𝑖𝑖 ) the MovieLens 10M dataset [13] connecting users to movies via their ratings, (𝑖𝑥 ) the Open Academic Graph (OAG) [32] connecting researchers to papers, (𝑥 )the affiliation of users to groups on LiveJournal [25], (𝑥𝑖 ) web domains and the trackers they contain [31], and (𝑥𝑖𝑖 ) the Wikipedia edit history (2001–2017) [19]. Table 1 summarizes the structural properties of our real-world networks, including power-law expo-nents ( 𝛼 ), degree-1 fractions ( 𝜙 ), and the ratio of unique contributors ( 𝛾 𝐶 ) who provide sole coverage for at least one item. These metrics capture the inherent difficulty of the CriticalSet instance. For example, 
+
+github exhibits a “shallow” structure where 69% of items possess only a single contributor ( 𝜙 𝐼 ), making it a trivial target for greedy heuristics. In contrast, datasets like bag-nips exhibit high redundancy of contributors (i.e., 𝜙 𝐼 = 0), thus forming a complex supermodular core —that is, a subgraph where the 8 S.A. Piccolo and A. Tagarelli                                                                    
+
+> Table 1. Statistics of real bipartite datasets. Dataset |𝐶 ||𝐼 ||𝐸 |𝑘 𝐶 𝑘 𝐼 𝛼 𝐶 𝛼 𝐼 𝜙 𝐶 𝜙 𝐼 𝛾 𝐶
+> dbpedia 81 085 76 099 281 396 3.47 3.70 0.19 0.32 0.59 0.20 0.12 github 56 519 120 867 440 237 7.79 3.64 0.17 0.13 0.41 0.69 0.64 bag-nips 12 375 1 500 746 316 60.31 497.54 0.23 1.54 0.03 0.00 0.00 excellent 273 959 2 780 2 941 902 10.74 1058.24 0.14 0.79 0.69 0.00 0.00 digg-votes 139 409 3 553 3 018 197 21.65 849.48 0.13 0.27 0.28 0.00 0.00 amazon 2 146 057 1 230 915 5 838 041 2.72 4.74 0.11 0.14 0.69 0.50 0.16 flickr 395 979 103 631 8 545 307 21.58 82.46 0.16 0.12 0.34 0.24 0.05 movielens 69 878 10 677 10 000 054 143.11 936.60 0.22 0.18 0.00 0.01 0.00 oag 9 381 152 6 736 186 22 766 556 2.43 3.38 0.14 0.14 0.60 0.30 0.16 livejournal 3 201 203 7 489 073 112 307 385 35.08 15.00 0.34 0.07 0.06 0.71 0.42 trackers 12 756 244 27 665 730 140 613 762 11.02 5.08 0.06 0.08 0.61 0.31 0.05 wikipedia 8 116 897 42 640 545 255 709 660 31.50 6.00 0.07 0.09 0.59 0.47 0.19
+
+fraction of degree-one items is close to zero. This way, critical sets become apparently “functionally invisible” to greedy approaches. 
+
+Synthetic Network Generation. To assess proximity to optimality, we generated synthetic bipartite graphs using the bipartite configuration model. We consider six configurations targeting different struc-tural regimes: 
+
+– Power-law graphs (a–e): We vary the exponents ( 𝛼 ) and maximum degrees ( 𝐷 ) to control heterogene-ity. Configurations (a–b) represent asymmetric item/contributor maximum degrees; (c) is balanced; (d–e) vary the skeweness of the degree distributions of the node sets. 
+
+– Random graph (f): An Erdős-Rényi (ER) bipartite graph ( 𝑝 = 0.004 ) providing a non-structured baseline. For the power-law instances, lower 𝛼 values correspond to higher heterogeneity, while 𝐷 constrains the hub sizes. For all networks, we set |𝐶 | = |𝐼 | = 5 000 ; all generation parameters are reported in Table 3. 
+
+Competing methods. We compare MinCov and ShapleyCov against the following baselines, each of which was computed on the set of contributors 𝐶 of an inout graph: degree centrality ( DC ), betweenness centrality ( BC ), PageRank ( PR ), the minimum degree peeling procedure used to compute the 𝑘 -core decomposition and to approximate the densest subgraph ( DS ) applied directly to the bipartite graph, and a forward greedy algorithm that maximizes cov (·) (FG ). We also considered closeness and eigenvector centrality, but they exhibited poor results. Finally, due to the scale of the real-world datasets, we adopt a Stochastic Hill Climbing ( SHC ) metaheuristic exclusively for synthetic graphs. This serves as a reference to estimate the heuristics’ proximity to optimality and compare their running times. 
+
+Assessment criteria. Recall that a critical set is a subset of contributors of size 𝑘 that covers the largest number of items or, equivalently, a subset of contributors of size 𝑘 whose removal maximally reduces the number of covered items. To evaluate our CriticalSet methods and competing ones, we measure the cumulative number of items in 𝐼 covered by the selected contributors as the size 𝑘 of the critical set increases—this produces a coverage curve as a function of 𝑘 . More specifically, we measure the normalized area under such a Identifying Critical Contributors in Bipartite Dependency Networks 9                                                                          
+
+> Table 2. Area under the coverage curve for critical sets of real-world graphs (higher values correspond to better solutions). Best in bold; second best underlined. Dataset PageRank Degree Fwd. Greedy Dens. Subgraph ShapleyCov MinCov dbpedia 0.661 0.675 0.722 0.636 0.709 0.699 github 0.736 0.724 0.757 0.652 0.751 0.757
+> bag-nips 0.073 0.078 0.002 0.079 0.080 0.148
+> excellent 0.204 0.026 0.021 0.037 0.492 0.507
+> digg-votes 0.074 0.155 0.001 0.155 0.348 0.348
+> amazon 0.745 0.647 0.758 0.550 0.813 0.794 flickr 0.525 0.440 0.448 0.402 0.658 0.659
+> movielens 0.241 0.242 0.216 0.232 0.482 0.618
+> oag 0.576 0.551 0.624 0.465 0.625 0.617 livejournal 0.788 0.719 0.825 0.636 0.833 0.837
+> trackers 0.939 0.935 0.956 0.914 0.970 0.969 wikipedia 0.955 0.950 0.964 0.934 0.963 0.963
+
+coverage curve (AUC). Given a bipartite graph 𝐵 = (𝐶, 𝐼, 𝐸 ) and a ranking 𝑅 of contributors in 𝐶 
+
+produced by a method for solving the CriticalSet task, the area under the coverage curve is defined as: AUC (𝐵, 𝑅 ) = 1 
+
+> |𝐶 |
+
+Í|𝐶 |    
+
+> 𝑖 =1cov (𝐵,𝑅 ≤𝑖 )|𝐼 |
+
+, where 𝑅 ≤𝑖 contains the first 𝑖 contributors in 𝑅 and cov (𝐵, 𝑅 ≤𝑖 )
+
+yields the number of items fully covered by 𝑅 ≤𝑖 . AUC (𝐵, 𝑅 ) ranges between 0 and 1, with higher values corresponding to better performance in approximating critical sets. In addition, we plot a representative selection of curves that will provide punctual information for each value of the budget 𝑘 , complementing the aggregate information of the AUC. 
+
+# 7 Results 
+
+Evaluation on the real-world networks. Here, we assess the performance of MinCov and ShapleyCov 
+
+contrasting them with the other baselines. Due to its computational complexity, Betweenness Centrality (BC) is computationally prohibitive for our largest real-world datasets. However, as demonstrated in the following sections on synthetic networks, BC consistently underperforms in the CriticalSet task, justifying its omission from the large-scale evaluation. We report the AUC values in Table 2. Overall, MinCov and ShapleyCov emerge as the most robust methods, achieving AUC values sig-nificantly higher than the competing methods. MinCov attains the highest AUC on seven datasets and ranks second on three, while ShapleyCov performs best on four and ranks second on all others. Con-versely, Forward Greedy (FG) is highly inconsistent: while competitive on shallow graphs with high fractions of degree-one items (cf. Table 2, 𝜙 𝐼 ) and contributors ( 𝜙 𝐶 ), such as dbpedia and github , it exhibits the worst performance on four high-redundancy datasets (cf. Sect. 6), including movielens and 
+
+excellent . On digg-votes , FG fails to detect any critical set within the budget (Fig. 2), confirming its ineffectiveness on complex supermodular problems. The transition between the two regimes is visible in the amazon graph (Fig. 2): FG remains competitive on small 𝑘 , as long as it captures low-hanging fruits ( 𝜙 𝐼 = 0.5). As soon as FG hits the supermodular core of items with high redundancy of contributors its performance degrades. In contrast, MinCov and 
+
+ShapleyCov maintain strong performance across all graphs, and emerge as clear winners on graphs with absence of degree-one items ( 𝜙 𝐼 ≈ 0), where FG fails to detect meaningful critical sets (e.g., 10 S.A. Piccolo and A. Tagarelli 
+
+Fig. 2. Coverage curves on real datasets (selection). 
+
+Table 3. AUC for CriticalSet approximation approaches on synthetic graphs. In bold, the best performer; underlined, the second best. SHC (blue) as reference. Configuration PR BC DC FG DS ShapleyCov MinCov SHC (a) 𝛼 𝐶 = 0.5, 𝛼 𝐼 = 0.5
+
+𝐷 𝐶 = 20 , 𝐷 𝐼 = 100 
+
+0.552 0.564 0.531 0.574 0.524 0.600 0.601 0.615 (b) 𝛼 𝐶 = 0.5, 𝛼 𝐼 = 0.5
+
+𝐷 𝐶 = 100 , 𝐷 𝐼 = 20 
+
+0.560 0.547 0.547 0.536 0.545 0.584 0.593 0.611 (c) 𝛼 𝐶 = 0.5, 𝛼 𝐼 = 0.5
+
+𝐷 𝐶 = 𝐷 𝐼 = 100 
+
+0.266 0.265 0.263 0.182 0.262 0.279 0.311 0.323 (d) 𝛼 𝐶 = 0.5, 𝛼 𝐼 = 0.7
+
+𝐷 𝐶 = 𝐷 𝐼 = 100 
+
+0.314 0.311 0.311 0.203 0.309 0.327 0.353 0.366 (e) 𝛼 𝐶 = 0.7, 𝛼 𝐼 = 0.5
+
+𝐷 𝐶 = 𝐷 𝐼 = 100 
+
+0.314 0.316 0.308 0.254 0.307 0.336 0.355 0.368 (f) ER graph ( 𝑝 = 0.004 ) 0.078 0.080 0.077 0.078 0.076 0.081 0.133 0.133 
+
+digg-votes and movielens , Fig 2). The low AUC of all methods on the bag-nips dataset arises because items (documents) have high degrees (many words), making full coverage difficult, particularly with a small budget 𝑘 . These results indicate that structural properties beyond degree distributions, specifically redundancy depth ( 𝜙 𝐼 , 𝜙 𝐶 , 𝛾 𝐶 ), dictate the relative difficulty of CriticalSet instances, pointing to an interesting direction for future investigations. A one-sided paired Wilcoxon signed rank test indicates that MinCov and ShapleyCov achieve a significantly larger AUC than FG and the other baselines ( 𝑝 < 0.05 ). The test between MinCov and 
+
+ShapleyCov does not detect any statistically significant difference in AUC ( 𝑝 = 0.52 ). 
+
+Optimality and approximation gap. We evaluate our methods against a Hill-Climbing metaheuristic (SHC) run until convergence to estimate the proximity to optimality. Table 3 reports the AUC values, while Fig. 3 provides a zoomed-in comparison of the coverage curves. 
+
+MinCov and ShapleyCov are consistently the best-performing methods, with MinCov achieving near-optimal results, trailing SHC by less than 0.02 AUC points across all settings. Notably, ShapleyCov Identifying Critical Contributors in Bipartite Dependency Networks 11       
+
+> Fig. 3. Zoomed-in comparison between MinCov ,ShapleyCov , Forward Greedy and SHC. The letter indicates the synthetic graph configuration (refer to Table 3).
+> Fig. 4. Running time comparison between MinCov ,ShapleyCov , FG, and SHC.
+
+remains highly competitive (within 0.05 of SHC), which is remarkable given it is a single-pass centrality measure. In contrast, all other baselines exhibit significantly larger approximation gaps. These results also highlight the inadequacy of standard centralities for CriticalSet : Forward Greedy (FG) is consistently outperformed, and Betweenness Centrality (BC) offers no advantage over simpler degree-based metrics. Finally, the striking performance gap between MinCov and Densest Subgraph (DS) confirms that while both utilize iterative peeling, the CriticalSet objective requires the specific redundancy-aware logic of our approach. 12 S.A. Piccolo and A. Tagarelli 
+
+Scalability and price of optimality. We have seen that MinCov and ShapleyCov obtain excellent results. In particular, MinCov is near optimal w.r.t. SHC. Here, we perform a scalability analysis to evaluate the price of optimality in terms of computation time. 3 To this end, we generate random bipartite graphs (ER and Power-law) with 50 000 nodes per node set and a total number of edges ranging from 
+
+1 000 000 to 10 000 000 , measuring the running time of our methods. Fig. 4, shows that while MinCov 
+
+and Shapley runtimes are below one second, SHC is three orders of magnitude slower than them. In summary, MinCov occupies a unique position in the algorithmic landscape, delivering near-optimal results with the linear-time efficiency required for large-scale networks. 
+
+# 8 Discussion and outlook 
+
+Summary of contributions. In this work, we introduced the CriticalSet problem to quantify a particular notion of critical dependencies modeled in bipartite contributor-item networks. We proved that identifying the set of contributors whose removal causes the maximal collapse of content coverage is NP-hard and involves a supermodular objective function. This theoretical insight explains why standard forward-greedy strategies, popular in influence maximization, fail in this context. To overcome this, we derived a closed-form centrality based on the ShapleyCov value of a coalitional game and proposed MinCov ,a linear-time peeling algorithm. Our experiments demonstrate that ShapleyCov and MinCov not only scale to massive graphs but also identify critical sets that are functionally invisible to the other competing methods. 
+
+Impact of our study. Our analysis contributes to the growing intersection of game theory and network science [33]. While the majority of recent work in this domain has focused on submodular maximization tasks, such as Influence Maximization [17], our work addresses the less-explored domain of supermodular maximization. By linking the CriticalSet problem to the Shapley value, we provide a principled justification for our ranking method, distinguishing it from ad-hoc heuristics. This suggests a broader class of criticality centralities that could be developed for other network topologies beyond the bipartite case. Future work can extend our framework to dynamic and multilayer settings, investigating how contributors criticality evolves over time. A direct application of our framework is the estimation of the criticality of open-source software, i.e. the minimum number of developers whose departure would stall a project (also known as Bus Factor). Current state-of-the-art methods largely rely on degree centrality or simple commit counts. Our results show that these metrics often underestimate criticality by ignoring the redundancy of knowledge distribution. CriticalSet provides a formal, rigorous mathematical model for assessing this type of vulnerabilities. Future work should aim to validate the Shapley-derived centrality against real-world project abandonment data to establish it as a standard metric for repository health. 
+
+Extensions to CriticalSet : Weighted importance and soft thresholds. Our current model assumes a worst-case scenario (AND logic): an item is lost only if all contributors depart, and all items are equally important. While appropriate for assessing total functional resilience, these definitions can be relaxed to cover a wider range of scenarios: 
+
+– Weighted Items: Real-world networks often contain items of varying value (e.g., a core software module vs. a documentation typo). A natural extension is to introduce weights 𝑤 𝑗 for each item. If weights are uniform, the problem reduces to our current formulation.  
+
+> 3We carried out our experiments on a commodity laptop (Windows 11, 2.9 GHz CPU, 32 GB RAM).
+
+Identifying Critical Contributors in Bipartite Dependency Networks 13 
+
+– Soft Thresholds: The strict all-or-nothing condition could be generalized to a fractional threshold, where an item is considered lost if at least a given fraction of its contributors leave. This would bridge the gap between our supermodular model and linear degradation models. 
+
+Theoretical outlook. While the general hardness of CriticalSet suggests that constant-factor approxi-mations are unlikely, our ongoing work focuses on identifying specific graph classes where tighter bounds are achievable. We are currently investigating parameterized complexity approaches for small budgets 
+
+𝑘 , as well as hybridized methods that adaptively transition between greedy and peeling strategies. By leveraging redundancy depth ( 𝜙 𝐼 , 𝜙 𝐶 ) and contributor uniqueness ( 𝛾 𝐶 ), we aim to develop a second family of algorithms that dynamically adjust their selection logic to the local structure of the network. 
+
+Acknowledgments. This research is partially supported by MUR under PNRR project PE0000013-FAIR, Spoke 9 - Green-aware AI – WP9.2 and PN RIC project ASVIN “Assistente Virtuale Intelligente di Negozio” (CUP B29J24000200005). 
+
+Disclosure of Interests. The authors have no competing interests. 
+
+# References 
+
+1. Albert, R., Jeong, H., Barabási, A.L.: Error and attack tolerance of complex networks. nature 406 (6794), 378–382 (2000) 2. Artime, O., Grassia, M., De Domenico, M., Gleeson, J.P., Makse, H.A., Mangioni, G., Perc, M., Radicchi, F.: Robustness and resilience of complex networks. Nature Reviews Physics 6(2), 114–131 (2024) 3. Auer, S., Bizer, C., Kobilarov, G., Lehmann, J., Cyganiak, R., Ives, Z.: DBpedia: A nucleus for a web of open data. In: Proc. Int. Semant. Web Conf. pp. 722–735 (2008) 4. Avelino, G., Passos, L., Hora, A., Valente, M.T.: A novel approach for estimating truck factors. In: 2016 IEEE 24th International Conference on Program Comprehension (ICPC). pp. 1–10 (2016). https://doi.org/10.1109/ICPC.2016.7503718 5. Banerjee, S., Jenamani, M., Pratihar, D.K.: A survey on influence maximization in a social network. Knowledge and Information Systems 62 (9), 3417–3455 (2020) 6. Bharathi, S., Kempe, D., Salek, M.: Competitive influence maximization in social networks. In: International workshop on web and internet economics. pp. 306–311. Springer (2007) 7. Bhaskara, A., Charikar, M., Chlamtac, E., Feige, U., Vijayaraghavan, A.: Detecting high log-densities: an o (n 
+
+1/4) approximation for densest k-subgraph. In: Proceedings of the forty-second ACM symposium on Theory of computing. pp. 201–210 (2010) 8. Borgatti, S.P., Everett, M.G.: Network analysis of 2-mode data. Social networks 19 (3), 243–269 (1997) 9. Crescenzi, P.: A short guide to approximation preserving reductions. In: Proceedings of Computational Com-plexity. Twelfth Annual IEEE Conference. pp. 262–273. IEEE (1997) 10. Feige, U., Seltser, M.: On the densest k-subgraph problems (1997) 11. Feige, U., Peleg, D., Kortsarz, G.: The dense k-subgraph problem. Algorithmica 29 (3), 410–421 (2001) 12. Goyal, A., Bonchi, F., Lakshmanan, L.V.: A data-based approach to social influence maximization. Proceedings of the VLDB Endowment 5(1) (2011) 13. Harper, F.M., Konstan, J.A.: The movielens datasets: History and context. Acm transactions on interactive intelligent systems (tiis) 5(4), 1–19 (2015) 14. Hogg, T., Lerman, K.: Social dynamics of Digg. Eur. Phys. J. Data Sci. 1(5) (2012) 15. Jabrayilzade, E., Evtikhiev, M., Tüzün, E., Kovalenko, V.: Bus factor in practice. In: Proceedings of the 44th International Conference on Software Engineering: Software Engineering in Practice. p. 97–106. ICSE-SEIP ’22, Association for Computing Machinery, New York, NY, USA (2022). https://doi.org/10.1145/3510457.3513082, https://doi.org/10.1145/3510457.3513082 14 S.A. Piccolo and A. Tagarelli 16. Jindal, N., Liu, B.: Opinion spam and analysis. In: Proc. Int. Conf. on Web Search and Web Data Min. pp. 219–230 (2008) 17. Kempe, D., Kleinberg, J., Tardos, É.: Maximizing the spread of influence through a social network. In: Pro-ceedings of the ninth ACM SIGKDD international conference on Knowledge discovery and data mining. pp. 137–146 (2003) 18. Khot, S.: Ruling out ptas for graph min-bisection, dense k-subgraph, and bipartite clique. SIAM Journal on Computing 36 (4), 1025–1071 (2006) 19. Kunegis, J.: Konect: the koblenz network collection. In: Proceedings of the 22nd international conference on world wide web. pp. 1343–1350 (2013) 20. Lanciano, T., Miyauchi, A., Fazzone, A., Bonchi, F.: A survey on the densest subgraph problem and its variants. ACM Computing Surveys 56 (8), 1–40 (2024) 21. Lichman, M.: UCI Machine Learning Repository (2013), http://archive.ics.uci.edu/ml 22. Liu, J., Xiong, Q., Shi, W., Shi, X., Wang, K.: Evaluating the importance of nodes in complex networks. Physica A: Statistical Mechanics and its Applications 452 , 209–219 (2016) 23. Liu, Z., Jiang, C., Wang, J., Yu, H.: The node importance in actual complex networks based on a multi-attribute ranking method. Knowledge-Based Systems 84 , 56–66 (2015) 24. Manurangsi, P.: Almost-polynomial ratio eth-hardness of approximating densest k-subgraph. In: Proceedings of the 49th Annual ACM SIGACT Symposium on Theory of Computing. pp. 954–961 (2017) 25. Mislove, A., Marcon, M., Gummadi, K.P., Druschel, P., Bhattacharjee, B.: Measurement and analysis of online social networks. In: Proc. Internet Measurement Conf. (2007) 26. Newman, M.E.: Coauthorship networks and patterns of scientific collaboration. Proceedings of the national academy of sciences 101 , 5200–5205 (2004) 27. Piccolo, S.A., De Meo, P., Terracina, G.: Evaluating and improving projects’ bus-factor: a network analytical framework. In: 16th International Conference, ASONAM 2024, Rende, Italy, September 2–5, 2024, Proceedings, Part I. LNCS, Springer (2024) 28. Piccolo, S.A., Lehmann, S., Maier, A.: Design process robustness: a bipartite network analysis reveals the central importance of people. Design Science 4, e1 (2018) 29. Raghavendra, P., Steurer, D.: Graph expansion and the unique games conjecture. In: Proceedings of the Forty-Second ACM Symposium on Theory of Computing. p. 755–764. STOC ’10, Associa-tion for Computing Machinery, New York, NY, USA (2010). https://doi.org/10.1145/1806689.1806792, https://doi.org/10.1145/1806689.1806792 30. Rossi, R., Ahmed, N.: The network data repository with interactive graph analytics and visualization. In: Proceedings of the AAAI conference on artificial intelligence (2015) 31. Schelter, S., Kunegis, J.: Tracking the trackers: A large-scale analysis of embedded web trackers. In: Proc. Int. Conf. on Web and Soc. Media (2016) 32. Tang, J., Zhang, J., Yao, L., Li, J., Zhang, L., Su, Z.: Arnetminer: extraction and mining of academic social networks. In: Proceedings of the 14th ACM SIGKDD international conference on Knowledge discovery and data mining. pp. 990–998 (2008) 33. Tarkowski, M.K., Michalak, T.P., Rahwan, T., Wooldridge, M.: Game-theoretic network centrality: A review. arXiv preprint arXiv:1801.00218 (2017)

@@ -1,0 +1,110 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.21863v1/fig-001.webp",
+      "caption": "Table 9: Hyperparameters used for 1 and 2-qubit quantum compilation experiments. All agents share a common environment and training configuration; buffer-specific parameters are listed separately in the lower block.",
+      "page": 26,
+      "index": 1,
+      "width": 427,
+      "height": 803
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21863v1/fig-002.webp",
+      "caption": "Figure 1: Overview of replay-buffer engineering for quantum optimization. (Left) Buffer engineering improves experience reuse through replay design and sampling. (Middle) Amortized learning reduces the cost of curriculum RL-based quantum architecture search by performing expensive quantum-classical updates only every m steps. (Right) Noise-aware transfer warm-starts the RL-training in noisy environment by reusing trajectories collected in noiseless training.",
+      "page": 2,
+      "index": 2,
+      "width": 826,
+      "height": 365
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21863v1/fig-003.webp",
+      "caption": "Figure 4: Efficiency and performance on 12-qubit H2O. (Left) OptCRLQAS reduces wall-clock time per episode by 67.5% over CRLQAS [19]. (Right) ReaPER achieves the lowest minimum energy error and fastest convergence across all replay baselines.",
+      "page": 7,
+      "index": 3,
+      "width": 817,
+      "height": 194
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21863v1/fig-004.webp",
+      "caption": "Table 2: OptCRLQAS + ReaPER+ vs. non-RL baselines. Our method achieves the lowest energy error across all systems while using competitive or fewer gates. The 5-qubit Heisenberg model is described in Appendix J.2. For 5-Heisenberg we utilize an action space consists of {XX(θxx), YY(θyy), ZZ(θzz), RX(θx), RY(θy), RZ(θz)} gates.",
+      "page": 7,
+      "index": 4,
+      "width": 736,
+      "height": 290
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21863v1/fig-005.webp",
+      "caption": "Figure 3: Replay-buffer design controls circuit compactness in QAS. For 6-BEH2 and 8-H2O, ReaPER+ variants yield the lowest total, CNOT, and rotation gate counts compared to PER and uniform replay (mean ± std over seeds). ω=0 recovers PER; ω=1 gives fully reliability-adjusted replay.",
+      "page": 7,
+      "index": 5,
+      "width": 781,
+      "height": 338
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21863v1/fig-006.webp",
+      "caption": "Figure 10: Comparative runtime analysis of the baseline CRLQAS versus OptCRLQAS across 6-, 8-, and 10-qubit tasks. The left panel shows the quantum energy evaluation time (in seconds), and the right panel displays the classical optimization time (in seconds). Results for OptCRLQAS are reported for different replay buffer sizes (m ∈ {3, 5, 7, 10}). Error bars denote the standard deviation measured over 3 to 5 independent episodes. The utilization of OptCRLQAS yields an average runtime reduction of up to 89% for quantum evaluations and 85% for classical optimizations at m = 10.",
+      "page": 22,
+      "index": 6,
+      "width": 794,
+      "height": 385
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21863v1/fig-007.webp",
+      "caption": "Figure 5: Weighted transfer matrix for BEH2 under noiseless and noisy transfer. Buffer transfer reduces steps to chemical accuracy by 47-58% and improves final energy by up to 90.2% across all noise settings, yielding composite scores of 19.2-35.8%. The strongest score (35.8%) is driven by the largest energy improvement at p2=0.001.",
+      "page": 8,
+      "index": 7,
+      "width": 727,
+      "height": 305
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21863v1/fig-008.webp",
+      "caption": "Figure 6: Weighted transfer matrix for H2O under noiseless and noisy transfer. Step reductions range from 49.8% to 84.8%, and energy improvements reach 46.7% under combined noise (p1=0.001, p2=0.005), yielding the highest score of 28.7%.",
+      "page": 8,
+      "index": 8,
+      "width": 728,
+      "height": 283
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21863v1/fig-009.webp",
+      "caption": "Figure 8: ReaPER+ progressively concentrates buffer mass toward higher-fidelity transitions (fidelity ≥ 0.95) while retaining broader early-training coverage, consistent with its annealed transition from PER-like exploration to ReaPER-like reliability-aware sampling. PER maintains broader low-fidelity coverage throughout training, while ReaPER shows intermediate concentration behavior.",
+      "page": 17,
+      "index": 9,
+      "width": 653,
+      "height": 389
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21863v1/fig-010.webp",
+      "caption": "Table 8: Environment, agent, and optimizer configuration for quantum architecture search benchmarks.",
+      "page": 24,
+      "index": 10,
+      "width": 506,
+      "height": 621
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21863v1/fig-011.webp",
+      "caption": "Figure 7: Weighted transfer matrix for 12-qubit H2O under noiseless and noisy transfer. Transfer reduces steps to achieve a similar accuracy as non-transfer by 88.2% and CNOT count by 57.6%, under combined depolarizing noise (p1=0.001, p2=0.005).",
+      "page": 9,
+      "index": 11,
+      "width": 808,
+      "height": 227
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21863v1/fig-012.webp",
+      "caption": "Table 3: Hyperparameters for the LunarLander-v3 validation experiment. Shared parameters apply to all three replay strategies; method-specific parameters are listed in the lower block.",
+      "page": 20,
+      "index": 12,
+      "width": 510,
+      "height": 563
+    },
+    {
+      "url": "assets/figures/arxiv/2604.21863v1/fig-013.webp",
+      "caption": "Figure 2: 1-qubit compiling of Haar-random target unitaries with RX, RY, RZ(±π/128) gates. (Left) Success probability and mean fidelity at tolerances 0.99, 0.999, and 0.9999, where ReaPER+ performs best overall. (Right) mean circuit length with std. dev. error bars versus tolerance; although all methods require deeper circuits at higher accuracy and exhibit a similar growth rate with tightening tolerance, ReaPER+ maintains a consistently lower circuit-length offset, giving the best accuracy-length tradeoff across all tolerance levels.",
+      "page": 5,
+      "index": 13,
+      "width": 809,
+      "height": 379
+    }
+  ]
+}

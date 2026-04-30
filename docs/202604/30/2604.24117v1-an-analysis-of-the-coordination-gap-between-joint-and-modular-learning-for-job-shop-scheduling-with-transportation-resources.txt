@@ -1,0 +1,484 @@
+Title: An Analysis of the Coordination Gap between Joint and Modular Learning for Job Shop Scheduling with Transportation Resources
+
+URL Source: https://arxiv.org/pdf/2604.24117v1
+
+Published Time: Tue, 28 Apr 2026 01:34:47 GMT
+
+Number of Pages: 8
+
+Markdown Content:
+# An Analysis of the Coordination Gap between Joint and Modular Learning for Job Shop Scheduling with Transportation Resources 
+
+Moritz Link 1, Jonathan Hoss 1, and Noah Klarmann 1
+
+Abstract — Efficient job-shop scheduling with transportation resources is critical for high-performance manufacturing. With the rise of ”decentralized factories”, multi-agent reinforcement learning has emerged as a promising approach for the combined scheduling of production and transportation tasks. Prior work has largely focused on developing novel cooperative architec-tures while overlooking the question of when joint training is necessary. Joint training denotes the simultaneous training of job and automatic guided vehicle scheduling agents, whereas modular training involves independently training each agent followed by post-hoc integration. In this study, we systematically investigate the conditions under which joint training is essential for optimal performance in the job-shop scheduling problem with transportation resources. Through a rigorous sensitivity analysis of resource scarcity and temporal dominance, we quantify the coordination gap — the performance difference between these two training modalities. In our evaluation, the joint training can produce superior performance compared to the best-performing combinations of dispatching rules and modular training. However, the coordination gap advantage diminishes in bottleneck environments, particularly under se-vere transport and processing constraints. These findings in-dicate that modular training represents a viable alternative in environments where a single scheduling task dominates. Overall, our work provides practical guidance for selecting between training modalities based on environmental conditions, enabling decision-makers to optimize reinforcement learning-based scheduling performance. 
+
+I. INTRODUCTION In today’s competitive industrial landscape, flexibility, cost-efficiency, and productivity are the primary drivers in manufacturing. Optimal scheduling is essential to minimize operational costs, maximize throughput, and ensure effective resource management. With the integration of automatic guided vehicles (AGVs) for material handling, intralogistics scheduling has gained significant relevance. This problem, often defined as job-shop scheduling problem with trans-portation resources (JSSPT), extends the classical job-shop scheduling problem (JSSP) by incorporating transportation constraints [1], [2]. Consequently, the simultaneous opti-mization of production operations and vehicle-based trans-portation is critical for the development of future high-performance manufacturing environments [3].           
+
+> *Supported by the Chips Joint Undertaking and its members, including top-up funding by National Authorities, within the Cynergy4MIE project (Grant Agreement No. 101140226).
+> 1Faculty of Management and Engineering, University of Applied Sciences, 83024 Rosenheim, Germany,Correspondence:
+
+moritz.link@th-rosenheim.de 
+
+> This work has been submitted to the IEEE for possible publication. Copyright may be transferred without notice, after which this version may no longer be accessible.
+
+Various methodologies exist to address the N P -hard JSSP and its variants. While exact optimization methods guarantee optimal solutions, they generally fail to identify feasible solutions within a practical time limit. For this reason, procedures, such as dispatching rules (DRs), and genetic algorithms (GAs), have been widely adopted. DRs facili-tate real-time decision-making with negligible computational overhead but frequently yield sub-optimal results and lack adaptability across diverse problem instances. Conversely, GAs provide superior solution quality but are computation-ally intensive, rendering them frequently unsuitable for real-time scheduling applications [4], [5]. To overcome these limitations, researchers have increas-ingly applied deep reinforcement learning (DRL) to schedul-ing variations, leveraging its adaptability and generalization capabilities in complex decision-making tasks [6]. Existing literature primarily distinguishes between end-to-end and priority dispatching rule (PDR)-based architectures. In PDR-based DRL, the agent’s action space consists of a set of predefined DRs. Despite offering scalability, this approach’s performance is capped by the sub-optimality of the rule set, leading to performance degradation in complex industrial scenarios [7], [8]. To address the distinct requirements of transportation control and operation scheduling, research has shifted from single-agent reinforcement learning (RL) toward multi-agent reinforcement learning (MARL), focusing on cooperative decentralized architectures [7], [9], [10], [11]. By decomposing responsibilities and action spaces, MARL has demonstrated robust performance in cooperative environ-ments. Despite its potential, MARL is frequently hindered by non-stationarity, increased state-space complexity, partial observability, and the multi-agent credit assignment prob-lem. These challenges result in degraded training stability and inconsistent policy convergence [12]. While specialized training frameworks have been proposed to coordinate agent updates [9], [11], they typically assume centralized control over all agents and the environment. This assumption is often unrealistic in modern ”decentralized factories”, where sub-systems are integrated from multiple vendors. Furthermore, centralized training can be computationally expensive when individual agents or components are replaced. Finally, the incorporation of shared information, such as embeddings, creates interdependencies that restrict the system’s modular-ity and flexibility in dynamic production settings [12], [13]. Given the shift toward multi-agent architectures, this study investigates the conditions under which joint training is essential for JSSPT versus when modular training is suffi-
+
+> arXiv:2604.24117v1 [cs.AI] 27 Apr 2026
+
+cient. This research evaluates DRL performance across two modalities: a joint setting, characterized by the concurrent training of job and AGV scheduling agents to foster learned cooperation through MARL, and a modular setting, where agents are trained independently and integrated post-hoc. While prior RL research for JSSPT has focused on proposing cooperative architectures, the question of when joint training is necessary remains largely unexplored. Unlike framework-centric studies, we provide a rigorous sensitivity analysis of the coordination gap, quantifying performance differentials between both training modalities. By evaluating performance across varying resource intensities — the relative scarcity of transportation resources and temporal-dominance ratios, rep-resenting the balance between transportation and processing durations — we identify the specific conditions under which the performance of independent agents diverges significantly from their coordinated counterparts. The main contributions of this study are summarized as follows:  
+
+> •
+
+Introduction of a novel training framework that enables independent agent learning while maintaining compati-bility for joint evaluation.  
+
+> •
+
+A systematic sensitivity analysis of joint versus modular RL training for JSSPT, identifying conditions under which joint training is essential to effectively coordinate both schedulers.  
+
+> •
+
+Characterization of the non-linear impact of resource scarcity and temporal-dominance on the coordination gap, elucidating the functional interdependence of lo-gistics and production scheduling. II. METHODOLOGY 
+
+A. Problem Formulation 
+
+Consider a set of n independent jobs, J =
+
+{J1, J 2, . . . , J n}, and a set of m + 2 machines, 
+
+M = {Ml, M u, M 1, . . . , M m}, where Ml and Mu
+
+are the load and unload machines from which jobs enter and leave the system. Each machine contains an input and an output buffer to store arriving and processed operations. A job j ∈ J is associated with a fixed, job-specific routing that defines an ordered sequence of 
+
+m + 1 operations Oj,i , 1 ≤ i ≤ m + 1 . Each operation must be processed on a specific machine μj,i ∈ M for a processing time pj,i > 0. The last operation Oj,m +1 
+
+represents the release to the unload machine Mu with 
+
+pj,m +1 = 0 . Additionally, AGVs are required to transport operations between machines. Specifically, an AGV picks up an operation from a machine’s output buffer and delivers it to the subsequent machine’s input buffer for further processing. A set V = {V1, V 2, . . . , V k} comprises k
+
+AGVs, with potentially asymmetric transportation times 
+
+t(Mi, M j ) between machines Mi and Mj . The input buffers are infinite and follow a first-in-first-out (FIFO) rule, ensuring that operations arriving at a machine are queued in order without capacity restrictions. Conversely, the output buffers provide infinite capacity without an ordering constraint, enabling an AGV to pick up completed operations in any order. At the beginning, all AGVs start at the load machine. The goal of the JSSPT is to minimize the makespan min Cmax , with Cmax = max j∈J cj,m +1 ,where cj,m +1 denotes the completion time of job j at the unload machine. The completion time is defined as 
+
+cj,i = sj,i + pj,i with the operation’s start time sj,i .The transport completion time cTj,i is determined by the start time sTj,i and the travel time t(·) between machine locations μj,i −1 and μj,i as cTj,i = sTj,i + t(μj,i −1, μ j,i ).To solve the JSSPT, the conditions for the JSSP are enhanced by transportation conditions. For the classic JSSP, the operations have to be processed in sequential order, expressed as Oj, 1 −→ Oj, 2 −→ . . . −→ Oj,m +1 . Additionally, machines can process one operation at a time without preemption. The AGVs are restricted by unit-capacity, with no preemption permitted during transportation. An operation can only be transported after its predecessor completes processing on its machine: sTj,i ≥ cj,i −1, and the processing of the operation starts after transportation: sj,i ≥ cTj,i . In addition, sTj,i depends on the pending tasks of the AGV: 
+
+sTj,i ≥ max( cj,i −1, idle u + t(loc u, μ j,i −1)) , (1) where idle u denotes the time AGV u finishes its pending tasks, and loc u the machine location where u becomes idle. 
+
+B. Markov Decision Process Formulation 
+
+We define the Markov decision process (MDP) by the tuple 
+
+(N, S, A, P, R, γ ). N defines the number of agents, S is the finite state space, and A = Qni=1 Ai is the joint action space with Ai denoting the agent i’s action space. P represents the transition probability P (st+1 |st, a) to state st+1 from state 
+
+st with joint action a ∈ A. R returns a scalar reward for a given state s and a. γ ∈ [0 , 1] is the discount factor. In our definition, N = 2 in the multi-agent setting or N = 1 for the single-agent training. 
+
+State: The global state St is composed of two local states 
+
+Sot and Sagv t , representing the states for the job scheduler and AGV scheduler at timestep t. Sot is a disjunctive graph, denoted as G = {V, E }, with vertices V and edges E.Vertices V = {O, M} comprise operations O and machines 
+
+M. Edges are divided into disjunctive edges D, encoding precedence constraints between operations, and conjunctive edges C, representing machine–operation assignments. In this formulation, all operations within a job are connected sequentially, and each operation is bidirectionally connected to its processing machine. This graph representation enables multichannel communication across machine resources while preserving the job precedence flow. The feature set for a vertex v ∈ V depends on its type, yet all vertices share a common base representation: 1) a binary indicator S(v),which is defined as 1 only if v is already scheduled, and 2) a binary indicator T (v), which takes the value 1 only if v is a machine vertex. In addition, a vertex vo ∈ O for operation 
+
+Oj,i contains a lower bound (LB) scalar defined as: LB j,i = max    
+
+> s∈scheduled Oj
+> s<i for job j
+
+cj,s + X  
+
+> k∈unscheduled Oj
+> k≤i
+
+pj,k , (2) and a machine vertex vm ∈ M incorporates the ratio of scheduled to total operations for this machine: 
+
+rvm = nsched (vm)
+
+n , (3) where n is the number of jobs and nsched (vm) the number of scheduled operations assigned to machine vm. These distinct features denote the type-specific completion ratio. Finally, the LB j,i is normalized based on all other vertices in O.The state Sagv t is defined by a set of features for each AGV u. These features comprise six scalars: earliest pick-up time (EPUT), earliest start time (EST), earliest ready time (ERT), travel time to start (TTS), earliest arrival time (EAT), and earliest finish time (EFT). They are conditioned upon the specific operation Oj,i +1 selected by the job scheduling agent. For this operation, the start machine Ms describes the location of the preceding operation Oj,i and Mt the target machine as Oj,i +1 ’s processing machine. A transport task comprises the traveling from the AGV’s location to Ms and the transport to Mt. EPUT j , with EPUT j = cj,i , is the completion time of Oj,i and provides the earliest possible pick-up time for u. The feature EST m returns the next available time point for Mt, representing the earliest moment the machine can commence processing the next assigned operation Oj,i +1 . It is defined as the maximum completion time cp,l among the set SMt of operations Op,l currently scheduled on Mt, EST m = max Op,l ∈S Mt {cp,l }. ERT u is the next idle time point of u, representing the completion of all pending tasks. TTS u is the travel duration (empty transport) from u’s location to Ms, TTS u = t(loc , M s), with loc denoting the machine where u will be available for the selected task. EAT u is the earliest possible arrival time of u at 
+
+Ms. By combining the time to the idle location and the travel time from there to Ms, EAT u = ERT u +TTS u. Finally, EFT u
+
+represents the earliest finish time of the total transport task. It combines EAT u with the transportation duration t(Ms, M t)
+
+as EFT u = EAT u + t(Ms, M t). All features are scaled between [0 , 1] . For EAT u, ERT u, TTS u, and EFT u, scaling is performed relative to the corresponding values of the other AGVs. The quantities EPUT j and EST m are scaled with respect to their related in-processing items: EPUT j relative to the ready times of other processing operations, and EST m
+
+relative to other processing machines. 
+
+Actions: A = Ao ×Aagv , where Ao is the set of unfinished operations that can be scheduled at a decision time step t and 
+
+ao ∈ Ao represents the selected operation. Aagv is the set of compatible AGVs for the operation ao. The final AGV action is aagv ∈ Aagv . Combined they form the joint action 
+
+a = ao × aagv .
+
+Transition: With the joint action at, the environment transitions from st to a new state st+1 . A new state does not represent a discrete forward movement in physical time but denotes the next valid state that fulfills the JSSPT conditions to schedule another operation-AGV pair after including at.The transition to st+1 is deterministic with P (st+1 |st, at) = 1 and occurs immediately after the joint action at is applied. 
+
+Reward: The optimization target is to minimize the makespan Cmax . Consequently, the reward signal is formu-lated as the negative makespan: 
+
+R =
+
+
+
+− Cmax 
+
+LB · s , if the schedule is complete 
+
+0 otherwise, (4) where s is a static scaling factor and LB represents the lower bound over all jobs at the beginning of the scheduling process with transportation times. While sparse, this reward structure ensures that the agents optimize for the global objective (Cmax ) rather than local processing efficiencies, avoiding greedy but sub-optimal scheduling behaviors. To prevent incentivizing the agents to select infinitely invalid decisions, action masking is applied to operations that are invalid at the current state. This ensures that the total number of decision steps remains equal to the total number of operations (n × (m + 1) ) required to complete the schedule. 
+
+Policy: Policy πθ (at|St) is a combination of the two sub-policies π(ao|Sot ) and π(aagv |Sagv t , a o), where the action of the AGV policy depends on the action of the job policy as described in the state definition. 
+
+C. Baseline Solvers and Network Structure 1) Baselines: We use ten DRs for the operation selection and four for the AGV selection, known for their efficient performance [14], [15], [16], [17]. The baseline solvers are constructed by combining each operation-selection rule with each AGV-selection rule. For the operation selection the following DRs are implemented: shortest processing time (SPT), shortest machine processing time (SMPT), longest processing time (LPT), most work remaining (MWR), least work remaining (LWR), flow due date per most work remain-ing (FDD/MWR), most operations remaining (MOR), least operations remaining (LOR), random and first come first serve (FCFS). The AGV rules are: random, shortest pick-up time (SPUT), shortest completion time of in-transport tasks (SCTA), and shortest completion time of in-transport tasks with pick-up time (SCPT). 
+
+2) Encoder and Decoder Structure: The proposed methodology employs a multi-agent approach to address the JSSPT, where job scheduling and AGV selection are handled by decoupled agents. In this study, the job scheduling agent is a graph neural network (GNN) and employs the graph representation G from Sot . As a basic feature encoder, the graph isomorphism network (GIN) [18] is utilized and defined as: 
+
+h(l) 
+
+> v
+
+= M LP (l)
+
+> θl
+
+(1 + ϵ(l)) · h(l−1)  
+
+> v
+
++ X 
+
+> u∈N (v)
+
+h(l−1) 
+
+> u
+
+ ,
+
+(5) where h(l) 
+
+> v
+
+is the representation of node v at iteration l. M LP 
+
+is a multi-layer perceptron (MLP) with parameters θl and ϵ
+
+a learnable parameter. N (v) are the neighboring nodes of v.After L iterations, a graph embedding hG is obtained by a readout function and combines all node embeddings. We set 
+
+L = 2 , ϵ = 0 , and use for each layer l a two-layered M LP 
+
+with a hidden dimension of 64 and ReLU activation. The global graph representation hG is derived by computing the mean over all final node embeddings h(L) 
+
+> v
+
+.The job scheduler’s decoder is a M LP with three layers and tanh activation functions. The initial two possess an output dimension of 64, followed by a layer that computes a single logit. By concatenating each h(L) 
+
+> v
+
+with hG, the input for the decoder comprises local and global information. This network is applied to all operation node embeddings to generate the logits used for action selection. The AGV scheduling agent is defined as a three-layered 
+
+M LP with tanh activation functions. The first two have an output dimension of 16 and the last layer computes the logit. Applying this network to all AGV embeddings yields a vector of logits for action sampling. The critic employs the same GIN feature encoder. Its decoder leverages the graph embedding hG to compute a state value via a three-layered MLP with tanh activation functions. The initial two layers possess an output dimension of 64, followed by a final layer that outputs the scalar state value. The disjunctive graph embedding hG serves as a suffi-cient proxy for the total system state, as it implicitly captures the temporal dynamics and completion times that already account for transportation delays. This approach reduces the dimensionality of the critic’s input, thereby facilitating more stable value estimation. 
+
+D. Training Framework 
+
+To evaluate the training dynamics of joint versus mod-ularly trained agents, two distinct training frameworks are implemented within an identical environment to ensure con-sistent conditions. Proximal policy optimization (PPO)[19] is selected as the underlying RL algorithm, following its strong performance in prior literature. To differentiate these training modalities, their respective influences on the MDP formu-lation are described. During joint training, both schedulers are represented by learnable agents, as described previously. Therefore, the π(ao|Sot ) is represented by the GN N and 
+
+π(aagv |Sagv t , a o) by the M LP . The single-agent PPO algo-rithm is enhanced by its multi-agent variation MAPPO [20]. Under this variation, both agents undergo concurrent training with independent parameter updates while being optimized through a joint objective. For the modular training, the job and AGV policy learning are decoupled into two independent training runs. However, to satisfy the MDP definition, the joint action at has to consist of both scheduler decisions. By replacing one policy with a baseline DR, two distinct settings are defined:  
+
+> •
+
+Job policy training: π(ao|Sot ) = GN N and 
+
+π(aagv |Sagv t , a o) = DR  
+
+> •
+
+AGV policy training: π(ao|Sot ) = DR and 
+
+π(aagv |Sagv t , a o) = M LP 
+
+A modular solver is constructed by pairing a job scheduling agent and an AGV scheduling agent, with the training DRs as solver identifiers. Sc defines the set of concatenated solvers with Sc = {Ji Aj | i ∈ { 1, . . . , 4}, j ∈ { 1, . . . , 10 }} and the index denotes the training DR as described in Table I. The                              
+
+> TABLE I: Training modalities and solvers
+> modality id i, j Ji DR Aj DR
+> joint 0--modular 1SCTA FDD/MWR 2SCPT MOR 3random LWR 4SPUT SPT 5-MWR 6-random 7-FCFS 8-SMPT 9-LOR 10 -LPT
+
+DRs distinguish the concatenated solver combinations. Our joint solver is identified as J0 A0. III. EXPERIMENTS AND RESULTS 
+
+A. Performance Metrics 
+
+To evaluate the performance of the solvers, this work utilizes the relative percentage increase (RPI) [9] and the win rate (WR). The WR is used to select between DR combinations. For the solver of interest i and a baseline solver y, the RPI is defined as: 
+
+RP I i = − Ci 
+
+> max
+
+− Cy
+
+> max
+
+Cy
+
+> max
+
+× 100 . (6) The WR is defined as the average over the independent wins 
+
+w(i, y ):
+
+w(i, y ) = 
+
+(
+
+1, if Ci 
+
+> max
+
+< C y
+
+> max
+
+0, otherwise . (7) To quantify the availability of transportation resources relative to production demand, the resource scarcity factor (ρ) represents the ratio of the number of AGVs ( k) to the total number of jobs ( n): 
+
+ρ = kn , (8) where ρ ∈ [ 1 
+
+> n
+
+, 1] . The boundary condition ρ = 1 denotes the unconstrained transport limit, where each job can theoreti-cally be serviced by a dedicated vehicle, thereby minimizing resource contention. To evaluate the sensitivity of the coordination gap to relative scheduling task durations, the temporal-dominance index ( τ ∗) characterizes the relative weight of logistics versus processing. Let praw be the average processing and traw 
+
+the average transportation times. To ensure scale-invariance, these values are normalized to a unit interval [0 , 1] using the system’s global time bounds [Tmin , T max ]:
+
+p′ = praw − Tmin 
+
+Tmax − Tmin 
+
+, t′ = traw − Tmin 
+
+Tmax − Tmin 
+
+, (9) with Tmin = 1 and Tmax = 100 . Subsequently, the normalized ratio ϕ ∈ [0 , 1] is computed, representing the processing share of the total ”normalized temporal budget”: 
+
+ϕ = p′
+
+p′ + t′ . (10) Finally, the ratio ϕ is rescaled to the symmetric interval 
+
+[−1, 1] to obtain the dominance index: 
+
+τ ∗ = 2 ϕ − 1 = p′ − t′
+
+p′ + t′ . (11) 
+
+B. Training Details 
+
+This section details the instance generation procedure for the training phase. To facilitate learning across diverse settings, JSSPT instances of size n × m × k are generated stochastically for the number of jobs n, machines m, and AGVs k. Operation-processing times are sampled from a discrete uniform distribution DU (1 , 100) , with transportation times between machines drawn from the same distribution. According to the instance size (n × m), k is sampled uniformly from DU (3 , n ). The training protocol incorporates diverse instance sizes, which are sampled from a predeter-mined set to facilitate robust learning across different job and machine ratios (6 × 6, 10 × 10 , 15 × 10 , 20 × 5, 30 × 10) .Together with a sampled number of AGVs, this configuration of n × m × k is used to train the agents for one rollout. 
+
+C. Implementation Settings 
+
+The hyperparameters for the training settings are sum-marized in Table II. To prevent overfitting to small-scale instances, the rollout length is adjusted dynamically to ensure each batch consistently encompasses four com-pleted episodes. Given that rewards are exclusively pro-vided at the end of an episode, a high discount fac-tor γ is employed to facilitate the propagation of re-ward signals across states. To facilitate reproducibility and provide the full hyperparameter configuration, the source code is available at https://github.com/dummy/ omitted-to-keep-anonymity .                    
+
+> TABLE II: Hyperparameter configuration
+> category parameter value
+> training total frames 4×10 6
+> optimizer Adam learning rate 0.0003 learning rate schedule linear decay instances per rollout 4number epochs 1scaling factor s5PPO settings clipping ϵ0.2 discount factor γ0.999 GAE parameter λ1.0 entropy coefficient 0.01 critic (value) coefficient 0.5
+
+D. Comparative Performance Evaluation and Sensitivity to Resource Scarcity 
+
+In the first experiment, we compare the solvers against DR baselines. For the evaluation, instances are sampled from the experimental configurations, summarized in Ta-ble III. Processing durations for the instances are drawn from a discrete uniform distribution DU (1 , 100) , consis-tent with the training distribution. To assess performance across varying levels of resource availability, the number             
+
+> TABLE III: Experiment configuration
+> instance: jobs ×machines ×AGVs
+> 15 ×10 18, 15, 12, 9, 6, 3 10 ×10 12, 10, 8, 6, 4, 2 12 ×12 14, 12, 10, 7, 5,2 14 ×14 17, 14, 11, 8, 6, 3 20 ×524, 20, 16, 12, 8, 4 5×10 6, 5, 4, 3, 2, 1 15 ×15 18, 15, 12, 9, 6, 3 30 ×10 36, 30, 24, 18, 12, 6
+
+of AGVs is parameterized using the resource scarcity factor 
+
+ρ ∈ { 0.2, 0.4, 0.6, 0.8, 1.0, 1.2}. For each configuration, 100 unique instances are processed by each solver to ensure sta-tistical significance. The performance is quantified using two primary benchmarks. First, the RPI is calculated against the single best-performing DR combination for each individual instance. Second, the RPI is measured against the overall best DR combination as determined by the WR across all configurations. The results, illustrated in Figure 1a, show the mean RPI with its 95% confidence interval (CI) across all evaluation instances for the joint solver and the top ten modular solvers. For both benchmark experiments, the RL solvers outperform the DR benchmark solvers. Their mean RPI values are in the positive range for both experiments and are even higher when evaluated against the best global DR combination. The joint solver (J0 A0) demonstrates superior performance compared to the modular solvers, achieving an average RPI of approximately 4.2% relative to the best DR combination. In contrast, the modular solvers exhibit high variance, with RPI values ranging from 1.6% to 0.3% in Figure 1a, while the overall minimum reaches -1.0%. This variance indicates that the efficacy of modular agents is sensitive to the specific heuristic pairing employed during the independent training phase. The second experiment investigates the coordination gap by analyzing the RPI as a function of ρ. Figure 1b depicts the RPI between the joint solver and the best-performing modular solver J4 A1. Regarding the RPI calculation in Equation 6, the makespans Ci 
+
+> max
+
+and Cy 
+
+> max
+
+correspond to the results of the J0 A0 and J4 A1 solvers, respectively. The results indicate that the competitive advantage of joint train-ing is maximized in environments with balanced resources. For extreme values of ρ, representing either severe transport bottleneck ( ρ < 0.4) or process-constrained regimes ( ρ > 
+
+0.8), the performance gap narrows from 3.4% to 0.6%. These results suggest that under highly constrained settings, the marginal benefits of holistic coordination through joint training diminish, as system performance is dominated by a single bottleneck. In contrast, balanced operational condi-tions enable joint training to effectively optimize the coupling between job scheduling and AGV allocation, thereby maxi-mizing system efficiency. Depending on available transport resources, these insights can guide the strategic selection of training modalities for JSSPT applications. J0 A0 
+
+> J4 A1
+> J4 A2
+> J4 A5
+> J2 A1
+> J2 A2
+> J2 A5
+> J4 A3
+> J4 A7
+> J2 A7
+> J4 A9
+> J2 A9
+> J2 A3
+> J4 A10
+> J2 A10
+> J2 A8
+> J3 A1
+> J4 A8
+> J3 A5
+> J1 A1
+> J3 A2
+> J1 A5
+
+6
+
+5
+
+4
+
+3
+
+2
+
+1
+
+0
+
+−1
+
+0
+
+solver        
+
+> mean RPI (%)
+> vs best DRs per instance
+> vs MOR & SCTA
+> (a) RPI performance across joint and modular solvers (mean ±95% CI).
+> 0.20.40.60.811.2
+> 4
+> 3
+> 2
+> 1
+> 0
+
+ρ      
+
+> mean RPI (%)
+> (b) RPI of J0 A0 vs. J4 A1 relative to ρ(mean ±95% CI). Fig. 1: Performance analysis of joint and modular solvers. (a) Overall RPI benchmark analysis of the joint solver and the top ten modular solvers. (b) Behavior of RPI relative to resource scarcity factor ρfor joint and best modular solver.
+
+E. Analysis of the Coordination Gap and Task Interdepen-dence 
+
+We design a grid experiment using range-based sampling to systematically explore the effect of relative temporal-dominance ( τ ∗) and resource scarcity ( ρ) on solver perfor-mance. The processing times of operations and the trans-portation times of AGVs are independently sampled from discrete consecutive intervals spanning [1 , 100] , defining 10 bins ( [1 , 10] , [11 , 20] , . . . , [91 , 100] ). Each interval combina-tion forms a grid cell, and within each cell, processing and transport times are sampled uniformly from the cor-responding ranges, resulting in systematic coverage of the induced τ ∗ values. For each cell, 20 random instances are generated per configuration listed in Table III, providing a statistically robust dataset across varying levels of resource scarcity and problem scales. The parameters ρ and τ ∗ are integrated into a bivariate parameter space to characterize the interdependence between transport resource allocation and operational duration dynamics. This mapping enables the identification of four distinct operational regimes:  
+
+> •
+
+Underutilized transport ( ρ < 0.5, τ ∗ > 0.0): This regime forms no dominant bottleneck. It is characterized by a restricted number of AGVs, paired with processing duration dominance. This prevents the formation of a dominant bottleneck.  
+
+> •
+
+Process-constrained (ρ > 0.5, τ ∗ > 0.0): In this regime, performance is governed by the underlying job scheduling logic rather than transport constraints. With both abundant resource availability and high transport efficiency, the system is primarily limited by machine processing.  
+
+> •
+
+Transport-constrained ( ρ < 0.5, τ ∗ < 0.0): This regime represents a critical transport bottleneck where vehicle scarcity is exacerbated by transport duration dominance. The system performance is highly sensitive to the trans-port scheduling.  
+
+> •
+
+Resource-saturated ( ρ > 0.5, τ ∗ < 0.0): In contrast to the initial scenario, this regime features a dominance of transportation durations that is mitigated by abun-dant resource availability. This prevents transport from becoming the primary system bottleneck. We utilize these regimes to analyze the interdependency of the two factors and the resulting performance delta between joint and modular training. Figure 2 illustrates the RPI of the joint solver ( J0 A0) in contrast to the best-performing modular solver ( J4 A1). The analysis reveals a distinct hierarchy of solver efficacy across the operational regimes: as illustrated, J0 A0 demonstrates significant performance gains within the resource-saturated and underutilized trans-port regimes, with regime mean RPIs of 4.0% and 3.6% ,respectively. In these regions, the absence of a dominant bot-tleneck allows the joint solver to optimize the schedule more effectively, with peak RPI values reaching up to 8.5% . Con-versely, in the process-constrained and transport-constrained bottleneck regimes, the RPI decreases and solver perfor-mance equalizes. Within the transport-constrained regime, several cells show zero improvement, and one cell even yields a slightly negative value. Consequently, the mean RPIs for these bottleneck regimes decrease to 1.5% and 0.7% ,respectively. The influence of the interplay between scheduling tasks is quantified by a hierarchical regression approach. Ordinary least squares (OLS) regression models are fitted with the RPI between the joint solver J0 A0 and the best modular solver 
+
+J4 A1, as the dependent variable. The model variables are derived from the two coupling factors ρ and τ ∗, to capture the balance and dominance of the tasks. First, the bottleneck dominance BD is computed as: 
+
+BD = | − max(0 , τ ∗) + ( −ρ + 1) |, (12) where the max term captures the dominance of the process-ing times, and the second term defines the AGV availability bottleneck region. Together they denote two distinct bottle-neck regimes, where either the job or transport scheduling task is dominant. The balance metric BM is then defined 0.2 0.4 0.6 0.8 1.0 1.2 
+
+-1.0 
+
+-0.8 
+
+-0.6 
+
+-0.4 
+
+-0.2 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0                                                                                                          
+
+> −0.20.114.48.56.8
+> 0.10.61.54.77.84.8
+> 00.624.97.34.7
+> 00.21.74.57.64.8
+> 0.10.72.64.96.43.7
+> 0.30.92.84.54.72.6
+> 0.51.33.34.44.52.3
+> 0.71.73.44.23.41.7
+> 0.82.23.63.83.11.8
+> 1.12.73.83.32.41.3
+> 1.43.13.931.91.1
+> 1.63.53.82.61.81
+> 1.93.93.62.21.61.2
+> 2.64.23.41.81.20.9
+> 3.34.42.51.71.20.9
+> 442.30.90.80.6
+> 53.32.11.11.21.3
+> 5.52.71.71.411
+> 5.131.50.80.70.7
+> 5.82.51.61.11.21
+> 4.51.81.51.21.21.2
+
+ρ
+
+> τ ∗
+
+0
+
+2
+
+4
+
+6
+
+8
+
+RPI rate (%)       
+
+> Fig. 2: Mapping the coordination gap under coupling factors ρand τ∗. The heatmap displays the RPI between the joint ( J0A0) and modular ( J4A1)solvers.
+
+as BM = ( BD − 1) 2. For the influence of the bottleneck dominance, two variables are defined: 
+
+JBN = τ ∗ × ρ, ABN = ( ρ − 1) × τ ∗. (13) 
+
+JBN identifies the process-constrained regime with positive values and the resource-saturated regime with negative val-ues. ABN captures the underutilized transport and transport-constrained regimes with negative and positive values, re-spectively. In both cases, positive values highlight regimes where a single scheduling task creates a system bottle-neck. Negative values indicate balanced operational regimes, characterized by equally represented scheduling tasks. The remaining regions of both variables exhibit values close to zero. For the following experiments, the features are z-normalized. In the initial stage, the three features are individually analyzed by fitting an OLS regression model for each fea-ture separately. The results indicate that all three features significantly influence the RPI, yielding R2 values of 0.49, 0.18, and 0.28 for BM , ABN , and JBN , respectively. The coefficient for BM is positive (4.06), whereas ABN (-2.83) and JBN (-2.05) have negative coefficients. A multivariate model is fitted using ABN and JBN to determine the joint influence of bottleneck dominance. This model shows an R2 value of 0.63 with negative coefficients (-4.04) for 
+
+ABN and (-2.67) JBN . Finally, a model with all three features is summarized in Table IV. With an F -statistic of 82.10 ( p < 0.001 ), the model confirms a statistically significant relationship. Multicollinearity is assessed using variance inflation factor (VIF) values to ensure the reliability of the coefficient estimates. All VIF scores in Table V remain below five, indicating that moderate correlations exist, but critical multicollinearity is absent. The correlation between the features is:             
+
+> TABLE IV: OLS regression statistics
+> parameter value
+> R20.67 adj. R20.66
+> F-statistic 82.10 Prob (F-statistic) 3.91 ×10 −29
+> observations 126 cond no. 2.43
+> •
+
+JBN and BM : -0.42  
+
+> •
+
+JBN and ABN : -0.26  
+
+> •
+
+ABN and BM : -0.43 The magnitudes of the coefficients are shown in Table V. While the full model achieves the highest R2 (0.67), the marginal increase over the two-feature model is relatively modest. This suggests that the balance metric provides ad-ditional explanatory power, but the variance in RPI is pre-dominantly captured by the bottleneck dominance features.                                    
+
+> TABLE V: OLS model coefficients
+> variable coef std error tP > |t|95% CI VIF
+> const 2.55 0.10 26.79 0.0 [2 .36 ,2.74] -
+> BM 0.54 0.13 4.03 0.0 [0 .27 ,0.80] 1.97
+> JBN -0.95 0.13 -7.62 0.0 [−1.20 ,−0.70] 1.72
+> ABN -0.80 0.13 -6.34 0.0 [−1.05 ,−0.55] 1.75
+
+In all analyses, a trend of decreasing RPI values is ob-served, corresponding to the increasing dominance of a single scheduling task, while regions with a balanced distribution of tasks exhibit higher RPI values. The negative coefficients for JBN and ABN lead to a decreasing RPI in regions with scheduling task dominance and increase the RPI in balanced regions. The positive coefficient of the balance met-ric yields an increase in RPI with growing balance between tasks. These effects align with the observed behavior in the heatmap (Figure 2), in which the same trend is visible in the regimes. These insights indicate that the coordination gap is driven by the level of functional interdependence between scheduling tasks. The strong balance between transport and processing tasks enables joint training to effectively optimize the coupling between job scheduling and AGV allocation. In contrast, the presence of a dominant bottleneck diminishes the marginal benefits of holistic coordination. With a bot-tleneck, the system’s performance is primarily constrained by a single scheduling task, thereby reducing the relative advantage of joint training over modular approaches. IV. CONCLUSION This study demonstrates the influence of resource avail-ability and temporal dynamics on the performance of joint versus modular training strategies in JSSPT tasks. Overall, joint training of job and AGV scheduling agents outper-forms modular approaches. However, this advantage di-minishes in bottleneck environments, where transport or processing constraints dominate and a hierarchical structure of scheduling tasks exists. These findings have practical implications for the design of RL-based scheduling systems in manufacturing environments. Depending on environmental conditions, decision-makers can select the most appropriate training modality to optimize performance and resource utilization. This work provides a foundation for extending the MARL framework to industrial JSSPT scenarios. Future research will investigate flexible JSSPT with the inclusion of a machine-selection agent, as well as the integration of multiple objectives, including energy consumption, delay minimization, and cost efficiency. REFERENCES [1] L. Berterotti` ere, S. Dauz` ere-P´ er` es, and C. Yugma, “Flexible job-shop scheduling with transportation resources,” European Journal of Operational Research , vol. 312, no. 3, Feb 2024. [2] H. E. Nouri, O. B. Driss, and K. Gh´ edira, “A classification schema for the job shop scheduling problem with transportation resources: State-of-the-art review,” in Artificial Intelligence Perspectives in Intelligent Systems , vol. 464. Springer International Publishing, Jan 2016. [3] J. Blazewicz, H. A. Eiselt, G. Finke, G. Laporte, and J. Weglarz, “Scheduling tasks and vehicles in a flexible manufacturing system,” 
+
+International Journal of Flexible Manufacturing Systems , vol. 4, no. 1, Aug 1991. [4] A. Bagheri, M. Zandieh, I. Mahdavi, and M. Yazdani, “An artificial immune algorithm for the flexible job-shop scheduling problem,” 
+
+Future Generation Computer Systems , vol. 26, no. 4, Apr 2010. [5] S. Luo, “Dynamic scheduling for flexible job shop with new job insertions by deep reinforcement learning,” Applied Soft Computing ,vol. 91, Jun 2020. [6] M. Yuan, L. Zheng, H. Huang, K. Zhou, F. Pei, and W. Gu, “Research on flexible job shop scheduling problem with AGV using double DQN,” Journal of Intelligent Manufacturing , vol. 36, no. 1, Jan 2025. [7] Y. Li, Q. Wang, X. Li, L. Gao, L. Fu, Y. Yu, and W. Zhou, “Real-time scheduling for flexible job shop with AGVs using multiagent rein-forcement learning and efficient action decoding,” IEEE Transactions on Systems, Man, and Cybernetics: Systems , vol. 55, no. 3, Mar 2025. [8] S. Chen, Z. Huang, and H. Guo, “An end-to-end deep learning method for dynamic job shop scheduling problem,” Machines , vol. 10, no. 7, Jul 2022. [9] W. Cheng, C. Zhang, L. Meng, K. Gao, B. Zhang, and H. Sang, “A cooperative agent deep reinforcement learning framework for solving flexible job shop scheduling problem with automated guided vehicles,” 
+
+Expert Systems with Applications , vol. 287, Aug. 2025. [10] J. Popper, V. Yfantis, and M. Ruskowski, “Simultaneous production and AGV scheduling using multi-agent deep reinforcement learning,” 
+
+Procedia CIRP , vol. 104, Jan 2021. [11] Q. Zhou, Z. Cheng, and H. Wang, “A modular and coordinated multi-agent framework for flexible job-shop scheduling problems with various constraints,” in 2024 IEEE International Conference on Systems, Man, and Cybernetics (SMC) . IEEE, Oct 2024. [12] F. Bahrpeyma and D. Reichelt, “A review of the applications of multi-agent reinforcement learning in smart factories,” Frontiers in Robotics and AI , vol. 9, Dec 2022. [13] P. Leit˜ ao, “Agent-based distributed manufacturing control: A state-of-the-art survey,” Engineering Applications of Artificial Intelligence ,vol. 22, no. 7, Oct 2009. [14] Y. Li, Q. Wang, X. Li, L. Gao, L. Fu, Y. Yu, and W. Zhou, “Real-time scheduling for flexible job shop with AGVs using multiagent rein-forcement learning and efficient action decoding,” IEEE Transactions on Systems, Man, and Cybernetics: Systems , vol. 55, no. 3, Mar 2025. [15] K. Lei, P. Guo, W. Zhao, Y. Wang, L. Qian, X. Meng, and L. Tang, “A multi-action deep reinforcement learning framework for flexible job-shop scheduling problem,” Expert Systems with Applications , vol. 205, Nov 2022. [16] Z. Li, W. Gu, H. Shang, G. Zhang, and G. Zhou, “Research on dynamic job shop scheduling problem with AGV based on DQN,” Cluster Computing , vol. 28, no. 4, Aug 2025. [17] Y.-H. Chang, C.-H. Liu, and S. D. You, “Scheduling for the flexible job-shop problem with a dynamic number of machines using deep reinforcement learning,” Information , vol. 15, no. 2, Feb 2024. [18] K. Xu, W. Hu, S. Jegelka, and J. Leskovec, “How powerful are graph neural networks?” in International conference on learning representations , Jan 2019. [19] J. Schulman, F. Wolski, P. Dhariwal, A. Radford, and O. Klimov, “Proximal policy optimization algorithms,” arXiv preprint arXiv:1707.06347 , 2017. [20] C. Yu, A. Velu, E. Vinitsky, J. Gao, Y. Wang, A. Bayen, and Y. Wu, “The surprising effectiveness of ppo in cooperative multi-agent games,” in Proceedings of the 36th International Conference on Neural Information Processing Systems , ser. NIPS ’22. Red Hook, NY, USA: Curran Associates Inc., Nov 2022.

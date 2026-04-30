@@ -1,0 +1,1199 @@
+Title: Replay-buffer engineering for noise-robust quantum circuit optimization
+
+URL Source: https://arxiv.org/pdf/2604.21863v1
+
+Published Time: Fri, 24 Apr 2026 01:10:14 GMT
+
+Number of Pages: 26
+
+Markdown Content:
+# Replay-buffer engineering for noise-robust quantum circuit optimization 
+
+Akash Kundu 1,2∗ Sebastian Feld 1,21Delft University of Technology, Delft, The Netherlands 
+
+> 2
+
+Quantum Computing Division, QuTech, The Netherlands 
+
+{A.kundu, S.Feld }@tudelft.nl 
+
+## Abstract 
+
+Deep reinforcement learning (RL) for quantum circuit optimization faces three fundamental bottlenecks: replay buffers that ignore the reliability of temporal-difference (TD) targets, curriculum-based architecture search that triggers a full quantum-classical evaluation at every environment step, and the routine discard of noiseless trajectories when retraining under hardware noise. We address all three by treating the replay buffer as a primary algorithmic lever for quantum op-timization. We introduce ReaPER +, an annealed replay rule that transitions from TD error-driven prioritization early in training to reliability-aware sampling as value estimates mature, achieving 4-32 × gains in sample efficiency over fixed PER, ReaPER, and uniform replay while consistently discovering more com-pact circuits across quantum compilation and QAS benchmarks; validation on LunarLander-v3 confirms the principle is domain-agnostic. Furthermore we elim-inate the quantum-classical evaluation bottleneck in curriculum RL by introduc-ing OptCRLQAS which amortizes expensive evaluations over multiple architec-tural edits, cutting wall-clock time per episode by up to 67 .5% on a 12-qubit optimization problem without degrading solution quality. Finally we introduce a lightweight replay-buffer transfer scheme that warm-starts noisy-setting learn-ing by reusing noiseless trajectories, without network-weight transfer or ϵ-greedy pretraining. This reduces steps to chemical accuracy by up to 85-90% and final energy error by up to 90% over from-scratch baselines on 6-, 8-, and 12-qubit molecular tasks. Together, these results establish that experience storage, sam-pling, and transfer are decisive levers for scalable, noise-robust quantum circuit optimization. 
+
+## 1 Introduction 
+
+Optimization is one of the most important application areas of quantum computing [1, 2], both as a target problem class and as an internal algorithmic task in the design and execution of quantum algorithms. On current quantum hardware, quantum computation is realized through sequences of elementary logic gates arranged into quantum circuits [3, 4, 5], and their depth, gate count, and hardware compatibility of these circuits directly determines what can be achieved in practice [6, 7]. This makes circuit optimization a central challenge across both near-term and fault-tolerant regimes. In the near term [8, 9], limited coherence, connectivity, and high gate noise place strong pressure on circuit depth, two-qubit gate count, and hardware compatibility. In the longer term [10, 11, 12], fault-tolerant quantum computing will relax some hardware constraints but will not remove the need for efficient circuit synthesis, compilation, and task-adapted circuit design. Across both 
+
+> ∗Corresponding author. Preprint.
+> arXiv:2604.21863v1 [quant-ph] 23 Apr 2026
+
+settings, the ability to construct compact and effective quantum circuits remains a key determinant of performance, resource cost, and practical utility. Figure 1: Overview of replay-buffer engineering for quantum optimization. (Left) Buffer engineering 
+
+improves experience reuse through replay design and sampling. (Middle) Amortized learning reduces the cost of curriculum RL-based quantum architecture search by performing expensive quantum-classical updates only every m steps. (Right) Noise-aware transfer warm-starts the RL-training in noisy environment by reusing trajectories collected in noiseless training. Replay buffer   
+
+> Experience
+> 1-Step
+> 2-Step
+> Buffer engineering Amortized learning Noise-aware transfer
+> Noiseless
+> Noisy
+> m-Step
+> Sampling
+> batch
+> Noise
+> m-Step
+> Observable
+
+Reinforcement learning (RL) [13] has emerged as a promising framework for this problem because it treats circuit design as a sequential decision process, enabling agents to construct gate sequences or parameterized circuit architectures step by step [14, 15]. RL has been successfully applied to quantum compilation [16, 17] and variational quantum circuit design [14, 18]. However, its prac-tical use remains limited by a basic inefficiency: past experience is often poorly reused . In most existing workflows [14, 19, 20, 21], each new setting is treated as a fresh training problem, so tra-jectories collected in a noiseless simulator are discarded when the task is revisited under hardware noise which is an especially costly choice in quantum optimization [22], where the noiseless-to-noisy gap represents a shift between fundamentally distinct computational substrates that is physi-cally motivated, practically unavoidable, and grows in severity with system size, making experience reuse both more challenging and more valuable than in classical transfer settings. In the standard variational framework [23], a parameterized quantum circuit U (θ, A) is defined by a discrete ar-chitecture A and continuous parameters θ, preparing a state |ψ(θ, A)⟩ = U (θ, A) |0⟩⊗n, with cost 
+
+C(θ, A) = ⟨ψ(θ, A)| H |ψ(θ, A)⟩ estimated on the QPU and a classical optimizer updating θ to-ward targets d(U (θ, A), U tar ) ≤ εcomp or C(θ, A) − E0 ≤ εchem . Each RL step may trigger a full quantum-classical evaluation, so wall-clock time grows rapidly with system size. While TensorRL-QAS [24] narrows the search space via tensor-network warm-starts, it still incurs substantial per-step cost and relies on standard replay buffers without explicit experience transfer; similarly, transfer in RL-optimized error-correcting codes [25] does not treat replay-buffer design as the primary transfer vehicle. As a result, the practicality of RL-based quantum optimization depends not only on the agent architecture, but critically on how experience is stored, prioritized, and transferred across the noiseless-to-noisy scenario which is a direction that is not explored yet in the scope of quantum optimization. We address these bottlenecks by treating the replay buffer as a primary algorithmic lever for mak-ing RL practical in quantum optimization. This is motivated by evidence from classical RL that buffer composition and sampling strongly affect stability and sample efficiency [26, 27, 28, 29, 30]. Figure 1 summarizes our replay-buffer engineering framework, which combines annealed replay, amortized curriculum learning, and lightweight noiseless-to-noisy transfer. Concretely, we make three contributions: 1. Annealed replay for quantum optimization. We systematically study replay design for quantum compiling and architecture search under a fixed DQN [31]/DDQN [32] setup, 2isolating the effect of the buffer from the agent or environment. Based on this analysis, we introduce ReaPER +, an annealed replay rule that transitions from TD-error prioritiza-tion [33] early in training to reliability-aware replay [34] later on, improving sample effi-ciency by 4×-32 × over fixed PER, fixed ReaPER, and uniform replay while finding more compact circuits. A classical RL validation on LunarLander-v3 (Appendix E) confirms that ReaPER + is not domain-specific. 2. Amortized curriculum learning. We introduce OptCRLQAS , an amortized variant of CRLQAS [19] that reuses expensive quantum-classical evaluations across multiple archi-tectural edits. On 12-qubit H2O ground-state preparation, OptCRLQAS reduces average wall-clock time per episode by 67 .5% (3× faster) without degrading final energy error or gate count. 3. Replay-based transfer to noise. We propose a lightweight transfer scheme that reuses noiseless trajectories to warm-start learning in noisy settings, without network-weight transfer or long ϵ-greedy pretraining. On 6-qubit BEH 2, and 8- and 12-qubit H2O molec-ular tasks, this buffer-only transfer cuts the steps needed to reach chemical accuracy by up to 85 -90% and improves final energy error by up to 90% over from-scratch noisy baselines, yielding a transfer advantage that grows with system size. 
+
+## 2 Related work 
+
+Quantum circuit optimization [1] has been approached via adaptive ansatz construction [35], differ-entiable architecture search [36, 37], evolutionary heuristics [38, 39], Bayesian optimization [40], Monte Carlo tree search [41], neural predictors [42], and sampling-based strategies [43], demon-strating automatic circuit structure discovery but revealing persistent challenges in scaling and noise robustness. Within this landscape, reinforcement learning has emerged as a flexible framework for both quantum compiling [16] and quantum architecture search [14, 44, 45], with value-based and policy-gradient methods applied to variational ground-state preparation [14, 19, 24], entangled-state generation [45, 46], and hardware-aware circuit design [47, 48]. We refer the reader the curated list [49] for a complete list of automated quantum circuit optimization approaches. However, ex-isting RL-based frameworks treat each new setting as a fresh training instance, when a task moves from a noiseless simulator to noisy hardware, the agent is retrained from scratch and accumulated experience is discarded, incurring substantial GPU and CPU cost per retraining cycle. Experience replay is a central component of off-policy deep RL [31], with uniform replay, hindsight experience replay [50], prioritized experience replay [33], and reliability-aware variants [34] pro-viding increasingly structured trade-offs between coverage, informativeness, and target reliability. In classical RL, recent offline-to-online methods [27, 28, 29, 30] demonstrate that buffer composi-tion and sampling rules are critical for stable, sample-efficient fine-tuning. In quantum optimiza-tion [19, 25], however, replay buffers have largely been treated as fixed implementation choices rather than as a primary algorithmic design lever. This is the gap our work directly addresses by treating the replay buffer as the central object of design for quantum circuit optimization. 
+
+## 3 Methods 
+
+We introduce a replay-buffer engineering algorithm for quantum circuit optimization as depicted in Figure 1 with three components: (1) annealed replay ( ReaPER+ , described in the next para-graph), (2) amortized curriculum learning ( OptCRLQAS ), and (3) lightweight noiseless-to-noisy buffer transfer. To isolate the effect of replay design from other algorithmic choices, all experiments use a common off-policy deep Q-learning (for quantum compiling) and double deep Q-learning (for quantum architecture search) agent with fixed state representation, action space, reward, and training protocol; only the replay mechanism is varied. 
+
+ReaPER +. Among existing strategies, PER and ReaPER emerge as complementary baselines. PER (see Equation 11) prioritizes transitions with large TD errors, providing aggressive early ex-ploration but potentially amplifying noisy targets. ReaPER (see Equation 13) discounts transitions whose downstream TD errors indicate unreliable targets, better matching the long-horizon structure of episodic quantum optimization but converging more slowly in the early phase. This comple-3mentary behavior motivates a hybrid that transitions from PER-like exploration to ReaPER-like refinement over the course of training. To exploit the best of both regimes, we introduce ReaPER+ , a replay strategy that transitions smoothly from PER-like prioritization to ReaPER-like prioritization over the course of training. Specifically, at training step τ we define 
+
+Ψ(+ ,τ ) 
+
+> t
+
+= Rωτ 
+
+> t
+
+(δ+ 
+
+> t
+
+)α, μ(+ ,τ ) 
+
+> t
+
+= Ψ(+ ,τ )
+
+> t
+
+P 
+
+> i
+
+Ψ(+ ,τ )
+
+> i
+
+, (1) where the annealing exponent ωτ ∈ [0 , 1] is non-decreasing in τ ; ωτ = 0 recovers PER and ωτ = 1 
+
+recovers ReaPER exactly. In practice, we use the linear schedule 
+
+ωτ = ωmin + ( ωmax − ωmin ) min 
+
+ τTann 
+
+, 1
+
+
+
+, (2) which is monotone and controlled by a single interpretable timescale Tann , avoiding the rapid early transitions of cosine or exponential schedules when reliability estimates are still poorly calibrated. We set ωmin = 0 .1 > 0 so that a residual TD-error signal is retained at initialization, where Rt
+
+carries little meaning under a random Q-function, and ωmax = 0 .7 < 1 to prevent premature over-commitment to reliability scores before Q-function convergence (values ωmax ≥ 0.9 produced slower convergence in both settings; see Appendix I). Tann is set to half the total training budget (5 × 10 5 for compilation, 5 × 10 4 for LunarLander-v3; Table 9), so the transition completes by mid-training when value estimates are sufficiently stable. Early in training sampling is thus driven by TD error; later, the influence of Rt grows, biasing replay toward transitions that are both informative and reliable. ReaPER+ therefore preserves the sample-efficiency advantages of PER at the beginning of learning while inheriting the stability of ReaPER once value estimates mature, a design choice directly motivated by the empirical finding that PER excels early while ReaPER is preferable once estimates stabilize this is confirmed by our systematic benchmark of uniform replay, HER [50], PER [33], and ReaPER [34] under a fixed agent across all tasks. A theoretical justification is given in Appendix C. 
+
+Lightweight buffer transfer. In addition to replay-buffer engineering, we study a replay buffer transfer scheme for noise-robust quantum optimization. The idea is to first collect trajectories in a source environment, typically the noiseless version of a given compiling or QAS task, and then use the resulting replay memory to initialize training in the corresponding noisy target environment. Let 
+
+Bsrc denote the replay buffer obtained after source training and B(0) tgt the initial replay buffer of the target task. We initialize the target buffer directly as 
+
+B(0) tgt ← B src , (3) that is, all stored transitions (St, A t, R t, S t+1 , d t) are copied from the source buffer to the target buffer without modification, relabeling, or filtering. This is valid because the noiseless and noisy environments share identical state and action spaces: the RL-state and the gate action set A are unchanged by the introduction of noise, which only affects the transition dynamics and reward statistics. Buffer-only transfer of this kind, where source experience warm-starts a target replay buffer without sharing network weights, has recently proved effective in classical deep RL. Zhou et al. [27] show that seeding the online replay buffer with offline transitions suffices for sample-efficient fine-tuning without retaining the offline dataset or transferring network parameters. Lee et al. [28] study balanced mixing of offline and online replay in the offline-to-online setting, find-ing that the buffer composition critically determines early learning speed. Our scheme follows the same instance-transfer paradigm [51]: experience is transferred at the trajectory level rather than the parameter level, deliberately decoupling the two mechanisms so that their individual contribu-tions can be isolated through controlled ablations that separately compare buffer transfer, network initialization transfer, and their combination. Consequently, trajectories that are informative in the noiseless setting can still provide a strong initialization for learning under noise by improving early buffer coverage and accelerating the dis-covery of high-quality circuits. In Appendix D we provide a formal argument for why replay-buffer transfer is natural in quantum optimization settings under the assumption that source and target tasks share approximately similar state and action spaces. 4OptCRLQAS. Finally, to scale while operating with CRLQAS we realized the time per episode scales rapidly with qubit count, and training the RL-agent with CRLQAS beyond 10-qubit can take a substantial amount of GPU compute. To address this issue we introduce OptCRLQAS , an efficiency-oriented variant of curriculum reinforcement learning-based quantum architecture search. In standard CRLQAS, each environment step triggers a full quantum-classical evaluation of the current circuit, including variational parameter optimization and cost-function estimation, so for an episode of length T , the total evaluation cost scales as T · Ceval , where Ceval denotes the cost of a single quantum-classical call. OptCRLQAS reduces this by amortizing each evaluation over m
+
+consecutive architectural edits: rather than invoking a new variational optimization at every step, the agent accumulates m local gate modifications before triggering a single evaluation, spreading the cost Ceval across m steps. Formally, let uτ ∈ { 0, 1} denote the update indicator, 
+
+uτ =
+
+1, if τ mod m = 0 or the episode terminates ,
+
+0, otherwise , (4) so that a full architecture evaluation is performed only when uτ = 1 . Hence, for an episode of length T , the number of expensive quantum-classical evaluations is reduced from T in CRLQAS to approximately ⌈T /m ⌉ in OptCRLQAS, yielding an expected reduction by a factor of about m when episode lengths are sufficiently large. Beyond the computational saving, accumulating m edits before evaluating also improves the learn-ing signal: single-gate modifications are often too small to produce distinguishable rewards when variational parameters θ can compensate local changes, leading to weakly separated TD targets and slow value propagation. Judging a block of m edits jointly increases reward contrast and allows use-ful gate combinations to be credited as a unit. A more detailed discussion of both effects is provided in Section 4.2. Throughout the paper, OptCRLQAS refers to m = 10 unless stated otherwise. 
+
+## 4 Results 
+
+We evaluate replay-buffer design in quantum compilation, where the agent must synthesize a target unitary with encoded in an RL-state of size 2 × 2N by sequentially appending gates from a fixed action space defined in Section B.2.1. In every training episode the environment resets to the |0⟩ and a fresh Haar-random 1-qubit target unitary is sampled; the agent acts until the target fidelity tolerance is met or the maximum episode length L is reached. All agents are trained for 5 × 10 4 episodes and evaluated on 10 5 independently sampled Haar-random target unitaries. Full hyperparameter details are given in Appendix M. Figure 2: 1-qubit compiling of Haar-random target unitaries with RX , RY , RZ (±π/ 128) gates. (Left) Suc-cess probability and mean fidelity at tolerances 0.99 , 0.999 , and 0.9999 , where ReaPER + performs best over-all. (Right) mean circuit length with std. dev. error bars versus tolerance; although all methods require deeper circuits at higher accuracy and exhibit a similar growth rate with tightening tolerance, ReaPER + maintains a consistently lower circuit-length offset, giving the best accuracy-length tradeoff across all tolerance levels. 
+
+Tol Method Success (%) ↑ Avg. fidelity ↑
+
+0.99 ReaPER+ (Ours) 89.30 0.94 
+
+PER [33] 85.81 0.94 ReaPER [34] 85.15 0.93 HER [50] 76.49 0.89 PPO [52] 75.40 0.88 0.999 ReaPER+ (Ours) 85.30 0.95 
+
+PER 82.35 0.94 ReaPER 80.97 0.93 HER 74.44 0.90 PPO 71.60 0.87 0.9999 ReaPER+ (Ours) 81.40 0.95 
+
+PER 72.66 0.94 ReaPER 64.35 0.93 HER 63.30 0.90 PPO 69.90 0.87 0.990 0.992 0.994 0.996 0.998 1.000 
+
+> Fidelity
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> 120
+> Gate count
+> HER PER ReaPER PPO
+> ReaPER+
+
+54.1 Quantum compiling 
+
+We evaluate replay-buffer design in quantum compiling, where the agent synthesizes a target unitary by sequentially appending gates from the action spaces defined in Section B.2.1. All agents are trained for 5 × 10 4 episodes and evaluated on 10 5 Haar-random target unitaries (hyperparameters in Appendix M). 
+
+1-qubit compiling. We evaluate two settings: (i) the small-rotation basis RX , RY , RZ (±π/ 128) and (ii) the discrete HRC gate set [53], following Ref. [16]. Figure 2 reports success probability and fidelity over tolerances 0.99 -0.9999 (40 seeds). ReaPER + achieves the highest success at every tolerance ( 89 .30% , 85 .30% , 81 .40% ), outperforming PER ( 85 .81% , 82 .35% , 72 .66% ) and fixed ReaPER ( 85 .15% , 80 .97% , 64 .35% ), while showing the slowest circuit-length growth, yielding the best success-fidelity-length tradeoff overall. For the HRC basis, Table 4 shows ReaPER + reaches 
+
+100% success with mean fidelity 0.995 and shortest circuits ( 14 .30 ± 7.89 gates) at 1.56 × 10 6
+
+steps, ∼ 24% faster than fixed ReaPER, ∼ 26% faster than PER, and ∼ 72% faster than our tuned HER baseline ( k=5 relabelings, 100-episode warm-up), which despite being stronger than the orig-inal [16] still plateaus at 95% success. All subsequent “HER” references denote this tuned imple-mentation. 
+
+2-qubit compiling. Using target unitaries sampled via Algorithm 1, we test whether agents can approximate a ZZ (π) gate at fidelity threshold 0.9914 , matching the benchmark of Ref. [16]. Ta-ble 1 shows ReaPER + reaches fidelity 0.9920 in only 2.5 × 10 4 episodes, a 4× reduction over fixed ReaPER, PER, and HER (all at 10 5 episodes), and a 32 × reduction over PPO [16] ( 8 × 10 5
+
+episodes). Although fixed ReaPER attains a marginally higher best fidelity ( 0.9931 ) given its longer budget, ReaPER + reaches a comparable fidelity regime far more efficiently, the operationally rele-vant metric when quantum-classical simulation time is limited. Table 1: ReaPER+ outperforms all baselines on ZZ (π) approximation using 2-qubit gates. ReaPER +                            
+
+> matches or exceeds fidelity at 32 ×fewer episodes than PPO [16].
+> Method Episodes ↓Min. gates ↓Best fidelity ↑
+> ReaPER+ (Ours) 2.5×10 4123 0.9920
+> ReaPER [34] 10 5126 0.9931
+> PPO (Moro et al. [16]) 8×10 5122 0.9914
+> PER [33] 10 5127 0.9918
+> HER [50] 10 5NA <0.9914
+
+4.2 Quantum architecture search 
+
+We evaluate replay buffers in QAS, where the agent seeks a parameterized circuit that prepares the ground state of a target molecular Hamiltonian. Following CRLQAS [19, 14], we use the gate set in Eq. 19 and reward in Eq. 22, benchmarking molecular ground-state preparation tasks of increasing scale (molecule geometries and hyperparameters in Appendices J and K respectively). Figure 3 compares replay strategies on the smaller-scale systems. ReaPER + achieves the low-est energy error among prioritized methods with competitive circuit compactness; fixed ReaPER (ω=0 .4 for BEH 2, ω=0 .6 for H2O) produces the most compact circuits, reflecting the longer-horizon credit assignment at larger scale (full ω sensitivity in Appendix I). Uniform replay yields superfi-cially shorter circuits but at substantially higher energy error, indicating early trapping in local min-ima. As shown in Table 2, OptCRLQAS with ReaPER + (denoted as “OptCRLQAS + ReaPER +”) achieves the lowest energy error across 5-, 6-, and 8-qubit QAS problems, outperforming non-RL baselines such as DQAS [36], GQAS [54], TF-QAS [55], SA-QAS [56], and quantumDARTS [37] while using competitive or fewer gates. For the 5-qubit problem, we target the ground-state energy of the Heisenberg model (Hamiltonian given in Appendix J.2). Since this problem is well-suited to the gateset {RXX (θxx ), RYY (θyy ), RZZ (θzz ), RX (θx), RY (θy ), RZ (θz )}, we employ an alternative RL state encoding described in Appendix L. At 12-qubit scale, standard CRLQAS is prohibitively expensive since every step triggers a full varia-tional optimization. OptCRLQAS amortizes this cost over m steps, reducing evaluations per episode 6Table 2: OptCRLQAS + ReaPER + vs. non-RL baselines. Our method achieves the low-est energy error across all systems while using competitive or fewer gates. The 5-qubit Heisen-berg model is described in Appendix J.2. For 5-Heisenberg we utilize an action space consists of 
+
+{XX (θxx ), YY (θyy ), ZZ (θzz ), RX (θx), RY (θy ), RZ (θz )} gates. Problem Method Min error (Ha) Total gates CNOT 5-Heisenberg OptCRLQAS + ReaPER + (ours) 5.9 × 10 −4 41 NA DQAS [36] 1.1 × 10 −1 35 NA GQAS [54] 7.1 × 10 −4 35 NA TF-QAS [55] 1.2 × 10 −3 35 NA 6-BEH 2 OptCRLQAS + ReaPER + (ours) 5.8 × 10 −5 54 12 
+
+TF-QAS [55] 1.8 × 10 −3 57 NA SA-QAS [56] 5.6 × 10 −3 73 45 8-H2O OptCRLQAS + ReaPER + (ours) 1.2 × 10 −4 134 52 
+
+quantumDARTS [37] 1.7 × 10 −4 219 68 SA-QAS [56] 2.6 × 10 −3 95 69 
+
+Figure 3: Replay-buffer design controls circuit compactness in QAS. For 6-BEH 2 and 8-H2O, ReaPER +
+
+variants yield the lowest total, CNOT , and rotation gate counts compared to PER and uniform replay (mean ±
+
+std over seeds). ω=0 recovers PER; ω=1 gives fully reliability-adjusted replay. ReaPER  (ω = 0.4)
+
+> ReaPER+
+> PER Vanilla 050 100 150 Total gate/CNOT/ROT count
+
+6-BeH 2
+
+> ReaPER+ ReaPER  (ω = 0.6)PER Vanilla
+
+8-H 2O  
+
+> Total gates CNOT ROT
+
+from T to ⌈T /m ⌉ and cutting average wall-clock time by 67 .5% (∼3×) without degrading solution quality (Fig. 4). Batching m edits also yields a more separable learning signal by crediting mean-ingful architectural blocks rather than nearly indistinguishable single-step edits. Figure 4: Efficiency and performance on 12-qubit H 2O. (Left) OptCRLQAS reduces wall-clock time per episode by 67 .5% over CRLQAS [19]. (Right) ReaPER achieves the lowest minimum energy error and fastest convergence across all replay baselines. CRLQAS OptCRLQAS 
+
+> 0
+> 100
+> 200
+> 300
+> 400
+> Avg. time per episode (s)
+> 67.5% lower time
+
+Method Min err. ↓ Gates ↓ CNOT ↓ Steps ↓
+
+ReaPER 1.7 × 10 −2 196 109 1.6 × 10 4
+
+ReaPER + 2.3 × 10 −2 241 94 3.7 × 10 4
+
+PER 2.5 × 10 −2 121 66 9.2 × 10 4
+
+Vanilla 2.5 × 10 −2 151 91 1.7 × 10 4
+
+With OptCRLQAS enabling 12-qubit training, ReaPER attains the lowest minimum energy error (1.7 × 10 −2 Ha) in the fewest steps ( 1.6 × 10 4), while PER reaches a similar floor at 5.7× the cost 7and vanilla replay converges rapidly to a worse solution. Appendix H further shows OptCRLQAS can reduce quantum simulation time by up to 89% and classical optimization time by up to 85% in matched comparisons. 
+
+4.3 Noise-robust learning through buffer transfer 
+
+We evaluate the transfer scheme of Section 3, in which a buffer Bsrc collected in a noiseless source environment initializes training in a related noisy target, to our knowledge, the first demon-stration that a lightweight, weight-free replay buffer alone suffices to transfer noiseless experi-ence to realistic depolarizing-noise settings, with advantages that grow with system size up to 12-qubit. All experiments use OptCRLQAS with uniform replay to isolate the effect of trans-fer. We study (i) noiseless-to-noiseless and (ii) noiseless-to-noisy transfer (depolarizing noise with single-qubit strength p1, two-qubit strength p2) on molecular ground-state preparation bench-marks of increasing scale. The source buffer is obtained by training a vanilla agent for a fixed 12 GPU-hour budget; to exploit the warm start, we reduce initial exploration from ϵ=1 .0 to 
+
+0.55 and tighten the curriculum (Appendix K). We quantify transfer via a multi-objective score 
+
+S = w1 ∆steps + w2 ∆ROT + w3 ∆CNOT + w4 ∆err (weights 0.4, 0.1, 0.2, 0.3), measuring relative improvement over the no-transfer baseline in steps to chemical accuracy, rotation and CNOT gate counts, and best energy error [57]. Figure 5: Weighted transfer matrix for BEH 2 under noiseless and noisy transfer. Buffer transfer reduces steps to chemical accuracy by 47 -58% and improves final energy by up to 90 .2% across all noise settings, yield-ing composite scores of 19 .2-35 .8% . The strongest score ( 35 .8% ) is driven by the largest energy improvement at p2=0 .001 .∆steps ∆ROT ∆CNOT ∆err Score Noiseless                    
+
+> p2=0 .001
+> p2=0 .005
+> p1=0 .001 , p 2=0 .005
+> 53.0% -28.6% 26.3% 0.5% 23.8% 57.7% -38.1% -52.6% 90.2% 35.8% 57.2% -14.3% 31.6% 6.5% 29.7% 47.1% -19.0% 10.5% 0.3% 19.2%
+> Transfer matrix ( 6−BeH 2): w1=0 .4, w 2=0 .1, w 3=0 .2, w 4=0 .3
+
+−50 050 
+
+> Relative improvement (%)
+
+Figure 6: Weighted transfer matrix for H2O under noiseless and noisy transfer. Step reductions range from 49 .8% to 84 .8% , and energy improvements reach 46 .7% under combined noise ( p1=0 .001 , p2=0 .005 ), yielding the highest score of 28 .7% .∆steps ∆ROT ∆CNOT ∆err Score Noiseless                
+
+> p2=0 .001
+> p1=0 .001 , p 2=0 .005
+> 61.1% -25.0% -20.0% 9.8% 20.9% 49.8% -19.3% -19.5% 27.0% 22.2% 84.8% -40.7% -75.7% 46.7% 28.7%
+> Transfer matrix ( 8−H2O): w1=0 .4, w 2=0 .1, w 3=0 .2, w 4=0 .3
+
+−50 050 
+
+> Relative improvement (%)
+
+Across all systems and noise settings, buffer transfer consistently reduces steps to chemical accu-racy and improves final energy error. At the smallest scale (Figure 5), step reductions of 47 -58% 
+
+8Figure 7: Weighted transfer matrix for 12-qubit H2O under noiseless and noisy transfer. Transfer reduces steps to achieve a similar accuracy as non-transfer by 88 .2% and CNOT count by 57 .6% , under combined depolarizing noise ( p1=0 .001 , p2=0 .005 ). ∆steps ∆ROT ∆CNOT ∆err Score                    
+
+> Noiseless
+> p1=0.001, p2=0.005 33.8% 13.6% 1.2% 14.9% 19.6% 88.2% 41.9% 57.6% 0.0% 51.0% Transfer matrix ( 12 −H2O): w1= 0 .4,w2= 0 .1,w3= 0 .2,w4= 0 .3
+> −50 050
+> Relative improvement ( %)
+
+and energy improvements of up to 90 .2% yield composite scores of 19 .2-35 .8% . At 8-qubit scale (Figure 6), step reductions reach 84 .8% under combined noise. Crucially, as shown in Figure 7, 
+
+the transfer advantage strengthens with system size : at 12-qubit under combined depolarizing noise, buffer transfer reduces steps by 88 .2% and achieves the highest composite score of 51 .0% across all benchmarks, demonstrating that lightweight replay-buffer transfer is not only effective but becomes 
+
+more beneficial as the quantum system grows. All gains require no architectural changes, no reward relabeling, and no network weight sharing .The noiseless and noisy tasks share identical state and action spaces, so their optimal value func-tions differ only by a bounded perturbation. Classical transfer analyses [58] show that high-value source trajectories remain informative under modest dynamics shifts; recent Bellman-alignment theory [59] formalizes this, proving that small one-step Bellman mismatch suffices for provable sample-complexity reduction via source replay, corrected online. 
+
+4.4 ReaPER + generalizes beyond quantum domain 
+
+To confirm that the annealing mechanism of ReaPER + is not specific to quantum reward structure, we benchmark all three replay strategies on LunarLander-v3 [60] using identical DQN agents and the same ω schedule ( ωmin =0 .1 → ωmax =0 .7, Tann =5 ×10 4 steps; full details in Appendix E). ReaPER + achieves a 9% gain in normalized cumulative-return AUC over both baselines and reaches first solve in 9.3% fewer environment steps than fixed ReaPER ( 3.8 × 10 5 vs. 42 × 10 5), while sustaining a higher asymptotic success rate ( 60% vs. 50 -55% at episode 4500 ), confirming that the PER → ReaPER annealing principle generalizes across reward regimes. 
+
+## 5 Conclusion 
+
+We introduced a replay-buffer engineering framework for quantum circuit optimization built on three complementary components: ReaPER +, which improves sample efficiency and circuit compactness through annealed PER → ReaPER prioritization, OptCRLQAS, which cuts wall-clock time per episode by up to 67 .5% by amortizing expensive quantum-classical evaluations and lightweight buffer transfer, which reduces steps to chemical accuracy by up to 88% and improves final energy error by up to 90% over from-scratch noisy baselines, without network-weight sharing or reward relabeling. Across quantum compiling and QAS benchmarks, these results show that how experience is stored, sampled, and transferred is a primary algorithmic lever for scalable, noise-robust quantum circuit optimization. A classical validation on LunarLander-v3 further confirms that ReaPER +’s annealing principle is domain-agnostic, yielding a +9% AUC improvement over PER and fixed ReaPER with identical agents and schedules as shown in Appendix E. 
+
+## References 
+
+[1] Amira Abbas, Andris Ambainis, Brandon Augustino, Andreas B¨ artschi, Harry Buhrman, Car-leton Coffrin, Giorgio Cortiana, Vedran Dunjko, Daniel J Egger, Bruce G Elmegreen, et al. 9Challenges and opportunities in quantum optimization. Nature Reviews Physics , 6(12):718– 735, 2024. [2] Edward Farhi, Jeffrey Goldstone, and Sam Gutmann. A quantum approximate optimization algorithm. arXiv preprint arXiv:1411.4028 , 2014. [3] Michel H Devoret and Robert J Schoelkopf. Superconducting circuits for quantum informa-tion: an outlook. Science , 339(6124):1169–1174, 2013. [4] Xanthe Croot, Kasra Nowrouzi, Christopher Spitzer, Carmen G Almudever, Alexandre Blais, Malcolm Carroll, Jerry Chow, Daniel Friedman, Masao Tokunari, Edoardo Charbon, et al. Enabling technologies for scalable superconducting quantum computing. arXiv preprint arXiv:2512.15001 , 2025. [5] Morten Kjaergaard, Mollie E Schwartz, Jochen Braum¨ uller, Philip Krantz, Joel I-J Wang, Si-mon Gustavsson, and William D Oliver. Superconducting qubits: Current state of play. Annual Review of Condensed Matter Physics , 11(1):369–395, 2020. [6] Abhinav Kandala, Antonio Mezzacapo, Kristan Temme, Maika Takita, Markus Brink, Jerry M Chow, and Jay M Gambetta. Hardware-efficient variational quantum eigensolver for small molecules and quantum magnets. nature , 549(7671):242–246, 2017. [7] Youngseok Kim, Andrew Eddins, Sajant Anand, Ken Xuan Wei, Ewout Van Den Berg, Sami Rosenblatt, Hasan Nayfeh, Yantao Wu, Michael Zaletel, Kristan Temme, et al. Evidence for the utility of quantum computing before fault tolerance. Nature , 618(7965):500–505, 2023. [8] John Preskill. Quantum computing in the nisq era and beyond. Quantum , 2:79, 2018. [9] Kishor Bharti, Alba Cervera-Lierta, Thi Ha Kyaw, Tobias Haug, Sumner Alperin-Lea, Abhinav Anand, Matthias Degroote, Hermanni Heimonen, Jakob S Kottmann, Tim Menke, et al. Noisy intermediate-scale quantum algorithms. Reviews of Modern Physics , 94(1):015004, 2022. [10] Austin G Fowler, Matteo Mariantoni, John M Martinis, and Andrew N Cleland. Surface codes: Towards practical large-scale quantum computation. Physical Review A—Atomic, Molecular, and Optical Physics , 86(3):032324, 2012. [11] Tobias V Forster, Nils Quetschlich, and Robert Wille. Quantum circuit optimization for the fault-tolerance era: Do we have to start from scratch? In 2025 IEEE International Conference on Quantum Computing and Engineering (QCE) , volume 1, pages 584–590. IEEE, 2025. [12] Zolt´ an Zimbor´ as, B´ alint Koczor, Zo¨ e Holmes, Elsi-Mari Borrelli, Andr´ as Gily´ en, Hsin-Yuan Huang, Zhenyu Cai, Antonio Ac´ ın, Leandro Aolita, Leonardo Banchi, et al. Myths around quantum computation before full fault tolerance: What no-go theorems rule out and what they don’t. arXiv preprint arXiv:2501.05694 , 2025. [13] Richard S Sutton, Andrew G Barto, et al. Reinforcement learning: An introduction , volume 1. MIT press Cambridge, 1998. [14] Mateusz Ostaszewski, Lea M Trenkwalder, Wojciech Masarczyk, Eleanor Scerri, and Vedran Dunjko. Reinforcement learning for optimization of variational quantum circuit architectures. 
+
+Advances in neural information processing systems , 34:18182–18194, 2021. [15] Marin Bukov and Florian Marquardt. Reinforcement learning for quantum technology. arXiv preprint arXiv:2601.18953 , 2026. [16] Lorenzo Moro, Matteo GA Paris, Marcello Restelli, and Enrico Prati. Quantum compiling by deep reinforcement learning. Communications Physics , 4(1):178, 2021. [17] ZT Wang, Qiuhao Chen, Yuxuan Du, ZH Yang, Xiaoxia Cai, Kaixuan Huang, Jingning Zhang, Kai Xu, Jun Du, Yinan Li, et al. Quantum compiling with reinforcement learning on a super-conducting processor. arXiv preprint arXiv:2406.12195 , 2024. [18] Akash Kundu. Reinforcement learning-assisted quantum architecture search for variational quantum algorithms. arXiv preprint arXiv:2402.13754 , 2024. 10 [19] Yash J. Patel, Akash Kundu, Mateusz Ostaszewski, Xavier Bonet-Monroig, Vedran Dunjko, and Onur Danaci. Curriculum reinforcement learning for quantum architecture search under hardware errors. In The Twelfth International Conference on Learning Representations , 2024. [20] Ryan Sweke, Markus S Kesselring, Evert PL van Nieuwenburg, and Jens Eisert. Reinforcement learning decoders for fault-tolerant quantum computation. Machine Learning: Science and Technology , 2(2):025005, 2021. [21] Kevin Reuer, Jonas Landgraf, Thomas F¨ osel, James O’Sullivan, Liberto Beltr´ an, Abdulkadir Akin, Graham J Norris, Ants Remm, Michael Kerschbaum, Jean-Claude Besse, et al. Realizing a deep reinforcement learning agent for real-time quantum feedback. Nature Communications ,14(1):7138, 2023. [22] Tyler LeBlond, Christopher Dean, George Watkins, and Ryan Bennink. Realistic cost to ex-ecute practical quantum circuits using direct clifford+ t lattice surgery compilation. ACM Transactions on Quantum Computing , 5(4):1–28, 2024. [23] Marco Cerezo, Andrew Arrasmith, Ryan Babbush, Simon C Benjamin, Suguru Endo, Keisuke Fujii, Jarrod R McClean, Kosuke Mitarai, Xiao Yuan, Lukasz Cincio, et al. Variational quan-tum algorithms. Nature Reviews Physics , 3(9):625–644, 2021. [24] Akash Kundu and Stefano Mangini. Tensorrl-qas: Reinforcement learning with tensor net-works for improved quantum architecture search. In The Thirty-ninth Annual Conference on Neural Information Processing Systems , 2025. [25] Remmy Zen, Jan Olle, Luis Colmenarez, Matteo Puviani, Markus M¨ uller, and Florian Mar-quardt. Quantum circuit discovery for fault-tolerant logical state preparation with reinforce-ment learning. Physical Review X , 15(4):041012, 2025. [26] Todd Hester, Matej Vecerik, Olivier Pietquin, Marc Lanctot, Tom Schaul, Bilal Piot, Dan Hor-gan, John Quan, Andrew Sendonaris, Ian Osband, et al. Deep q-learning from demonstrations. In Proceedings of the AAAI conference on artificial intelligence , volume 32, 2018. [27] Zhiyuan Zhou, Andy Peng, Qiyang Li, Sergey Levine, and Aviral Kumar. Efficient online reinforcement learning fine-tuning need not retain offline data. In The Thirteenth International Conference on Learning Representations , 2025. [28] Seunghyun Lee, Younggyo Seo, Kimin Lee, Pieter Abbeel, and Jinwoo Shin. Offline-to-online reinforcement learning via balanced replay and pessimistic q-ensemble. In 5th Annual Confer-ence on Robot Learning , 2021. [29] Siyuan Guo, Lixin Zou, Hechang Chen, Bohao Qu, Haotian Chi, Philip S. Yu, and Yi Chang. Sample efficient offline-to-online reinforcement learning. IEEE Transactions on Knowledge and Data Engineering , 36(3):1299–1310, 2024. [30] Chihyeon Song, Jaewoo Lee, and Jinkyoo Park. Adaptive replay buffer for offline-to-online reinforcement learning, 2025. [31] Volodymyr Mnih, Koray Kavukcuoglu, David Silver, Alex Graves, Ioannis Antonoglou, Daan Wierstra, and Martin Riedmiller. Playing atari with deep reinforcement learning. arXiv preprint arXiv:1312.5602 , 2013. [32] Hado Van Hasselt, Arthur Guez, and David Silver. Deep reinforcement learning with double q-learning. In Proceedings of the AAAI conference on artificial intelligence , volume 30, 2016. [33] Tom Schaul, John Quan, Ioannis Antonoglou, and David Silver. Prioritized experience replay. 
+
+arXiv preprint arXiv:1511.05952 , 2015. [34] Leonard S. Pleiss, Tobias Sutter, and Maximilian Schiffer. Reliability-adjusted prioritized experience replay. In The Fourteenth International Conference on Learning Representations ,2026. [35] Harper R Grimsley, Sophia E Economou, Edwin Barnes, and Nicholas J Mayhall. An adap-tive variational algorithm for exact molecular simulations on a quantum computer. Nature communications , 10(1):3007, 2019. 11 [36] Shi-Xin Zhang, Chang-Yu Hsieh, Shengyu Zhang, and Hong Yao. Differentiable quantum architecture search. Quantum Science & Technology , 7(4):045023, 2022. [37] Wenjie Wu, Ge Yan, Xudong Lu, Kaisen Pan, and Junchi Yan. Quantumdarts: differentiable quantum architecture search for variational quantum algorithms. In International conference on machine learning , pages 37745–37764. PMLR, 2023. [38] Riccardo Rasconi and Angelo Oddi. An innovative genetic algorithm for the quantum cir-cuit compilation problem. In Proceedings of the AAAI conference on artificial intelligence ,volume 33, pages 7707–7714, 2019. [39] Leo S¨ unkel, Darya Martyniuk, Denny Mattern, Johannes Jung, and Adrian Paschke. Ga4qco: genetic algorithm for quantum circuit optimization. arXiv preprint arXiv:2302.01303 , 2023. [40] Kim Nicoli, Christopher J Anders, Lena Funcke, Tobias Hartung, Karl Jansen, Stefan K¨ uhn, Klaus-Robert M¨ uller, Paolo Stornati, Pan Kessel, and Shinichi Nakajima. Physics-informed bayesian optimization of variational quantum circuits. Advances in Neural Information Pro-cessing Systems , 36:18341–18376, 2023. [41] Peiyong Wang, Muhammad Usman, Udaya Parampalli, Lloyd CL Hollenberg, and Casey R Myers. Automated quantum circuit design with nested monte carlo tree search. IEEE Trans-actions on Quantum Engineering , 4:1–20, 2023. [42] Shi-Xin Zhang, Chang-Yu Hsieh, Shengyu Zhang, and Hong Yao. Neural predictor based quantum architecture search. Machine Learning: Science and Technology , 2(4):045027, 2021. [43] Yuxuan Du, Tao Huang, Shan You, Min-Hsiu Hsieh, and Dacheng Tao. Quantum circuit architecture search for variational quantum algorithms. npj Quantum Information , 8(1):62, 2022. [44] Thomas F¨ osel, Murphy Yuezhen Niu, Florian Marquardt, and Li Li. Quantum circuit opti-mization with deep reinforcement learning. arXiv preprint arXiv:2103.07585 , 2021. [45] En-Jui Kuo, Yao-Lung L Fang, and Samuel Yen-Chi Chen. Quantum architecture search via deep reinforcement learning. arXiv preprint arXiv:2104.07715 , 2021. [46] Akash Kundu, Aritra Sarkar, and Abhishek Sadhu. Kanqas: Kolmogorov-arnold network for quantum architecture search. EPJ Quantum Technology , 11(1):76, 2024. [47] David Kremer, Victor Villar, Hanhee Paik, Ivan Duran, Ismael Faro, and Juan Cruz-Benito. Practical and efficient quantum circuit synthesis and transpiling with reinforcement learning. 
+
+arXiv preprint arXiv:2405.13196 , 2024. [48] Akash Kundu and Leopoldo Sarra. Reinforcement learning with learned gadgets to tackle hard quantum problems on real hardware. Communications Physics , 2026. [49] Akash Kundu. awesome-QAS: A curated list of resources for quantum architecture search, June 2025. [50] Marcin Andrychowicz, Filip Wolski, Alex Ray, Jonas Schneider, Rachel Fong, Peter Welinder, Bob McGrew, Josh Tobin, OpenAI Pieter Abbeel, and Wojciech Zaremba. Hindsight experi-ence replay. Advances in neural information processing systems , 30, 2017. [51] Heng You, Tianpei Yang, Yan Zheng, Jianye Hao, E Taylor, et al. Cross-domain adaptive trans-fer reinforcement learning based on state-action correspondence. In Uncertainty in Artificial Intelligence , pages 2299–2309. PMLR, 2022. [52] John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Radford, and Oleg Klimov. Proximal policy optimization algorithms. arXiv preprint arXiv:1707.06347 , 2017. [53] Aram W Harrow, Benjamin Recht, and Isaac L Chuang. Efficient discrete approximations of quantum gates. Journal of Mathematical Physics , 43(9):4445–4451, 2002. 12 [54] Zhimin He, Jiachun Wei, Chuangtao Chen, Zhiming Huang, Haozhen Situ, and Lvzhou Li. Gradient-based optimization for quantum architecture search. Neural Networks , 179:106508, 2024. [55] Zhimin He, Maijie Deng, Shenggen Zheng, Lvzhou Li, and Haozhen Situ. Training-free quan-tum architecture search. In Proceedings of the AAAI conference on artificial intelligence , vol-ume 38, pages 12430–12438, 2024. [56] Xudong Lu, Kaisen Pan, Ge Yan, Jiaming Shan, Wenjie Wu, and Junchi Yan. Qas-bench: rethinking quantum architecture search and a benchmark. In International conference on ma-chine learning , pages 22880–22898. PMLR, 2023. [57] Azhar Ikhtiarudin, Aditi Das, Param Thakkar, and Akash Kundu. Benchrl-qas: Benchmarking reinforcement learning algorithms for quantum architecture search. In Proceedings of the AAAI Symposium Series , volume 7, pages 358–367, 2025. [58] Matthew E Taylor and Peter Stone. Transfer learning for reinforcement learning domains: A survey. Journal of Machine Learning Research , 10(7), 2009. [59] Jinhang Chai, Enpei Zhang, Elynn Chen, and Yujun Yan. Optimistic transfer under task shift via bellman alignment. arXiv preprint arXiv:2601.21924 , 2026. [60] Mark Towers, Ariel Kwiatkowski, Jordan Terry, John U Balis, Gianluca De Cola, Tristan Deleu, Manuel Goul˜ ao, Andreas Kallinteris, Markus Krimmel, Arjun KG, et al. Gym-nasium: A standard interface for reinforcement learning environments. arXiv preprint arXiv:2407.17032 , 2024. [61] Renhao Wang, Kevin Frans, Pieter Abbeel, Sergey Levine, and Alexei A Efros. Prioritized generative replay. In The Thirteenth International Conference on Learning Representations ,2025. [62] Francisco JR Ruiz, Tuomas Laakkonen, Johannes Bausch, Matej Balog, Mohammadamin Barekatain, Francisco JH Heras, Alexander Novikov, Nathan Fitzpatrick, Bernardino Romera-Paredes, John Van De Wetering, et al. Quantum circuit optimization with alphatensor. Nature Machine Intelligence , 7(3):374–385, 2025. [63] Ian Osband, Charles Blundell, Alexander Pritzel, and Benjamin Van Roy. Deep exploration via bootstrapped dqn. Advances in neural information processing systems , 29, 2016. [64] Michael JD Powell. A direct search optimization method that models the objective and con-straint functions by linear interpolation. In Advances in optimization and numerical analysis ,pages 51–67. Springer, 1994. 13 A Limitations and future work 
+
+Limitations. All quantum experiments use a fixed DQN/DDQN backbone; whether ReaPER +’s annealing advantage persists under policy-gradient or actor-critic agents remains an open question. The replay-buffer transfer scheme assumes shared state and action spaces between source and target tasks, which may not hold when porting across substantially different hardware topologies or gate sets. 
+
+Future work. Immediate extensions include: (i) combining OptCRLQAS with tensor-network warm-starts [24] to further reduce search cost at 20 -qubit scale; (ii) hardware-aware replay, where buffered circuits are ranked using limited QPU evaluations before transfer to realistic noise mod-els; and (iii) prioritized generative replay [61] to synthesize high-value transitions for richer buffer initialization under depolarizing noise. 
+
+## B Preliminaries 
+
+Here we discuss the preliminaries based on which the methods (in Section 3) are based on. This discussion includes a through description of the state-of-the-art replay buffer. Also t includes the encoding methods through which we represent the action space, reward functions and the RL-state. 
+
+B.1 Replay buffers in deep reinforcement learning 
+
+Experience replay is a central component of off-policy deep RL because it determines which past transitions are revisited during optimization. Uniform replay [31], hindsight experience replay [50], prioritized experience replay [33], and more recent reliability-aware variants [34] provide increas-ingly structured ways to trade off coverage, informativeness, and target reliability. In quantum op-timization, however, replay buffers have largely been treated as fixed implementation choices rather than as a primary object of algorithmic design. To formalize the replay mechanisms studied in this work, we consider an episodic reinforcement-learning setting. An episode is a sequence D = {Ct}nt=1 of transitions, where each transition 
+
+Ct = ( St, A t, R t, S t+1 , d t) records the state St ∈ S , action At ∈ A , scalar reward Rt, next state 
+
+St+1 , and terminal flag dt ∈ { 0, 1}, which equals 1 if the episode ends at step t and 0 otherwise. The agent maintains an online Q-network Qθ with parameters θ and a periodically updated target network Q¯θ with parameters ¯θ, and γ ∈ (0 , 1] denotes the discount factor. For each stored transition, we define four quantities that replay strategies use to assign sampling priorities. The TD target Yt is the bootstrapped return estimate used to update Qθ :
+
+Yt = Rt + γ(1 − dt) max  
+
+> a′
+
+Q¯θ (St+1 , a ′). (5) The TD error δt measures how far the current value estimate deviates from this target: 
+
+δt = Yt − Qθ (St, A t), (6) and its magnitude δ+ 
+
+> t
+
+= |δt| serves as a proxy for how much a transition still has to teach the agent. The true value error et measures the deviation of the current estimate from the optimal Q-function 
+
+Q⋆:
+
+et = Qθ (St, A t) − Q⋆(St, A t). (7) Finally, the target bias εt captures the error introduced by the target network itself: 
+
+εt = Q¯θ (St, A t) − Q⋆(St, A t). (8) Replay strategies differ in how they assign sampling preference to stored transitions. For each tran-sition Ci in the replay buffer, let Ψi denote its unnormalized replay priority and μi = Ψ i/ PNj=1 Ψj
+
+the corresponding sampling probability. Different replay rules are then specified by different choices of Ψi.
+
+Uniform replay (Vanilla). A uniform replay buffer samples all stored transitions with equal prob-ability. If the current buffer contains {Ci}Ni=1 , then 
+
+Ψuni  
+
+> i
+
+= 1 , μuni  
+
+> i
+
+= 1
+
+N . (9) 14 Hindsight experience replay (HER). HER augments the replay buffer by relabeling goals from achieved future states within the same trajectory [50]. The key idea is that even a failed trajectory, one that did not reach the intended goal g, can be treated as a successful one with respect to a different goal g′, typically the state actually reached. Concretely, given a goal-conditioned transition 
+
+(St, A t, R t, S t+1 , d t, g ), HER adds an additional relabeled copy to the buffer, 
+
+ St, A t, R ′
+
+> t
+
+(g′), S t+1 , d ′
+
+> t
+
+(g′), g ′, (10) where g′ is the relabeled goal and R′
+
+> t
+
+(g′), d′
+
+> t
+
+(g′) are the reward and terminal flag recomputed with respect to g′. Unless stated otherwise, HER samples uniformly from the augmented buffer. HER is utilized in the quantum compilation task in Ref. [16]. 
+
+Prioritized experience replay (PER). PER samples transitions according to their absolute TD error [33]: 
+
+ΨPER  
+
+> i
+
+= ( δ+ 
+
+> i
+
+)α, μPER  
+
+> i
+
+= ΨPER 
+
+> i
+
+PNj=1 ΨPER 
+
+> j
+
+, (11) where α > 0 controls the strength of prioritization. 
+
+Reliability-adjusted prioritized experience replay (ReaPER). ReaPER was recently introduced in ref. [34]. It discounts transitions whose targets are unreliable due to large downstream TD errors. For an episode D = {Ct}nt=1 , the reliability score is 
+
+Rt = 1 −
+
+Pni=t+1 δ+
+
+> i
+
+Pni=1 δ+
+
+> i
+
+, (12) and the corresponding priorities are 
+
+ΨReaPER  
+
+> t
+
+= Rωt (δ+ 
+
+> t
+
+)α, μReaPER  
+
+> t
+
+= ΨReaPER 
+
+> t
+
+Pni=1 ΨReaPER 
+
+> i
+
+, (13) where ω ∈ [0 , 1] controls the strength of reliability weighting ( ω = 0 recovers PER and ω = 1 
+
+corresponds to fully reliability-adjusted replay). Thus, relative to PER, high-error and low-reliability transitions are down-weighted. 
+
+B.2 Reinforcement learning for quantum optimization 
+
+Reinforcement learning has been applied to both quantum compilation and parameterized quantum circuit design. Existing work includes RL-based gate-sequence synthesis [62, 44, 47], architecture search for molecular ground-state preparation [14], and hardware-aware variational circuit construc-tion [19], demonstrating that RL can discover nontrivial circuit structures across a range of quantum tasks. At the same time, prior methods typically operate under substantial sample and compute demands, especially when each environment step requires an expensive variational optimization or when the target setting includes hardware noise. To tackle this, we formulate both quantum compi-lation and quantum architecture search as Markov decision processes in which an agent sequentially constructs a quantum circuit. At time step t, the agent observes St ∈ S , selects At ∈ A , receives reward Rt, and transitions to St+1 . Episodes terminate when a target threshold is reached or when a maximum circuit length is exceeded. 
+
+B.2.1 RL-state and action for quantum compilation 
+
+In quantum compilation, the agent aims to approximate a target unitary Utar by appending gates from a finite base G. Following Ref. [16], the system is initialized in the all-zero state |0⟩⊗n, and the circuit unitary after t steps is Ut = Qtj=1 Aj , so that the prepared state at step t is Ut |0⟩⊗n. The observation is based on the residual unitary 
+
+Ot = U † 
+
+> t
+
+Utar , (14) whose real and imaginary entries are provided to the agent. 15 1-qubit compiling For 1-qubit compiling, the chosen gateset base is 
+
+G(1) rot =
+
+n
+
+Ri(θj ) i ∈ { x, y, z }, θ j ∈
+
+n
+
++ π
+
+128 , − π
+
+128 
+
+oo 
+
+, (15) where Ri(θj ) denotes a single-qubit rotation by angle θj about axis i. The rotation angle is thus restricted to a binary set of small fixed increments ±π/ 128 , making each action a minimal discrete rotation rather than a continuous parameter choice. In an alternate setting, we also consider the Harrow-Recht-Chuang (HRC) [53] efficient universal basis, V1 = 1√5
+
+ 1 2i
+
+2i 1
+
+
+
+, V2 = 1√5
+
+ 1 2
+
+−2 1
+
+
+
+, V3 = 1√5
+
+1 + 2 i 00 1 − 2i
+
+
+
+, with action space 
+
+A(1) HRC = {V1, V 2, V 3}. (16) 
+
+2-qubit compiling. For the 2-qubit setting, we use the action space: 
+
+A(2) = {Rz (θj ) ⊗ I, I ⊗ Rz (θj ), XX = XX 
+
+
+
+± π
+
+128 
+
+
+
+, Y Y = Y Y 
+
+
+
+± π
+
+128 
+
+
+
+}, (17) 
+
+B.2.2 RL-state and action for quantum architecture search 
+
+For quantum architecture search (QAS), the agent searches over parameterized quantum circuits to minimize a task-dependent cost, typically the expectation value [23]. Following CRLQAS [19], the state is represented by a tensor-based binary encoding of the circuit: 
+
+SQAS = (Et, c t) Et ∈ { 0, 1}Ndepth ×Nwires ×Ngate type , c t ∈ R , (18) where Et encodes the circuit structure and ct summarizes its current performance by calculating the current cost function i.e. the expectation value of Hamiltonian. Using the gate set GQAS =
+
+{RX (θx), RY (θy ), RZ (θz ), CNOT }, the action space consists of placing a gate at a particular circuit location. A compact description is 
+
+AQAS = a = ( ℓ, i, g ) ℓ ∈ { 1, . . . , N layers }, i ∈ { 1, . . . , N wires }kg , g ∈ G QAS , (19) where ℓ is the layer index, i specifies the qubit(s) the gate acts on, and kg is the number of qubits required by gate g which isequal to 1 for single-qubit gates {RX , RY , RZ } and 2 for the two-qubit gate 
+
+CNOT . Illegal actions are masked out during training. 
+
+B.2.3 Reward structure 
+
+In both tasks, an episode ends either when a target threshold is met or when the maximum number of steps is reached. 
+
+quantum compilation. Following Ref. [16], we use two reward designs depending on the gate base. For bases small-rotation (i.e ±π/ 128 ), we use the dense reward 
+
+rcomp  
+
+> t
+
+=
+
+((L − t) + 1 , if d(Ut, U tar ) < ε, 
+
+−d(Ut, U tar )/L, otherwise , (20) where L is the maximum episode length and ε is the target accuracy threshold. For discrete bases such as HRC, we use the sparse reward 
+
+rcomp  
+
+> t
+
+=
+
+(0, if d(Ut, U tar ) < ε, 
+
+−1/L, otherwise . (21) 
+
+Quantum architecture search. Here we use the reward used as in [14, 19]. Let Ct be the opti-mized variational cost at step t, ξ the target threshold, Cmin the desired minimum cost, and T es the maximum number of steps in episode e. Then 
+
+RQAS  
+
+> t
+
+=
+
+
+
+5, if Ct < ξ, 
+
+−5, if t ≥ T es and Ct ≥ ξ, 
+
+max 
+
+ Ct−1 − Ct
+
+Ct−1 − Cmin 
+
+, −1
+
+
+
+, otherwise .
+
+(22) This reward provides a positive terminal signal for success, a negative terminal signal for failure, and otherwise a normalized improvement-based intermediate reward. 16 C Justification for ReaPER+ 
+
+Here we provide an argument on why the proposed ReaPER + replay rule can be expected to outper-form a fixed replay strategy over the full course of training. Recall that ReaPER + defines the replay priority of transition t at training step τ as 
+
+Ψ(+ ,τ ) 
+
+> t
+
+= Rωτ 
+
+> t
+
+(δ+ 
+
+> t
+
+)α, μ(+ ,τ ) 
+
+> t
+
+= Ψ(+ ,τ )
+
+> t
+
+P 
+
+> i
+
+Ψ(+ ,τ )
+
+> i
+
+, (23) where δ+ 
+
+> t
+
+= |δt| is the absolute temporal-difference error, Rt ∈ [0 , 1] is the reliability score, α > 0 is the prioritization exponent, and ωτ ∈ [0 , 1] is a non-decreasing annealing parameter. When ωτ = 0 ,the scheme reduces to PER, whereas ωτ = 1 recovers ReaPER. 
+
+Proposition 1. Assume that: (i) larger reliability Rt corresponds to smaller bias in the TD target of transition t; (ii) early in training, reliability estimates are noisy and only weakly correlated with true target quality; and (iii) later in training, reliability estimates become more informative. Then a schedule ωτ that starts near 0 and increases toward 1 induces a replay distribution that is better aligned with the needs of the learning process than either fixed PER [33] or ReaPER [34] used throughout training. 
+
+Justification. Consider two transitions i and j. Their relative sampling probability under ReaPER + is 
+
+μ(ω)
+
+> i
+
+μ(ω)
+
+> j
+
+= Rωi (δ+ 
+
+> i
+
+)α
+
+Rωj (δ+ 
+
+> j
+
+)α =
+
+ Ri
+
+Rj
+
+ω δ+
+
+> i
+
+δ+
+
+> j
+
+!α
+
+. (24) If Ri > R j , then for any ω2 > ω 1 we have 
+
+μ(ω2)
+
+> i
+
+μ(ω2)
+
+> j
+
+> μ(ω1)
+
+> i
+
+μ(ω1)
+
+> j
+
+. (25) Hence increasing ω monotonically shifts replay mass toward transitions with higher reliability while preserving the PER-style dependence on TD error. Figure 8: ReaPER+ progressively concentrates buffer mass toward higher-fidelity transitions (fidelity 
+
+≥ 0.95 ) while retaining broader early-training coverage, consistent with its annealed transition from PER-like exploration to ReaPER-like reliability-aware sampling. PER maintains broader low-fidelity coverage through-out training, while ReaPER shows intermediate concentration behavior. 0                       
+
+> 2
+> 4
+> 6
+> 8
+> ReaPER+
+> (a)
+> Episode 100
+> (b)
+> Episode 2000
+> (c)
+> Episode 4000
+> (d)
+> Episode 6000
+> 0
+> 2
+> 4
+> 6
+> 8
+> PER
+> (e) (f) (g) (h)
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> 0
+> 2
+> 4
+> 6
+> 8
+> ReaPER
+> (i)
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> (j)
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> (k)
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> (l)
+> Average gate fidelity
+
+This monotonicity explains the role of the annealing schedule. At the beginning of training, the value function is inaccurate and the resulting reliability estimates can be unstable. In this regime, setting ωτ ≈ 0 prevents the learner from overcommitting to a noisy reliability signal and recovers 17 the PER [33] behavior that emphasizes large TD-error transitions. Later in training, once the critic becomes more accurate, the reliability score carries more information about whether a large TD error corresponds to a genuinely useful correction or to a misleading target. Increasing ωτ then down-weights high-error but low-reliability transitions and shifts the replay distribution toward more trustworthy updates. Equivalently, one may examine the log-priority 
+
+log Ψ (+ ,τ ) 
+
+> t
+
+= ωτ log Rt + α log δ+ 
+
+> t
+
+. (26) The annealing coefficient ωτ controls the contribution of log Rt relative to log δ+ 
+
+> t
+
+. Early in training, the replay rule is dominated by the TD-error term; later, the reliability term gradually regularizes prioritization by suppressing transitions whose downstream targets are less trustworthy. Therefore, ReaPER+ inherits the strong early-learning behavior of PER and the late-stage stability of ReaPER. The argument above does not claim universal dominance for every environment or every annealing schedule. Rather, it shows that under mild assumptions on the quality of reliability estimates across training, ReaPER+ provides a natural continuation method between two useful replay regimes. As shown in Figure 8, during the 1-qubit compiling task, ReaPER + progressively shifts the fidelity distribution toward higher-fidelity, more reliable replay samples significantly faster than both PER and ReaPER. 
+
+## D Replay buffer transfer under source-target task similarity 
+
+We next justify why replay-buffer transfer from a noiseless source environment to a corresponding noisy target environment can accelerate learning in quantum optimization. Let Msrc and Mtgt 
+
+denote two Markov decision processes with the same state and action spaces, where the target task differs from the source task by noise in the transition dynamics, reward evaluations, or both. Let 
+
+Bsrc be a replay buffer collected in the source task, and let the target replay buffer be initialized as 
+
+B(0) tgt ← T (Bsrc ), (27) where T is a transfer operator that copies compatible transitions from source to target. 
+
+Proposition 2. Assume that: (i) the source and target tasks share the same state and action spaces; (ii) the target task is a bounded perturbation of the source task in the sense that rewards and tran-sition kernels do not differ arbitrarily; and (iii) high-value trajectories in the source task remain informative, though not necessarily optimal, in the target task. Then initializing the target replay buffer with transferred source transitions can improve early target learning relative to training from an empty buffer. 
+
+Justification. Let the source and target Bellman targets for a transition (s, a ) be 
+
+Y src (s, a ) = rsrc (s, a ) + γEs′∼P src (·| s,a )
+
+h
+
+max  
+
+> a′
+
+Q(s′, a ′)
+
+i
+
+, (28) and 
+
+Y tgt (s, a ) = rtgt (s, a ) + γEs′∼P tgt (·| s,a )
+
+h
+
+max  
+
+> a′
+
+Q(s′, a ′)
+
+i
+
+. (29) If the source and target tasks are sufficiently similar in rewards and transition dynamics, then the induced Bellman targets differ by a bounded amount, as suggested by classical simulation-lemma arguments and recent Bellman-alignment analyses for transfer reinforcement learning [59]. For example, if 
+
+|rtgt (s, a ) − rsrc (s, a )| ≤ εr (30) and the transition mismatch is bounded so that 
+
+EP tgt 
+
+h
+
+max  
+
+> a′
+
+Q(s′, a ′)
+
+i
+
+− EP src 
+
+h
+
+max  
+
+> a′
+
+Q(s′, a ′)
+
+i
+
+≤ εp, (31) then 
+
+|Y tgt (s, a ) − Y src (s, a )| ≤ εr + γε p. (32) Thus, a transition that is informative for the source task remains approximately informative for the target task whenever the source-target shift is moderate. 18 The second in the proposition 2 is improved coverage. At the start of training in the noisy environ-ment, an empty replay buffer contains little information about which gate sequences, partial circuits, or architectural motifs are promising. In contrast, a transferred buffer already contains trajectories concentrated in regions of state-action space that were useful in the source task. Since the noisy and noiseless tasks share the same circuit-building structure, these transitions provide a more informa-tive initial replay distribution than random target experience alone. Consequently, the learner can begin updating from semantically meaningful trajectories before it has independently rediscovered them under noise. Whereas the third mechanism in proposition 2 is self-correction during continued training. As the agent interacts with the target environment, new target-domain transitions are added to the replay buffer and progressively adjust the replay distribution toward the true noisy task. Hence transfer does not lock the agent into the source domain; rather, it supplies a warm start that is gradually refined by on-target experience. In prioritized replay schemes, this correction can be even more effective because target transitions that carry larger TD errors or higher reliability automatically gain greater replay probability. The above argument explains why replay-buffer transfer is especially natural in quantum optimiza-tion settings where the noisy and noiseless problems share the same circuit representation, action space, and objective structure, but differ in the stochastic distortion introduced by hardware noise. Under such source-target similarity, transferred source trajectories provide a useful initial memory for the target learner, improving early sample efficiency while still allowing subsequent adaptation to the noisy environment. 
+
+## E Classical RL validation: LunarLander-v3 
+
+The three contributions presented in the main text ReaPER +, OptCRLQAS, and replay-buffer trans-fer, are motivated by and evaluated on quantum circuit optimization tasks. To verify that the anneal-ing schedule underlying Reaper + is not specific to the sparse, long-horizon reward structure of quantum environments, we provide a supplementary validation on LunarLander-v3 [60], a well-established continuous-control benchmark from classical deep RL with dense rewards and a standard solved threshold of +200 cumulative return. We stress that this experiment is not intended as a pri-mary result; its sole purpose is to confirm that the PER →ReaPER annealing idea generalizes beyond the quantum domain. Figure 9: LunarLander-v3 validation of ReaPER +. (Left ) rolling success rate (300-episode window). (Middle ) ReaPER + (blue) reaches a higher success rate faster and maintains a higher asymptotic level than fixed ReaPER (red) and PER (green). (Right ) normalized cumulative-return AUC. ReaPER + accumulates 
+
++9% more return over the full training run, confirming improved sample efficiency on a dense-reward classical benchmark. All methods use identical DQN agents, only the replay mechanism differs. 1,000 2 × 10 3 3 × 10 3 4 × 10 3      
+
+> Episode
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Rolling success (300-ep)
+> ReaPER+ reaches
+> higher faster
+> ReaPER
+> PER
+> ReaPER+
+> 110 100 1,000
+> Episode
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Normalized return (AUC)
+> +9% AUC
+> advantage
+> 0k 200k 400k 600k
+> Steps to first solve
+> ReaPER
+> ReaPER+
+> PER
+> 419k
+> 380k
+> 428k
+> LunarLander-v3: ReaPER+ vs ReaPER vs PER
+
+We benchmark three replay strategies using identical DQN agents (two hidden layers of 128 units, SELU activations, Table 3): • PER [33]: prioritization by absolute TD error, α=0 .6, β0=0 .4 annealed to 1.0 over 5×10 4
+
+frames. • ReaPER [34]: reliability-adjusted prioritization with fixed ω=0 .4, α=0 .4.19 • ReaPER + (ours) : annealed ω schedule ωmin =0 .1 → ωmax =0 .7 over Tann =5 ×10 4 steps (identical schedule to the quantum compiling experiments), α=0 .4.All agents are trained for 5,000 episodes on LunarLander-v3 with γ=0 .99 , ε-greedy exploration (ε0=1 .0 → εmin =0 .05 , decay 0.9995 per episode), learning rate 10 −3, batch size 64 , replay capacity 
+
+10 5, and target-network synchronization every 10 episodes. Four gradient updates are performed per episode after a 20 -episode warm-up. The same agent architecture and training code used for the quantum experiments are employed without modification; only the environment is swapped. Results are reported for 3 different initializations of neural network. Figure 9 summarizes two complementary metrics. Left : the 300 -episode rolling success rate (frac-tion of episodes exceeding the +200 solved threshold). ReaPER + reaches a higher success rate earlier in training and sustains a higher asymptotic level ( ≈60% at episode 4500 ) compared with fixed ReaPER ( ≈50% ) and PER ( ≈55% ). Right : the normalized area under the reward curve (AUC), computed as the per-episode running mean of the cumulative return, shifted and normalized to [0 , 1] .ReaPER + achieves a +9% AUC advantage over both baselines by episode 5000 , indicating better sample efficiency throughout training. These results are consistent with the mechanism described in Section 3 and Appendix C: early in training, ω ≈ 0 recovers PER-style exploration; as value estimates stabilize, rising ω down-weights unreliable high-error transitions and concentrates replay on trustworthy updates. This two-phase behavior is beneficial regardless of whether rewards are sparse and episodic (quantum compilation) or dense and continuous (LunarLander), supporting the view that ReaPER + is a general-purpose annealing strategy rather than a domain-specific heuristic. Table 3: Hyperparameters for the LunarLander-v3 validation experiment. Shared parameters apply to all three replay strategies; method-specific parameters are listed in the lower block.                                             
+
+> Parameter Value
+> Shared (all methods)
+> Network architecture 2×128 hidden units, SELU Discount γ0.99
+> Learning rate 10 −3
+> Batch size 64
+> Replay capacity 10 5
+> εschedule 1.0→0.05 , decay 0.9995 /episode Gradient updates/ep. 4(after 20 -episode warm-up) Training episodes 5000
+> Solved threshold +200 cumulative return
+> PER
+> α0.6
+> β00.4, annealed to 1.0over 5×10 4frames
+> ReaPER
+> α0.4
+> ω0.4(fixed)
+> β00.4, annealed to 1.0over 5×10 4frames
+> ReaPER +
+> α0.4
+> ωmin 0.1
+> ωmax 0.7
+> Tann 5×10 4steps
+> β00.4, annealed to 1.0over 5×10 4frames
+
+## F 1-qubit compiling with HRC gateset 
+
+For a direct comparison with Ref. [16], we evaluate the discrete HRC basis [53] using the action space and sparse reward defined in Eq. 16 and Eq. 21. Table 4 shows that ReaPER + reaches 100% 
+
+success with a mean fidelity of 0.995 and the shortest average circuit length ( 14 .30 ± 7.89 gates), achieving this at 1.56 × 10 6 steps. This is slightly earlier than fixed ReaPER ( 1.60 × 10 6 steps), 20 clearly earlier than PER ( 2.10 × 10 6 steps), and substantially earlier than our tuned HER baseline (5.50 ×10 6 steps), while also producing shorter circuits than all three. In contrast, the original unop-Table 4: 1-qubit compiling of Haar-random targets using the HRC basis. Success rate, mean fidelity, and circuit length for different replay strategies. All methods except the original HER baseline [16] reach 100% success. ReaPER + yields the shortest circuits ( 14 .30 ± 7.89 gates) and reaches peak performance ∼24% ,                                               
+
+> ∼26% , and ∼72% faster than fixed ReaPER, PER, and tuned HER, respectively.
+> Method Success (%) ↑Fidelity ↑Mean length ↓At step ↓
+> ReaPER +(Ours) 100 .00.995 14 .30 ±7.89 1.56 ×10 6
+> ReaPER [34] 100 .00.995 20 .34 ±16 .16 1.60 ×10 6
+> PER [33] 100 .00.995 19 .54 ±14 .61 2.10 ×10 6
+> HER (tuned) 100 .00.992 28 .60 ±21 .58 5.50 ×10 6
+> HER (Moro et al. [16]) 95 .00.990 35 –
+
+timized HER implementation from Moro et al. [16] plateaus at 95% accuracy. Note that throughout the remainder of this paper, any reference to the HER baseline indicates our tuned implementation rather than the original formulation of Ref. [16], ensuring all comparisons are made against the strongest possible version of the baseline. 
+
+## G Target dataset for 2-qubit compiling task 
+
+For the compiling experiments with the 1-qubit small-rotation basis and the 2-qubit gate set, we generate target unitaries synthetically by sampling random circuits from the corresponding elementary gate library. Concretely, a target unitary is constructed by first sampling a circuit length uniformly at random and then composing gates drawn uniformly from the same basis used by the agent during training. This yields a diverse dataset of reachable targets with vary-ing circuit complexity while ensuring that the target distribution is consistent with the underly-ing compilation task. For the 2-qubit setting, Algorithm 1 details this procedure for the gate set 
+
+{XX (±π/ 128) , Y Y (±π/ 128) , R z (±π/ 128) ⊗ I, I ⊗ Rz (±π/ 128) }; the 1-qubit small-rotation targets are generated analogously from their corresponding 1-qubit rotation basis. 
+
+Algorithm 1: 2-qubit target unitary generation. 
+
+Input: Gate set B = XX (± π 
+
+> 128
+
+), Y Y (± π 
+
+> 128
+
+), R z (± π 
+
+> 128
+
+) ⊗ I, I ⊗ Rz (± π 
+
+> 128
+
+)
+
+Output: Target unitary Utar ∈ SU(4)  
+
+> 1
+
+Sample circuit length N ∼ Uniform  {6, 7, . . . , 10 4 − 1}; 
+
+> 2
+
+Initialize Utar ← I4; 
+
+> 3
+
+for k = 1 to N do  
+
+> 4
+
+Sample gate Gk ∼ Uniform( B); 
+
+> 5
+
+Utar ← Gk · Utar ; 
+
+> 6
+
+end  
+
+> 7
+
+return Utar 
+
+## H Benchmarking OptCRLQAS against CRLQAS [19] 
+
+To empirically validate the computational efficiency gained by amortizing the architecture update overhead, we benchmarked OptCRLQAS against the baseline CRLQAS framework across 6-, 8-, and 10 -qubit configurations. We tracked both the expectation value evaluation and the classical optimization time over multiple episodes. Figure 10 illustrates the substantial reduction in compu-tational cost when utilizing OptCRLQAS across varying step intervals ( m ∈ { 3, 5, 7, 10 }). Because CRLQAS triggers a full quantum-classical evaluation at every environment step, its run-time scales poorly as circuit complexity increases. By accumulating local architecture edits and restricting full evaluations to every m steps, OptCRLQAS closely matches the expected runtime reduction factor of ≈ 1/m . Our empirical results demonstrate an aggressive decline in runtime as 21 Figure 10: Comparative runtime analysis of the baseline CRLQAS versus OptCRLQAS across 6-, 8-, and 10 -qubit tasks . The left panel shows the quantum energy evaluation time (in seconds), and the right panel displays the classical optimization time (in seconds). Results for OptCRLQAS are reported for different replay buffer sizes ( m ∈ { 3, 5, 7, 10 }). Error bars denote the standard deviation measured over 3 to 5 independent episodes. The utilization of OptCRLQAS yields an average runtime reduction of up to 89% for quantum evaluations and 85% for classical optimizations at m = 10 .CRLQAS OptCRLQAS (m=3) OptCRLQAS (m=5) OptCRLQAS (m=7) 
+
+> OptCRLQAS (m=10)
+
+0
+
+1
+
+2
+
+3
+
+> Quantum sim. time (s)
+> CRLQAS OptCRLQAS (m=3) OptCRLQAS (m=5) OptCRLQAS (m=7)
+> OptCRLQAS (m=10)
+
+0
+
+100 
+
+200 
+
+300 
+
+400 
+
+500 
+
+> Classical opt. time (s)
+
+6-qubit 8-qubit 10-qubit 
+
+m increases. For quantum energy evaluations, OptCRLQAS achieves an average time reduction of 
+
+69 .2% at m = 3 , scaling up to an impressive 89 .3% reduction at m = 10 across all qubit scales. Similarly, the classical optimization time is heavily mitigated, yielding an average decrease of 48 .2% 
+
+at m = 3 and up to 84 .9% at m = 10 . This benchmarking clearly establishes that accumulating structural modifications before parameter optimization successfully breaks the runtime bottleneck, enabling RL-based quantum architecture search to scale to larger qubit regimes without prohibitive GPU compute requirements. Table 5: Comparison between vanilla CRLQAS and OptCRLQAS ( m = 10 ) on 8-qubit H 2Oover three random seeds . For OptCRLQAS, the total gate count is computed as ROT + CNOT .
+
+Method Seed Error (Ha) Total gates CNOT ROT 1 1.167 × 10 −3 153 129 24 CRLQAS [19] 42 1.171 × 10 −3 80 59 21 786 1.167 × 10 −3 100 66 34 1 1.167 × 10 −3 81 45 36 
+
+OptCRLQAS (Ours) 42 1.171 × 10 −3 97 23 74 786 1.168 × 10 −3 87 31 56 
+
+To isolate the effect of amortized evaluation beyond wall-clock speedup, we additionally compare vanilla CRLQAS and OptCRLQAS on 8-H2O under matched training conditions, varying only the update schedule. Table 5 shows that the two methods reach essentially identical final energies: the mean error is 1.168636 × 10 −3 Ha for CRLQAS and 1.168738 × 10 −3 Ha for OptCRLQAS, a difference of only ∼ 10 −7 Ha . Despite this negligible difference in energy, OptCRLQAS produces substantially more hardware-efficient circuits, reducing the mean total gate count from 111 .0 to 
+
+88 .3 (20 .4% fewer gates) and the mean CNOT count from 84 .7 to 33 .0 (61 .0% fewer CNOT s), at the cost of more single-qubit rotations. This is consistent with the intuition behind OptCRLQAS: by evaluating the circuit only after multiple architectural edits, the agent receives a less myopic and more informative reward signal, which can preserve final accuracy while steering learning toward circuits with substantially lower 2-qubit cost. 22 I ReaPER ω sensitivity and variant selection 
+
+In the main text, Figure 3 reports gate counts for a single fixed-ω ReaPER variant per molecular system: ω = 0 .4 for 6-qubit BEH 2 and ω = 0 .6 for 8-qubit H2O. This appendix documents the full sweep over ω that motivates these choices. For each system we train agents with ω ∈ { 0.2, 0.4, 0.6}
+
+(6-qubit) and ω ∈ { 0.2, 0.4, 0.6, 0.8} (8-qubit), using three independent random seeds {1, 42 , 786 }
+
+per setting. All other hyperparameters are identical to the main-text QAS experiments (Appendix K). We report mean and standard deviation over seeds for CNOT count and single-qubit rotation ( ROT )count. Results are given in Table 6. Since two-qubit gates dominate both circuit noise and compilation cost on near-term hardware, we select the ω value that minimizes mean CNOT count subject to the agent achieving chemical accuracy (∆E ≤ εchem ) across all seeds, using ROT count as a tiebreaker. Table 6: CNOT and ROT gate counts (mean ± std. dev. over 3 seeds) for ReaPER ω variants . All entries achieve chemical accuracy ( ∆E ≤ εchem = 1 .6 × 10 −3 Ha). Bold rows indicate the variant selected for the main text. PER, ReaPER +, and Vanilla are included for reference. 
+
+6-qubit BEH 2 8-qubit H2O
+
+ReaPER CNOT ROT CNOT ROT 
+
+ω = 0 .2 30 .7 ± 18 .8 20 .7 ± 9.9 84 .3 ± 75 .4 39 .3 ± 32 .0
+
+ω = 0.4 23 .7 ± 9.0 29 .3 ± 21 .5 71 .7 ± 46 .6 38 .3 ± 14 .6
+
+ω = 0.6 30 .7 ± 7.4 30 .3 ± 2.1 51 .0 ± 25 .1 24 .3 ± 20 .6
+
+ω = 0 .8 – – 78 .7 ± 46 .2 35 .0 ± 5.0
+
+For 6-qubit BEH 2, ω = 0 .4 achieves the lowest mean CNOT count of 23 .7 ± 9.0 gates among all ReaPER variants, compared with 30 .7 ± 18 .8 for ω = 0 .2 and 30 .7 ± 7.4 for ω = 0 .6. For 8-qubit 
+
+H2O, ω = 0 .6 achieves the lowest mean CNOT count of 51 .0 ± 25 .1 gates–a 41% reduction relative to PER ( 86 .3 ± 37 .5) and 29% relative to ω = 0 .4 (71 .7 ± 46 .6). Across both systems, increasing ω shifts the replay distribution toward reliability-aware sampling more aggressively, which tends to reduce CNOT count at the cost of slightly higher energy variance. The optimal ω is therefore task-dependent: shorter-horizon problems with lower qubit counts benefit from moderate reliability weighting ( ω = 0 .4), while longer-horizon, larger systems favour stronger weighting ( ω = 0 .6) to suppress noisy TD targets in a deeper search space. This task-dependence is precisely what motivates the annealed ReaPER + construction, which avoids committing to a fixed ω
+
+by scheduling the transition adaptively during training (Section 3). where Xi, Y i, Z i denote the Pauli operators acting on site i and the first sum runs over nearest-neighbour pairs i ∈ { 1, . . . , n −1}. The isotropic exchange interaction (equal XX , YY , and ZZ couplings) places the ground state in a highly entangled singlet sector, making it a non-trivial testbed for variational ansatz construction: a circuit that correctly captures the ground state must generate multi-qubit entanglement across the full chain, which rewards replay strategies that retain long-horizon, high-fidelity trajectories. The target energy 
+
+E0 is obtained by exact diagonalization and the sum of Pauli coefficients are utilized as the fake minium energy. 
+
+## J Hamiltonians 
+
+J.1 Chemical Hamiltonian 
+
+In Table 7 we provide the detailed configuration of molecules utilized throughout the quantum ar-chitecture search. 
+
+J.2 Heisenberg model Hamiltonian formulation 
+
+In addition to molecular chemistry benchmarks, we evaluate OptCRLQAS and replay-buffer design on the n=5 qubit one-dimensional isotropic Heisenberg model with a uniform longitudinal field. 23 Table 7: The geometry and basis of molecules used in this research . The coordinates are in Angstrom units. 
+
+Molecule Geometry Basis 6-BEH 2 H (0,0,-1.33); Be (0,0,0); H (0,0,1.33) STO-3G 8-H2O H (-0.02,-0,0); O (0.84,0.45,0); H (1.48,-0.27,0) STO-3G 10-H2O H (-0.02,-0,0); O (0.84,0.45,0); H (1.48,-0.27,0) 6-31G 12-H2O H (-0.02,-0,0); O (0.84,0.45,0); H (1.48,-0.27,0) 6-31G 
+
+The Hamiltonian is defined on a chain of n spin- 12 particles with open boundary conditions as 
+
+HHeis =
+
+> n
+
+X
+
+> i=1
+
+
+
+XiXi+1 + YiYi+1 + ZiZi+1 
+
+
+
++
+
+> n
+
+X
+
+> i=1
+
+Zi, (33) Table 8: Environment, agent, and optimizer configuration for quantum architecture search benchmarks. 
+
+Parameter 6-qubit 8-qubit 12-qubit 
+
+Environment 
+
+Episodes 5000 5000 1000 Qubits 6 8 12 Max layers 70 250 300 Accept error (Ha) 5.5 5.0 5.0 Shift threshold ball 0.001 Shift threshold time 2000 Success switch (Ha) 5.5 5.0 5.0 Success threshold 50 
+
+opt step interval (m) 10 10 15 
+
+energy interval (m) 10 10 15 
+
+Agent (DQN with n-step returns [63]) 
+
+Network layers [1000] 3 [1000] 4 [1000] 4
+
+Batch size 1000 Replay buffer size 20 000 Learning rate 3 × 10 −4
+
+n-step return 5 6 6Target net update Every 500 steps 
+
+γ (discount) 0.005 Dropout 0.0 
+
+Exploration ( ϵ-greedy) 
+
+ϵstart 1.0 
+
+ϵmin 0.05 
+
+ϵdecay 0.99995 
+
+Classical optimizer (COBYLA [64]) 
+
+Iterations 1000 
+
+## K Hyperparameters for quantum architecture search 
+
+Tables 8 summarize the environment and agent configurations used across the three QAS bench-marks. All experiments share the same agent architecture (multi-step DQN with n-step returns), optimizer, and curriculum type, differing only where the problem scale demands it. 
+
+Environment. The maximum circuit depth ( num layers ) grows with qubit count, from 70 (6-qubit) to 250 (8-qubit) to 300 (12-qubit), to accommodate the deeper circuits required 24 for larger Hamiltonians. The curriculum uses a MovingThreshold introduced in ref. [19] schedule in all cases, with the acceptance error initialized at 5.0-5.5 Ha and tightened by 
+
+0.001 Ha every 2000 episodes. OptCRLQAS evaluates the circuit every m architectural edits (opt step interval = energy interval ): m=10 for the 6- and 8-qubit problems and m=15 
+
+for the 12-qubit problem, reflecting the longer episodes at larger scale. 
+
+Agent. The DQN agent uses a 3-layer MLP ( [1000 , 1000 , 1000] ) for the 6-qubit task and a 4-layer MLP ( [1000 , 1000 , 1000 , 1000] ) for the 8- and 12-qubit tasks. The n-step return horizon is n=5 
+
+for 6-qubit and n=6 for 8- and 12-qubit. Exploration follows an ϵ-greedy schedule decaying from 
+
+ϵ=1 .0 at rate 0.99995 per step to a floor of ϵmin =0 .05 . The replay buffer holds 20 000 transitions in all cases, with a batch size of 1000. 
+
+Classical optimizer. All three tasks use COBYLA [64] with a local search size of 8. The 6- and 8-qubit tasks run 1000 global iterations per evaluation, as does the 12-qubit task; the reduced number of evaluations per episode at 12-qubit due to the larger amortization interval m=15 keeps the total classical optimization cost manageable. 
+
+## L State encoding for quantum architecture search 
+
+In both gateset configurations, the partially constructed ansatz at each step is represented as a three-dimensional state tensor S ∈ RL×R×n, where L is the maximum number of circuit layers (mo-ments), n is the number of qubits, and R is the number of row channels encoding gate placement and, optionally, variational angle parameters. A moment-tracking vector μ ∈ Zn records the next available layer index per qubit, ensuring causal gate ordering. At each time step the agent places at most one 2-qubit gate and one 1-qubit rotation, updates μ accordingly, and returns a flattened view of S as the observation. 
+
+Encoding I (for gateset {RX , RY , RZ , CX }). This a a complete binary encoding. The action is a four-tuple a = [ a0, a 1, a 2, a 3], where a0 is the CNOT control qubit ( a0 = n signals no CNOT), the target is t = ( a0 + a1) mod n, a2 is the rotation qubit ( a2 = n signals no rotation), and 
+
+a3 ∈ { 1, 2, 3} encodes the axis (X/Y/Z). Gate placement writes are strictly binary: 
+
+S[ℓ][ t][ a0] ← 1 (CNOT ), (34) 
+
+S[ℓ][ n + a3 − 1][ a2] ← 1 (rotation ), (35) where ℓ is the resolved moment from μ. Because the gate set contains only one two-qubit gate type (CX), all non-zero connectivity entries are uniformly 1 and gate identity is unambiguous. 
+
+Encoding II (for gateset {RXX , RYY , RZZ , RX , RY , RZ }). This encoding is integer-valued type. The action is an eight-tuple a = [ axx  
+
+> 0
+
+, a xx  
+
+> 1
+
+, a yy  
+
+> 0
+
+, a yy  
+
+> 1
+
+, a zz  
+
+> 0
+
+, a zz  
+
+> 1
+
+, a rot , a axis ], providing a control-qubit and an offset for each of the three two-qubit gate types plus a single-qubit rotation. Targets are tg =(ag 
+
+> 0
+
++ ag
+
+> 1
+
+) mod n for g ∈ { xx, yy, zz }. Rather than introducing separate binary planes per gate type, distinct integer labels are assigned within a single shared connectivity plane: 
+
+S[ℓ][ txx ][ axx  
+
+> 0
+
+] ← 1, (36) 
+
+S[ℓ][ tyy ][ ayy  
+
+> 0
+
+] ← 2, (37) 
+
+S[ℓ][ tzz ][ azz  
+
+> 0
+
+] ← 3, (38) 
+
+S[ℓ][ n + aaxis − 1][ arot ] ← 1 (rotation ). (39) A fully binary encoding for K distinct two-qubit gate types requires K separate n × n connectiv-ity planes, giving a connectivity footprint of O(Kn 2). Encoding II consolidates all K types into a single plane via integer labels, reducing this to O(n2) regardless of K, which is particularly ad-vantageous as both the gate vocabulary and qubit count grow. The tradeoff is that integer labels introduce an implicit ordinal relationship among gate types that carries no physical meaning; a fully binary scheme provides a strictly one-hot signal per gate type that may be easier for the network to disentangle. A systematic comparison of the two encoding strategies across a controlled set of benchmarks is beyond the scope of the present work and is left as a direction for future investigation. 25 Table 9: Hyperparameters used for 1 and 2-qubit quantum compilation experiments . All agents share a common environment and training configuration; buffer-specific parameters are listed sepa-rately in the lower block. 
+
+Parameter Value 
+
+Network (all agents) 
+
+Architecture Hidden layer 2 (each 128 units) Activation ReLU Input size 8Output size 6 / 3 (small rotations / HRC) Discount factor γ 0.99 Learning rate 3 × 10 −4
+
+Batch size 200 Replay capacity 5 × 10 5
+
+Target update freq. 100 episodes Gradient clipping 1.0 
+
+ε-start 1.0 
+
+ε-min 0.01 
+
+ε-decay 0.99931 
+
+HER 
+
+k-future relabeling 5Strategy future 
+
+PER 
+
+α 0.6 
+
+β0 0.4 
+
+β anneal frames 10 5
+
+ReaPER 
+
+α 0.4 
+
+ω 0.2 
+
+β0 0.4 
+
+β anneal frames 10 5
+
+ReaPER +
+
+α 0.4 
+
+ωmin 0.1 
+
+ωmax 0.7 
+
+Tann 5 × 10 5
+
+β0 0.4 
+
+β anneal frames 10 5
+
+## M Hyperparameters for quantum compilation 
+
+To isolate the effect of replay design, all quantum compilation experiments use a common off-policy deep Q-learning setup. The network architecture, optimization procedure, exploration schedule, and replay capacity are held fixed across agents, so that performance differences can be attributed to the replay mechanism rather than to changes in model capacity or training protocol. Table 9 lists the hyperparameters used in the 1- and 2-qubit compiling benchmarks. The upper block gives the shared network and training configuration, while the lower blocks specify the additional method-dependent parameters for HER, PER, ReaPER, and ReaPER +. In this way, the comparison remains controlled, and the gains of ReaPER and ReaPER + can be interpreted as arising from replay design itself. 26
