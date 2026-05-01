@@ -1,0 +1,54 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.28018v1/fig-001.webp",
+      "caption": "Table 2: Performance Across Models, Knowledge Conditions, and DSM Cases. Values show TotalCost mean ± std (CE mean ± std) over 10 runs. with = k = 1; without = k = 0.",
+      "page": 6,
+      "index": 1,
+      "width": 980,
+      "height": 453
+    },
+    {
+      "url": "assets/figures/arxiv/2604.28018v1/fig-002.webp",
+      "caption": "Table 3: LLM-CO hyperparameter settings",
+      "page": 11,
+      "index": 2,
+      "width": 594,
+      "height": 231
+    },
+    {
+      "url": "assets/figures/arxiv/2604.28018v1/fig-003.webp",
+      "caption": "Figure 2: Convergence behavior of LLM-CO across three LLMs and five DSM cases. Each panel shows Gap% (mean ± std over 10 runs) vs. iteration number, for k = 0 and k = 1 conditions.",
+      "page": 7,
+      "index": 3,
+      "width": 979,
+      "height": 608
+    },
+    {
+      "url": "assets/figures/arxiv/2604.28018v1/fig-004.webp",
+      "caption": "Figure 3: Modularization quality with and without domain knowledge. Each bar shows final Gap% for k = 1 (with) and k = 0 (without) across models and cases.",
+      "page": 7,
+      "index": 4,
+      "width": 979,
+      "height": 341
+    },
+    {
+      "url": "assets/figures/arxiv/2604.28018v1/fig-005.webp",
+      "caption": "Figure 4: Ablation convergence behavior (UCAV, Claude, k = 1). (a) Solution pool design. (b) Objective formulation. (c) DSM input format.",
+      "page": 8,
+      "index": 5,
+      "width": 979,
+      "height": 348
+    },
+    {
+      "url": "assets/figures/arxiv/2604.28018v1/fig-006.webp",
+      "caption": "Figure 1: LLM-based combinatorial optimization framework for DSM modularization. (a) The iterative loop consists of four stages: prompt construction, LLM query and validation, evaluation, and solution pool update. (b) Successive iterations re-order the DSM toward a block-diagonal partition. (c) Knowledge flag k controls prompt content.",
+      "page": 4,
+      "index": 6,
+      "width": 976,
+      "height": 379
+    }
+  ]
+}

@@ -6,100 +6,89 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-04-30
-- 运行时间：2026-04-30 21:06:36 UTC
+- 最新运行日期：2026-05-01
+- 运行时间：2026-05-01 20:36:02 UTC
 - 运行状态：成功
-- 本次总论文数：26
-- 精读区：14
+- 本次总论文数：22
+- 精读区：10
 - 速读区：12
 
 ### 今日简报（AI）
-今日深度研读 26 篇前沿论文，重点聚焦大模型驱动的算法设计与复杂优化问题求解。
-满分神作 OptiVerse 建立了优化求解新基准，而 A2DEPT 展现了 LLM 结合进化程序树自动设计算法的巨大潜力。
-建议优先关注大模型如何赋能供应链、金融组合及城市交通等实际场景的落地优化方案。
-- 详情：[/202604/30/README](/202604/30/README)
+- 今日共生成 22 篇推荐（精读 10 篇，速读 12 篇）
+- 精读：《GR-Evolve: Design-Adaptive Global Routing via LLM-Driven Algorithm Evolution》（10.0/10）, 《A2DEPT: Large Language Model-Driven Automated Algorithm Design via Evolutionary Program Trees》（10.0/10）
+- 速读：《A Hybrid Reinforcement and Self-Supervised Learning Aided Benders Decomposition Algorithm》（8.5/10）, 《MappingEvolve: LLM-Driven Code Evolution for Technology Mapping》（8.5/10）, 《LLM-Guided Runtime Parameter Optimization for Energy-Efficient Model Inference》（8.5/10）
+- 这些结果覆盖了当下较热的方向，建议先看精读区论文的关键问题与方法。
+- 详情：[/202605/01/README](/202605/01/README)
 
 ### 精读区论文标签
-1. [OptiVerse: A Comprehensive Benchmark towards Optimization Problem Solving](/202604/30/2604.21510v1-optiverse-a-comprehensive-benchmark-towards-optimization-problem-solving)  
+1. [GR-Evolve: Design-Adaptive Global Routing via LLM-Driven Algorithm Evolution](/202605/01/2604.22234v1-gr-evolve-design-adaptive-global-routing-via-llm-driven-algorithm-evolution)  
    标签：评分：10.0/10、query:nco-llm
-   evidence：针对包括组合优化在内的复杂优化任务的大模型基准测试
-2. [A2DEPT: Large Language Model-Driven Automated Algorithm Design via Evolutionary Program Trees](/202604/30/2604.24043v1-a2dept-large-language-model-driven-automated-algorithm-design-via-evolutionary-program-trees)  
+   evidence：大语言模型驱动的全局布线算法演进
+2. [A2DEPT: Large Language Model-Driven Automated Algorithm Design via Evolutionary Program Trees](/202605/01/2604.24043v1-a2dept-large-language-model-driven-automated-algorithm-design-via-evolutionary-program-trees)  
    标签：评分：10.0/10、query:nco-llm
-   evidence：大模型驱动的组合优化问题自动启发式设计
-3. [From Soliloquy to Agora: Memory-Enhanced LLM Agents with Decentralized Debate for Optimization Modeling](/202604/30/2604.25847v1-from-soliloquy-to-agora-memory-enhanced-llm-agents-with-decentralized-debate-for-optimization-modeling)  
+   evidence：大语言模型驱动的组合优化启发式自动设计
+3. [RAG-Enhanced Kernel-Based Heuristic Synthesis (RKHS): A Structured Methodology Using Large Language Models for Hardware Design](/202605/01/2604.26153v1-rag-enhanced-kernel-based-heuristic-synthesis-rkhs-a-structured-methodology-using-large-language-models-for-hardware-design)  
    标签：评分：10.0/10、query:nco-llm
-   evidence：用于从自然语言进行优化建模的大模型智能体框架
-4. [Learning to Route Electric Trucks Under Operational Uncertainty](/202604/30/2604.26566v1-learning-to-route-electric-trucks-under-operational-uncertainty)  
-   标签：评分：10.0/10、query:nco
-   evidence：用于随机电动卡车路径规划问题的强化学习方法
-5. [GR-Evolve: Design-Adaptive Global Routing via LLM-Driven Algorithm Evolution](/202604/30/2604.22234v1-gr-evolve-design-adaptive-global-routing-via-llm-driven-algorithm-evolution)  
+   evidence：LLM驱动的优化启发式算法合成精炼循环
+4. [FiLMMeD: Feature-wise Linear Modulation for Cross-Problem Multi-Depot Vehicle Routing](/202605/01/2604.28102v1-filmmed-feature-wise-linear-modulation-for-cross-problem-multi-depot-vehicle-routing)  
+   标签：评分：10.0/10、query:nco-llm
+   evidence：针对多车库车辆路径问题（MDVRP）的神经组合优化
+5. [Design Structure Matrix Modularization with Large Language Models](/202605/01/2604.28018v1-design-structure-matrix-modularization-with-large-language-models)  
    标签：评分：9.5/10、query:nco-llm
-   evidence：大模型驱动的全局布线优化算法演进
-6. [RAG-Enhanced Kernel-Based Heuristic Synthesis (RKHS): A Structured Methodology Using Large Language Models for Hardware Design](/202604/30/2604.26153v1-rag-enhanced-kernel-based-heuristic-synthesis-rkhs-a-structured-methodology-using-large-language-models-for-hardware-design)  
-   标签：评分：9.5/10、query:nco-llm
-   evidence：大模型驱动的调度与布线优化启发式算法合成
-7. [MappingEvolve: LLM-Driven Code Evolution for Technology Mapping](/202604/30/2604.26591v1-mappingevolve-llm-driven-code-evolution-for-technology-mapping)  
-   标签：评分：9.5/10、query:nco-llm
-   evidence：大模型驱动的技术映射优化代码演进
-8. [Dual-Cluster Memory Agent: Resolving Multi-Paradigm Ambiguity in Optimization Problem Solving](/202604/30/2604.20183v1-dual-cluster-memory-agent-resolving-multi-paradigm-ambiguity-in-optimization-problem-solving)  
+   evidence：基于大语言模型的DSM模块化组合优化
+6. [OptiVerse: A Comprehensive Benchmark towards Optimization Problem Solving](/202605/01/2604.21510v1-optiverse-a-comprehensive-benchmark-towards-optimization-problem-solving)  
    标签：评分：9.0/10、query:nco-llm
-   evidence：基于大语言模型的代理，用于解决优化问题求解中的结构歧义
-9. [A Hybrid Reinforcement and Self-Supervised Learning Aided Benders Decomposition Algorithm](/202604/30/2604.22107v1-a-hybrid-reinforcement-and-self-supervised-learning-aided-benders-decomposition-algorithm)  
+   evidence：大语言模型在组合及复杂优化问题上的基准测试
+7. [SeaEvo: Advancing Algorithm Discovery with Strategy Space Evolution](/202605/01/2604.24372v1-seaevo-advancing-algorithm-discovery-with-strategy-space-evolution)  
    标签：评分：9.0/10、query:nco-llm
-   evidence：用于Benders分解的混合强化学习和基于图的表示
-10. [Crystal structure prediction using graph neural combinatorial optimization](/202604/30/2604.23921v1-crystal-structure-prediction-using-graph-neural-combinatorial-optimization)  
-   标签：评分：9.0/10、query:nco
-   evidence：使用图神经组合优化进行晶体结构预测
-11. [An Analysis of the Coordination Gap between Joint and Modular Learning for Job Shop Scheduling with Transportation Resources](/202604/30/2604.24117v1-an-analysis-of-the-coordination-gap-between-joint-and-modular-learning-for-job-shop-scheduling-with-transportation-resources)  
-   标签：评分：9.0/10、query:nco
-   evidence：用于作业车间调度和运输的多智能体强化学习
-12. [Agentic Architect: An Agentic AI Framework for Architecture Design Exploration and Optimization](/202604/30/2604.25083v1-agentic-architect-an-agentic-ai-framework-for-architecture-design-exploration-and-optimization)  
+   evidence：LLM引导的算法发现进化搜索
+8. [Why Search When You Can Transfer? Amortized Agentic Workflow Design from Structural Priors](/202605/01/2604.25012v1-why-search-when-you-can-transfer-amortized-agentic-workflow-design-from-structural-priors)  
    标签：评分：9.0/10、query:nco-llm
-   evidence：利用大语言模型驱动的代码演化来探索计算机架构中庞大的组合空间
-13. [DGLight: DQN-Guided GRPO Fine-Tuning of Large Language Models for Traffic Signal Control](/202604/30/2604.25259v1-dglight-dqn-guided-grpo-fine-tuning-of-large-language-models-for-traffic-signal-control)  
+   evidence：基于大模型的框架，用于摊销工作流设计中的组合搜索
+9. [Agentic Architect: An Agentic AI Framework for Architecture Design Exploration and Optimization](/202605/01/2604.25083v1-agentic-architect-an-agentic-ai-framework-for-architecture-design-exploration-and-optimization)  
    标签：评分：9.0/10、query:nco-llm
-   evidence：DQN引导的大模型交通信号控制微调
-14. [LLM-Flax : Generalizable Robotic Task Planning via Neuro-Symbolic Approaches with Large Language Models](/202604/30/2604.26569v1-llm-flax--generalizable-robotic-task-planning-via-neuro-symbolic-approaches-with-large-language-models)  
+   evidence：LLM驱动的组合设计空间代码演化
+10. [From Soliloquy to Agora: Memory-Enhanced LLM Agents with Decentralized Debate for Optimization Modeling](/202605/01/2604.25847v1-from-soliloquy-to-agora-memory-enhanced-llm-agents-with-decentralized-debate-for-optimization-modeling)  
    标签：评分：9.0/10、query:nco-llm
-   evidence：集成GNN对象评分器与LLM引导的任务规划
+   evidence：用于优化建模和求解的大模型智能体框架
 
 ### 速读区论文标签
-1. [Hybrid Deep Learning Approach for Coupled Demand Forecasting and Supply Chain Optimization](/202604/30/2604.21567v1-hybrid-deep-learning-approach-for-coupled-demand-forecasting-and-supply-chain-optimization)  
+1. [A Hybrid Reinforcement and Self-Supervised Learning Aided Benders Decomposition Algorithm](/202605/01/2604.22107v1-a-hybrid-reinforcement-and-self-supervised-learning-aided-benders-decomposition-algorithm)  
    标签：评分：8.5/10、query:nco-llm
-   evidence：结合LSTM预测和MILP优化的混合方法
-2. [Comparative Evaluation of Modern Deep Learning Methodologies for Portfolio Optimization](/202604/30/2604.24486v1-comparative-evaluation-of-modern-deep-learning-methodologies-for-portfolio-optimization)  
+   evidence：混合强化学习与神经网络用于加速混合整数非线性规划中的Benders分解
+2. [MappingEvolve: LLM-Driven Code Evolution for Technology Mapping](/202605/01/2604.26591v1-mappingevolve-llm-driven-code-evolution-for-technology-mapping)  
    标签：评分：8.5/10、query:nco-llm
-   evidence：结合GNN、DRL和Transformer的混合方法用于投资组合优化
-3. [Semi-Markov Reinforcement Learning for City-Scale EV Ride-Hailing with Feasibility-Guaranteed Actions](/202604/30/2604.25848v1-semi-markov-reinforcement-learning-for-city-scale-ev-ride-hailing-with-feasibility-guaranteed-actions)  
+   evidence：大模型驱动的逻辑综合技术映射代码演化优化
+3. [LLM-Guided Runtime Parameter Optimization for Energy-Efficient Model Inference](/202605/01/2604.27032v1-llm-guided-runtime-parameter-optimization-for-energy-efficient-model-inference)  
+   标签：评分：8.5/10、query:nco-llm
+   evidence：大模型辅助的运行时参数优化以提高能效
+4. [On the Expressive Power of GNNs to Solve Linear SDPs](/202605/01/2604.27786v1-on-the-expressive-power-of-gnns-to-solve-linear-sdps)  
    标签：评分：8.5/10、query:nco
-   evidence：用于城市规模车辆调度与路径规划的强化学习
-4. [LLM-Steered Power Allocation for Parallel QPSK-AWGN Channels](/202604/30/2604.21316v1-llm-steered-power-allocation-for-parallel-qpsk-awgn-channels)  
-   标签：评分：8.0/10、query:nco-llm
-   evidence：大模型作为功率分配优化的高层决策模块
-5. [Replay-buffer engineering for noise-robust quantum circuit optimization](/202604/30/2604.21863v1-replay-buffer-engineering-for-noise-robust-quantum-circuit-optimization)  
-   标签：评分：7.5/10、query:nco
-   evidence：用于量子电路优化的深度强化学习
-6. [JURY-RL: Votes Propose, Proofs Dispose for Label-Free RLVR](/202604/30/2604.25419v1-jury-rl-votes-propose-proofs-dispose-for-label-free-rlvr)  
+   evidence：本文研究了图神经网络（GNN）在解决硬组合问题的半正定规划（SDP）松弛方面的表达能力。
+5. [LLM-Steered Power Allocation for Parallel QPSK-AWGN Channels](/202605/01/2604.21316v1-llm-steered-power-allocation-for-parallel-qpsk-awgn-channels)  
    标签：评分：7.5/10、query:nco-llm
-   evidence：通过可验证奖励的强化学习增强大模型在机器可检查领域的推理能力
-7. [Learning to Evolve: A Self-Improving Framework for Multi-Agent Systems via Textual Parameter Graph Optimization](/202604/30/2604.20714v1-learning-to-evolve-a-self-improving-framework-for-multi-agent-systems-via-textual-parameter-graph-optimization)  
-   标签：评分：7.0/10、query:nco-llm
-   evidence：通过文本参数图优化来优化多智能体系统
-8. [The CriticalSet problem: Identifying Critical Contributors in Bipartite Dependency Networks](/202604/30/2604.21537v1-the-criticalset-problem-identifying-critical-contributors-in-bipartite-dependency-networks)  
-   标签：评分：7.0/10、query:nco
-   evidence：二分网络中的NP难组合问题
-9. [Self-Guided Plan Extraction for Instruction-Following Tasks with Goal-Conditional Reinforcement Learning](/202604/30/2604.20601v1-self-guided-plan-extraction-for-instruction-following-tasks-with-goal-conditional-reinforcement-learning)  
-   标签：评分：6.5/10、query:nco
-   evidence：协同训练大模型规划器与强化学习智能体
-10. [Enforcing TSP-Optimality in Fair Vehicle Routing by Cutting Planes](/202604/30/2604.23748v1-enforcing-tsp-optimality-in-fair-vehicle-routing-by-cutting-planes)  
-   标签：评分：6.5/10、query:nco
-   evidence：在公平车辆路径问题中通过割平面法强制执行TSP最优性
-11. [Compute Aligned Training: Optimizing for Test Time Inference](/202604/30/2604.24957v1-compute-aligned-training-optimizing-for-test-time-inference)  
+   evidence：大语言模型作为优化任务的高层决策模块
+6. [Hybrid Deep Learning Approach for Coupled Demand Forecasting and Supply Chain Optimization](/202605/01/2604.21567v1-hybrid-deep-learning-approach-for-coupled-demand-forecasting-and-supply-chain-optimization)  
+   标签：评分：7.5/10、query:nco-llm
+   evidence：深度学习与MILP优化结合的混合供应链优化
+7. [ATRS: Adaptive Trajectory Re-splitting via a Shared Neural Policy for Parallel Optimization](/202605/01/2604.22715v1-atrs-adaptive-trajectory-re-splitting-via-a-shared-neural-policy-for-parallel-optimization)  
+   标签：评分：7.5/10、query:nco-llm
+   evidence：将深度强化学习策略嵌入到并行ADMM循环中进行优化。
+8. [Relaxation-Informed Training of Neural Network Surrogate Models](/202605/01/2604.22746v1-relaxation-informed-training-of-neural-network-surrogate-models)  
+   标签：评分：7.5/10、query:nco-llm
+   evidence：用于混合整数线性规划（MILP）的神经网络代理模型
+9. [A Task Decomposition and Planning Framework for Efficient LLM Inference in AI-Enabled WiFi-Offload Networks](/202605/01/2604.21399v1-a-task-decomposition-and-planning-framework-for-efficient-llm-inference-in-ai-enabled-wifi-offload-networks)  
    标签：评分：6.5/10、query:nco-llm
-   evidence：通过测试时计算缩放和强化学习对齐优化大语言模型性能
-12. [Prior-Aligned Data Cleaning for Tabular Foundation Models](/202604/30/2604.25154v1-prior-aligned-data-cleaning-for-tabular-foundation-models)  
-   标签：评分：6.5/10、query:nco
-   evidence：用于数据清洗顺序决策的深度强化学习框架
+   evidence：基于大模型的网络任务分解与规划框架
+10. [Nemobot Games: Crafting Strategic AI Gaming Agents for Interactive Learning with Large Language Models](/202605/01/2604.21896v1-nemobot-games-crafting-strategic-ai-gaming-agents-for-interactive-learning-with-large-language-models)  
+   标签：评分：6.5/10、query:nco-llm
+   evidence：基于大模型的智能体用于计算博弈中的最优策略
+11. [Learning Evidence Highlighting for Frozen LLMs](/202605/01/2604.22565v1-learning-evidence-highlighting-for-frozen-llms)  
+   标签：评分：6.5/10、query:nco-llm
+   evidence：针对冻结大模型求解器在推理任务中的强化学习优化
+12. [Bridging Reasoning and Action: Hybrid LLM-RL Framework for Efficient Cross-Domain Task-Oriented Dialogue](/202605/01/2604.23345v1-bridging-reasoning-and-action-hybrid-llm-rl-framework-for-efficient-cross-domain-task-oriented-dialogue)  
+   标签：评分：6.5/10、query:nco-llm
+   evidence：结合大模型与强化学习的混合任务对话框架
 
 
 <div class="dpr-home-promo-card">

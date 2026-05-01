@@ -1,0 +1,62 @@
+{
+  "version": 2,
+  "extractor": "pdffigures2",
+  "figures": [
+    {
+      "url": "assets/figures/arxiv/2604.27032v1/fig-001.webp",
+      "caption": "Figure 8: Throughput versus energy per token for evaluated configurations. The default configuration (red) consumes significantly more energy while achieving lower throughput. LLM-optimized configurations move the system toward a more Pareto-efficient operating region with both lower energy consumption and higher throughput.",
+      "page": 6,
+      "index": 1,
+      "width": 514,
+      "height": 395
+    },
+    {
+      "url": "assets/figures/arxiv/2604.27032v1/fig-002.webp",
+      "caption": "Figure 7: Cumulative energy per image over iterations for baseline and enhanced prompts across five runs when running Qwen with PyTorch. Shaded areas represent ±1 standard deviation (shaded for the baseline is too small to be shown over the line). The enhanced prompt reaches the convergence threshold (30 J/image) earlier and maintains lower energy values with smaller variance, demonstrating faster and more consistent convergence toward energy-efficient configurations.",
+      "page": 6,
+      "index": 2,
+      "width": 514,
+      "height": 337
+    },
+    {
+      "url": "assets/figures/arxiv/2604.27032v1/fig-003.webp",
+      "caption": "Figure 1: Human-in-the-loop workflow for optimizing runtime inference parameters using an external LLM. Energy metrics from each inference run are used in subsequent prompts to guide parameter exploration.",
+      "page": 2,
+      "index": 3,
+      "width": 514,
+      "height": 321
+    },
+    {
+      "url": "assets/figures/arxiv/2604.27032v1/fig-004.webp",
+      "caption": "Figure 2: System architecture for measuring energy consumption during LLM inference. An experiment runner executes prompts through vLLM while a PyNVML-based script samples GPU power to compute energy metrics. Parameter configurations are provided from the defined search space or suggested by an external LLM.",
+      "page": 2,
+      "index": 4,
+      "width": 514,
+      "height": 308
+    },
+    {
+      "url": "assets/figures/arxiv/2604.27032v1/fig-005.webp",
+      "caption": "Figure 3: Template for the enhanced prompts including the first prompt (on the left) and subsequent prompts (on the right). Prompting techniques discussed in section 4.3 are highlighted in bold.",
+      "page": 3,
+      "index": 5,
+      "width": 514,
+      "height": 299
+    },
+    {
+      "url": "assets/figures/arxiv/2604.27032v1/fig-006.webp",
+      "caption": "Figure 5: Cumulative energy per token over iterations for baseline and enhanced prompts across five runs. Shaded areas represent ±1 standard deviation. The enhanced prompt reaches the convergence threshold (1.80 J/token) earlier and maintains lower energy values with smaller variance, demonstrating faster and more consistent convergence toward energy-efficient configurations.",
+      "page": 4,
+      "index": 6,
+      "width": 514,
+      "height": 385
+    },
+    {
+      "url": "assets/figures/arxiv/2604.27032v1/fig-007.webp",
+      "caption": "Figure 6: Cumulative energy per token over iterations for baseline and enhanced prompts across five runs when running Qwen with PyTorch. Shaded areas represent ±1 standard deviation (shaded for the baseline is too small to be shown over the line). The enhanced prompt reaches the convergence threshold (0.20 J/token) earlier and maintains lower energy values with smaller variance, demonstrating faster and more consistent convergence toward energy-efficient configurations.",
+      "page": 5,
+      "index": 7,
+      "width": 514,
+      "height": 288
+    }
+  ]
+}
